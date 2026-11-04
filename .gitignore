@@ -1,0 +1,78 @@
+# ===== 비밀정보 / 인증키 =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials*.json
+*_credentials.json
+*api_key*.txt
+
+# ===== Python =====
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# ===== Frontend (프레임워크 확정 전 공통 항목) =====
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+
+# ===== DB 로컬 저장 파일 =====
+# docker-compose.yml은 named volume을 쓰지만, 바인드 마운트로 바꾸는 경우 대비
+neo4j_data/
+neo4j_logs/
+qdrant_storage/
+qdrant_snapshots/
+*.db
+*.sqlite3
+
+# ===== 모델 / 임베딩 캐시 =====
+.cache/
+models/cache/
+hf_cache/
+.huggingface/
+*.safetensors
+*.bin
+*.onnx
+
+# ===== 데이터 =====
+# 원본 데이터(raw)는 용량·라이선스·재배포 조건 때문에 기본 제외.
+# 커밋이 필요하면 팀 합의 후 해당 파일만 예외 처리(! 규칙)하거나 Git LFS 검토.
+data/raw/**
+!data/raw/**/
+!data/raw/**/.gitkeep
+# 대용량 원본 형식
+*.hwp
+*.hwpx
+data/**/*.pdf
+data/**/*.zip
+
+# ===== 개인정보 =====
+# 실사용자 정보는 수집하지 않는 것이 원칙. 실수로 생성된 파일 차단용.
+**/personal/
+**/*_pii.*
+**/real_profiles*
+
+# ===== 참고 자료 =====
+# refer/의 강의 실습 zip 등은 개인 참고용 (PRD·스타일 원본 md는 추적 가능)
+refer/*.zip
+
+# ===== OS / IDE =====
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

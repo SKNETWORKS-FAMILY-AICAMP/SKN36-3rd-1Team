@@ -1,0 +1,45 @@
+# 개발용 예시 구성 — 로컬에서 Neo4j와 Qdrant만 실행한다.
+# 운영 배포용이 아니며, 실제 비밀번호·키는 이 파일이 아닌 .env에서 주입한다.
+#
+# 사용법:
+#   1) cp .env.example .env  후 NEO4J_PASSWORD, QDRANT_API_KEY 등 값 입력
+#   2) docker compose up -d
+#   3) Neo4j Browser: http://localhost:7474 / Qdrant Dashboard: http://localhost:6333/dashboard
+#
+# 이미지 버전은 재현성을 위해 고정했다. 버전 변경은 DB 담당 확정 후 반영한다 (PRD D-02).
+
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: lifepolicy-neo4j
+    environment:
+      # Neo4j 초기 계정은 사용자명이 neo4j로 고정된다. 비밀번호 미설정 시 기동을 막는다.
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?NEO4J_PASSWORD를 .env에 설정하세요}
+      NEO4J_server_memory_heap_max__size: 1G
+    ports:
+      # 로컬 PC에서만 접근하도록 127.0.0.1에 바인딩
+      - "127.0.0.1:7474:7474"   # HTTP (Neo4j Browser)
+      - "127.0.0.1:7687:7687"   # Bolt (드라이버 연결)
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: lifepolicy-qdrant
+    environment:
+      # API 키 미설정 시 인증 없이 열리지 않도록 기동을 막는다.
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?QDRANT_API_KEY를 .env에 설정하세요}
+      QDRANT__LOG_LEVEL: INFO
+    ports:
+      - "127.0.0.1:6333:6333"   # REST API / Dashboard
+      - "127.0.0.1:6334:6334"   # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  qdrant_storage:
