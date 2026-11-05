@@ -1,0 +1,60 @@
+{
+  "totals_before": {
+    "nodes": 1034,
+    "relationships": 3615
+  },
+  "totals_after": {
+    "nodes": 1034,
+    "relationships": 3615
+  },
+  "node_properties": {
+    "ok": true,
+    "compared_nodes": 1034,
+    "counts": {
+      "missing_property": 0,
+      "extra_property": 0,
+      "type_mismatch": 0,
+      "value_mismatch": 0
+    },
+    "by_property": {},
+    "examples": {},
+    "unmatched": {
+      "missing_node": 0,
+      "extra_node": 0,
+      "duplicate_node_rows": 0
+    },
+    "null_properties_not_stored": {},
+    "normalization": "null 값은 저장되지 않는 것으로 기대(속성 없음). 그 밖의 값은 정규화 없이 종류·값을 그대로 비교."
+  },
+  "relationship_properties": {
+    "ok": true,
+    "compared_relationships": 3615,
+    "counts": {
+      "missing_property": 0,
+      "extra_property": 0,
+      "type_mismatch": 0,
+      "value_mismatch": 0
+    },
+    "by_property": {},
+    "examples": {},
+    "unmatched": {
+      "missing_relationship": 0,
+      "extra_relationship": 0,
+      "duplicate_relationship_rows": 0
+    },
+    "null_properties_not_stored": {},
+    "input_fields_not_loaded": {},
+    "excluded_structural_fields": {
+      "source_id": "출발 노드 고유 ID → 관계의 출발 노드로 표현 (verify_relationship_endpoints에서 검증)",
+      "relation": "관계 타입 → type(r)로 표현 (verify_relationship_endpoints에서 검증)",
+      "target_id": "도착 노드 고유 ID → 관계의 도착 노드로 표현 (verify_relationship_endpoints에서 검증)"
+    }
+  },
+  "notifications": {
+    "total": 0,
+    "by_code": {},
+    "unknown_token": 0,
+    "schema_already_exists": 0,
+    "needs_review": []
+  }
+}
