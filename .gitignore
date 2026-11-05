@@ -68,10 +68,6 @@ data/**/*.zip
 **/*_pii.*
 **/real_profiles*
 
-# ===== 참고 자료 =====
-# refer/의 강의 실습 zip 등은 개인 참고용 (PRD·스타일 원본 md는 추적 가능)
-refer/*.zip
-
 # ===== OS / IDE =====
 .DS_Store
 Thumbs.db
