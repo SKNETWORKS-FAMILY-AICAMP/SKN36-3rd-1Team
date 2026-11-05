@@ -14,7 +14,9 @@
 | **복합 대상자 표현** | 단일 문자열 결합 ("청년, 저소득·취약계층") | 5대 차원(가족, 소득, 취업, 특수, 주거) 독립 필드 구조화 | 다중 조건 AND/OR 복합 필터링 정밀도 향상 |
 | **비정상 연령 (`0~0세`)** | `min_age: 0, max_age: 0` 수치 방치 (28건) | `min_age: null, max_age: null, age_review_needed: true` | 신생아/유아에게 성인 일자리/창업 정책이 오추천되는 결함 해소 |
 | **하위 호환성 보장** | 기존 인터페이스 의존 | 기존 `target_groups`, `requirements` 100% 보존 | 기존 DB 로더 및 프론트엔드 코드 브레이킹 제로(0) |
-| **Graph DB 확장** | `TARGETS` 단일 엣지만 존재 | `TARGETS` + `APPLIES_TO_LIFECYCLE` (2,537개 엣지) | Neo4j Cypher 쿼리에서 `(:LifeCycle {name: '중장년'})` 직접 탐색 지원 |
+| **Graph DB 확장** | `TARGETS` 단일 엣지만 존재 | `TARGETS` + `APPLIES_TO_LIFESTAGE` (419개 엣지, 전체 관계 2,537개 중) | Neo4j Cypher 쿼리에서 `(:LifeStage {name: '중장년'})` 직접 탐색 지원 |
+
+> **표기 기준:** 최종 인계본(`data/handoff/`)의 Neo4j 레이블·관계는 `LifeStage` / `APPLIES_TO_LIFESTAGE`, Qdrant Payload 필드는 `life_stages`로 통일되었다. 이 문서의 `life_cycles` 필드는 `data/processed/policies.jsonl`의 하위 호환 필드명이다.
 
 ---
 

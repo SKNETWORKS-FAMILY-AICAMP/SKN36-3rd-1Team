@@ -16,7 +16,7 @@
 | **`policy_id`** | `^POL_[A-Z0-9_]+$` | 프로젝트 전역 정책 기본 키 (PK)<br>예: `POL_001`, `POL_BOK_001`, `POL_GOV_001`, `POL_YC_001` | Neo4j `(:Policy)` PK, Qdrant Payload FK |
 | **`official_id`** | `^[A-Za-z0-9_-]+$` | 원천 기관/공식 API의 원본 서비스 식별자<br>예: `161300000099`, `WLF00004656`, `20261103005400214707` | 원천 기관 대조 및 실시간 갱신용 |
 | **`document_id`** | `^DOC_[A-Z0-9_]+$` | 공식 근거 문서 기본 키 (PK)<br>예: `DOC_LH_001`, `DOC_BOK_001`, `DOC_GOV_001`, `DOC_YC_001` | Neo4j `(:Document)` PK, Qdrant Payload FK |
-| **`chunk_id`** | `^CHK_[A-Za-z0-9_]+$` | Qdrant 벡터 검색용 청크 기본 키 (PK)<br>예: `CHK_POL_001_001`, `CHK_POL_BOK_001_002` | Qdrant Point ID 매핑용 (UUIDv5 생성 가능) |
+| **`chunk_id`** | `^(DOC_[A-Za-z0-9_]+_(P[0-9]+_)?C[0-9]+|CHK_[A-Za-z0-9_]+)$` | Qdrant 벡터 검색용 청크 기본 키 (PK)<br>예: `DOC_LH_001_P01_C01`, `DOC_GOV_001_C01`<br>최종 인계본 557건은 모두 `DOC_…_C…` 형식 (`CHK_` 사용 0건) | Qdrant Payload 식별자, `point_id` = UUIDv5(`chunk_id`) |
 | **`group_id`** | `^GRP_[A-Za-z0-9_]+$` | 복합 조건 그룹 기본 키 (PK)<br>예: `GRP_POL_001_ROOT`, `GRP_POL_001_AND_01` | Neo4j `(:ConditionGroup)` PK |
 | **`condition_id`** | `^COND_[A-Z0-9_]+$` | 원자 자격 조건 기본 키 (PK)<br>예: `COND_AGE_19_39`, `COND_INC_MEDIAN_50`, `COND_MRG_기혼` | Neo4j `(:EligibilityCondition)` PK |
 
