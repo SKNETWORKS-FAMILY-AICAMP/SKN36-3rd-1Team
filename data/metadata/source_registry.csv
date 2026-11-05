@@ -1,0 +1,7 @@
+provider,domain,data_type,status,total_records,latest_check
+LH청약플러스,apply.lh.or.kr,PDF/HTML,공식 원문 대조 검증 완료 (UI 노이즈 정제),3건,2026-11-04
+주택도시기금(NHUF),nhuf.molit.go.kr,PDF/HTML,보증부월세대출 원문 교체 및 절차서류 신규 추가 완료,10건,2026-11-04
+고용24(Work24),work24.go.kr,HTML,본문 셀렉터(.cont_wrap) 정제 및 검증 완료,1건,2026-11-04
+온통청년 Open API,youthcenter.go.kr,OpenAPI (JSON),전체 39페이지 3861건 전수 수집 및 65건 정규화 통합,3861건,2026-11-04
+행정안전부 공공서비스 API,api.odcloud.kr,OpenAPI (JSON),목록·상세·조건 10942건 전수 수집 및 65건 정규화 통합,10942건,2026-11-04
+사회보장정보원 복지서비스 API,apis.data.go.kr,OpenAPI (XML),목록 461건 및 상세 XML 99건 수집 (95건 정규화 통합),461건,2026-11-04

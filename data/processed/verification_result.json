@@ -1,0 +1,58 @@
+{
+  "summary": {
+    "total_checks": 10,
+    "passed_checks": 10,
+    "failed_checks": 0
+  },
+  "metrics": {
+    "policies": 237,
+    "documents": 246,
+    "chunks": 557,
+    "relationships": 2537,
+    "graph_edges": 2537
+  },
+  "details": {
+    "1_jsonl_parsing": {
+      "passed": true,
+      "errors": []
+    },
+    "2_required_fields": {
+      "passed": true,
+      "errors": []
+    },
+    "3_policy_id_uniqueness": {
+      "passed": true,
+      "duplicates": []
+    },
+    "4_document_integrity": {
+      "passed": true,
+      "duplicate_documents": [],
+      "broken_references": []
+    },
+    "5_chunk_integrity": {
+      "passed": true,
+      "duplicate_chunks": [],
+      "broken_references": []
+    },
+    "6_relationship_integrity": {
+      "passed": true,
+      "errors": []
+    },
+    "7_raw_file_existence": {
+      "passed": true,
+      "errors": []
+    },
+    "8_junk_contamination": {
+      "passed": true,
+      "errors": []
+    },
+    "9_short_text": {
+      "passed": true,
+      "errors": []
+    },
+    "10_url_and_semantics": {
+      "passed": true,
+      "errors": []
+    }
+  }
+}

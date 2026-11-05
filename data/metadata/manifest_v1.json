@@ -1,0 +1,107 @@
+{
+  "version": "v1.2.0-step2-final",
+  "created_at": "2026-11-05T01:12:56.074609",
+  "dataset_scope": "LifePolicy AI 3rd Cleaned Baseline Dataset (6 LifeStages, APPLIES_TO_LIFESTAGE Graph Edges, 5D Eligibility Attributes)",
+  "raw_sources_summary": {
+    "gov24_total_raw": 10942,
+    "youthcenter_total_raw": 3861,
+    "bokjiro_list_raw": 461,
+    "bokjiro_detail_raw": 99,
+    "total_raw_collected": 15363
+  },
+  "integrated_dataset_summary": {
+    "policies": {
+      "total": 237,
+      "verified": 21,
+      "extracted": 216,
+      "middle_aged_policies": 44,
+      "multi_lifestage_policies": 111,
+      "multi_attribute_policies": 113
+    },
+    "documents": {
+      "total": 246,
+      "verified": 30,
+      "extracted": 216
+    },
+    "chunks": {
+      "total": 557
+    },
+    "relationships": {
+      "total": 2537,
+      "applies_to_lifestage_edges": 419
+    }
+  },
+  "data_integrity": {
+    "jsonl_syntax_errors": 0,
+    "duplicate_policy_ids": 0,
+    "duplicate_document_ids": 0,
+    "broken_references": 0,
+    "missing_raw_files": 0,
+    "secrets_detected": 0
+  },
+  "files": {
+    "policies.jsonl": {
+      "description": "Neo4j Policy Nodes with life_stages & eligibility_attributes (237)",
+      "records": 237,
+      "size_bytes": 976102,
+      "sha256": "1587f15bb53bc4655e20e945f8c8c308bc5ddb1330925bc1d0958c8dd873ecc9",
+      "modified_at": "2026-11-05T01:07:02.865371"
+    },
+    "documents.jsonl": {
+      "description": "Neo4j Document Nodes (246)",
+      "records": 246,
+      "size_bytes": 1532477,
+      "sha256": "81f8b1f7c4ae9cbd3d63d23540d5150084fe2c571c9f43c3baaa69a61f30d092",
+      "modified_at": "2026-11-05T01:07:02.876363"
+    },
+    "chunks.jsonl": {
+      "description": "Qdrant Vector Search Chunks (557)",
+      "records": 557,
+      "size_bytes": 1794285,
+      "sha256": "552b770faeb47fa5b57bca09c18ab0d7b684af3cdece60af830382e5b6d63b6a",
+      "modified_at": "2026-11-05T01:07:02.890363"
+    },
+    "relationships.jsonl": {
+      "description": "Neo4j Graph Relationship Edges including APPLIES_TO_LIFESTAGE (2,537)",
+      "records": 2537,
+      "size_bytes": 639540,
+      "sha256": "fa02910c9924e9bcd8e2a48ddeacc08b698b55fa90a4ea2bd7f1b29e305ae2db",
+      "modified_at": "2026-11-05T01:07:02.909592"
+    },
+    "graph_edges.jsonl": {
+      "description": "Neo4j Graph Relationship Edges Mirror (2,537)",
+      "records": 2537,
+      "size_bytes": 639540,
+      "sha256": "fa02910c9924e9bcd8e2a48ddeacc08b698b55fa90a4ea2bd7f1b29e305ae2db",
+      "modified_at": "2026-11-05T01:07:02.926207"
+    },
+    "gov24_public_services.jsonl": {
+      "description": "Gov24 Refined Full Public Services (10,942)",
+      "records": 10942,
+      "size_bytes": 110208648,
+      "sha256": "08a6d9d123b7c9e5445922a0dc52d4b72301aff8acdec1621c9e074e3ad3510c",
+      "modified_at": "2026-11-04T20:11:53.498258"
+    },
+    "gov24_merged_services.jsonl": {
+      "description": "Gov24 Compatibility Alias (10,942)",
+      "records": 10942,
+      "size_bytes": 110208648,
+      "sha256": "08a6d9d123b7c9e5445922a0dc52d4b72301aff8acdec1621c9e074e3ad3510c",
+      "modified_at": "2026-11-04T20:11:53.498258"
+    },
+    "youthcenter_policies.jsonl": {
+      "description": "YouthCenter Refined Full Policies with 0~0 age normalization (3,861)",
+      "records": 3861,
+      "size_bytes": 44765905,
+      "sha256": "e57e152ef7d75093d6222e7d705e5e100a1dcff3a1e2206b9c12396f925cb9f2",
+      "modified_at": "2026-11-05T00:47:55.169147"
+    },
+    "bokjiro_welfare_services.jsonl": {
+      "description": "Bokjiro Refined Welfare Services (99)",
+      "records": 99,
+      "size_bytes": 1475913,
+      "sha256": "5d3ded562e1d144d3616f68dd1d0e7deda0b01ddebe529410da93e2e20f41d4c",
+      "modified_at": "2026-11-04T19:56:36.432483"
+    }
+  }
+}

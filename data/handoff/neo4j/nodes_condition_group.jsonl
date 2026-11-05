@@ -1,0 +1,343 @@
+{"group_id": "GRP_POL_001_ROOT", "policy_id": "POL_001", "logic": "UNKNOWN", "is_root": true, "description": "[정정공고][서울지역본부] 26년 1차 신혼·신생아 매입임대Ⅰ 예비입주자 모집공고 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_002_ROOT", "policy_id": "POL_002", "logic": "UNKNOWN", "is_root": true, "description": "기금대출 신혼부부 소득요건 합리화 개정 규정 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_003_ROOT", "policy_id": "POL_003", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 신혼부부전용 전세자금대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_004_ROOT", "policy_id": "POL_004", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 청년전용 버팀목전세자금대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_005_ROOT", "policy_id": "POL_005", "logic": "AND", "is_root": true, "description": "고용24 국민내일배움카드 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_005_NOT_EXCL", "policy_id": "POL_005", "logic": "NOT", "is_root": false, "description": "고용24 국민내일배움카드 참여 제외 대상 그룹: 현직 공무원 및 사립학교 교직원, 만 75세 이상인 사람, 졸업까지 수업연한이 2년을 초과하여 남은 대학생 및 고등학교 1·2학년 재학생, 연 "}
+{"group_id": "GRP_POL_006_ROOT", "policy_id": "POL_006", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 주거안정월세대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_007_ROOT", "policy_id": "POL_007", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 청년전용 보증부월세대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_009_ROOT", "policy_id": "POL_009", "logic": "UNKNOWN", "is_root": true, "description": "국토교통부 청년월세 한시 특별지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_010_ROOT", "policy_id": "POL_010", "logic": "UNKNOWN", "is_root": true, "description": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_001_ROOT", "policy_id": "POL_BOK_001", "logic": "UNKNOWN", "is_root": true, "description": "아이돌봄서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_002_ROOT", "policy_id": "POL_BOK_002", "logic": "UNKNOWN", "is_root": true, "description": "장애인자립자금대여 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_003_ROOT", "policy_id": "POL_BOK_003", "logic": "UNKNOWN", "is_root": true, "description": "의료급여(요양비) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_004_ROOT", "policy_id": "POL_BOK_004", "logic": "UNKNOWN", "is_root": true, "description": "청년내일저축계좌 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_005_ROOT", "policy_id": "POL_BOK_005", "logic": "UNKNOWN", "is_root": true, "description": "의료급여 임신·출산 진료비 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_006_ROOT", "policy_id": "POL_BOK_006", "logic": "UNKNOWN", "is_root": true, "description": "발달장애인 부모상담지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_007_ROOT", "policy_id": "POL_BOK_007", "logic": "UNKNOWN", "is_root": true, "description": "에너지바우처 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_008_ROOT", "policy_id": "POL_BOK_008", "logic": "UNKNOWN", "is_root": true, "description": "청소년특별지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_009_ROOT", "policy_id": "POL_BOK_009", "logic": "UNKNOWN", "is_root": true, "description": "저소득층 기저귀·조제분유 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_010_ROOT", "policy_id": "POL_BOK_010", "logic": "UNKNOWN", "is_root": true, "description": "여성청소년 생리용품 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_011_ROOT", "policy_id": "POL_BOK_011", "logic": "UNKNOWN", "is_root": true, "description": "고용보험 미적용자 출산급여 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_012_ROOT", "policy_id": "POL_BOK_012", "logic": "UNKNOWN", "is_root": true, "description": "방과후학교 자유수강권 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_013_ROOT", "policy_id": "POL_BOK_013", "logic": "UNKNOWN", "is_root": true, "description": "유아학비 지원(3~5세 누리과정 지원) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_014_ROOT", "policy_id": "POL_BOK_014", "logic": "UNKNOWN", "is_root": true, "description": "대학생 근로장학금 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_015_ROOT", "policy_id": "POL_BOK_015", "logic": "UNKNOWN", "is_root": true, "description": "장애아보육료지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_016_ROOT", "policy_id": "POL_BOK_016", "logic": "UNKNOWN", "is_root": true, "description": "한부모가족 아동양육비 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_017_ROOT", "policy_id": "POL_BOK_017", "logic": "UNKNOWN", "is_root": true, "description": "가정폭력·성폭력 등 폭력 피해자 무료법률지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_018_ROOT", "policy_id": "POL_BOK_018", "logic": "UNKNOWN", "is_root": true, "description": "가사·간병 방문 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_019_ROOT", "policy_id": "POL_BOK_019", "logic": "UNKNOWN", "is_root": true, "description": "고위험 임산부 의료비 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_020_ROOT", "policy_id": "POL_BOK_020", "logic": "UNKNOWN", "is_root": true, "description": "교육급여(맞춤형 급여) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_021_ROOT", "policy_id": "POL_BOK_021", "logic": "UNKNOWN", "is_root": true, "description": "농업인 연금보험료 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_022_ROOT", "policy_id": "POL_BOK_022", "logic": "UNKNOWN", "is_root": true, "description": "농업인 건강보험료 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_023_ROOT", "policy_id": "POL_BOK_023", "logic": "UNKNOWN", "is_root": true, "description": "폭력피해자 주거지원 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_024_ROOT", "policy_id": "POL_BOK_024", "logic": "UNKNOWN", "is_root": true, "description": "초중고 교육비 지원사업(고교학비 지원) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_025_ROOT", "policy_id": "POL_BOK_025", "logic": "UNKNOWN", "is_root": true, "description": "한부모가족자녀 교육비 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_026_ROOT", "policy_id": "POL_BOK_026", "logic": "UNKNOWN", "is_root": true, "description": "가정폭력피해자 치료회복 프로그램 및 의료비지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_027_ROOT", "policy_id": "POL_BOK_027", "logic": "UNKNOWN", "is_root": true, "description": "청소년한부모 아동양육 및 자립지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_028_ROOT", "policy_id": "POL_BOK_028", "logic": "UNKNOWN", "is_root": true, "description": "이주배경 청소년 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_029_ROOT", "policy_id": "POL_BOK_029", "logic": "UNKNOWN", "is_root": true, "description": "해산급여 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_030_ROOT", "policy_id": "POL_BOK_030", "logic": "UNKNOWN", "is_root": true, "description": "자활근로(기초, 차상위) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_031_ROOT", "policy_id": "POL_BOK_031", "logic": "UNKNOWN", "is_root": true, "description": "방과후보육료지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_032_ROOT", "policy_id": "POL_BOK_032", "logic": "UNKNOWN", "is_root": true, "description": "노인일자리 및 사회활동 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_033_ROOT", "policy_id": "POL_BOK_033", "logic": "UNKNOWN", "is_root": true, "description": "표준모자보건수첩 제공 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_034_ROOT", "policy_id": "POL_BOK_034", "logic": "UNKNOWN", "is_root": true, "description": "기초연금 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_035_ROOT", "policy_id": "POL_BOK_035", "logic": "UNKNOWN", "is_root": true, "description": "발달장애인 주간활동서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_036_ROOT", "policy_id": "POL_BOK_036", "logic": "UNKNOWN", "is_root": true, "description": "아동수당 지급 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_037_ROOT", "policy_id": "POL_BOK_037", "logic": "UNKNOWN", "is_root": true, "description": "자립준비청년 자립수당 지급 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_038_ROOT", "policy_id": "POL_BOK_038", "logic": "UNKNOWN", "is_root": true, "description": "청소년 발달장애인 방과후활동서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_039_ROOT", "policy_id": "POL_BOK_039", "logic": "UNKNOWN", "is_root": true, "description": "산모·신생아 건강관리 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_040_ROOT", "policy_id": "POL_BOK_040", "logic": "UNKNOWN", "is_root": true, "description": "정신건강복지센터 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_041_ROOT", "policy_id": "POL_BOK_041", "logic": "UNKNOWN", "is_root": true, "description": "의료급여본인부담면제 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_042_ROOT", "policy_id": "POL_BOK_042", "logic": "UNKNOWN", "is_root": true, "description": "긴급복지 해산비지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_043_ROOT", "policy_id": "POL_BOK_043", "logic": "UNKNOWN", "is_root": true, "description": "노인맞춤돌봄서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_044_ROOT", "policy_id": "POL_BOK_044", "logic": "UNKNOWN", "is_root": true, "description": "다문화가족 방문교육 서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_045_ROOT", "policy_id": "POL_BOK_045", "logic": "UNKNOWN", "is_root": true, "description": "발달재활서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_046_ROOT", "policy_id": "POL_BOK_046", "logic": "UNKNOWN", "is_root": true, "description": "장애아동수당 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_047_ROOT", "policy_id": "POL_BOK_047", "logic": "UNKNOWN", "is_root": true, "description": "주거급여(맞춤형 급여) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_048_ROOT", "policy_id": "POL_BOK_048", "logic": "UNKNOWN", "is_root": true, "description": "영농도우미 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_049_ROOT", "policy_id": "POL_BOK_049", "logic": "UNKNOWN", "is_root": true, "description": "장애인보조기기 교부 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_050_ROOT", "policy_id": "POL_BOK_050", "logic": "UNKNOWN", "is_root": true, "description": "인플루엔자 국가예방접종 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_051_ROOT", "policy_id": "POL_BOK_051", "logic": "UNKNOWN", "is_root": true, "description": "출산육아기 고용안정장려금 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_052_ROOT", "policy_id": "POL_BOK_052", "logic": "UNKNOWN", "is_root": true, "description": "초.중.고 학생 교육정보화 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_053_ROOT", "policy_id": "POL_BOK_053", "logic": "UNKNOWN", "is_root": true, "description": "장애인연금 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_054_ROOT", "policy_id": "POL_BOK_054", "logic": "UNKNOWN", "is_root": true, "description": "영유아보육료 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_055_ROOT", "policy_id": "POL_BOK_055", "logic": "UNKNOWN", "is_root": true, "description": "가정양육수당 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_056_ROOT", "policy_id": "POL_BOK_056", "logic": "UNKNOWN", "is_root": true, "description": "청소년방과후아카데미운영지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_057_ROOT", "policy_id": "POL_BOK_057", "logic": "UNKNOWN", "is_root": true, "description": "외국인근로자 등 의료지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_058_ROOT", "policy_id": "POL_BOK_058", "logic": "UNKNOWN", "is_root": true, "description": "이동통신요금감면 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_059_ROOT", "policy_id": "POL_BOK_059", "logic": "UNKNOWN", "is_root": true, "description": "아동발달지원계좌(디딤씨앗통장)지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_060_ROOT", "policy_id": "POL_BOK_060", "logic": "UNKNOWN", "is_root": true, "description": "장애인활동지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_061_ROOT", "policy_id": "POL_BOK_061", "logic": "UNKNOWN", "is_root": true, "description": "장애아가족양육지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_062_ROOT", "policy_id": "POL_BOK_062", "logic": "UNKNOWN", "is_root": true, "description": "통합건강증진사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_063_ROOT", "policy_id": "POL_BOK_063", "logic": "UNKNOWN", "is_root": true, "description": "장애수당 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_064_ROOT", "policy_id": "POL_BOK_064", "logic": "UNKNOWN", "is_root": true, "description": "장제급여 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_065_ROOT", "policy_id": "POL_BOK_065", "logic": "UNKNOWN", "is_root": true, "description": "내집마련 디딤돌 대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_066_ROOT", "policy_id": "POL_BOK_066", "logic": "UNKNOWN", "is_root": true, "description": "여성장애인 출산비용지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_067_ROOT", "policy_id": "POL_BOK_067", "logic": "UNKNOWN", "is_root": true, "description": "언어발달지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_068_ROOT", "policy_id": "POL_BOK_068", "logic": "UNKNOWN", "is_root": true, "description": "다문화가족 자녀 언어발달지원서비스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_069_ROOT", "policy_id": "POL_BOK_069", "logic": "UNKNOWN", "is_root": true, "description": "아동통합서비스지원(드림스타트사업) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_070_ROOT", "policy_id": "POL_BOK_070", "logic": "UNKNOWN", "is_root": true, "description": "가스요금할인 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_071_ROOT", "policy_id": "POL_BOK_071", "logic": "UNKNOWN", "is_root": true, "description": "첫만남이용권 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_072_ROOT", "policy_id": "POL_BOK_072", "logic": "UNKNOWN", "is_root": true, "description": "부모급여 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_073_ROOT", "policy_id": "POL_BOK_073", "logic": "UNKNOWN", "is_root": true, "description": "과학문화 바우처 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_074_ROOT", "policy_id": "POL_BOK_074", "logic": "UNKNOWN", "is_root": true, "description": "일상돌봄 서비스 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_075_ROOT", "policy_id": "POL_BOK_075", "logic": "UNKNOWN", "is_root": true, "description": "대중교통비 환급 지원(모두의카드) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_076_ROOT", "policy_id": "POL_BOK_076", "logic": "UNKNOWN", "is_root": true, "description": "긴급돌봄 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_077_ROOT", "policy_id": "POL_BOK_077", "logic": "UNKNOWN", "is_root": true, "description": "정신건강 심리상담 바우처사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_078_ROOT", "policy_id": "POL_BOK_078", "logic": "UNKNOWN", "is_root": true, "description": "아가와 엄마를 위한 무료 공익보험(우체국대한민국 엄마보험) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_079_ROOT", "policy_id": "POL_BOK_079", "logic": "UNKNOWN", "is_root": true, "description": "임신 사전건강관리 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_080_ROOT", "policy_id": "POL_BOK_080", "logic": "UNKNOWN", "is_root": true, "description": "자활성공지원금 지급·관리 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_081_ROOT", "policy_id": "POL_BOK_081", "logic": "UNKNOWN", "is_root": true, "description": "환경오염피해 구제급여 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_082_ROOT", "policy_id": "POL_BOK_082", "logic": "UNKNOWN", "is_root": true, "description": "직장인 든든한 점심밥 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_083_ROOT", "policy_id": "POL_BOK_083", "logic": "UNKNOWN", "is_root": true, "description": "중증장애인확인서 발급 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_084_ROOT", "policy_id": "POL_BOK_084", "logic": "UNKNOWN", "is_root": true, "description": "연탄쿠폰 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_085_ROOT", "policy_id": "POL_BOK_085", "logic": "UNKNOWN", "is_root": true, "description": "보훈가족 심리재활서비스 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_086_ROOT", "policy_id": "POL_BOK_086", "logic": "UNKNOWN", "is_root": true, "description": "장애인 등록 신청 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_087_ROOT", "policy_id": "POL_BOK_087", "logic": "UNKNOWN", "is_root": true, "description": "자동차사고 피해자 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_088_ROOT", "policy_id": "POL_BOK_088", "logic": "UNKNOWN", "is_root": true, "description": "무료법률상담 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_089_ROOT", "policy_id": "POL_BOK_089", "logic": "UNKNOWN", "is_root": true, "description": "법률구조 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_090_ROOT", "policy_id": "POL_BOK_090", "logic": "UNKNOWN", "is_root": true, "description": "개인회생 파산 종합지원(지원센터) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_091_ROOT", "policy_id": "POL_BOK_091", "logic": "UNKNOWN", "is_root": true, "description": "법문화교육(교육센터) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_092_ROOT", "policy_id": "POL_BOK_092", "logic": "UNKNOWN", "is_root": true, "description": "사회통합프로그램 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_093_ROOT", "policy_id": "POL_BOK_093", "logic": "UNKNOWN", "is_root": true, "description": "가족전용상담전화 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_094_ROOT", "policy_id": "POL_BOK_094", "logic": "UNKNOWN", "is_root": true, "description": "발달장애인 자기주도 재직자 훈련 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_095_ROOT", "policy_id": "POL_BOK_095", "logic": "UNKNOWN", "is_root": true, "description": "경계선지능청년지원 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_096_ROOT", "policy_id": "POL_BOK_096", "logic": "UNKNOWN", "is_root": true, "description": "무료법률구조 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_097_ROOT", "policy_id": "POL_BOK_097", "logic": "UNKNOWN", "is_root": true, "description": "자살예방센터 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_BOK_098_ROOT", "policy_id": "POL_BOK_098", "logic": "UNKNOWN", "is_root": true, "description": "건강보험 산정특례 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_GOV_001_ROOT", "policy_id": "POL_GOV_001", "logic": "AND", "is_root": true, "description": "주택금융공사 월세자금보증 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_001_OR_INC", "policy_id": "POL_GOV_001", "logic": "OR", "is_root": false, "description": "주택금융공사 월세자금보증 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_002_ROOT", "policy_id": "POL_GOV_002", "logic": "AND", "is_root": true, "description": "귀어 창업 및 주택구입 지원(융자) 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_002_OR_INC", "policy_id": "POL_GOV_002", "logic": "OR", "is_root": false, "description": "귀어 창업 및 주택구입 지원(융자) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_002_OR_HH", "policy_id": "POL_GOV_002", "logic": "OR", "is_root": false, "description": "귀어 창업 및 주택구입 지원(융자) 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_003_ROOT", "policy_id": "POL_GOV_003", "logic": "AND", "is_root": true, "description": "어업활동 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_003_OR_INC", "policy_id": "POL_GOV_003", "logic": "OR", "is_root": false, "description": "어업활동 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_003_OR_HH", "policy_id": "POL_GOV_003", "logic": "OR", "is_root": false, "description": "어업활동 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_004_ROOT", "policy_id": "POL_GOV_004", "logic": "AND", "is_root": true, "description": "창업어가멘토링지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_004_OR_INC", "policy_id": "POL_GOV_004", "logic": "OR", "is_root": false, "description": "창업어가멘토링지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_004_OR_HH", "policy_id": "POL_GOV_004", "logic": "OR", "is_root": false, "description": "창업어가멘토링지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_005_ROOT", "policy_id": "POL_GOV_005", "logic": "AND", "is_root": true, "description": "청년어촌정착지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_005_OR_INC", "policy_id": "POL_GOV_005", "logic": "OR", "is_root": false, "description": "청년어촌정착지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_005_OR_HH", "policy_id": "POL_GOV_005", "logic": "OR", "is_root": false, "description": "청년어촌정착지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_006_ROOT", "policy_id": "POL_GOV_006", "logic": "AND", "is_root": true, "description": "수산자원보호 직접지불제 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_006_OR_INC", "policy_id": "POL_GOV_006", "logic": "OR", "is_root": false, "description": "수산자원보호 직접지불제 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_006_OR_HH", "policy_id": "POL_GOV_006", "logic": "OR", "is_root": false, "description": "수산자원보호 직접지불제 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_007_ROOT", "policy_id": "POL_GOV_007", "logic": "AND", "is_root": true, "description": "북한이탈주민 자산형성 지원 (미래행복통장) 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_007_OR_INC", "policy_id": "POL_GOV_007", "logic": "OR", "is_root": false, "description": "북한이탈주민 자산형성 지원 (미래행복통장) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_008_ROOT", "policy_id": "POL_GOV_008", "logic": "AND", "is_root": true, "description": "북한이탈주민 정착금 지원(가산금) 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_008_OR_INC", "policy_id": "POL_GOV_008", "logic": "OR", "is_root": false, "description": "북한이탈주민 정착금 지원(가산금) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_009_ROOT", "policy_id": "POL_GOV_009", "logic": "AND", "is_root": true, "description": "성폭력, 아동학대, 인신매매등범죄의 피해 아동과 범죄 피해자인 장애인을 위한 진술조력인 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_009_OR_INC", "policy_id": "POL_GOV_009", "logic": "OR", "is_root": false, "description": "성폭력, 아동학대, 인신매매등범죄의 피해 아동과 범죄 피해자인 장애인을 위한 진술조력인 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_010_ROOT", "policy_id": "POL_GOV_010", "logic": "AND", "is_root": true, "description": "성폭력, 아동학대, 장애인학대,인신매매, 스토킹범죄, 특정강력범죄 피해자 국선변호사 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_010_OR_INC", "policy_id": "POL_GOV_010", "logic": "OR", "is_root": false, "description": "성폭력, 아동학대, 장애인학대,인신매매, 스토킹범죄, 특정강력범죄 피해자 국선변호사 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_011_ROOT", "policy_id": "POL_GOV_011", "logic": "AND", "is_root": true, "description": "소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_011_OR_INC", "policy_id": "POL_GOV_011", "logic": "OR", "is_root": false, "description": "소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_011_OR_HH", "policy_id": "POL_GOV_011", "logic": "OR", "is_root": false, "description": "소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_012_ROOT", "policy_id": "POL_GOV_012", "logic": "AND", "is_root": true, "description": "범죄 피해 구조금 지급 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_012_OR_INC", "policy_id": "POL_GOV_012", "logic": "OR", "is_root": false, "description": "범죄 피해 구조금 지급 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_013_ROOT", "policy_id": "POL_GOV_013", "logic": "AND", "is_root": true, "description": "이전비 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_013_OR_INC", "policy_id": "POL_GOV_013", "logic": "OR", "is_root": false, "description": "이전비 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_014_ROOT", "policy_id": "POL_GOV_014", "logic": "AND", "is_root": true, "description": "범죄피해자에 대한 경제적 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_014_OR_INC", "policy_id": "POL_GOV_014", "logic": "OR", "is_root": false, "description": "범죄피해자에 대한 경제적 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_015_ROOT", "policy_id": "POL_GOV_015", "logic": "AND", "is_root": true, "description": "6ㆍ25전사자(미수습) 유가족 유전자 채취 포상금 및 전사자 유해 소재 제보 포상금 지급 안내 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_015_OR_INC", "policy_id": "POL_GOV_015", "logic": "OR", "is_root": false, "description": "6ㆍ25전사자(미수습) 유가족 유전자 채취 포상금 및 전사자 유해 소재 제보 포상금 지급 안내 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_015_OR_HH", "policy_id": "POL_GOV_015", "logic": "OR", "is_root": false, "description": "6ㆍ25전사자(미수습) 유가족 유전자 채취 포상금 및 전사자 유해 소재 제보 포상금 지급 안내 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_016_ROOT", "policy_id": "POL_GOV_016", "logic": "AND", "is_root": true, "description": "장애인 자립생활주택 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_016_OR_INC", "policy_id": "POL_GOV_016", "logic": "OR", "is_root": false, "description": "장애인 자립생활주택 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_016_OR_HH", "policy_id": "POL_GOV_016", "logic": "OR", "is_root": false, "description": "장애인 자립생활주택 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_017_ROOT", "policy_id": "POL_GOV_017", "logic": "AND", "is_root": true, "description": "지자체(취약계층) 인플루엔자 예방접종 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_017_OR_INC", "policy_id": "POL_GOV_017", "logic": "OR", "is_root": false, "description": "지자체(취약계층) 인플루엔자 예방접종 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_017_OR_HH", "policy_id": "POL_GOV_017", "logic": "OR", "is_root": false, "description": "지자체(취약계층) 인플루엔자 예방접종 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_018_ROOT", "policy_id": "POL_GOV_018", "logic": "AND", "is_root": true, "description": "출산장려 건강보험 가입지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_018_OR_INC", "policy_id": "POL_GOV_018", "logic": "OR", "is_root": false, "description": "출산장려 건강보험 가입지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_018_OR_HH", "policy_id": "POL_GOV_018", "logic": "OR", "is_root": false, "description": "출산장려 건강보험 가입지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_019_ROOT", "policy_id": "POL_GOV_019", "logic": "AND", "is_root": true, "description": "부산 중구 임신·출산 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_019_OR_INC", "policy_id": "POL_GOV_019", "logic": "OR", "is_root": false, "description": "부산 중구 임신·출산 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_019_OR_HH", "policy_id": "POL_GOV_019", "logic": "OR", "is_root": false, "description": "부산 중구 임신·출산 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_020_ROOT", "policy_id": "POL_GOV_020", "logic": "AND", "is_root": true, "description": "출산장려금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_020_OR_INC", "policy_id": "POL_GOV_020", "logic": "OR", "is_root": false, "description": "출산장려금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_020_OR_HH", "policy_id": "POL_GOV_020", "logic": "OR", "is_root": false, "description": "출산장려금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_021_ROOT", "policy_id": "POL_GOV_021", "logic": "AND", "is_root": true, "description": "장애인가정 출산지원금지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_021_OR_INC", "policy_id": "POL_GOV_021", "logic": "OR", "is_root": false, "description": "장애인가정 출산지원금지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_021_OR_HH", "policy_id": "POL_GOV_021", "logic": "OR", "is_root": false, "description": "장애인가정 출산지원금지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_022_ROOT", "policy_id": "POL_GOV_022", "logic": "AND", "is_root": true, "description": "가정위탁아동 양육보조금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_022_OR_INC", "policy_id": "POL_GOV_022", "logic": "OR", "is_root": false, "description": "가정위탁아동 양육보조금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_022_OR_HH", "policy_id": "POL_GOV_022", "logic": "OR", "is_root": false, "description": "가정위탁아동 양육보조금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_023_ROOT", "policy_id": "POL_GOV_023", "logic": "AND", "is_root": true, "description": "장애인 활동지원(추가) 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_023_OR_INC", "policy_id": "POL_GOV_023", "logic": "OR", "is_root": false, "description": "장애인 활동지원(추가) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_023_OR_HH", "policy_id": "POL_GOV_023", "logic": "OR", "is_root": false, "description": "장애인 활동지원(추가) 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_024_ROOT", "policy_id": "POL_GOV_024", "logic": "AND", "is_root": true, "description": "청년 사업자 임대료 지원 사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_024_OR_INC", "policy_id": "POL_GOV_024", "logic": "OR", "is_root": false, "description": "청년 사업자 임대료 지원 사업 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_025_ROOT", "policy_id": "POL_GOV_025", "logic": "AND", "is_root": true, "description": "사회복지 증진 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_025_OR_HH", "policy_id": "POL_GOV_025", "logic": "OR", "is_root": false, "description": "사회복지 증진 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_026_ROOT", "policy_id": "POL_GOV_026", "logic": "AND", "is_root": true, "description": "돌봄플러그 설치 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_027_ROOT", "policy_id": "POL_GOV_027", "logic": "AND", "is_root": true, "description": "아빠 육아휴직 장려금 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_027_OR_INC", "policy_id": "POL_GOV_027", "logic": "OR", "is_root": false, "description": "아빠 육아휴직 장려금 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_027_OR_HH", "policy_id": "POL_GOV_027", "logic": "OR", "is_root": false, "description": "아빠 육아휴직 장려금 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_028_ROOT", "policy_id": "POL_GOV_028", "logic": "AND", "is_root": true, "description": "동구 출산축하금 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_028_OR_INC", "policy_id": "POL_GOV_028", "logic": "OR", "is_root": false, "description": "동구 출산축하금 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_029_ROOT", "policy_id": "POL_GOV_029", "logic": "AND", "is_root": true, "description": "청소년 방과후 아카데미 운영 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_029_OR_INC", "policy_id": "POL_GOV_029", "logic": "OR", "is_root": false, "description": "청소년 방과후 아카데미 운영 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_029_OR_HH", "policy_id": "POL_GOV_029", "logic": "OR", "is_root": false, "description": "청소년 방과후 아카데미 운영 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_030_ROOT", "policy_id": "POL_GOV_030", "logic": "AND", "is_root": true, "description": "위기청소년 특별지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_030_OR_INC", "policy_id": "POL_GOV_030", "logic": "OR", "is_root": false, "description": "위기청소년 특별지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_031_ROOT", "policy_id": "POL_GOV_031", "logic": "AND", "is_root": true, "description": "명절(설, 추석) 어려운 이웃 위문 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_031_OR_HH", "policy_id": "POL_GOV_031", "logic": "OR", "is_root": false, "description": "명절(설, 추석) 어려운 이웃 위문 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_032_ROOT", "policy_id": "POL_GOV_032", "logic": "AND", "is_root": true, "description": "대청장학금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_032_OR_INC", "policy_id": "POL_GOV_032", "logic": "OR", "is_root": false, "description": "대청장학금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_032_OR_HH", "policy_id": "POL_GOV_032", "logic": "OR", "is_root": false, "description": "대청장학금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_033_ROOT", "policy_id": "POL_GOV_033", "logic": "AND", "is_root": true, "description": "저소득주민 고등학생 자녀 장학금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_033_OR_HH", "policy_id": "POL_GOV_033", "logic": "OR", "is_root": false, "description": "저소득주민 고등학생 자녀 장학금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_034_ROOT", "policy_id": "POL_GOV_034", "logic": "AND", "is_root": true, "description": "출산지원금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_034_OR_INC", "policy_id": "POL_GOV_034", "logic": "OR", "is_root": false, "description": "출산지원금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_034_OR_HH", "policy_id": "POL_GOV_034", "logic": "OR", "is_root": false, "description": "출산지원금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_035_ROOT", "policy_id": "POL_GOV_035", "logic": "AND", "is_root": true, "description": "저소득층 국민건강보험료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_035_OR_INC", "policy_id": "POL_GOV_035", "logic": "OR", "is_root": false, "description": "저소득층 국민건강보험료 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_035_OR_HH", "policy_id": "POL_GOV_035", "logic": "OR", "is_root": false, "description": "저소득층 국민건강보험료 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_036_ROOT", "policy_id": "POL_GOV_036", "logic": "AND", "is_root": true, "description": "결식아동 급식지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_036_OR_HH", "policy_id": "POL_GOV_036", "logic": "OR", "is_root": false, "description": "결식아동 급식지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_037_ROOT", "policy_id": "POL_GOV_037", "logic": "AND", "is_root": true, "description": "미혼모가족복지시설 퇴소자 자립 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_037_OR_INC", "policy_id": "POL_GOV_037", "logic": "OR", "is_root": false, "description": "미혼모가족복지시설 퇴소자 자립 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_038_ROOT", "policy_id": "POL_GOV_038", "logic": "AND", "is_root": true, "description": "수원지역 범죄 피해자 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_038_OR_INC", "policy_id": "POL_GOV_038", "logic": "OR", "is_root": false, "description": "수원지역 범죄 피해자 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_039_ROOT", "policy_id": "POL_GOV_039", "logic": "AND", "is_root": true, "description": "외국인 주민 긴급 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_039_OR_INC", "policy_id": "POL_GOV_039", "logic": "OR", "is_root": false, "description": "외국인 주민 긴급 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_040_ROOT", "policy_id": "POL_GOV_040", "logic": "AND", "is_root": true, "description": "생계곤란가정 긴급생활용품 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_040_OR_INC", "policy_id": "POL_GOV_040", "logic": "OR", "is_root": false, "description": "생계곤란가정 긴급생활용품 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_040_OR_HH", "policy_id": "POL_GOV_040", "logic": "OR", "is_root": false, "description": "생계곤란가정 긴급생활용품 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_041_ROOT", "policy_id": "POL_GOV_041", "logic": "AND", "is_root": true, "description": "강원대법학전문 대학원생 장학금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_041_OR_INC", "policy_id": "POL_GOV_041", "logic": "OR", "is_root": false, "description": "강원대법학전문 대학원생 장학금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_041_OR_HH", "policy_id": "POL_GOV_041", "logic": "OR", "is_root": false, "description": "강원대법학전문 대학원생 장학금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_042_ROOT", "policy_id": "POL_GOV_042", "logic": "AND", "is_root": true, "description": "발달재활서비스 지원(시자체) 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_042_OR_INC", "policy_id": "POL_GOV_042", "logic": "OR", "is_root": false, "description": "발달재활서비스 지원(시자체) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_042_OR_HH", "policy_id": "POL_GOV_042", "logic": "OR", "is_root": false, "description": "발달재활서비스 지원(시자체) 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_043_ROOT", "policy_id": "POL_GOV_043", "logic": "AND", "is_root": true, "description": "주택 도시가스 보급사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_043_OR_INC", "policy_id": "POL_GOV_043", "logic": "OR", "is_root": false, "description": "주택 도시가스 보급사업 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_044_ROOT", "policy_id": "POL_GOV_044", "logic": "AND", "is_root": true, "description": "자활사업 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_044_OR_HH", "policy_id": "POL_GOV_044", "logic": "OR", "is_root": false, "description": "자활사업 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_045_ROOT", "policy_id": "POL_GOV_045", "logic": "AND", "is_root": true, "description": "여성장애인 가사도우미 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_045_OR_HH", "policy_id": "POL_GOV_045", "logic": "OR", "is_root": false, "description": "여성장애인 가사도우미 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_046_ROOT", "policy_id": "POL_GOV_046", "logic": "AND", "is_root": true, "description": "수급자 및 차상위계층 자산형성지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_046_OR_HH", "policy_id": "POL_GOV_046", "logic": "OR", "is_root": false, "description": "수급자 및 차상위계층 자산형성지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_047_ROOT", "policy_id": "POL_GOV_047", "logic": "AND", "is_root": true, "description": "대학생 학자금 대출이자 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_047_OR_INC", "policy_id": "POL_GOV_047", "logic": "OR", "is_root": false, "description": "대학생 학자금 대출이자 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_047_OR_HH", "policy_id": "POL_GOV_047", "logic": "OR", "is_root": false, "description": "대학생 학자금 대출이자 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_048_ROOT", "policy_id": "POL_GOV_048", "logic": "AND", "is_root": true, "description": "출생축하금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_048_OR_INC", "policy_id": "POL_GOV_048", "logic": "OR", "is_root": false, "description": "출생축하금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_048_OR_HH", "policy_id": "POL_GOV_048", "logic": "OR", "is_root": false, "description": "출생축하금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_049_ROOT", "policy_id": "POL_GOV_049", "logic": "AND", "is_root": true, "description": "열린교육바우처 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_049_OR_HH", "policy_id": "POL_GOV_049", "logic": "OR", "is_root": false, "description": "열린교육바우처 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_050_ROOT", "policy_id": "POL_GOV_050", "logic": "AND", "is_root": true, "description": "장애인가정 양육비용 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_050_OR_INC", "policy_id": "POL_GOV_050", "logic": "OR", "is_root": false, "description": "장애인가정 양육비용 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_050_OR_HH", "policy_id": "POL_GOV_050", "logic": "OR", "is_root": false, "description": "장애인가정 양육비용 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_051_ROOT", "policy_id": "POL_GOV_051", "logic": "AND", "is_root": true, "description": "장애인가정 출산비용 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_051_OR_INC", "policy_id": "POL_GOV_051", "logic": "OR", "is_root": false, "description": "장애인가정 출산비용 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_051_OR_HH", "policy_id": "POL_GOV_051", "logic": "OR", "is_root": false, "description": "장애인가정 출산비용 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_052_ROOT", "policy_id": "POL_GOV_052", "logic": "AND", "is_root": true, "description": "포항시 장애수당 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_052_OR_HH", "policy_id": "POL_GOV_052", "logic": "OR", "is_root": false, "description": "포항시 장애수당 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_053_ROOT", "policy_id": "POL_GOV_053", "logic": "AND", "is_root": true, "description": "다문화가족 출산용품 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_053_OR_INC", "policy_id": "POL_GOV_053", "logic": "OR", "is_root": false, "description": "다문화가족 출산용품 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_054_ROOT", "policy_id": "POL_GOV_054", "logic": "AND", "is_root": true, "description": "24시간 장애인활동지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_054_OR_INC", "policy_id": "POL_GOV_054", "logic": "OR", "is_root": false, "description": "24시간 장애인활동지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_055_ROOT", "policy_id": "POL_GOV_055", "logic": "AND", "is_root": true, "description": "명절 어려운 이웃 위문 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_055_OR_HH", "policy_id": "POL_GOV_055", "logic": "OR", "is_root": false, "description": "명절 어려운 이웃 위문 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_056_ROOT", "policy_id": "POL_GOV_056", "logic": "AND", "is_root": true, "description": "난임부부 격려금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_056_OR_INC", "policy_id": "POL_GOV_056", "logic": "OR", "is_root": false, "description": "난임부부 격려금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_056_OR_HH", "policy_id": "POL_GOV_056", "logic": "OR", "is_root": false, "description": "난임부부 격려금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_057_ROOT", "policy_id": "POL_GOV_057", "logic": "AND", "is_root": true, "description": "한국장학재단 대학생 학자금 대출이자 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_057_OR_INC", "policy_id": "POL_GOV_057", "logic": "OR", "is_root": false, "description": "한국장학재단 대학생 학자금 대출이자 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_057_OR_HH", "policy_id": "POL_GOV_057", "logic": "OR", "is_root": false, "description": "한국장학재단 대학생 학자금 대출이자 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_058_ROOT", "policy_id": "POL_GOV_058", "logic": "AND", "is_root": true, "description": "출산축하금 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_058_OR_INC", "policy_id": "POL_GOV_058", "logic": "OR", "is_root": false, "description": "출산축하금 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_058_OR_HH", "policy_id": "POL_GOV_058", "logic": "OR", "is_root": false, "description": "출산축하금 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_059_ROOT", "policy_id": "POL_GOV_059", "logic": "AND", "is_root": true, "description": "세종시 청년 행정인턴 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_059_OR_INC", "policy_id": "POL_GOV_059", "logic": "OR", "is_root": false, "description": "세종시 청년 행정인턴 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_059_OR_HH", "policy_id": "POL_GOV_059", "logic": "OR", "is_root": false, "description": "세종시 청년 행정인턴 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_060_ROOT", "policy_id": "POL_GOV_060", "logic": "AND", "is_root": true, "description": "국민임대주택 공동전기료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_060_OR_HH", "policy_id": "POL_GOV_060", "logic": "OR", "is_root": false, "description": "국민임대주택 공동전기료 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_061_ROOT", "policy_id": "POL_GOV_061", "logic": "AND", "is_root": true, "description": "2025년 광주광역시 장애인 평생교육이용권 우수이용자 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_061_OR_INC", "policy_id": "POL_GOV_061", "logic": "OR", "is_root": false, "description": "2025년 광주광역시 장애인 평생교육이용권 우수이용자 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_061_OR_HH", "policy_id": "POL_GOV_061", "logic": "OR", "is_root": false, "description": "2025년 광주광역시 장애인 평생교육이용권 우수이용자 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_062_ROOT", "policy_id": "POL_GOV_062", "logic": "AND", "is_root": true, "description": "저소득층 희귀난치성 및 중증질환자 교통비 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_062_OR_HH", "policy_id": "POL_GOV_062", "logic": "OR", "is_root": false, "description": "저소득층 희귀난치성 및 중증질환자 교통비 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_063_ROOT", "policy_id": "POL_GOV_063", "logic": "AND", "is_root": true, "description": "어르신 이·미용료 및 목욕료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_063_OR_HH", "policy_id": "POL_GOV_063", "logic": "OR", "is_root": false, "description": "어르신 이·미용료 및 목욕료 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_064_ROOT", "policy_id": "POL_GOV_064", "logic": "AND", "is_root": true, "description": "참전유공자 TV수신료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_064_OR_INC", "policy_id": "POL_GOV_064", "logic": "OR", "is_root": false, "description": "참전유공자 TV수신료 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_064_OR_HH", "policy_id": "POL_GOV_064", "logic": "OR", "is_root": false, "description": "참전유공자 TV수신료 지원 가구유형선택그룹: 가구 형태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_GOV_065_ROOT", "policy_id": "POL_GOV_065", "logic": "AND", "is_root": true, "description": "승촌보 캠핑장 이용요금 감면 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_GOV_065_OR_INC", "policy_id": "POL_GOV_065", "logic": "OR", "is_root": false, "description": "승촌보 캠핑장 이용요금 감면 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_001_ROOT", "policy_id": "POL_YC_001", "logic": "UNKNOWN", "is_root": true, "description": "신혼부부 및 청년 임대주택 임대보증금 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_002_ROOT", "policy_id": "POL_YC_002", "logic": "AND", "is_root": true, "description": "사회초년생 청년인턴제 운영 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_002_OR_EDU", "policy_id": "POL_YC_002", "logic": "OR", "is_root": false, "description": "사회초년생 청년인턴제 운영 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_002_OR_SP", "policy_id": "POL_YC_002", "logic": "OR", "is_root": false, "description": "사회초년생 청년인턴제 운영 특화대상선택그룹: 특화 대상자 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_003_ROOT", "policy_id": "POL_YC_003", "logic": "AND", "is_root": true, "description": "2026 우수인재 연계 기업인턴십 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_004_ROOT", "policy_id": "POL_YC_004", "logic": "UNKNOWN", "is_root": true, "description": "지역콘텐츠산업 육성 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_005_ROOT", "policy_id": "POL_YC_005", "logic": "UNKNOWN", "is_root": true, "description": "대학연계 로컬크리에이터 양성 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_006_ROOT", "policy_id": "POL_YC_006", "logic": "UNKNOWN", "is_root": true, "description": "대학생 학자금대출 부담경감 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_007_ROOT", "policy_id": "POL_YC_007", "logic": "AND", "is_root": true, "description": "글로벌첨단전략산업 기술경영 전문인력 양성사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_007_OR_EDU", "policy_id": "POL_YC_007", "logic": "OR", "is_root": false, "description": "글로벌첨단전략산업 기술경영 전문인력 양성사업 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_008_ROOT", "policy_id": "POL_YC_008", "logic": "UNKNOWN", "is_root": true, "description": "여성과학기술인 육성 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_009_ROOT", "policy_id": "POL_YC_009", "logic": "AND", "is_root": true, "description": "공학교육혁신센터 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_009_OR_EDU", "policy_id": "POL_YC_009", "logic": "OR", "is_root": false, "description": "공학교육혁신센터 지원 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_010_ROOT", "policy_id": "POL_YC_010", "logic": "AND", "is_root": true, "description": "혁신융합캠퍼스 구축 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_010_OR_EDU", "policy_id": "POL_YC_010", "logic": "OR", "is_root": false, "description": "혁신융합캠퍼스 구축 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_011_ROOT", "policy_id": "POL_YC_011", "logic": "UNKNOWN", "is_root": true, "description": "물류로봇경진대회 개최 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_012_ROOT", "policy_id": "POL_YC_012", "logic": "UNKNOWN", "is_root": true, "description": "글로벌 AI로봇 해커톤 개최 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_013_ROOT", "policy_id": "POL_YC_013", "logic": "UNKNOWN", "is_root": true, "description": "청년 일경험 및 현장체험 프로그램 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_014_ROOT", "policy_id": "POL_YC_014", "logic": "AND", "is_root": true, "description": "청년농업인 맞춤 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_015_ROOT", "policy_id": "POL_YC_015", "logic": "AND", "is_root": true, "description": "재직자 직업훈련 사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_016_ROOT", "policy_id": "POL_YC_016", "logic": "UNKNOWN", "is_root": true, "description": "현장중심 실무인력 양성사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_017_ROOT", "policy_id": "POL_YC_017", "logic": "AND", "is_root": true, "description": "대학일자리플러스센터 설치운영 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_017_OR_EDU", "policy_id": "POL_YC_017", "logic": "OR", "is_root": false, "description": "대학일자리플러스센터 설치운영 지원 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_018_ROOT", "policy_id": "POL_YC_018", "logic": "AND", "is_root": true, "description": "대구형 청년 그린 내일채움공제 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_019_ROOT", "policy_id": "POL_YC_019", "logic": "UNKNOWN", "is_root": true, "description": "청년농업인 영농정착 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_020_ROOT", "policy_id": "POL_YC_020", "logic": "UNKNOWN", "is_root": true, "description": "경기북부 청년 서포터즈 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_021_ROOT", "policy_id": "POL_YC_021", "logic": "AND", "is_root": true, "description": "경기청년 기후특사단 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_022_ROOT", "policy_id": "POL_YC_022", "logic": "UNKNOWN", "is_root": true, "description": "경기청년공간 조성 및 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_023_ROOT", "policy_id": "POL_YC_023", "logic": "UNKNOWN", "is_root": true, "description": "지역사회서비스분야 청년사업단 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_024_ROOT", "policy_id": "POL_YC_024", "logic": "UNKNOWN", "is_root": true, "description": "경기 컬처패스 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_025_ROOT", "policy_id": "POL_YC_025", "logic": "UNKNOWN", "is_root": true, "description": "청년문화예술패스 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_026_ROOT", "policy_id": "POL_YC_026", "logic": "UNKNOWN", "is_root": true, "description": "재난복구지원 군 장병 상해보험 가입지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_027_ROOT", "policy_id": "POL_YC_027", "logic": "UNKNOWN", "is_root": true, "description": "군복무 경기청년 상해보험 가입지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_028_ROOT", "policy_id": "POL_YC_028", "logic": "AND", "is_root": true, "description": "공중보건 장학제도 운영 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_029_ROOT", "policy_id": "POL_YC_029", "logic": "UNKNOWN", "is_root": true, "description": "자립준비청년 자립수당 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_030_ROOT", "policy_id": "POL_YC_030", "logic": "UNKNOWN", "is_root": true, "description": "청년 노동자 통장 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_031_ROOT", "policy_id": "POL_YC_031", "logic": "UNKNOWN", "is_root": true, "description": "근로능력 있는 수급자의 탈수급 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_032_ROOT", "policy_id": "POL_YC_032", "logic": "UNKNOWN", "is_root": true, "description": "청년의 날 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_033_ROOT", "policy_id": "POL_YC_033", "logic": "UNKNOWN", "is_root": true, "description": "자립준비청년 주거비 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_034_ROOT", "policy_id": "POL_YC_034", "logic": "UNKNOWN", "is_root": true, "description": "사하청년 온라인 플랫폼 <사하청년 1839 운영> 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_035_ROOT", "policy_id": "POL_YC_035", "logic": "UNKNOWN", "is_root": true, "description": "청년월세 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_036_ROOT", "policy_id": "POL_YC_036", "logic": "UNKNOWN", "is_root": true, "description": "사하청년네트워크 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_037_ROOT", "policy_id": "POL_YC_037", "logic": "UNKNOWN", "is_root": true, "description": "대학기숙사 확충 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_038_ROOT", "policy_id": "POL_YC_038", "logic": "UNKNOWN", "is_root": true, "description": "경기도 공공기숙사 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_039_ROOT", "policy_id": "POL_YC_039", "logic": "UNKNOWN", "is_root": true, "description": "청년층을 위한 지분적립형 분양주택 공급 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_040_ROOT", "policy_id": "POL_YC_040", "logic": "UNKNOWN", "is_root": true, "description": "청년층을 위한 매입임대주택 공급 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_041_ROOT", "policy_id": "POL_YC_041", "logic": "UNKNOWN", "is_root": true, "description": "청년농업인 경쟁력제고 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_042_ROOT", "policy_id": "POL_YC_042", "logic": "UNKNOWN", "is_root": true, "description": "경기도 평생교육이용권 지원 및 사업운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_043_ROOT", "policy_id": "POL_YC_043", "logic": "UNKNOWN", "is_root": true, "description": "경기청년 역량강화 기회지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_044_ROOT", "policy_id": "POL_YC_044", "logic": "UNKNOWN", "is_root": true, "description": "경기도 대학생 드림링크 직무실습 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_045_ROOT", "policy_id": "POL_YC_045", "logic": "UNKNOWN", "is_root": true, "description": "대학일자리플러스센터 사업 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_046_ROOT", "policy_id": "POL_YC_046", "logic": "UNKNOWN", "is_root": true, "description": "경기도 지역혁신 중심대학 지원체계(RISE) 구축･지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_047_ROOT", "policy_id": "POL_YC_047", "logic": "UNKNOWN", "is_root": true, "description": "경기도형 창업특화주택 조성 및 운영 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_048_ROOT", "policy_id": "POL_YC_048", "logic": "AND", "is_root": true, "description": "GH 청춘 빌드업 창업 공모전 개최 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_049_ROOT", "policy_id": "POL_YC_049", "logic": "AND", "is_root": true, "description": "진안청년 내일 창업 아카데미 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_049_OR_JOB", "policy_id": "POL_YC_049", "logic": "OR", "is_root": false, "description": "진안청년 내일 창업 아카데미 취업상태선택그룹: 취업 상태 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_050_ROOT", "policy_id": "POL_YC_050", "logic": "UNKNOWN", "is_root": true, "description": "진안군 청년쉐어하우스 월랑 입주 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_051_ROOT", "policy_id": "POL_YC_051", "logic": "UNKNOWN", "is_root": true, "description": "청년 사회적경제 창업동아리 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_052_ROOT", "policy_id": "POL_YC_052", "logic": "UNKNOWN", "is_root": true, "description": "진안청년 참여지원(청년참여 포인트제도) 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_053_ROOT", "policy_id": "POL_YC_053", "logic": "UNKNOWN", "is_root": true, "description": "소상공인 청년 창업 원스텝 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_054_ROOT", "policy_id": "POL_YC_054", "logic": "UNKNOWN", "is_root": true, "description": "진안군 청년 주거비 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_055_ROOT", "policy_id": "POL_YC_055", "logic": "UNKNOWN", "is_root": true, "description": "신혼부부 및 청년 공공임대주택 임대보증금 지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_056_ROOT", "policy_id": "POL_YC_056", "logic": "UNKNOWN", "is_root": true, "description": "K-Art 청년창작자 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_057_ROOT", "policy_id": "POL_YC_057", "logic": "AND", "is_root": true, "description": "민간 소공연장 청년인력 지원사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_058_ROOT", "policy_id": "POL_YC_058", "logic": "UNKNOWN", "is_root": true, "description": "청년 문화예술 활성화 사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_059_ROOT", "policy_id": "POL_YC_059", "logic": "UNKNOWN", "is_root": true, "description": "얼티밋 뮤직 페스티벌 개최 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_060_ROOT", "policy_id": "POL_YC_060", "logic": "UNKNOWN", "is_root": true, "description": "문화예술교육사 현장역량강화사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_061_ROOT", "policy_id": "POL_YC_061", "logic": "UNKNOWN", "is_root": true, "description": "전북 청년문화예술 주문배달서비스사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_062_ROOT", "policy_id": "POL_YC_062", "logic": "UNKNOWN", "is_root": true, "description": "문화예술일자리지원사업 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_YC_063_ROOT", "policy_id": "POL_YC_063", "logic": "AND", "is_root": true, "description": "서울시 내발산동 공공기숙사 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_063_OR_EDU", "policy_id": "POL_YC_063", "logic": "OR", "is_root": false, "description": "서울시 내발산동 공공기숙사 학력선택그룹: 학력 조건 중 하나 충족 시 지원 가능 (OR)"}
+{"group_id": "GRP_POL_YC_064_ROOT", "policy_id": "POL_YC_064", "logic": "AND", "is_root": true, "description": "글로벌 미래인재 육성사업 복합 자격 조건 루트 그룹 (AND 결합)"}
+{"group_id": "GRP_POL_YC_065_ROOT", "policy_id": "POL_YC_065", "logic": "UNKNOWN", "is_root": true, "description": "세종시 위원회 청년참여 확대 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}

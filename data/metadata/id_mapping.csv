@@ -1,0 +1,24 @@
+original_id,entity_type,canonical_id,change_reason,target_location
+POL_008,policy,EXCLUDED_FROM_POLICY,정책이 아닌 오픈API 연계 안내 레코드이므로 추천 데이터에서 제외,data/metadata/api_metadata.json
+DOC_LH_002,document,DOC_LH_002,기존 48자 자동로그아웃 텍스트에서 서울지역본부 유의사항 PDF 원본(646자)으로 복구,data/processed/documents.jsonl
+DOC_LH_003,document,DOC_LH_003,센스리더·GNB·자동로그아웃 모달·공유버튼 제거 후 순수 공고 본문(639자)으로 정제,data/processed/documents.jsonl
+DOC_NHUF_001~007,document,DOC_NHUF_001~007,브레드크럼·탭·버튼 노이즈 제거 및 본문 선택자(.contents) 정제,data/processed/documents.jsonl
+DOC_NHUF_008,document,DOC_NHUF_008,잘못 수집된 버팀목전세자금 FAQ 대신 공식 청년전용 보증부월세대출 대출안내(FP05020701.jsp)로 교체,data/processed/documents.jsonl
+DOC_NHUF_009,document,DOC_NHUF_009,청년전용 보증부월세대출 이용절차 및 제출서류(FP05020702.jsp) 신규 추가,data/processed/documents.jsonl
+DOC_NHUF_010,document,DOC_NHUF_010,주거안정월세대출 이용절차 및 제출서류(FP05020202.jsp) 신규 추가,data/processed/documents.jsonl
+DOC_MOLIT_001,document,DOC_MOLIT_001,비존재 가상 텍스트 대체 -> 복지로 중앙부처복지서비스 원문(WLF00004661.xml)으로 복구,data/processed/documents.jsonl
+DOC_MOLIT_002,document,DOC_MOLIT_002,POL_009 근거 강화를 위해 정부24 공공서비스 원문(161300000099.json) 신규 연계,data/processed/documents.jsonl
+DOC_MOEL_001,document,DOC_MOEL_001,비존재 가상 텍스트 대체 -> 정부24 공공서비스 원문(149200005007.json)으로 복구,data/processed/documents.jsonl
+DOC_MOEL_002,document,DOC_MOEL_002,POL_010 근거 강화를 위해 온통청년 정책 원문(20260710005400113256.json) 신규 연계,data/processed/documents.jsonl
+WLF00004661,bokjiro_policy,POL_009,국토교통부 청년월세 지원사업 동일 건 -> POL_009로 통합 및 근거 문서 DOC_MOLIT_001 연계,data/processed/policies.jsonl
+161300000099,gov24_service,POL_009,국토교통부 청년월세 한시 특별지원 동일 건 -> POL_009로 통합 및 근거 문서 DOC_MOLIT_002 연계,data/processed/policies.jsonl
+20261004005400113874,youthcenter_policy,POL_009,국토교통부 청년월세지원 동일 건 -> POL_009로 중복 병합,data/processed/policies.jsonl
+149200005007,gov24_service,POL_010,고용노동부 국민취업지원제도 동일 건 -> POL_010으로 통합 및 근거 문서 DOC_MOEL_001 연계,data/processed/policies.jsonl
+20260710005400113256,youthcenter_policy,POL_010,고용노동부 국민취업지원제도 동일 건 -> POL_010으로 통합 및 근거 문서 DOC_MOEL_002 연계,data/processed/policies.jsonl
+WLF00003245,bokjiro_policy,POL_010,고용노동부 국민취업지원제도 동일 건 -> POL_010으로 중복 병합,data/processed/policies.jsonl
+WLF00006229,bokjiro_policy,POL_005,고용노동부 국민내일배움카드(일반) 동일 건 -> POL_005로 중복 병합,data/processed/policies.jsonl
+149200000026,gov24_service,POL_005,고용노동부 국민내일배움카드 동일 건 -> POL_005로 중복 병합,data/processed/policies.jsonl
+20250123005400110393,youthcenter_policy,POL_005,고용노동부 국민내일배움카드 동일 건 -> POL_005로 중복 병합,data/processed/policies.jsonl
+WLF00003222,bokjiro_policy,POL_004,국토교통부 주택도시기금 버팀목전세자금 동일 건 -> POL_004로 중복 병합,data/processed/policies.jsonl
+20241231005400100180,youthcenter_policy,POL_004,청년전용 버팀목 전세자금 동일 건 -> POL_004로 중복 병합,data/processed/policies.jsonl
+WLF00001063,bokjiro_policy,POL_006,국토교통부 주택도시기금 주거안정월세대출 동일 건 -> POL_006으로 중복 병합,data/processed/policies.jsonl

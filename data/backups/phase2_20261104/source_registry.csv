@@ -1,0 +1,8 @@
+﻿provider,domain,data_type,status,latest_check
+LH청약플러스,apply.lh.or.kr,PDF/HTML,정상 수집 및 검증 완료,2026-11-04
+주택도시기금(NHUF),nhuf.molit.go.kr,PDF/HTML,본문 셀렉터 복구 및 정상 검증 완료,2026-11-04
+고용24(Work24),work24.go.kr,HTML,정상 수집 및 검증 완료,2026-11-04
+복지로(Bokjiro),bokjiro.go.kr,공식 정책 안내,정상 수집 및 검증 완료,2026-11-04
+행정안전부 공공서비스 API,api.odcloud.kr,OpenAPI (JSON),연동 모듈 완성 (키 주입 시 즉시 실행),2026-11-04
+사회보장정보원 복지서비스 API,apis.data.go.kr,OpenAPI (XML),연동 모듈 완성 (키 주입 시 즉시 실행),2026-11-04
+온통청년 Open API,youthcenter.go.kr,OpenAPI (XML),심사 대기 중 (연동 모듈 준비 완료),2026-11-04

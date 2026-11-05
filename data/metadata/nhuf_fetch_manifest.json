@@ -1,0 +1,35 @@
+[
+  {
+    "file_name": "nhuf_youth_monthly_rent_deposit_guide.html",
+    "url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020701.jsp",
+    "fetched_at": "2026-11-04T18:59:39.747769+09:00",
+    "http_status": 200,
+    "title": "대출안내 < 청년전용 보증부월세대출 < 주택전세자금대출 < 개인상품 | 주택도시기금",
+    "title_ok": true,
+    "sha256": "90092dbf0653c664de64efdd9a1f9787789b821eb5992b31ad4448d6f7602d01",
+    "local_raw_path": "data/raw/nhuf/nhuf_youth_monthly_rent_deposit_guide.html",
+    "error": null
+  },
+  {
+    "file_name": "nhuf_youth_monthly_rent_deposit_process.html",
+    "url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020702.jsp",
+    "fetched_at": "2026-11-04T18:59:44.699238+09:00",
+    "http_status": 200,
+    "title": "이용절차 및 제출서류 < 청년전용 보증부월세대출 < 주택전세자금대출 < 개인상품 | 주택도시기금",
+    "title_ok": true,
+    "sha256": "b646e906e4f09474f2103c9c6574c94cec8af8ae9b08e6461b7084d8b9b3fa1e",
+    "local_raw_path": "data/raw/nhuf/nhuf_youth_monthly_rent_deposit_process.html",
+    "error": null
+  },
+  {
+    "file_name": "nhuf_monthly_rent_process.html",
+    "url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020202.jsp",
+    "fetched_at": "2026-11-04T18:59:49.531843+09:00",
+    "http_status": 200,
+    "title": "이용절차 및 제출서류 < 주거안정월세대출 < 주택전세자금대출 < 개인상품 | 주택도시기금",
+    "title_ok": true,
+    "sha256": "bb76b6569b07c1b6cffe1bd53f60e125a8108ac5db1b232a8c0ff6e039d9199e",
+    "local_raw_path": "data/raw/nhuf/nhuf_monthly_rent_process.html",
+    "error": null
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "metadata_type": "api_service_info",
+  "official_id": "KEIS-YC-API-001",
+  "service_name": "온통청년 청년정책 Open API 서비스",
+  "provider": "국무조정실 / 한국고용정보원",
+  "category": "플랫폼·연계",
+  "status": "active_collected",
+  "auth_type": "apiKeyNm (공식 승인 완료)",
+  "endpoint": "https://www.youthcenter.go.kr/go/ythip/getPlcy",
+  "guide_url": "https://www.youthcenter.go.kr/cmnFooter/openapiIntro/oaiGuide",
+  "total_collected": 3861,
+  "registered_at": "2026-11-04T19:30:00+09:00",
+  "note": "정책 추천 데이터셋(policies.jsonl)에서 분리하여 API 메타데이터로 관리하며 실제 3,861건 수집 완료"
+}

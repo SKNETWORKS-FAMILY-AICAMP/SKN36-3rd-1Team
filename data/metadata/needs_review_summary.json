@@ -1,0 +1,28 @@
+{
+  "total_analyzed": 3861,
+  "total_flagged": 1009,
+  "by_category": {
+    "age_review": {
+      "total": 1076,
+      "zero_zero_age_limit_N": 70,
+      "zero_zero_age_limit_Y": 994,
+      "min_greater_than_max": 8,
+      "missing_age": 4
+    },
+    "income_review": {
+      "total": 3,
+      "missing_code": 2,
+      "zero_max_amount": 1
+    },
+    "marriage_review": {
+      "total": 2,
+      "missing_code": 2
+    }
+  },
+  "status_breakdown": {
+    "auto_normalized_pass": 70,
+    "needs_manual_check": 1003,
+    "actual_error_confirmed": 8,
+    "manual_verified": 0
+  }
+}

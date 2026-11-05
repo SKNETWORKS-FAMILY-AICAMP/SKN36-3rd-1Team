@@ -1,0 +1,8 @@
+original_id,entity_type,new_id_or_status,change_reason,target_location
+POL_008,policy,EXCLUDED_FROM_POLICY,정책이 아닌 오픈API 연계 안내 레코드이므로 추천 데이터에서 제외,data/metadata/api_metadata.json
+DOC_LH_002,document,DOC_LH_002,기존 48자 자동로그아웃 텍스트에서 서울지역본부 유의사항 PDF 원본(646자)으로 복구,data/processed/documents.jsonl
+DOC_LH_003,document,DOC_LH_003,POL_001에서 참조하던 누락 문서 복구 (LH 웹 상세공고 HTML 28912자),data/processed/documents.jsonl
+DOC_NHUF_001~008,document,DOC_NHUF_001~008,기존 푸터 158자/29자 추출오류에서 .contents 셀렉터 적용하여 수천 자 본문 전수 복구,data/processed/documents.jsonl
+DOC_MOLIT_001,document,DOC_MOLIT_001,POL_009 참조 누락 해소를 위한 공식 복지서비스 안내 복구,data/processed/documents.jsonl
+DOC_MOEL_001,document,DOC_MOEL_001,POL_010 참조 누락 해소를 위한 공식 복지서비스 안내 복구,data/processed/documents.jsonl
+

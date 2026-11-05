@@ -58,6 +58,9 @@ data/raw/**
 *.hwpx
 data/**/*.pdf
 data/**/*.zip
+# 대용량 원천 API 덤프 (GitHub 100MB 단일 파일 제한 방지)
+**/gov24_merged_services.jsonl
+**/gov24_public_services.jsonl
 
 # ===== 개인정보 =====
 # 실사용자 정보는 수집하지 않는 것이 원칙. 실수로 생성된 파일 차단용.
