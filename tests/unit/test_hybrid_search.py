@@ -10,10 +10,13 @@ Hybrid 검색 인터페이스 단위 테스트 — 실제 Qdrant·Neo4j·Ollama 
 - Ollama: 질문 문자열 → 미리 정한 벡터를 돌려주는 가짜 embedder
 """
 
+import copy
+import json
 import sys
 import unittest
 import warnings
 from pathlib import Path
+from unittest import mock
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -513,6 +516,427 @@ class TestVerifyCrossDb(unittest.TestCase):
         client = make_memory_client([])
         report = self._verify(client, FakeHybridRunner())
         self.assertEqual(report["status"], hs.NOT_TESTED)
+
+
+# ---------------------------------------------------------------------------
+# 7) 연결 관리 (내부 생성 리소스만 닫는다) — 가짜 연결, sample_only
+# ---------------------------------------------------------------------------
+class TrackingClient:
+    """메모리 Qdrant client를 감싸 close 호출 수를 센다."""
+
+    def __init__(self, inner=None, fail_with=None):
+        self.inner, self.fail_with, self.close_calls = inner, fail_with, 0
+
+    def query_points(self, **kwargs):
+        if self.fail_with is not None:
+            raise self.fail_with
+        return self.inner.query_points(**kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+    def close(self):
+        self.close_calls += 1
+
+
+class TrackingDriver:
+    def __init__(self):
+        self.close_calls = 0
+
+    def close(self):
+        self.close_calls += 1
+
+
+def _patched_resources(client_factory, runner=None):
+    """내부 생성 경로(make_qdrant_client·_make_neo4j_driver·ReadOnlyTimedRunner)를 가짜로 바꾼다."""
+    created = {"clients": [], "drivers": []}
+
+    def make_client(*args, **kwargs):
+        client = client_factory()
+        created["clients"].append(client)
+        return client
+
+    def make_driver(*args, **kwargs):
+        driver = TrackingDriver()
+        created["drivers"].append(driver)
+        return driver
+    patches = [mock.patch.object(hs, "make_qdrant_client", make_client),
+               mock.patch.object(hs, "_make_neo4j_driver", make_driver),
+               mock.patch.object(hs, "ReadOnlyTimedRunner", lambda driver, **kwargs: runner or FakeHybridRunner())]
+    return created, patches
+
+
+@unittest.skipUnless(HAS_QDRANT, "qdrant-client 미설치 → NOT_TESTED")
+class TestConnectionOwnership(unittest.TestCase):
+    def setUp(self):
+        self.memory = make_memory_client()
+
+    def _run_with(self, client_factory, runner=None, call=None):
+        created, patches = _patched_resources(client_factory, runner)
+        for patch in patches:
+            patch.start()
+        try:
+            result = call()
+        finally:
+            for patch in patches:
+                patch.stop()
+        return created, result
+
+    def test_internal_resources_are_closed_after_success(self):
+        created, result = self._run_with(lambda: TrackingClient(self.memory), call=lambda: hs.search_policy_context(
+            "금리 질문", k=3, embedder=fake_embedder, collection=COLLECTION))
+        self.assertEqual([p["policy_id"] for p in result["policies"]], ["POL_S1", "POL_S2"])
+        self.assertEqual([c.close_calls for c in created["clients"]], [1])
+        self.assertEqual([d.close_calls for d in created["drivers"]], [1])
+
+    def test_internal_resources_are_closed_after_exception(self):
+        def broken(texts):
+            raise em.EmbeddingError("가상 Ollama 장애 (sample_only)")
+        created, patches = _patched_resources(lambda: TrackingClient(self.memory))
+        for patch in patches:
+            patch.start()
+        try:
+            with self.assertRaises(hs.HybridSearchBackendError):
+                hs.search_policy_context("금리 질문", embedder=broken, collection=COLLECTION)
+            failing_runner = FakeHybridRunner()
+            failing_runner.fail_with = ConnectionError("가상 Neo4j 장애 (sample_only)")
+            with mock.patch.object(hs, "ReadOnlyTimedRunner", lambda driver, **kwargs: failing_runner):
+                with self.assertRaises(hs.HybridSearchBackendError) as context:
+                    hs.search_policy_context("금리 질문", embedder=fake_embedder, collection=COLLECTION)
+            self.assertEqual(context.exception.backend, "neo4j")
+        finally:
+            for patch in patches:
+                patch.stop()
+        self.assertEqual([c.close_calls for c in created["clients"]], [1, 1])
+        self.assertEqual([d.close_calls for d in created["drivers"]], [1])   # 첫 호출은 Neo4j까지 가지 않음
+
+    def test_search_policy_evidence_closes_internal_client_only(self):
+        created, _ = self._run_with(lambda: TrackingClient(self.memory), call=lambda: hs.search_policy_evidence(
+            "금리 질문", embedder=fake_embedder, collection=COLLECTION))
+        self.assertEqual(created["clients"][0].close_calls, 1)
+        external = TrackingClient(self.memory)
+        hs.search_policy_evidence("금리 질문", client=external, embedder=fake_embedder, collection=COLLECTION)
+        self.assertEqual(external.close_calls, 0)
+
+    def test_external_client_and_runner_are_not_closed(self):
+        external_client, external_runner = TrackingClient(self.memory), FakeHybridRunner()
+        external_runner.close = mock.Mock()
+        with hs.HybridSearchSession(client=external_client, runner=external_runner, embedder=fake_embedder,
+                                    collection=COLLECTION) as session:
+            session.search_policy_context("금리 질문")
+            self.assertEqual(session.owned_resources, {"qdrant_client": False, "neo4j_driver": False})
+        self.assertEqual(external_client.close_calls, 0)
+        external_runner.close.assert_not_called()
+
+    def test_session_reuses_connections_and_closes_once(self):
+        created, patches = _patched_resources(lambda: TrackingClient(self.memory))
+        for patch in patches:
+            patch.start()
+        try:
+            with hs.HybridSearchSession(embedder=fake_embedder, collection=COLLECTION) as session:
+                self.assertEqual(session.owned_resources, {"qdrant_client": False, "neo4j_driver": False})   # 지연 생성
+                first = session.search_policy_context("금리 질문", k=3)
+                second = session.search_policy_context("금리 질문", k=3)
+                self.assertEqual(session.owned_resources, {"qdrant_client": True, "neo4j_driver": True})
+            self.assertTrue(session.closed)
+            with self.assertRaises(RuntimeError):
+                session.search_policy_context("금리 질문")
+            session.close()                                                    # 두 번 닫아도 안전
+        finally:
+            for patch in patches:
+                patch.stop()
+        self.assertEqual((len(created["clients"]), len(created["drivers"])), (1, 1))
+        self.assertEqual((created["clients"][0].close_calls, created["drivers"][0].close_calls), (1, 1))
+        self.assertEqual([p["policy_id"] for p in first["policies"]], [p["policy_id"] for p in second["policies"]])
+
+    def test_session_closes_on_exception_inside_with(self):
+        created, patches = _patched_resources(lambda: TrackingClient(self.memory))
+        for patch in patches:
+            patch.start()
+        try:
+            with self.assertRaises(ZeroDivisionError):
+                with hs.HybridSearchSession(embedder=fake_embedder, collection=COLLECTION) as session:
+                    session.search_policy_context("금리 질문")
+                    1 / 0
+        finally:
+            for patch in patches:
+                patch.stop()
+        self.assertEqual((created["clients"][0].close_calls, created["drivers"][0].close_calls), (1, 1))
+
+    def test_close_error_is_recorded_not_raised(self):
+        class BadClose(TrackingClient):
+            def close(self):
+                raise OSError("가상 닫기 실패 (sample_only)")
+        created, patches = _patched_resources(lambda: BadClose(self.memory))
+        for patch in patches:
+            patch.start()
+        try:
+            session = hs.HybridSearchSession(embedder=fake_embedder, collection=COLLECTION)
+            session.search_policy_evidence("금리 질문")
+            session.close()
+        finally:
+            for patch in patches:
+                patch.stop()
+        self.assertEqual(len(session.close_errors), 1)
+
+    def test_invalid_input_creates_no_connection(self):
+        created, patches = _patched_resources(lambda: TrackingClient(self.memory))
+        for patch in patches:
+            patch.start()
+        try:
+            for bad in ({"query": ""}, {"filters": {"text": "x"}}):
+                with self.subTest(bad=bad), self.assertRaises(hs.HybridSearchInputError):
+                    hs.search_policy_context(bad.get("query", "금리 질문"), bad.get("filters"), collection=COLLECTION)
+        finally:
+            for patch in patches:
+                patch.stop()
+        self.assertEqual(created, {"clients": [], "drivers": []})
+
+
+# ---------------------------------------------------------------------------
+# 8) 타임아웃·오류 분류 (서버 장애 vs 코드 버그)
+# ---------------------------------------------------------------------------
+@unittest.skipUnless(HAS_QDRANT, "qdrant-client 미설치 → NOT_TESTED")
+class TestTimeoutsAndErrorClassification(unittest.TestCase):
+    def _qdrant_failure(self, error):
+        client = TrackingClient(make_memory_client(), fail_with=error)
+        return hs.search_policy_evidence("금리 질문", client=client, embedder=fake_embedder, collection=COLLECTION)
+
+    def test_qdrant_timeout_and_unavailable_and_auth(self):
+        import httpx
+        from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
+        cases = [(ResponseHandlingException(httpx.ReadTimeout("가상 시간 초과")), "timeout"),
+                 (ResponseHandlingException(httpx.ConnectError("가상 접속 거부")), "unavailable"),
+                 (UnexpectedResponse(401, "Unauthorized", b"", httpx.Headers()), "auth"),
+                 (UnexpectedResponse(500, "Server Error", b"", httpx.Headers()), "server"),
+                 (TimeoutError("가상"), "timeout")]
+        for error, kind in cases:
+            with self.subTest(error=type(error).__name__, kind=kind):
+                with self.assertRaises(hs.HybridSearchBackendError) as context:
+                    self._qdrant_failure(error)
+                self.assertEqual((context.exception.backend, context.exception.kind), ("qdrant", kind))
+
+    def test_qdrant_code_bugs_are_not_wrapped(self):
+        for error in (TypeError("가상 코드 버그"), KeyError("payload"), AttributeError("x")):
+            with self.subTest(error=type(error).__name__), self.assertRaises(type(error)):
+                self._qdrant_failure(error)
+
+    def test_make_qdrant_client_passes_timeout_and_hides_settings(self):
+        captured = {}
+
+        class FakeQdrantClient:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+        with mock.patch.object(store, "resolve_connection_settings", return_value=("http://127.0.0.1:6333", "sample_key")), \
+                mock.patch("qdrant_client.QdrantClient", FakeQdrantClient):
+            hs.make_qdrant_client(timeout=3)
+        self.assertEqual(captured["timeout"], 3)
+        self.assertEqual(hs.QDRANT_TIMEOUT_SECONDS, 10)
+        with mock.patch.object(store, "resolve_connection_settings",
+                               side_effect=store.ConnectionSettingsError("QDRANT_URL 누락 (sample_only)")):
+            with self.assertRaises(hs.HybridSearchBackendError) as context:
+                hs.make_qdrant_client()
+        self.assertEqual(context.exception.kind, "config")
+
+
+class TestNeo4jTimeoutsAndErrors(unittest.TestCase):
+    def _hydrate(self, code):
+        from neo4j import exceptions as ne
+        return ne.Neo4jError._hydrate_neo4j(code=code, message="sample_only")
+
+    def test_neo4j_errors_are_classified(self):
+        from neo4j import exceptions as ne
+        cases = [(self._hydrate("Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"), "timeout"),
+                 (ne.ServiceUnavailable("가상 접속 불가"), "unavailable"),
+                 (self._hydrate("Neo.ClientError.Security.Unauthorized"), "auth"),
+                 (self._hydrate("Neo.TransientError.General.MemoryPoolOutOfMemoryError"), "server"),
+                 (ConnectionError("가상"), "unavailable")]
+        for error, kind in cases:
+            runner = FakeHybridRunner()
+            runner.fail_with = error
+            with self.subTest(kind=kind), self.assertRaises(hs.HybridSearchBackendError) as context:
+                hs.get_policy_graph_context(["POL_S1"], runner=runner)
+            self.assertEqual((context.exception.backend, context.exception.kind), ("neo4j", kind))
+
+    def test_neo4j_code_bugs_are_not_wrapped(self):
+        from neo4j import exceptions as ne
+        for error in (self._hydrate("Neo.ClientError.Statement.SyntaxError"), KeyError("policy_id"), TypeError("x")):
+            runner = FakeHybridRunner()
+            runner.fail_with = error
+            with self.subTest(error=type(error).__name__), self.assertRaises(type(error)):
+                hs.get_policy_graph_context(["POL_S1"], runner=runner)
+        self.assertTrue(issubclass(ne.CypherSyntaxError, ne.ClientError))
+
+    def test_read_only_runner_applies_query_timeout_and_refuses_writes(self):
+        from neo4j import Query
+        seen = []
+
+        class FakeResult:
+            def __iter__(self):
+                return iter([])
+
+            def consume(self):
+                return None
+
+        class FakeSession:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def run(self, query, parameters):
+                seen.append((query, parameters))
+                return FakeResult()
+
+        class FakeDriver:
+            def session(self, **kwargs):
+                seen.append(kwargs)
+                return FakeSession()
+        runner = hs.ReadOnlyTimedRunner(FakeDriver(), query_timeout=2.5)
+        runner.read_rows(hs.POLICY_CONTEXT_QUERY, {"policy_ids": ["POL_S1"]})
+        self.assertEqual(seen[0]["default_access_mode"], "READ")
+        query, parameters = seen[1]
+        self.assertIsInstance(query, Query)
+        self.assertEqual((query.timeout, query.text, parameters), (2.5, hs.POLICY_CONTEXT_QUERY, {"policy_ids": ["POL_S1"]}))
+        self.assertEqual(hs.NEO4J_QUERY_TIMEOUT_SECONDS, 10.0)
+        with self.assertRaises(PermissionError):
+            runner.write_batch("UNWIND $rows AS row RETURN 1 AS merged", [], expected=0)
+        with self.assertRaises(PermissionError):
+            runner.run_schema("CREATE INDEX x IF NOT EXISTS FOR (n:Policy) ON (n.category)")
+
+    def test_notifications_are_capped(self):
+        class Summary:
+            summary_notifications = [type("N", (), {"code": "Neo.ClientNotification.Statement.UnknownLabelWarning",
+                                                    "title": "sample_only", "severity_level": None, "category": None})()] * 3
+
+        class FakeSession:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def run(self, query, parameters):
+                return type("R", (), {"__iter__": lambda self: iter([]), "consume": lambda self: Summary()})()
+        driver = type("D", (), {"session": lambda self, **kwargs: FakeSession()})()
+        runner = hs.ReadOnlyTimedRunner(driver, max_notifications=5)
+        for _ in range(3):
+            runner.read_rows("MATCH (n:Unknown) RETURN count(n) AS count")
+        self.assertEqual((len(runner.notifications), runner.dropped_notifications), (5, 4))
+
+    def test_driver_creation_failure_is_config_error_without_secrets(self):
+        secret = "sample_only_secret_pw"
+        env = {"NEO4J_URI": f"neo4j://neo4j:{secret}@bad host", "NEO4J_USER": "neo4j", "NEO4J_PASSWORD": secret}
+        with mock.patch.dict("os.environ", env), \
+                mock.patch("neo4j.GraphDatabase.driver", side_effect=ValueError(f"Invalid URI neo4j://neo4j:{secret}@bad")):
+            with self.assertRaises(hs.HybridSearchBackendError) as context:
+                with hs.open_neo4j_runner():
+                    pass
+        self.assertEqual((context.exception.backend, context.exception.kind), ("neo4j", "config"))
+        self.assertNotIn(secret, str(context.exception))
+
+    def test_connectivity_failure_closes_driver(self):
+        from neo4j import exceptions as ne
+        driver = mock.Mock()
+        driver.verify_connectivity.side_effect = ne.ServiceUnavailable("가상 접속 불가 (sample_only)")
+        env = {"NEO4J_URI": "bolt://127.0.0.1:1", "NEO4J_USER": "neo4j", "NEO4J_PASSWORD": "sample_only_pw"}
+        with mock.patch.dict("os.environ", env), mock.patch("neo4j.GraphDatabase.driver", return_value=driver):
+            with self.assertRaises(hs.HybridSearchBackendError) as context:
+                with hs.open_neo4j_runner():
+                    pass
+        self.assertEqual(context.exception.kind, "unavailable")
+        driver.close.assert_called_once()
+
+    def test_safe_message_redacts_secrets_and_url_userinfo(self):
+        with mock.patch.dict("os.environ", {"QDRANT_API_KEY": "sample_only_api_key"}):
+            text = hs._safe_message(RuntimeError("key=sample_only_api_key url=http://user:pw@127.0.0.1:6333/x"))
+        self.assertNotIn("sample_only_api_key", text)
+        self.assertNotIn("user:pw", text)
+
+
+# ---------------------------------------------------------------------------
+# 9) 데이터 품질 경고 (판정·순위를 바꾸지 않음)
+# ---------------------------------------------------------------------------
+def _context_with_tree(tree, policy=None):
+    return {"policy_id": "POL_Q", "policy": policy or {}, "documents": [],
+            "eligibility": {"evaluated": False, "condition_tree": [tree], "unknown_logic_groups": [],
+                            "structure_issues": []}}
+
+
+def _cond(cid, review="verified"):
+    return {"condition_id": cid, "relationship": {"review_status": review}}
+
+
+class TestDataQualityWarnings(unittest.TestCase):
+    def setUp(self):
+        self.context = hs.get_policy_graph_context(["POL_S1", "POL_S2"], runner=FakeHybridRunner())["policies"]
+
+    def _codes(self, quality):
+        return [warning["code"] for warning in quality["warnings"]]
+
+    def test_unknown_and_extracted_warnings(self):
+        unknown = hs.assess_policy_data_quality(self.context["POL_S2"])
+        self.assertIn(hs.QUALITY_UNKNOWN_CONDITION, self._codes(unknown))
+        self.assertIn("제한 없음", unknown["warnings"][0]["message"])
+        extracted = hs.assess_policy_data_quality(self.context["POL_S1"])
+        warning = [w for w in extracted["warnings"] if w["code"] == hs.QUALITY_EXTRACTED_NOT_VERIFIED][0]
+        self.assertEqual(warning["count"], 1)
+        self.assertNotIn(hs.QUALITY_HOMELESS_PROMOTED, self._codes(extracted))   # 정상 샘플은 의심 패턴 없음
+        self.assertEqual(extracted["review_status_counts"]["extracted"], 1)
+
+    def test_suspected_gov24_patterns_are_flagged_not_judged(self):
+        tree = {"group_id": "GRP_Q_ROOT", "logic": "AND", "relationship": {"review_status": "extracted"},
+                "conditions": [_cond("COND_AGE_19_120", "extracted"), _cond(hs.HOMELESS_CONDITION_ID, "extracted")],
+                "groups": [{"group_id": "GRP_Q_OR_HH", "logic": "OR", "relationship": {}, "groups": [],
+                            "conditions": [_cond("COND_HH_1인가구", "extracted"), _cond("COND_HH_다자녀가구", "extracted")]},
+                           {"group_id": "GRP_Q_OR_INC", "logic": "OR", "relationship": {}, "groups": [],
+                            "conditions": [_cond(cid, "extracted") for cid in sorted(hs.INCOME_BAND_CONDITION_IDS)]}]}
+        context = _context_with_tree(tree, policy={"eligibility": "가상 추출 텍스트 (sample_only)"})
+        before = copy.deepcopy(context)
+        quality = hs.assess_policy_data_quality(context)
+        self.assertEqual(context, before)                                          # 입력을 바꾸지 않는다
+        codes = self._codes(quality)
+        self.assertIn(hs.QUALITY_HOMELESS_PROMOTED, codes)
+        self.assertIn(hs.QUALITY_INCOME_ALL_BANDS, codes)
+        for warning in quality["warnings"]:
+            if warning["code"].startswith("SUSPECTED"):
+                self.assertEqual(warning["level"], "suspected")
+                self.assertIn("확정 아님", warning["message"])
+        self.assertEqual(quality["graph_text_fields"], ["eligibility"])
+        self.assertNotIn("VERIFIED", json.dumps(quality, ensure_ascii=False).upper().replace("NOT_VERIFIED", ""))
+
+    def test_homeless_alone_or_partial_income_is_not_flagged(self):
+        tree = {"group_id": "GRP_Q_ROOT", "logic": "AND", "relationship": {},
+                "conditions": [_cond(hs.HOMELESS_CONDITION_ID)],
+                "groups": [{"group_id": "GRP_Q_OR_INC", "logic": "OR", "relationship": {}, "groups": [],
+                            "conditions": [_cond(cid) for cid in sorted(hs.INCOME_BAND_CONDITION_IDS)[:4]]}]}
+        self.assertEqual(hs.assess_policy_data_quality(_context_with_tree(tree))["warnings"], [])
+
+    def test_missing_graph_policy_warning(self):
+        self.assertEqual(self._codes(hs.assess_policy_data_quality(None)), [hs.QUALITY_GRAPH_MISSING])
+
+    def test_combine_keeps_existing_keys_order_and_adds_quality(self):
+        search = {"query": "q", "hits": [_hit(1, 0.9, "CHK_B2_DOC_S2_C001", "POL_S2", "DOC_S2"),
+                                         _hit(2, 0.8, "CHK_B2_DOC_S1_C001", "POL_S1", "DOC_S1"),
+                                         _hit(3, 0.7, "CHK_B2_DOC_S3_C001", "POL_S3", "DOC_S3")]}
+        context = hs.get_policy_graph_context(["POL_S1", "POL_S2", "POL_S3"], runner=FakeHybridRunner())
+        combined = hs.combine_policy_evidence(search, context)
+        old_top_keys = {"query", "filters", "k", "collection", "query_template", "policies", "unlinked_hits",
+                        "missing_policy_ids", "warnings", "latency_seconds", "notes"}
+        old_policy_keys = {"policy_id", "policy_name", "best_rank", "best_score", "evidence", "graph_status", "graph",
+                           "evidence_document_check"}
+        self.assertLessEqual(old_top_keys, set(combined))
+        self.assertEqual([p["policy_id"] for p in combined["policies"]], ["POL_S2", "POL_S1", "POL_S3"])
+        for entry in combined["policies"]:
+            self.assertLessEqual(old_policy_keys, set(entry))
+            self.assertIn("data_quality", entry)
+            if entry["graph"]:
+                self.assertFalse(entry["graph"]["eligibility"]["evaluated"])
+        self.assertEqual(combined["data_quality_summary"][hs.QUALITY_GRAPH_MISSING], 1)
+        self.assertIn("unknown", combined["notes"])
+        self.assertIn("score", combined["notes"])
+        json.dumps(combined, ensure_ascii=False)      # 직렬화 가능
 
 
 if __name__ == "__main__":

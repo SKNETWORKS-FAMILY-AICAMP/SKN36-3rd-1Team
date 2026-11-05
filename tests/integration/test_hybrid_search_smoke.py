@@ -133,6 +133,34 @@ class TestHybridSearchSmoke(unittest.TestCase):
         self.assertEqual(self.points_before, EXPECTED_POINTS)
         self.assertEqual(self.runner.read_rows(self.hs.lg.QUERY_TOTAL_COUNTS)[0], self.graph_before)
 
+    def test_session_reuses_connections_and_matches_function_results(self):
+        with self.hs.HybridSearchSession() as session:
+            results = [session.search_policy_context(question, k=5) for question, *_ in QUESTIONS]
+            self.assertEqual(session.owned_resources, {"qdrant_client": True, "neo4j_driver": True})
+            self.assertEqual(session.runner.query_timeout, self.hs.NEO4J_QUERY_TIMEOUT_SECONDS)
+        self.assertTrue(session.closed)
+        self.assertEqual(session.owned_resources, {"qdrant_client": False, "neo4j_driver": False})
+        for (question, *_), result in zip(QUESTIONS, results):
+            expected = self.results[question]
+            with self.subTest(question=question):
+                self.assertEqual([(p["policy_id"], p["best_rank"]) for p in result["policies"]],
+                                 [(p["policy_id"], p["best_rank"]) for p in expected["policies"]])
+                self.assertEqual([h["chunk_id"] for p in result["policies"] for h in p["evidence"]],
+                                 [h["chunk_id"] for p in expected["policies"] for h in p["evidence"]])
+
+    def test_data_quality_warnings_on_real_data(self):
+        """경고는 표시만 한다: 순위·근거는 그대로이고, 자격 판정(evaluated)은 False."""
+        gov = self.hs.search_policy_context("수산자원보호 직접지불금을 부정하게 받으면 어떤 벌칙이 있나요?", k=5,
+                                            client=self.client, runner=self.runner)
+        top = gov["policies"][0]
+        self.assertEqual(top["policy_id"], "POL_GOV_006")
+        codes = {warning["code"] for warning in top["data_quality"]["warnings"]}
+        self.assertLessEqual({self.hs.QUALITY_HOMELESS_PROMOTED, self.hs.QUALITY_INCOME_ALL_BANDS,
+                              self.hs.QUALITY_EXTRACTED_NOT_VERIFIED}, codes)
+        self.assertFalse(top["graph"]["eligibility"]["evaluated"])
+        unknown = self.results[QUESTIONS[0][0]]["policies"][0]                      # POL_003 (조건 UNKNOWN)
+        self.assertIn(self.hs.QUALITY_UNKNOWN_CONDITION, {w["code"] for w in unknown["data_quality"]["warnings"]})
+
     def test_no_neo4j_notifications_need_review(self):
         classified = self.hs.lg.classify_notifications(self.runner.notifications)
         self.assertEqual(classified["needs_review"], [], classified["by_code"])
