@@ -186,7 +186,7 @@ for field in ["policy_id", "category", "region", "life_stages", "target_groups",
 
 1. **미확정 기술 스택 항목:**
    - **임베딩 모델:** OpenAI `text-embedding-3-small`(1536), `text-embedding-3-large`(3072), `BAAI/bge-m3`(1024), `multilingual-e5-large`(1024) 중 선택 대기 상태이며, 주민혁 님이 모델을 확정하여 `collection_config.json`의 `size`에 주입하도록 분리되어 있습니다.
-   - **프론트엔드 UI:** Streamlit, Chainlit, Next.js 중 프로토타입 단계에서 결정 예정.
+   - **프론트엔드 UI:** 웹 UI는 React를 사용하며 4차에서 개발. 3차는 터미널·노트북 등 최소 실행 방식으로 시연.
 2. **실제 실행 테스트와 미실행(대기) 테스트 구분:**
    - **실제 실행 검증 완료 (100% PASS):**
      * 데이터셋 전수 파싱 및 9대 노드(1,034건), 11대 관계(3,615건), 557개 청크 유일성 검증
