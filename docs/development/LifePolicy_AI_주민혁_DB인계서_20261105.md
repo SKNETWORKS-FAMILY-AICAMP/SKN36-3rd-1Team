@@ -239,7 +239,7 @@ sequenceDiagram
 - `data/handoff/data_contract.md`: 정식 ID/필드/상태 데이터 계약
 - `data/handoff/neo4j/load_neo4j.py`, `cypher_ddl.cypher`, `verify_neo4j.cypher`
 - `data/handoff/qdrant/collection_config.json`, `payload_chunks.jsonl`
-- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `3a6a9b15360bb6605579d20cfd7e199cd0f2803840cb35a44870a0606bc118c0` (매니페스트 파일 자체)
+- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `24844d866f13c6c7b75ea2d2b43c3180fa9773ed7e84a7ad0fc29383ffdcddb6` (매니페스트 파일 자체; 2026-11-05 `README.md` UI 안내 문구 수정에 따라 갱신, 데이터 파일 변경 없음)
 - `data/reports/lifecycle_distribution_report.md`: 생애주기 상세 분석
 
 **인계 판정:** 오프라인 파일 검증은 통과. **실제 DB 구축 후 실행 검증이 남아 있으며, 해당 결과는 인수 담당자가 기록해야 합니다.**
