@@ -4,7 +4,7 @@
 > **발신:** 데이터 엔지니어링 파이프라인 (LifePolicy AI 데이터팀)  
 > **기준일시:** 2026-11-05 (KST)  
 > **버전:** `v1.3.2-verified`  
-> **인계 상태:** **전수 수집·정제·정합성 검증 완료 (참조 무결성 100% PASS, Broken References = 0)**
+> **인계 상태:** **정제·인계 파일 준비. 파일 내 관계 참조 누락 0건. 원본 별도 배치 후 최종 검증 필요**
 
 ---
 
@@ -178,7 +178,7 @@ for field in ["policy_id", "category", "region", "life_stages", "target_groups",
    OPTIONAL MATCH (sg)-[:CONTAINS_CONDITION]->(ec:EligibilityCondition)
    RETURN p.policy_id, p.policy_name, p.benefit, rg.logic AS root_logic, sg.logic AS sub_logic, collect(ec.name) AS conditions;
    ```
-4. **LLM 응답 생성:** 공식 문서 근거 텍스트 + Graph에서 검증된 자격 요건을 결합하여 환각 없는 100% 사실 기반의 답변 반환.
+4. **LLM 응답 생성:** 검색된 공식 문서 근거와 조건 확인 결과를 결합해 답변합니다. 미검증 조건은 추가 확인 필요로 안내하고, 답변·인용의 근거 일치 여부는 별도로 검증합니다. 이 절은 연결 예시이며 실제 RAG 구현 완료를 의미하지 않습니다.
 
 ---
 
@@ -188,13 +188,21 @@ for field in ["policy_id", "category", "region", "life_stages", "target_groups",
    - **임베딩 모델:** OpenAI `text-embedding-3-small`(1536), `text-embedding-3-large`(3072), `BAAI/bge-m3`(1024), `multilingual-e5-large`(1024) 중 선택 대기 상태이며, 주민혁 님이 모델을 확정하여 `collection_config.json`의 `size`에 주입하도록 분리되어 있습니다.
    - **프론트엔드 UI:** 웹 UI는 React를 사용하며 4차에서 개발. 3차는 터미널·노트북 등 최소 실행 방식으로 시연.
 2. **실제 실행 테스트와 미실행(대기) 테스트 구분:**
-   - **실제 실행 검증 완료 (100% PASS):**
+   - **파일 단위 검사 통과 항목 (2026-11-05 현재 로컬 재검증):**
      * 데이터셋 전수 파싱 및 9대 노드(1,034건), 11대 관계(3,615건), 557개 청크 유일성 검증
      * 관계 엣지 3,615건의 Broken Source / Target = 0건 전수 검증
      * DDL 파일 주석 제거 파싱(13개 DDL) 및 정규식 일치율 100% 검증
      * Qdrant Point ID의 RFC 4122 표준 UUIDv5 유효성 전수 검증
-     * 전 파일 SHA-256 체크섬 일치율 100% 검증
+     * 문서 수정 후 매니페스트의 파일 크기·SHA-256을 갱신하고 재검증합니다. 최종 결과는 아래 로컬 검증 범위를 참고합니다.
    - **미실행 테스트 (NOT_TESTED - 인프라 가동 대기):**
      * 실제 Neo4j 라이브 서버 적재 (현재 로컬/배포 서버 인프라 미가동 상태이므로, 서버 기동 후 `python load_neo4j.py`로 최초 1회 실측 요망)
      * 실제 Qdrant 라이브 서버 벡터 인덱싱 (임베딩 모델 선정 및 Qdrant 서버 가동 후 업로드 요망)
 
+
+## 7. 원본 배치 및 로컬 검증 범위 (2026-11-05)
+
+- 원본은 Git 기본 제외 대상입니다. 현재 로컬에서는 246개 문서가 참조하는 원본이 없어 전체 검증이 실패합니다. 원본 누락은 정제 JSONL의 관계 참조 무결성과 별개입니다.
+- 데이터 담당자에게 원본 전달 파일과 이용·공유 가능 범위를 확인하고, 프로젝트 루트 아래에 원래 `data/raw/...` 상대 경로를 유지하여 배치합니다. 상세 경로는 `data/processed/documents.jsonl`의 `local_raw_path`를 따릅니다. 정제 본문으로 원본을 대체하지 않습니다.
+- 배치 후 프로젝트 루트에서 `python scripts/verify_handoff_package.py`를 실행합니다. 원본 존재·매니페스트 검사를 포함한 최종 결과가 통과해야 최종 검증 완료로 기록합니다.
+- 현재 파싱·ID 고유성·관계 참조·청크 연결·DDL 검사는 통과했습니다. 문서 수정에 따른 매니페스트 체크섬 갱신은 원본 확보나 실제 DB 적재 검증을 대신하지 않습니다.
+- 실제 Neo4j 적재·Qdrant 임베딩/색인은 NOT_TESTED입니다. 원본 복원 및 DB 검증을 완료할 때 담당자·환경·실행 시점·결과를 함께 기록합니다.

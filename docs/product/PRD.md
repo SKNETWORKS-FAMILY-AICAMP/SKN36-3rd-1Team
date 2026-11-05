@@ -4,7 +4,7 @@
 > 작성 기준일: 2026-11-04 (KST)  
 > 교과목: LLM  
 > 프로젝트 주제: LLM을 연동한 내·외부 문서 기반 질의응답 시스템  
-> 원본 일정 및 역할: [Notion WBS · 일정 관리](https://app.notion.com/p/40e8fc09deb980508fb7c9130e25017c)  
+> 원본 일정 및 역할: [Notion WBS · 일정 관리](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 > 문서 상태: **검토 필요** — 아래 '미확정 사항'은 회의에서 확정 후 변경 이력 기록
 
 ---
@@ -269,7 +269,7 @@ data/
 
 | 역할 | 담당 | 핵심 소유 업무 | 주요 산출물 |
 |---|---|---|---|
-| 데이터 / API / README | **장반석** | 원문 링크·API 키 발급 총괄, 데이터 수집·전처리, 출처·건수·방법 기록, README 취합 | **01 수집 데이터 및 전처리 문서**, README |
+| 데이터 / API / README | **장반석** | 원문 링크·데이터 API 직접 신청·키 발급, 데이터 수집·전처리, 출처·건수·방법 기록, README 취합 | **01 수집 데이터 및 전처리 문서**, README |
 | 임베딩 / DB | **주민혁** | DB 2종 설계·설치·적재, 임베딩·청킹, 아키텍처 | **02 아키텍처** |
 | 검색 / 평가 | **나지인, 박소희** | 평가 질문·정답 근거, 검색·필터, 비교 평가 및 재시험 | **05 테스트 계획 및 결과 보고서** |
 | LLM / RAG | **나지인, 박소희** | LLM·프롬프트·RAG 연결, 조건 결과 기반 답변·추가 질문, 근거 없음/오류 처리 | **04 RAG-LLM 및 DB 연동 코드 정리** |
@@ -423,7 +423,7 @@ data/
 
 ### 참고 원문
 
-- [Notion 팀 WBS 및 역할 분담](https://app.notion.com/p/40e8fc09deb980508fb7c9130e25017c)
+- [Notion 팀 WBS 및 역할 분담](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 - [온통청년 공식 사이트](https://www.youthcenter.go.kr/)
 - [온통청년 Open API 안내](https://www.youthcenter.go.kr/cmnFooter/openapiIntro/oaiGuide)
 - [LH청약플러스](https://apply.lh.or.kr/)
