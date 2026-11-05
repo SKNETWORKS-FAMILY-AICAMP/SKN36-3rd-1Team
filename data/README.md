@@ -22,4 +22,4 @@
 
 - `raw/` 원본은 덮어쓰지 않고, Git에서는 기본 제외된다 (`.gitignore`).
 - `samples/`는 **형식 설명용 가상 예시**만 둔다. 실제 정책 데이터로 적재하지 않는다.
-- 선행 수집 패키지 `refer/LifePolicy_Official_Data_Collection_20261104.zip`은 아직 이 폴더에 반영하지 않았다. 반영 여부·방식은 데이터 담당이 결정한다.
+- 선행 수집 패키지(`LifePolicy_Official_Data_Collection_20261104.zip`)의 샘플은 `processed/*_sample.jsonl`로 반영되었다. 독립 검증 결과는 [docs/CROSSCHECK_REPORT.md](../docs/CROSSCHECK_REPORT.md), 검증 지시문은 [docs/data/ANTIGRAVITY_CROSSCHECK_PROMPT.md](../docs/data/ANTIGRAVITY_CROSSCHECK_PROMPT.md) 참고.
