@@ -81,8 +81,8 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 | 데이터 / API / README | 장반석 | `data/`, `collectors/`, `docs/data/` | 01 수집 데이터 및 전처리 문서 |
 | 임베딩 / DB | 주민혁 | `database/`, `ai/embeddings/`, `backend/graph/`, `docs/architecture/` | 02 시스템 아키텍처 |
 | 검색 / 평가 | 나지인, 박소희 | 검색 관련 코드, `ai/evaluation/`, `tests/evaluation/` | 05 테스트 계획 및 결과 보고서 |
-| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `ai/prompts/`, `ai/workflows/` | 04 RAG-LLM 및 DB 연동 코드 |
-| 사용자 조건 확인 / 운영 / 발표 | 강민지 | `backend/eligibility/` | 03 개발 소프트웨어 실행·시연, 발표 |
+| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `ai/prompts/`, `ai/workflows/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
+| 사용자 조건 확인 / 발표 | 강민지 | `backend/eligibility/` | 03 개발 소프트웨어 실행·시연 정리 (전원 실행법 취합), 발표 |
 | 공통 변경 | 전원 (PR 리뷰 필수) | `README.md`, `.env.example`, `AGENTS.md`, `docs/api/` (공통 API 계약) | — |
 
 검색·평가와 LLM·RAG의 세부 코드 소유권은 아직 합의 전입니다 (PRD D-08).
