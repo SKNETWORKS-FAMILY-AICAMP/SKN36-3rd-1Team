@@ -1,0 +1,1100 @@
+{
+  "collection": "exp_b2_qwen3emb06b_v1",
+  "new_document": "DOC_LH_001",
+  "rule": "policy_section_body_v2",
+  "qdrant_host": "127.0.0.1:6333",
+  "ollama_host": "127.0.0.1:11434",
+  "before": {
+    "size": 1024,
+    "distance": "Cosine",
+    "count": 34,
+    "lh001_count": 0,
+    "old_ids": 34,
+    "old_docs": [
+      "DOC_BOK_001",
+      "DOC_GOV_006",
+      "DOC_NHUF_003",
+      "DOC_YC_003"
+    ]
+  },
+  "chunk_count": 73,
+  "embedding_input_chars": {
+    "total": 43845,
+    "body_total": 38226,
+    "max_input": 831
+  },
+  "embedding_call_args": {
+    "batch_size": 4,
+    "timeout": 180,
+    "previous_attempt": "batch_size=16, timeout=60 → 첫 배치 ReadTimeout, upsert 전 중단"
+  },
+  "embedding": {
+    "warmup": {
+      "model": "qwen3-embedding:0.6b",
+      "input_count": 1,
+      "total_duration": 155828900,
+      "load_duration": 15815500,
+      "prompt_eval_count": 10
+    },
+    "wall_seconds": 245.856,
+    "summary": {
+      "requests": 19,
+      "inputs": 73,
+      "total_duration_seconds": 245.473,
+      "load_duration_seconds": 0.224,
+      "prompt_eval_count": 31834
+    },
+    "batches": [
+      {
+        "inputs": 4,
+        "total_seconds": 13.748,
+        "load_seconds": 0.012,
+        "prompt_eval_count": 1648,
+        "inputs_per_second": 0.29,
+        "tokens_per_second": 119.9
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 17.327,
+        "load_seconds": 0.016,
+        "prompt_eval_count": 2119,
+        "inputs_per_second": 0.23,
+        "tokens_per_second": 122.3
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 13.022,
+        "load_seconds": 0.009,
+        "prompt_eval_count": 1510,
+        "inputs_per_second": 0.31,
+        "tokens_per_second": 116.0
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 13.797,
+        "load_seconds": 0.013,
+        "prompt_eval_count": 1712,
+        "inputs_per_second": 0.29,
+        "tokens_per_second": 124.1
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 8.979,
+        "load_seconds": 0.012,
+        "prompt_eval_count": 1210,
+        "inputs_per_second": 0.45,
+        "tokens_per_second": 134.8
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 9.792,
+        "load_seconds": 0.01,
+        "prompt_eval_count": 1328,
+        "inputs_per_second": 0.41,
+        "tokens_per_second": 135.6
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 10.708,
+        "load_seconds": 0.011,
+        "prompt_eval_count": 1445,
+        "inputs_per_second": 0.37,
+        "tokens_per_second": 134.9
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 13.712,
+        "load_seconds": 0.012,
+        "prompt_eval_count": 1811,
+        "inputs_per_second": 0.29,
+        "tokens_per_second": 132.1
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 14.065,
+        "load_seconds": 0.006,
+        "prompt_eval_count": 1876,
+        "inputs_per_second": 0.28,
+        "tokens_per_second": 133.4
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 11.168,
+        "load_seconds": 0.012,
+        "prompt_eval_count": 1417,
+        "inputs_per_second": 0.36,
+        "tokens_per_second": 126.9
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 17.08,
+        "load_seconds": 0.029,
+        "prompt_eval_count": 2137,
+        "inputs_per_second": 0.23,
+        "tokens_per_second": 125.1
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 14.675,
+        "load_seconds": 0.012,
+        "prompt_eval_count": 1983,
+        "inputs_per_second": 0.27,
+        "tokens_per_second": 135.1
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 16.67,
+        "load_seconds": 0.013,
+        "prompt_eval_count": 2184,
+        "inputs_per_second": 0.24,
+        "tokens_per_second": 131.0
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 12.027,
+        "load_seconds": 0.008,
+        "prompt_eval_count": 1622,
+        "inputs_per_second": 0.33,
+        "tokens_per_second": 134.9
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 14.598,
+        "load_seconds": 0.006,
+        "prompt_eval_count": 1961,
+        "inputs_per_second": 0.27,
+        "tokens_per_second": 134.3
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 14.304,
+        "load_seconds": 0.01,
+        "prompt_eval_count": 1881,
+        "inputs_per_second": 0.28,
+        "tokens_per_second": 131.5
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 12.478,
+        "load_seconds": 0.011,
+        "prompt_eval_count": 1657,
+        "inputs_per_second": 0.32,
+        "tokens_per_second": 132.8
+      },
+      {
+        "inputs": 4,
+        "total_seconds": 14.881,
+        "load_seconds": 0.013,
+        "prompt_eval_count": 2005,
+        "inputs_per_second": 0.27,
+        "tokens_per_second": 134.7
+      },
+      {
+        "inputs": 1,
+        "total_seconds": 2.442,
+        "load_seconds": 0.01,
+        "prompt_eval_count": 328,
+        "inputs_per_second": 0.41,
+        "tokens_per_second": 134.3
+      }
+    ],
+    "dims": [
+      1024
+    ],
+    "all_finite": true,
+    "norm_min_max": [
+      0.999999,
+      1.0
+    ]
+  },
+  "new_ids_overlap_old": 0,
+  "upsert_seconds_first": 0.204,
+  "after_first": {
+    "count": 107,
+    "lh001_count": 73,
+    "old_unchanged": true,
+    "old_changed_ids": [],
+    "new_ids_present": true
+  },
+  "page_check": {
+    "text_mismatch": [],
+    "page_missing": [],
+    "page_start_ne_end": [],
+    "page_mismatch_marker": [],
+    "page_range": [
+      1,
+      25
+    ],
+    "markers": 25,
+    "missing_fields": []
+  },
+  "upsert_seconds_second": 0.132,
+  "after_second": {
+    "count": 107,
+    "ids_same": true
+  },
+  "evidence_chunks": {
+    "P1": [
+      "CHK_B2_DOC_LH_001_C005"
+    ],
+    "P2": [
+      "CHK_B2_DOC_LH_001_C005",
+      "CHK_B2_DOC_LH_001_C035"
+    ],
+    "P3": [
+      "CHK_B2_DOC_LH_001_C007",
+      "CHK_B2_DOC_LH_001_C010"
+    ],
+    "P4": [
+      "CHK_B2_DOC_LH_001_C001",
+      "CHK_B2_DOC_LH_001_C002",
+      "CHK_B2_DOC_LH_001_C004"
+    ],
+    "P5": [
+      "CHK_B2_DOC_LH_001_C021"
+    ],
+    "P6": [
+      "CHK_B2_DOC_LH_001_C001",
+      "CHK_B2_DOC_LH_001_C039"
+    ]
+  },
+  "search": [
+    {
+      "id": "P1",
+      "question": "신혼·신생아 매입임대Ⅰ 주택의 임대기간과 재계약 가능 횟수는?",
+      "template": "A_none",
+      "has_policy_name": true,
+      "evidence": "2년, 재계약 9회 가능",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C005"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        2
+      ],
+      "query_embed_seconds": 0.304,
+      "search_seconds": 0.0133,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.7237,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C035",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "- 12 - 관련항목 유의사항 • 계약체결 후 60일 이내에 입주를 완료하여야 합니다. 단, 일부 주택(100세대 이상 공동 주택)의 경우 입주"
+        },
+        {
+          "rank": 2,
+          "score": 0.6772,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C005",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 임대기간 및 임대조건",
+          "contains_evidence": true,
+          "text_head": "■ 임대기간 및 임대조건 구분 내용 임대기간 • 2년, 재계약 9회 가능(자격 충족 시 최장 20년 거주) 임대조건 • 시중 시세의 30~40%"
+        },
+        {
+          "rank": 3,
+          "score": 0.6577,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C037",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "수 있습니다. 이 경우 변경하려는 주택에 예비입주자가  있으면 가장 후순위 예비입주자로 등록되며, 변경대상 주택의 임대조건을 적용합니다.  • "
+        },
+        {
+          "rank": 4,
+          "score": 0.6398,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C002",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": false,
+          "text_head": "세대구성원, 주택소유,  자산, 소득 등) 판단 기준일이 됩니다.  • (모집호수) 총 119호  • (주택관리번호) 2026-980069  •"
+        },
+        {
+          "rank": 5,
+          "score": 0.6348,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C006",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 임대기간 및 임대조건",
+          "contains_evidence": false,
+          "text_head": "임대보증금 감액분 × 3.5% ÷ 12개월 = 월임대료 증가분    ☞ (예시) 임대보증금을 300만원 낮출 경우 월임대료 8,750원 증가 ※"
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "question": "신혼·신생아 매입임대Ⅰ 주택의 임대기간과 재계약 가능 횟수는?",
+      "template": "B_instruct",
+      "has_policy_name": true,
+      "evidence": "2년, 재계약 9회 가능",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C005"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        2
+      ],
+      "query_embed_seconds": 0.406,
+      "search_seconds": 0.011,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.7627,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C035",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "- 12 - 관련항목 유의사항 • 계약체결 후 60일 이내에 입주를 완료하여야 합니다. 단, 일부 주택(100세대 이상 공동 주택)의 경우 입주"
+        },
+        {
+          "rank": 2,
+          "score": 0.7043,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C005",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 임대기간 및 임대조건",
+          "contains_evidence": true,
+          "text_head": "■ 임대기간 및 임대조건 구분 내용 임대기간 • 2년, 재계약 9회 가능(자격 충족 시 최장 20년 거주) 임대조건 • 시중 시세의 30~40%"
+        },
+        {
+          "rank": 3,
+          "score": 0.7027,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C037",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "수 있습니다. 이 경우 변경하려는 주택에 예비입주자가  있으면 가장 후순위 예비입주자로 등록되며, 변경대상 주택의 임대조건을 적용합니다.  • "
+        },
+        {
+          "rank": 4,
+          "score": 0.6897,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C002",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": false,
+          "text_head": "세대구성원, 주택소유,  자산, 소득 등) 판단 기준일이 됩니다.  • (모집호수) 총 119호  • (주택관리번호) 2026-980069  •"
+        },
+        {
+          "rank": 5,
+          "score": 0.67,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C036",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "제19조 제2항에 따른 기준을 초과한 경우 1회에 한하여 재계약할 수 있으며,  이 경우 임대보증금 및 임대료는 80% 할증됩니다. 기타사항 •"
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "question": "매입임대 주택에서 최장 몇 년까지 거주할 수 있나요?",
+      "template": "A_none",
+      "has_policy_name": false,
+      "evidence": "최장 20년 거주",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C005",
+        "CHK_B2_DOC_LH_001_C035"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        1,
+        2
+      ],
+      "query_embed_seconds": 0.229,
+      "search_seconds": 0.0116,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.5237,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C005",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 임대기간 및 임대조건",
+          "contains_evidence": true,
+          "text_head": "■ 임대기간 및 임대조건 구분 내용 임대기간 • 2년, 재계약 9회 가능(자격 충족 시 최장 20년 거주) 임대조건 • 시중 시세의 30~40%"
+        },
+        {
+          "rank": 2,
+          "score": 0.5032,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C035",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": true,
+          "text_head": "- 12 - 관련항목 유의사항 • 계약체결 후 60일 이내에 입주를 완료하여야 합니다. 단, 일부 주택(100세대 이상 공동 주택)의 경우 입주"
+        },
+        {
+          "rank": 3,
+          "score": 0.4783,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C042",
+          "page": 14,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "등의 사유로 처분한 경우) 사업주체와의 계약서상 명의변경일 ￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)  "
+        },
+        {
+          "rank": 4,
+          "score": 0.4687,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C044",
+          "page": 14,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "취득한 경우   ⑩ 보유한 분양권등이 `18.12.11. 전에 입주자모집 승인, 「주택법」 제5조제2항에 따른 지역주택조합의 사업계획승 인, 「"
+        },
+        {
+          "rank": 5,
+          "score": 0.4666,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C034",
+          "page": 11,
+          "section_title": "5 기타 유의사항",
+          "contains_evidence": false,
+          "text_head": "때 계약을 포기(계약일시에 불참, 계약 물량이 남아있음에도 불구하고 미계약 등)할 경우 예비입주자로서의 지위가 상실됨을  유념하시기 바랍니다. "
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "question": "매입임대 주택에서 최장 몇 년까지 거주할 수 있나요?",
+      "template": "B_instruct",
+      "has_policy_name": false,
+      "evidence": "최장 20년 거주",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C005",
+        "CHK_B2_DOC_LH_001_C035"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        1,
+        2
+      ],
+      "query_embed_seconds": 0.331,
+      "search_seconds": 0.0117,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.6477,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C005",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 임대기간 및 임대조건",
+          "contains_evidence": true,
+          "text_head": "■ 임대기간 및 임대조건 구분 내용 임대기간 • 2년, 재계약 9회 가능(자격 충족 시 최장 20년 거주) 임대조건 • 시중 시세의 30~40%"
+        },
+        {
+          "rank": 2,
+          "score": 0.63,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C035",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": true,
+          "text_head": "- 12 - 관련항목 유의사항 • 계약체결 후 60일 이내에 입주를 완료하여야 합니다. 단, 일부 주택(100세대 이상 공동 주택)의 경우 입주"
+        },
+        {
+          "rank": 3,
+          "score": 0.6041,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C042",
+          "page": 14,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "등의 사유로 처분한 경우) 사업주체와의 계약서상 명의변경일 ￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)  "
+        },
+        {
+          "rank": 4,
+          "score": 0.5994,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C037",
+          "page": 12,
+          "section_title": "5 기타 유의사항 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "수 있습니다. 이 경우 변경하려는 주택에 예비입주자가  있으면 가장 후순위 예비입주자로 등록되며, 변경대상 주택의 임대조건을 적용합니다.  • "
+        },
+        {
+          "rank": 5,
+          "score": 0.5854,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C044",
+          "page": 14,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "취득한 경우   ⑩ 보유한 분양권등이 `18.12.11. 전에 입주자모집 승인, 「주택법」 제5조제2항에 따른 지역주택조합의 사업계획승 인, 「"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "question": "예비신혼부부는 언제까지 혼인신고를 해야 하나요?",
+      "template": "A_none",
+      "has_policy_name": false,
+      "evidence": "입주일 전일까지 혼인신고",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C007",
+        "CHK_B2_DOC_LH_001_C010"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [],
+      "query_embed_seconds": 0.222,
+      "search_seconds": 0.0117,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.4741,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C021",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 + 4 서류제출 대상자 제출서류 안내 > ■ 서류제출 방법 : 온라인 제출",
+          "contains_evidence": false,
+          "text_head": "■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 ■ 서류제출 방법 : 온라인 제출 • 우편으로는 서"
+        },
+        {
+          "rank": 2,
+          "score": 0.4735,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C027",
+          "page": 9,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 기타 제출서류 (아래 표에 해당하는 자만 제출)",
+          "contains_evidence": false,
+          "text_head": "외국인인 경우 • 외국인 직계 존·비속을 가구원수로 인정받고자 하는 경우  출입국 관리사무소 세대구성 확인서 (예 비  신 혼 부 부) • 예비"
+        },
+        {
+          "rank": 3,
+          "score": 0.4689,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C020",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후",
+          "contains_evidence": false,
+          "text_head": "■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후 • 신청자 본인이 서류제출대상자 발표일에 결과를 직접 확인하셔야 합니다. "
+        },
+        {
+          "rank": 4,
+          "score": 0.4639,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C018",
+          "page": 6,
+          "section_title": "3 공급일정 및 신청방법 등",
+          "contains_evidence": false,
+          "text_head": "계약체결 개별 안내 • 예비입주자 순번 발표 후 선택 가능한 주택 및 주택열람에 관한 계약체결 안내문을  순차적으로 발송할 예정입니다. • 예비"
+        },
+        {
+          "rank": 5,
+          "score": 0.4631,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C073",
+          "page": 25,
+          "section_title": "6 문의처 및 서류제출 장소 > ■  공공주택특별법 시행규칙 [별지 제4호서식] <개정 2022. 12. 29.>                (이어짐)",
+          "contains_evidence": false,
+          "text_head": "- 25 - (예비신혼부부만 제출) 세대구성 확인서     본인 및 예비배우자는 금회 모집하는 신혼·신생아 매입임대주택에 예비신혼 부부 자격으로"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "question": "예비신혼부부는 언제까지 혼인신고를 해야 하나요?",
+      "template": "B_instruct",
+      "has_policy_name": false,
+      "evidence": "입주일 전일까지 혼인신고",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C007",
+        "CHK_B2_DOC_LH_001_C010"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [],
+      "query_embed_seconds": 0.378,
+      "search_seconds": 0.0189,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.5884,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C027",
+          "page": 9,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 기타 제출서류 (아래 표에 해당하는 자만 제출)",
+          "contains_evidence": false,
+          "text_head": "외국인인 경우 • 외국인 직계 존·비속을 가구원수로 인정받고자 하는 경우  출입국 관리사무소 세대구성 확인서 (예 비  신 혼 부 부) • 예비"
+        },
+        {
+          "rank": 2,
+          "score": 0.5801,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C073",
+          "page": 25,
+          "section_title": "6 문의처 및 서류제출 장소 > ■  공공주택특별법 시행규칙 [별지 제4호서식] <개정 2022. 12. 29.>                (이어짐)",
+          "contains_evidence": false,
+          "text_head": "- 25 - (예비신혼부부만 제출) 세대구성 확인서     본인 및 예비배우자는 금회 모집하는 신혼·신생아 매입임대주택에 예비신혼 부부 자격으로"
+        },
+        {
+          "rank": 3,
+          "score": 0.5773,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C021",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 + 4 서류제출 대상자 제출서류 안내 > ■ 서류제출 방법 : 온라인 제출",
+          "contains_evidence": false,
+          "text_head": "■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 ■ 서류제출 방법 : 온라인 제출 • 우편으로는 서"
+        },
+        {
+          "rank": 4,
+          "score": 0.5724,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C023",
+          "page": 8,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 공통 제출서류 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "- 8 - ※ 수급자, 지원대상 한부모가족(한부모가족 증명서), 차상위계층은 금융정보 등 제공 동의서,  자산 보유사실 확인서 제출 불필요(예비"
+        },
+        {
+          "rank": 5,
+          "score": 0.5724,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C020",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후",
+          "contains_evidence": false,
+          "text_head": "■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후 • 신청자 본인이 서류제출대상자 발표일에 결과를 직접 확인하셔야 합니다. "
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "question": "이번 모집공고에서 공급하는 주택은 총 몇 호인가요?",
+      "template": "A_none",
+      "has_policy_name": false,
+      "evidence": "총 119호",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C001",
+        "CHK_B2_DOC_LH_001_C002",
+        "CHK_B2_DOC_LH_001_C004"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        1,
+        5
+      ],
+      "query_embed_seconds": 0.289,
+      "search_seconds": 0.0103,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.5944,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C004",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 공급대상 주택 : 총 119호",
+          "contains_evidence": true,
+          "text_head": "- 2 - 1 공급개요 ■ 공급대상 주택 : 총 119호  • 주택군, 주택별 소재지, 면적, 임대조건 등 세부내역은 첨부 “주택목록” 참조  "
+        },
+        {
+          "rank": 2,
+          "score": 0.522,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C003",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": false,
+          "text_head": "생 아Ⅱ(전세형) 공고”를 중복 신청하는 경우 신혼·신 생 아Ⅱ(전세형) 신청만  인정되고 신혼·신 생 아Ⅰ 신청은 자동 탈락 처리됩니다.  •"
+        },
+        {
+          "rank": 3,
+          "score": 0.5149,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C040",
+          "page": 13,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의",
+          "contains_evidence": false,
+          "text_head": "바랍니다. • 공고문에 명시되지 않은 사항에 대하여는 「공공주택 특별법」 및 ｢기존주택 매입임대주택  업무처리지침｣ 등 관련법령에 따릅니다. •"
+        },
+        {
+          "rank": 4,
+          "score": 0.5148,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C065",
+          "page": 21,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "동의를 거부할 경우 한국토지주택공사가 본인의 임대주택 공급신청  접수를 거부하거나 임대차계약(갱신계약 포함) 체결에 응하지 않을 수 있습니다. "
+        },
+        {
+          "rank": 5,
+          "score": 0.5053,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C001",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": true,
+          "text_head": "- 1 - 서울지역본부 신혼·신생아 매입임대주택Ⅰ 예비입주자 모집공고  □ 신혼·신생아 매입임대주택Ⅰ은 도심 내 신혼부부 등이 원하는 생활권에서"
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "question": "이번 모집공고에서 공급하는 주택은 총 몇 호인가요?",
+      "template": "B_instruct",
+      "has_policy_name": false,
+      "evidence": "총 119호",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C001",
+        "CHK_B2_DOC_LH_001_C002",
+        "CHK_B2_DOC_LH_001_C004"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        1,
+        5
+      ],
+      "query_embed_seconds": 0.352,
+      "search_seconds": 0.0088,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.6414,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C004",
+          "page": 2,
+          "section_title": "1 공급개요 > ■ 공급대상 주택 : 총 119호",
+          "contains_evidence": true,
+          "text_head": "- 2 - 1 공급개요 ■ 공급대상 주택 : 총 119호  • 주택군, 주택별 소재지, 면적, 임대조건 등 세부내역은 첨부 “주택목록” 참조  "
+        },
+        {
+          "rank": 2,
+          "score": 0.5847,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C003",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": false,
+          "text_head": "생 아Ⅱ(전세형) 공고”를 중복 신청하는 경우 신혼·신 생 아Ⅱ(전세형) 신청만  인정되고 신혼·신 생 아Ⅰ 신청은 자동 탈락 처리됩니다.  •"
+        },
+        {
+          "rank": 3,
+          "score": 0.5718,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C065",
+          "page": 21,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "동의를 거부할 경우 한국토지주택공사가 본인의 임대주택 공급신청  접수를 거부하거나 임대차계약(갱신계약 포함) 체결에 응하지 않을 수 있습니다. "
+        },
+        {
+          "rank": 4,
+          "score": 0.5708,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C040",
+          "page": 13,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의",
+          "contains_evidence": false,
+          "text_head": "바랍니다. • 공고문에 명시되지 않은 사항에 대하여는 「공공주택 특별법」 및 ｢기존주택 매입임대주택  업무처리지침｣ 등 관련법령에 따릅니다. •"
+        },
+        {
+          "rank": 5,
+          "score": 0.5704,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C001",
+          "page": 1,
+          "section_title": "(첫 제목 이전)",
+          "contains_evidence": true,
+          "text_head": "- 1 - 서울지역본부 신혼·신생아 매입임대주택Ⅰ 예비입주자 모집공고  □ 신혼·신생아 매입임대주택Ⅰ은 도심 내 신혼부부 등이 원하는 생활권에서"
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "question": "서류를 우편으로 제출할 수 있나요? 제출 방법은?",
+      "template": "A_none",
+      "has_policy_name": false,
+      "evidence": "서류제출 방법 : 온라인 제출",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C021"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        3
+      ],
+      "query_embed_seconds": 0.19,
+      "search_seconds": 0.0092,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.3982,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C029",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "- 10 - ■ 온라인(PC, 모바일) 서류제출 방법 ※ 상기 유의사항에 부적합한 전자화문서가 접수된 경우 적합한 서류로 재접수를 요구할 수 있"
+        },
+        {
+          "rank": 2,
+          "score": 0.347,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C030",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "선택)    하여 발급받은 파일을 LH 청약플러스에 업로드      * 주요 행정서류별 인터넷 발급 사이트는 LH 청약플러스 안내 참조   - "
+        },
+        {
+          "rank": 3,
+          "score": 0.3381,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C021",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 + 4 서류제출 대상자 제출서류 안내 > ■ 서류제출 방법 : 온라인 제출",
+          "contains_evidence": true,
+          "text_head": "■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 ■ 서류제출 방법 : 온라인 제출 • 우편으로는 서"
+        },
+        {
+          "rank": 4,
+          "score": 0.3317,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C031",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "병합하여 제출 가능합니다. (병합제출 권장) ▪ 모바일(스마트폰 등) 사진 촬영 시 프레임 안에 종이 면 전체가 잘리지 않고 모두 들어오도록  "
+        },
+        {
+          "rank": 5,
+          "score": 0.3133,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [구비서류]",
+          "contains_evidence": false,
+          "text_head": "[구비서류] ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침"
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "question": "서류를 우편으로 제출할 수 있나요? 제출 방법은?",
+      "template": "B_instruct",
+      "has_policy_name": false,
+      "evidence": "서류제출 방법 : 온라인 제출",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C021"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": true,
+      "evidence_ranks": [
+        4
+      ],
+      "query_embed_seconds": 0.345,
+      "search_seconds": 0.0092,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.5563,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C029",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "- 10 - ■ 온라인(PC, 모바일) 서류제출 방법 ※ 상기 유의사항에 부적합한 전자화문서가 접수된 경우 적합한 서류로 재접수를 요구할 수 있"
+        },
+        {
+          "rank": 2,
+          "score": 0.5103,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C030",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "선택)    하여 발급받은 파일을 LH 청약플러스에 업로드      * 주요 행정서류별 인터넷 발급 사이트는 LH 청약플러스 안내 참조   - "
+        },
+        {
+          "rank": 3,
+          "score": 0.4964,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C031",
+          "page": 10,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 온라인(PC, 모바일) 서류제출 방법",
+          "contains_evidence": false,
+          "text_head": "병합하여 제출 가능합니다. (병합제출 권장) ▪ 모바일(스마트폰 등) 사진 촬영 시 프레임 안에 종이 면 전체가 잘리지 않고 모두 들어오도록  "
+        },
+        {
+          "rank": 4,
+          "score": 0.4875,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C021",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내 > ■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 + 4 서류제출 대상자 제출서류 안내 > ■ 서류제출 방법 : 온라인 제출",
+          "contains_evidence": true,
+          "text_head": "■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시 ■ 서류제출 방법 : 온라인 제출 • 우편으로는 서"
+        },
+        {
+          "rank": 5,
+          "score": 0.4519,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C019",
+          "page": 7,
+          "section_title": "4 서류제출 대상자 제출서류 안내",
+          "contains_evidence": false,
+          "text_head": "- 7 - 4 서류제출 대상자 제출서류 안내  • 공고일(‘26.03.31.)이후 발급한 서류만 인정됩니다.  • 주민등록표등본, 가족관계증명서"
+        }
+      ]
+    },
+    {
+      "id": "P6",
+      "question": "신청 관련 상담 전화번호는 무엇인가요?",
+      "template": "A_none",
+      "has_policy_name": false,
+      "evidence": "1600-1004",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C001",
+        "CHK_B2_DOC_LH_001_C039"
+      ],
+      "lh001_in_top5": false,
+      "lh001_rank1": false,
+      "evidence_ranks": [],
+      "query_embed_seconds": 0.155,
+      "search_seconds": 0.0095,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.348,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C008",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [구비서류]",
+          "contains_evidence": false,
+          "text_head": "[신청기간 및 신청방법] - 신청기한: 2025.10.~12월 중 신청,접수 기간 공고 참조 - 신청방법: □ 사업신청 : : 어업허가 처분권 "
+        },
+        {
+          "rank": 2,
+          "score": 0.3432,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [구비서류]",
+          "contains_evidence": false,
+          "text_head": "[구비서류] ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침"
+        },
+        {
+          "rank": 3,
+          "score": 0.3333,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C001",
+          "page": null,
+          "section_title": "[서비스명] + [소관기관 / 서비스분야] + [서비스목적]",
+          "contains_evidence": false,
+          "text_head": "[서비스명] 수산자원보호 직접지불제 (서비스ID: 119200000194)  [소관기관 / 서비스분야] 해양수산부 / 농림축산어업  [서비스목적"
+        },
+        {
+          "rank": 4,
+          "score": 0.3268,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C010",
+          "page": null,
+          "section_title": "[근거법령] + [문의처]",
+          "contains_evidence": false,
+          "text_head": "[근거법령] 수산업ㆍ어촌 공익기능 증진을 위한 직접지불제도 운영에 관한 법률 시행규칙(제13조)||수산업ㆍ어촌 공익기능 증진을 위한 직접지불제도"
+        },
+        {
+          "rank": 5,
+          "score": 0.3206,
+          "document_id": "DOC_BOK_001",
+          "chunk_id": "CHK_B2_DOC_BOK_001_C007",
+          "page": null,
+          "section_title": "[구비서류] + [근거법령] + [문의처]",
+          "contains_evidence": false,
+          "text_head": "[구비서류] - 사회보장급여 신청(변경)서.pdf - 2026년 아이돌봄 지원사업 안내.pdf  [근거법령] 아이돌봄 지원법  [문의처] 아이돌"
+        }
+      ]
+    },
+    {
+      "id": "P6",
+      "question": "신청 관련 상담 전화번호는 무엇인가요?",
+      "template": "B_instruct",
+      "has_policy_name": false,
+      "evidence": "1600-1004",
+      "evidence_chunks": [
+        "CHK_B2_DOC_LH_001_C001",
+        "CHK_B2_DOC_LH_001_C039"
+      ],
+      "lh001_in_top5": true,
+      "lh001_rank1": false,
+      "evidence_ranks": [],
+      "query_embed_seconds": 0.295,
+      "search_seconds": 0.0111,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.4688,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C008",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [구비서류]",
+          "contains_evidence": false,
+          "text_head": "[신청기간 및 신청방법] - 신청기한: 2025.10.~12월 중 신청,접수 기간 공고 참조 - 신청방법: □ 사업신청 : : 어업허가 처분권 "
+        },
+        {
+          "rank": 2,
+          "score": 0.4601,
+          "document_id": "DOC_YC_003",
+          "chunk_id": "CHK_B2_DOC_YC_003_C003",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [제출서류] + [신청 URL]",
+          "contains_evidence": false,
+          "text_head": "[신청기간 및 신청방법] - 신청기간: 20260812 ~ 20261106 - 신청방법: 공고문 참조  [제출서류] 공고문 참조  [신청 URL"
+        },
+        {
+          "rank": 3,
+          "score": 0.4449,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C064",
+          "page": 21,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "및 자산,  계약 및 입주 여부 검색 성명, 주소, 휴대전화번호,   주민등록번호(외국인등록번호) 사회보장정보원 주택, 소득 및 자산 검색 성명"
+        },
+        {
+          "rank": 4,
+          "score": 0.4413,
+          "document_id": "DOC_GOV_006",
+          "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+          "page": null,
+          "section_title": "[신청기간 및 신청방법] + [구비서류]",
+          "contains_evidence": false,
+          "text_head": "[구비서류] ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침"
+        },
+        {
+          "rank": 5,
+          "score": 0.4395,
+          "document_id": "DOC_LH_001",
+          "chunk_id": "CHK_B2_DOC_LH_001_C062",
+          "page": 20,
+          "section_title": "6 문의처 및 서류제출 장소 > ■ 신청접수 및 입주자 선정 문의 (이어짐)",
+          "contains_evidence": false,
+          "text_head": "수 있습니다. 단, 동의를 거부할  경우 우선공급 대상 “장애인 등”에서 제외되고, 장애인 관련 배점 적용대상에서 제외됨을 알려드립니다. [선택"
+        }
+      ]
+    }
+  ],
+  "collections_after": [
+    "exp_b2_qwen3emb06b_v1"
+  ]
+}
