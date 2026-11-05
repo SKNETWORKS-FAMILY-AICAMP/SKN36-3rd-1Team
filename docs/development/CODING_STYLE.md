@@ -3,7 +3,7 @@
 > 버전: 1.0 (팀 검토용)  
 > 적용 프로젝트: 생애주기 맞춤형 정부·지자체 정책 추천 및 근거 기반 질의응답 서비스  
 > 참고 원본: `CODING_STYLE.md` (LabBridge 팀 공통 스타일; 핵심 원칙 계승)  
-> 기획 기준: `LifePolicy_AI_PRD_v1.0.md`, [Notion WBS](https://app.notion.com/p/40e8fc09deb980508fb7c9130e25017c)  
+> 기획 기준: `LifePolicy_AI_PRD_v1.0.md`, [Notion WBS](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 > 적용: 데이터 수집·전처리, Graph/Vector DB, Python/FastAPI, RAG/LLM, 웹 UI, 테스트·문서  
 > 상태: **초안** — 팀 합의가 필요한 항목은 아래 '결정 대기'에 명시
 
@@ -23,7 +23,7 @@
 4. 이 문서의 일관성·단순성·가독성
 5. 개인 취향
 
-**11월 8일 개발 완료 목표의 MVP**는 공식 정책 원문 수집 → 정제 → Graph DB/Vector DB 조회 → LLM 답변 → 화면의 **출처 표시**까지다. 계정 장기 관리, 정기 알림, 브라우저 신청 대행, MCP/Multi-Agent/Fine-tuning은 팀에서 별도 확정하지 않으면 선구현하지 않는다.
+**11월 8일 개발 완료 목표의 MVP**는 공식 정책 원문 수집 → 정제 → Graph DB/Vector DB 조회 → 사용자 조건 확인 → LLM 답변·출처의 **터미널·노트북 등 최소 실행 출력**까지다. 계정 장기 관리, 정기 알림, 브라우저 신청 대행, MCP/Multi-Agent/Fine-tuning은 팀에서 별도 확정하지 않으면 선구현하지 않는다.
 
 ## 3. 모든 언어 공통 원칙
 
@@ -295,7 +295,7 @@ function PolicyList({ policies }: { policies: PolicySummary[] }) {
 ## 14. Git / PR / 문서 변경
 
 - 작업 전 최신 브랜치·README·PRD·공통 데이터 계약을 확인한다.
-- `feature/...` 브랜치에서 작업하고 PR로 합친다. **기본 브랜치가 `develop`인지 `main`인지 팀에서 확정**하기 전에는 원본의 `develop` 강제 규칙을 그대로 적용하지 않는다.
+- `feature/...` 브랜치에서 작업하고 PR로 합친다. 현재 저장소의 통합 브랜치는 `dev`이며, PR 대상도 `dev`로 맞춘다.
 - PR에는 **무엇을 / 왜 / 어떻게 테스트했는지 / 영향을 받는 API·스키마·문서**를 적는다.
 - 다른 담당자의 코드·공통 필드를 수정하면 관련 담당자에게 리뷰를 요청한다.
 - 데이터 원본을 대량 커밋하기 전에 크기·라이선스·저장 위치·Git LFS 필요 여부를 확인한다.
@@ -349,7 +349,7 @@ API 키·개인정보를 노출하지 말고 변경 후 테스트 결과, 변경
 | Graph / Vector 제품 | Neo4j + Qdrant (현재 설계안) | DB 담당·팀, 개발 시작 전 |
 | 공통 JSON 필드와 null 처리 | `snake_case`, 필수 ID/출처 보존 | 데이터·DB·검색·RAG, 개발 시작 전 |
 | 청킹 책임과 설정 | DB 담당이 전처리 결과로 청킹 | 데이터·DB 담당, 개발 시작 전 |
-| Git 통합 브랜치 | `develop` 사용 여부 확인 | 저장소 담당·팀 |
+| Git 통합 브랜치 | `dev` (현재 저장소 운영 기준) | 변경 시 저장소 담당·팀 합의 |
 | 자동 포맷/린트 도구 | Python Ruff, TS ESLint/Prettier 후보 | 각 언어 담당·팀 |
 | 정책 수집 범위/건수 | 청년·신혼/주거 소량 샘플 우선 | 데이터·검색 담당·팀 |
 | LLM·임베딩 방식 및 비용 | API/로컬 및 환경변수 명칭 합의 | LLM·DB 담당, 개발 시작 전 |
