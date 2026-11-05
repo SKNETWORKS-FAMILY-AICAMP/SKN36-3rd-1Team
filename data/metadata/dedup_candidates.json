@@ -1,0 +1,86 @@
+[
+  {
+    "canonical_policy_id": "POL_009",
+    "duplicate_official_id": "WLF00004661",
+    "duplicate_source": "bokjiro_api",
+    "duplicate_name": "청년월세 지원사업",
+    "reason": "국토교통부 동일 사업(청년월세 한시 특별지원) — POL_009의 공식 근거 문서 DOC_MOLIT_001로 통합"
+  },
+  {
+    "canonical_policy_id": "POL_009",
+    "duplicate_official_id": "161300000099",
+    "duplicate_source": "gov24_api",
+    "duplicate_name": "청년월세 한시 특별지원",
+    "reason": "국토교통부 동일 사업 — POL_009의 공식 근거 문서 DOC_MOLIT_002로 통합"
+  },
+  {
+    "canonical_policy_id": "POL_009",
+    "duplicate_official_id": "20261004005400113874",
+    "duplicate_source": "youthcenter_api",
+    "duplicate_name": "청년월세지원",
+    "reason": "국토교통부 동일 사업 — POL_009 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_010",
+    "duplicate_official_id": "149200005007",
+    "duplicate_source": "gov24_api",
+    "duplicate_name": "국민취업지원제도",
+    "reason": "고용노동부 동일 사업 — POL_010의 공식 근거 문서 DOC_MOEL_001로 통합"
+  },
+  {
+    "canonical_policy_id": "POL_010",
+    "duplicate_official_id": "20260710005400113256",
+    "duplicate_source": "youthcenter_api",
+    "duplicate_name": "국민취업지원제도",
+    "reason": "고용노동부 동일 사업 — POL_010의 공식 근거 문서 DOC_MOEL_002로 통합"
+  },
+  {
+    "canonical_policy_id": "POL_010",
+    "duplicate_official_id": "WLF00003245",
+    "duplicate_source": "bokjiro_api",
+    "duplicate_name": "국민취업지원제도",
+    "reason": "고용노동부 동일 사업 — POL_010 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_005",
+    "duplicate_official_id": "WLF00006229",
+    "duplicate_source": "bokjiro_api",
+    "duplicate_name": "국민내일배움카드(일반)",
+    "reason": "고용노동부 동일 사업 — POL_005 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_005",
+    "duplicate_official_id": "149200000026",
+    "duplicate_source": "gov24_api",
+    "duplicate_name": "국민내일배움카드",
+    "reason": "고용노동부 동일 사업 — POL_005 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_005",
+    "duplicate_official_id": "20250123005400110393",
+    "duplicate_source": "youthcenter_api",
+    "duplicate_name": "국민내일배움카드",
+    "reason": "고용노동부 동일 사업 — POL_005 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_004",
+    "duplicate_official_id": "WLF00003222",
+    "duplicate_source": "bokjiro_api",
+    "duplicate_name": "버팀목전세자금대출",
+    "reason": "국토교통부 주택도시기금 버팀목전세자금대출 — POL_003/POL_004 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_004",
+    "duplicate_official_id": "20241231005400100180",
+    "duplicate_source": "youthcenter_api",
+    "duplicate_name": "청년전용 버팀목 전세자금",
+    "reason": "국토교통부 동일 사업 — POL_004 기준으로 중복 병합"
+  },
+  {
+    "canonical_policy_id": "POL_006",
+    "duplicate_official_id": "WLF00001063",
+    "duplicate_source": "bokjiro_api",
+    "duplicate_name": "주거안정월세대출",
+    "reason": "국토교통부 동일 사업 — POL_006 기준으로 중복 병합"
+  }
+]
