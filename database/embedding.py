@@ -358,6 +358,9 @@ def make_ollama_embedder(
             ))
         return vectors
 
+    # 이 함수가 어떤 모델·차원의 벡터를 만드는지 표시 (Hybrid 검색 프로필이 embedder를 검증할 때 쓴다)
+    embed.embedding_model = model
+    embed.embedding_dim = expected_dim
     return embed
 
 

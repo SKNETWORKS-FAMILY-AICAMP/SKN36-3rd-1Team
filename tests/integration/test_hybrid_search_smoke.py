@@ -73,7 +73,9 @@ class TestHybridSearchSmoke(unittest.TestCase):
             cls._runner_context.__exit__(None, None, None)
             raise unittest.SkipTest("DATA_NOT_READY: Neo4j가 비어 있음")
         cls.documents = {doc["document_id"]: doc for doc in hd.load_documents(verify_hash=True)}
-        cls.results = {question: hs.search_policy_context(question, k=5, client=cls.client, runner=cls.runner)
+        # 2026-11-06: 기본 검색이 전체 색인 프로필로 바뀌어, 107 point 회귀 검사는 기존 컬렉션을 명시한다
+        cls.results = {question: hs.search_policy_context(question, k=5, client=cls.client, runner=cls.runner,
+                                                          collection=hs.LEGACY_EXPERIMENT_COLLECTION)
                        for question, *_ in QUESTIONS}
 
     @classmethod
@@ -123,9 +125,11 @@ class TestHybridSearchSmoke(unittest.TestCase):
                 self.assertEqual(eligibility["structure_issues"], [])
 
     def test_filters_restrict_results(self):
-        result = self.hs.search_policy_evidence("상담 전화번호", {"document_id": "DOC_LH_001"}, k=5, client=self.client)
+        result = self.hs.search_policy_evidence("상담 전화번호", {"document_id": "DOC_LH_001"}, k=5, client=self.client,
+                                                collection=self.hs.LEGACY_EXPERIMENT_COLLECTION)
         self.assertEqual({hit["document_id"] for hit in result["hits"]}, {"DOC_LH_001"})
-        result = self.hs.search_policy_evidence("상담 전화번호", {"policy_id": "POL_001"}, k=5, client=self.client)
+        result = self.hs.search_policy_evidence("상담 전화번호", {"policy_id": "POL_001"}, k=5, client=self.client,
+                                                collection=self.hs.LEGACY_EXPERIMENT_COLLECTION)
         self.assertEqual({hit["policy_id"] for hit in result["hits"]}, {"POL_001"})
 
     def test_databases_unchanged(self):
@@ -134,7 +138,7 @@ class TestHybridSearchSmoke(unittest.TestCase):
         self.assertEqual(self.runner.read_rows(self.hs.lg.QUERY_TOTAL_COUNTS)[0], self.graph_before)
 
     def test_session_reuses_connections_and_matches_function_results(self):
-        with self.hs.HybridSearchSession() as session:
+        with self.hs.HybridSearchSession(collection=self.hs.LEGACY_EXPERIMENT_COLLECTION) as session:
             results = [session.search_policy_context(question, k=5) for question, *_ in QUESTIONS]
             self.assertEqual(session.owned_resources, {"qdrant_client": True, "neo4j_driver": True})
             self.assertEqual(session.runner.query_timeout, self.hs.NEO4J_QUERY_TIMEOUT_SECONDS)
@@ -151,7 +155,8 @@ class TestHybridSearchSmoke(unittest.TestCase):
     def test_data_quality_warnings_on_real_data(self):
         """경고는 표시만 한다: 순위·근거는 그대로이고, 자격 판정(evaluated)은 False."""
         gov = self.hs.search_policy_context("수산자원보호 직접지불금을 부정하게 받으면 어떤 벌칙이 있나요?", k=5,
-                                            client=self.client, runner=self.runner)
+                                            client=self.client, runner=self.runner,
+                                            collection=self.hs.LEGACY_EXPERIMENT_COLLECTION)
         top = gov["policies"][0]
         self.assertEqual(top["policy_id"], "POL_GOV_006")
         codes = {warning["code"] for warning in top["data_quality"]["warnings"]}

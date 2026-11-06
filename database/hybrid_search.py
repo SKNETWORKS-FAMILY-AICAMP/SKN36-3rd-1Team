@@ -28,7 +28,10 @@ from typing import Any, Iterator
 
 import requests
 
+from database import data_quality_flags as dqf
 from database import embedding as em
+from database import full_index as fi
+from database import retrieval_run as rr
 from database.chunking import make_point_id
 from database.neo4j import load_graph as lg
 from database.qdrant import store
@@ -36,7 +39,19 @@ from database.qdrant import store
 # ---------------------------------------------------------------------------
 # 1. 설정값
 # ---------------------------------------------------------------------------
-DEFAULT_COLLECTION = "exp_b2_qwen3emb06b_v1"     # 현재 검증된 실험 컬렉션 (서비스 컬렉션 아님)
+# 기존 107 point 실험 컬렉션 (문서 5개). 호환용: collection을 직접 지정하는 호출·교차 검증 기본값에만 쓴다.
+LEGACY_EXPERIMENT_COLLECTION = "exp_b2_qwen3emb06b_v1"
+DEFAULT_COLLECTION = LEGACY_EXPERIMENT_COLLECTION   # 이름 호환용 별칭 (검색 기본값은 DEFAULT_PROFILE)
+
+# ---- 검색 프로필 (2026-11-06) ----
+# 프로필 하나가 컬렉션·임베딩 모델·차원·질의 지시문을 함께 정한다. 값은 색인 구성(full_index)과
+# 평가 실행기(retrieval_run.QUERY_TEMPLATES)에서 그대로 가져온다 → 실험에서 검증한 설정과 어긋날 수 없다.
+SEARCH_PROFILES: dict[str, dict[str, str]] = {
+    "b2_06b_baseline": {"index_config": "A_B2", "query_template_name": "none"},          # 기본 (0.6B 기준선)
+    "b2_4b_instruct": {"index_config": "A_B2_4B", "query_template_name": "instruct_v1"},  # 유력 후보 (최종 미확정)
+}
+DEFAULT_PROFILE = "b2_06b_baseline"
+_UNSET = object()     # query_template을 "넘기지 않음"과 "None(지시문 없음)"을 구분하기 위한 표시
 DEFAULT_K = 5
 MAX_K = 200                                     # 진단용 전체 순위(107개)까지 허용하되 무제한은 막는다
 MAX_QUERY_CHARS = 2000
@@ -88,6 +103,48 @@ QUALITY_HOMELESS_PROMOTED = "SUSPECTED_HOMELESS_REQUIRED_WITH_HOUSEHOLD_OR"
 QUALITY_INCOME_ALL_BANDS = "SUSPECTED_INCOME_ALL_BANDS_OR"
 QUALITY_GRAPH_MISSING = "GRAPH_CONTEXT_MISSING"
 QUALITY_STRUCTURE_ISSUE = "CONDITION_STRUCTURE_ISSUE"
+# 2026-11-06 Neo4j 의미 점검 결과로 추가한 그래프 계산 경고 (모두 의심 후보, 확정 아님)
+QUALITY_EMPTY_NOT_GROUP = "EMPTY_NOT_GROUP"
+QUALITY_REGION_GRANULARITY = "SUSPECTED_REGION_GRANULARITY_LOST"
+QUALITY_REVIEW_STATUS_OVERCLAIM = "SUSPECTED_REVIEW_STATUS_OVERCLAIM"
+# 경고 코드별 메타: severity / evidence_level(근거 종류) / verification(검증 상태) / affects(판정 영향 항목)
+#   / blocks_auto_eligibility(자동 판정 보류 필요). 공식 원문 검증은 모두 하지 않았다.
+QUALITY_CODE_META: dict[str, dict[str, Any]] = {
+    "GRAPH_CONTEXT_MISSING": {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
+                              "affects": ["all"], "blocks_auto_eligibility": True},
+    "UNKNOWN_CONDITION_GROUP": {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
+                                "affects": ["all"], "blocks_auto_eligibility": True},
+    "CONDITION_STRUCTURE_ISSUE": {"severity": "high", "evidence_level": "graph_structure", "verification": "suspected",
+                                  "affects": ["all"], "blocks_auto_eligibility": True},
+    "EXTRACTED_NOT_VERIFIED": {"severity": "low", "evidence_level": "graph_metadata", "verification": "not_officially_checked",
+                               "affects": [], "blocks_auto_eligibility": False},
+    "SUSPECTED_HOMELESS_REQUIRED_WITH_HOUSEHOLD_OR": {"severity": "high", "evidence_level": "graph_pattern",
+                                                      "verification": "suspected", "affects": ["housing"],
+                                                      "blocks_auto_eligibility": True},
+    "SUSPECTED_INCOME_ALL_BANDS_OR": {"severity": "high", "evidence_level": "graph_pattern", "verification": "suspected",
+                                      "affects": ["income"], "blocks_auto_eligibility": True},
+    QUALITY_EMPTY_NOT_GROUP: {"severity": "medium", "evidence_level": "graph_structure", "verification": "not_modeled",
+                              "affects": ["exclusion"], "blocks_auto_eligibility": True},
+    QUALITY_REGION_GRANULARITY: {"severity": "high", "evidence_level": "graph_property_pattern",
+                                 "verification": "suspected", "affects": ["region"], "blocks_auto_eligibility": True},
+    QUALITY_REVIEW_STATUS_OVERCLAIM: {"severity": "low", "evidence_level": "graph_metadata", "verification": "suspected",
+                                      "affects": [], "blocks_auto_eligibility": False},
+    # 정적 목록(data_quality_flags) 코드: 심각도·근거 수준은 목록 값을 그대로 쓴다
+    "EMPLOYMENT_NOT_MODELED": {"affects": ["employment"], "blocks_auto_eligibility": True},
+    "AGE_SOURCE_GRAPH_MISMATCH": {"affects": ["age"], "blocks_auto_eligibility": True},
+    "AGE_LOWER_BOUND_WITHOUT_SOURCE": {"affects": ["age"], "blocks_auto_eligibility": True},
+    "EXCLUSION_NOT_MODELED": {"affects": ["exclusion"], "blocks_auto_eligibility": True},
+    "MARRIAGE_CHILD_NOT_MODELED": {"affects": ["marriage", "children"], "blocks_auto_eligibility": True},
+    "SOURCE_AGE_ERROR_MARK": {"affects": ["age"], "blocks_auto_eligibility": True},
+}
+QUALITY_STATIC_MESSAGES = {
+    "EMPLOYMENT_NOT_MODELED": "인계 속성의 취업 상태 요건이 그래프 조건에 없음 → 취업 상태는 추가 질문으로 확인 (확정 아님)",
+    "AGE_SOURCE_GRAPH_MISMATCH": "원문에 명시된 연령 범위와 그래프 연령 조건이 다름 → 원문 연령 우선, 판정 보류 (공식 원문 미검증)",
+    "AGE_LOWER_BOUND_WITHOUT_SOURCE": "원문에 연령 언급이 없는데 그래프는 연령 하한을 둠 → 연령으로 탈락시키지 말 것 (확정 아님)",
+    "EXCLUSION_NOT_MODELED": "원문의 제외·참여 제한 문구가 그래프 조건에 없음(키워드 탐지) → 제외 대상 여부는 추가 질문 (확정 아님)",
+    "MARRIAGE_CHILD_NOT_MODELED": "혼인·자녀 관련 문구가 있으나 해당 조건 타입이 그래프에 없음(키워드 탐지) → 추가 질문",
+    "SOURCE_AGE_ERROR_MARK": "수집 원문에 연령 표기 오류 표시(0~0세)가 있음 → 연령 판정 보류, 공고 확인",
+}
 DATA_QUALITY_NOTES = {
     "unknown": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
     "extracted": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
@@ -95,11 +152,17 @@ DATA_QUALITY_NOTES = {
                    "(무주택 필수 승격, 소득 전 구간 OR, 가구 '해당사항없음' 누락, 취업 조건 미반영). 확정된 오류는 아니다."),
     "graph_text": ("graph.policy의 eligibility·benefit 등은 수집 단계 추출 텍스트다. 답변 근거로는 evidence[].text(원문 청크)와 "
                    "source_url을 쓴다."),
+    "hold": ("data_quality.hold_auto_eligibility=True는 '부적격'이 아니라 '자동 판정 보류'다. affected_attributes의 항목은 "
+             "원문 근거 제시·추가 질문으로 확인한다. 경고는 모두 자동 점검 의심 후보이며 공식 원문과 대조하지 않았다."),
 }
 
 
 class HybridSearchInputError(ValueError):
     """잘못된 입력 (빈 질문, 허용되지 않은 필터 필드, 형식이 틀린 policy_id, 범위 밖 k 등). DB에 접속하지 않았다."""
+
+
+class SearchProfileError(HybridSearchInputError):
+    """검색 프로필·컬렉션·임베딩 모델·차원·지시문이 서로 맞지 않음. 검색(Qdrant 호출) 전에 낸다."""
 
 
 class HybridSearchBackendError(RuntimeError):
@@ -352,9 +415,71 @@ def _hit_record(hit: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
+def resolve_search_profile(name: str) -> dict[str, Any]:
+    """프로필 이름 → {name, index_config, collection, embedding_model, embedding_dim, query_template_name, query_template, …}"""
+    if name not in SEARCH_PROFILES:
+        raise SearchProfileError(f"알 수 없는 검색 프로필: {name!r} (허용: {', '.join(SEARCH_PROFILES)})")
+    spec = SEARCH_PROFILES[name]
+    config = fi.get_config(spec["index_config"])
+    model, dim = fi.config_model(config)
+    return {"name": name, "index_config": spec["index_config"], "collection": config["collection"],
+            "embedding_model": model, "embedding_dim": dim, "distance": fi.DISTANCE,
+            "embedding_input_rule": fi.EMBEDDING_INPUT_RULE,
+            "query_template_name": spec["query_template_name"],
+            "query_template": rr.QUERY_TEMPLATES[spec["query_template_name"]]}
+
+
+def resolve_search_settings(*, profile: str | None = None, collection: str | None = None,
+                            embedder: em.Embedder | None = None, query_template: Any = _UNSET) -> dict[str, Any]:
+    """
+    검색 설정을 정한다 (DB 접속 없음). 두 방식 중 하나다.
+
+    1) 프로필 방식 (collection을 주지 않음, 기본 DEFAULT_PROFILE)
+       - 컬렉션·모델·차원·지시문을 프로필이 정한다.
+       - query_template을 넘기면 프로필 지시문과 같아야 한다 (다르면 SearchProfileError).
+       - embedder를 넘기면 그 함수에 embedding_model·embedding_dim 표시가 있고 프로필과 같아야 한다
+         (embedding.make_ollama_embedder가 붙여 준다). 표시가 없거나 다르면 SearchProfileError → 검증 우회 불가.
+       - 실제 질의 벡터 차원과 컬렉션 벡터 크기도 검색 전에 다시 확인한다 (_search_evidence).
+    2) 사용자 지정 방식 (collection을 직접 줌, 기존 호출과 같음)
+       - 컬렉션·embedder·지시문은 호출한 쪽이 정한다 (embedder 없으면 0.6B, 지시문 기본 없음).
+       - 차원은 검색 전에 컬렉션 벡터 크기와 비교한다. profile과 함께 줄 수 없다.
+    """
+    if collection is not None:
+        if profile is not None:
+            raise SearchProfileError("profile과 collection을 함께 줄 수 없습니다 (하나만 선택).")
+        store.assert_experiment_collection(collection)
+        return {"mode": "custom", "name": None, "index_config": None, "collection": collection,
+                "embedding_model": em.DEFAULT_EMBEDDING_MODEL if embedder is None else getattr(embedder, "embedding_model", None),
+                "embedding_dim": em.DEFAULT_EMBEDDING_DIM if embedder is None else getattr(embedder, "embedding_dim", None),
+                "query_template_name": None, "query_template": None if query_template is _UNSET else query_template,
+                "embedder": embedder}
+    resolved = resolve_search_profile(profile or DEFAULT_PROFILE)
+    if query_template is not _UNSET and query_template != resolved["query_template"]:
+        raise SearchProfileError(f"프로필 {resolved['name']}의 질의 지시문({resolved['query_template_name']})과 다른 "
+                                 "query_template은 쓸 수 없습니다.")
+    if embedder is not None:
+        declared = (getattr(embedder, "embedding_model", None), getattr(embedder, "embedding_dim", None))
+        if declared != (resolved["embedding_model"], resolved["embedding_dim"]):
+            raise SearchProfileError(f"embedder 표시 {declared} ≠ 프로필 {resolved['name']} "
+                                     f"({resolved['embedding_model']}, {resolved['embedding_dim']})")
+    return {"mode": "profile", **resolved, "embedder": embedder}
+
+
+def _collection_vector_size(client, collection: str) -> int:
+    """컬렉션 벡터 크기(읽기 전용). Qdrant 장애는 HybridSearchBackendError로 바꾼다."""
+    try:
+        return int(client.get_collection(collection).config.params.vectors.size)
+    except Exception as error:
+        converted = _qdrant_error(error)
+        if converted is None:
+            raise
+        raise converted from error
+
+
 def search_policy_evidence(query: str, filters: dict[str, Any] | None = None, k: int = DEFAULT_K, *,
                            client=None, embedder: em.Embedder | None = None,
-                           collection: str = DEFAULT_COLLECTION, query_template: str | None = None) -> dict[str, Any]:
+                           collection: str | None = None, query_template: Any = _UNSET,
+                           profile: str | None = None) -> dict[str, Any]:
     """
     질문을 임베딩해 Qdrant에서 Top-K 근거 청크를 찾는다. (읽기 전용)
     입력
@@ -362,31 +487,51 @@ def search_policy_evidence(query: str, filters: dict[str, Any] | None = None, k:
       filters        : None 또는 {허용 필드: 값 | [값, ...]} (validate_filters 참고)
       k              : 돌려받을 청크 수 (1~MAX_K)
       client         : QdrantClient (None이면 .env로 store.get_client())
-      embedder       : 문자열 목록 → 벡터 목록 함수 (None이면 Ollama qwen3-embedding:0.6b, batch 1)
-      query_template : None(질문 그대로, 기본) 또는 "{question}"이 든 지시문 템플릿. 질의 지시문 채택은 미확정(PRD §13)
+      profile        : 검색 프로필 이름 (기본 DEFAULT_PROFILE = 0.6B 전체 색인). resolve_search_settings 참고
+      collection     : 직접 지정할 컬렉션 (주면 사용자 지정 방식, 기존 호출과 같음)
+      embedder       : 문자열 목록 → 벡터 목록 함수 (None이면 프로필 모델 또는 Ollama qwen3-embedding:0.6b, batch 1)
+      query_template : 사용자 지정 방식에서만 자유롭게 쓴다 (프로필 방식은 프로필 지시문)
     반환
       {"query", "query_template", "filters", "k", "collection", "query_embedding_model",
        "latency_seconds": {"query_embedding", "qdrant_search"}, "warnings": [...],
        "hits": [{"rank", "score", "policy_id", "document_id", "chunk_id", "text", "char_start", "char_end",
-                 "page_start", "page_end", "section_title", "source_url", "source_type", ...}, ...]}  (rank 오름차순)
-    오류: HybridSearchInputError(입력), HybridSearchBackendError(backend="ollama"|"qdrant")
+                 "page_start", "page_end", "section_title", "source_url", "source_type", ...}, ...],  (rank 오름차순)
+       "search_profile": {mode, name, collection, embedding_model, embedding_dim, collection_vector_size,
+                          query_template_name, query_template, ...}}   ← 2026-11-06 추가 필드
+    오류: HybridSearchInputError(입력·SearchProfileError), HybridSearchBackendError(backend="ollama"|"qdrant")
     """
     query, filters, k = validate_query(query), validate_filters(filters), validate_k(k)
-    store.assert_experiment_collection(collection)
+    settings = resolve_search_settings(profile=profile, collection=collection, embedder=embedder,
+                                       query_template=query_template)
     if client is not None:      # 외부에서 받은 client → 닫지 않는다
-        return _search_evidence(client, query, filters, k, embedder, collection, query_template)
+        return _search_evidence(client, query, filters, k, settings)
     owned = make_qdrant_client()   # 이 호출에서 만든 client → 정상·예외 모두 닫는다
     try:
-        return _search_evidence(owned, query, filters, k, embedder, collection, query_template)
+        return _search_evidence(owned, query, filters, k, settings)
     finally:
         _close_quietly(owned)
 
 
-def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int, embedder: em.Embedder | None,
-                     collection: str, query_template: str | None) -> dict[str, Any]:
-    """검증을 마친 입력으로 실제 임베딩·검색을 한다. client는 호출한 쪽이 관리한다."""
-    query_model = em.DEFAULT_EMBEDDING_MODEL if embedder is None else None
-    embedder = embedder or em.make_ollama_embedder(batch_size=1, timeout=QUERY_EMBED_TIMEOUT_SECONDS)
+def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
+                     settings: dict[str, Any]) -> dict[str, Any]:
+    """검증을 마친 입력·설정으로 실제 임베딩·검색을 한다. client는 호출한 쪽이 관리한다."""
+    collection, query_template = settings["collection"], settings["query_template"]
+    # (1) 컬렉션 벡터 크기와 설정 차원을 검색 전에 비교한다 (프로필, 또는 차원을 표시한 embedder)
+    #     사용자 지정 방식에서 embedder를 주지 않으면 기본값으로 단정하지 않고 (2)의 실제 벡터 차원 검사로 막는다
+    vector_size = _collection_vector_size(client, collection)
+    declared_dim = settings["embedding_dim"] if (settings["mode"] == "profile" or settings["embedder"] is not None) else None
+    if declared_dim is not None and declared_dim != vector_size:
+        raise SearchProfileError(f"{collection} 벡터 크기 {vector_size} ≠ 임베딩 차원 {settings['embedding_dim']} "
+                                 f"({settings['embedding_model']})")
+    embedder = settings["embedder"]
+    if embedder is None:
+        if settings["mode"] == "profile":
+            embedder = em.make_ollama_embedder(model=settings["embedding_model"], expected_dim=settings["embedding_dim"],
+                                               batch_size=1, timeout=QUERY_EMBED_TIMEOUT_SECONDS)
+        else:
+            embedder = em.make_ollama_embedder(batch_size=1, timeout=QUERY_EMBED_TIMEOUT_SECONDS)
+    # 질의 모델 이름: 프로필 모델, 기본 0.6B, 또는 embedder 표시. 표시 없는 가짜 embedder는 None (단정하지 않음)
+    query_model = settings["embedding_model"]
 
     started = time.perf_counter()
     try:
@@ -398,6 +543,9 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
         kind = "timeout" if isinstance(error, requests.Timeout) else "unavailable"
         raise HybridSearchBackendError("ollama", f"질의 임베딩 실패: {_safe_message(error)}", kind) from error
     embed_seconds = time.perf_counter() - started
+    # (2) 실제 질의 벡터 차원도 검색 전에 확인한다 (표시를 속인 embedder도 여기서 막힌다)
+    if len(query_vector) != vector_size:
+        raise SearchProfileError(f"질의 벡터 차원 {len(query_vector)} ≠ {collection} 벡터 크기 {vector_size}")
 
     started = time.perf_counter()
     try:
@@ -414,10 +562,14 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
     index_models = sorted({record["embedding_model"] for record in records if record["embedding_model"]})
     if query_model and index_models and index_models != [query_model]:
         warnings.append(f"질의 임베딩 모델({query_model})과 색인 모델({index_models})이 다름 → 점수 비교 불가")
+    profile_meta = {key: settings.get(key) for key in ("mode", "name", "index_config", "collection", "embedding_model",
+                                                        "embedding_dim", "query_template_name", "query_template",
+                                                        "distance", "embedding_input_rule")}
+    profile_meta["collection_vector_size"] = vector_size
     return {"query": query, "query_template": query_template, "filters": filters, "k": k, "collection": collection,
             "query_embedding_model": query_model,
             "latency_seconds": {"query_embedding": round(embed_seconds, 4), "qdrant_search": round(search_seconds, 4)},
-            "warnings": warnings, "hits": records}
+            "warnings": warnings, "hits": records, "search_profile": profile_meta}
 
 
 # ---------------------------------------------------------------------------
@@ -605,17 +757,81 @@ def _walk_relationships(tree: dict[str, Any]) -> list[dict[str, Any]]:
     return found
 
 
-def assess_policy_data_quality(context: dict[str, Any] | None) -> dict[str, Any]:
+def _annotate(warning: dict[str, Any]) -> dict[str, Any]:
+    """경고에 메타 필드를 덧붙인다 (기존 키·값은 그대로). 공식 원문 검증은 하지 않았다."""
+    meta = QUALITY_CODE_META.get(warning["code"], {})
+    warning.setdefault("severity", meta.get("severity", "medium"))
+    warning.setdefault("evidence_level", meta.get("evidence_level", "graph_structure"))
+    warning.setdefault("verification", meta.get("verification", "suspected"))
+    warning.setdefault("affects", list(meta.get("affects", [])))
+    warning.setdefault("blocks_auto_eligibility", meta.get("blocks_auto_eligibility", True))
+    warning["official_source_checked"] = False
+    return warning
+
+
+def _graph_quality_patterns(context: dict[str, Any], trees: list[dict[str, Any]], warnings: list[dict[str, Any]]) -> None:
+    """그래프만으로 계산하는 추가 의심 패턴 (2026-11-06 Neo4j 의미 점검 S9·S12·검토 상태)."""
+    groups = [group for tree in trees for group in _tree_groups(tree)]
+    for group in groups:
+        if group.get("logic") == "NOT" and not group.get("conditions") and not group.get("groups"):
+            warnings.append({"code": QUALITY_EMPTY_NOT_GROUP, "level": "caution", "group_id": group.get("group_id"),
+                             "message": ("제외(NOT) 그룹에 평가할 조건이 없음. 제외 대상은 설명 문장·원문에만 있으므로 "
+                                         "'제외 조건 없음'으로 해석하지 말 것")})
+    policy = context.get("policy") or {}
+    organization = str(policy.get("organization") or policy.get("agency") or "")
+    region_names = [str(item.get("name")) for item in context.get("regions", [])]
+    municipal = [token for token in re.findall(r"([가-힣]+(?:시|군|구))(?=\s|$|/|\))", organization)
+                 if token not in region_names and not token.endswith(("특별시", "광역시", "특별자치시"))]
+    if municipal and region_names:
+        warnings.append({"code": QUALITY_REGION_GRANULARITY, "level": "suspected", "organization": organization[:60],
+                         "graph_regions": region_names, "municipality_in_organization": municipal[0],
+                         "message": (f"운영기관은 {municipal[0]}인데 그래프 지역은 {region_names}(시·도 단위)뿐임. "
+                                     "시·군·구 거주 요건이 사라졌을 수 있으니 지역 판정은 원문으로 (확정 아님)")})
+    if any(w["code"] in (QUALITY_HOMELESS_PROMOTED, QUALITY_INCOME_ALL_BANDS) for w in warnings):
+        verified = sorted({item.get("condition_id") for group in groups for item in group.get("conditions", [])
+                           if (item.get("relationship") or {}).get("review_status") == "verified"})
+        if verified:
+            warnings.append({"code": QUALITY_REVIEW_STATUS_OVERCLAIM, "level": "suspected", "condition_ids": verified,
+                             "message": ("생성 규칙 의심 패턴이 있는 정책인데 조건 관계가 review_status=verified로 표기됨. "
+                                         "verified를 공식 검증 완료로 해석하지 말 것 (확정 아님)")})
+
+
+def _apply_static_flags(flags: list[dict[str, Any]], warnings: list[dict[str, Any]]) -> None:
+    """정적 의심 목록: 새 경고로 추가하거나, 기존 그래프 경고에 인계 대조 결과(handoff_check)를 덧붙인다."""
+    by_code = {warning["code"]: warning for warning in warnings}
+    for flag in flags:
+        if "enrich" in flag:
+            target = by_code.get(flag["enrich"])
+            if target is not None:
+                target.setdefault("handoff_checks", []).append(
+                    {"check": flag["check"], "handoff_semantic_match": flag["handoff_semantic_match"],
+                     "evidence_level": flag["evidence_level"], "evidence": flag["evidence"]})
+            continue
+        warnings.append({"code": flag["code"], "level": "suspected" if flag["evidence_level"] != "source_text_explicit"
+                         else "caution", "severity": flag["severity"], "evidence_level": flag["evidence_level"],
+                         "verification": flag["handoff_semantic_match"], "affects": flag["affects"],
+                         "evidence": flag["evidence"], "source": "static_flags",
+                         "message": QUALITY_STATIC_MESSAGES.get(flag["code"], "인계 데이터 의심 (확정 아님)")})
+
+
+def assess_policy_data_quality(context: dict[str, Any] | None,
+                               static_flags: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     """
     정책 그래프 문맥에서 데이터 품질 경고를 만든다. (DB 접속 없음, 입력을 바꾸지 않음)
-    반환: {"warnings": [{"code", "level", "message", ...}], "review_status_counts": {...}, "graph_text_fields": [...]}
-    level: "caution"(해석 주의) / "suspected"(생성 규칙 오류 의심 패턴 — 확정 아님)
+    반환: {"warnings": [{"code", "level", "message", "severity", "evidence_level", "verification", "affects",
+                         "blocks_auto_eligibility", "official_source_checked", ...}],
+           "review_status_counts", "graph_text_fields",
+           "hold_auto_eligibility", "hold_reasons", "affected_attributes", "official_source_checked"}
+    level: "caution"(해석 주의) / "suspected"(생성 규칙 오류 의심 패턴 — 확정 아님)   ← 기존 값 그대로
+    static_flags: data_quality_flags 목록 중 이 정책 항목 (없으면 그래프 계산만)
     이 함수는 자격을 판정하지 않고, 조건을 VERIFIED로 바꾸거나 틀렸다고 확정하지 않는다.
+    hold_auto_eligibility=True는 "자동 판정을 보류하고 원문 근거·추가 질문으로 확인하라"는 뜻이지 부적격이 아니다.
     """
     if context is None:
-        return {"warnings": [{"code": QUALITY_GRAPH_MISSING, "level": "caution",
-                              "message": "Neo4j에 이 정책이 없어 그래프 문맥을 붙이지 못함 (정책을 만들어 내지 않음)"}],
-                "review_status_counts": {}, "graph_text_fields": []}
+        warnings = [_annotate({"code": QUALITY_GRAPH_MISSING, "level": "caution",
+                               "message": "Neo4j에 이 정책이 없어 그래프 문맥을 붙이지 못함 (정책을 만들어 내지 않음)"})]
+        return {"warnings": warnings, "review_status_counts": {}, "graph_text_fields": [],
+                **_hold_summary(warnings)}
     eligibility = context.get("eligibility") or {}
     trees = eligibility.get("condition_tree") or []
     warnings: list[dict[str, Any]] = []
@@ -650,9 +866,21 @@ def assess_policy_data_quality(context: dict[str, Any] | None) -> dict[str, Any]
                 warnings.append({"code": QUALITY_INCOME_ALL_BANDS, "level": "suspected", "group_id": group.get("group_id"),
                                  "message": ("소득 5구간 전부가 OR로 묶여 있어 의미상 '소득 제한 없음'일 수 있음. "
                                              "소득 조건으로 해석하지 말고 공고 원문 확인 (확정 아님)")})
+    _graph_quality_patterns(context, trees, warnings)
+    _apply_static_flags(static_flags or [], warnings)
+    warnings = [_annotate(warning) for warning in warnings]
     policy = context.get("policy") or {}
     return {"warnings": warnings, "review_status_counts": dict(review_counts),
-            "graph_text_fields": [name for name in GRAPH_EXTRACTED_TEXT_FIELDS if policy.get(name)]}
+            "graph_text_fields": [name for name in GRAPH_EXTRACTED_TEXT_FIELDS if policy.get(name)],
+            **_hold_summary(warnings)}
+
+
+def _hold_summary(warnings: list[dict[str, Any]]) -> dict[str, Any]:
+    """자동 판정 보류 여부와 이유. 보류는 '부적격'이 아니라 '원문·추가 질문으로 확인 필요'."""
+    reasons = sorted({w["code"] for w in warnings if w.get("blocks_auto_eligibility")})
+    return {"hold_auto_eligibility": bool(reasons), "hold_reasons": reasons,
+            "affected_attributes": sorted({a for w in warnings if w.get("blocks_auto_eligibility") for a in w.get("affects", [])}),
+            "official_source_checked": False}
 
 
 # ---------------------------------------------------------------------------
@@ -667,6 +895,8 @@ def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[s
     - evidence_document_check: 근거 청크의 document_id가 그래프에서 그 정책의 SUPPORTED_BY 문서인지 (PASS/MISMATCH/NOT_TESTED)
     """
     contexts = graph_context.get("policies", {})
+    static = dqf.load_flags()                     # manifest가 다르면 적용하지 않는다 (status=stale)
+    static_status = dqf.status_summary(static)
     grouped: dict[str, dict[str, Any]] = {}
     unlinked: list[dict[str, Any]] = []
     for hit in sorted(search_result.get("hits", []), key=lambda item: item["rank"]):
@@ -693,7 +923,8 @@ def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[s
             hit["document_id"]: (NOT_TESTED if context is None else PASS if hit["document_id"] in linked_documents
                                  else MISMATCH)
             for hit in entry["evidence"]}
-        entry["data_quality"] = assess_policy_data_quality(context)     # 추가 키 (기존 키·순서는 그대로)
+        entry["data_quality"] = assess_policy_data_quality(        # 추가 키 (기존 키·순서는 그대로)
+            context, static["flags_by_policy"].get(entry["policy_id"]) if context is not None else None)
         policies.append(entry)
     quality_summary = Counter(warning["code"] for entry in policies for warning in entry["data_quality"]["warnings"])
     return {"query": search_result.get("query"), "filters": search_result.get("filters"),
@@ -701,10 +932,17 @@ def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[s
             "query_template": search_result.get("query_template"),
             "policies": policies, "unlinked_hits": unlinked,
             "missing_policy_ids": graph_context.get("missing_policy_ids", []),
-            "warnings": list(search_result.get("warnings", [])),
+            "warnings": list(search_result.get("warnings", [])) + (
+                [] if static_status["status"] == "applied" else
+                [f"정적 데이터 품질 목록 미적용({static_status['status']}): 원문·인계 속성 대조 경고가 빠져 있음"]),
             "latency_seconds": dict(search_result.get("latency_seconds", {})),
             "data_quality_summary": dict(quality_summary),
-            "notes": {"score": SCORE_NOTE, "eligibility": ELIGIBILITY_NOTE, **DATA_QUALITY_NOTES}}
+            "notes": {"score": SCORE_NOTE, "eligibility": ELIGIBILITY_NOTE, **DATA_QUALITY_NOTES},
+            # 2026-11-06 추가 필드 (기존 키는 그대로)
+            "search_profile": search_result.get("search_profile"),
+            "hold_auto_eligibility_policy_ids": [p["policy_id"] for p in policies
+                                                 if p["data_quality"].get("hold_auto_eligibility")],
+            "static_quality_flags": static_status}
 
 
 # ---------------------------------------------------------------------------
@@ -734,22 +972,26 @@ class HybridSearchSession:
             result2 = session.search_policy_context("다른 질문", filters={"document_id": "DOC_LH_001"})
         # with가 끝나면(예외가 나도) 세션이 "직접 만든" 연결만 닫는다
 
-    client·runner를 넘기면 그 객체는 세션이 닫지 않는다 (소유권은 넘긴 쪽). embedder를 넘기지 않으면 Ollama 기본 모델.
+    client·runner를 넘기면 그 객체는 세션이 닫지 않는다 (소유권은 넘긴 쪽).
+    검색 설정: profile(기본 DEFAULT_PROFILE) 또는 collection 직접 지정 — resolve_search_settings 참고.
+    설정은 세션을 만들 때 한 번 검증한다 (잘못된 조합은 연결을 열기 전에 SearchProfileError).
     """
 
     def __init__(self, *, client=None, runner=None, embedder: em.Embedder | None = None,
-                 collection: str = DEFAULT_COLLECTION, query_template: str | None = None,
+                 collection: str | None = None, query_template: Any = _UNSET, profile: str | None = None,
                  qdrant_timeout: int = QDRANT_TIMEOUT_SECONDS,
                  neo4j_connection_timeout: float = NEO4J_CONNECTION_TIMEOUT_SECONDS,
                  neo4j_acquisition_timeout: float = NEO4J_ACQUISITION_TIMEOUT_SECONDS,
                  neo4j_query_timeout: float | None = NEO4J_QUERY_TIMEOUT_SECONDS):
-        store.assert_experiment_collection(collection)
+        self.settings = resolve_search_settings(profile=profile, collection=collection, embedder=embedder,
+                                                query_template=query_template)
         self._client, self._owns_client = client, client is None
         self._runner, self._owns_runner = runner, runner is None
         self._driver = None
         self.embedder = embedder
-        self.collection = collection
-        self.query_template = query_template
+        self.collection = self.settings["collection"]
+        self.query_template = self.settings["query_template"]
+        self.profile = self.settings["name"]
         self._qdrant_timeout = qdrant_timeout
         self._neo4j_settings = (neo4j_connection_timeout, neo4j_acquisition_timeout, neo4j_query_timeout)
         self.closed = False
@@ -807,7 +1049,7 @@ class HybridSearchSession:
     # --- 검색 (모듈 함수와 같은 입력·출력) ---
     def search_policy_evidence(self, query: str, filters: dict[str, Any] | None = None, k: int = DEFAULT_K) -> dict[str, Any]:
         query, filters, k = validate_query(query), validate_filters(filters), validate_k(k)
-        return _search_evidence(self.client, query, filters, k, self.embedder, self.collection, self.query_template)
+        return _search_evidence(self.client, query, filters, k, self.settings)
 
     def get_policy_graph_context(self, policy_ids: list[str]) -> dict[str, Any]:
         ids = validate_policy_ids(policy_ids)
@@ -841,9 +1083,12 @@ def _collect_policy_ids(hits: list[dict[str, Any]]) -> tuple[list[str], list[str
 
 def search_policy_context(query: str, filters: dict[str, Any] | None = None, k: int = DEFAULT_K, *,
                           client=None, runner=None, embedder: em.Embedder | None = None,
-                          collection: str = DEFAULT_COLLECTION, query_template: str | None = None) -> dict[str, Any]:
+                          collection: str | None = None, query_template: Any = _UNSET,
+                          profile: str | None = None) -> dict[str, Any]:
     """
     통합 진입 함수: 질의 임베딩 → Qdrant Top-K → policy_id 수집 → Neo4j 정책 문맥 → 결합.
+    - 기존 호출 search_policy_context(question, filters=None, k=5)는 그대로 동작한다.
+      collection을 주지 않으면 기본 프로필(DEFAULT_PROFILE = 0.6B 전체 색인)로 검색한다.
     - client·runner를 넘기면 그대로 쓰고 닫지 않는다.
     - 넘기지 않으면 이 호출 안에서 만들고, 끝나면(예외 포함) 닫는다. 질문을 여러 번 보낼 때는 HybridSearchSession을 쓰면
       연결을 재사용해 빠르다.
@@ -851,7 +1096,7 @@ def search_policy_context(query: str, filters: dict[str, Any] | None = None, k: 
     """
     validate_query(query), validate_filters(filters), validate_k(k)   # 연결을 만들기 전에 입력부터 확인
     with HybridSearchSession(client=client, runner=runner, embedder=embedder, collection=collection,
-                             query_template=query_template) as session:
+                             query_template=query_template, profile=profile) as session:
         return session.search_policy_context(query, filters, k)
 
 

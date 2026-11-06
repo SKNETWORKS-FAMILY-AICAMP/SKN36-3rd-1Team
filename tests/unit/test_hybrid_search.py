@@ -264,6 +264,10 @@ class TestSearchPolicyEvidence(unittest.TestCase):
         self.assertEqual(context.exception.backend, "ollama")
 
         class BrokenClient:
+            # 2026-11-06: 검색 전에 컬렉션 벡터 크기를 읽으므로(get_collection) 같은 장애를 거기서도 낸다
+            def get_collection(self, *args, **kwargs):
+                raise ConnectionError("가상 Qdrant 장애 (sample_only)")
+
             def query_points(self, **kwargs):
                 raise ConnectionError("가상 Qdrant 장애 (sample_only)")
         with self.assertRaises(hs.HybridSearchBackendError) as context:
