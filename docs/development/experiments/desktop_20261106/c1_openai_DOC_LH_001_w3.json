@@ -1,0 +1,121 @@
+{
+  "run_at": "2026-11-06T19:54:22+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 3,
+    "window_count": 7,
+    "window_range": [
+      15289,
+      20656
+    ],
+    "pages": [
+      12,
+      13,
+      14
+    ]
+  },
+  "proposals": [
+    {
+      "title": "임대조건",
+      "start_text": "임대조건",
+      "page": 12
+    },
+    {
+      "title": "재계약\n자격 등",
+      "start_text": "재계약",
+      "page": 12
+    },
+    {
+      "title": "기타사항",
+      "start_text": "기타사항",
+      "page": 12
+    },
+    {
+      "title": "6 문의처 및 서류제출 장소",
+      "start_text": "6 문의처 및 서류제출 장소",
+      "page": 13
+    },
+    {
+      "title": "■ 신청접수 및 입주자 선정 문의",
+      "start_text": "■ 신청접수 및 입주자 선정 문의",
+      "page": 13
+    },
+    {
+      "title": "※ 주택 소유여부 확인 방법 및 판정기준(주택공급에 관한 규칙 제53조)",
+      "start_text": " ※ 주택 소유여부 확인 방법 및 판정기준(주택공급에 관한 규칙 제53조)",
+      "page": 14
+    },
+    {
+      "title": "￭ 확인 방법",
+      "start_text": "￭ 확인 방법",
+      "page": 14
+    },
+    {
+      "title": "￭ 주택의 범위",
+      "start_text": "￭ 주택의 범위",
+      "page": 14
+    },
+    {
+      "title": "￭ 주택 및 분양권등 소유 여부 판단 기준일",
+      "start_text": "￭ 주택 및 분양권등 소유 여부 판단 기준일",
+      "page": 14
+    },
+    {
+      "title": "￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)",
+      "start_text": "￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)",
+      "page": 14
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"임대조건\",\"start_text\":\"임대조건\",\"page\":12},{\"title\":\"재계약\\n자격 등\",\"start_text\":\"재계약\",\"page\":12},{\"title\":\"기타사항\",\"start_text\":\"기타사항\",\"page\":12},{\"title\":\"6 문의처 및 서류제출 장소\",\"start_text\":\"6 문의처 및 서류제출 장소\",\"page\":13},{\"title\":\"■ 신청접수 및 입주자 선정 문의\",\"start_text\":\"■ 신청접수 및 입주자 선정 문의\",\"page\":13},{\"title\":\"※ 주택 소유여부 확인 방법 및 판정기준(주택공급에 관한 규칙 제53조)\",\"start_text\":\" ※ 주택 소유여부 확인 방법 및 판정기준(주택공급에 관한 규칙 제53조)\",\"page\":14},{\"title\":\"￭ 확인 방법\",\"start_text\":\"￭ 확인 방법\",\"page\":14},{\"title\":\"￭ 주택의 범위\",\"start_text\":\"￭ 주택의 범위\",\"page\":14},{\"title\":\"￭ 주택 및 분양권등 소유 여부 판단 기준일\",\"start_text\":\"￭ 주택 및 분양권등 소유 여부 판단 기준일\",\"page\":14},{\"title\":\"￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)\",\"start_text\":\"￭ 주택 및 분양권등을 소유한 것으로 보지 않는 경우 (무주택으로 인정하는 경우)\",\"page\":14}]}",
+  "raw_response_sha256": "f012a1c96c5db9a80b610a44df1de0abd6c12d90bc5b1c760c44c116a6ba083a",
+  "llm_calls": [
+    {
+      "window": 3,
+      "start": 15289,
+      "end": 20656,
+      "pages": [
+        12,
+        13,
+        14
+      ],
+      "prompt_chars": 5852,
+      "prompt_sha256": "f2abccf95bf69eab279e6f29cbe20c5335cdcab60ae7fe86bfad6d4d87db8d7d",
+      "response_sha256": "f012a1c96c5db9a80b610a44df1de0abd6c12d90bc5b1c760c44c116a6ba083a",
+      "seconds": 2.86,
+      "proposals": 10
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 6052,
+      "worst_case_usd": 0.060104,
+      "seconds": 2.859,
+      "status": 200,
+      "response_id": "resp_02e92ff28b7727aa016aedb18a030487d2a1ea957385562bb1",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 3721,
+      "cached_input_tokens": 0,
+      "output_tokens": 343,
+      "reasoning_tokens": 0,
+      "cost_usd": 0.011558
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.011558,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 9,
+    "issues": [
+      {
+        "index": 1,
+        "issue": "start_text_too_short",
+        "title": "재계약\n자격 등"
+      }
+    ]
+  }
+}

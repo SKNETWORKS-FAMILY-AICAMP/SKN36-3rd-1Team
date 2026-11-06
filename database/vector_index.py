@@ -19,7 +19,7 @@ from database.qdrant import store
 
 # 최소 구축 대표 문서 후보 (2026-11-05 계획 보고 기준, 확정 아님)
 DEFAULT_SAMPLE_DOCUMENT_IDS = ("DOC_LH_001", "DOC_NHUF_003", "DOC_BOK_001", "DOC_YC_003", "DOC_GOV_006")
-STRATEGIES = ("A", "B1", "B2")
+STRATEGIES = ("A", "B1", "B2", "B3")   # B3: 2026-11-06 추가 (chunk_documents(strategy="B3") 그대로 호출)
 
 
 # ---------------------------------------------------------------------------

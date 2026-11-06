@@ -1,0 +1,65 @@
+{
+  "mode": "dry-run",
+  "plan": {
+    "config": "C_B3C1",
+    "collection": "exp_b3c1_qwen3emb06b_full_v1",
+    "strategy": "B3+C1",
+    "model": "qwen3-embedding:0.6b",
+    "dim": 1024,
+    "distance": "Cosine",
+    "embedding_input_rule": "policy_section_body_v2",
+    "query_template": null,
+    "manifest_sha256": "7783d578ce1834a121e0e23f24df2d489644d93842eca73fb3cf25895164ffc9",
+    "chunks": 1141,
+    "expected_chunks": 1141,
+    "chunk_count_matches": true,
+    "versions": {
+      "B3": 1010,
+      "C1": 131
+    },
+    "unique_point_ids": true,
+    "point_id_is_uuid5_chunk_id": true,
+    "restore_mismatch": 0,
+    "missing_documents": [],
+    "missing_policies": [],
+    "documents": 246,
+    "policies": 237,
+    "embedding_input_chars": 312756,
+    "estimated_tokens": 231206,
+    "max_input_chars": 821,
+    "chunk_fingerprint": "f14739e3843a89dc867fe0b4dba9f5afa2604a7488ec10fffa60b03b41002945",
+    "c1": {
+      "DOC_LH_001": {
+        "proposals": 58,
+        "accepted": 57,
+        "chunks": 85,
+        "issues": [
+          "start_text_too_short"
+        ]
+      },
+      "DOC_NHUF_003": {
+        "proposals": 23,
+        "accepted": 23,
+        "chunks": 23,
+        "issues": []
+      },
+      "DOC_NHUF_005": {
+        "proposals": 21,
+        "accepted": 21,
+        "chunks": 23,
+        "issues": []
+      }
+    },
+    "protected_collections_untouched": [
+      "exp_b2_qwen3emb06b_v1"
+    ],
+    "collection_state": {
+      "state": "absent",
+      "existing_points": 0,
+      "missing": 1141,
+      "reasons": []
+    },
+    "ready": true
+  },
+  "created_at": "2026-11-06T20:34:04+09:00"
+}

@@ -50,7 +50,8 @@ REQUIRED_PAYLOAD_FIELDS = (
 )
 # 청크에 있으면 그대로 옮기는 선택 필드
 OPTIONAL_CHUNK_FIELDS = ("section_group", "section_groups", "boundary_method", "chunk_seq", "merged_from",
-                         "overlap_prev_chars", "source_type")
+                         "overlap_prev_chars", "source_type",
+                         "section_titles")   # C1: 합쳐진 섹션 제목 목록 (B1·B2·B3 청크에는 없으므로 기존 payload는 그대로)
 # 필터 검색용 payload 인덱스 (실험 컬렉션에만 만든다)
 PAYLOAD_INDEX_FIELDS = ("policy_id", "document_id", "chunk_id", "chunking_version",
                         "category", "region", "life_stages", "verification_status")

@@ -1,0 +1,85 @@
+{
+  "run_at": "2026-11-06T19:54:25+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 4,
+    "window_count": 7,
+    "window_range": [
+      20656,
+      25276
+    ],
+    "pages": [
+      15,
+      16,
+      17
+    ]
+  },
+  "proposals": [
+    {
+      "title": "※ 소득ž자산 산정방법",
+      "start_text": "※ 소득ž자산 산정방법",
+      "page": 15
+    },
+    {
+      "title": "• 요약",
+      "start_text": "• 요약",
+      "page": 15
+    },
+    {
+      "title": "• 상세",
+      "start_text": "• 상세",
+      "page": 15
+    },
+    {
+      "title": "※ 사회보장정보시스템을 통한 소득항목 설명 및 소득자료 출처",
+      "start_text": "※ 사회보장정보시스템을 통한 소득항목 설명 및 소득자료 출처",
+      "page": 17
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"※ 소득ž자산 산정방법\",\"start_text\":\"※ 소득ž자산 산정방법\",\"page\":15},{\"title\":\"• 요약\",\"start_text\":\"• 요약\",\"page\":15},{\"title\":\"• 상세\",\"start_text\":\"• 상세\",\"page\":15},{\"title\":\"※ 사회보장정보시스템을 통한 소득항목 설명 및 소득자료 출처\",\"start_text\":\"※ 사회보장정보시스템을 통한 소득항목 설명 및 소득자료 출처\",\"page\":17}]}",
+  "raw_response_sha256": "bf4050b5ab09fa93801b6b9c6cbdaba3c8127c6bbf342656e076998548285bb6",
+  "llm_calls": [
+    {
+      "window": 4,
+      "start": 20656,
+      "end": 25276,
+      "pages": [
+        15,
+        16,
+        17
+      ],
+      "prompt_chars": 5105,
+      "prompt_sha256": "79c7dd6e228c424bb6916633eda9bcaad5f632baf4c264d00fa51ca91a9df73d",
+      "response_sha256": "bf4050b5ab09fa93801b6b9c6cbdaba3c8127c6bbf342656e076998548285bb6",
+      "seconds": 3.016,
+      "proposals": 4
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 5305,
+      "worst_case_usd": 0.05861,
+      "seconds": 3.014,
+      "status": 200,
+      "response_id": "resp_0d84aebe406a9f60016aedb18cf50487d2af11b6096e115904",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 3500,
+      "cached_input_tokens": 0,
+      "output_tokens": 237,
+      "reasoning_tokens": 110,
+      "cost_usd": 0.009844
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.009844,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 4,
+    "issues": []
+  }
+}

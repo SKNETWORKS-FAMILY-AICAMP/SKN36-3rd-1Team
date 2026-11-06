@@ -1,0 +1,67 @@
+{
+  "run_at": "2026-11-06T19:53:53+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_NHUF_003",
+    "window": 1,
+    "window_count": 2,
+    "window_range": [
+      5891,
+      6515
+    ],
+    "pages": []
+  },
+  "proposals": [
+    {
+      "title": "상담문의",
+      "start_text": "상담문의",
+      "page": null
+    },
+    {
+      "title": "업무취급은행",
+      "start_text": "업무취급은행",
+      "page": null
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"상담문의\",\"start_text\":\"상담문의\",\"page\":null},{\"title\":\"업무취급은행\",\"start_text\":\"업무취급은행\",\"page\":null}]}",
+  "raw_response_sha256": "afe8c9f86202d0ecc8f314fc83484d52c9b455764906c12a2b5dd933b12a9645",
+  "llm_calls": [
+    {
+      "window": 1,
+      "start": 5891,
+      "end": 6515,
+      "pages": [],
+      "prompt_chars": 1109,
+      "prompt_sha256": "6b135bd60bcc9070560e45495f03ec954c628ffe4899441685a8346346800f08",
+      "response_sha256": "afe8c9f86202d0ecc8f314fc83484d52c9b455764906c12a2b5dd933b12a9645",
+      "seconds": 4.78,
+      "proposals": 2
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 1309,
+      "worst_case_usd": 0.050618,
+      "seconds": 4.779,
+      "status": 200,
+      "response_id": "resp_061766af6248fb59016aedb16cc00087d2ab364c62c62db3ef",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 717,
+      "cached_input_tokens": 0,
+      "output_tokens": 86,
+      "reasoning_tokens": 33,
+      "cost_usd": 0.002466
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.002466,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 2,
+    "issues": []
+  }
+}

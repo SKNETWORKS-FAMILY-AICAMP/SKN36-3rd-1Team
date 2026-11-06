@@ -248,6 +248,7 @@ def split_long_span(
     end: int,
     chunk_size: int = CHUNK_SIZE,
     chunk_overlap: int = CHUNK_OVERLAP,
+    avoid_orphan_label: bool = False,
 ) -> list[tuple[int, int, int]]:
     """
     text[start:end] 구간을 chunk_size 이하 조각으로 자른다.
@@ -257,6 +258,8 @@ def split_long_span(
          - 위치는 모두 "원문 전체" 기준이다. 그래서 text[조각 시작:조각 끝] 이 곧 청크 본문이다.
          - 구간이 chunk_size 이하이면 조각 1개(공백만 앞뒤로 정리)를 돌려준다.
     주의: overlap은 같은 구간 안에서 잘린 조각끼리만 생긴다. 서로 다른 필드·제목 사이에는 생기지 않는다.
+    avoid_orphan_label=True (B3 전용): 조각의 마지막 줄이 소제목·표 항목 이름처럼 짧은 줄이면(_is_orphan_label_line)
+        그 줄 앞에서 잘라 다음 조각으로 넘긴다. → 소제목과 본문이 같은 청크에 들어간다. (B1/B2는 False 그대로)
     """
     pieces: list[tuple[int, int, int]] = []
     pos = start
@@ -274,6 +277,8 @@ def split_long_span(
         else:
             window_end = pos + chunk_size
             cut = _find_cut(text, pos + chunk_size // MIN_CUT_RATIO, window_end)
+            if avoid_orphan_label:
+                cut = _move_cut_before_label(text, pos, cut, pos + chunk_size // MIN_CUT_RATIO)
             piece_end = _skip_space_backward(text, pos, cut)
 
         overlap_chars = max(0, previous_end - pos) if previous_end is not None else 0
@@ -369,7 +374,8 @@ def _heading_starts_html(text: str) -> list[tuple[int, str, int]]:
 
 
 def _segments_from_starts(
-    text: str, starts: list[tuple[int, str, int]], page_markers: list[tuple[int, int, int]]
+    text: str, starts: list[tuple[int, str, int]], page_markers: list[tuple[int, int, int]],
+    short_piece_policy: str = "forward",
 ) -> tuple[list[dict], list[dict]]:
     """
     제목 시작 위치(starts)와 페이지 표지로 구간을 만든다. (강의 셀 34의 '다음 시작 위치까지 자르기'와 같은 원리)
@@ -379,7 +385,15 @@ def _segments_from_starts(
     - 페이지가 바뀌어 제목 없이 이어지는 부분은 앞 제목을 이어받고 "(이어짐)"을 붙인다.
     - 구간 제목은 "장 제목 > 절 제목" 경로로 만든다. 예) "2 입주자격 및 입주자 선정기준 > ■ 입주자격"
     - 제목 앞에 남은 MIN_PIECE_CHARS 미만 조각(예: 쪽번호 "- 4 -")은 다음 구간 앞에 붙인다. 원문은 버리지 않는다.
+    short_piece_policy
+      "forward"(기본, B1·B2·B3): 짧은 조각을 무조건 다음 조각 앞에 붙이고 다음 조각의 제목만 남긴다 (기존 동작 그대로)
+      "forward_keep_titles"(C1 전용): 제목이 있는 짧은 조각은 _short_section_merge_allowed()가 허용할 때만 붙이고,
+          붙인 구간의 제목 목록(titles)에 두 제목을 모두 남긴다. 허용되지 않으면 짧은 조각을 따로 둔다.
+          제목이 없는 짧은 조각(쪽번호 등)은 기존처럼 붙이되 제목은 더하지 않는다.
     """
+    if short_piece_policy not in ("forward", "forward_keep_titles"):
+        raise ValueError(f"알 수 없는 short_piece_policy: {short_piece_policy}")
+    keep_titles = short_piece_policy == "forward_keep_titles"
     excluded = [{"start": s, "end": e, "reason": "page_marker"} for s, e, _page in page_markers]
 
     # 원문을 "페이지 표지를 뺀 연속 영역"들로 나눈다. 각 영역은 한 페이지(또는 페이지 없음)다.
@@ -421,18 +435,79 @@ def _segments_from_starts(
                 else:
                     current_title = f"{current_chapter} > {title}" if current_chapter else title
                 piece_title = current_title
-            region_pieces.append({"start": piece_start, "end": piece_end, "title": piece_title,
-                                  "group": None, "page": page})
+            piece = {"start": piece_start, "end": piece_end, "title": piece_title, "group": None, "page": page}
+            if keep_titles:
+                piece["titles"] = [piece_title]
+                piece["headed"] = title is not None
+            region_pieces.append(piece)
+
+        # C1 전용: 페이지 첫머리의 제목 없는 조각이 공식 서식 지정 줄([별지 제N호서식])로 시작하면 앞 페이지의
+        # 이어짐이 아니라 새 서식의 머리말이다. 같은 페이지 바로 다음 조각이 검증된 섹션일 때만 그 앞에 붙인다.
+        # (제목을 만들지 않고 다음 섹션 제목을 쓴다. 페이지가 바뀌었다는 이유만으로는 자르지 않는다)
+        if (keep_titles and len(region_pieces) > 1 and not region_pieces[0]["headed"]
+                and region_pieces[1]["headed"] and _starts_with_form_header(text, region_pieces[0])):
+            region_pieces[1]["start"] = region_pieces[0]["start"]
+            region_pieces[1]["form_header_merged"] = True
+            region_pieces[0]["end"] = region_pieces[0]["start"]
 
         # 짧은 조각은 같은 영역의 다음 조각 앞에 붙인다. (마지막 조각이면 그대로 둔다)
         for index, piece in enumerate(region_pieces):
             is_short = len(text[piece["start"]:piece["end"]].strip()) < MIN_PIECE_CHARS
-            if is_short and index + 1 < len(region_pieces):
-                region_pieces[index + 1]["start"] = piece["start"]
-                piece["end"] = piece["start"]  # 빈 조각으로 만들어 아래에서 버린다.
+            if not (is_short and index + 1 < len(region_pieces)):
+                continue
+            following = region_pieces[index + 1]
+            if keep_titles and piece["headed"]:
+                if not _short_section_merge_allowed(piece["titles"][-1], following["titles"][0]):
+                    continue                                   # 관련 없는 섹션은 붙이지 않고 따로 둔다
+                following["titles"] = piece["titles"] + [t for t in following["titles"] if t not in piece["titles"]]
+                following["title"] = " + ".join(following["titles"])
+                following["short_merged_titles"] = following.get("short_merged_titles", []) + piece["titles"]
+            following["start"] = piece["start"]
+            piece["end"] = piece["start"]  # 빈 조각으로 만들어 아래에서 버린다.
 
-        segments.extend(piece for piece in region_pieces if text[piece["start"]:piece["end"]].strip())
+        kept = [piece for piece in region_pieces if text[piece["start"]:piece["end"]].strip()]
+        if keep_titles:
+            for piece in kept:
+                piece.pop("headed", None)
+        segments.extend(kept)
     return segments, excluded
+
+
+# 공식 서식 지정 표시. 예) "■ 공공주택특별법 시행규칙 [별지 제4호서식] <개정 2022. 12. 29.>"
+# 법령 서식의 머리말에만 쓰이는 표기라서 "새 서식 시작"의 근거로 쓴다 (C1 전용, 2026-11-06 DOC_LH_001 22쪽 사례).
+FORM_HEADER_PATTERN = re.compile(r"\[별지\s*제?\s*\d+\s*호\s*서식\]")
+
+
+def _starts_with_form_header(text: str, piece: dict) -> bool:
+    """조각의 첫 내용 줄(쪽번호 줄 제외)이 서식 지정 표시를 담고 있는가."""
+    for line in re.split(LINE_BREAK, text[piece["start"]:piece["end"]]):
+        stripped = line.strip()
+        if not stripped or PAGE_NUMBER_LINE_PATTERN.match(stripped):
+            continue
+        return bool(FORM_HEADER_PATTERN.search(stripped))
+    return False
+
+
+def _heading_group(title: str) -> str | None:
+    """제목의 의미 그룹(SECTION_VOCABULARY). 기호·번호·경로·(이어짐)을 떼고 찾는다. 사전에 없으면 None."""
+    last = title.split(" > ")[-1].replace(" (이어짐)", "")
+    last = re.sub(r"^[\s■◆□▣◈○●◎◇▶▷►※\-]*(?:\d{1,2}[.)]|[①-⑳]|[가-하][.)])?\s*", "", last)
+    return SECTION_VOCABULARY.get(_normalize_title(last))
+
+
+def _short_section_merge_allowed(short_title: str, next_title: str) -> bool:
+    """
+    C1 짧은 섹션 병합 기준 (forward_keep_titles 전용).
+    - 두 제목 모두 사전(SECTION_VOCABULARY)에 있으면: 같은 그룹이거나 MERGE_PARTNER_GROUPS 짝일 때만 허용
+      (B2 merge_short_chunks의 API 그룹 규칙과 같다. 예: 대출금리·대출한도 = 지원내용끼리 → 허용,
+       대출대상(자격) + 대출금리(지원내용) → 불허)
+    - 한쪽이라도 사전에 없으면(상환방법·담보취득 등): 허용하되 두 제목을 모두 남긴다.
+      → 제목 정보가 사라지지 않으므로 검색 메타데이터가 본문 내용을 감추지 않는다.
+    """
+    left, right = _heading_group(short_title), _heading_group(next_title)
+    if left is None or right is None:
+        return True
+    return left == right or frozenset({left, right}) in MERGE_PARTNER_GROUPS
 
 
 def find_page_markers(text: str) -> list[tuple[int, int, int]]:
@@ -461,23 +536,49 @@ def chunk_document(document: dict[str, Any]) -> tuple[list[dict[str, Any]], dict
       처리 기록 필드: document_id, source_type, boundary_method, fallback_reason,
                      chunk_count, excluded_spans
     """
+    return _chunk_document_core(document, version=CHUNKING_VERSION, html_starts=_heading_starts_html)
+
+
+def _chunk_document_core(
+    document: dict[str, Any],
+    *,
+    version: str,
+    html_starts,
+    avoid_orphan_label: bool = False,
+    starts_override: list[tuple[int, str, int]] | None = None,
+    override_method: str | None = None,
+    short_piece_policy: str = "forward",
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """
+    chunk_document(B1)·B3·C1(LLM 보조)이 함께 쓰는 청킹 본체.
+    - version: 청크 ID·payload에 남길 버전 이름
+    - html_starts: HTML 문서의 제목 위치 함수 (B1: _heading_starts_html, B3: _heading_starts_html_b3)
+    - avoid_orphan_label: split_long_span에 그대로 넘긴다 (B3)
+    - starts_override: 검증을 마친 외부 제목 위치(LLM 제안 등). 주면 PDF·HTML 규칙 대신 이 위치로 자른다.
+    B1 호출(chunk_document)은 기본값만 쓰므로 결과가 이전과 같다 (출력 해시 테스트로 확인).
+    """
     text = document["text"]
     source_type = document["source_type"]
     page_markers = find_page_markers(text) if source_type == "pdf" else []
     fallback_reason = None
 
     # (1) 경계 찾기
-    if source_type == "api" and API_FIELD_PATTERN.search(text):
+    if starts_override is None and source_type == "api" and API_FIELD_PATTERN.search(text):
         boundary_method = "api_field"
         segments, excluded = _api_segments(text)
     else:
-        starts = _heading_starts_pdf(text) if source_type == "pdf" else _heading_starts_html(text)
-        if starts:
+        if starts_override is not None:
+            starts = starts_override
+        else:
+            starts = _heading_starts_pdf(text) if source_type == "pdf" else html_starts(text)
+        if starts_override is not None and starts:
+            boundary_method = override_method or "external_heading"
+        elif starts:
             boundary_method = "pdf_heading" if source_type == "pdf" else "html_heading"
         else:
             boundary_method = "length_fallback"
             fallback_reason = "명시적 제목·필드를 찾지 못함 → 길이 기반 분할"
-        segments, excluded = _segments_from_starts(text, starts, page_markers)
+        segments, excluded = _segments_from_starts(text, starts, page_markers, short_piece_policy=short_piece_policy)
         if boundary_method == "length_fallback":
             # 제목이 없으므로 구간 제목 자리에 문서 제목을 쓴다.
             for segment in segments:
@@ -494,14 +595,16 @@ def chunk_document(document: dict[str, Any]) -> tuple[list[dict[str, Any]], dict
             ranges = [(segment["start"], segment["end"])]
 
         for range_start, range_end in ranges:
-            for piece_start, piece_end, overlap_chars in split_long_span(text, range_start, range_end):
+            for piece_start, piece_end, overlap_chars in split_long_span(
+                    text, range_start, range_end, avoid_orphan_label=avoid_orphan_label):
                 chunks.append(build_chunk(
-                    document, seq=len(chunks) + 1, version=CHUNKING_VERSION,
+                    document, seq=len(chunks) + 1, version=version,
                     char_start=piece_start, char_end=piece_end,
                     section_title=segment["title"], section_group=segment["group"],
                     boundary_method=boundary_method,
                     page_start=segment["page"], page_end=segment["page"],
                     overlap_prev_chars=overlap_chars,
+                    section_titles=segment.get("titles"),
                 ))
 
     report = {
@@ -528,13 +631,15 @@ def build_chunk(
     page_start: int | None,
     page_end: int | None,
     overlap_prev_chars: int,
+    section_titles: list[str] | None = None,
 ) -> dict[str, Any]:
     """
     청크 dict 하나를 만든다. B1·B2(그리고 다음 단계 C안)가 모두 이 함수로 청크를 만든다.
     text는 항상 원문[char_start:char_end] 를 그대로 잘라 쓴다. → 원문이 바뀌거나 요약되지 않는다.
+    section_titles: 여러 섹션 제목을 목록으로도 남길 때만 넘긴다(C1). None이면 키를 만들지 않는다(B1·B2·B3 출력 그대로).
     """
     chunk_id = make_chunk_id(document["document_id"], seq, version)
-    return {
+    chunk = {
         "chunk_id": chunk_id,
         "point_id": make_point_id(chunk_id),
         "chunking_version": version,
@@ -553,6 +658,9 @@ def build_chunk(
         "overlap_prev_chars": overlap_prev_chars,
         "chunk_seq": seq,
     }
+    if section_titles is not None:
+        chunk["section_titles"] = list(section_titles)
+    return chunk
 
 
 # ---------------------------------------------------------------------------
@@ -591,11 +699,13 @@ def merge_short_chunks(
     chunks: list[dict[str, Any]],
     min_chars: int = MIN_CHUNK_CHARS,
     max_chars: int = CHUNK_SIZE,
+    version: str = "B2",
 ) -> list[dict[str, Any]]:
     """
     B1 청크(한 문서분)를 받아 min_chars보다 짧은 청크를 관련 있는 이웃과 합친 B2 청크를 돌려준다.
 
-    입력: 문서 dict, 그 문서의 B1 청크 리스트(순서대로), 최소 길이, 최대 길이
+    입력: 문서 dict, 그 문서의 B1 청크 리스트(순서대로), 최소 길이, 최대 길이,
+         version(결과 청크 ID의 버전. 기본 "B2". B3·C1도 같은 병합 규칙을 쓰고 버전 이름만 바꾼다)
     반환: B2 청크 리스트. 각 청크에 merged_from(합쳐진 B1 chunk_id 목록)과 section_groups가 추가된다.
 
     병합 순서
@@ -655,7 +765,7 @@ def merge_short_chunks(
     for unit in units:
         overlap = max(0, previous_end - unit["start"]) if previous_end is not None else 0
         chunk = build_chunk(
-            document, seq=len(merged_chunks) + 1, version=B2_VERSION,
+            document, seq=len(merged_chunks) + 1, version=version,
             char_start=unit["start"], char_end=unit["end"],
             section_title=" + ".join(unit["titles"]),
             section_group="+".join(unit["groups"]) if unit["groups"] else None,
@@ -711,12 +821,18 @@ def chunk_documents(
 
     strategy="B1"(기본값): 기존 B1 결과 그대로
     strategy="B2": B1 결과에 merge_short_chunks()를 적용. 처리 기록에 chunking_version·b1_chunk_count가 추가된다.
+    strategy="B3": 개선 후보(R2·R5). chunk_document_b3() 결과. B1·B2 결과는 바뀌지 않는다.
     """
-    if strategy not in ("B1", "B2"):
-        raise ValueError(f"알 수 없는 청킹 전략: {strategy} (B1 또는 B2)")
+    if strategy not in ("B1", "B2", "B3"):
+        raise ValueError(f"알 수 없는 청킹 전략: {strategy} (B1, B2 또는 B3)")
 
     all_chunks, reports = [], []
     for document in documents:
+        if strategy == "B3":
+            chunks, report = chunk_document_b3(document)
+            all_chunks.extend(chunks)
+            reports.append(report)
+            continue
         chunks, report = chunk_document(document)
         if strategy == "B2":
             b1_count = len(chunks)
@@ -1330,3 +1446,151 @@ def score_heading_detection(analysis: dict[str, Any], expected_lines: list[str])
         "found": len(found),
         "expected": len(expected_lines),
     }
+
+
+# ---------------------------------------------------------------------------
+# 11. B3 후보: 소제목 고아(R2)·HTML 제목 미인식(R5) 개선 (2026-11-06)
+# ---------------------------------------------------------------------------
+# B3 = B1과 같은 경계 찾기 + 두 가지 개선 → B2와 같은 짧은 청크 병합(버전 이름만 B3)
+#   R5: HTML 문서에서 analyze_structure 규칙(_detect_text_headings)이 인정한 제목도 경계로 쓴다.
+#       (B1의 _heading_starts_html은 □ 줄과 번호 목록만 보므로 "대출대상"·"지원자격" 같은 제목 줄을 놓쳤다)
+#       수치 조건 줄("연 1.9%", "만 19세 이상")은 제목으로 쓰지 않는다.
+#   R2: 긴 구간을 자를 때 조각의 마지막 줄이 짧은 소제목·표 항목 이름이면 그 줄 앞에서 자른다.
+# PDF 제목 규칙과 API 필드 경계는 B1과 같다. B1·B2 함수의 기본 동작은 바꾸지 않았다(출력 해시 테스트).
+B3_VERSION = "B3"
+B3_PRE_MERGE_VERSION = "B3PRE"     # 병합 전 단계의 청크 ID 버전 (merged_from 추적용, 저장 대상 아님)
+
+# 고아 소제목 판정: 기호·번호(선택) + 한글·가운뎃점·공백·빗금 1~14자 (+ 괄호·콜론)인 짧은 줄.
+# 16자는 2026-11-06 정밀 점검에서 B2 고아 소제목 22건을 셀 때 쓴 기준과 같다(측정 기준을 바꾸지 않기 위해).
+ORPHAN_LABEL_MAX_CHARS = 16
+ORPHAN_LABEL_PATTERN = re.compile(
+    r"^\s*(?:ㅇ|○|□|■|◆|-|\d{1,2}\.|[①-⑳]|\[)?\s*\(?[가-힣·\s/]{1,14}\)?\s*:?\s*$")
+
+# 제목으로 쓰지 않을 수치 조건: 숫자 뒤에 금액·비율·나이·기간·면적 단위가 붙은 줄. 예) "연 1.9%", "만 19세 이상"
+NUMERIC_CONDITION_PATTERN = re.compile(r"\d[\d,.]*\s*(?:만\s?원|천\s?원|억|원|%|％|세|년|개월|일|호|㎡|평|회|배)")
+
+
+def _is_orphan_label_line(line: str) -> bool:
+    """청크 끝에 홀로 남으면 안 되는 짧은 소제목·표 항목 이름 줄인가. 예) "ㅇ (소득)", "자동차", "대출금리" """
+    stripped = line.strip()
+    if not stripped or len(stripped) > ORPHAN_LABEL_MAX_CHARS:
+        return False
+    return bool(ORPHAN_LABEL_PATTERN.match(stripped))
+
+
+def _line_start(text: str, position: int) -> int:
+    """position이 들어 있는 줄의 시작 위치. (\\r 단독 줄바꿈도 줄 경계로 본다)"""
+    return max(text.rfind("\n", 0, position), text.rfind("\r", 0, position)) + 1
+
+
+def _move_cut_before_label(text: str, pos: int, cut: int, min_cut: int) -> int:
+    """
+    split_long_span(avoid_orphan_label=True)에서 쓴다. 조각 text[pos:cut]의 마지막 줄이 짧은 소제목이면
+    그 줄의 시작으로 자를 위치를 옮긴다(여러 줄이 이어지면 반복). 조각이 min_cut보다 짧아지면 옮기지 않는다.
+    자를 위치만 바꾸므로 원문은 그대로이고, 옮겨진 줄은 다음 조각의 첫 부분이 된다.
+    """
+    while True:
+        piece_end = _skip_space_backward(text, pos, cut)
+        line_start = max(text.rfind("\n", pos, piece_end), text.rfind("\r", pos, piece_end)) + 1
+        if line_start <= pos or line_start < min_cut:
+            return cut
+        if not _is_orphan_label_line(text[line_start:piece_end]):
+            return cut
+        cut = line_start
+
+
+def _b3_text_headings(text: str) -> tuple[list[dict[str, Any]], int]:
+    """
+    analyze_structure와 같은 규칙으로 인정된 제목 중 B3 경계로 쓸 것. 반환: (제목 목록, 수치 조건이라 뺀 개수)
+    인정된 제목이 2개 미만이면 쓰지 않는다 (_decide_structure_status의 "섹션 경계 근거 없음" 기준과 같다).
+    """
+    accepted, _rejected = _detect_text_headings(text)
+    if len(accepted) < 2:
+        return [], 0
+    kept = [heading for heading in accepted if not NUMERIC_CONDITION_PATTERN.search(heading["title"])]
+    return kept, len(accepted) - len(kept)
+
+
+def _heading_starts_html_b3(text: str) -> list[tuple[int, str, int]]:
+    """B3 HTML 제목 위치 = B1 위치(□ 줄·번호 목록 시작) + 구조 인식 규칙의 제목 줄. 같은 줄은 한 번만 쓴다."""
+    starts = list(_heading_starts_html(text))
+    seen_lines = {_line_start(text, position) for position, _title, _level in starts}
+    extra, _numeric = _b3_text_headings(text)
+    for heading in extra:
+        line_start = _line_start(text, heading["start"])
+        if line_start in seen_lines:
+            continue
+        seen_lines.add(line_start)
+        starts.append((line_start, heading["line"][:60], heading["level"]))
+    return sorted(starts)
+
+
+def chunk_document_b3(document: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """
+    문서 1건의 B3 청킹. 반환 형식은 chunk_documents(strategy="B2")와 같다(청크 ID는 CHK_B3_…).
+    처리 기록 추가 필드: chunking_version, pre_merge_chunk_count, b3_text_headings_added, b3_numeric_headings_rejected
+    """
+    pre_chunks, report = _chunk_document_core(document, version=B3_PRE_MERGE_VERSION,
+                                              html_starts=_heading_starts_html_b3, avoid_orphan_label=True)
+    chunks = merge_short_chunks(document, pre_chunks, version=B3_VERSION)
+    added = numeric = 0
+    if document["source_type"] not in ("api", "pdf"):
+        text = document["text"]
+        base_lines = {_line_start(text, position) for position, _t, _l in _heading_starts_html(text)}
+        extra, numeric = _b3_text_headings(text)
+        added = len({_line_start(text, h["start"]) for h in extra} - base_lines)
+    report = {**report, "chunking_version": B3_VERSION, "pre_merge_chunk_count": len(pre_chunks),
+              "chunk_count": len(chunks), "b3_text_headings_added": added, "b3_numeric_headings_rejected": numeric}
+    return chunks, report
+
+
+# ---- 비교 지표 (B2 vs B3 vs C1). 검색 정확도가 아니라 "구조" 지표다. ----
+def find_orphan_label_chunks(chunks: list[dict[str, Any]], include_section_boundaries: bool = False) -> list[dict[str, Any]]:
+    """
+    마지막 줄이 짧은 소제목인데 그 본문이 다음 청크로 넘어간 청크 목록. [{chunk_id, document_id, line}]
+    기본(include_section_boundaries=False): 다음 청크가 같은 구간의 이어짐(overlap 있음 또는 같은 구간 제목)일 때만 센다.
+      → 2026-11-06 정밀 점검의 "고아 소제목 22건"과 같은 기준
+    True: 다음 청크가 다른 구간이어도 센다 (페이지 경계에서 생기는 경우까지 포함한 넓은 기준)
+    """
+    by_document: dict[str, list[dict[str, Any]]] = {}
+    for chunk in chunks:
+        by_document.setdefault(chunk["document_id"], []).append(chunk)
+    found = []
+    for document_chunks in by_document.values():
+        for index, chunk in enumerate(document_chunks[:-1]):
+            following = document_chunks[index + 1]
+            continues = (following["overlap_prev_chars"] > 0 or following["char_start"] < chunk["char_end"]
+                         or following["section_title"] == chunk["section_title"])
+            if not continues and not include_section_boundaries:
+                continue
+            lines = [line for line in re.split(LINE_BREAK, chunk["text"]) if line.strip()]
+            if lines and _is_orphan_label_line(lines[-1]):
+                found.append({"chunk_id": chunk["chunk_id"], "document_id": chunk["document_id"],
+                              "line": lines[-1].strip()})
+    return found
+
+
+def heading_alignment(document: dict[str, Any], chunks: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    analyze_structure가 인정한 제목(규칙 S1 기준, 정답 아님)이 청크 경계와 얼마나 맞는지.
+      at_chunk_start : 제목 줄이 어떤 청크의 첫 내용인 제목 수
+      with_body      : 제목 줄과 바로 다음 본문 줄이 같은 청크에 들어 있는 제목 수 (다음 줄이 없으면 센다)
+    chunks: 이 문서의 청크만
+    """
+    text = document["text"]
+    headings = analyze_structure(document)["headings"]
+    at_start = with_body = 0
+    for heading in headings:
+        if any(chunk["char_start"] <= heading["start"] and not text[chunk["char_start"]:heading["start"]].strip()
+               for chunk in chunks):
+            at_start += 1
+        body = re.search(r"[^\s]", text[heading["end"]:])
+        if body is None:
+            with_body += 1
+            continue
+        body_start = heading["end"] + body.start()
+        body_end = _skip_space_backward(text, body_start, re.compile(r"[\r\n]|$").search(text, body_start).start())
+        if any(chunk["char_start"] <= heading["start"] and body_end <= chunk["char_end"] for chunk in chunks):
+            with_body += 1
+    return {"document_id": document["document_id"], "headings": len(headings),
+            "at_chunk_start": at_start, "with_body": with_body}

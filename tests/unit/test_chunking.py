@@ -335,8 +335,9 @@ class TestMergeShortChunksSample(unittest.TestCase):
         self.assertTrue(b2[0]["chunk_id"].startswith("CHK_B2_"))
 
     def test_unknown_strategy_is_rejected(self):
+        # 2026-11-06: B3가 정식 전략으로 추가되어, 예시를 실제로 없는 이름으로 바꿨다 (검사 의도는 같다).
         with self.assertRaises(ValueError):
-            ck.chunk_documents([], strategy="B3")
+            ck.chunk_documents([], strategy="B9")
 
 
 # ---------------------------------------------------------------------------
