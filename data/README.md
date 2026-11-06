@@ -5,7 +5,7 @@
 > **담당자:** 데이터 / API / 전처리 담당 (장반석)  
 > **인계 대상:** DB 엔지니어(주민혁 님), RAG/검색·조건 확인 담당(나지인 님, 박소희 님), React 시연 UI/발표 담당(강민지 님)  
 > **상태:** **STEP 1~3 수집·정제·정합성 검증 완료 및 DB 인계 패키지 배포 완료 (파일·참조 무결성 100% PASS, Broken References = 0)**  
-> **후속 후보:** `data/releases/v1.4.0-candidate/` (정책 246 · 문서 268 · 청크 593, 정적 검증만 완료 — 신규 문서 공식 원문 대조 미완료, DB 미적재)  
+> **후속 후보:** `data/releases/v1.4.0-candidate/` (정책 246 · 문서 260 · 청크 590 · 노드 1,073 · 관계 3,702, 신규 문서 14건 모두 공식 원문 대조 완료 — DB 미적재, 신규 정책 조건은 UNKNOWN). 대조 결과: [official_source_crosscheck_report.md](../docs/data/official_source_crosscheck_report.md)  
 > **체크섬 기준:** `data/handoff/`, `data/releases/`는 `.gitattributes`로 줄바꿈 변환을 끄고 저장소 바이트(LF) 기준으로 SHA-256을 기록한다. Windows·Mac·Linux 어디서 내려받아도 `verify_handoff_package.py` 결과가 같다.
 
 ---

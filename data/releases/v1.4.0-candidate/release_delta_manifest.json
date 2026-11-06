@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-06T17:27:44.503120",
+  "created_at": "2026-11-06T17:56:25.884978",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -13,38 +13,29 @@
     "POL_STG_ICN_001"
   ],
   "added_document_ids": [
-    "DOC_STG_001_NOTICE",
-    "DOC_STG_001_FAQ",
     "DOC_STG_001_LAW",
-    "DOC_STG_MOLIT_002_GDL",
-    "DOC_STG_MOLIT_002_FAQ",
-    "DOC_STG_MOHW_001_GDL",
-    "DOC_STG_MOHW_001_LAW",
-    "DOC_STG_DGU_001_ORD",
-    "DOC_STG_DGU_001_NOT",
     "DOC_STG_NTS_001_LAW",
-    "DOC_STG_NTS_001_FAQ",
     "DOC_STG_MOIS_001_LAW",
-    "DOC_STG_MOIS_001_NOT",
     "DOC_STG_EX_001_LAW",
-    "DOC_STG_EX_001_FAQ",
-    "DOC_STG_MOLIT_001_GDL",
-    "DOC_STG_MOLIT_001_FAQ",
     "DOC_STG_SEOUL_001_ORD",
-    "DOC_STG_SEOUL_001_NOT",
-    "DOC_STG_SEOUL_001_FAQ",
     "DOC_STG_ICN_001_ORD",
-    "DOC_STG_ICN_001_NOT"
+    "DOC_STG_MOLIT_002_GOV24",
+    "DOC_STG_MOHW_001_GOV24",
+    "DOC_STG_DGU_001_GOV24",
+    "DOC_STG_MOIS_001_GOV24",
+    "DOC_STG_EX_001_GOV24",
+    "DOC_STG_MOLIT_001_GOV24",
+    "DOC_STG_ICN_001_GOV24",
+    "DOC_STG_SEOUL_001_YC"
   ],
   "added_organization_ids": [
     "AGENCY_국세청_기획재정부",
-    "AGENCY_국토교통부_대도시권광역교통위원회",
     "AGENCY_서울특별시_동대문구_가족정책과",
-    "AGENCY_서울특별시_미래청년기획단",
-    "AGENCY_인천광역시_서구_청년정책일자리과",
-    "AGENCY_한국도로공사_국토교통부",
-    "AGENCY_행정안전부_보건복지부",
-    "AGENCY_행정안전부_지방세특례제도과"
+    "AGENCY_서울특별시_미래청년기획관_청년정책담당관",
+    "AGENCY_인천광역시_서해구_기업일자리정책과",
+    "AGENCY_한국도로공사",
+    "AGENCY_행정안전부_지방세특례제도과",
+    "AGENCY_행정안전부_행정정보공유과"
   ],
   "added_condition_group_ids": [
     "GRP_POL_STG_MOLIT_002_ROOT",
@@ -58,89 +49,46 @@
     "GRP_POL_STG_ICN_001_ROOT"
   ],
   "added_qdrant_point_ids": [
-    "df517a13-6194-5d62-8801-3dab154932fe",
-    "c65f2367-7f4f-5243-9ccd-22329753e4a7",
-    "89cd940f-dfbe-5968-9c60-59f19f33b0f7",
-    "e6ef6929-0585-52c3-bebc-da73e14f0ef7",
-    "6d76969d-5be4-5c54-bec6-e391aa29eda1",
-    "59c6b456-5901-536f-a45f-a91c3a2af24a",
     "acbfebe9-f76f-5f5d-a13d-330bcb9b14e0",
-    "abf4b89a-1a05-59e5-b4e3-12ab10f2b55f",
-    "87333fed-4de7-5552-a2de-a37bb51bd4dc",
-    "02e4597a-89a4-5b2a-840d-b3092307d530",
-    "02de13f1-962e-59ae-8364-1d8db247487d",
-    "df150acf-d75c-5a63-b54f-b76d80ac1b74",
-    "45b23a3b-fec5-5ac6-9f4b-776f20bf1882",
-    "0313c727-a06d-52cb-945c-cbea152044e9",
-    "de3fa697-08ee-5953-9dfc-3e8d1addc913",
-    "5b0099be-7f41-5c4c-97ce-fa2b2152fe1d",
+    "1921d3ee-f8da-556f-90a9-e4b097255256",
     "fce7e80a-dace-54ff-bec1-425c52984b7e",
-    "d5d74abd-a338-53cf-95fb-5c5bbe6c1eda",
-    "43f1728d-1b2e-52e0-a10f-5a3b1a4d78e3",
-    "0f7b5990-c59e-594e-ae05-d925f1aab30c",
+    "defdb714-607a-57ab-9211-35a746931bd9",
+    "e130259e-ccb3-596c-8040-f279788df0c0",
+    "d7f49108-5f5b-5811-b82b-bdca12f88780",
     "cd53bdec-2072-5288-9432-e22541090b18",
-    "62763832-f6e9-53f7-b079-3985fd2b9788",
+    "bea3eb4c-c78a-5fe0-bd7e-52a9fb5c76d3",
+    "bca98786-48aa-571e-8252-d7ad258c49d3",
     "c19df4d4-d598-5277-a2bd-8663570e680e",
-    "1ddebebf-35dc-51c4-ada1-cb64c12ed690",
-    "c60a13cc-2096-51c0-89c3-4b751e5d04e0",
-    "9a82f97a-90fc-59aa-b9b8-d21ec00aa68f",
-    "980591b7-ef34-54ba-9e98-eec04d5f4e1a",
-    "f1def0c6-410c-5b94-bf31-d095b61d93a4",
-    "92396e5c-020e-567c-9e59-eb102c2a41b8",
-    "152ed07b-4492-57ca-8d35-163934468cd9",
+    "24047f49-4775-56df-9b62-d364b1f489a1",
     "ba69eefa-a6f3-5fd1-b993-811159dddbb4",
-    "0d59d365-44fa-56f5-a13f-03161a74a7a9",
-    "fc15b895-251e-53b6-a99d-ee647d86463a",
-    "5067d6bf-7972-5cba-b99e-6ad8823dc9a5",
     "0e0eb9d4-5de3-5868-b2ea-1a9426846e13",
-    "116ced3c-6553-5df0-8cbf-392d07e7d6a9"
+    "665af5b3-f4fa-512f-8755-06219014af82",
+    "be15c662-b81f-527e-9a1c-3bbf3cc46c3d",
+    "980778c3-1539-519d-8090-b6117dc5129e",
+    "f9595d56-1518-5aed-a913-f5eeb33243f6",
+    "8eca426d-50ce-5b0d-ac81-fa96a1583bd5",
+    "6511da1a-fae7-5333-8896-6aa94889a67c",
+    "4ac3f317-a0b3-5269-9980-049618e6e98e",
+    "07dea648-ded1-5f85-a1f8-4d1e58b0b126",
+    "c2fe36d1-777c-50a0-8f6a-6aa1039a27a8",
+    "a4293318-a976-590e-868b-45a28d2f1633",
+    "426a3269-9456-58b4-b865-53264bc81678",
+    "a79482c6-11cd-5077-84b8-e35fdd2742e6",
+    "bed8abdc-5366-5341-8c09-1254e8aa39a1",
+    "c847817f-5ab3-5434-b9c4-e93f5ce257ce",
+    "30a4cf4f-0d76-5191-b367-909e44576f2d",
+    "98360772-b65d-590b-b8da-f6813f78200a",
+    "0c22cbe7-c6ba-5638-867a-cee4511f777d",
+    "6e91bec8-e310-5383-bed1-7d1fee1f9d92",
+    "e2714b83-1fd2-53e4-8bd4-926ed8a1a319",
+    "ea5cb5e9-0d11-52d3-985f-f92828e021f8"
   ],
-  "added_relationships_count": 95,
+  "added_relationships_count": 87,
   "exact_added_relationships": [
     {
       "source_id": "POL_001",
       "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_001_NOTICE"
-    },
-    {
-      "source_id": "POL_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_001_FAQ"
-    },
-    {
-      "source_id": "POL_001",
-      "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_001_LAW"
-    },
-    {
-      "source_id": "POL_STG_MOLIT_002",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOLIT_002_GDL"
-    },
-    {
-      "source_id": "POL_STG_MOLIT_002",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOLIT_002_FAQ"
-    },
-    {
-      "source_id": "POL_STG_MOHW_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOHW_001_GDL"
-    },
-    {
-      "source_id": "POL_STG_MOHW_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOHW_001_LAW"
-    },
-    {
-      "source_id": "POL_STG_DGU_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_DGU_001_ORD"
-    },
-    {
-      "source_id": "POL_STG_DGU_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_DGU_001_NOT"
     },
     {
       "source_id": "POL_STG_NTS_001",
@@ -148,19 +96,9 @@
       "target_id": "DOC_STG_NTS_001_LAW"
     },
     {
-      "source_id": "POL_STG_NTS_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_NTS_001_FAQ"
-    },
-    {
       "source_id": "POL_STG_MOIS_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_MOIS_001_LAW"
-    },
-    {
-      "source_id": "POL_STG_MOIS_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOIS_001_NOT"
     },
     {
       "source_id": "POL_STG_EX_001",
@@ -168,34 +106,9 @@
       "target_id": "DOC_STG_EX_001_LAW"
     },
     {
-      "source_id": "POL_STG_EX_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_EX_001_FAQ"
-    },
-    {
-      "source_id": "POL_STG_MOLIT_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOLIT_001_GDL"
-    },
-    {
-      "source_id": "POL_STG_MOLIT_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_MOLIT_001_FAQ"
-    },
-    {
       "source_id": "POL_STG_SEOUL_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_SEOUL_001_ORD"
-    },
-    {
-      "source_id": "POL_STG_SEOUL_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_SEOUL_001_NOT"
-    },
-    {
-      "source_id": "POL_STG_SEOUL_001",
-      "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_SEOUL_001_FAQ"
     },
     {
       "source_id": "POL_STG_ICN_001",
@@ -203,9 +116,44 @@
       "target_id": "DOC_STG_ICN_001_ORD"
     },
     {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_002_GOV24"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOHW_001_GOV24"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_DGU_001_GOV24"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOIS_001_GOV24"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_EX_001_GOV24"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_001_GOV24"
+    },
+    {
       "source_id": "POL_STG_ICN_001",
       "relation": "SUPPORTED_BY",
-      "target_id": "DOC_STG_ICN_001_NOT"
+      "target_id": "DOC_STG_ICN_001_GOV24"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_YC"
     },
     {
       "source_id": "POL_STG_MOLIT_002",
@@ -245,7 +193,7 @@
     {
       "source_id": "POL_STG_MOHW_001",
       "relation": "ADMINISTERED_BY",
-      "target_id": "AGENCY_행정안전부_보건복지부"
+      "target_id": "AGENCY_행정안전부_행정정보공유과"
     },
     {
       "source_id": "POL_STG_MOHW_001",
@@ -425,7 +373,7 @@
     {
       "source_id": "POL_STG_EX_001",
       "relation": "ADMINISTERED_BY",
-      "target_id": "AGENCY_한국도로공사_국토교통부"
+      "target_id": "AGENCY_한국도로공사"
     },
     {
       "source_id": "POL_STG_EX_001",
@@ -470,7 +418,7 @@
     {
       "source_id": "POL_STG_MOLIT_001",
       "relation": "ADMINISTERED_BY",
-      "target_id": "AGENCY_국토교통부_대도시권광역교통위원회"
+      "target_id": "AGENCY_국토교통부_광역교통경제과"
     },
     {
       "source_id": "POL_STG_MOLIT_001",
@@ -505,7 +453,7 @@
     {
       "source_id": "POL_STG_SEOUL_001",
       "relation": "ADMINISTERED_BY",
-      "target_id": "AGENCY_서울특별시_미래청년기획단"
+      "target_id": "AGENCY_서울특별시_미래청년기획관_청년정책담당관"
     },
     {
       "source_id": "POL_STG_SEOUL_001",
@@ -540,7 +488,7 @@
     {
       "source_id": "POL_STG_ICN_001",
       "relation": "ADMINISTERED_BY",
-      "target_id": "AGENCY_인천광역시_서구_청년정책일자리과"
+      "target_id": "AGENCY_인천광역시_서해구_기업일자리정책과"
     },
     {
       "source_id": "POL_STG_ICN_001",

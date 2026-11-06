@@ -3,36 +3,37 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (절대 무변경 보존)
-- **최종 검증 일시**: 2026-11-06 17:27:44
+- **최종 검증 일시**: 2026-11-06 17:56:25
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
 
 ## 1. 베이스라인 대비 실제 파일 집계 수치 (Actual Verified Counts)
 
-| 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 내역 (Delta) | 호환성 및 무결성 판정 |
-| :--- | :---: | :---: | :---: | :---: |
-| **통합 정책 (`Policy`)** | 237건 | **246건** | **+9건 신규** (기존 1건 병합) | 충돌 0건 (100% PASS) |
-| **근거 문서 (`Document`)** | 246건 | **268건** | **+22건 공식 근거** | 4단계 검증 분류 적용 |
-| • *공식 원본 직보유 (`verified_official_raw`)* | - | 2건 | +2건 | LH 모집공고문(PDF) / FAQ(HWP) |
-| • *법령·조례 직추출 (`verified_extracted`)* | - | 8건 | +8건 | 법률 제49조, 제30조, 조례 등 |
-| • *공식 포털 정제본 (`reference_restructured`)* | - | 12건 | +12건 | 정부24/포털 지침·FAQ 정제본 |
-| **벡터 청크 (`Chunk`)** | 557건 | **593건** | **+36건 맞춤 청크** | UUIDv5 충돌 0건 (100% PASS) |
-| **그래프 노드 (`Total Nodes`)** | 1,034개 | **1,082개** | **+48개 노드 증분** | 고유 제약조건 100% PASS |
-| • *Policy 노드* | 237개 | 246개 | +9개 | PK 유일 |
-| • *Document 노드* | 246개 | 268개 | +22개 | PK 유일 |
-| • *Organization 노드* | 116개 | 124개 | +8개 | PK 유일 (신규 부처 8개) |
-| • *ConditionGroup 노드* | 343개 | 352개 | +9개 (루트 UNKNOWN) | PK 유일 |
-| • *Category / LifeStage / Region / TargetGroup / Condition* | 92개 | 92개 | 0개 (기존 100% 재사용) | 불변 |
-| **그래프 관계 (`Relationship`)** | 3,615건 | **3,710건** | **+95건 관계 증분** | **Broken References = 0건** |
-| • *SUPPORTED_BY* | 246건 | 268건 | +22건 | 출처 추적 100% |
-| • *ADMINISTERED_BY* | 237건 | 246건 | +9건 | 소관기관 매핑 100% |
-| • *HAS_CATEGORY* | 237건 | 246건 | +9건 | 5대 표준 카테고리 100% |
-| • *AVAILABLE_IN* | 238건 | 247건 | +9건 | 18대 표준 광역지역 100% |
-| • *APPLIES_TO_LIFESTAGE* | 419건 | 437건 | +18건 | 6대 표준 생애단계 100% |
-| • *TARGETS* | 424건 | 443건 | +19건 | 11대 표준 대상집단 100% |
-| • *HAS_ROOT_CONDITION_GROUP* | 237건 | 246건 | +9건 | 루트 조건 그룹 연결 100% |
-| • *기타 조건 DAG 관계* | 1,577건 | 1,577건 | 0건 (기존 보존) | 무변경 보존 |
+| 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |
+| :--- | ---: | ---: | ---: |
+| 정책 (`Policy`) | 237 | 246 | +9 |
+| 근거 문서 (`Document`) | 246 | 260 | +14 |
+| • 신규 문서 `verified_official_api` | - | 8 | +8 |
+| • 신규 문서 `verified_official_text` | - | 6 | +6 |
+| 벡터 청크 (`Chunk`) | 557 | 590 | +33 |
+| 그래프 노드 (전체) | 1034 | 1073 | +39 |
+| • Organization | 116 | 123 | +7 |
+| • ConditionGroup | 343 | 352 | +9 (루트 UNKNOWN) |
+| 그래프 관계 (전체) | 3615 | 3702 | +87 |
+| • ADMINISTERED_BY | 237 | 246 | +9 |
+| • APPLIES_TO_LIFESTAGE | 419 | 437 | +18 |
+| • AVAILABLE_IN | 238 | 247 | +9 |
+| • HAS_CATEGORY | 237 | 246 | +9 |
+| • HAS_ROOT_CONDITION_GROUP | 237 | 246 | +9 |
+| • SUPPORTED_BY | 246 | 260 | +14 |
+| • TARGETS | 424 | 443 | +19 |
+
+## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)
+
+- 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).
+- 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.
+- 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.
 
 ---
 
@@ -59,4 +60,4 @@
 
 ## 4. 정밀 롤백 프로토콜 (Targeted Rollback by Exact Item List)
 - 단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식을 폐기함.
-- [`release_delta_manifest.json`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 9개 정책 ID, 22개 문서 ID, 8개 기관 ID, 9개 조건그룹 ID, 36개 Qdrant Point ID, 95개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
+- `release_delta_manifest.json`에 기록된 **정확한 9개 정책 ID, 14개 문서 ID, 7개 기관 ID, 9개 조건그룹 ID, 33개 Qdrant Point ID, 87개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.

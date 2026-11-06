@@ -804,6 +804,11 @@ def chunk_document(doc: dict, policy: dict) -> list:
 # 5. 메인 실행 파이프라인
 # ---------------------------------------------------------
 def run_staging_poc():
+    # 2026-11-06: 이 스크립트의 RAW_DOCUMENTS_DATA는 원문이 아닌 요약문이며 일부는 공식 원문과 다르다.
+    # 재실행하면 공식 원문 대조 결과(apply_official_crosscheck.py)를 덮어쓰므로 막는다.
+    if (STAGING_DIR / "crosscheck_results.json").exists():
+        raise SystemExit("staging은 공식 원문 대조본입니다. scripts/apply_official_crosscheck.py를 사용하세요. "
+                         "(docs/data/official_source_crosscheck_report.md 참고)")
     print("="*70)
     print("LifePolicy AI — STEP C: 공식 근거 문서 수집 PoC 및 증분 파이프라인 시작")
     print("="*70)

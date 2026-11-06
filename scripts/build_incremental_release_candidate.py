@@ -12,6 +12,12 @@ LifePolicy AI — 후보 릴리스 v1.4.0-candidate 빌드 및 안정화 스크�
 2. 9개 신규 정책에 대한 HAS_ROOT_CONDITION_GROUP 및 GRP_{pid}_ROOT 노드 자동 생성 (UNKNOWN 모델)
 3. 22개 신규 문서의 4단계 검증 분류(verified_official_raw, verified_extracted, reference_restructured, unverified_reference) 적용
 4. 실측 기반의 수치 정합성 및 변경 목록(release_delta_manifest.json) 생성
+
+개정 사항 (2026-11-06, 공식 원문 대조):
+5. 문서·청크 검증 상태를 staging 데이터의 verification_status에서 읽는다.
+   (scripts/apply_official_crosscheck.py가 공식 원문으로 확인한 문서만 staging에 남긴다)
+6. 신규 정책 노드의 자격·지원내용·신청 정보는 정부24·온통청년 원문 필드를 우선 사용한다.
+7. 산출 파일은 OS와 무관하게 LF 줄바꿈으로 쓴다 (manifest SHA-256 일관성).
 """
 
 import os
@@ -22,7 +28,7 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
-BASE_DIR = Path(r"c:\Users\Peter\Desktop\모꼬지\SKN 36기 부트캠프\단위프로젝트\3차\LifePolicy AI")
+BASE_DIR = Path(__file__).resolve().parent.parent
 HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 STAGING_DIR = BASE_DIR / "data" / "staging"
 CANDIDATE_DIR = BASE_DIR / "data" / "releases" / "v1.4.0-candidate"
@@ -86,33 +92,17 @@ POLICY_TARGET_GROUPS_MAP = {
     "POL_STG_ICN_001": ["GROUP_WORKER_BIZ", "GROUP_YOUTH"]
 }
 
-# 4단계 문서 검증 분류
-DOCUMENT_VERIFICATION_MAP = {
-    # 1. 공식 원본 실재 및 검증 완료 (PDF/HWP/HTML 실재)
-    "DOC_STG_001_NOTICE": "verified_official_raw",
-    "DOC_STG_001_FAQ": "verified_official_raw",
-    # 2. 국가법령정보센터/자치법규 표준 조문 직추출
-    "DOC_STG_001_LAW": "verified_extracted",
-    "DOC_STG_MOHW_001_LAW": "verified_extracted",
-    "DOC_STG_DGU_001_ORD": "verified_extracted",
-    "DOC_STG_NTS_001_LAW": "verified_extracted",
-    "DOC_STG_MOIS_001_LAW": "verified_extracted",
-    "DOC_STG_EX_001_LAW": "verified_extracted",
-    "DOC_STG_SEOUL_001_ORD": "verified_extracted",
-    "DOC_STG_ICN_001_ORD": "verified_extracted",
-    # 3. 공식 기관 안내자료/보도자료 기반 정제 참고본
-    "DOC_STG_MOLIT_002_GDL": "reference_restructured",
-    "DOC_STG_MOLIT_002_FAQ": "reference_restructured",
-    "DOC_STG_MOHW_001_GDL": "reference_restructured",
-    "DOC_STG_DGU_001_NOT": "reference_restructured",
-    "DOC_STG_NTS_001_FAQ": "reference_restructured",
-    "DOC_STG_MOIS_001_NOT": "reference_restructured",
-    "DOC_STG_EX_001_FAQ": "reference_restructured",
-    "DOC_STG_MOLIT_001_GDL": "reference_restructured",
-    "DOC_STG_MOLIT_001_FAQ": "reference_restructured",
-    "DOC_STG_SEOUL_001_NOT": "reference_restructured",
-    "DOC_STG_SEOUL_001_FAQ": "reference_restructured",
-    "DOC_STG_ICN_001_NOT": "reference_restructured"
+# 문서 검증 상태는 staging/documents.jsonl의 verification_status를 그대로 쓴다.
+#   verified_official_text: 국가법령정보센터 조문 원문
+#   verified_official_api : 정부24·온통청년 공식 API 응답 원문
+# (공식 원문을 확인하지 못한 문서는 apply_official_crosscheck.py 단계에서 제외됨)
+EVIDENCE_TYPE_BY_DOC_TYPE = {
+    "notice": "announcement",
+    "law": "statutory_basis",
+    "ordinance": "statutory_basis",
+    "guideline": "administrative_guideline",
+    "service_guide": "official_service_guide",
+    "faq": "faq_reference",
 }
 
 def build_candidate_release():
@@ -171,11 +161,11 @@ def build_candidate_release():
                 "region": sp["regions"][0] if sp["regions"] else "전국",
                 "life_stages": clean_ls,
                 "target_groups": clean_tg,
-                "eligibility": sp["selection_rationale"],
-                "benefit": sp["category"],
-                "application_period": "상시 또는 공고 확인",
-                "application_method": "온라인 신청",
-                "official_apply_url": sp["source_url"],
+                "eligibility": sp.get("eligibility_text") or sp["selection_rationale"],
+                "benefit": sp.get("benefit_text") or sp["category"],
+                "application_period": sp.get("application_period") or "상시 또는 공고 확인",
+                "application_method": sp.get("application_method") or "온라인 신청",
+                "official_apply_url": sp.get("official_apply_url") or sp["source_url"],
                 "source_url": sp["source_url"],
                 "verification_status": sp["verification_status"],
                 "collected_at": datetime.now().isoformat(),
@@ -186,7 +176,7 @@ def build_candidate_release():
             new_policies.append(p_node)
 
     merged_policies = policies + new_policies
-    with open(neo4j_out / "nodes_policy.jsonl", "w", encoding="utf-8") as f:
+    with open(neo4j_out / "nodes_policy.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for p in merged_policies:
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_policies)}건 (+{len(new_policies)}건 증분)")
@@ -206,9 +196,7 @@ def build_candidate_release():
             if not line.strip(): continue
             sd = json.loads(line)
             assert sd["document_id"] not in existing_dids, f"Document ID 충돌 감지: {sd['document_id']}"
-            # 4단계 검증 상태 및 실제 원본 파일 매핑
-            v_status = DOCUMENT_VERIFICATION_MAP.get(sd["document_id"], "reference_restructured")
-            sd["verification_status"] = v_status
+            assert sd.get("verification_status"), f"검증 상태 누락: {sd['document_id']}"
             if sd["document_id"] == "DOC_STG_001_NOTICE":
                 sd["local_raw_path"] = "data/raw/lh/26년1차_신혼·신생아매입임대Ⅰ_입주자모집공고문(서울지역본부)(정정공고).pdf"
                 sd["source_type"] = "pdf"
@@ -224,7 +212,7 @@ def build_candidate_release():
             new_docs.append(sd)
 
     merged_documents = documents + new_docs
-    with open(neo4j_out / "nodes_document.jsonl", "w", encoding="utf-8") as f:
+    with open(neo4j_out / "nodes_document.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for d in merged_documents:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_documents)}건 (+{len(new_docs)}건 증분, 4단계 검증 분류 적용)")
@@ -253,9 +241,8 @@ def build_candidate_release():
             existing_org_names.add(oname)
 
     added_agency_ids = sorted([o["agency_id"] for o in added_org_nodes if o["agency_id"] not in handoff_agency_ids])
-    assert len(added_agency_ids) == 8, f"Expected 8 added agencies, got {len(added_agency_ids)}: {added_agency_ids}" 
 
-    with open(neo4j_out / "nodes_organization.jsonl", "w", encoding="utf-8") as f:
+    with open(neo4j_out / "nodes_organization.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for o in orgs:
             f.write(json.dumps(o, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(orgs)}건 (+{len(added_agency_ids)}개 기관 신규 등록)")
@@ -280,7 +267,7 @@ def build_candidate_release():
         })
 
     merged_cgroups = cgroups + new_cgroups
-    with open(neo4j_out / "nodes_condition_group.jsonl", "w", encoding="utf-8") as f:
+    with open(neo4j_out / "nodes_condition_group.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for cg in merged_cgroups:
             f.write(json.dumps(cg, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_cgroups)}건 (+{len(new_cgroups)}개 루트 조건 그룹 추가)")
@@ -309,11 +296,7 @@ def build_candidate_release():
     # A. 22개 문서에 대한 [:SUPPORTED_BY] 관계 (3건 POL_001, 19건 신규 정책)
     for d in new_docs:
         pid = d["policy_id"]
-        evidence_type = "announcement" if d["doc_type"] == "notice" else (
-            "statutory_basis" if d["doc_type"] in ["law", "ordinance"] else (
-                "administrative_guideline" if d["doc_type"] == "guideline" else "faq_reference"
-            )
-        )
+        evidence_type = EVIDENCE_TYPE_BY_DOC_TYPE[d["doc_type"]]
         new_rels.append({
             "source_id": pid,
             "relation": "SUPPORTED_BY",
@@ -436,7 +419,7 @@ def build_candidate_release():
         })
 
     merged_rels = relationships + new_rels
-    with open(neo4j_out / "relationships.jsonl", "w", encoding="utf-8") as f:
+    with open(neo4j_out / "relationships.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for r in merged_rels:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_rels)}건 (+{len(new_rels)}개 관계 증분)")
@@ -451,18 +434,19 @@ def build_candidate_release():
             if line.strip(): chunks.append(json.loads(line))
 
     existing_cids = {c["chunk_id"] for c in chunks}
+    doc_status = {d["document_id"]: d["verification_status"] for d in new_docs}
     new_chunks = []
     with open(STAGING_DIR / "payload_chunks.jsonl", "r", encoding="utf-8") as f:
         for line in f:
             if not line.strip(): continue
             sc = json.loads(line)
             assert sc["chunk_id"] not in existing_cids, f"Chunk ID 충돌 감지: {sc['chunk_id']}"
-            # 4단계 검증 상태 반영
-            sc["verification_status"] = DOCUMENT_VERIFICATION_MAP.get(sc["document_id"], "reference_restructured")
+            # 청크 검증 상태는 소속 문서의 상태와 같게 맞춘다
+            sc["verification_status"] = doc_status[sc["document_id"]]
             new_chunks.append(sc)
 
     merged_chunks = chunks + new_chunks
-    with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8") as f:
+    with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for c in merged_chunks:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_chunks)}건 (+{len(new_chunks)}건 증분)")
@@ -473,7 +457,7 @@ def build_candidate_release():
     coll_cfg["proposed_indexes"] = [
         {"field_name": "doc_type", "field_schema": "keyword", "status": "PENDING_DB_REVIEW"}
     ]
-    with open(qdrant_out / "collection_config.json", "w", encoding="utf-8") as f:
+    with open(qdrant_out / "collection_config.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(coll_cfg, f, ensure_ascii=False, indent=2)
 
     # -------------------------------------------------------------
@@ -538,8 +522,47 @@ def build_candidate_release():
         ],
         "baseline_manifest_sha256": init_hash
     }
-    with open(CANDIDATE_DIR / "release_delta_manifest.json", "w", encoding="utf-8") as f:
+    with open(CANDIDATE_DIR / "release_delta_manifest.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(delta_manifest, f, ensure_ascii=False, indent=2)
+
+    # B-0. CHANGELOG 집계 표 (실제 파일 기준)
+    from collections import Counter
+    def node_count(name, rows=None):
+        with open((HANDOFF_DIR / "neo4j" / name) if rows is None else rows, "r", encoding="utf-8") as f:
+            return sum(1 for line in f if line.strip())
+    old_nodes = sum(node_count(fname) for fname in pk_map)
+    old_rel = Counter(r["relation"] for r in relationships)
+    new_rel = Counter(r["relation"] for r in merged_rels)
+    status_count = Counter(d["verification_status"] for d in new_docs)
+    rows = [
+        "## 1. 베이스라인 대비 실제 파일 집계 수치 (Actual Verified Counts)",
+        "",
+        "| 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |",
+        "| :--- | ---: | ---: | ---: |",
+        f"| 정책 (`Policy`) | {len(policies)} | {len(merged_policies)} | +{len(new_policies)} |",
+        f"| 근거 문서 (`Document`) | {len(documents)} | {len(merged_documents)} | +{len(new_docs)} |",
+    ]
+    for status, cnt in sorted(status_count.items()):
+        rows.append(f"| • 신규 문서 `{status}` | - | {cnt} | +{cnt} |")
+    rows += [
+        f"| 벡터 청크 (`Chunk`) | {len(chunks)} | {len(merged_chunks)} | +{len(new_chunks)} |",
+        f"| 그래프 노드 (전체) | {old_nodes} | {total_nodes_count} | +{total_nodes_count - old_nodes} |",
+        f"| • Organization | {len(orgs) - len(added_org_nodes)} | {len(orgs)} | +{len(added_org_nodes)} |",
+        f"| • ConditionGroup | {len(cgroups)} | {len(merged_cgroups)} | +{len(new_cgroups)} (루트 UNKNOWN) |",
+        f"| 그래프 관계 (전체) | {len(relationships)} | {len(merged_rels)} | +{len(new_rels)} |",
+    ]
+    for rel in sorted(new_rel):
+        if new_rel[rel] != old_rel[rel]:
+            rows.append(f"| • {rel} | {old_rel[rel]} | {new_rel[rel]} | +{new_rel[rel] - old_rel[rel]} |")
+    rows += [
+        "",
+        "## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)",
+        "",
+        "- 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).",
+        "- 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.",
+        "- 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.",
+    ]
+    counts_section = "\n".join(rows)
 
     # B. CHANGELOG.md 생성
     changelog_content = f"""# LifePolicy AI — 후보 릴리스 v1.4.0-candidate 변경 기록 (CHANGELOG)
@@ -552,31 +575,7 @@ def build_candidate_release():
 
 ---
 
-## 1. 베이스라인 대비 실제 파일 집계 수치 (Actual Verified Counts)
-
-| 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 내역 (Delta) | 호환성 및 무결성 판정 |
-| :--- | :---: | :---: | :---: | :---: |
-| **통합 정책 (`Policy`)** | 237건 | **246건** | **+9건 신규** (기존 1건 병합) | 충돌 0건 (100% PASS) |
-| **근거 문서 (`Document`)** | 246건 | **268건** | **+22건 공식 근거** | 4단계 검증 분류 적용 |
-| • *공식 원본 직보유 (`verified_official_raw`)* | - | 2건 | +2건 | LH 모집공고문(PDF) / FAQ(HWP) |
-| • *법령·조례 직추출 (`verified_extracted`)* | - | 8건 | +8건 | 법률 제49조, 제30조, 조례 등 |
-| • *공식 포털 정제본 (`reference_restructured`)* | - | 12건 | +12건 | 정부24/포털 지침·FAQ 정제본 |
-| **벡터 청크 (`Chunk`)** | 557건 | **593건** | **+36건 맞춤 청크** | UUIDv5 충돌 0건 (100% PASS) |
-| **그래프 노드 (`Total Nodes`)** | 1,034개 | **1,082개** | **+48개 노드 증분** | 고유 제약조건 100% PASS |
-| • *Policy 노드* | 237개 | 246개 | +9개 | PK 유일 |
-| • *Document 노드* | 246개 | 268개 | +22개 | PK 유일 |
-| • *Organization 노드* | 116개 | 124개 | +8개 | PK 유일 (신규 부처 8개) |
-| • *ConditionGroup 노드* | 343개 | 352개 | +9개 (루트 UNKNOWN) | PK 유일 |
-| • *Category / LifeStage / Region / TargetGroup / Condition* | 92개 | 92개 | 0개 (기존 100% 재사용) | 불변 |
-| **그래프 관계 (`Relationship`)** | 3,615건 | **3,710건** | **+95건 관계 증분** | **Broken References = 0건** |
-| • *SUPPORTED_BY* | 246건 | 268건 | +22건 | 출처 추적 100% |
-| • *ADMINISTERED_BY* | 237건 | 246건 | +9건 | 소관기관 매핑 100% |
-| • *HAS_CATEGORY* | 237건 | 246건 | +9건 | 5대 표준 카테고리 100% |
-| • *AVAILABLE_IN* | 238건 | 247건 | +9건 | 18대 표준 광역지역 100% |
-| • *APPLIES_TO_LIFESTAGE* | 419건 | 437건 | +18건 | 6대 표준 생애단계 100% |
-| • *TARGETS* | 424건 | 443건 | +19건 | 11대 표준 대상집단 100% |
-| • *HAS_ROOT_CONDITION_GROUP* | 237건 | 246건 | +9건 | 루트 조건 그룹 연결 100% |
-| • *기타 조건 DAG 관계* | 1,577건 | 1,577건 | 0건 (기존 보존) | 무변경 보존 |
+{counts_section}
 
 ---
 
@@ -603,9 +602,9 @@ def build_candidate_release():
 
 ## 4. 정밀 롤백 프로토콜 (Targeted Rollback by Exact Item List)
 - 단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식을 폐기함.
-- [`release_delta_manifest.json`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 9개 정책 ID, 22개 문서 ID, 8개 기관 ID, 9개 조건그룹 ID, 36개 Qdrant Point ID, 95개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
+- `release_delta_manifest.json`에 기록된 **정확한 {len(new_policies)}개 정책 ID, {len(new_docs)}개 문서 ID, {len(added_agency_ids)}개 기관 ID, {len(new_cgroups)}개 조건그룹 ID, {len(new_chunks)}개 Qdrant Point ID, {len(new_rels)}개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
 """
-    (CANDIDATE_DIR / "CHANGELOG.md").write_text(changelog_content, encoding="utf-8")
+    (CANDIDATE_DIR / "CHANGELOG.md").write_text(changelog_content, encoding="utf-8", newline="\n")
 
     # -------------------------------------------------------------
     # 7. 매니페스트 생성 (CHANGELOG 및 모든 파일의 크기/해시 최종 반영)
@@ -657,7 +656,7 @@ def build_candidate_release():
         "files": files_manifest
     }
 
-    with open(CANDIDATE_DIR / "manifest.json", "w", encoding="utf-8") as f:
+    with open(CANDIDATE_DIR / "manifest.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(candidate_manifest, f, ensure_ascii=False, indent=2)
 
     # 8. 종료 검증: 원본 handoff manifest 불변 재확인
