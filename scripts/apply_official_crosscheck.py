@@ -32,6 +32,7 @@ GOV24_EXTRACT_PATH = STAGING_DIR / "official" / "gov24_crosscheck_services.jsonl
 YOUTH_PATH = BASE_DIR / "data" / "processed" / "youthcenter_policies.jsonl"
 RETRIEVED_AT = "2026-11-06T00:00:00+09:00"
 MAX_CHUNK_CHARS = 900
+MIN_CHUNK_CHARS = 200
 
 # 법령·조례: 국가법령정보센터에서 조문 원문을 확인한 문서
 OFFICIAL_LAW_DOCS = [
@@ -68,6 +69,16 @@ OFFICIAL_LAW_DOCS = [
      "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"},
 ]
 
+# 원본 파일에서 직접 추출한 문서 (scripts/extract_hwp_text.py)
+OFFICIAL_RAW_DOCS = [
+    {"document_id": "DOC_STG_001_FAQ", "policy_id": "POL_001", "doc_type": "faq",
+     "title": "26년 신혼·신생아 매입임대Ⅰ 관련 Q&A (LH 공고 첨부)",
+     "local_raw_path": "data/raw/lh/26년신혼·신생아매입임대Ⅰ_QnA.hwp",
+     "extracted_text_path": "data/staging/official/faq/LH_26년_신혼신생아매입임대Ⅰ_QnA.txt",
+     "source_type": "hwp", "effective_date": None, "version": "2026년 1차 공고 첨부",
+     "source_url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&panId=2015122300019712&uppAisTpCd=13"},
+]
+
 # 서비스 안내: 정부24 공공서비스 API 응답(서비스 상세)을 원문으로 사용
 GOV24_SERVICE_DOCS = {
     "POL_STG_MOLIT_002": "161300000103",
@@ -84,7 +95,6 @@ YOUTH_SERVICE_DOCS = {"POL_STG_SEOUL_001": "20261018005400213994"}
 # 공식 원문을 확인하지 못했거나 원문과 달라 제외한 문서
 EXCLUDED_DOCS = {
     "DOC_STG_001_NOTICE": "v1.3.2의 DOC_LH_001과 같은 PDF의 중복 요약본. 요약 내용이 원문과 다름(공고일 3/20↔원문 3/31, 자동차가액 3,708만원↔원문 4,542만원, '420호'·'서류접수 4/12 연장'은 원문에 없음)",
-    "DOC_STG_001_FAQ": "원본 HWP는 보유하나 추출 텍스트가 원문에서 추출된 것이 아님. HWP 파서(olefile 등) 설치 승인 후 재추출 필요",
     "DOC_STG_MOLIT_002_GDL": "사업안내서 원문 미확보. 출처 URL로 원문 확인 불가 → 정부24 서비스 상세(DOC_STG_MOLIT_002_GOV24)로 대체",
     "DOC_STG_MOLIT_002_FAQ": "질의회시집 원문 미확보. 출처 URL(plus.gov.kr/portal/benefitV2/faq/…) 형식 확인 불가",
     "DOC_STG_MOHW_001_GDL": "표준처리지침 원문 미확보 → 정부24 서비스 상세(DOC_STG_MOHW_001_GOV24)로 대체",
@@ -159,7 +169,8 @@ def split_text(text: str, pattern: str) -> list:
     parts = [p.strip() for p in re.split(pattern, text) if p.strip()]
     chunks, current = [], ""
     for part in parts:
-        if current and len(current) + len(part) + 2 > MAX_CHUNK_CHARS:
+        # 제목·머리말처럼 짧은 조각(MIN_CHUNK_CHARS 미만)은 단독 청크로 두지 않고 다음 조각과 묶는다
+        if len(current) >= MIN_CHUNK_CHARS and len(current) + len(part) + 2 > MAX_CHUNK_CHARS:
             chunks.append(current)
             current = part
         else:
@@ -173,6 +184,9 @@ def chunk_document(doc: dict, text: str) -> list:
     if doc["doc_type"] in ("law", "ordinance"):
         # 조문 머리(제N조)와 항(①②…) 경계에서 나눈다. 법령명·시행 정보 머리말은 첫 청크에 남는다.
         pieces = split_text(text, r"\n(?=제\d+조(?:의\d+)?\()|\n(?=[①-⑳])")
+    elif doc["doc_type"] == "faq":
+        # HWP Q&A는 '번호 줄 → 질문 줄(…?)' 순서이므로 질문 번호 줄 앞에서 나눈다.
+        pieces = split_text(text, r"\n(?=\d{1,2}\n[^\n]*\n)")
     else:
         # API 원문의 [지원대상]·[지원내용] 같은 섹션 머리에서 나눈다.
         pieces = split_text(text, r"\n(?=\[[^\]]+\]\n)")
@@ -193,6 +207,20 @@ def build_documents(policies: dict) -> list:
             "source_url": spec["source_url"], "local_raw_path": path.relative_to(BASE_DIR).as_posix(),
             "content_hash": sha256_text(text), "verification_status": "verified_official_text",
             "collected_at": RETRIEVED_AT, "doc_type": spec["doc_type"], "law_article": spec["law_article"],
+            "effective_date": spec["effective_date"], "version": spec["version"], "_text": text,
+        })
+
+    for spec in OFFICIAL_RAW_DOCS:
+        raw_path = BASE_DIR / spec["local_raw_path"]
+        text = (BASE_DIR / spec["extracted_text_path"]).read_text(encoding="utf-8").strip()
+        # 원본 파일은 Git에서 제외(*.hwp)되므로, 원본이 있을 때만 원본 해시를 기록하고 없으면 추출 텍스트 해시를 쓴다
+        content_hash = hashlib.sha256(raw_path.read_bytes()).hexdigest() if raw_path.exists() else sha256_text(text)
+        docs.append({
+            "document_id": spec["document_id"], "policy_id": spec["policy_id"], "title": spec["title"],
+            "source_type": spec["source_type"], "source_url": spec["source_url"],
+            "local_raw_path": spec["local_raw_path"], "extracted_text_path": spec["extracted_text_path"],
+            "content_hash": content_hash, "verification_status": "verified_official_raw",
+            "collected_at": RETRIEVED_AT, "doc_type": spec["doc_type"], "law_article": None,
             "effective_date": spec["effective_date"], "version": spec["version"], "_text": text,
         })
 
@@ -330,7 +358,8 @@ def main() -> None:
     with open(STAGING_DIR / "crosscheck_results.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump({"checked_at": RETRIEVED_AT, "documents": results}, f, ensure_ascii=False, indent=2)
 
-    print(f"문서 {len(docs)}건 (법령·조례 {len(OFFICIAL_LAW_DOCS)}, API 서비스 안내 {len(docs) - len(OFFICIAL_LAW_DOCS)}), "
+    print(f"문서 {len(docs)}건 (법령·조례 {len(OFFICIAL_LAW_DOCS)}, 원본 추출 {len(OFFICIAL_RAW_DOCS)}, "
+          f"API 서비스 안내 {len(docs) - len(OFFICIAL_LAW_DOCS) - len(OFFICIAL_RAW_DOCS)}), "
           f"청크 {len(chunks)}건, 제외 {sum(r['result'] == 'excluded' for r in results)}건")
 
 

@@ -9,9 +9,8 @@
     },
     {
       "document_id": "DOC_STG_001_FAQ",
-      "result": "excluded",
-      "old_status": "verified_official_raw",
-      "reason": "원본 HWP는 보유하나 추출 텍스트가 원문에서 추출된 것이 아님. HWP 파서(olefile 등) 설치 승인 후 재추출 필요"
+      "result": "replaced_with_official_text",
+      "old_status": "verified_official_raw"
     },
     {
       "document_id": "DOC_STG_001_LAW",

@@ -197,18 +197,7 @@ def build_candidate_release():
             sd = json.loads(line)
             assert sd["document_id"] not in existing_dids, f"Document ID 충돌 감지: {sd['document_id']}"
             assert sd.get("verification_status"), f"검증 상태 누락: {sd['document_id']}"
-            if sd["document_id"] == "DOC_STG_001_NOTICE":
-                sd["local_raw_path"] = "data/raw/lh/26년1차_신혼·신생아매입임대Ⅰ_입주자모집공고문(서울지역본부)(정정공고).pdf"
-                sd["source_type"] = "pdf"
-                sd["source_url"] = "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&panId=2015122300019712&uppAisTpCd=13"
-                sd["content_hash"] = "95d7229ed0ec3efe1697c1779292ef7c2c218c3d92239ab4775ff2e1dfe2a282"
-                sd["extracted_text_path"] = "data/staging/raw/notice/26년1차_신혼·신생아매입임대Ⅰ_모집공고_정정.md"
-            elif sd["document_id"] == "DOC_STG_001_FAQ":
-                sd["local_raw_path"] = "data/raw/lh/26년신혼·신생아매입임대Ⅰ_QnA.hwp"
-                sd["source_type"] = "hwp"
-                sd["source_url"] = "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&panId=2015122300019712&uppAisTpCd=13"
-                sd["content_hash"] = "1771a7cf06fcdf126a891ecfbd8a533ac7799f54389b68d640f1a3fcec02d800"
-                sd["extracted_text_path"] = "data/staging/raw/faq/26년_신혼신생아매입임대1_FAQ.md"
+            # 원본 경로·해시·추출 텍스트 경로는 apply_official_crosscheck.py가 staging에 기록한 값을 그대로 쓴다
             new_docs.append(sd)
 
     merged_documents = documents + new_docs

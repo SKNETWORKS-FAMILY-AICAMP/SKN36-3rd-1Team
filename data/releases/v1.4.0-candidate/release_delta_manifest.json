@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-06T18:13:01.818872",
+  "created_at": "2026-11-06T18:15:45.491576",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -19,6 +19,7 @@
     "DOC_STG_EX_001_LAW",
     "DOC_STG_SEOUL_001_ORD",
     "DOC_STG_ICN_001_ORD",
+    "DOC_STG_001_FAQ",
     "DOC_STG_MOLIT_002_GOV24",
     "DOC_STG_MOHW_001_GOV24",
     "DOC_STG_DGU_001_GOV24",
@@ -54,7 +55,6 @@
     "fce7e80a-dace-54ff-bec1-425c52984b7e",
     "defdb714-607a-57ab-9211-35a746931bd9",
     "e130259e-ccb3-596c-8040-f279788df0c0",
-    "d7f49108-5f5b-5811-b82b-bdca12f88780",
     "cd53bdec-2072-5288-9432-e22541090b18",
     "bea3eb4c-c78a-5fe0-bd7e-52a9fb5c76d3",
     "bca98786-48aa-571e-8252-d7ad258c49d3",
@@ -63,7 +63,17 @@
     "ba69eefa-a6f3-5fd1-b993-811159dddbb4",
     "0e0eb9d4-5de3-5868-b2ea-1a9426846e13",
     "665af5b3-f4fa-512f-8755-06219014af82",
-    "be15c662-b81f-527e-9a1c-3bbf3cc46c3d",
+    "e6ef6929-0585-52c3-bebc-da73e14f0ef7",
+    "6d76969d-5be4-5c54-bec6-e391aa29eda1",
+    "59c6b456-5901-536f-a45f-a91c3a2af24a",
+    "211bcb5f-d83d-5221-af89-132d7b8b7191",
+    "94f788c2-c468-50f3-b4c4-90c9b8a7b01b",
+    "2bfa9105-e4c7-5ad0-9b6d-1ca0647b6e4c",
+    "e776471b-624b-5a86-9e99-0b1d9e645026",
+    "6e2f980d-b89d-5348-ae33-9ef69fc3ca09",
+    "9de71933-2201-54f1-a699-90c4b46d5a2c",
+    "4a09c097-0693-5891-b4af-6d74080b4fe0",
+    "c6429cc9-0ff1-54d2-a017-d7fd11fbeb6f",
     "980778c3-1539-519d-8090-b6117dc5129e",
     "f9595d56-1518-5aed-a913-f5eeb33243f6",
     "8eca426d-50ce-5b0d-ac81-fa96a1583bd5",
@@ -83,7 +93,7 @@
     "e2714b83-1fd2-53e4-8bd4-926ed8a1a319",
     "ea5cb5e9-0d11-52d3-985f-f92828e021f8"
   ],
-  "added_relationships_count": 87,
+  "added_relationships_count": 88,
   "exact_added_relationships": [
     {
       "source_id": "POL_001",
@@ -114,6 +124,11 @@
       "source_id": "POL_STG_ICN_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_ICN_001_ORD"
+    },
+    {
+      "source_id": "POL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_001_FAQ"
     },
     {
       "source_id": "POL_STG_MOLIT_002",

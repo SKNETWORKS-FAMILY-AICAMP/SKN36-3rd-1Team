@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (절대 무변경 보존)
-- **최종 검증 일시**: 2026-11-06 18:13:01
+- **최종 검증 일시**: 2026-11-06 18:15:45
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -13,20 +13,21 @@
 | 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |
 | :--- | ---: | ---: | ---: |
 | 정책 (`Policy`) | 237 | 246 | +9 |
-| 근거 문서 (`Document`) | 246 | 260 | +14 |
+| 근거 문서 (`Document`) | 246 | 261 | +15 |
 | • 신규 문서 `verified_official_api` | - | 8 | +8 |
+| • 신규 문서 `verified_official_raw` | - | 1 | +1 |
 | • 신규 문서 `verified_official_text` | - | 6 | +6 |
-| 벡터 청크 (`Chunk`) | 557 | 590 | +33 |
-| 그래프 노드 (전체) | 1034 | 1073 | +39 |
+| 벡터 청크 (`Chunk`) | 557 | 599 | +42 |
+| 그래프 노드 (전체) | 1034 | 1074 | +40 |
 | • Organization | 116 | 123 | +7 |
 | • ConditionGroup | 343 | 352 | +9 (루트 UNKNOWN) |
-| 그래프 관계 (전체) | 3615 | 3702 | +87 |
+| 그래프 관계 (전체) | 3615 | 3703 | +88 |
 | • ADMINISTERED_BY | 237 | 246 | +9 |
 | • APPLIES_TO_LIFESTAGE | 419 | 437 | +18 |
 | • AVAILABLE_IN | 238 | 247 | +9 |
 | • HAS_CATEGORY | 237 | 246 | +9 |
 | • HAS_ROOT_CONDITION_GROUP | 237 | 246 | +9 |
-| • SUPPORTED_BY | 246 | 260 | +14 |
+| • SUPPORTED_BY | 246 | 261 | +15 |
 | • TARGETS | 424 | 443 | +19 |
 
 ## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)
@@ -60,4 +61,4 @@
 
 ## 4. 정밀 롤백 프로토콜 (Targeted Rollback by Exact Item List)
 - 단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식을 폐기함.
-- `release_delta_manifest.json`에 기록된 **정확한 9개 정책 ID, 14개 문서 ID, 7개 기관 ID, 9개 조건그룹 ID, 33개 Qdrant Point ID, 87개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
+- `release_delta_manifest.json`에 기록된 **정확한 9개 정책 ID, 15개 문서 ID, 7개 기관 ID, 9개 조건그룹 ID, 42개 Qdrant Point ID, 88개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
