@@ -178,9 +178,9 @@ RETURN count(p) AS PoliciesWithoutDocument;
 
 ```json
 {
-  "chunk_id": "CHK_POL_005_001",
+  "chunk_id": "DOC_WORK24_001_C01",
   "policy_id": "POL_005",
-  "document_id": "DOC_MOEL_003",
+  "document_id": "DOC_WORK24_001",
   "policy_name": "고용24 국민내일배움카드",
   "category": "일자리·취업",
   "region": "전국",

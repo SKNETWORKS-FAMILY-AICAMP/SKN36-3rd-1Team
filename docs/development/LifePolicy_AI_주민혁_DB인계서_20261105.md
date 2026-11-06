@@ -13,7 +13,7 @@
 | 확정 | Neo4j 노드 1,034 / 관계 3,615 | JSONL 실파일 집계 |
 | 확정 | `LifeStage` 레이블, `ConditionGroup` 구조 | 실제 노드 파일 확인 |
 | 확정 | Qdrant Point ID = UUIDv5(`NAMESPACE_DNS`, `chunk_id`) | 557개 파일 검증 결과 |
-| 확정 | 파일 참조 무결성·체크섬 | 인계 전 오프라인 검증 완료 |
+| 파일 검사 | 관계 참조 무결성·체크섬 | 관계 참조 누락 0건. 체크섬은 현재 파일 기준 재검증. 원본 246개는 별도 배치 필요 |
 | 미확정 | 임베딩 모델 및 컬렉션 벡터 차원 | **담당자 결정 필요** |
 | 미실행 | Neo4j 실서버 적재·Qdrant 임베딩 색인·실검색 | **NOT_TESTED** |
 
@@ -239,7 +239,7 @@ sequenceDiagram
 - `data/handoff/data_contract.md`: 정식 ID/필드/상태 데이터 계약
 - `data/handoff/neo4j/load_neo4j.py`, `cypher_ddl.cypher`, `verify_neo4j.cypher`
 - `data/handoff/qdrant/collection_config.json`, `payload_chunks.jsonl`
-- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `3a6a9b15360bb6605579d20cfd7e199cd0f2803840cb35a44870a0606bc118c0` (매니페스트 파일 자체)
+- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `355a7310e7bc60a2b0707174c8496069b3f1b598a47a1dffb45960a7f7673341` (2026-11-05 문서 정합성 수정 후 파일 크기·체크섬 갱신, 데이터 내용 변경 없음)
 - `data/reports/lifecycle_distribution_report.md`: 생애주기 상세 분석
 
-**인계 판정:** 오프라인 파일 검증은 통과. **실제 DB 구축 후 실행 검증이 남아 있으며, 해당 결과는 인수 담당자가 기록해야 합니다.**
+**인계 판정:** 정제·인계 파일 준비 및 관계 참조 검사는 통과. 현재 로컬은 참조 원본 246개가 없어 전체 검증은 실패합니다. `data/handoff/README.md` §7에 따라 원본을 별도 배치하고 재검증해야 합니다. 실제 DB 적재·임베딩 검증은 NOT_TESTED이며 인수 담당자가 환경·실행 시점·결과를 기록합니다.

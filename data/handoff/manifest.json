@@ -13,19 +13,19 @@
   },
   "files": {
     "data_contract.md": {
-      "size_bytes": 8846,
-      "sha256": "c35b9fef54fca2fdbbf71c5949e6ef92f7fe2fc2a19d7d8df85eec107f7d7d7c",
-      "record_count": 88
+      "size_bytes": 8959,
+      "sha256": "efb37a71660ccc90f98f032d9bcb290b6a11c16647258c3cc3b38019586044ae",
+      "record_count": 113
     },
     "neo4j/cypher_ddl.cypher": {
       "size_bytes": 1746,
       "sha256": "1ce335ff23b327426efcd8954b794c9aefcf31a9bb32e2bfcc79434c45941105",
-      "record_count": 32
+      "record_count": 45
     },
     "neo4j/load_neo4j.py": {
       "size_bytes": 9832,
       "sha256": "38557c2f8eec6b07de3ac6e0a813416b0449eac2f19799c71d33ffba1ccddf00",
-      "record_count": 173
+      "record_count": 196
     },
     "neo4j/nodes_category.jsonl": {
       "size_bytes": 402,
@@ -80,17 +80,17 @@
     "neo4j/schema_constraints.cypher": {
       "size_bytes": 1241,
       "sha256": "779558d4be8eb45d05e2e2a4817314088115eaa5f28d4878fc609f53849a243b",
-      "record_count": 23
+      "record_count": 33
     },
     "neo4j/verification_queries.cypher": {
       "size_bytes": 815,
       "sha256": "d96f8f84bdbd00fe55a68e51d53ad944c8e6b971fb6565fce65a5d06338021d6",
-      "record_count": 15
+      "record_count": 18
     },
     "neo4j/verify_neo4j.cypher": {
       "size_bytes": 1611,
       "sha256": "96b22f13c96c7e5c6a1306a8e1b4b0df35276ee402af95edfaebf928f5c70487",
-      "record_count": 27
+      "record_count": 32
     },
     "qdrant/collection_config.json": {
       "size_bytes": 1031,
@@ -103,9 +103,9 @@
       "record_count": 557
     },
     "README.md": {
-      "size_bytes": 11381,
-      "sha256": "e8e8085c4f803e13578579722b64245622981b92362643110eed30ef0d4c3eb5",
-      "record_count": 167
+      "size_bytes": 13055,
+      "sha256": "6c462cbea473ca06ea83e6232459d776f47077c59bd69ad1d89f9a69dc84f359",
+      "record_count": 208
     }
   }
 }
