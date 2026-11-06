@@ -43,7 +43,7 @@ class TestConfigs(unittest.TestCase):
         cls.documents = hd.load_documents()
         cls.metadata = hd.load_policy_metadata()
         cls.plans = {name: fi.plan_full_index(name, documents=cls.documents, policy_metadata=cls.metadata)
-                     for name in fi.FULL_INDEX_CONFIGS}
+                     for name in fi.available_configs()}
 
     def test_expected_counts_and_ids(self):
         for name, plan in self.plans.items():

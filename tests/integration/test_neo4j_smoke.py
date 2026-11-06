@@ -84,8 +84,10 @@ class TestNeo4jLoadedGraphSmoke(unittest.TestCase):
     def test_total_node_and_relationship_counts(self):
         self.assertEqual(self.totals["nodes"], sum(len(rows) for rows in self.graph.nodes_by_label.values()))
         self.assertEqual(self.totals["relationships"], len(self.graph.relationships))
-        self.assertEqual(self.totals["nodes"], 1034)          # 인계 기준값 (파일 기준 계산과 같아야 함)
-        self.assertEqual(self.totals["relationships"], 3615)
+        # 인계 기준값 (v1.3.2: 1034/3615, LIFEPOLICY_DATASET_DIR 지정 시 그 manifest summary)
+        from database import handoff_data as hd
+        self.assertEqual(self.totals["nodes"], hd.EXPECTED_NODE_COUNT)
+        self.assertEqual(self.totals["relationships"], hd.EXPECTED_RELATIONSHIP_COUNT)
 
     def test_counts_by_label_and_type_match_input(self):
         self.assertEqual(self.lg.snapshot_counts(self.runner), self.lg.expected_counts(self.graph))
@@ -110,13 +112,15 @@ class TestNeo4jLoadedGraphSmoke(unittest.TestCase):
         report = self.lg.verify_node_properties(self.graph, self.runner)
         self.assertTrue(report["ok"], {"counts": report["counts"], "unmatched": report["unmatched"],
                                        "examples": str(report.get("examples"))[:500]})
-        self.assertEqual(report["compared_nodes"], 1034)
+        from database import handoff_data as hd
+        self.assertEqual(report["compared_nodes"], hd.EXPECTED_NODE_COUNT)
 
     def test_relationship_properties_match_input(self):
         report = self.lg.verify_relationship_properties(self.graph, self.runner)
         self.assertTrue(report["ok"], {"counts": report["counts"], "unmatched": report["unmatched"],
                                        "not_loaded": report["input_fields_not_loaded"]})
-        self.assertEqual(report["compared_relationships"], 3615)
+        from database import handoff_data as hd
+        self.assertEqual(report["compared_relationships"], hd.EXPECTED_RELATIONSHIP_COUNT)
 
     def test_no_notifications_need_review(self):
         self.lg.verify_loaded_graph(self.graph, self.runner)

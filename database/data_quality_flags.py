@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from database import full_index as fi
+from database import handoff_data as hd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SEMANTIC_REPORT = PROJECT_ROOT / "docs" / "development" / "experiments" / "neo4j_semantic_20261106" / "neo4j_semantic_check.json"
@@ -96,12 +97,18 @@ def load_flags(path: Path = FLAGS_PATH) -> dict[str, Any]:
         return _CACHE[key]
     if not Path(path).is_file():
         result = {"status": "missing", "file": Path(path).name, "flags_by_policy": {}}
+    elif not hd.IS_DEFAULT_DATASET:
+        # v1.3.2 그래프로 만든 목록이다. 다른 인계 패키지(LIFEPOLICY_DATASET_DIR)에는 적용 대상이 아니다.
+        result = {"status": "not_applicable", "file": Path(path).name, "dataset": hd.dataset_version(),
+                  "flags_by_policy": {}}
     else:
         flags = json.loads(Path(path).read_text(encoding="utf-8"))
         current = fi.manifest_sha256()
-        status = "applied" if flags.get("manifest_sha256") == current else "stale"
+        # 같은 manifest이거나, 데이터 파일이 그대로인 기록된 manifest 변경(manifest_equivalence.json)만 적용
+        status = "applied" if fi.manifest_equivalent(flags.get("manifest_sha256", ""), current) else "stale"
         result = {"status": status, "file": Path(path).name, "flags_version": flags.get("flags_version"),
                   "data_version": flags.get("data_version"), "manifest_sha256": flags.get("manifest_sha256"),
+                  "current_manifest_sha256": current,
                   "disclaimer": flags.get("disclaimer"),
                   "flags_by_policy": flags.get("flags_by_policy", {}) if status == "applied" else {}}
     _CACHE[key] = result

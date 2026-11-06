@@ -59,8 +59,17 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
     # 2026-11-06 모델 비교: 청킹(B2)은 A_B2와 같고 임베딩 모델·차원만 다르다. 차원 2560은 다운로드 후 실측값
     "A_B2_4B": {"collection": "exp_b2_qwen3emb4b_full_v1", "strategy": "B2", "expected_chunks": 1081,
                 "model": "qwen3-embedding:4b", "dim": 2560},
+    # 2026-11-07 Issue #21 최종 후보(data/candidates/issue21-v1.4.0-rag, 문서 261). 새 컬렉션에만 쓴다.
+    # LIFEPOLICY_DATASET_DIR로 후보를 고른 경우에만 사용 가능 (dataset 확인).
+    "A_B2_I21": {"collection": "exp_b2_qwen3emb06b_i21_v1", "strategy": "B2", "expected_chunks": 1138,
+                 "dataset": "issue21-v1.4.0-review"},
+    "B_B3_I21": {"collection": "exp_b3_qwen3emb06b_i21_v1", "strategy": "B3", "expected_chunks": 1220,
+                 "dataset": "issue21-v1.4.0-review"},
 }
 # 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다
+# 구성에 dataset이 없으면 v1.3.2 인계 패키지 전용이다.
+DEFAULT_DATASET_VERSION = "1.3.2"
+MANIFEST_EQUIVALENCE_PATH = PROJECT_ROOT / "database" / "data_quality" / "manifest_equivalence.json"
 
 
 def config_model(config: dict[str, Any]) -> tuple[str, int]:
@@ -79,10 +88,22 @@ class FullIndexError(RuntimeError):
 # ---------------------------------------------------------------------------
 # 1. 구성별 청크
 # ---------------------------------------------------------------------------
+def available_configs() -> tuple[str, ...]:
+    """현재 인계 패키지(LIFEPOLICY_DATASET_DIR)에서 쓸 수 있는 구성 이름."""
+    version = handoff_data.dataset_version()
+    return tuple(name for name, config in FULL_INDEX_CONFIGS.items()
+                 if config.get("dataset", DEFAULT_DATASET_VERSION) == version)
+
+
 def get_config(name: str) -> dict[str, Any]:
     if name not in FULL_INDEX_CONFIGS:
         raise FullIndexError(f"알 수 없는 구성: {name} {tuple(FULL_INDEX_CONFIGS)}")
     config = {"name": name, **FULL_INDEX_CONFIGS[name]}
+    wanted = config.get("dataset", DEFAULT_DATASET_VERSION)
+    actual = handoff_data.dataset_version()
+    if wanted != actual:
+        raise FullIndexError(f"{name} 구성은 데이터셋 {wanted} 전용입니다 (현재 {actual}, "
+                             f"{handoff_data.DATASET_DIR_ENV} 확인)")
     store.assert_experiment_collection(config["collection"])
     if config["collection"] in PROTECTED_COLLECTIONS:
         raise FullIndexError(f"보호 컬렉션에는 쓰지 않습니다: {config['collection']}")
@@ -128,6 +149,26 @@ def chunk_fingerprint(chunks: list[dict[str, Any]]) -> str:
 def manifest_sha256() -> str:
     """manifest.json의 sha256. 줄바꿈을 LF로 맞춘 뒤 계산한다 (Windows Git 체크아웃 CRLF 변환과 무관하게 같은 값)."""
     return hashlib.sha256(handoff_data.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
+def manifest_equivalent(pinned: str, current: str | None = None) -> bool:
+    """
+    고정 기록(평가셋 freeze, 정적 플래그)의 manifest_sha256이 현재 데이터와 같은 데이터를 가리키는지.
+
+    같은 해시이거나, manifest_equivalence.json에 기록된 변경(manifest·문서만 변경)이면서
+    기록된 데이터 파일이 지금도 LF 기준 바이트 동일할 때만 True. 고정 기록 파일 자체는 고치지 않는다.
+    """
+    current = current or manifest_sha256()
+    if pinned == current:
+        return True
+    if not MANIFEST_EQUIVALENCE_PATH.is_file():
+        return False
+    for item in json.loads(MANIFEST_EQUIVALENCE_PATH.read_text(encoding="utf-8"))["equivalences"]:
+        if item["from_manifest_sha256"] == pinned and item["to_manifest_sha256"] == current:
+            return all((handoff_data.HANDOFF_DIR / name).is_file() and hashlib.sha256(
+                (handoff_data.HANDOFF_DIR / name).read_bytes().replace(b"\r\n", b"\n")).hexdigest() == sha
+                for name, sha in item["unchanged_data_files"].items())
+    return False
 
 
 def make_run_info(name: str, run_id: str | None = None) -> dict[str, Any]:

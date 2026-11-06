@@ -14,6 +14,7 @@
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -23,17 +24,36 @@ from typing import Any
 # ---------------------------------------------------------------------------
 # 이 파일은 <프로젝트 루트>/database/handoff_data.py 에 있으므로 parents[1]이 프로젝트 루트다.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
+DEFAULT_HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
+# 다른 인계 패키지(예: Issue #21 후보 data/candidates/issue21-v1.4.0-rag)를 쓸 때만 설정한다.
+# 상대 경로는 프로젝트 루트 기준. 설정하지 않으면 기존 v1.3.2(data/handoff) 동작 그대로다.
+DATASET_DIR_ENV = "LIFEPOLICY_DATASET_DIR"
+
+
+def _dataset_dir() -> Path:
+    value = os.environ.get(DATASET_DIR_ENV, "").strip()
+    if not value:
+        return DEFAULT_HANDOFF_DIR
+    path = Path(value)
+    return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+
+
+HANDOFF_DIR = _dataset_dir()
+IS_DEFAULT_DATASET = HANDOFF_DIR == DEFAULT_HANDOFF_DIR
 NEO4J_HANDOFF_DIR = HANDOFF_DIR / "neo4j"
 QDRANT_HANDOFF_DIR = HANDOFF_DIR / "qdrant"
 
 PAYLOAD_CHUNKS_PATH = QDRANT_HANDOFF_DIR / "payload_chunks.jsonl"
 RELATIONSHIPS_PATH = NEO4J_HANDOFF_DIR / "relationships.jsonl"
 MANIFEST_PATH = HANDOFF_DIR / "manifest.json"
+# 정책 단위 메타데이터 (Issue #21 후보부터 제공). 없으면 청크에서 모은다.
+POLICY_METADATA_PATH = QDRANT_HANDOFF_DIR / "policy_metadata.jsonl"
 
 # 문서 단위 정제본 (재청킹 원천). 반석님 정제 결과이며 읽기만 한다.
 # 기존 청크 557건이 모두 이 파일 본문의 부분 문자열임을 2026-11-05에 확인했다.
-DOCUMENTS_PATH = PROJECT_ROOT / "data" / "processed" / "documents.jsonl"
+# 다른 인계 패키지는 패키지 안의 documents.jsonl(본문 + content_hash)을 쓴다.
+DOCUMENTS_PATH = (PROJECT_ROOT / "data" / "processed" / "documents.jsonl" if IS_DEFAULT_DATASET
+                  else HANDOFF_DIR / "documents.jsonl")
 
 # 인계 문서(data/handoff/README.md, manifest v1.3.2)에 적힌 기대 건수.
 # 테스트는 실제 파일을 세어 이 값과 비교한다. 데이터가 바뀌면 테스트가 FAIL로 알려준다.
@@ -42,6 +62,19 @@ EXPECTED_POLICY_COUNT = 237
 EXPECTED_DOCUMENT_COUNT = 246
 EXPECTED_NODE_COUNT = 1034
 EXPECTED_RELATIONSHIP_COUNT = 3615
+if not IS_DEFAULT_DATASET:
+    # 다른 패키지는 그 manifest summary가 기대 건수다 (고정값을 새로 박지 않는다).
+    _summary = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["summary"]
+    EXPECTED_CHUNK_COUNT = _summary["total_chunks"]
+    EXPECTED_POLICY_COUNT = _summary["total_policies"]
+    EXPECTED_DOCUMENT_COUNT = _summary["total_documents"]
+    EXPECTED_NODE_COUNT = _summary["total_graph_nodes"]
+    EXPECTED_RELATIONSHIP_COUNT = _summary["total_graph_edges"]
+
+
+def dataset_version() -> str:
+    """현재 인계 패키지의 manifest_version (v1.3.2는 "1.3.2")."""
+    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["manifest_version"]
 
 # ---------------------------------------------------------------------------
 # 2. Neo4j 노드·관계 명세
@@ -369,6 +402,7 @@ POLICY_METADATA_FIELDS = (
     "policy_name", "category", "region", "life_stages", "target_groups",
     "eligibility_attributes", "verification_status",
 )
+OPTIONAL_POLICY_METADATA_FIELDS = ("region_detail", "eligibility_review_status")
 
 
 def load_policy_metadata(chunks: list[dict[str, Any]] | None = None) -> dict[str, dict[str, Any]]:
@@ -378,7 +412,22 @@ def load_policy_metadata(chunks: list[dict[str, Any]] | None = None) -> dict[str
     입력: 인계 payload 청크 리스트 (생략하면 payload_chunks.jsonl을 읽는다)
     반환: {"POL_001": {"policy_name": ..., "category": ..., ...}, ...}
     같은 policy_id인데 청크마다 값이 다르면 ValueError를 낸다. (어느 값이 맞는지 추측하지 않는다)
+
+    패키지에 qdrant/policy_metadata.jsonl이 있으면 그 정책 단위 값을 우선한다.
+    (v1.4.0부터 청크에 문서별 값이 섞여 청크로 모으면 정책 5개가 불일치한다.)
+    이때도 청크의 policy_id가 모두 있어야 하며, 선택 필드 region_detail·eligibility_review_status는 있을 때만 담는다.
     """
+    if POLICY_METADATA_PATH.is_file():
+        metadata = {}
+        for row in read_jsonl(POLICY_METADATA_PATH):
+            values = {field: row[field] for field in POLICY_METADATA_FIELDS}
+            values.update({field: row[field] for field in OPTIONAL_POLICY_METADATA_FIELDS if field in row})
+            metadata[row["policy_id"]] = values
+        missing = sorted({chunk["policy_id"] for chunk in (chunks if chunks is not None else load_payload_chunks())}
+                         - set(metadata))
+        if missing:
+            raise ValueError(f"policy_metadata.jsonl에 없는 정책: {missing[:5]}")
+        return metadata
     if chunks is None:
         chunks = load_payload_chunks()
     metadata: dict[str, dict[str, Any]] = {}

@@ -71,7 +71,7 @@ def load_frozen_questions(eval_dir: Path = EVAL_DIR) -> tuple[list[dict[str, Any
         actual = _lf_sha256(eval_dir / name)
         if actual != expected:
             problems.append(f"{name} 해시 불일치")
-    if freeze["manifest_sha256"] != fi.manifest_sha256():
+    if not fi.manifest_equivalent(freeze["manifest_sha256"]):
         problems.append("manifest 해시 불일치")
     questions = rv.load_jsonl(eval_dir / QUESTIONS_FILE.name)
     counts = (len(questions), sum(q["answerable"] for q in questions), sum(q["verification"] == "verified" for q in questions))

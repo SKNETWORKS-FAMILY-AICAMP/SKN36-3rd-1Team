@@ -158,7 +158,8 @@ class TestFrozenV0(unittest.TestCase):
             data = (EVAL_DIR / name).read_bytes().replace(b"\r\n", b"\n")
             with self.subTest(file=name):
                 self.assertEqual(hashlib.sha256(data).hexdigest(), expected)
-        self.assertEqual(record["manifest_sha256"], full_index.manifest_sha256())
+        # 고정 기록은 고치지 않는다. 같은 manifest이거나 데이터 파일이 그대로인 기록된 manifest 변경만 허용
+        self.assertTrue(full_index.manifest_equivalent(record["manifest_sha256"]))
         self.assertEqual((record["questions"], record["scored_questions"], record["verified"]), (55, 52, 55))
 
 

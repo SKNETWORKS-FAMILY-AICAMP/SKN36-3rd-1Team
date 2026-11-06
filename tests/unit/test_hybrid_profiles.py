@@ -222,7 +222,8 @@ class TestStaticFlagsFile(unittest.TestCase):
     def test_real_flags_file_matches_current_manifest(self):
         loaded = dqf.load_flags()
         self.assertEqual(loaded["status"], "applied")
-        self.assertEqual(loaded["manifest_sha256"], fi.manifest_sha256())
+        self.assertTrue(fi.manifest_equivalent(loaded["manifest_sha256"]))
+        self.assertEqual(loaded["current_manifest_sha256"], fi.manifest_sha256())
         raw = json.loads(dqf.FLAGS_PATH.read_text(encoding="utf-8"))
         self.assertIn("확정된 정책 오류가 아니며", raw["disclaimer"])
         for flags in raw["flags_by_policy"].values():

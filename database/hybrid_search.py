@@ -31,6 +31,7 @@ import requests
 from database import data_quality_flags as dqf
 from database import embedding as em
 from database import full_index as fi
+from database import handoff_data as hd
 from database import retrieval_run as rr
 from database.chunking import make_point_id
 from database.neo4j import load_graph as lg
@@ -49,8 +50,12 @@ DEFAULT_COLLECTION = LEGACY_EXPERIMENT_COLLECTION   # 이름 호환용 별칭 (�
 SEARCH_PROFILES: dict[str, dict[str, str]] = {
     "b2_06b_baseline": {"index_config": "A_B2", "query_template_name": "none"},          # 기본 (0.6B 기준선)
     "b2_4b_instruct": {"index_config": "A_B2_4B", "query_template_name": "instruct_v1"},  # 유력 후보 (최종 미확정)
+    # Issue #21 후보 데이터셋(LIFEPOLICY_DATASET_DIR) 전용. v1.3.2에서는 full_index의 dataset 확인으로 거부된다.
+    "b2_06b_i21": {"index_config": "A_B2_I21", "query_template_name": "none"},
+    "b3_06b_i21": {"index_config": "B_B3_I21", "query_template_name": "none"},
 }
 DEFAULT_PROFILE = "b2_06b_baseline"
+DATASET_DEFAULT_PROFILES = {"issue21-v1.4.0-review": "b2_06b_i21"}   # 데이터셋별 기본 프로필 (없으면 DEFAULT_PROFILE)
 _UNSET = object()     # query_template을 "넘기지 않음"과 "None(지시문 없음)"을 구분하기 위한 표시
 DEFAULT_K = 5
 MAX_K = 200                                     # 진단용 전체 순위(107개)까지 허용하되 무제한은 막는다
@@ -108,6 +113,8 @@ QUALITY_EMPTY_NOT_GROUP = "EMPTY_NOT_GROUP"
 QUALITY_EMPTY_AND_GROUP = "EMPTY_AND_GROUP"
 QUALITY_NEEDS_REVIEW = "NEEDS_REVIEW"
 QUALITY_REGION_GRANULARITY = "SUSPECTED_REGION_GRANULARITY_LOST"
+# Issue #21 후보: 시군구가 Policy.region_detail로 보존된 경우 (유실이 아니라 시군구 한정 확인 필요)
+QUALITY_REGION_DETAIL = "REGION_LIMITED_TO_MUNICIPALITY"
 QUALITY_REVIEW_STATUS_OVERCLAIM = "SUSPECTED_REVIEW_STATUS_OVERCLAIM"
 # 경고 코드별 메타: severity / evidence_level(근거 종류) / verification(검증 상태) / affects(판정 영향 항목)
 #   / blocks_auto_eligibility(자동 판정 보류 필요). 공식 원문 검증은 모두 하지 않았다.
@@ -133,6 +140,8 @@ QUALITY_CODE_META: dict[str, dict[str, Any]] = {
                               "affects": ["exclusion"], "blocks_auto_eligibility": True},
     QUALITY_REGION_GRANULARITY: {"severity": "high", "evidence_level": "graph_property_pattern",
                                  "verification": "suspected", "affects": ["region"], "blocks_auto_eligibility": True},
+    QUALITY_REGION_DETAIL: {"severity": "medium", "evidence_level": "graph_metadata", "verification": "source_text",
+                            "affects": ["region"], "blocks_auto_eligibility": True},
     QUALITY_REVIEW_STATUS_OVERCLAIM: {"severity": "low", "evidence_level": "graph_metadata", "verification": "suspected",
                                       "affects": [], "blocks_auto_eligibility": False},
     # 정적 목록(data_quality_flags) 코드: 심각도·근거 수준은 목록 값을 그대로 쓴다
@@ -435,6 +444,11 @@ def resolve_search_profile(name: str) -> dict[str, Any]:
             "query_template": rr.QUERY_TEMPLATES[spec["query_template_name"]]}
 
 
+def default_profile() -> str:
+    """현재 인계 데이터셋의 기본 검색 프로필. v1.3.2(data/handoff)는 DEFAULT_PROFILE 그대로."""
+    return DATASET_DEFAULT_PROFILES.get(hd.dataset_version(), DEFAULT_PROFILE)
+
+
 def resolve_search_settings(*, profile: str | None = None, collection: str | None = None,
                             embedder: em.Embedder | None = None, query_template: Any = _UNSET) -> dict[str, Any]:
     """
@@ -459,7 +473,7 @@ def resolve_search_settings(*, profile: str | None = None, collection: str | Non
                 "embedding_dim": em.DEFAULT_EMBEDDING_DIM if embedder is None else getattr(embedder, "embedding_dim", None),
                 "query_template_name": None, "query_template": None if query_template is _UNSET else query_template,
                 "embedder": embedder}
-    resolved = resolve_search_profile(profile or DEFAULT_PROFILE)
+    resolved = resolve_search_profile(profile or default_profile())
     if query_template is not _UNSET and query_template != resolved["query_template"]:
         raise SearchProfileError(f"프로필 {resolved['name']}의 질의 지시문({resolved['query_template_name']})과 다른 "
                                  "query_template은 쓸 수 없습니다.")
@@ -790,6 +804,13 @@ def _graph_quality_patterns(context: dict[str, Any], trees: list[dict[str, Any]]
     region_names = [str(item.get("name")) for item in context.get("regions", [])]
     municipal = [token for token in re.findall(r"([가-힣]+(?:시|군|구))(?=\s|$|/|\))", organization)
                  if token not in region_names and not token.endswith(("특별시", "광역시", "특별자치시"))]
+    detail = str(policy.get("region_detail") or "")
+    if detail:
+        # 시도 관계로 검색되지만 대상은 시군구 한정. 시도 일치만으로 거주 요건 충족으로 보지 않는다.
+        warnings.append({"code": QUALITY_REGION_DETAIL, "level": "caution", "region_detail": detail,
+                         "graph_regions": region_names,
+                         "message": f"지역 대상이 {detail}로 한정됨. 시도 일치만으로 거주 요건 충족 판정 금지"})
+        municipal = [token for token in municipal if token not in detail]
     if municipal and region_names:
         warnings.append({"code": QUALITY_REGION_GRANULARITY, "level": "suspected", "organization": organization[:60],
                          "graph_regions": region_names, "municipality_in_organization": municipal[0],
