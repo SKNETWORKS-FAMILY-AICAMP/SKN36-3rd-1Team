@@ -211,10 +211,10 @@ def build_documents(policies: dict) -> list:
         })
 
     for spec in OFFICIAL_RAW_DOCS:
-        raw_path = BASE_DIR / spec["local_raw_path"]
         text = (BASE_DIR / spec["extracted_text_path"]).read_text(encoding="utf-8").strip()
-        # 원본 파일은 Git에서 제외(*.hwp)되므로, 원본이 있을 때만 원본 해시를 기록하고 없으면 추출 텍스트 해시를 쓴다
-        content_hash = hashlib.sha256(raw_path.read_bytes()).hexdigest() if raw_path.exists() else sha256_text(text)
+        # content_hash는 어느 PC에서 실행하든 같도록 추출한 본문 텍스트로 계산한다.
+        # (원본 HWP는 Git에서 제외되어 있어, 원본 파일 해시를 쓰면 PC마다 값이 달라진다)
+        content_hash = sha256_text(text)
         docs.append({
             "document_id": spec["document_id"], "policy_id": spec["policy_id"], "title": spec["title"],
             "source_type": spec["source_type"], "source_url": spec["source_url"],
@@ -300,23 +300,31 @@ def update_policies(policies: list) -> list:
             continue  # 기존 v1.3.2 정책은 건드리지 않음
         if p["policy_id"] in OFFICIAL_AGENCY:
             p["agency"] = OFFICIAL_AGENCY[p["policy_id"]]
+        # official_apply_url은 실제 신청 주소가 확인된 경우에만 넣는다 (UI '신청하기' 버튼 노출 기준).
+        # 법령 페이지·정부24 서비스 상세 페이지 같은 안내용 주소는 source_url에만 두고 신청 주소로 쓰지 않는다.
         record = None
         if p["policy_id"] in GOV24_SERVICE_DOCS:
             r = gov24[GOV24_SERVICE_DOCS[p["policy_id"]]]
+            apply_url = r["application_url"] or r["official_apply_url"]
             record = {"eligibility_text": r["target_audience"], "benefit_text": r["benefit"],
                       "application_period": r["application_period"], "application_method": r["application_method"],
-                      "official_apply_url": r["official_apply_url"] or r["source_url"]}
+                      # 정부24가 신청 주소로 자기 상세 페이지를 돌려주면(방문 신청 등) 신청 주소 미확인으로 본다
+                      "official_apply_url": apply_url if apply_url and apply_url != r["source_url"] else None,
+                      "source_url": r["source_url"]}
         elif p["policy_id"] in YOUTH_SERVICE_DOCS:
             r = youth[YOUTH_SERVICE_DOCS[p["policy_id"]]]
             record = {"eligibility_text": r["eligibility"], "benefit_text": r["benefit"],
                       "application_period": r["application_period"], "application_method": r["application_method"],
-                      "official_apply_url": r["official_apply_url"]}
+                      # 정제 레코드의 official_apply_url은 신청 주소가 없으면 출처 URL로 채워지므로 원문 aplyUrlAddr를 쓴다
+                      "official_apply_url": r["aplyUrlAddr"] or None,
+                      "source_url": r["source_url"]}
         elif p["policy_id"] == "POL_STG_NTS_001":
             # 정부24·온통청년 레코드가 없어 서비스 안내 원문이 없다. 내부 선정 메모 대신 법령 원문을 가리킨다.
-            law_url = "https://www.law.go.kr/법령/조세특례제한법/제30조"
+            # 법령 페이지는 신청 주소가 아니므로 출처에만 둔다.
             record = {"eligibility_text": "자격 요건은 조세특례제한법 제30조 원문(DOC_STG_NTS_001_LAW) 참조. 공식 서비스 안내 원문 미확보",
                       "benefit_text": "감면 내용은 조세특례제한법 제30조 원문(DOC_STG_NTS_001_LAW) 참조",
-                      "official_apply_url": law_url, "source_url": law_url}
+                      "official_apply_url": None,
+                      "source_url": "https://www.law.go.kr/법령/조세특례제한법/제30조"}
         if record:
             p.update(record)
         # 자격 조건 그룹이 UNKNOWN이고 조건 노드가 없으므로 'verified'로 두지 않는다.

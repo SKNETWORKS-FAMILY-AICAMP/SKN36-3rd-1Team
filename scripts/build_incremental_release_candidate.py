@@ -165,7 +165,8 @@ def build_candidate_release():
                 "benefit": sp.get("benefit_text") or sp["category"],
                 "application_period": sp.get("application_period") or "상시 또는 공고 확인",
                 "application_method": sp.get("application_method") or "온라인 신청",
-                "official_apply_url": sp.get("official_apply_url") or sp["source_url"],
+                # 신청 주소가 확인되지 않으면 null (출처 URL로 대신 채우지 않음 → UI '신청하기' 미노출)
+                "official_apply_url": sp.get("official_apply_url"),
                 "source_url": sp["source_url"],
                 "verification_status": sp["verification_status"],
                 "collected_at": datetime.now().isoformat(),
