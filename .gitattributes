@@ -1,0 +1,4 @@
+# 인계·릴리스 패키지는 manifest.json의 SHA-256으로 검증한다.
+# OS별 줄바꿈 변환(CRLF/LF)이 일어나면 해시가 달라지므로, 저장소의 바이트(LF) 그대로 내려받도록 고정한다.
+data/handoff/** -text
+data/releases/** -text
