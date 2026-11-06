@@ -246,7 +246,9 @@ def build_documents(policies: dict) -> list:
             "document_id": f"DOC_STG_{short}_YC", "policy_id": policy_id,
             "title": f"온통청년 정책 상세 — {record['policy_name']}",
             "source_type": "youthcenter_api", "source_url": record["source_url"],
-            "local_raw_path": record["local_raw_path"],
+            # processed 레코드의 local_raw_path(items/{plcyNo}.json)는 실제로 없는 파일이라,
+            # 해당 정책이 들어 있는 API 응답 페이지를 직접 찾아 기록한다
+            "local_raw_path": find_raw_page(BASE_DIR / "data/raw/youthcenter/api", plcy_no),
             "content_hash": sha256_text(record["full_text"]), "verification_status": "verified_official_api",
             "collected_at": record["retrieved_at"], "doc_type": "service_guide", "law_article": None,
             "effective_date": None, "version": None, "official_id": plcy_no, "_text": record["full_text"],

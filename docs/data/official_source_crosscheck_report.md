@@ -53,7 +53,7 @@
 | `DOC_STG_MOLIT_001_GOV24` | 정부24 161300000104 K-패스 | 〃 |
 | `DOC_STG_EX_001_GOV24` | 정부24 B50000400042 고속도로 다자녀가구 통행료 할인 | `page_0009.json` |
 | `DOC_STG_ICN_001_GOV24` | 정부24 356100000004 중소기업 재직청년 복지공유제 지원 | `page_0003.json` |
-| `DOC_STG_SEOUL_001_YC` | 온통청년 20261018005400213994 2026 청년수당 지원 | `data/raw/youthcenter/items/20261018005400213994.json` |
+| `DOC_STG_SEOUL_001_YC` | 온통청년 20261018005400213994 2026 청년수당 지원 | `data/raw/youthcenter/api/page_0006.json` (정책명·지원내용·신청기간·신청방법·URL·수정일 원문과 일치 확인) |
 
 **제외 (원문 미확보):** 사업안내서·표준처리지침·운영지침·모집공고 7건(위 API 문서로 대체), FAQ 5건(전세보증료·국세청·도로공사·K-패스·서울청년수당).
 
@@ -93,4 +93,8 @@
 2. **FAQ 원문 수집:** 공식 FAQ 페이지를 수동으로 확인하고, 원문이 있으면 추가한다. 대상은 K-패스(korea-pass.kr), 서울청년수당(youth.seoul.go.kr), 한국도로공사, 국세청, 주택도시보증공사이다.
 3. **조건 구조화:** 신규 정책 9건의 자격 조건을 원문 기준으로 구조화한다(현재 `UNKNOWN`).
 4. **평가 재실행:** 이전 검색 평가(`docs/data/graphrag_retrieval_evaluation.md`, `data/staging/evaluation/`)는 대조 전 요약 문서로 측정한 결과라 다시 실행해야 한다.
-5. **staging PoC 재실행 금지:** `scripts/staging_poc_pipeline.py`를 다시 실행하면 요약문이 되살아난다. 그래서 `crosscheck_results.json`이 있으면 실행을 막아 두었다. 대조 전 staging 원본은 `data/staging/pre_crosscheck/`에 보존했다.
+5. **온통청년 원본 경로 정리:** `data/processed/youthcenter_policies.jsonl` 3,861건 중 3,358건의 `local_raw_path`(`data/raw/youthcenter/items/{plcyNo}.json`)가 실제로 없는 파일을 가리킨다.
+   - 원문은 `data/raw/youthcenter/api/page_*.json`(API 응답 페이지)에 들어 있다.
+   - 이번 후보의 `DOC_STG_SEOUL_001_YC`는 실제 페이지 파일로 고쳤다.
+   - v1.3.2 인계본 문서는 영향이 없다 (`verify_handoff_package.py` 원본 파일 존재 검사 Missing=0).
+6. **staging PoC 재실행 금지:** `scripts/staging_poc_pipeline.py`를 다시 실행하면 요약문이 되살아난다. 그래서 `crosscheck_results.json`이 있으면 실행을 막아 두었다. 대조 전 staging 원본은 `data/staging/pre_crosscheck/`에 보존했다.
