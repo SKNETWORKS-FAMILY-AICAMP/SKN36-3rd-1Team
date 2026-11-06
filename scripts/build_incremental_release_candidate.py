@@ -25,13 +25,17 @@ import re
 import json
 import uuid
 import hashlib
-from datetime import datetime
+import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from scripts.review_candidate_application_urls import EVIDENCE_PATH, review_candidate_policies
 HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 STAGING_DIR = BASE_DIR / "data" / "staging"
 CANDIDATE_DIR = BASE_DIR / "data" / "releases" / "v1.4.0-candidate"
+KST = timezone(timedelta(hours=9))
 
 def get_file_sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -132,6 +136,9 @@ def build_candidate_release():
             if line.strip(): policies.append(json.loads(line))
     print(f"  - 기존 정책 로드: {len(policies)}건")
 
+    # 재빌드는 재수집이 아니다. 증거 목록에 보존한 원래 수집 시각을 사용한다.
+    source_evidence = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))["policies"]
+
     existing_pids = {p["policy_id"] for p in policies}
     existing_oids = {p["official_id"] for p in policies}
 
@@ -169,7 +176,7 @@ def build_candidate_release():
                 "official_apply_url": sp.get("official_apply_url"),
                 "source_url": sp["source_url"],
                 "verification_status": sp["verification_status"],
-                "collected_at": datetime.now().isoformat(),
+                "collected_at": source_evidence[sp["policy_id"]]["collected_at"],
                 "approval_status": sp["approval_status"],
                 "reception_status": sp["reception_status"],
                 "lifecycle_status": sp["lifecycle_status"]
@@ -177,6 +184,15 @@ def build_candidate_release():
             new_policies.append(p_node)
 
     merged_policies = policies + new_policies
+    # 원본 인계 파일은 읽기만 한다. 후보에서는 신청 주소만 교정한다.
+    baseline_policies = [dict(policy) for policy in policies]
+    application_reviews, application_changes = review_candidate_policies(
+        merged_policies, baseline_policies,
+    )
+    (CANDIDATE_DIR / "application_url_review.json").write_text(
+        json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8", newline="\n",
+    )
     with open(neo4j_out / "nodes_policy.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for p in merged_policies:
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
@@ -266,13 +282,18 @@ def build_candidate_release():
     for static_name in [
         "nodes_category.jsonl", "nodes_lifestage.jsonl", "nodes_region.jsonl",
         "nodes_target_group.jsonl", "nodes_eligibility_condition.jsonl",
-        "cypher_ddl.cypher", "load_neo4j.py", "schema_constraints.cypher",
+        "cypher_ddl.cypher", "schema_constraints.cypher",
         "verify_neo4j.cypher", "verification_queries.cypher"
     ]:
         src = HANDOFF_DIR / "neo4j" / static_name
         dst = neo4j_out / static_name
         if src.exists():
             dst.write_bytes(src.read_bytes())
+
+    # 동결 인계본의 로더 대신 후보용 안전 로더를 패키지에 포함한다.
+    (neo4j_out / "load_neo4j.py").write_bytes(
+        (BASE_DIR / "scripts/load_candidate_neo4j.py").read_bytes()
+    )
 
     # (6) relationships.jsonl 병합 (엄격한 표준 ID 매핑)
     print("\n[D-1.5] Relationships 관계 병합 (표준 ID 100% 매핑)...")
@@ -499,13 +520,17 @@ def build_candidate_release():
     # A. 정밀 변경 목록(release_delta_manifest.json)
     delta_manifest = {
         "release_version": "1.4.0-candidate",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime.now(KST).isoformat(),
         "added_policy_ids": [p["policy_id"] for p in new_policies],
         "added_document_ids": [d["document_id"] for d in new_docs],
         "added_organization_ids": added_agency_ids,
         "added_condition_group_ids": [cg["group_id"] for cg in new_cgroups],
         "added_qdrant_point_ids": [c["point_id"] for c in new_chunks],
         "added_relationships_count": len(new_rels),
+        "updated_policy_properties": application_changes,
+        "application_url_evidence_sha256": get_file_sha256(
+            BASE_DIR / "data/metadata/application_url_evidence_v1.4.0.json"
+        ),
         "exact_added_relationships": [
             {"source_id": r["source_id"], "relation": r["relation"], "target_id": r["target_id"]}
             for r in new_rels
@@ -559,13 +584,20 @@ def build_candidate_release():
 
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
-- **기준 베이스라인**: `v1.3.2-verified` (절대 무변경 보존)
-- **최종 검증 일시**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+- **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
+- **최종 검증 일시**: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')} KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
 
 {counts_section}
+
+## 1-2. 기존 정책의 신청 주소 교정
+
+- 기존 정책 {len(application_changes)}건에서 `official_apply_url`만 변경했다. 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
+- 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
+- `data/handoff/`, 기존 정제본, 기존 문서·관계·청크·원문 해시는 수정하지 않는다.
+- 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
 ---
 
@@ -591,8 +623,9 @@ def build_candidate_release():
 ---
 
 ## 4. 정밀 롤백 프로토콜 (Targeted Rollback by Exact Item List)
-- 단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식을 폐기함.
-- `release_delta_manifest.json`에 기록된 **정확한 {len(new_policies)}개 정책 ID, {len(new_docs)}개 문서 ID, {len(added_agency_ids)}개 기관 ID, {len(new_cgroups)}개 조건그룹 ID, {len(new_chunks)}개 Qdrant Point ID, {len(new_rels)}개 관계 튜플**만을 타겟팅하여 삭제하도록 롤백 스크립트를 재설계함.
+- 증분 삭제용 롤백 스크립트는 구현하지 않았다. 기존 DB에 합쳐 적재하는 작업은 이번 검증 범위에 포함하지 않는다.
+- 검증 로더는 하나의 트랜잭션에서 적재·재적재·건수 대조를 수행하고, `--commit`을 명시하지 않으면 롤백한다.
+- 후보의 신청 주소를 되돌려야 할 때는 `updated_policy_properties`의 `before` 값을 사용한다. 신규 ID 목록만 삭제해서는 기존 정책 속성이 복원되지 않는다.
 """
     (CANDIDATE_DIR / "CHANGELOG.md").write_text(changelog_content, encoding="utf-8", newline="\n")
 
@@ -622,7 +655,7 @@ def build_candidate_release():
     candidate_manifest = {
         "manifest_version": "1.4.0-candidate",
         "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime.now(KST).isoformat(),
         "baseline_version": "1.3.2-verified",
         "author": "LifePolicy AI Data Engineering Team",
         "summary": {
@@ -641,6 +674,7 @@ def build_candidate_release():
                 "organizations_added": len(added_agency_ids),
                 "condition_groups_added": len(new_cgroups)
             },
+            "policies_with_application_url_updates": len(application_changes),
             "db_review_status": "PENDING_APPROVAL_FROM_MINHYEOK_JU"
         },
         "files": files_manifest

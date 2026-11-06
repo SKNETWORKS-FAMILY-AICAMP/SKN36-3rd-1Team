@@ -1,0 +1,6 @@
+<!-- sample_only: 신청 주소가 없는 경우를 확인하기 위한 가상 XML입니다. -->
+<wantedDtl>
+  <servId>SAMPLE_ONLY</servId>
+  <servNm>가상 테스트 정책</servNm>
+  <applmetList><servSeDetailLink>주민센터 방문 신청</servSeDetailLink></applmetList>
+</wantedDtl>

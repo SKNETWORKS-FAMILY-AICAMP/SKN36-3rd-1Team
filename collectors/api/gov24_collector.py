@@ -39,8 +39,10 @@ from urllib.parse import unquote
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
 METADATA_ROOT = BASE_DIR / "data" / "metadata"
@@ -274,7 +276,7 @@ def normalize_gov24_record(
     reception_org = combined_raw.get("접수기관명") or combined_raw.get("접수기관") or ""
     contact = combined_raw.get("문의처") or combined_raw.get("전화문의") or ""
     detail_url = combined_raw.get("상세조회URL") or f"https://www.gov.kr/portal/rcvfvrSvc/dtlEx/{service_id}"
-    apply_url = combined_raw.get("온라인신청사이트URL") or detail_url
+    apply_url = application_url_or_none(combined_raw.get("온라인신청사이트URL"), detail_url)
 
     laws = ", ".join(filter(None, [combined_raw.get("법령"), combined_raw.get("자치법규"), combined_raw.get("행정규칙")]))
 
@@ -367,7 +369,7 @@ def write_mapping_table_markdown() -> Path:
         "| `구비서류` | serviceDetail | String | `required_documents` | 민원인 지참 제출 서류 목록 |",
         "| `법령` / `자치법규` | serviceDetail | String | `basic_laws` | 정책의 근거 법령 및 조례 |",
         "| `문의처` / `전화문의` | 공통 | String | `contact_info` | 담당 부서 및 문의 전화번호 |",
-        "| `온라인신청사이트URL` | serviceDetail | String | `official_apply_url` | 온라인 접수 URL (없을 시 상세 URL) |",
+        "| `온라인신청사이트URL` | serviceDetail | String/null | `official_apply_url` | 신청 주소만 저장, 없거나 안내 주소이면 null |",
         "| `상세조회URL` | serviceList | String | `source_url` | 정부24 공식 상세 안내 웹페이지 |",
         "",
         "---",
