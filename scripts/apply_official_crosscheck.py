@@ -25,7 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STAGING_DIR = BASE_DIR / "data" / "staging"
 OFFICIAL_DIR = STAGING_DIR / "official"
 BACKUP_DIR = STAGING_DIR / "pre_crosscheck"
+# 정부24 전체 응답(105MB)은 GitHub 용량 제한으로 Git에서 제외된다.
+# 대조에 쓰는 7건만 GOV24_EXTRACT_PATH로 뽑아 저장소에 두고, 전체 파일이 있으면 그때마다 다시 뽑는다.
 GOV24_PATH = BASE_DIR / "data" / "processed" / "gov24_public_services.jsonl"
+GOV24_EXTRACT_PATH = STAGING_DIR / "official" / "gov24_crosscheck_services.jsonl"
 YOUTH_PATH = BASE_DIR / "data" / "processed" / "youthcenter_policies.jsonl"
 RETRIEVED_AT = "2026-11-06T00:00:00+09:00"
 MAX_CHUNK_CHARS = 900
@@ -131,6 +134,20 @@ def find_raw_page(raw_dir: Path, official_id: str) -> str:
     raise FileNotFoundError(f"{official_id} 원본 응답을 {raw_dir}에서 찾지 못함")
 
 
+def load_gov24_records() -> dict:
+    """대조 대상 정부24 레코드 7건을 읽는다. 전체 응답 파일이 있으면 추출본을 새로 만든다."""
+    if GOV24_PATH.exists():
+        wanted = set(GOV24_SERVICE_DOCS.values())
+        records = [r for r in read_jsonl(GOV24_PATH) if r["service_id"] in wanted]
+        for r in records:
+            r["local_raw_path"] = find_raw_page(BASE_DIR / "data/raw/gov24/serviceDetail", r["service_id"])
+        write_jsonl(GOV24_EXTRACT_PATH, sorted(records, key=lambda r: r["service_id"]))
+    records = {r["service_id"]: r for r in read_jsonl(GOV24_EXTRACT_PATH)}
+    missing = set(GOV24_SERVICE_DOCS.values()) - set(records)
+    assert not missing, f"정부24 추출본에 없는 서비스: {missing}"
+    return records
+
+
 def official_body(markdown: str) -> str:
     """official/*.md에서 출처 메모(> 줄)를 빼고 조문 본문만 남긴다."""
     lines = [line for line in markdown.splitlines() if not line.startswith(">")]
@@ -179,7 +196,7 @@ def build_documents(policies: dict) -> list:
             "effective_date": spec["effective_date"], "version": spec["version"], "_text": text,
         })
 
-    gov24 = {r["service_id"]: r for r in read_jsonl(GOV24_PATH)}
+    gov24 = load_gov24_records()
     for policy_id, service_id in GOV24_SERVICE_DOCS.items():
         record = gov24[service_id]
         short = policy_id.replace("POL_STG_", "")
@@ -187,7 +204,7 @@ def build_documents(policies: dict) -> list:
             "document_id": f"DOC_STG_{short}_GOV24", "policy_id": policy_id,
             "title": f"정부24 공공서비스 상세 — {record['service_name']}",
             "source_type": "gov24_api", "source_url": record["source_url"],
-            "local_raw_path": find_raw_page(BASE_DIR / "data/raw/gov24/serviceDetail", service_id),
+            "local_raw_path": record["local_raw_path"],
             "content_hash": sha256_text(record["full_text"]), "verification_status": "verified_official_api",
             "collected_at": record["retrieved_at"], "doc_type": "service_guide", "law_article": None,
             "effective_date": None, "version": None, "official_id": service_id, "_text": record["full_text"],
@@ -246,7 +263,7 @@ def build_chunks(docs: list, policies: dict) -> list:
 
 def update_policies(policies: list) -> list:
     """정부24·온통청년 원문으로 소관기관·지원내용·대상 문구를 교정하고, 조건 미검증 상태를 표시한다."""
-    gov24 = {r["service_id"]: r for r in read_jsonl(GOV24_PATH)}
+    gov24 = load_gov24_records()
     youth = {r["plcyNo"]: r for r in read_jsonl(YOUTH_PATH)}
     for p in policies:
         if p["policy_id"] == "POL_001":
@@ -264,6 +281,12 @@ def update_policies(policies: list) -> list:
             record = {"eligibility_text": r["eligibility"], "benefit_text": r["benefit"],
                       "application_period": r["application_period"], "application_method": r["application_method"],
                       "official_apply_url": r["official_apply_url"]}
+        elif p["policy_id"] == "POL_STG_NTS_001":
+            # 정부24·온통청년 레코드가 없어 서비스 안내 원문이 없다. 내부 선정 메모 대신 법령 원문을 가리킨다.
+            law_url = "https://www.law.go.kr/법령/조세특례제한법/제30조"
+            record = {"eligibility_text": "자격 요건은 조세특례제한법 제30조 원문(DOC_STG_NTS_001_LAW) 참조. 공식 서비스 안내 원문 미확보",
+                      "benefit_text": "감면 내용은 조세특례제한법 제30조 원문(DOC_STG_NTS_001_LAW) 참조",
+                      "official_apply_url": law_url, "source_url": law_url}
         if record:
             p.update(record)
         # 자격 조건 그룹이 UNKNOWN이고 조건 노드가 없으므로 'verified'로 두지 않는다.

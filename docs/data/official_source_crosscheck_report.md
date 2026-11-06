@@ -73,7 +73,18 @@
 - 소관기관을 정부24·온통청년 원문으로 교정했다: 행복출산, 고속도로 통행료, K-패스, 서울 청년수당, 인천 서해구 복지공유제(서구 → **서해구** 기업일자리정책과).
 - 7건(정부24)과 1건(온통청년)은 정책 노드의 `eligibility`·`benefit`·`application_period`·`application_method`·`official_apply_url`을 공식 API 원문 필드로 채웠다. 기존에는 내부 선정 메모(`selection_rationale`)가 들어가 있었다.
 - 9건 모두 `verification_status`를 `verified`에서 **`extracted`**로 낮췄다. 조건 그룹이 `UNKNOWN`이고 연결된 조건 노드가 없어서, 자격 판정까지 검증된 상태가 아니기 때문이다.
-- `POL_STG_NTS_001`(중소기업 취업자 소득세 감면)은 정부24 레코드가 없다. 그래서 소관기관(`국세청 / 기획재정부`)을 확인하지 못했다. 근거 문서는 조세특례제한법 제30조 원문 1건이다.
+- `POL_STG_NTS_001`(중소기업 취업자 소득세 감면)은 정부24·온통청년 레코드가 없다.
+  - 소관기관(`국세청 / 기획재정부`)과 `official_id`(`136000000288`)를 원문으로 확인하지 못했다.
+  - `eligibility`·`benefit`에 들어 있던 내부 선정 메모를 지우고, 조세특례제한법 제30조 원문 문서를 가리키도록 바꿨다.
+  - 근거 문서는 조세특례제한법 제30조 원문 1건이다.
+
+## 5-1. 정부24 원문 데이터 보관 방식
+
+- 정부24 전체 응답 정제본(`gov24_public_services.jsonl`, `gov24_merged_services.jsonl`)은 파일 하나가 105MB이다. GitHub 단일 파일 제한(100MB)을 넘어 Git에서 제외했다. `.gitignore`에도 이미 제외 규칙이 있다.
+- 대조에 쓰는 7건만 `data/staging/official/gov24_crosscheck_services.jsonl`(약 100KB)로 추출해 저장소에 둔다.
+  - 전체 파일이 없어도 `apply_official_crosscheck.py`가 같은 결과를 만든다.
+  - 전체 파일이 있으면 실행할 때마다 추출본을 새로 만든다.
+- `data/releases/v1/manifest.json`은 위 두 파일을 계속 목록에 둔다. `dev`에서도 같은 상태였다. 따라서 이 두 항목은 원본 수집 환경에서만 확인할 수 있다.
 
 ## 6. 남은 일
 
