@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import type { AskResponse, ConditionStatus, PolicyCheck, ReceptionStatus } from '../api/types';
+import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { Icon, type IconName } from './Icon';
 import { safeHttpUrl } from '../lib/validate';
 
@@ -18,7 +18,7 @@ const RECEPTION_LABEL: Record<ReceptionStatus, [string, string]> = {
 
 interface Props {
   turn: Turn;
-  onFollowUp: (text: string, origin: HTMLElement) => void;
+  onFollowUp: (followUp: FollowUp, origin: HTMLElement) => void;
   onRetry: (id: number) => void;
   onDemoApply: () => void;
 }
@@ -125,7 +125,7 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     blocks.push(
       <Block key="f" title="이것도 알려 주시면 더 정확해요" icon="bulb">
         <div className="chips">
-          {r.follow_up_questions.map((t) => <button key={t} type="button" className="chip" onClick={(e) => onFollowUp(t, e.currentTarget)}>{t}</button>)}
+          {r.follow_up_questions.map((f) => <button key={f.text} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
         </div>
       </Block>,
     );

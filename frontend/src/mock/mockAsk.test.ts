@@ -45,12 +45,12 @@ describe('mockAsk 예시 응답', () => {
     });
     expect(r.status).toBe('answered');
     expect(r.answer).toContain('다시 확인');
-    expect(r.follow_up_questions.some((t) => t.includes('소득'))).toBe(false);
+    expect(r.follow_up_questions.some((f) => f.field === 'income')).toBe(false);
   });
 
   it('되물은 항목에 대한 대답의 나이는 내 나이로 쓰지 않는다', async () => {
     const r = await ask({
-      question: '아이가 3살이에요', awaiting_field: '자녀 나이',
+      question: '아이가 3살이에요', awaiting_field: 'child_age',
       history: [{ role: 'user', text: EXAMPLES.find((e) => e.key === 'welfare')!.question }],
     });
     expect(r.status).toBe('info');
@@ -76,5 +76,12 @@ describe('mockAsk 예시 응답', () => {
     const r = await ask({ question: EXAMPLES.find((e) => e.key === 'housing')!.question });
     expect(r.policy_checks).toHaveLength(0);
     expect(r.notice?.title).toContain('신청 주소');
+  });
+
+  it('추가 질문은 구조화된 값으로 온다: 정보 요청은 field가 있다', async () => {
+    const r = await ask({ question: work.question });
+    const info = r.follow_up_questions.filter((f) => f.kind === 'ask_info');
+    expect(info.map((f) => f.field)).toEqual(['region', 'income']);
+    expect(r.follow_up_questions.find((f) => f.kind === 'question')?.text).toContain('서류');
   });
 });

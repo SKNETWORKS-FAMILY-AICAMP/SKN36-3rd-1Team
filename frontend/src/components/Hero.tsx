@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { REGIONS } from '../lib/parseProfile';
 import { Icon, type IconName } from './Icon';
-
-export interface Category { key: string; title: string; sub: string; icon: IconName; question: string }
+import type { Category } from '../config/categories';
 
 interface Props {
   age: string;

@@ -24,7 +24,7 @@ export interface AskRequest {
   profile: UserProfile;
   /** 이어지는 대화를 위해 앞선 질문·답변을 함께 보낸다. */
   history: ChatTurnMessage[];
-  /** AI가 되물은 항목(예: '혼인 기간')에 대한 대답일 때 그 항목 이름. */
+  /** AI가 되물은 항목에 대한 대답일 때 그 항목 키 (FollowUp.field, 예: 'child_age'). */
   awaiting_field?: string | null;
 }
 
@@ -59,6 +59,18 @@ export interface Citation {
   page_number?: number | null;
 }
 
+/**
+ * 답변 아래 추가 질문 버튼.
+ * - question: 누르면 text를 그대로 질문으로 보낸다
+ * - ask_info: 누르면 화면이 field 항목을 되묻고, 사용자의 대답을 다음 요청에 awaiting_field와 함께 보낸다
+ * PRD의 follow_up_question(문장 하나)을 버튼 여러 개로 넓힌 초안이다.
+ */
+export interface FollowUp {
+  kind: 'question' | 'ask_info';
+  text: string;
+  field?: string; // ask_info일 때: age, region, income, marriage_period, child_age, school_work, household_size …
+}
+
 export interface Notice {
   kind: 'info' | 'warn';
   title: string;
@@ -73,7 +85,7 @@ export interface AskResponse {
   answer: string; // 본문 속 [1], [2]는 citations 순번
   citations: Citation[];
   policy_checks: PolicyCheck[];
-  follow_up_questions: string[];
+  follow_up_questions: FollowUp[];
   /** 공식 원문 수집·확인 시점 (PRD §7.1 최신성) */
   checked_at: string | null;
   notice?: Notice | null;

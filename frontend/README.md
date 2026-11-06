@@ -38,7 +38,7 @@ npm run dev
 |---|---|
 | 정상 답변 + 조건 확인 | 분야 카드 '일자리' 클릭 |
 | 조건을 말로 알려 주고 이어서 질문 | 답변 뒤 아래 입력창에 "26살, 서울, 소득은 4000만원이야" |
-| AI가 되묻기 | 답변의 '○○도 알려줄게요' 버튼 |
+| AI가 되묻기 | 답변의 '○○도 알려줄게요' 버튼 (응답의 `follow_up_questions`에서 `kind: 'ask_info'`, `field`로 구분) |
 | 근거 없음 | 예시에 없는 질문 |
 | 오류 + 다시 시도 | 질문에 "오류"를 넣어 보내기 (예시 응답일 때만) |
 | 신청 주소 없음 | 분야 카드 '주거' — '신청하기' 버튼 없이 출처만 표시 |
@@ -51,6 +51,7 @@ npm run dev
 src/
 ├── App.tsx              # 화면 상태(내 조건·대화·테마)와 질문 흐름
 ├── api/                 # 백엔드 계약(types)과 호출(client)
+├── config/              # 분야 카드(categories), 되물을 정보 항목(infoFields)
 ├── mock/mockAsk.ts      # 예시 응답 (sample_only)
 ├── lib/parseProfile.ts  # 문장 속 나이·지역·소득 읽기
 ├── lib/validate.ts      # 나이 입력 검증(0~120 정수), 외부 링크는 http/https만 허용

@@ -1,28 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { askPolicy, usingSample } from './api/client';
-import type { AskRequest, ChatTurnMessage, UserProfile } from './api/types';
-import { EXAMPLES } from './mock/mockAsk';
+import type { AskRequest, ChatTurnMessage, FollowUp, UserProfile } from './api/types';
+import { CATEGORIES } from './config/categories';
+import { infoField } from './config/infoFields';
 import { describeProfile, parseProfile } from './lib/parseProfile';
 import { checkAge } from './lib/validate';
-import { Hero, type Category } from './components/Hero';
+import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
 import { Icon, type IconName } from './components/Icon';
 
-const CATEGORY_META: Record<string, { title: string; sub: string; icon: IconName }> = {
-  work: { title: '일자리', sub: '취업·구직 지원받기', icon: 'briefcase' },
-  housing: { title: '주거', sub: '주거비 부담 덜기', icon: 'house' },
-  edu: { title: '교육·훈련', sub: '역량 키우기', icon: 'books' },
-  money: { title: '복지·금융', sub: '생활·자산 지키기', icon: 'money' },
-  welfare: { title: '출산·육아', sub: '아이와 함께', icon: 'bottle' },
-};
-const CATEGORIES: Category[] = EXAMPLES.map((e) => ({ key: e.key, question: e.question, ...CATEGORY_META[e.key] }));
-
-/** '○○도 알려줄게요' 칩을 누르면 AI가 되묻는 문구 */
-const ASK_FOR: [string, string, string][] = [
-  ['지역', '거주 지역', '예: 서울에 살아요'], ['소득', '가구 소득', '예: 소득은 연 4000만 원이에요'], ['혼인', '혼인 기간', '예: 결혼한 지 2년 됐어요'],
-  ['자녀', '자녀 나이', '예: 아이가 3살이에요'], ['학교', '학교·직장 상황', '예: 대학 졸업 예정이에요'], ['가구원', '가구원 수', '예: 3인 가구예요'],
-];
 const josa = (w: string) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를'; };
 
 const THEME_KEY = 'lifepolicy-theme';
@@ -139,11 +126,12 @@ export default function App() {
     void run(id, request);
   }, [run]);
 
-  /** 추가 질문 칩: '…알려줄게요'는 AI가 먼저 되묻고, 나머지는 바로 질문한다. */
-  const followUp = useCallback((text: string, origin: HTMLElement) => {
-    if (!text.endsWith('알려줄게요')) { ask(text, origin); return; }
-    const [key, label, example] = ASK_FOR.find(([k]) => text.includes(k)) ?? ['', '추가 정보', '예: 26살이에요'];
-    setAwaiting(key && key !== '지역' && key !== '소득' ? label : null);
+  /** 추가 질문 버튼: 정보 요청(ask_info)이면 AI가 먼저 되묻고, 일반 질문이면 바로 보낸다. */
+  const followUp = useCallback((f: FollowUp, origin: HTMLElement) => {
+    if (f.kind !== 'ask_info') { ask(f.text, origin); return; }
+    const { label, example, usedForCheck } = infoField(f.field);
+    // 나이·지역·소득은 화면이 문장에서 읽어 조건에 반영하므로 따로 기다리지 않는다
+    setAwaiting(usedForCheck ? null : f.field ?? null);
     setTurns((list) => [...list, { id: nextId.current++, kind: 'prompt', text: `좋아요! ${label}${josa(label)} 알려 주세요. 아래 입력창에 편하게 적어 주시면 그 조건으로 다시 확인해 드릴게요. (${example})` }]);
     setMiniPlaceholder(example);
     setTimeout(() => (miniOn ? miniInputRef : heroInputRef).current?.focus({ preventScroll: true }), 300);
