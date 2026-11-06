@@ -135,7 +135,8 @@ flowchart LR
 |---|---|---|
 | **주민혁 (DB)** | Neo4j 적재·제약조건/관계 검증, 임베딩 모델 결정, Qdrant 적재·검색 | `data/handoff/`, 데이터 계약 및 최종 DB 스키마 문서 |
 | **나지인·박소희 (RAG/평가)** | Graph+Vector 검색 결합, 조건 확인 결과 기반 답변·추가 질문, 근거 제시 및 UNKNOWN 처리, A/B 비교·테스트 | 공식 출처·검증 상태·Qdrant 청크·ConditionGroup |
-| **강민지 (조건 확인/산출물 03·발표)** | 사용자 입력 검증, 연령·지역·신청기간 조건 확인 기능 개발, 산출물 03(개발 소프트웨어 실행·시연) 정리 및 발표 | 정책 `region`·`application_period`·`eligibility`, EligibilityCondition·ConditionGroup, 카테고리/생애주기 통계, 출처 정보 |
+| **나지인·박소희 (조건 확인 공동 담당)** | 사용자 입력 검증, 연령·지역·신청기간 조건 확인 기능 개발 | 정책 `region`·`application_period`·`eligibility`, EligibilityCondition·ConditionGroup, 출처 정보 |
+| **강민지 (React 시연 UI/산출물 03·발표)** | 질문·선택 조건 입력과 답변·공식 출처 표시, 산출물 03 실행·시연 정리 및 발표 | 답변·공식 출처·추가 확인 항목 |
 | **장반석 (데이터)** | 인계 지원, 데이터 문의, 후속 증분 수집 대응 | 수집 원본, 매핑표, 품질/인계 패키지 |
 
 ## 8. 팀이 합의하면 좋은 사항

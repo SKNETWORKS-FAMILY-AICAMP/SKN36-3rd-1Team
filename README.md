@@ -28,7 +28,7 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 - [ ] LLM 근거 기반 답변 + 출처 표시
 - [ ] 평가 질문 10개 및 결과 기록
 
-> 웹 UI(React)는 **4차 프로젝트 범위**입니다 (파인튜닝 등 챗봇 기능 고도화와 함께 진행). 3차는 터미널·노트북 등으로 시연합니다.
+> 3차 발표는 **React 화면 한 장**으로 질문과 선택 조건을 입력하고 답변·공식 출처를 보여줍니다. 터미널·노트북은 시연 백업이며 정식 웹 UI 개발은 4차 범위입니다.
 
 ## 기술 스택
 
@@ -39,7 +39,7 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 | Graph DB | Neo4j | 제안 (PRD D-02) |
 | Vector DB | Qdrant | 제안 (PRD D-02) |
 | Embedding | 한국어 지원 모델 | 미확정 (PRD D-04) |
-| Frontend | React | 사용 확정·4차 개발 |
+| Frontend | React | 3차 최소 시연·4차 정식 웹 UI |
 | 데이터 처리 | Python, Pandas, XML/HTML/PDF 파서 | 파서 라이브러리 미확정 |
 | 테스트 | pytest | 제안 |
 | 개발 환경 | Python venv, Docker Compose | 제안 |
@@ -56,7 +56,7 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 │   ├── rag/            #   검색 결과 결합·LLM 호출
 │   ├── graph/          #   Neo4j 연동
 │   └── eligibility/    #   사용자 입력 검증, 연령·지역·신청기간 조건 확인
-├── frontend/           # React 기반 웹 UI (4차 프로젝트 범위)
+├── frontend/           # 3차 React 최소 시연 화면과 4차 웹 UI
 ├── data/
 │   ├── raw/            # 원본 (youth_policy/, lh/, other/) — Git 기본 제외
 │   ├── processed/      # 정제 결과 (policies/documents/relationships.jsonl)
@@ -82,9 +82,9 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 |---|---|---|---|
 | 데이터 / API / README | 장반석 | `data/`, `collectors/`, `docs/data/` | 01 수집 데이터 및 전처리 문서 |
 | 임베딩 / DB | 주민혁 | `database/`, `ai/embeddings/`, `backend/graph/`, `docs/architecture/` | 02 시스템 아키텍처 |
-| 검색 / 평가 | 나지인, 박소희 | 검색 관련 코드, `ai/evaluation/`, `tests/evaluation/` | 05 테스트 계획 및 결과 보고서 |
+| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | 검색 관련 코드, `backend/eligibility/`, `ai/evaluation/`, `tests/evaluation/` | 05 테스트 계획 및 결과 보고서 |
 | LLM / RAG | 나지인, 박소희 | `backend/rag/`, `ai/prompts/`, `ai/workflows/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
-| 사용자 조건 확인 / 발표 | 강민지 | `backend/eligibility/` | 03 개발 소프트웨어 실행·시연 정리 (전원 실행법 취합), 발표 |
+| React 시연 UI / 발표 | 강민지 | `frontend/` | 03 개발 소프트웨어 실행·시연 정리 (화면 연동·검증, 전원 실행법 취합), 발표 |
 | 공통 변경 | 전원 (PR 리뷰 필수) | `README.md`, `.env.example`, `AGENTS.md`, `docs/api/` (공통 API 계약) | — |
 
 검색·평가와 LLM·RAG의 세부 코드 소유권은 아직 합의 전입니다 (PRD D-08).
