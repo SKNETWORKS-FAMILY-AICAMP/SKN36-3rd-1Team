@@ -192,6 +192,8 @@ def score_question(question: dict[str, Any], hits: list[dict[str, Any]], k: int 
         outcome, first = "miss", None
     return {"question_id": question["question_id"], "outcome": outcome, "first_hit_rank": first,
             "reciprocal_rank": (1.0 / first) if first else 0.0, "first_gold_document_rank": doc_rank,
+            # 표시용(판정 기준 아님): 필수 근거 중 Top-K에서 통째로 찾은 개수 / 전체 개수
+            "required_found": len(found), "required_total": len(required),
             "evidence": evidence_results}
 
 

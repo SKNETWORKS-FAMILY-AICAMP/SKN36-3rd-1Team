@@ -54,9 +54,9 @@ class TestConfigs(unittest.TestCase):
                 self.assertTrue(plan["point_id_is_uuid5_chunk_id"])
                 self.assertEqual(plan["restore_mismatch"], 0)
                 self.assertEqual((plan["documents"], plan["policies"]), (246, 237))
-                self.assertEqual(plan["model"], "qwen3-embedding:0.6b")
-                self.assertEqual((plan["dim"], plan["distance"], plan["embedding_input_rule"]),
-                                 (1024, "Cosine", "policy_section_body_v2"))
+                expected_model = ("qwen3-embedding:4b", 2560) if name == "A_B2_4B" else ("qwen3-embedding:0.6b", 1024)
+                self.assertEqual((plan["model"], plan["dim"]), expected_model)
+                self.assertEqual((plan["distance"], plan["embedding_input_rule"]), ("Cosine", "policy_section_body_v2"))
                 self.assertIsNone(plan["query_template"])
                 self.assertIsNone(plan["collection_state"])          # client 없이 계획만
 
@@ -72,7 +72,15 @@ class TestConfigs(unittest.TestCase):
         for name in names:
             store.assert_experiment_collection(name)
             self.assertNotIn(name, fi.PROTECTED_COLLECTIONS)
+        # A_B2와 A_B2_4B는 같은 B2 청크(모델만 다름) → 지문이 같아야 하고, 나머지 구성끼리는 다르다
+        self.assertEqual(self.plans["A_B2"]["chunk_fingerprint"], self.plans["A_B2_4B"]["chunk_fingerprint"])
         self.assertEqual(len({plan["chunk_fingerprint"] for plan in self.plans.values()}), 3)
+
+    def test_existing_configs_keep_default_model(self):
+        for name in ("A_B2", "B_B3", "C_B3C1"):
+            self.assertEqual(fi.config_model(fi.get_config(name)), ("qwen3-embedding:0.6b", 1024))
+            self.assertEqual(fi.make_run_info(name)["embedding_dim"], 1024)
+        self.assertEqual(fi.make_run_info("A_B2_4B")["embedding_model"], "qwen3-embedding:4b")
 
     def test_unknown_and_protected_configs_are_rejected(self):
         with self.assertRaises(fi.FullIndexError):
@@ -148,6 +156,49 @@ class TestWriteSafety(unittest.TestCase):
         with self.assertRaises(fi.FullIndexError):
             self._execute(chunks=changed, confirm_write=True)
         self.assertEqual(store.count_points(self.client, self.collection), count)
+
+
+class Test4BConfigSafety(unittest.TestCase):
+    """4B 구성(2560차원): 차원·모델이 다른 데이터와 섞이지 않는지 (메모리 Qdrant, 가짜 2560차원 벡터)"""
+
+    def setUp(self):
+        self.client = store.get_client(location=":memory:")
+        documents = {d["document_id"]: d for d in hd.load_documents()}
+        self.documents = [documents[document_id] for document_id in SMALL_DOCUMENTS]
+        self.metadata = hd.load_policy_metadata()
+        self.chunks, _ = fi.build_config_chunks("A_B2_4B", self.documents)
+        self.collection = fi.FULL_INDEX_CONFIGS["A_B2_4B"]["collection"]
+        self.hashes = {d["document_id"]: d["content_hash"] for d in self.documents}
+
+    def _embedder(self, dim):
+        return lambda texts: [[0.1] * dim for _ in texts]
+
+    def test_write_with_2560_dim_and_verify(self):
+        result = fi.execute_full_index("A_B2_4B", client=self.client, embedder=self._embedder(2560),
+                                       documents=self.documents, policy_metadata=self.metadata,
+                                       chunks=self.chunks, confirm_write=True)
+        self.assertTrue(result["verification"]["passed"], result["verification"])
+        self.assertEqual(self.client.get_collection(self.collection).config.params.vectors.size, 2560)
+        self.assertEqual(result["run_info"]["embedding_model"], "qwen3-embedding:4b")
+
+    def test_wrong_dimension_embedder_is_rejected(self):
+        with self.assertRaises(ValueError):                                  # build_points가 차원 불일치를 막는다
+            fi.execute_full_index("A_B2_4B", client=self.client, embedder=self._embedder(1024),
+                                  documents=self.documents, policy_metadata=self.metadata,
+                                  chunks=self.chunks, confirm_write=True)
+
+    def test_existing_1024_collection_with_4b_name_is_conflict(self):
+        store.ensure_collection(self.client, self.collection, 1024)
+        state = fi.inspect_collection(self.client, self.collection, self.chunks, self.hashes, "qwen3-embedding:4b", 2560)
+        self.assertEqual(state["state"], "conflict")
+
+    def test_06b_payload_in_4b_collection_is_conflict(self):
+        # 0.6B 기록(payload의 모델·차원)이 들어 있는 point는 4B 기준으로 검사하면 불일치
+        fi.execute_full_index("A_B2_4B", client=self.client, embedder=self._embedder(2560),
+                              documents=self.documents, policy_metadata=self.metadata,
+                              chunks=self.chunks, confirm_write=True)
+        state = fi.inspect_collection(self.client, self.collection, self.chunks, self.hashes)   # 기본값 = 0.6B·1024
+        self.assertEqual(state["state"], "conflict")
 
 
 if __name__ == "__main__":

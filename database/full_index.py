@@ -4,6 +4,7 @@
   A_B2   : 전체 B2                       → exp_b2_qwen3emb06b_full_v1   (1,081 청크)
   B_B3   : 전체 B3                       → exp_b3_qwen3emb06b_full_v1   (1,117 청크)
   C_B3C1 : B3 243개 문서 + C1 3개 문서   → exp_b3c1_qwen3emb06b_full_v1 (1,141 청크)
+  A_B2_4B: 전체 B2 + qwen3-embedding:4b(2560차원) → exp_b2_qwen3emb4b_full_v1 (1,081 청크, 모델 비교용)
 공통: qwen3-embedding:0.6b, 1024차원, Cosine, 임베딩 입력 policy_section_body_v2, 질의 지시문 없음, point id = uuid5(chunk_id)
 
 안전장치
@@ -55,7 +56,15 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
     "B_B3": {"collection": "exp_b3_qwen3emb06b_full_v1", "strategy": "B3", "expected_chunks": 1117},
     "C_B3C1": {"collection": "exp_b3c1_qwen3emb06b_full_v1", "strategy": "B3+C1", "expected_chunks": 1141,
                "c1_documents": C1_DOCUMENTS},
+    # 2026-11-06 모델 비교: 청킹(B2)은 A_B2와 같고 임베딩 모델·차원만 다르다. 차원 2560은 다운로드 후 실측값
+    "A_B2_4B": {"collection": "exp_b2_qwen3emb4b_full_v1", "strategy": "B2", "expected_chunks": 1081,
+                "model": "qwen3-embedding:4b", "dim": 2560},
 }
+# 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다
+
+
+def config_model(config: dict[str, Any]) -> tuple[str, int]:
+    return config.get("model", EMBEDDING_MODEL), config.get("dim", EMBEDDING_DIM)
 # payload 비교 필드: 같은 point id인데 이 값이 다르면 다른 실험 데이터로 보고 덮어쓰지 않는다
 PAYLOAD_IDENTITY_FIELDS = ("chunk_id", "document_id", "policy_id", "char_start", "char_end", "page_start", "page_end",
                            "chunking_version", "content_hash", "embedding_model", "embedding_dim", "embedding_input_rule")
@@ -122,16 +131,18 @@ def manifest_sha256() -> str:
 
 
 def make_run_info(name: str, run_id: str | None = None) -> dict[str, Any]:
-    return {"embedding_model": EMBEDDING_MODEL, "embedding_dim": EMBEDDING_DIM,
+    model, dim = config_model(get_config(name))
+    return {"embedding_model": model, "embedding_dim": dim,
             "embedding_input_rule": EMBEDDING_INPUT_RULE,
             "index_run_id": run_id or f"RUN_FULL_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"}
 
 
-def expected_payload_identity(chunk: dict[str, Any], content_hash: str) -> dict[str, Any]:
+def expected_payload_identity(chunk: dict[str, Any], content_hash: str, model: str = EMBEDDING_MODEL,
+                              dim: int = EMBEDDING_DIM) -> dict[str, Any]:
     return {"chunk_id": chunk["chunk_id"], "document_id": chunk["document_id"], "policy_id": chunk["policy_id"],
             "char_start": chunk["char_start"], "char_end": chunk["char_end"], "page_start": chunk["page_start"],
             "page_end": chunk["page_end"], "chunking_version": chunk["chunking_version"], "content_hash": content_hash,
-            "embedding_model": EMBEDDING_MODEL, "embedding_dim": EMBEDDING_DIM,
+            "embedding_model": model, "embedding_dim": dim,
             "embedding_input_rule": EMBEDDING_INPUT_RULE}
 
 
@@ -147,10 +158,12 @@ def _retrieve_payloads(client, collection: str, ids: list[str], batch: int = 256
     return payloads
 
 
-def inspect_collection(client, collection: str, chunks: list[dict[str, Any]], content_hashes: dict[str, str]) -> dict[str, Any]:
+def inspect_collection(client, collection: str, chunks: list[dict[str, Any]], content_hashes: dict[str, str],
+                       model: str = EMBEDDING_MODEL, dim: int = EMBEDDING_DIM) -> dict[str, Any]:
     """
     대상 컬렉션 상태를 읽기만 한다. 반환 state: absent / complete / partial / conflict
-    conflict 이유: 차원·거리 불일치, 예상 밖 point, 같은 id의 payload 불일치, 본문 불일치
+    conflict 이유: 차원·거리 불일치, 예상 밖 point, 같은 id의 payload 불일치(모델·차원 포함), 본문 불일치
+    model·dim: 구성의 임베딩 모델과 차원 (기본값 0.6B·1024)
     """
     store.assert_experiment_collection(collection)
     expected = {chunk["point_id"]: chunk for chunk in chunks}
@@ -158,7 +171,7 @@ def inspect_collection(client, collection: str, chunks: list[dict[str, Any]], co
         return {"state": "absent", "existing_points": 0, "missing": len(expected), "reasons": []}
     reasons: list[str] = []
     params = client.get_collection(collection).config.params.vectors
-    if params.size != EMBEDDING_DIM or str(params.distance).split(".")[-1].lower() != DISTANCE.lower():
+    if params.size != dim or str(params.distance).split(".")[-1].lower() != DISTANCE.lower():
         reasons.append(f"벡터 설정 불일치: size={params.size}, distance={params.distance}")
     existing = store.list_point_ids(client, collection)
     unexpected = sorted(existing - set(expected))
@@ -168,7 +181,7 @@ def inspect_collection(client, collection: str, chunks: list[dict[str, Any]], co
     mismatched = []
     for point_id, payload in _retrieve_payloads(client, collection, present).items():
         chunk = expected[point_id]
-        identity = expected_payload_identity(chunk, content_hashes[chunk["document_id"]])
+        identity = expected_payload_identity(chunk, content_hashes[chunk["document_id"]], model, dim)
         differing = [field for field in PAYLOAD_IDENTITY_FIELDS if payload.get(field) != identity[field]]
         if payload.get("text") != chunk["text"]:
             differing.append("text")
@@ -200,11 +213,13 @@ def plan_full_index(name: str, *, documents: list[dict[str, Any]], policy_metada
     covered_documents = {chunk["document_id"] for chunk in chunks}
     covered_policies = {chunk["policy_id"] for chunk in chunks}
     content_hashes = {document["document_id"]: document["content_hash"] for document in documents}
-    inspection = inspect_collection(client, config["collection"], chunks, content_hashes) if client is not None else None
+    model, dim = config_model(config)
+    inspection = (inspect_collection(client, config["collection"], chunks, content_hashes, model, dim)
+                  if client is not None else None)
     total_chars = sum(len(text) for text in texts)
     plan = {
         "config": name, "collection": config["collection"], "strategy": config["strategy"],
-        "model": EMBEDDING_MODEL, "dim": EMBEDDING_DIM, "distance": DISTANCE, "embedding_input_rule": EMBEDDING_INPUT_RULE,
+        "model": model, "dim": dim, "distance": DISTANCE, "embedding_input_rule": EMBEDDING_INPUT_RULE,
         "query_template": QUERY_TEMPLATE, "manifest_sha256": manifest_sha256(),
         "chunks": len(chunks), "expected_chunks": config["expected_chunks"],
         "chunk_count_matches": len(chunks) == config["expected_chunks"],
@@ -224,6 +239,16 @@ def plan_full_index(name: str, *, documents: list[dict[str, Any]], policy_metada
                      and not plan["missing_documents"] and not plan["missing_policies"]
                      and (inspection is None or inspection["state"] != "conflict"))
     return plan
+
+
+def git_state() -> dict[str, Any]:
+    """실행 기록용 Git 상태: HEAD, 추적 파일 변경 여부, 미추적 파일 수 (내용은 기록하지 않는다)."""
+    import subprocess
+
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True).stdout.strip()
+    return {"head": run("rev-parse", "HEAD"), "tracked_dirty": bool(run("status", "--porcelain", "--untracked-files=no")),
+            "untracked": run("status", "--porcelain").count("??")}
 
 
 def documents_by_id(documents: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -248,13 +273,14 @@ def execute_full_index(name: str, *, client, embedder, documents: list[dict[str,
     if chunks is None:
         chunks, _info = build_config_chunks(name, documents, proposals_dir)
     content_hashes = {document["document_id"]: document["content_hash"] for document in documents}
-    before = inspect_collection(client, config["collection"], chunks, content_hashes)
+    model, dim = config_model(config)
+    before = inspect_collection(client, config["collection"], chunks, content_hashes, model, dim)
     if before["state"] == "conflict":
         raise FullIndexError(f"{config['collection']} 충돌 → 쓰지 않음: {before['reasons']}")
     run_info = make_run_info(name, run_id)
     written, embed_seconds, upsert_seconds = 0, 0.0, 0.0
     if before["state"] != "complete":
-        store.ensure_collection(client, config["collection"], EMBEDDING_DIM, DISTANCE)
+        store.ensure_collection(client, config["collection"], dim, DISTANCE)
         existing = store.list_point_ids(client, config["collection"])
         todo = [chunk for chunk in chunks if chunk["point_id"] not in existing]
         for start in range(0, len(todo), batch_size):
@@ -279,7 +305,8 @@ def verify_full_index(name: str, *, client, chunks: list[dict[str, Any]], docume
     config = get_config(name)
     content_hashes = {document["document_id"]: document["content_hash"] for document in documents}
     by_id = documents_by_id(documents)
-    inspection = inspect_collection(client, config["collection"], chunks, content_hashes)
+    model, dim = config_model(config)
+    inspection = inspect_collection(client, config["collection"], chunks, content_hashes, model, dim)
     payloads = _retrieve_payloads(client, config["collection"], [chunk["point_id"] for chunk in chunks])
     slice_mismatch = sum(1 for payload in payloads.values()
                          if by_id[payload["document_id"]]["text"][payload["char_start"]:payload["char_end"]] != payload.get("text"))
@@ -323,11 +350,14 @@ def main(argv: list[str] | None = None) -> int:
                 raise FullIndexError("--execute 에는 --confirm-write 가 함께 필요합니다.")
             if not plan["ready"]:
                 raise FullIndexError(f"{name} 계획 검사 실패 → 쓰지 않음")
-            embedder = em.make_ollama_embedder(model=EMBEDDING_MODEL, expected_dim=EMBEDDING_DIM)
+            model, dim = config_model(get_config(name))
+            metrics: list[dict[str, Any]] = []
+            embedder = em.make_ollama_embedder(model=model, expected_dim=dim, metrics_sink=metrics)
             output = {"mode": "execute", "plan": plan,
                       "result": execute_full_index(name, client=client, embedder=embedder, documents=documents,
                                                    policy_metadata=policy_metadata, confirm_write=True),
-                      "created_at": output["created_at"]}
+                      "ollama_metrics": em.summarize_ollama_metrics(metrics),
+                      "git": git_state(), "created_at": output["created_at"]}
         outputs.append(output)
         if args.record:
             RECORD_DIR.mkdir(parents=True, exist_ok=True)
