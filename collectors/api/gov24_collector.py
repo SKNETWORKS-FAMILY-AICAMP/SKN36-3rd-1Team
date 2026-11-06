@@ -225,7 +225,7 @@ def structure_ja_conditions(cond_dict: Dict[str, Any]) -> Dict[str, Any]:
     household_cond["상태"] = "확인" if hh_has_y else "미확인(공고문 본문 참조)"
 
     # 6. 생애주기 / 학업 / 건강·특수
-    for code in ["JA0301", "JA0302", "JA0303", "JA0317", "JA0318", "JA0319", "JA0320", "JA0328", "JA0329", "JA0330"]:
+    for code in ["JA0301", "JA0302", "JA0303", "JA0317", "JA0318", "JA0319", "JA0320", "JA0322", "JA0328", "JA0329", "JA0330"]:
         name = JA_CODE_DEFINITIONS[code][2]
         lifecycle_cond[name] = val_to_status(cond_dict.get(code))
     lc_has_y = any(v == "적용대상" for v in lifecycle_cond.values())

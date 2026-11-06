@@ -21,13 +21,84 @@ HANDOFF_DIR = BASE_DIR / "data" / "candidates" / "issue21-handoff"
 NEO4J_DIR = HANDOFF_DIR / "neo4j"
 QDRANT_DIR = HANDOFF_DIR / "qdrant"
 
+def build_condition_nodes(edges):
+    """관계의 근거·검토 상태를 보존하는 조건 노드를 메모리에서 생성한다."""
+    cond_edges = [e for e in edges if e.get("relation") == "REQUIRES_CONDITION"]
+    conditions_dict = {}
+    for e in cond_edges:
+        cid = e["target_id"]
+        cname = e.get("target_name") or cid
+        ev_loc = e.get("evidence_location") or ""
+
+        # 타입 및 연산자 분류
+        if cid.startswith("COND_YC_INCOME_"):
+            # 무관/기타를 금액 조건으로 승격하지 않는다. 원값 해석은 확인 대기.
+            ctype = "OTHER"
+            op = "UNKNOWN"
+            val = e.get("raw_value", "")
+            unit = "unknown"
+        elif cid.startswith("COND_AGE_"):
+            ctype = "AGE"
+            op = "UNKNOWN" if "UNKNOWN" in cid else "BETWEEN"
+            parts = cid.replace("COND_AGE_", "").split("_")
+            val = f"{parts[0]}~{parts[1]}" if len(parts) >= 2 else parts[0]
+            unit = "세"
+        elif cid.startswith("COND_HH_"):
+            ctype = "HOUSING_HOUSEHOLD"
+            op = "EQUAL"
+            val = cid.replace("COND_HH_", "")
+            unit = "유형"
+        elif cid.startswith("COND_INC_"):
+            ctype = "INCOME"
+            op = "IN_RANGE"
+            val = cid.replace("COND_INC_", "")
+            unit = "%"
+        elif cid.startswith("COND_JOB_"):
+            ctype = "EMPLOYMENT"
+            op = "IN"
+            val = cid.replace("COND_JOB_", "")
+            unit = "상태"
+        elif cid.startswith("COND_EDU_"):
+            ctype = "EDUCATION"
+            op = "IN"
+            val = cid.replace("COND_EDU_", "")
+            unit = "학력"
+        elif cid.startswith("COND_SP_"):
+            ctype = "SPECIAL_TARGET"
+            op = "IN"
+            val = cid.replace("COND_SP_", "")
+            unit = "특성"
+        else:
+            ctype = "OTHER"
+            op = "EQUAL"
+            val = cid
+            unit = ""
+
+        if cid not in conditions_dict:
+            conditions_dict[cid] = {
+                "condition_id": cid,
+                "type": ctype,
+                "name": cname,
+                "operator": op,
+                "value": val,
+                "unit": unit,
+                "evidence_location": ev_loc,
+                "review_status": e.get("review_status", "needs_review"),
+                "description": f"정책 지원 자격 조건 ({cname})"
+            }
+
+    return conditions_dict
+
+
 def build_condition_groups(policies, existing_edges, conditions_dict):
     """조건 DAG만 메모리에서 생성한다. 파일/DB 접근 없음."""
     all_node_ids = set()
     cond_edges = [e for e in existing_edges if e.get("relation") == "REQUIRES_CONDITION"]
     pol_conditions = defaultdict(list)
+    policy_condition_edges = defaultdict(dict)
     for e in cond_edges:
         pol_conditions[e["source_id"]].append(e["target_id"])
+        policy_condition_edges[e["source_id"]][e["target_id"]] = e
 
     condition_groups = []
     handoff_edges = list(existing_edges) # 기존 2,537건 보존
@@ -42,13 +113,24 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
         cond_list = pol_conditions.get(pid, [])
         exclusion = req.get("exclusion_criteria") or req.get("excluded_participants")
         has_exclusion = bool(exclusion)
-        uncertain = bool(req.get("structured_support_conditions")) or any(
+        structured = req.get("structured_support_conditions") or {}
+        ja_categories = {"INC": "소득구간조건", "HH": "가구주거조건", "JOB": "취업경제활동조건"}
+        # 구조화 객체가 있다는 사실이나 지역 검토만으로 명확한 자격식을 지우지 않는다.
+        # JA의 실제 적용 코드와 결합 의미는 확인 전까지 보류한다.
+        ja_uncertain = {category for category, field in ja_categories.items() if any(
+            status == "적용대상" for status in (structured.get(field) or {}).values()
+        )}
+        uncertain = bool(ja_uncertain) or any(
             e.get("review_status") == "needs_review" for e in cond_edges if e["source_id"] == pid
-        ) or req.get("age_review_needed") or req.get("region_review_needed") or (
+        ) or req.get("age_review_needed") or (
             "age_limit_yn" in req and req["age_limit_yn"] != "Y"
         )
-        if uncertain or has_exclusion:
+        if uncertain or has_exclusion or req.get("region_review_needed") or not cond_list:
             v_stat = "needs_review"
+
+        def condition_review(cid):
+            # 공유 조건 노드가 아니라 이 정책의 근거 관계를 기준으로 한다.
+            return policy_condition_edges[pid][cid].get("review_status", "needs_review")
 
         # 루트 그룹 식별자
         root_grp_id = f"GRP_{pid}_ROOT"
@@ -72,7 +154,7 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
                 "policy_id": pid,
                 "logic": "UNKNOWN",
                 "is_root": True,
-                "description": f"{pname} 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"
+                "description": f"{pname} 기본 자격 조건 그룹 (구조화 조건 미제공 / 제한 없음 여부도 미확인)"
             })
             continue
 
@@ -92,26 +174,53 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
             else:
                 type_groups["DIRECT"].append(cid)
 
-        # 루트 그룹 생성 (logic: AND)
-        condition_groups.append({
-            "group_id": root_grp_id,
-            "policy_id": pid,
-            "logic": "UNKNOWN" if uncertain else "AND",
-            "is_root": True,
-            "description": f"{pname} 복합 자격 조건 (원천 해석 확인 필요)" if uncertain else f"{pname} 복합 자격 조건 (AND)"
-        })
+        # 3값 논리(db_schema): 검토 대기 조건은 UNKNOWN 하위 그룹에만 둔다.
+        # 확인된 하위 조건이 하나라도 있으면 루트 AND로 부분 판정(FALSE)을 보존하고,
+        # 모두 검토 대기이면 AND를 주장하지 않고 루트 UNKNOWN을 유지한다.
+        def pending(cid):
+            return condition_review(cid) == "needs_review"
 
-        # 직결 필수 조건 (연령, 무주택 등)
-        for cid in type_groups.get("DIRECT", []):
+        def group_uncertain(t_key):
+            return t_key in ja_uncertain or any(pending(cid) for cid in type_groups.get(t_key, []))
+
+        typed_keys = ("INC", "HH", "JOB", "EDU", "SP")
+        evaluable = any(not pending(cid) for cid in type_groups.get("DIRECT", [])) or any(
+            type_groups.get(t_key) and not group_uncertain(t_key) for t_key in typed_keys
+        )
+        root_logic = "AND" if evaluable else "UNKNOWN"
+        review_grp_id = f"GRP_{pid}_UNKNOWN_REVIEW"
+        review_members = []
+
+        def attach(cid, location, uncertain_member):
+            # AND 루트 아래의 검토 대기 원자 조건은 FALSE를 만들지 않도록 UNKNOWN 그룹으로 격리한다.
+            if root_logic == "AND" and (uncertain_member or pending(cid)):
+                review_members.append(cid)
+                return
             handoff_edges.append({
                 "source_id": root_grp_id,
                 "relation": "CONTAINS_CONDITION",
                 "target_id": cid,
                 "target_name": conditions_dict[cid]["name"],
                 "evidence_document_id": ev_doc,
-                "evidence_location": "필수조건",
-                "review_status": v_stat
+                "evidence_location": location,
+                "review_status": condition_review(cid)
             })
+
+        if root_logic == "AND":
+            description = f"{pname} 복합 자격 조건 (AND" + (", 일부 하위 조건 확인 필요)" if uncertain or has_exclusion else ")")
+        else:
+            description = f"{pname} 복합 자격 조건 (원천 해석 확인 필요)"
+        condition_groups.append({
+            "group_id": root_grp_id,
+            "policy_id": pid,
+            "logic": root_logic,
+            "is_root": True,
+            "description": description
+        })
+
+        # 직결 필수 조건 (연령, 무주택 등)
+        for cid in type_groups.get("DIRECT", []):
+            attach(cid, "필수조건", pending(cid))
 
         # 선택형 서브그룹 (OR DAG)
         subgroup_configs = [
@@ -127,25 +236,17 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
             if not items:
                 continue
             if len(items) == 1:
-                cid = items[0]
-                handoff_edges.append({
-                    "source_id": root_grp_id,
-                    "relation": "CONTAINS_CONDITION",
-                    "target_id": cid,
-                    "target_name": conditions_dict[cid]["name"],
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "조건요건",
-                    "review_status": v_stat
-                })
+                attach(items[0], "조건요건", group_uncertain(t_key))
             else:
                 sub_grp_id = f"GRP_{pid}_OR_{t_key}"
                 all_node_ids.add(sub_grp_id)
+                subgroup_uncertain = group_uncertain(t_key)
                 condition_groups.append({
                     "group_id": sub_grp_id,
                     "policy_id": pid,
-                    "logic": "UNKNOWN" if uncertain else "OR",
+                    "logic": "UNKNOWN" if subgroup_uncertain else "OR",
                     "is_root": False,
-                    "description": f"{pname} {t_title}: 결합 의미 확인 필요" if uncertain else f"{pname} {t_title}: {t_desc}"
+                    "description": f"{pname} {t_title}: 결합 의미 확인 필요" if subgroup_uncertain else f"{pname} {t_title}: {t_desc}"
                 })
                 handoff_edges.append({
                     "source_id": root_grp_id,
@@ -154,7 +255,7 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
                     "target_name": f"{t_title} ({sub_grp_id})",
                     "evidence_document_id": ev_doc,
                     "evidence_location": "선택조건그룹",
-                    "review_status": v_stat
+                    "review_status": "needs_review" if subgroup_uncertain else p.get("verification_status", "extracted")
                 })
                 for cid in items:
                     handoff_edges.append({
@@ -164,8 +265,70 @@ def build_condition_groups(policies, existing_edges, conditions_dict):
                         "target_name": conditions_dict[cid]["name"],
                         "evidence_document_id": ev_doc,
                         "evidence_location": "선택조건",
-                        "review_status": v_stat
+                        "review_status": condition_review(cid)
                     })
+
+        if review_members:
+            all_node_ids.add(review_grp_id)
+            condition_groups.append({
+                "group_id": review_grp_id,
+                "policy_id": pid,
+                "logic": "UNKNOWN",
+                "is_root": False,
+                "description": f"{pname} 검토 대기 조건: 원천 의미 확인 전 판정에 사용하지 않음"
+            })
+            handoff_edges.append({
+                "source_id": root_grp_id,
+                "relation": "CONTAINS_GROUP",
+                "target_id": review_grp_id,
+                "target_name": f"검토대기조건그룹 ({review_grp_id})",
+                "evidence_document_id": ev_doc,
+                "evidence_location": "검토대기조건그룹",
+                "review_status": "needs_review"
+            })
+            for cid in review_members:
+                handoff_edges.append({
+                    "source_id": review_grp_id,
+                    "relation": "CONTAINS_CONDITION",
+                    "target_id": cid,
+                    "target_name": conditions_dict[cid]["name"],
+                    "evidence_document_id": ev_doc,
+                    "evidence_location": "검토대기조건",
+                    "review_status": condition_review(cid)
+                })
+
+        # 확인된 조건만으로 TRUE(적격)가 나오지 않도록, 구조화하지 못한 원문 자격 문장을 UNKNOWN으로 남긴다.
+        # 온통청년 eligibility는 코드값으로 생성한 문장이므로 원문으로 보지 않는다.
+        free_text = [req.get("additional_qualification"), req.get("selection_criteria")]
+        if "age_limit_yn" not in req:
+            free_text.append(p.get("eligibility"))
+        free_text = [str(t).strip() for t in free_text if str(t or "").strip()]
+        residual = ["원문 자격 문장"] if free_text else []
+        known_age = any(cid.startswith("COND_AGE_") and not pending(cid) for cid in cond_list)
+        if req.get("age_review_needed") and not known_age:
+            residual.append("연령 값 검토(트리에 확인된 연령 조건 없음)")
+        if req.get("region_review_needed"):
+            residual.append("지역 상세 검토")
+        if root_logic == "AND" and residual:
+            text_grp_id = f"GRP_{pid}_UNKNOWN_UNSTRUCTURED"
+            all_node_ids.add(text_grp_id)
+            condition_groups.append({
+                "group_id": text_grp_id,
+                "policy_id": pid,
+                "logic": "UNKNOWN",
+                "is_root": False,
+                "description": (f"{pname} 구조화하지 않은 자격 요소 ({', '.join(residual)}): 판정에 사용하지 않음"
+                                + (f". 원문: {free_text[0][:300]}" if free_text else ""))
+            })
+            handoff_edges.append({
+                "source_id": root_grp_id,
+                "relation": "CONTAINS_GROUP",
+                "target_id": text_grp_id,
+                "target_name": f"미구조화자격요소그룹 ({text_grp_id})",
+                "evidence_document_id": ev_doc,
+                "evidence_location": "미구조화자격요소",
+                "review_status": "needs_review"
+            })
 
         # 비정형 제외 문장만으로 비어 있는 NOT을 만들지 않는다.
         if has_exclusion:
@@ -360,68 +523,8 @@ def main():
     cond_edges = [e for e in existing_edges if e.get("relation") == "REQUIRES_CONDITION"]
     conditions_dict = {}
 
-    for e in cond_edges:
-        cid = e["target_id"]
-        cname = e.get("target_name") or cid
-        ev_loc = e.get("evidence_location") or ""
-
-        # 타입 및 연산자 분류
-        if cid.startswith("COND_YC_INCOME_"):
-            # 무관/기타를 금액 조건으로 승격하지 않는다. 원값 해석은 확인 대기.
-            ctype = "OTHER"
-            op = "UNKNOWN"
-            val = e.get("raw_value", "")
-            unit = "unknown"
-        elif cid.startswith("COND_AGE_"):
-            ctype = "AGE"
-            op = "UNKNOWN" if "UNKNOWN" in cid else "BETWEEN"
-            parts = cid.replace("COND_AGE_", "").split("_")
-            val = f"{parts[0]}~{parts[1]}" if len(parts) >= 2 else parts[0]
-            unit = "세"
-        elif cid.startswith("COND_HH_"):
-            ctype = "HOUSING_HOUSEHOLD"
-            op = "EQUAL"
-            val = cid.replace("COND_HH_", "")
-            unit = "유형"
-        elif cid.startswith("COND_INC_"):
-            ctype = "INCOME"
-            op = "IN_RANGE"
-            val = cid.replace("COND_INC_", "")
-            unit = "%"
-        elif cid.startswith("COND_JOB_"):
-            ctype = "EMPLOYMENT"
-            op = "IN"
-            val = cid.replace("COND_JOB_", "")
-            unit = "상태"
-        elif cid.startswith("COND_EDU_"):
-            ctype = "EDUCATION"
-            op = "IN"
-            val = cid.replace("COND_EDU_", "")
-            unit = "학력"
-        elif cid.startswith("COND_SP_"):
-            ctype = "SPECIAL_TARGET"
-            op = "IN"
-            val = cid.replace("COND_SP_", "")
-            unit = "특성"
-        else:
-            ctype = "OTHER"
-            op = "EQUAL"
-            val = cid
-            unit = ""
-
-        if cid not in conditions_dict:
-            conditions_dict[cid] = {
-                "condition_id": cid,
-                "type": ctype,
-                "name": cname,
-                "operator": op,
-                "value": val,
-                "unit": unit,
-                "evidence_location": ev_loc,
-                "review_status": e.get("review_status", "needs_review"),
-                "description": f"정책 지원 자격 조건 ({cname})"
-            }
-            all_node_ids.add(cid)
+    conditions_dict = build_condition_nodes(existing_edges)
+    all_node_ids.update(conditions_dict)
 
     with open(NEO4J_DIR / "nodes_eligibility_condition.jsonl", "w", encoding="utf-8") as f:
         for ec in conditions_dict.values():

@@ -145,12 +145,13 @@ def infer_target_groups(life_str: str, trg_str: str, title: str, text: str) -> L
 
 
 def get_structured_conditions(requirements):
-    """정제본에 남은 JA0410 원값으로 누락만 복구하며 입력은 수정하지 않는다."""
+    """정제본에 남은 JA0410/JA0322 원값으로 누락만 복구하며 입력은 수정하지 않는다."""
     structured = copy.deepcopy(requirements.get("structured_support_conditions") or {})
     raw = requirements.get("support_conditions") or {}
-    if "JA0410" in raw:
-        household = structured.setdefault("가구주거조건", {})
-        household["해당사항없음"] = structure_ja_conditions(raw)["가구주거조건"]["해당사항없음"]
+    # 두 코드 모두 '해당사항없음'. 의미 해석 없이 원천 코드의 존재만 보존한다.
+    for code, group in (("JA0410", "가구주거조건"), ("JA0322", "생애주기특수조건")):
+        if code in raw:
+            structured.setdefault(group, {})["해당사항없음"] = structure_ja_conditions(raw)[group]["해당사항없음"]
     return structured
 
 
@@ -534,11 +535,19 @@ def build_condition_edges(pol: Dict[str, Any]) -> List[Dict[str, Any]]:
     if not s_cond and "age_limit_yn" in reqs:
         low, high = reqs.get("min_age"), reqs.get("max_age")
         if low is not None or high is not None:
+            # Y와 정상 범위가 명시된 연령까지 소득 검토 때문에 보류하지 않는다.
+            # N, 누락 경계, 역전 범위 및 기존 검토 표시는 그대로 보류한다.
+            age_is_explicit = (
+                reqs.get("age_limit_yn") == "Y" and reqs.get("age_review_needed") is False
+                and type(low) is int and type(high) is int and 0 < low <= high
+            ) or bool(reqs.get("age_text_evidence"))
             add_condition(
                 f"COND_AGE_{low if low is not None else 'UNKNOWN'}_{high if high is not None else 'UNKNOWN'}",
                 f"연령조건: {low}~{high}", "온통청년 sprtTrgtMinAge/sprtTrgtMaxAge/sprtTrgtAgeLmtYn",
+                review_status=v_stat if age_is_explicit else "needs_review",
             )
-    if "income_condition_code" in reqs:
+    # 공식 코드 '무관'은 다른 '제한없음' 라벨처럼 조건 관계를 만들지 않는다. 원값은 requirements에 남는다.
+    if "income_condition_code" in reqs and not youth_income_unrestricted(reqs):
         income = {key: reqs.get(key) for key in (
             "income_condition_code", "income_condition_label", "income_min_amount",
             "income_max_amount", "income_etc_details",
@@ -597,8 +606,13 @@ def build_condition_edges(pol: Dict[str, Any]) -> List[Dict[str, Any]]:
                 slug = re.sub(r"[^0-9A-Za-z가-힣]+", "_", name)
                 add_condition(f"COND_JOB_{slug}", f"취업경제활동조건: {name}", "지원조건 JA03/JA11")
         # JA의 선택/필수 의미와 본문 충돌이 확인되기 전 적격 판정 금지.
+        # 단, 연령은 JA0110/JA0111과 지원대상 원문이 같은 범위 하나만 말할 때 출처 상태를 유지한다.
         for edge in edges:
-            edge["review_status"] = "needs_review"
+            if edge["target_id"].startswith("COND_AGE_") and reqs.get("age_text_evidence"):
+                edge["review_status"] = v_stat
+                edge["evidence_location"] = "지원조건 JA0110/JA0111 + 원문 일치: " + reqs["age_text_evidence"][:200]
+            else:
+                edge["review_status"] = "needs_review"
 
     # 7. 온통청년 구조화 요건 엣지 (혼인, 취업, 학력, 특화)
     mrg_lbl = reqs.get("marriage_status_label")
@@ -657,6 +671,38 @@ def build_condition_edges(pol: Dict[str, Any]) -> List[Dict[str, Any]]:
     return edges
 
 
+AGE_RANGE_PATTERN = r"(?:만\s*)?(\d{1,3})\s*세?\s*(?:~|∼|～|-|부터)\s*(?:만\s*)?(\d{1,3})\s*세"
+
+
+def age_text_evidence(low, high, texts):
+    """독립 원문에 같은 연령 범위 하나만 명시된 경우에만 근거 문장을 돌려준다.
+
+    코드 플래그(age_limit_yn)의 의미는 해석하지 않는다. 다른 범위가 함께 있거나
+    범위가 없으면 None. 생성기가 만든 문장(온통청년 eligibility)은 입력하지 않는다.
+    """
+    if type(low) is not int or type(high) is not int or not 0 < low <= high:
+        return None
+    found = []
+    for name, text in texts:
+        for match in re.finditer(AGE_RANGE_PATTERN, str(text or "")):
+            found.append((int(match.group(1)), int(match.group(2)), name, match.group(0)))
+    if not found or {(a, b) for a, b, _, _ in found} != {(low, high)}:
+        return None
+    return "; ".join(sorted({f"{name}: {snippet}" for _, _, name, snippet in found}))
+
+
+OFFICIAL_AGE_REVIEW = json.loads(
+    (BASE_DIR / "data/metadata/issue21_official_age_review.json").read_text(encoding="utf-8"))["decisions"]
+
+
+def youth_income_unrestricted(req):
+    """온통청년 공식 코드표(API코드정보.xlsx) earnCndSeCd 0043001='무관'이고 다른 소득 정보가 없을 때만 True."""
+    return (req.get("income_condition_code") == "0043001"
+            and not str(req.get("income_etc_details") or "").strip()
+            and str(req.get("income_min_amount") or "0") in ("0", "")
+            and str(req.get("income_max_amount") or "0") in ("0", ""))
+
+
 def rebuild_policy_conditions(policies):
     """원본 정책·출처는 보존하고 후보의 조건 메타데이터만 갱신한다."""
     candidates = copy.deepcopy(policies)
@@ -673,8 +719,9 @@ def rebuild_policy_conditions(policies):
         if len(regions) == len(detailed) == 1 and detailed[0].startswith(regions[0] + " "):
             municipality = detailed[0][len(regions[0]) + 1:]
             if municipality in evidence:
-                policy["regions"] = detailed
-                policy["region"] = detailed[0]
+                # 계약(AVAILABLE_IN: 전국 또는 17개 시도)과 시도 검색을 유지한다.
+                # 시군구는 별도 필드로만 보존해 시도 전체 적용으로 오판하지 않게 한다.
+                policy["region_detail"] = detailed[0]
                 policy.setdefault("requirements", req)
                 req["region_review_needed"] = True
                 req["region_evidence"] = evidence
@@ -693,9 +740,32 @@ def rebuild_policy_conditions(policies):
             req["age_limit"] = None
             req["age_review_needed"] = True
             policy["eligibility_review_status"] = "needs_review"
+        # 연령 코드값과 독립 원문이 같은 범위를 말할 때만 연령 조건을 확인된 조건으로 쓴다.
+        age = (structured or {}).get("연령조건") or {}
+        if age:
+            texts = [("지원대상", policy.get("eligibility")), ("선정기준", req.get("selection_criteria")),
+                     ("추가자격", req.get("additional_qualification"))]
+            evidence = age_text_evidence(age.get("대상연령_시작"), age.get("대상연령_종료"), texts)
+        elif "age_limit_yn" in req:
+            evidence = age_text_evidence(req.get("min_age"), req.get("max_age"),
+                                         sorted((req.get("source_free_text") or {}).items()))
+        else:
+            evidence = None
+        review = OFFICIAL_AGE_REVIEW.get(policy.get("policy_id"), {})
+        if review.get("status") == "confirmed" and list(review.get("structured_age") or []) == [
+                age.get("대상연령_시작"), age.get("대상연령_종료")]:
+            evidence = "공식 원문 검토(data/metadata/issue21_official_age_review.json): " + review["confirmed_condition"]
+        elif review.get("status") == "unresolved":
+            evidence = None
+        if evidence:
+            req["age_text_evidence"] = evidence
         if "income_condition_code" in req:
-            req["income_review_needed"] = True
-            policy["eligibility_review_status"] = "needs_review"
+            if youth_income_unrestricted(req):
+                req["income_review_needed"] = False
+                req["income_condition_basis"] = "온통청년 API코드정보.xlsx earnCndSeCd 0043001=무관, 기타/금액 없음"
+            else:
+                req["income_review_needed"] = True
+                policy["eligibility_review_status"] = "needs_review"
     return candidates
 
 
@@ -712,22 +782,7 @@ def rebuild_condition_relationships(policies, existing_edges):
     )]
     for policy in supported:
         edges.extend(build_condition_edges(policy))
-    # 상세 지역 복구 정책의 AVAILABLE_IN도 같은 값으로 재구성한다.
-    for policy in policies:
-        req = policy.get("requirements") or {}
-        if not req.get("region_evidence"):
-            continue
-        pid = policy["policy_id"]
-        edges = [e for e in edges if not (e["source_id"] == pid and e["relation"] == "AVAILABLE_IN")]
-        for region in policy["regions"]:
-            edges.append({
-                "source_id": pid, "relation": "AVAILABLE_IN",
-                "target_id": REGION_CODE_MAP.get(region, f"REGION_{region}"),
-                "target_name": region,
-                "evidence_document_id": (policy.get("source_document_ids") or [None])[0],
-                "evidence_location": "정제본 자격 원문 및 소관기관의 명시 지역",
-                "review_status": "needs_review",
-            })
+    # AVAILABLE_IN은 기존 시도 관계를 그대로 둔다. 시군구는 Policy.region_detail에만 기록한다.
     return edges
 
 

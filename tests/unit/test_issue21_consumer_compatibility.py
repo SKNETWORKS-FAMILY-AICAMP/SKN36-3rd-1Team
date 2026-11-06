@@ -22,7 +22,7 @@ from scripts.build_clean_dataset import (
 from scripts.build_handoff_package import build_condition_groups
 
 ROOT = Path(__file__).resolve().parents[2]
-CONSUMER_REF = "cb55cb7542560210ae41a4fd05be25c461a89c63"
+CONSUMER_REF = "04a9edc366090f151b3f0ac6f74db8b6206c7ca1"  # feature/5-hybrid-rag-db 최신 (읽기 전용)
 
 
 def git_text(path, ref=CONSUMER_REF):
@@ -72,15 +72,9 @@ def git_symbols(path, names, **bindings):
 
 
 def condition_nodes(edges):
-    """Run the production condition-node loop only; no builder main or file output."""
-    tree = ast.parse((ROOT / "scripts/build_handoff_package.py").read_text(encoding="utf-8"))
-    main = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "main")
-    loop = next(n for n in main.body if isinstance(n, ast.For)
-                and isinstance(n.iter, ast.Name) and n.iter.id == "cond_edges")
-    ns = {"cond_edges": [e for e in edges if e["relation"] == "REQUIRES_CONDITION"],
-          "conditions_dict": {}, "all_node_ids": set()}
-    exec(compile(ast.Module(body=[loop], type_ignores=[]), "production_condition_nodes", "exec"), ns)
-    return ns["conditions_dict"]
+    """Use the shared pure production node builder."""
+    from scripts.build_handoff_package import build_condition_nodes
+    return build_condition_nodes(edges)
 
 
 def region_nodes(edges):
@@ -186,18 +180,25 @@ class ConsumerCompatibilityTests(unittest.TestCase):
 
     def test_blocker_cheonan_region_is_rebuilt_from_preserved_source(self):
         p = next(p for p in self.policies if p["policy_id"] == "POL_GOV_048")
-        self.assertEqual(p["regions"], ["충청남도 천안시"])
-        edge = next(e for e in self.edges if e["source_id"] == p["policy_id"] and e["relation"] == "AVAILABLE_IN")
-        self.assertEqual(edge["target_name"], p["region"])
-        node = next(n for n in region_nodes(self.edges) if n["region_id"] == edge["target_id"])
+        # 시도 계약·검색은 그대로, 시군구는 별도 필드로 보존한다.
+        self.assertEqual((p["region"], p["regions"]), ("충청남도", ["충청남도"]))
+        self.assertEqual(p["region_detail"], "충청남도 천안시")
+        edges = [e for e in self.edges if e["source_id"] == p["policy_id"] and e["relation"] == "AVAILABLE_IN"]
+        self.assertEqual([e["target_id"] for e in edges], ["REGION_CHUNGNAM"])
+        node = next(n for n in region_nodes(self.edges) if n["region_id"] == "REGION_CHUNGNAM")
         self.assertEqual(node["name"], p["region"])
+        self.assertTrue(all(" " not in n["region_id"] for n in region_nodes(self.edges)))
 
     def test_blocker_other_income_is_not_typed_as_amount(self):
+        # 0043001(공식 코드표 '무관')은 조건 관계를 만들지 않고, 기타(0043003)는 OTHER 원값으로만 남는다.
         p = next(p for p in self.policies if p["policy_id"] == "POL_YC_002")
         self.assertEqual(p["requirements"]["income_condition_code"], "0043001")
         self.assertEqual(p["requirements"]["income_condition_label"], "무관")
-        edge = next(e for e in self.edges if e["source_id"] == p["policy_id"] and "raw_value" in e)
-        self.assertNotEqual(self.nodes[edge["target_id"]]["type"], "INCOME_AMOUNT")
+        self.assertFalse(any(e["source_id"] == p["policy_id"] and "raw_value" in e for e in self.edges))
+        other = next(p for p in self.policies if p["policy_id"] == "POL_YC_054")
+        edge = next(e for e in self.edges if e["source_id"] == other["policy_id"] and "raw_value" in e)
+        self.assertEqual(self.nodes[edge["target_id"]]["type"], "OTHER")
+        self.assertEqual(self.nodes[edge["target_id"]]["operator"], "UNKNOWN")
 
 
 class GenerationFollowupTests(unittest.TestCase):
@@ -206,9 +207,12 @@ class GenerationFollowupTests(unittest.TestCase):
                    "regions": ["충청남도"], "region": "충청남도", "requirements": {}, "eligibility": "sample_only"}]
         snapshot = copy.deepcopy(source)
         self.assertEqual(rebuild_policy_conditions(source)[0]["regions"], ["충청남도"])
+        self.assertNotIn("region_detail", rebuild_policy_conditions(source)[0])
         source[0]["eligibility"] = "sample_only 천안시에 주민등록을 둔 가정"
         candidate = rebuild_policy_conditions(source)
-        self.assertEqual(candidate[0]["regions"], ["충청남도 천안시"])
+        self.assertEqual(candidate[0]["regions"], ["충청남도"])
+        self.assertEqual(candidate[0]["region"], "충청남도")
+        self.assertEqual(candidate[0]["region_detail"], "충청남도 천안시")
         self.assertEqual(rebuild_policy_conditions(candidate), candidate)
         edges = rebuild_condition_relationships(candidate, [])
         self.assertEqual(rebuild_condition_relationships(candidate, edges), edges)
