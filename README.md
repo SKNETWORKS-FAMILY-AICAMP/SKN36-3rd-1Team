@@ -135,7 +135,36 @@ docker compose up -d
 pytest
 ```
 
-아직 테스트 코드는 없습니다.
+후보 데이터 검증에는 추가 설치 없이 Python 기본 테스트 도구를 사용할 수 있습니다.
+
+```bash
+python -m unittest discover -s tests -p "test_candidate_release.py" -v
+python scripts/load_candidate_neo4j.py
+python scripts/verify_candidate_qdrant.py
+python scripts/verify_candidate_sources.py
+```
+
+위 명령은 파일·계약·참조·해시를 검사하며 실제 DB에는 쓰지 않습니다.
+전체 회귀 테스트와 원본 본문 검사는 Git 제외 원본 및 v1 정부24 대용량 파일 2개를 복원한 환경에서 실행합니다. 새 체크아웃의 후보 파일 사전 검증은 `load_candidate_neo4j.py`와 `verify_candidate_qdrant.py`로 별도 수행할 수 있습니다.
+실제 DB 검사와 신청 주소 교정 범위는 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요.
+
+2026-11-06 임시 Neo4j에서 노드 1,074개·관계 3,703개의 적재·재적재·속성 대조와 DDL 13개 적용 검사를 통과했습니다.
+임시 Qdrant에서도 599개 청크의 ID·payload 저장 검사를 통과했습니다. 검증 후 데이터와 컨테이너를 정리했으며, 임베딩·의미 검색·서비스 통합 완료를 뜻하지 않습니다.
+
+### 후보 릴리스 재생성 및 DB 검사
+
+```bash
+python scripts/build_incremental_release_candidate.py
+# Neo4j: 비어 있는 검증 DB에서 적재·재적재·속성을 대조한 뒤 롤백
+python scripts/load_candidate_neo4j.py --apply --http-url http://127.0.0.1:7474
+# Qdrant: 새 임시 컬렉션에서 ID·payload를 대조한 뒤 컬렉션 정리
+python scripts/verify_candidate_qdrant.py --apply --url http://127.0.0.1:6333
+```
+
+- DB 검사 전 `.env`에 `NEO4J_USER`, `NEO4J_PASSWORD`, `QDRANT_API_KEY`를 설정합니다. 접속 값은 로그에 출력하지 않습니다.
+- Neo4j에 기존 노드가 있거나 Qdrant 검증 컬렉션이 이미 있으면 쓰기를 거절합니다. 기존 DB를 초기화하지 않습니다.
+- Qdrant 검사는 **벡터 없는 ID·payload 저장 검사**입니다. 임베딩 생성·유사도 검색은 별도 검증이 필요합니다. 모델·차원은 임의로 확정하지 않습니다.
+- 후보는 기존 정책의 신청 주소를 교정하며 `data/handoff/` 인계 원본은 보존합니다. 변경 전후 값은 후보의 `release_delta_manifest.json`에 기록합니다.
 
 ## 데이터 원칙 (요약)
 

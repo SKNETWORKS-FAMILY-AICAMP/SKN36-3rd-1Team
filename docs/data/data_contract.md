@@ -2,6 +2,7 @@
 
 > **기준일시:** 2026-11-05 (KST)  
 > **버전:** `v1.3.0-final-contract`  
+> **개정 (2026-11-06):** `Policy.official_apply_url`을 선택(Nullable)으로 변경 — 신청 주소가 확인된 경우에만 값이 있다. `Document`의 `doc_type`·`law_article`·`effective_date`·`version` 등 선택 속성 명시. v1.3.2 데이터 자체는 변경 없음(기존 값은 모두 채워져 있어 호환).  
 > **당사자:** 데이터 엔지니어링 파이프라인(생성) ↔ Neo4j Graph DB & Qdrant Vector DB(소비)  
 > **목적:** 데이터 파이프라인과 다운스트림 데이터베이스(Graph/Vector) 간의 무결성, 필드 타입, 제약조건 및 생명주기를 규정하는 공식 법적/기술적 계약
 
@@ -26,11 +27,13 @@
 
 ### 2.1 필수 필드와 선택 필드 구분
 - **정책(`Policy`):**
-  - **필수(NOT NULL):** `policy_id`, `official_id`, `policy_name`, `source_type`, `category`, `agency`, `organization`, `regions`, `life_stages`, `eligibility_attributes`, `requirements`, `eligibility`, `benefit`, `application_period`, `application_method`, `required_documents`, `official_apply_url`, `source_url`, `source_document_ids`, `verification_status`, `reception_status`, `collected_at`
-  - **선택(Nullable):** `application_start`, `application_end`, `lastMdfcnDt`, `review_flags`
+  - **필수(NOT NULL):** `policy_id`, `official_id`, `policy_name`, `source_type`, `category`, `agency`, `organization`, `regions`, `life_stages`, `eligibility_attributes`, `requirements`, `eligibility`, `benefit`, `application_period`, `application_method`, `required_documents`, `source_url`, `source_document_ids`, `verification_status`, `reception_status`, `collected_at`
+  - **선택(Nullable):** `application_start`, `application_end`, `lastMdfcnDt`, `review_flags`, `official_apply_url`
+    - `official_apply_url`: **실제 신청 주소가 확인된 경우에만 값이 있다.** 법령·서비스 안내(정부24·복지로 상세 등) 페이지만 있으면 `null`이며, 해당 주소는 `source_url`에 둔다. 소비 측(UI)은 값이 있을 때만 '신청하기'를 노출한다. (2026-11-06 개정)
 - **근거 문서(`Document`):**
   - **필수(NOT NULL):** `document_id`, `policy_id`, `title`, `source_type`, `source_url`, `local_raw_path`, `content_hash`, `text`, `verification_status`, `collected_at`
-  - **선택(Nullable):** `published_at`, `effective_at`
+  - **선택(Nullable):** `published_at`, `effective_at`, `doc_type`, `law_article`, `effective_date`, `version`, `extracted_text_path`, `official_id`
+    - `law_article`·`effective_date`·`version`은 법령·조례·공고에만 의미가 있어 서비스 안내·FAQ 문서는 `null`이다. (2026-11-06 개정, v1.4.0-candidate 신규 문서 속성)
 - **벡터 청크(`Chunk`):**
   - **필수(NOT NULL):** `chunk_id`, `policy_id`, `document_id`, `policy_name`, `category`, `region`, `life_stages`, `section_title`, `text`, `source_url`, `verification_status`
 
@@ -105,4 +108,26 @@ Neo4j 노드 레이블 및 Qdrant 필터 필드는 **`LifeStage`**로 단일화�
    - 정책은 하나로 병합되더라도 각 기관의 원본 문서는 각각 고유한 `document_id`로 생성되어 `[:SUPPORTED_BY]` 관계로 다중 연결된다.
 3. **매핑 추적성:**
    - 모든 병합 이력은 `data/metadata/id_mapping.csv` 및 `data/metadata/dedup_candidates.json`에 영구 보존된다.
+
+---
+
+## 8. 자격 조건 그래프·지역 상세 계약 (Issue #21, 2026-11-07 추가)
+
+기존 소비자 동작을 바꾸지 않는 추가 계약이다. 기존 필드의 의미와 `AVAILABLE_IN`(전국 또는 17개 시도) 규칙은 그대로다.
+
+1. **시군구 상세 지역 (`region_detail`, 선택):**
+   - `Policy.region`·`AVAILABLE_IN`·청크 `region`은 계속 시도(또는 전국)다. 시도 검색·Qdrant `region` 필터는 기존과 같다.
+   - 원문(지원대상·선정기준·추가자격)에 같은 시군구가 명시된 정책에만 `Policy.region_detail`(예: `"충청남도 천안시"`)과 청크 `region_detail`을 둔다. 값이 없으면 **속성 자체를 두지 않는다**(null 금지).
+   - `region_detail`이 있으면 시도 일치만으로 거주 요건 충족으로 판정하지 않는다(시군구 확인 전 UNKNOWN).
+2. **ConditionGroup 논리 (`db_schema.md` 3값 논리):**
+   - 루트 `AND`: 확인된 하위 조건이 하나 이상 있을 때만. 루트 `UNKNOWN`: 조건이 없거나 모든 조건이 검토 대기.
+   - `GRP_{policy_id}_UNKNOWN_REVIEW`: `review_status=needs_review`인 원자 조건 모음. 판정에 쓰지 않는다.
+   - `GRP_{policy_id}_UNKNOWN_UNSTRUCTURED`: 구조화하지 못한 원문 자격 문장·연령 값 검토·지역 상세 검토. 확인된 조건만으로 TRUE(적격)가 나오지 않게 한다.
+   - `GRP_{policy_id}_UNKNOWN_EXCL`: 비정형 제외 대상 문장. 빈 NOT 그룹은 만들지 않는다.
+   - `GRP_{policy_id}_OR_{INC|HH|JOB}` 중 정부24 JA 유래 그룹은 `UNKNOWN`(JA 코드 결합 의미 미공개).
+3. **원천 코드 적용 규칙:**
+   - 온통청년 `earnCndSeCd=0043001`(공식 API코드정보.xlsx '무관')이고 기타 내용·금액이 없으면 소득 조건 관계를 만들지 않는다(다른 '제한없음' 라벨과 동일). 원값은 `requirements`에 남는다.
+   - 그 외 소득(`0043003` 기타 등)은 `type=OTHER`, `operator=UNKNOWN`, `raw_value`(JSON 문자열)로만 둔다. 숫자 비교 금지.
+   - 연령은 코드값(JA0110/JA0111, sprtTrgtMin/MaxAge)과 **독립 원문**에 같은 범위 하나만 명시되거나 `data/metadata/issue21_official_age_review.json`에서 confirmed일 때만 확인된 조건이다. 온통청년 `eligibility`는 코드값으로 생성한 문장이라 근거로 쓰지 않는다. `sprtTrgtAgeLmtYn`의 Y/N 방향은 해석하지 않는다(§3.2는 0~0세 행에만 적용되며 현재 후보에 N+0~0세 정책은 없다).
+4. **판정 보류:** `eligibility_review_status=needs_review` 정책은 자동 적격 판정을 하지 않는다. 3값 평가 결과 FALSE(확인된 조건 불충족)만 '대상 아님 가능성'으로 안내할 수 있다.
 

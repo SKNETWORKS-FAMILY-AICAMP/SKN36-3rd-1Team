@@ -19,6 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
+from collectors.preprocessing.application_urls import application_url_or_none, first_application_url
+
 UI_NOISE_EXACT_LINES = {
     "공유하기",
     "페이스북",
@@ -298,7 +300,7 @@ def parse_bokjiro_detail_xml(xml_path: Path) -> Dict[str, Any]:
         return None
 
     source_url = f"https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId={serv_id}"
-    apply_url = apply_urls[0] if apply_urls else source_url
+    apply_url = first_application_url(apply_urls, source_url)
 
     # 본문 텍스트 구성 (공식 XML의 모든 핵심 필드 통합)
     text_sections = [
@@ -399,8 +401,8 @@ def format_youthcenter_item_text(item: Dict[str, Any]) -> str:
     aply_ymd = item.get("aplyYmd", "")
     biz_bgng = item.get("bizPrdBgngYmd", "")
     biz_end = item.get("bizPrdEndYmd", "")
-    aply_url = item.get("aplyUrlAddr", "") or item.get("refUrlAddr1", "")
     source_url = f"https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/{plcy_no}"
+    aply_url = application_url_or_none(item.get("aplyUrlAddr"), source_url)
 
     age_str = f"만 {min_age}세 ~ {max_age}세" if min_age or max_age else "제한없음/공고참조"
 

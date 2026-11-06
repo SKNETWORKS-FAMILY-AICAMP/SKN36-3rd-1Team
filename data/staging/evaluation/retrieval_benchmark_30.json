@@ -1,0 +1,273 @@
+[
+  {
+    "query_id": "Q01",
+    "category": "정책 대상자 탐색",
+    "query": "만 19세 이상 34세 이하 청년이 이용할 수 있는 대중교통비 환급 지원 정책은 무엇인가요?",
+    "target_policies": ["POL_STG_MOLIT_001"],
+    "target_documents": ["DOC_STG_MOLIT_001_GDL", "DOC_STG_MOLIT_001_FAQ"],
+    "expected_answer": "K-패스(대중교통비 환급지원) 정책으로, 만 19세~34세 청년은 월 15회 이상 대중교통 이용 시 지출액의 30%를 환급받을 수 있습니다.",
+    "evaluation_criteria": {"age_filter": "19-34", "benefit_rate": "30%", "min_trips": 15}
+  },
+  {
+    "query_id": "Q02",
+    "category": "정책 대상자 탐색",
+    "query": "서울에 거주하는 만 19~34세 미취업 청년에게 매월 50만원씩 활동비를 지원해주는 정책이 있나요?",
+    "target_policies": ["POL_STG_SEOUL_001"],
+    "target_documents": ["DOC_STG_SEOUL_001_NOT", "DOC_STG_SEOUL_001_ORD"],
+    "expected_answer": "서울특별시 청년수당으로, 서울 거주 만 19~34세 미취업 청년(중위소득 150% 이하)에게 매월 50만원씩 최대 6개월간 총 300만원을 지원합니다.",
+    "evaluation_criteria": {"region": "서울특별시", "age_filter": "19-34", "monthly_amount": "50만원"}
+  },
+  {
+    "query_id": "Q03",
+    "category": "정책 대상자 탐색",
+    "query": "출생아 또는 2년 이내 출산 가구를 위한 LH 공공임대주택 1순위 자격 조건은?",
+    "target_policies": ["POL_001"],
+    "target_documents": ["DOC_STG_001_NOTICE", "DOC_STG_001_LAW"],
+    "expected_answer": "LH 신혼·신생아 매입임대Ⅰ으로, 입주자모집공고일 기준 2년 이내 출산 또는 입양한 자녀가 있는 가구(임신 중인 태아 포함)가 1순위 대상입니다.",
+    "evaluation_criteria": {"target": "신생아가구", "child_age": "2년 이내", "priority": "1순위"}
+  },
+  {
+    "query_id": "Q04",
+    "category": "정책 대상자 탐색",
+    "query": "인천 서구 관내 중소기업에 6개월 이상 재직 중인 청년 근로자가 받을 수 있는 복지 혜택은?",
+    "target_policies": ["POL_STG_ICN_001"],
+    "target_documents": ["DOC_STG_ICN_001_NOT", "DOC_STG_ICN_001_ORD"],
+    "expected_answer": "인천 서구 중소기업 재직청년 복지공유제 지원으로, 연 100만원 복지포인트 바우처 카드 및 종합건강검진비를 지원합니다.",
+    "evaluation_criteria": {"region": "인천 서구", "tenure": "6개월 이상", "benefit": "100만원"}
+  },
+  {
+    "query_id": "Q05",
+    "category": "연령·지역·소득 복합 조건",
+    "query": "임차보증금 2억 5천만원 주택에 거주하는 연소득 4,500만원 단독 청년이 전세보증금 반환보증료 지원을 받을 수 있나요?",
+    "target_policies": ["POL_STG_MOLIT_002"],
+    "target_documents": ["DOC_STG_MOLIT_002_GDL"],
+    "expected_answer": "지원 가능합니다. 임차보증금 3억원 이하 주택 및 청년 단독 연소득 5,000만원 이하 요건을 모두 충족하므로 납부한 보증료를 최대 30만원까지 지원받을 수 있습니다.",
+    "evaluation_criteria": {"deposit_limit": "3억원 이하", "income_limit": "5000만원 이하", "result": "충족"}
+  },
+  {
+    "query_id": "Q06",
+    "category": "연령·지역·소득 복합 조건",
+    "query": "부부합산 연소득 8,000만원인 신혼부부가 청년 전세보증금 반환보증료 지원을 신청할 수 있나요?",
+    "target_policies": ["POL_STG_MOLIT_002"],
+    "target_documents": ["DOC_STG_MOLIT_002_GDL"],
+    "expected_answer": "신청 불가합니다. 청년 신혼부부의 경우 부부합산 연소득 기준이 7,500만원 이하이므로, 8,000만원은 기준을 초과하여 지원 대상에서 제외됩니다.",
+    "evaluation_criteria": {"newlywed_income_limit": "7500만원 이하", "result": "미충족/제외"}
+  },
+  {
+    "query_id": "Q07",
+    "category": "연령·지역·소득 복합 조건",
+    "query": "서울 동대문구에 거주하는 다자녀가정의 셋째 자녀가 고등학교에 입학할 때 축하금 지원 금액은 얼마인가요?",
+    "target_policies": ["POL_STG_DGU_001"],
+    "target_documents": ["DOC_STG_DGU_001_ORD", "DOC_STG_DGU_001_NOT"],
+    "expected_answer": "500,000원(50만원)입니다. 동대문구 출산 및 양육지원 조례 제8조에 따라 셋째아 이상 고등학교 입학 시 50만원을 지원합니다.",
+    "evaluation_criteria": {"child_order": "셋째아", "school_level": "고등학교", "amount": "50만원"}
+  },
+  {
+    "query_id": "Q08",
+    "category": "연령·지역·소득 복합 조건",
+    "query": "총자산 3억 2천만원, 자동차가액 3,500만원을 보유한 무주택 신혼부부가 LH 매입임대 자산 기준을 통과하나요?",
+    "target_policies": ["POL_001"],
+    "target_documents": ["DOC_STG_001_NOTICE"],
+    "expected_answer": "통과합니다. LH 신혼·신생아 매입임대Ⅰ 자산 기준은 총자산 3억 4,500만원 이하, 자동차가액 3,708만원 이하이므로 두 기준을 모두 충족합니다.",
+    "evaluation_criteria": {"asset_limit": "3억 4500만원", "car_limit": "3708만원", "result": "통과"}
+  },
+  {
+    "query_id": "Q09",
+    "category": "제외 조건과 예외 상황",
+    "query": "군 복무를 2년 마친 만 35세 청년 근로자도 중소기업 청년 소득세 감면 대상이 되나요?",
+    "target_policies": ["POL_STG_NTS_001"],
+    "target_documents": ["DOC_STG_NTS_001_LAW", "DOC_STG_NTS_001_FAQ"],
+    "expected_answer": "감면 대상이 됩니다. 조세특례제한법 제30조에 따라 군 복무 기간(2년)을 현재 연령에서 차감하면 만 33세로 인정되어 청년 감면(90%, 5년간 연 200만원 한도)을 적용받습니다.",
+    "evaluation_criteria": {"military_service_deduction": "최대 6년", "adjusted_age": 33, "result": "대상 포함"}
+  },
+  {
+    "query_id": "Q10",
+    "category": "제외 조건과 예외 상황",
+    "query": "중소기업 대표이사의 자녀가 해당 중소기업에 취업한 경우 소득세 감면을 받을 수 있나요?",
+    "target_policies": ["POL_STG_NTS_001"],
+    "target_documents": ["DOC_STG_NTS_001_FAQ"],
+    "expected_answer": "받을 수 없습니다. 중소기업의 최대주주 또는 최대출자자(대표자)의 배우자 및 직계존비속, 친족관계인 사람은 감면 대상자에서 엄격히 제외됩니다.",
+    "evaluation_criteria": {"exclusion_reason": "대표자 직계존비속/친족", "result": "제외"}
+  },
+  {
+    "query_id": "Q11",
+    "category": "제외 조건과 예외 상황",
+    "query": "고속도로 다자녀 통행료 할인은 부모 없이 자녀들만 탑승하여 운전할 때도 적용되나요?",
+    "target_policies": ["POL_STG_EX_001"],
+    "target_documents": ["DOC_STG_EX_001_FAQ"],
+    "expected_answer": "적용되지 않습니다. 하이패스 통과 시 이동통신사 위치정보로 등록된 부 또는 모의 탑승 여부가 확인되어야 하며, 부모 미탑승 시 정상 요금이 부과됩니다.",
+    "evaluation_criteria": {"parent_onboard_required": true, "result": "적용 불가"}
+  },
+  {
+    "query_id": "Q12",
+    "category": "제외 조건과 예외 상황",
+    "query": "서울시 청년수당 신청 시 주 25시간 아르바이트를 하고 있는 경우 미취업자로 인정되나요?",
+    "target_policies": ["POL_STG_SEOUL_001"],
+    "target_documents": ["DOC_STG_SEOUL_001_FAQ"],
+    "expected_answer": "인정됩니다. 주 30시간 이하 또는 3개월 이하 단기근로자의 경우 근로계약서 등 증빙을 제출하면 미취업 청년으로 인정되어 신청할 수 있습니다.",
+    "evaluation_criteria": {"work_hours_limit": "주 30시간 이하", "result": "인정"}
+  },
+  {
+    "query_id": "Q13",
+    "category": "신청 서류 및 절차",
+    "query": "LH 신혼·신생아 매입임대 예비신혼부부 신청 시 혼인 입증 서류 제출 기한은 언제인가요?",
+    "target_policies": ["POL_001"],
+    "target_documents": ["DOC_STG_001_FAQ"],
+    "expected_answer": "신청 시에는 예비배우자와의 관계확인서 및 혼인서약서를 제출하고, 입주일 전까지 반드시 혼인관계증명서(상세)를 제출해야 합니다.",
+    "evaluation_criteria": {"initial_doc": "혼인서약서", "final_doc": "입주일 전 혼인관계증명서"}
+  },
+  {
+    "query_id": "Q14",
+    "category": "신청 서류 및 절차",
+    "query": "출생신고 시 한 번에 첫만남이용권, 부모급여, 전기요금 감면을 일괄 신청하는 서비스 명칭과 절차는?",
+    "target_policies": ["POL_STG_MOHW_001"],
+    "target_documents": ["DOC_STG_MOHW_001_GDL", "DOC_STG_MOHW_001_LAW"],
+    "expected_answer": "행복출산 원스톱서비스입니다. 출생신고 시 주민센터 또는 정부24 온라인에서 통합신청서 한 장을 제출하면 일괄 처리됩니다.",
+    "evaluation_criteria": {"service_name": "행복출산 원스톱", "channel": "주민센터/정부24"}
+  },
+  {
+    "query_id": "Q15",
+    "category": "신청 서류 및 절차",
+    "query": "K-패스 전용카드를 발급받은 후 환급을 받기 위해 필수로 해야 하는 절차는?",
+    "target_policies": ["POL_STG_MOLIT_001"],
+    "target_documents": ["DOC_STG_MOLIT_001_FAQ"],
+    "expected_answer": "K-패스 공식 모바일 앱 또는 웹사이트에서 회원가입 후 발급받은 카드번호를 등록해야 환급 적립이 시작됩니다.",
+    "evaluation_criteria": {"mandatory_action": "공식 앱/웹 카드번호 등록"}
+  },
+  {
+    "query_id": "Q16",
+    "category": "신청 서류 및 절차",
+    "query": "동대문구 다자녀 입학축하금 신청 시 구비해야 하는 서류는 무엇인가요?",
+    "target_policies": ["POL_STG_DGU_001"],
+    "target_documents": ["DOC_STG_DGU_001_NOT"],
+    "expected_answer": "신분증, 통장사본, 재학증명서(또는 입학증명서)를 구비하여 관할 동 주민센터에 제출해야 합니다.",
+    "evaluation_criteria": {"required_docs": ["신분증", "통장사본", "재학증명서"]}
+  },
+  {
+    "query_id": "Q17",
+    "category": "법령 근거",
+    "query": "중소기업 취업 청년의 소득세 90% 감면 규정은 어느 법률 몇 조에 명시되어 있나요?",
+    "target_policies": ["POL_STG_NTS_001"],
+    "target_documents": ["DOC_STG_NTS_001_LAW"],
+    "expected_answer": "조세특례제한법 제30조(중소기업 취업자에 대한 소득세 감면) 제1항 제1호에 규정되어 있습니다.",
+    "evaluation_criteria": {"law_name": "조세특례제한법", "article": "제30조 제1항"}
+  },
+  {
+    "query_id": "Q18",
+    "category": "법령 근거",
+    "query": "다자녀가구 고속도로 통행료 할인의 법적 근거 시행령 조항과 별표 규정은?",
+    "target_policies": ["POL_STG_EX_001"],
+    "target_documents": ["DOC_STG_EX_001_LAW"],
+    "expected_answer": "유료도로법 시행령 제8조(통행료의 감면대상 차량 및 감면비율) 별표 1 제14호에 규정되어 있습니다.",
+    "evaluation_criteria": {"law_name": "유료도로법 시행령", "article": "제8조 별표 1"}
+  },
+  {
+    "query_id": "Q19",
+    "category": "법령 근거",
+    "query": "다자녀가구의 자동차 취득세 140만원 감면 혜택을 규정한 법률 조항은 무엇인가요?",
+    "target_policies": ["POL_STG_MOIS_001"],
+    "target_documents": ["DOC_STG_MOIS_001_LAW"],
+    "expected_answer": "지방세특례제한법 제22조의2(출산 및 양육 지원을 위한 감면) 제1항 제2호에 규정되어 있습니다.",
+    "evaluation_criteria": {"law_name": "지방세특례제한법", "article": "제22조의2"}
+  },
+  {
+    "query_id": "Q20",
+    "category": "법령 근거",
+    "query": "서울특별시 청년수당을 지급할 수 있도록 규정한 조례 명칭과 조항은?",
+    "target_policies": ["POL_STG_SEOUL_001"],
+    "target_documents": ["DOC_STG_SEOUL_001_ORD"],
+    "expected_answer": "서울특별시 청년 기본 조례 제12조(청년의 사회진입 및 경제활동 지원)입니다.",
+    "evaluation_criteria": {"ordinance_name": "서울특별시 청년 기본 조례", "article": "제12조"}
+  },
+  {
+    "query_id": "Q21",
+    "category": "신청 종료 또는 개정 정책",
+    "query": "중앙정부 청년내일채움공제는 지금 신규 신청이 가능한가요?",
+    "target_policies": ["SD0000011848"],
+    "target_documents": [],
+    "expected_answer": "2024년부터 신규 가입 지원이 전면 중단되었으며, 기존 가입자의 유지 관리 지원만 이루어지고 있습니다. 신규 자산형성은 청년도약계좌나 지자체 공제를 이용해야 합니다.",
+    "evaluation_criteria": {"status": "신규중단/기존유지", "alternative": "청년도약계좌/지자체공제"}
+  },
+  {
+    "query_id": "Q22",
+    "category": "신청 종료 또는 개정 정책",
+    "query": "고속도로 다자녀 통행료 할인은 2자녀 가구와 3자녀 가구의 할인율과 시행 시기가 어떻게 다른가요?",
+    "target_policies": ["POL_STG_EX_001"],
+    "target_documents": ["DOC_STG_EX_001_LAW", "DOC_STG_EX_001_FAQ"],
+    "expected_answer": "3자녀 이상은 20% 할인(2026. 7. 28. 시행), 2자녀 가구는 10% 할인(2026. 8. 22. 시행)으로 차등 적용되며 주말·공휴일 재정고속도로에 한합니다.",
+    "evaluation_criteria": {"2_children": "10% (8.22)", "3_children": "20% (7.28)"}
+  },
+  {
+    "query_id": "Q23",
+    "category": "신청 종료 또는 개정 정책",
+    "query": "다자녀가구 고속도로 통행료 할인은 평일이나 명절 연휴에도 적용되나요?",
+    "target_policies": ["POL_STG_EX_001"],
+    "target_documents": ["DOC_STG_EX_001_FAQ"],
+    "expected_answer": "적용되지 않습니다. 주말(토·일요일) 및 법정 공휴일에만 적용되며 평일은 제외됩니다. (명절은 통행료 전면 면제 기간)",
+    "evaluation_criteria": {"weekday_applied": false, "weekend_only": true}
+  },
+  {
+    "query_id": "Q24",
+    "category": "신청 종료 또는 개정 정책",
+    "query": "LH 26년 1차 신혼 매입임대 공고에서 정정된 접수 마감일은 언제인가요?",
+    "target_policies": ["POL_001"],
+    "target_documents": ["DOC_STG_001_NOTICE"],
+    "expected_answer": "당초 4월 5일에서 4월 12일 17:00까지로 7일간 연장되었습니다.",
+    "evaluation_criteria": {"extended_date": "4월 12일 17:00"}
+  },
+  {
+    "query_id": "Q25",
+    "category": "유사 정책 간 구분",
+    "query": "중앙정부 청년내일채움공제와 인천 서구 중소기업 복지공유제의 차이점은 무엇인가요?",
+    "target_policies": ["SD0000011848", "POL_STG_ICN_001"],
+    "target_documents": ["DOC_STG_ICN_001_NOT"],
+    "expected_answer": "중앙 청년내일채움공제는 신규 신청이 중단된 반면, 인천 서구 복지공유제는 관내 중소기업 재직 청년에게 연 100만원 복지포인트를 정상 지원하는 지자체 사업입니다.",
+    "evaluation_criteria": {"central_status": "중단", "local_benefit": "연 100만원 바우처"}
+  },
+  {
+    "query_id": "Q26",
+    "category": "유사 정책 간 구분",
+    "query": "K-패스와 일반 신용카드 대중교통 할인 혜택의 구조적 차이는?",
+    "target_policies": ["POL_STG_MOLIT_001"],
+    "target_documents": ["DOC_STG_MOLIT_001_GDL"],
+    "expected_answer": "K-패스는 정부와 지자체 예산으로 월 15회 이상 이용 시 20~53.3%를 환급해주는 공공 지원 정책이며, 카드사 자체 청구할인과 중복 수혜가 가능합니다.",
+    "evaluation_criteria": {"public_refund": "20~53.3%", "duplicate_benefit": true}
+  },
+  {
+    "query_id": "Q27",
+    "category": "유사 정책 간 구분",
+    "query": "중소기업 취업자 소득세 감면에서 일반 근로자와 청년 근로자의 감면율과 감면 기간 차이는?",
+    "target_policies": ["POL_STG_NTS_001"],
+    "target_documents": ["DOC_STG_NTS_001_LAW"],
+    "expected_answer": "일반(고령자·장애인·경단녀)은 3년간 70% 감면이며, 청년은 5년간 90% 감면(연 200만원 한도 동일)으로 기간과 감면율에서 우대됩니다.",
+    "evaluation_criteria": {"youth_rate": "90% 5년", "general_rate": "70% 3년"}
+  },
+  {
+    "query_id": "Q28",
+    "category": "공식 FAQ 기반 자연어 질문",
+    "query": "임신 중인 태아도 신혼·신생아 매입임대 1순위 자격으로 인정되나요?",
+    "target_policies": ["POL_001"],
+    "target_documents": ["DOC_STG_001_FAQ"],
+    "expected_answer": "인정됩니다. 임신진단서(임신확인서)를 제출하면 태아도 자녀로 인정되어 1순위 신생아 가구 자격으로 신청할 수 있습니다.",
+    "evaluation_criteria": {"pregnant_fetus": "인정", "required_doc": "임신진단서"}
+  },
+  {
+    "query_id": "Q29",
+    "category": "공식 FAQ 기반 자연어 질문",
+    "query": "중소기업에서 다른 중소기업으로 이직하면 청년 소득세 감면 기간 5년이 새로 시작되나요?",
+    "target_policies": ["POL_STG_NTS_001"],
+    "target_documents": ["DOC_STG_NTS_001_FAQ"],
+    "expected_answer": "새로 시작되지 않습니다. 최초 감면 적용일로부터 연속하여 5년(캘린더 기준)이 계산되므로, 다른 중소기업으로 이직 시 잔여 기간에 한해서만 감면이 적용됩니다.",
+    "evaluation_criteria": {"reset": false, "remaining_period_only": true}
+  },
+  {
+    "query_id": "Q30",
+    "category": "공식 FAQ 기반 자연어 질문",
+    "query": "K-패스 카드로 KTX나 SRT, 고속버스를 타도 환급 적립이 되나요?",
+    "target_policies": ["POL_STG_MOLIT_001"],
+    "target_documents": ["DOC_STG_MOLIT_001_FAQ"],
+    "expected_answer": "적립되지 않습니다. 시외버스, 고속버스, KTX, SRT 등 별도 승차권 발권 수단은 대상에서 제외되며, 시내버스, 지하철, 광역버스, GTX 등만 환급 대상입니다.",
+    "evaluation_criteria": {"train_excluded": true, "subway_bus_only": true}
+  }
+]
+

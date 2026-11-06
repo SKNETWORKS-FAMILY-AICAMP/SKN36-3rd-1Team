@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "body_hashes_checked": 261,
+  "body_hash_mismatches": [],
+  "raw_files_checked": 261,
+  "missing_raw_documents": [],
+  "chunks_checked_against_body": 599,
+  "unmatched_chunk_ids": [],
+  "scope": "저장된 본문과의 일치 검사. 원문의 최신성이나 정책 내용의 정확성을 새로 판정한 결과는 아님."
+}

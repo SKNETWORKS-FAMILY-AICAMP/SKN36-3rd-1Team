@@ -1,0 +1,49 @@
+{
+  "checked_at": "2026-11-06T22:00:23.875986+09:00",
+  "neo4j": {
+    "status": "NOT_TESTED"
+  },
+  "offline": {
+    "status": "PASS",
+    "counts": {
+      "total_policies": 246,
+      "total_documents": 261,
+      "total_chunks": 599,
+      "total_graph_nodes": 1074,
+      "total_graph_edges": 3703
+    },
+    "nodes_by_label": {
+      "Policy": 246,
+      "Document": 261,
+      "Organization": 123,
+      "Region": 18,
+      "Category": 5,
+      "LifeStage": 6,
+      "TargetGroup": 11,
+      "ConditionGroup": 352,
+      "EligibilityCondition": 52
+    },
+    "relations_by_type": {
+      "ADMINISTERED_BY": 246,
+      "HAS_CATEGORY": 246,
+      "AVAILABLE_IN": 247,
+      "TARGETS": 443,
+      "APPLIES_TO_LIFESTAGE": 437,
+      "SUPPORTED_BY": 261,
+      "REQUIRES_CONDITION": 735,
+      "MODIFIES_CONDITION_OF": 1,
+      "HAS_ROOT_CONDITION_GROUP": 246,
+      "CONTAINS_GROUP": 106,
+      "CONTAINS_CONDITION": 735
+    },
+    "nullable_properties": {
+      "Policy.official_apply_url": 224,
+      "Document.law_article": 9,
+      "Document.effective_date": 9,
+      "Document.version": 8
+    },
+    "manifest_files_checked": 20,
+    "document_text_hashes_checked": 0
+  },
+  "status": "PASS"
+}

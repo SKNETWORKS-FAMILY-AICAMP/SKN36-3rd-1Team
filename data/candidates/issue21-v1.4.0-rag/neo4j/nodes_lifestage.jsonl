@@ -1,0 +1,6 @@
+{"stage_id": "LIFESTAGE_영유아", "name": "영유아", "age_range": "0~5세", "description": "취학 전 영유아 및 보육 지원"}
+{"stage_id": "LIFESTAGE_아동", "name": "아동", "age_range": "6~12세", "description": "초등 학령기 아동 및 방과후 돌봄 지원"}
+{"stage_id": "LIFESTAGE_청소년", "name": "청소년", "age_range": "13~18세", "description": "중고등 청소년, 진로 및 자립 지원"}
+{"stage_id": "LIFESTAGE_청년", "name": "청년", "age_range": "19~39세", "description": "청년 구직·주거·자산형성·일자리 지원"}
+{"stage_id": "LIFESTAGE_중장년", "name": "중장년", "age_range": "40~64세", "description": "중장년 재취업, 노후 준비 및 전직 지원"}
+{"stage_id": "LIFESTAGE_노년", "name": "노년", "age_range": "65세 이상", "description": "어르신 기초연금, 노후 건강 및 돌봄 지원"}

@@ -1,0 +1,170 @@
+{
+  "checked_at": "2026-11-06T00:00:00+09:00",
+  "documents": [
+    {
+      "document_id": "DOC_STG_001_NOTICE",
+      "result": "excluded",
+      "old_status": "verified_official_raw",
+      "reason": "v1.3.2의 DOC_LH_001과 같은 PDF의 중복 요약본. 요약 내용이 원문과 다름(공고일 3/20↔원문 3/31, 자동차가액 3,708만원↔원문 4,542만원, '420호'·'서류접수 4/12 연장'은 원문에 없음)"
+    },
+    {
+      "document_id": "DOC_STG_001_FAQ",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_official_raw"
+    },
+    {
+      "document_id": "DOC_STG_001_LAW",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_002_GDL",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "사업안내서 원문 미확보. 출처 URL로 원문 확인 불가 → 정부24 서비스 상세(DOC_STG_MOLIT_002_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_002_FAQ",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "질의회시집 원문 미확보. 출처 URL(plus.gov.kr/portal/benefitV2/faq/…) 형식 확인 불가"
+    },
+    {
+      "document_id": "DOC_STG_MOHW_001_GDL",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "표준처리지침 원문 미확보 → 정부24 서비스 상세(DOC_STG_MOHW_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_MOHW_001_LAW",
+      "result": "excluded",
+      "old_status": "verified_extracted",
+      "reason": "전자정부법 제9조의2 실제 조문은 '전자정부 포털을 통한 생활정보의 제공'으로 정책과 무관. 정부24 근거법령은 '임신·출산 관련 서비스 통합처리에 관한 규정'"
+    },
+    {
+      "document_id": "DOC_STG_DGU_001_ORD",
+      "result": "excluded",
+      "old_status": "verified_extracted",
+      "reason": "'서울특별시 동대문구 출산 및 양육지원에 관한 조례'를 국가법령정보센터에서 찾을 수 없음. 출처 URL(elis.go.kr/ordinance/…)은 404. 정부24 근거법령은 '아동복지법'"
+    },
+    {
+      "document_id": "DOC_STG_DGU_001_NOT",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "신청안내 공고 원문 미확보 → 정부24 서비스 상세(DOC_STG_DGU_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_NTS_001_LAW",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_NTS_001_FAQ",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "국세청 FAQ 원문 미확보. 출처 URL(hometax.go.kr/nts_faq_tax_30.html) 형식 확인 불가"
+    },
+    {
+      "document_id": "DOC_STG_MOIS_001_LAW",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_MOIS_001_NOT",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "신청안내문 원문 미확보 → 정부24 서비스 상세(DOC_STG_MOIS_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_EX_001_LAW",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_EX_001_FAQ",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "한국도로공사 Q&A 원문 미확보 → 정부24 서비스 상세(DOC_STG_EX_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_001_GDL",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "운영지침 원문 미확보 → 정부24 서비스 상세(DOC_STG_MOLIT_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_001_FAQ",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "K-패스 FAQ 원문 미확보. 요약본의 저소득층 환급률(53.3%)이 정부24 원문(53%)과 다름"
+    },
+    {
+      "document_id": "DOC_STG_SEOUL_001_ORD",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_SEOUL_001_NOT",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "2026 모집공고 원문 미확보 → 온통청년 정책 상세(DOC_STG_SEOUL_001_YC)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_SEOUL_001_FAQ",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "서울청년수당 FAQ 원문 미확보"
+    },
+    {
+      "document_id": "DOC_STG_ICN_001_ORD",
+      "result": "replaced_with_official_text",
+      "old_status": "verified_extracted"
+    },
+    {
+      "document_id": "DOC_STG_ICN_001_NOT",
+      "result": "excluded",
+      "old_status": "reference_restructured",
+      "reason": "참여자 모집공고 원문 미확보 → 정부24 서비스 상세(DOC_STG_ICN_001_GOV24)로 대체"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_002_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2126303&bnefType=all&svcId=161300000103"
+    },
+    {
+      "document_id": "DOC_STG_MOHW_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=593069&bnefType=all&svcId=174000000029"
+    },
+    {
+      "document_id": "DOC_STG_DGU_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002556&bnefType=all&svcId=305000000103"
+    },
+    {
+      "document_id": "DOC_STG_MOIS_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999002&bnefType=all&svcId=131200000008"
+    },
+    {
+      "document_id": "DOC_STG_EX_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042"
+    },
+    {
+      "document_id": "DOC_STG_MOLIT_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104"
+    },
+    {
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "result": "added_from_official_api",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+    },
+    {
+      "document_id": "DOC_STG_SEOUL_001_YC",
+      "result": "added_from_official_api",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994"
+    }
+  ]
+}

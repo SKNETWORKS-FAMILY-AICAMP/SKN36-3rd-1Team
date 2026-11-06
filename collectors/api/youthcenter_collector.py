@@ -38,8 +38,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
 METADATA_ROOT = BASE_DIR / "data" / "metadata"
@@ -94,7 +96,7 @@ def parse_comma_codes(raw_val: Any, code_map: Dict[str, str]) -> Tuple[List[str]
 def map_zip_codes_to_regions(zip_cd_str: Any) -> List[str]:
     """5자리 또는 2자리 법정동/우편번호 목록을 광역시·도 명칭으로 변환."""
     if not zip_cd_str or str(zip_cd_str).strip() in ("", "null"):
-        return ["전국"]
+        return ["unknown"]
     raw_zips = [z.strip() for z in str(zip_cd_str).split(",") if z.strip()]
     regions: List[str] = []
     for z in raw_zips:
@@ -102,9 +104,10 @@ def map_zip_codes_to_regions(zip_cd_str: Any) -> List[str]:
         reg_name = ZIP_CODE_TO_REGION.get(prefix)
         if reg_name and reg_name not in regions:
             regions.append(reg_name)
-    if len(regions) >= 15:
-        return ["전국"]
-    return regions if regions else ["전국"]
+    # 접두 시도가 많아도 전국이라고 추론하지 않는다.
+    if any(z[:2] not in ZIP_CODE_TO_REGION for z in raw_zips):
+        regions.append("unknown")
+    return regions if regions else ["unknown"]
 
 
 def normalize_youthcenter_item(
@@ -155,31 +158,21 @@ def normalize_youthcenter_item(
     effective_age_limit = True
 
     if min_age == 0 and max_age == 0:
-        if age_lmt_yn == "N":
-            # 연령제한없음: min/max는 None으로 정규화하고 age_limit는 False로 설정
-            min_age = None
-            max_age = None
-            effective_age_limit = False
-            age_review_status = "정상 (연령제한없음: 원문 0~0세, 제한여부 N 정규화)"
-        else:
-            # 연령제한여부가 Y이거나 불명확한 0~0세는 입력오류 / 검토대상
-            min_age = None
-            max_age = None
-            effective_age_limit = True
-            age_review_status = "검토대상: 최소/최대연령 0세 표기 (입력오류, 공고문 확인 필요)"
+        min_age = None
+        max_age = None
+        age_review_status = "검토대상: 최소/최대연령 0세 표기 (공고문 확인 필요)"
     elif min_age is not None and max_age is not None and min_age > max_age:
         age_review_status = "검토대상: 최소연령이 최대연령보다 큼 (모순 데이터)"
     elif min_age is None and max_age is None:
-        if age_lmt_yn == "N":
-            effective_age_limit = False
-            age_review_status = "정상 (연령제한없음)"
-        else:
-            age_review_status = "검토대상: 연령 필드 누락"
-    elif age_lmt_yn == "N":
-        effective_age_limit = False
+        age_review_status = "검토대상: 연령 필드 누락"
+
+    # Issue #21: N의 의미는 공식 확인 대기. 숫자와 플래그를 함께 보존한다.
+    if age_lmt_yn != "Y":
+        effective_age_limit = None
+        age_review_status = "검토대상: 연령제한여부 코드 의미 공식 확인 필요"
 
     if min_age is None and max_age is None:
-        age_desc = "제한없음" if not effective_age_limit else "미상 (원문 0~0세 표기 오류, 공고문 확인 필요)"
+        age_desc = "미확인 (공고문 확인 필요)"
     elif min_age is not None and max_age is not None:
         age_desc = f"만 {min_age}~{max_age}세"
     elif min_age is not None:
@@ -219,7 +212,9 @@ def normalize_youthcenter_item(
     # 6. 지역 (zipCd)
     zip_cd_raw = (item.get("zipCd") or "").strip()
     regions = map_zip_codes_to_regions(zip_cd_raw)
-    region_review_status = "정상" if zip_cd_raw else "검토대상: zipCd 누락(전국 간주)"
+    region_review_status = "검토대상: 상세 지역 코드 해석 필요" if (
+        "unknown" in regions or any(len(z.strip()) > 2 for z in zip_cd_raw.split(","))
+    ) else "정상"
 
     # 7. 신청 및 접수 정보
     aply_ymd = (item.get("aplyYmd") or "").strip()
@@ -229,8 +224,10 @@ def normalize_youthcenter_item(
     sbmsn_dcmnt = (item.get("sbmsnDcmntCn") or "").strip()
     add_aply = (item.get("addAplyQlfcCndCn") or "").strip()
     ptcp_prp = (item.get("ptcpPrpTrgtCn") or "").strip()
-    aply_url = (item.get("aplyUrlAddr") or item.get("refUrlAddr1") or "").strip()
     source_url = f"https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/{pno}"
+    # 참고URL은 신청URL의 대체값이 아니다. 원천 신청 필드만 검토한다.
+    raw_aply_url = (item.get("aplyUrlAddr") or "").strip()
+    aply_url = application_url_or_none(raw_aply_url, source_url)
     last_mdfcn_dt = (item.get("lastMdfcnDt") or "").strip()
 
     # RAG 청킹용 본문 텍스트 생성
@@ -277,6 +274,10 @@ def normalize_youthcenter_item(
         "plcySprtCn": sprt_cn,
         "eligibility": f"연령: {age_desc} / 혼인: {mrg_label} / 소득: {earn_label} / 취업: {', '.join(job_labels) if job_labels else '제한없음'}",
         "requirements": {
+            "region_codes": [z.strip() for z in zip_cd_raw.split(",") if z.strip()],
+            "region_review_needed": "검토대상" in region_review_status,
+            "min_age_raw": min_age_raw,
+            "max_age_raw": max_age_raw,
             "min_age": min_age,
             "max_age": max_age,
             "age_limit_yn": age_lmt_yn,
@@ -289,6 +290,7 @@ def normalize_youthcenter_item(
             "income_min_amount": earn_min,
             "income_max_amount": earn_max,
             "income_etc_details": earn_etc,
+            "income_review_needed": "검토대상" in income_review_status,
             "job_codes": job_raw_codes,
             "job_labels": job_labels,
             "school_codes": school_raw_codes,
@@ -313,8 +315,8 @@ def normalize_youthcenter_item(
         "plcyAplyMthdCn": aply_method,
         "required_documents": [line.strip("- ·*") for line in sbmsn_dcmnt.splitlines() if line.strip()][:8] if sbmsn_dcmnt else [],
         "sbmsnDcmntCn": sbmsn_dcmnt,
-        "official_apply_url": aply_url or source_url,
-        "aplyUrlAddr": aply_url,
+        "official_apply_url": aply_url,
+        "aplyUrlAddr": raw_aply_url,
         "source_url": source_url,
         "lastMdfcnDt": last_mdfcn_dt,
         "local_raw_path": f"data/raw/youthcenter/items/{pno}.json",

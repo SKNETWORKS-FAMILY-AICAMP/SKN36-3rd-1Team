@@ -1,0 +1,2465 @@
+{
+  "description": "2026-11-06 저장된 원본의 신청 필드만 추출. 참고 URL은 신청 주소로 사용하지 않음. 실제 접수 화면 방문 검증은 미실행.",
+  "policies": {
+    "POL_001": {
+      "official_id": "LH-2015122300019712",
+      "source_url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&panId=2015122300019712&uppAisTpCd=13",
+      "application_url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&panId=2015122300019712&uppAisTpCd=13",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_002": {
+      "official_id": "MOLIT-HUG-NOTICE-1316",
+      "source_url": "https://nhuf.molit.go.kr/FP/FP08/FP0804/FP080402.jsp?articleId=1316&mode=S",
+      "application_url": "https://nhuf.molit.go.kr/FP/FP08/FP0804/FP080402.jsp?articleId=1316&mode=S",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_003": {
+      "official_id": "NHUF-JEONSE-002",
+      "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020401.jsp",
+      "application_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020401.jsp",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_004": {
+      "official_id": "NHUF-JEONSE-001",
+      "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp",
+      "application_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_005": {
+      "official_id": "MOEL-WORK24-CARD-001",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "application_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_006": {
+      "official_id": "NHUF-RENT-001",
+      "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020201.jsp",
+      "application_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020201.jsp",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_007": {
+      "official_id": "NHUF-RENT-002",
+      "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020701.jsp",
+      "application_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020701.jsp",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_009": {
+      "official_id": "WLF00004661",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00004661.xml",
+      "evidence_sha256": "5c1fef27444fed623be77d64f6beab3bd66b5eec9372a581b25264e3cceca31e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_010": {
+      "official_id": "149200005007",
+      "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+      "application_url": "https://www.work24.go.kr",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
+      "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_001": {
+      "official_id": "WLF00000024",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000024",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000024.xml",
+      "evidence_sha256": "fd75c50b19c3c44097371d81c0ec5f6f75035734216a839e6731a77605ee55b3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_002": {
+      "official_id": "WLF00000026",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000026",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000026.xml",
+      "evidence_sha256": "8a582184fbe1008f127f9f9f6b066e5e88b3da004290d1e2463ffb86f3bb4579",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_003": {
+      "official_id": "WLF00000056",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000056",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000056.xml",
+      "evidence_sha256": "8227ae59f8c1c96c43067f6a059ef95dcb97200764769a2f2ad69faec6acf512",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_004": {
+      "official_id": "WLF00000060",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000060.xml",
+      "evidence_sha256": "717db2ee26b9c93e848e21db51cdf2034efa97c4a3a275754a6545b61eaf33ec",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_005": {
+      "official_id": "WLF00000061",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000061",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000061.xml",
+      "evidence_sha256": "efde74973caabba4cb52db8ca6f27ad199188ab273c5950fb59282830b574579",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_006": {
+      "official_id": "WLF00000064",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000064",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000064.xml",
+      "evidence_sha256": "d22d414b0a87cdcd4538abd51a3abf1b3271de86d25fadb4c54480ac6e08df14",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_007": {
+      "official_id": "WLF00000072",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000072",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000072.xml",
+      "evidence_sha256": "89f64be2e8c396efb2942ab2accfde262db059386602d13e869a6ccfeb50c7f9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_008": {
+      "official_id": "WLF00000078",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000078",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000078.xml",
+      "evidence_sha256": "2efcaa8f00f484aa837b816668833e04baf5c624579097d2953bb3d646c2e52e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_009": {
+      "official_id": "WLF00000092",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000092",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000092.xml",
+      "evidence_sha256": "2afc6ce528f2f318594d0b882688f818cbb9aeca55eda81d272a959866d298e9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_010": {
+      "official_id": "WLF00000781",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000781",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000781.xml",
+      "evidence_sha256": "47ab0a2cbbabde03a0f99227f7272ef5b4813e9a97ea81faa7cad18089bfb25c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_011": {
+      "official_id": "WLF00000838",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000838",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000838.xml",
+      "evidence_sha256": "ed1ea7fbdecffa85f97a02874eae17dad91dce4a8e1ed2974f75a9ae6fd4ea21",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_012": {
+      "official_id": "WLF00000867",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000867",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000867.xml",
+      "evidence_sha256": "105cee23e653b1ced05fbe464150a0c46b8b14166034aa11429fcc59894dcc60",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_013": {
+      "official_id": "WLF00000969",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00000969.xml",
+      "evidence_sha256": "decf15b4a3163339cb6e3bac8397cc6bf47c473f1251f53de29336b79bec65aa",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_014": {
+      "official_id": "WLF00001060",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001060",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001060.xml",
+      "evidence_sha256": "7891e98531570c33e457b68d5c3f3e87d1063b68bffaba6fc9504a99134e7aa9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_015": {
+      "official_id": "WLF00001067",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001067",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001067.xml",
+      "evidence_sha256": "a2f2454161181ef4186158e25169f505f0d9efcc2788741b6a82a8b6b28a4fdb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_016": {
+      "official_id": "WLF00001068",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001068.xml",
+      "evidence_sha256": "9501987c76e08438250f4811443e5944de1f2fa2a51ce9fed448669412f19a8e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_017": {
+      "official_id": "WLF00001072",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001072",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001072.xml",
+      "evidence_sha256": "e288bf5dc5dccabbd7520a3c03e36c9e8ffe6b2322cb05c2ccddbf07ac60ccd8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_018": {
+      "official_id": "WLF00001087",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001087",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001087.xml",
+      "evidence_sha256": "77495cf78fdd51fe8dc5bc7dea928b31f2557f0c478daf07ff73870048223d13",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_019": {
+      "official_id": "WLF00001088",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001088",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001088.xml",
+      "evidence_sha256": "e0f40baf4d88d505cacda295fa6df4e17aebaddef2ea4b7580628b7f24931905",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_020": {
+      "official_id": "WLF00001089",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001089.xml",
+      "evidence_sha256": "18746179d4e50ab6b4cc28e02b734c37a490156ee142cb22c8de90c15e74aefb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_021": {
+      "official_id": "WLF00001097",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001097",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001097.xml",
+      "evidence_sha256": "874347710d89ac12c37298c4e51f9e30054cc797a1a41d67b884014e1905ac44",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_022": {
+      "official_id": "WLF00001099",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001099",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001099.xml",
+      "evidence_sha256": "0669702b601982f5e257f937a13321c46a22982c4b15510d52bfcdff70999c6e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_023": {
+      "official_id": "WLF00001101",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001101",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001101.xml",
+      "evidence_sha256": "95c18c7b0ab63dc8551fae60e781996804695f17b36dda0fea4b6243be2acf1c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_024": {
+      "official_id": "WLF00001103",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001103.xml",
+      "evidence_sha256": "1bc5364f83594a1063216ef80a5e6872563303d4623496d77cc389d175fc3d11",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_025": {
+      "official_id": "WLF00001104",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001104.xml",
+      "evidence_sha256": "c765689823fc96471f2f17bc73aa924f01d85615c41ec889cf7e4b41d4e9fab3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_026": {
+      "official_id": "WLF00001105",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001105.xml",
+      "evidence_sha256": "f8a9de016d567c0339b0f136c18ecc4247de98783fe5dc210e4b91874d35d5fd",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_027": {
+      "official_id": "WLF00001109",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001109",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001109.xml",
+      "evidence_sha256": "5026060859b199713b88d8bcd87ac1fb4d9b04daf3b43f73c9b717e4cc22be7e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_028": {
+      "official_id": "WLF00001114",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001114",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001114.xml",
+      "evidence_sha256": "9236d8de5e438d9a034949bccbb5d0bee2b00777add360cade7055a829acd21a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_029": {
+      "official_id": "WLF00001135",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001135",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001135.xml",
+      "evidence_sha256": "8485b2766330d1dffe6cee3ebb0adfc40365cbd25bee7c1eca065eba191bc001",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_030": {
+      "official_id": "WLF00001138",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001138",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001138.xml",
+      "evidence_sha256": "1896021228e6c672543b969e9a606827d079e3f3a39297c5a5d2ee2179eec4ba",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_031": {
+      "official_id": "WLF00001140",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001140",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001140.xml",
+      "evidence_sha256": "b70f37d682a2df7cf6a06f917109d502c48367e6a66e0d1c2a06bb310f4c887f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_032": {
+      "official_id": "WLF00001155",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001155",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001155.xml",
+      "evidence_sha256": "d090d26823d2cafc4407e77b881b3eca69d8def8bf2ee826a455b9f047185d07",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_033": {
+      "official_id": "WLF00001161",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001161",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001161.xml",
+      "evidence_sha256": "066fd95926ee1d58f62208c29cef8659a51118e2236226c0d54454fd1d66e022",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_034": {
+      "official_id": "WLF00001164",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001164",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001164.xml",
+      "evidence_sha256": "b3f12127126e380bb54090093c0353ab72cf8027adc4056252e341b2fcf95da3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_035": {
+      "official_id": "WLF00001165",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001165",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001165.xml",
+      "evidence_sha256": "24b09649ffaa3c143038058972ad0d34c4520357975ba2adeffe303d0aa66867",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_036": {
+      "official_id": "WLF00001171",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001171",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001171.xml",
+      "evidence_sha256": "067b260b2fc6478f7f2b9ecdd43ebe185a71afc0eec43d929aa44b65556fd4b5",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_037": {
+      "official_id": "WLF00001175",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001175",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001175.xml",
+      "evidence_sha256": "4ad22b76b5274b6acee67fc320d02716fae13cc34122e7642bae74ffd61d9bb9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_038": {
+      "official_id": "WLF00001178",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001178",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001178.xml",
+      "evidence_sha256": "68606c5a2096ce182eb8e9390ecdba41d936a48dedd32ce1b7246f282bde6ed9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_039": {
+      "official_id": "WLF00001188",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001188",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00001188.xml",
+      "evidence_sha256": "237498df6181872b11c66541f321b466541cce92c7dd55a9dc12d4e924494457",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_040": {
+      "official_id": "WLF00003169",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003169",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003169.xml",
+      "evidence_sha256": "c6cdb078b3c51623ecfc924b3087c1e47a1af2d13aa94828c5f0c1d16bf70cf8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_041": {
+      "official_id": "WLF00003171",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003171",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003171.xml",
+      "evidence_sha256": "750a94ef0b22418f3e173153a99d85c3e8905d5fd208d20cca771fabc5ae8d85",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_042": {
+      "official_id": "WLF00003178",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003178",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003178.xml",
+      "evidence_sha256": "3ea63e6b664df82e2a3c731c377195b055d655dcd1df3b5e7f4ceff858ac4e5d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_043": {
+      "official_id": "WLF00003191",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003191",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003191.xml",
+      "evidence_sha256": "716a2dd2de1cd000395be46d07c122c9b406dbfa4c17856515225036124a8ecc",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_044": {
+      "official_id": "WLF00003192",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003192",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003192.xml",
+      "evidence_sha256": "0a29f55ec68fe79972e9c90153bf920d1d696abea6ad403dbc3e0ada34463b80",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_045": {
+      "official_id": "WLF00003195",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003195",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003195.xml",
+      "evidence_sha256": "c40133a8c3d81880dd5d2de41ec4647fc9289e509587e503b4fbf0523cbd5a3c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_046": {
+      "official_id": "WLF00003198",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003198",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003198.xml",
+      "evidence_sha256": "bba2d6a9cc374a3532a94b1d090cfd0f2a15685e3adb44c8e95ab81fb9338cc1",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_047": {
+      "official_id": "WLF00003201",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003201",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003201.xml",
+      "evidence_sha256": "a7de4ac4b176881fab1508f396ee47101cd8a92f75eadfe488a6c908bfe467a7",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_048": {
+      "official_id": "WLF00003207",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003207",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003207.xml",
+      "evidence_sha256": "28e3161007f46f3afcc88769504e0510b1716d7cfca5baa0b053edb5fe51145d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_049": {
+      "official_id": "WLF00003211",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003211",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003211.xml",
+      "evidence_sha256": "8a798cf9849ff313e842979b1bb51fe55ebe36a30c587c56513a9e1ccb511acd",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_050": {
+      "official_id": "WLF00003213",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003213",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003213.xml",
+      "evidence_sha256": "71097f2db248d132c11e45a6dcbddc861859bf68572f857bef511652fdda4582",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_051": {
+      "official_id": "WLF00003224",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003224",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003224.xml",
+      "evidence_sha256": "8b2c61b20688463a73c9ef8f191c28b7602bc8f1ca0931b711c6c32fd70a6c8f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_052": {
+      "official_id": "WLF00003227",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003227.xml",
+      "evidence_sha256": "57d7f5ab4fffaf90c082e289aa62658d9481bdf20c79ab836b63388b7f6cf515",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_053": {
+      "official_id": "WLF00003249",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003249",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003249.xml",
+      "evidence_sha256": "3dfe0bcc9a9f0fb46dbaf48a56887a47862c03c5096fcc0b5a8cc6f497960eff",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_054": {
+      "official_id": "WLF00003250",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003250",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003250.xml",
+      "evidence_sha256": "174246ce6c5974fdacef4affe42f73fa0331e32014902589ca261f2b6cc90ac3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_055": {
+      "official_id": "WLF00003253",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003253",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003253.xml",
+      "evidence_sha256": "a8e73b30e874b144344f2f451d99cb351eb87117b6fb41c654271c89781d153f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_056": {
+      "official_id": "WLF00003254",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003254",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003254.xml",
+      "evidence_sha256": "1c1ee61640c2ebd511e05213192f861d952ddf71052407a435ac3ddfb27232f3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_057": {
+      "official_id": "WLF00003256",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003256",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003256.xml",
+      "evidence_sha256": "1c77aca2aa7fde99190b7e26dc5346d49a4e547b82bdca60f89cc2c3edfb261a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_058": {
+      "official_id": "WLF00003257",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003257",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003257.xml",
+      "evidence_sha256": "af06e7f0fb15ac717dab91612448c079ebd697b0d4c808100e75402f84e844b0",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_059": {
+      "official_id": "WLF00003258",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003258",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003258.xml",
+      "evidence_sha256": "ce87bce51ae3870dccc95b34721dd621fff9b3e82f679c2a9d50fb993893099e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_060": {
+      "official_id": "WLF00003260",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003260",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003260.xml",
+      "evidence_sha256": "d57ca37531c86bbf7c593f299c61eed151a78dd4bedc772e612baa8f30750a0f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_061": {
+      "official_id": "WLF00003262",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003262",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003262.xml",
+      "evidence_sha256": "0b2bd6dee7a7a8deea1f2f1bb9c05b16b76f0ef58819ad3c60182ae02ac79809",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_062": {
+      "official_id": "WLF00003264",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003264",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003264.xml",
+      "evidence_sha256": "cdfd54439864c76473c4778ee1e9a4d6ee56d4bd9ac0d21ef3dc78e8d5dbe43c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_063": {
+      "official_id": "WLF00003265",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003265",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003265.xml",
+      "evidence_sha256": "e986787405af2ffb12794c4fdb1cc127bb7753060be7c8356e0a46e29dd84245",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_064": {
+      "official_id": "WLF00003267",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003267",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003267.xml",
+      "evidence_sha256": "41aba4d6fe7497c2492cb8381e1d178a85532de2a9c5f926b6d5bb331a7c3d74",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_065": {
+      "official_id": "WLF00003271",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003271",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003271.xml",
+      "evidence_sha256": "d1fdef79019dac1043a04acfda8ec60ca279f407bcd273baf21f8d1352586aa4",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_066": {
+      "official_id": "WLF00003278",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003278",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003278.xml",
+      "evidence_sha256": "db8f7a05b99ccfa62e358eb3516df8dbf304dc416382d67df776f0bc4c5b5b70",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_067": {
+      "official_id": "WLF00003279",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003279",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003279.xml",
+      "evidence_sha256": "9a67d4602f024713f3842f10016f5a600a0474f96eee260b1a62977e1fab7cc5",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_068": {
+      "official_id": "WLF00003282",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003282",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003282.xml",
+      "evidence_sha256": "d59442d1733041d045dfa1f39eda16f5760f3ebcac8e09b4df01f9f40218b9ba",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_069": {
+      "official_id": "WLF00003283",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003283",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00003283.xml",
+      "evidence_sha256": "b2ac4863700a900caf89c67a6e7a3c721fcefff71384574b740486045fb51a81",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_070": {
+      "official_id": "WLF00004638",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004638",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00004638.xml",
+      "evidence_sha256": "1dcfa123d194b1cb81f22dddde9977933afd693f3994297092569fe84e3839f1",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_071": {
+      "official_id": "WLF00004656",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004656",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00004656.xml",
+      "evidence_sha256": "42136f7bea7c23c10327c93c11b54605a74d03b6a2fab5f4fb65ada8dddef1c6",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_072": {
+      "official_id": "WLF00004657",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004657",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00004657.xml",
+      "evidence_sha256": "3d0bbc6b61aa216da5f65893ccf2f9801cff85c960c3a80811896419fbc48d09",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_073": {
+      "official_id": "WLF00004658",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004658",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00004658.xml",
+      "evidence_sha256": "d509b27c5d4d1bef0f79012303e769403d74b686e6d6327a9e75cfe03e2fd210",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_074": {
+      "official_id": "WLF00005411",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005411",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005411.xml",
+      "evidence_sha256": "b8e6f4491b00e5a1f953553b0a3190a79984c69316dc4171ecc42463e15c63ae",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_075": {
+      "official_id": "WLF00005440",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005440.xml",
+      "evidence_sha256": "c3ac77cc448eeaa2211d46eca525ab92652864553213c56151f53886c01ae402",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_076": {
+      "official_id": "WLF00005442",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005442",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005442.xml",
+      "evidence_sha256": "93d2f3e16e7c6d073579e663b4dbe798970a9e74be99d4595ea70df2fdacf0b3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_077": {
+      "official_id": "WLF00005567",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005567",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005567.xml",
+      "evidence_sha256": "98e30b3e80bc829cda6fdabad285b5376806f9c48d4a52cf855a41bb3104be9f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_078": {
+      "official_id": "WLF00005631",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005631",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005631.xml",
+      "evidence_sha256": "97ab491eb8e2442606b91e3d3a33740237f1d172f021ac2b413db6c49701297f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_079": {
+      "official_id": "WLF00005858",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005858",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00005858.xml",
+      "evidence_sha256": "3661397606187f7d2c47cb8fdc396684f4f330f6d4df0ea8c3d8ae5d3422b254",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_080": {
+      "official_id": "WLF00006196",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006196",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006196.xml",
+      "evidence_sha256": "a9d03c58354c2b15ed39639dc909a3cd4a837830f9b87e0d8b4e297f57099dda",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_081": {
+      "official_id": "WLF00006212",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006212",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006212.xml",
+      "evidence_sha256": "f639737790b4434d472a984b317c13ea0fed18ecabd12befc14ec4e537277e10",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_082": {
+      "official_id": "WLF00006248",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006248",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006248.xml",
+      "evidence_sha256": "17acd94fdd5bef7a8478e09440b04b66e32ba3c276a8cc7095d267600bad8224",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_083": {
+      "official_id": "WLF00006251",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006251",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006251.xml",
+      "evidence_sha256": "bb0b2b931c4da9e3f789fe57ba46fcd3ec605a88299ac6b7f61075d515ac61b4",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_084": {
+      "official_id": "WLF00006265",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006265",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006265.xml",
+      "evidence_sha256": "0b5b6c77dece2374abf85a4262fa55018be010d6b3ced964f87c8ebdace2e26d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_085": {
+      "official_id": "WLF00006282",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006282",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006282.xml",
+      "evidence_sha256": "87b70edc976cfabb6010e38b70978e860fce1e5c4e76d581f251c653d0b6f3a5",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_086": {
+      "official_id": "WLF00006294",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006294",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006294.xml",
+      "evidence_sha256": "950b1b7df1bdc4c5febbb9c89dad4a621883c01c3435e244d4bc804e6df94976",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_087": {
+      "official_id": "WLF00006298",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006298",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006298.xml",
+      "evidence_sha256": "a490b91729b5c39ae7a939dd5a717ca05f9cc46945bf42dcef93e61039742281",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_088": {
+      "official_id": "WLF00006308",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006308",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006308.xml",
+      "evidence_sha256": "60627e8d1dc4617ecc2f8d1498b443502100a9051d6d21549569456d689e3a33",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_089": {
+      "official_id": "WLF00006309",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006309",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006309.xml",
+      "evidence_sha256": "90c481f042230a894d20131456b6bd9e2cac95be1ca76268fb7f0fa5712c2c43",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_090": {
+      "official_id": "WLF00006310",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006310",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006310.xml",
+      "evidence_sha256": "93a4b5da846583094e2d59a75b76b20df8063162ff30f14f8b04f3904bc265cf",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_091": {
+      "official_id": "WLF00006311",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006311",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006311.xml",
+      "evidence_sha256": "8c7c947229b968151fd1ceb5180cef7720915e9b542769132bc0f599ffce0dc5",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_092": {
+      "official_id": "WLF00006314",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006314",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006314.xml",
+      "evidence_sha256": "3fa868544215a51605e7d49661f37cf6a0add7239f75fe7fd2025a62b573c5c2",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_093": {
+      "official_id": "WLF00006315",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006315",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006315.xml",
+      "evidence_sha256": "e6587437d3260f76e041050c95d99fe5d7729d7181b5bc478051eb3f01d06e86",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_094": {
+      "official_id": "WLF00006317",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006317",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006317.xml",
+      "evidence_sha256": "8fde9ec6ce4980987bb4d65a399119d41dc35d89a8185f77155b8107fd8f8ac8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_095": {
+      "official_id": "WLF00006318",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006318",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006318.xml",
+      "evidence_sha256": "d9e0dd551c3426fc2b850fe0739698d443d831106e4eea72a8f15a36bf1da4cf",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_096": {
+      "official_id": "WLF00006324",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006324",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006324.xml",
+      "evidence_sha256": "4b85f0a39469e86499ccc118fb06585109e1fd0d55e0a30eb8f5282819814950",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_097": {
+      "official_id": "WLF00006331",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006331",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006331.xml",
+      "evidence_sha256": "3c40b381f71b4dbcdc8a657d316014cd700b27a88831c501fbbc589cd0d46505",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_BOK_098": {
+      "official_id": "WLF00006333",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006333",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink/servSeDetailNm",
+      "evidence_path": "data/raw/bokjiro/detail/WLF00006333.xml",
+      "evidence_sha256": "a916b8d5dd0a0fdb73069a176fc3544ad6777cee23ecce13fa2fef689df70a00",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_001": {
+      "official_id": "116010000001",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=754881&bnefType=all&svcId=116010000001",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/116010000001.json",
+      "evidence_sha256": "55656f1e899ef69e5ade7337ef6ba052ad82ddadfb1aecb8fca0ab4da0e65a6d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_002": {
+      "official_id": "119200000012",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999205&bnefType=all&svcId=119200000012",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/119200000012.json",
+      "evidence_sha256": "f2bc36506e86e9d7d3ee2554df23bb25fb0293f94f26844f266314264a75c4df",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_003": {
+      "official_id": "119200000059",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=696042&bnefType=all&svcId=119200000059",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/119200000059.json",
+      "evidence_sha256": "00bd9f70ff96862b44a71e23aa3e1cf314fc44146a4bd1e4be7a7ce28555af98",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_004": {
+      "official_id": "119200000070",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999218&bnefType=all&svcId=119200000070",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/119200000070.json",
+      "evidence_sha256": "7722cbcc80a3268ca8cfb7b3d58e0c754c3dbb46911c32cf954ea46f2fde06e7",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_005": {
+      "official_id": "119200000174",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=697576&bnefType=all&svcId=119200000174",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/119200000174.json",
+      "evidence_sha256": "3aac2309f951179b4ce2fd04567e3e583ee56e5d3a0bf26b59732dcfa6d5ed16",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_006": {
+      "official_id": "119200000194",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/119200000194.json",
+      "evidence_sha256": "6457158b9015658dd9f8b1807237e8332d6380fdcf37888da6544df610ccd141",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_007": {
+      "official_id": "125000000004",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/125000000004.json",
+      "evidence_sha256": "0f75617946181223b29f48a71070481a619662fe1f2bdeff04798fef8f2d9d59",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_008": {
+      "official_id": "125000000015",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/125000000015.json",
+      "evidence_sha256": "509e1d39bf44697915c0de3959f8bf50c0bffe9639556b6844c3699b71c5b3e5",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_009": {
+      "official_id": "127000000025",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=514496&bnefType=all&svcId=127000000025",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/127000000025.json",
+      "evidence_sha256": "1808133da9b49249aba7a58bf7807974d463f60d73c2ecdc2d1113335fd9acf3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_010": {
+      "official_id": "127000000026",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=515277&bnefType=all&svcId=127000000026",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/127000000026.json",
+      "evidence_sha256": "844fec7cf5d0f26a434eea73076f9f7a6ce4d9a52a7b7f32d54b49be1bb394df",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_011": {
+      "official_id": "127000000037",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/127000000037.json",
+      "evidence_sha256": "f86496ef6015c4254fe850d17914ba00829d52dd1a657b445a482342ef7c4343",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_012": {
+      "official_id": "128000000001",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=751981&bnefType=all&svcId=128000000001",
+      "application_url": "http://www.kics.go.kr",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/128000000001.json",
+      "evidence_sha256": "e8edf0bdb84955f12c4f5b043056f5f17c22be4fbb1a89c9a5c02c01a8ba5d61",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_013": {
+      "official_id": "128000000002",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=751979&bnefType=all&svcId=128000000002",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/128000000002.json",
+      "evidence_sha256": "cebdb4c48bb007e1ebef20ca625fd4412b63dc0b3ff70d0014aa6e6c18d96a20",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_014": {
+      "official_id": "128000000003",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=751980&bnefType=all&svcId=128000000003",
+      "application_url": "http://www.kics.go.kr",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/128000000003.json",
+      "evidence_sha256": "c3fb1cdee1934a77cbf976998e45325e8262e91a1ddba1a5a423d6e03b56745d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_015": {
+      "official_id": "129000000082",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173018&bnefType=all&svcId=129000000082",
+      "application_url": "https://www.withcountry.mil.kr/",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/129000000082.json",
+      "evidence_sha256": "e6ab15753a1929754a45142e8092d6a1b6f1af33023012304b823f6d2eb8ff97",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_016": {
+      "official_id": "300000000103",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/300000000103.json",
+      "evidence_sha256": "db4bee516409aaae1de4bbd392d06d2c2117c560c3e4b5345d078803c7fcc456",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_017": {
+      "official_id": "300000000106",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004070&bnefType=all&svcId=300000000106",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/300000000106.json",
+      "evidence_sha256": "86617c4d9b9a800e9de59ce2b9db1d54a6d567dde3c1721a5c46a756aeba2e3f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_018": {
+      "official_id": "300000000108",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004282&bnefType=all&svcId=300000000108",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/300000000108.json",
+      "evidence_sha256": "c144b4c5b232e6f3682e501558762733761cb837c4f7a77948fafc87ab85ba7e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_019": {
+      "official_id": "325000000104",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002636&bnefType=all&svcId=325000000104",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/325000000104.json",
+      "evidence_sha256": "cbc06aafc2e6510256f0afbcca728f9b93b748b901fc4c7ef2bae580a815bfd2",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_020": {
+      "official_id": "325000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002637&bnefType=all&svcId=325000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/325000000105.json",
+      "evidence_sha256": "863d9f675abb0d1cbd89cb08f0cc2904f065abe337f53e8599e62d912f622b32",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_021": {
+      "official_id": "325000000106",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004238&bnefType=all&svcId=325000000106",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/325000000106.json",
+      "evidence_sha256": "129a3472a1c60d19153ef54c3daa0d75cfd00da2fa99d817fa0b3d513b44bd87",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_022": {
+      "official_id": "341000000101",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/341000000101.json",
+      "evidence_sha256": "c51b7d8b378673917aaf4a9a04629762b893d67433972354e8505821d35202fb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_023": {
+      "official_id": "341000000104",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001776&bnefType=all&svcId=341000000104",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/341000000104.json",
+      "evidence_sha256": "55a16966daec05c90e2a48b110ef65354acefbc83235b0a2764438fdd5e1aa10",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_024": {
+      "official_id": "341000000312",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/341000000312.json",
+      "evidence_sha256": "72bf5ee0e2327def5239886b2cddd5326664da8b0922961235450231e5a8d4be",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_025": {
+      "official_id": "349000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003674&bnefType=all&svcId=349000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/349000000105.json",
+      "evidence_sha256": "00369f9ef240f916abe75cab7583c66951474e510c26c4e8498c8bec3c58c345",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_026": {
+      "official_id": "349000000111",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1006237&bnefType=all&svcId=349000000111",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/349000000111.json",
+      "evidence_sha256": "3866fa6f519f5413601a933d55ca72229c1233d41bc91eddeea3e3354b9a1232",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_027": {
+      "official_id": "349000000126",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2124601&bnefType=all&svcId=349000000126",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/349000000126.json",
+      "evidence_sha256": "76cb1f5bc2e2a33727ad4d58e67095505891a664c5108021f805e28058b9e8ad",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_028": {
+      "official_id": "359000000102",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001718&bnefType=all&svcId=359000000102",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/359000000102.json",
+      "evidence_sha256": "e65ce5ebc674ed580326bb9123ec3edc5fd1890c4504ce4f12b6beb8e2a6b8df",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_029": {
+      "official_id": "359000000104",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001720&bnefType=all&svcId=359000000104",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/359000000104.json",
+      "evidence_sha256": "22f36251748f6d8d4a622f64eb39651940fd9483a343706a0e43e4ddc3e49281",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_030": {
+      "official_id": "359000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001739&bnefType=all&svcId=359000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/359000000105.json",
+      "evidence_sha256": "00b301d81e7031f69e8d64d601cf70ccae85af51521dfad40770298911adb444",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_031": {
+      "official_id": "364000000102",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000371&bnefType=all&svcId=364000000102",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/364000000102.json",
+      "evidence_sha256": "68676d967b8d489aca889be76452b3f50bee0e67e09c90db70e324f785d2e8e1",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_032": {
+      "official_id": "364000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1006673&bnefType=all&svcId=364000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/364000000105.json",
+      "evidence_sha256": "5c24ea726f6e069602fd01f2ae834573c6cbf56ae0e486d9e73f73167908ad24",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_033": {
+      "official_id": "365000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1005896&bnefType=all&svcId=365000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/365000000105.json",
+      "evidence_sha256": "b8084f0566cf9f1647d7614c4078ec8121947f189f9da5f21edef8dc01ee8b4a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_034": {
+      "official_id": "369000000103",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002808&bnefType=all&svcId=369000000103",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/369000000103.json",
+      "evidence_sha256": "dfaf3e77856df702a338b96800a40c21337ba92b7df96f0730775fb85a2c40fb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_035": {
+      "official_id": "369000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002810&bnefType=all&svcId=369000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/369000000105.json",
+      "evidence_sha256": "1549e79b583f1eb7a1fcb3e06dbe716782847ef07269e2b038871adeee82e2d8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_036": {
+      "official_id": "369000000115",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1006534&bnefType=all&svcId=369000000115",
+      "application_url": "http://www.bokjiro.go.kr",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/369000000115.json",
+      "evidence_sha256": "efd0c208259cf07669688d66d51dddcdd061cda16e4df9d29094c1641a6a22db",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_037": {
+      "official_id": "374000000115",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001339&bnefType=all&svcId=374000000115",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/374000000115.json",
+      "evidence_sha256": "5c7c92cb9882370556a0d18086ed25667652634bab71431a5d17da262698e233",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_038": {
+      "official_id": "374000000119",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001343&bnefType=all&svcId=374000000119",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/374000000119.json",
+      "evidence_sha256": "eae8492dac8c6c0470a1e6a8fa7dc16ad69eba21855447de85e8c02be6cf8922",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_039": {
+      "official_id": "374000000120",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001344&bnefType=all&svcId=374000000120",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/374000000120.json",
+      "evidence_sha256": "53bc73f0b5ced08ff29e6983dab63d235dc0fa7be8957d994514e0cc5049326e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_040": {
+      "official_id": "418000000230",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001975&bnefType=all&svcId=418000000230",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/418000000230.json",
+      "evidence_sha256": "4aada401d6be89d424e64e591e8cc3e3701cee9aa649215a548fd922fe01289a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_041": {
+      "official_id": "418000000232",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001978&bnefType=all&svcId=418000000232",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/418000000232.json",
+      "evidence_sha256": "0a9a64db6966c158810eed4a90463d45765bdad288032ac4fabf8cd66b2ef344",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_042": {
+      "official_id": "418000000233",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/418000000233.json",
+      "evidence_sha256": "ae96950da93bc9d134dccd31836475dd5a3ee7675c54b81c9558dc5fb30bfacb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_043": {
+      "official_id": "439000000828",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000934&bnefType=all&svcId=439000000828",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/439000000828.json",
+      "evidence_sha256": "46c14c938082f516ab10333e4be5ffc04f336a4fe6997cff9cc062f7807352e8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_044": {
+      "official_id": "439000000830",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001126&bnefType=all&svcId=439000000830",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/439000000830.json",
+      "evidence_sha256": "ae9feead342f2a3ee2af5a473441790b106f9474adb50e7d6b5612ee47792228",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_045": {
+      "official_id": "439000000835",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003158&bnefType=all&svcId=439000000835",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/439000000835.json",
+      "evidence_sha256": "48393d8fce99552a2e9fb44f5b0729a8919563a3256a1fa55316f35a0481a5d8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_046": {
+      "official_id": "449000000101",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000213&bnefType=all&svcId=449000000101",
+      "application_url": "https://www.bokjiro.go.kr/ssis-teu/index.do",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/449000000101.json",
+      "evidence_sha256": "8b6fd848b6cd3e76c957b91103f45dcec7ebf473218acc9163721bdece2ce19c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_047": {
+      "official_id": "449000000106",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000451&bnefType=all&svcId=449000000106",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/449000000106.json",
+      "evidence_sha256": "9e665e5e3feacba7fe62d3af93e6de44c16ba6170d235a9a0a68a3354218bd54",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_048": {
+      "official_id": "449000000108",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002322&bnefType=all&svcId=449000000108",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/449000000108.json",
+      "evidence_sha256": "31d9c301d8fdb98b654c0ebb2e955104111d7cbeb72b92c2b89100d2a903b48a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_049": {
+      "official_id": "464000000118",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004746&bnefType=all&svcId=464000000118",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/464000000118.json",
+      "evidence_sha256": "2942093f2d82bcc069b8d281c950261bfc329f658de4834b14901b6ef73e9073",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_050": {
+      "official_id": "464000000119",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/464000000119.json",
+      "evidence_sha256": "de59bf0588180ba0750a58b7578b03826516d272e68fcc0f2e3f694834c60eff",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_051": {
+      "official_id": "464000000123",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1005459&bnefType=all&svcId=464000000123",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/464000000123.json",
+      "evidence_sha256": "1d413c465d8949c2daf3765ea55cb7a13485f11aa0341a61ba336a411883e2ac",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_052": {
+      "official_id": "502000000204",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000712&bnefType=all&svcId=502000000204",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/502000000204.json",
+      "evidence_sha256": "608dc8286b5f3202bc9416c2141a48626bcceed9e8324954c4941dcbdd150078",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_053": {
+      "official_id": "502000000206",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001969&bnefType=all&svcId=502000000206",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/502000000206.json",
+      "evidence_sha256": "0099601b729f2e662d568f60835e90070891d7171147c01c6abd1cdf77c61509",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_054": {
+      "official_id": "502000000211",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001991&bnefType=all&svcId=502000000211",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/502000000211.json",
+      "evidence_sha256": "8adb42c5bd45141ef4050d0c0b9718fc11ace1139e4d5a1b0c0ea7a55c1d585a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_055": {
+      "official_id": "531000000101",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000421&bnefType=all&svcId=531000000101",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/531000000101.json",
+      "evidence_sha256": "04ac49512792144a7508da0ff42c97492950484ee3df181263ba84258e464fb8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_056": {
+      "official_id": "531000000105",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001183&bnefType=all&svcId=531000000105",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/531000000105.json",
+      "evidence_sha256": "dd04984fe3e326d3351b951edd8e4882122d4b46b2a58686526bd0bdd592679d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_057": {
+      "official_id": "531000000116",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003906&bnefType=all&svcId=531000000116",
+      "application_url": "http://www.jinju.go.kr",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/531000000116.json",
+      "evidence_sha256": "46c89f545a08f293f6c1133e5b7fe8bd0eba73663dae9b8102d76e76cd4c2f4f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_058": {
+      "official_id": "569000000343",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003134&bnefType=all&svcId=569000000343",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/569000000343.json",
+      "evidence_sha256": "991f41088007e7e3be67057d014f7ec3de406f888b7ef29950795c05376cd344",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_059": {
+      "official_id": "569000000346",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+      "application_url": "https://www.sejong.go.kr",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/569000000346.json",
+      "evidence_sha256": "0cf4911fb7a3a374ef0a3636d4bd0e33118aa85d3f7802fe48397fe5b0f12dd8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_060": {
+      "official_id": "569000000350",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004090&bnefType=all&svcId=569000000350",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/569000000350.json",
+      "evidence_sha256": "c15d423728f33d5c04afb755f3d6c35cb208fda6189322a7ce3bac16481a1794",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_061": {
+      "official_id": "629000000797",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2137918&bnefType=all&svcId=629000000797",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/629000000797.json",
+      "evidence_sha256": "de24af98e2c8122e220ca4296907494c8abf9fd9c35f515f1f7144d40987949c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_062": {
+      "official_id": "650000000214",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000062&bnefType=all&svcId=650000000214",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/650000000214.json",
+      "evidence_sha256": "83bf39e9df203799277ff07f5b09de0638b7456003c1f01c512f0422dca199ac",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_063": {
+      "official_id": "650000000217",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000178&bnefType=all&svcId=650000000217",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/650000000217.json",
+      "evidence_sha256": "b6131bf062b0a60b3ddc1144bf1882bc76f877dd8bbb82395994cfbe4d2e5b39",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_064": {
+      "official_id": "650000000221",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000305&bnefType=all&svcId=650000000221",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/650000000221.json",
+      "evidence_sha256": "b1ddabe0992171eb9a92175f2fc856439c98eead2d80ee319bf6c6443db1d6ec",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_GOV_065": {
+      "official_id": "O00018400001",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2000323&bnefType=all&svcId=O00018400001",
+      "application_url": "https://www.eco-g.or.kr/",
+      "reference_url": null,
+      "evidence_field": "온라인신청사이트URL",
+      "evidence_path": "data/raw/gov24/items/O00018400001.json",
+      "evidence_sha256": "486c0f8c84bb8764136761ebbf6918b575cc6887ff9238626286f54314ab1c31",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_001": {
+      "official_id": "20261103005400214707",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261103005400214707",
+      "application_url": "",
+      "reference_url": "https://www.jeonbuk.go.kr/index.jeonbuk?menuCd=DOM_000000104015059002",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261103005400214707.json",
+      "evidence_sha256": "720012c1c64f0b529e4707c6395d56b9db95ece0c3abc3422d0b89875d1df57e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_002": {
+      "official_id": "20261103005400214706",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261103005400214706",
+      "application_url": "",
+      "reference_url": "https://www.yeonggwang.go.kr/bbs/?b_id=gosigonggo&site=headquarter_new&mn=9059&type=view&sc_cate=&per_page=10&start_date=&end_date=&sc_key=subject&sc_word=%EC%9D%B8%ED%84%B4&bs_idx=28825",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261103005400214706.json",
+      "evidence_sha256": "9925a9d820f6b2ae10ab1deacee1f3eb7010a3c6894a356488551afcea12a6f8",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_003": {
+      "official_id": "20261103005400114715",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261103005400114715",
+      "application_url": "https://www.kocca.kr/kocca/bbs/view/B0000137/2012372.do?searchCnd=1&searchWrd=%EC%9D%B8%ED%84%B4&cateTp1=&cateTp2=&useYn=&menuNo=204802&categorys=0&subcate=0&cateCode=&type=&instNo=0&questionTp=&ufSetting=&recovery=&option1=&option2=&year=&morePage=&qtp=&domainId=&sortCode=&pageIndex=1",
+      "reference_url": "https://www.kocca.kr/kocca/bbs/view/B0000137/2012372.do?searchCnd=1&searchWrd=%EC%9D%B8%ED%84%B4&cateTp1=&cateTp2=&useYn=&menuNo=204802&categorys=0&subcate=0&cateCode=&type=&instNo=0&questionTp=&ufSetting=&recovery=&option1=&option2=&year=&morePage=&qtp=&domainId=&sortCode=&pageIndex=1",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261103005400114715.json",
+      "evidence_sha256": "2848b3608e60cde108a5fe06808aa6916327462a6d5e85ed8ed1e65775b92035",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_004": {
+      "official_id": "20261101005400214684",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214684",
+      "application_url": "",
+      "reference_url": "https://www.dgtp.or.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214684.json",
+      "evidence_sha256": "f20ab27a38c913883a18276b2aa824566d8729782d1e3b930b7e0653a48c74c6",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_005": {
+      "official_id": "20261101005400214683",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214683",
+      "application_url": "",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do?menu_id=00939131&menu_link=/front/youthpolicy/selectYouthpolicy.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214683.json",
+      "evidence_sha256": "460e665ab92f4f707dfa23bf82dea4a9b767be61d6bb8a2595fe1f6eed487212",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_006": {
+      "official_id": "20261101005400214682",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214682",
+      "application_url": "https://minwon.daegu.go.kr/main",
+      "reference_url": "https://minwon.daegu.go.kr/main",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214682.json",
+      "evidence_sha256": "56d6b848bca8e639c12b10caaef3a1305edc84cb533e0508ea09b5f1297503ec",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_007": {
+      "official_id": "20261101005400214681",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214681",
+      "application_url": "www.dgist.ac.kr",
+      "reference_url": "www.dgist.ac.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214681.json",
+      "evidence_sha256": "7c8300a25cbeca492c5ce555e770571da9fbe4ed1ee1b8e2be4372de859ed6bc",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_008": {
+      "official_id": "20261101005400214680",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214680",
+      "application_url": "http://www.wisetkmu.kr",
+      "reference_url": "http://www.wisetkmu.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214680.json",
+      "evidence_sha256": "1de2834d0b45a46b82d1eaa2b930a3374e7de22b172ffe32bbf4e27fa05aa2c6",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_009": {
+      "official_id": "20261101005400214679",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "application_url": "https://ceedin.knu.ac.kr",
+      "reference_url": "https://ceedin.knu.ac.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214679.json",
+      "evidence_sha256": "d9bc6a80a66bef8bf4b28fa1bb97f25e829e6c92926e03aad39752a8e4c9f480",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_010": {
+      "official_id": "20261101005400214675",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214675",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do?menu_id=00939131&menu_link=/front/youthpolicy/selectYouthpolicy.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214675.json",
+      "evidence_sha256": "ee1df508bf0e226062c9d39dc0f99508e3a198f9c8952d62bcade94b2ea31425",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_011": {
+      "official_id": "20261101005400214674",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214674",
+      "application_url": "https://robotcontest.kr",
+      "reference_url": "https://robotcontest.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214674.json",
+      "evidence_sha256": "856ab7de02a1f23f5c8efb208ec075bd33135e176b0c34564a0547bc0e724420",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_012": {
+      "official_id": "20261101005400214673",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214673",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.kaae.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214673.json",
+      "evidence_sha256": "9b3c1af6d809daab76ac1835c9325808eaa7979639f8735ee8c563803b093b41",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_013": {
+      "official_id": "20261101005400214672",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214672",
+      "application_url": "",
+      "reference_url": "www.dgyouth.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214672.json",
+      "evidence_sha256": "4d002c220acc480ccf27f8230ac6824fa195b23e351f9dc29da1a90e10b3198f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_014": {
+      "official_id": "20261101005400214671",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214671",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do?menu_id=00939131&menu_link=/front/youthpolicy/selectYouthpolicy.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214671.json",
+      "evidence_sha256": "502ef1a495a4ed92f59ea0ce62515c4fac64c3be010d8edf5f8152b9f50b512d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_015": {
+      "official_id": "20261101005400214669",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214669",
+      "application_url": "https://inochongdg.org",
+      "reference_url": "https://inochongdg.org",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214669.json",
+      "evidence_sha256": "cf64ee79e432fd6343c20e19d5485c4ff9f1918ae3e0135b0f6e8b1b9d0627f9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_016": {
+      "official_id": "20261101005400214668",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214668",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do?menu_id=00939131&menu_link=/front/youthpolicy/selectYouthpolicy.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214668.json",
+      "evidence_sha256": "9b5af00d45ef0123904ae019b562f3e16d4c3b4b28a64c4e71170fa9ff42db7a",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_017": {
+      "official_id": "20261101005400214667",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214667",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do?menu_id=00939131&menu_link=/front/youthpolicy/selectYouthpolicy.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214667.json",
+      "evidence_sha256": "25418426044a9276a7f0135417a8c7538ff852def322fced57248d473b35b222",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_018": {
+      "official_id": "20261101005400214666",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214666",
+      "application_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "reference_url": "https://www.daegu.go.kr/YouthPolicy/index.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400214666.json",
+      "evidence_sha256": "ec0ac4b3f8b09780a8a6067636cdcf674eaca6648b0a782b1e5fb239d2ce8db4",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_019": {
+      "official_id": "20261101005400114670",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400114670",
+      "application_url": "www.nongupez.go.kr",
+      "reference_url": "www.nongupez.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261101005400114670.json",
+      "evidence_sha256": "da76a87d677dd130a4ebede66b14641869ea884c34ae554ea01d5e6326dc41ee",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_020": {
+      "official_id": "20261031005400214665",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214665",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-law-test.do?mode=view&articleNo=9015&title=%EA%B2%BD%EA%B8%B0%EB%B6%81%EB%B6%80+%EC%B2%AD%EB%85%84+%EC%84%9C%ED%8F%AC%ED%84%B0%EC%A6%88+%EC%9A%B4%EC%98%81",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214665.json",
+      "evidence_sha256": "f786e2c659b0dc7a35b4eea3d538ce334b285e65f8c7cc8fb139e74b402d2ca3",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_021": {
+      "official_id": "20261031005400214664",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214664",
+      "application_url": "",
+      "reference_url": "https://apply.jobaba.net/bsns/bsnsDetailView.do?bsnsSeq=5705",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214664.json",
+      "evidence_sha256": "810864d7d6ec6b93a4ef004438115a1a379d749b2db6877ed067177dc4d05823",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_022": {
+      "official_id": "20261031005400214663",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214663",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/ggyouthplace/youth/place",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214663.json",
+      "evidence_sha256": "f61cc5c384c26ba5d21365722aae611d1b2cf74d2462a1ff80a970b5328d1cc1",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_023": {
+      "official_id": "20261031005400214662",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214662",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-housing-test.do?mode=view&articleNo=7703&title=%EC%A7%80%EC%97%AD%EC%82%AC%ED%9A%8C+%EC%84%9C%EB%B9%84%EC%8A%A4%EB%B6%84%EC%95%BC+%EC%B2%AD%EB%85%84%EC%82%AC%EC%97%85%EB%8B%A8+%EC%A7%80%EC%9B%90",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214662.json",
+      "evidence_sha256": "ba6d490f10d130b3b49541d1014491ff6c2a4a9fa3e357cc6a739ea0fd482e2e",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_024": {
+      "official_id": "20261031005400214661",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/myggd/vol197/2_1.php",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214661.json",
+      "evidence_sha256": "684636014b5d98abd1c28bbf3f2488848fa80c0129dd8a09e5e005501dc0cd22",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_025": {
+      "official_id": "20261031005400214660",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214660",
+      "application_url": "",
+      "reference_url": "https://youthculturepass.or.kr/introPage/intro.html",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214660.json",
+      "evidence_sha256": "8045aab173d966a5a68032f65c77ab7ad67b937d6ac4cf03baa985ffe271a175",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_026": {
+      "official_id": "20261031005400214659",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214659",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-housing-test.do?mode=view&articleNo=8986&title=%EC%9E%AC%EB%82%9C%EB%B3%B5%EA%B5%AC%EC%A7%80%EC%9B%90+%EA%B5%B0+%EC%9E%A5%EB%B3%91+%EC%83%81%ED%95%B4%EB%B3%B4%ED%97%98+%EA%B0%80%EC%9E%85+%EC%A7%80%EC%9B%90",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214659.json",
+      "evidence_sha256": "850515c146a706092280e90de678e521369b7a3e88e1353d828210f880cf7e21",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_027": {
+      "official_id": "20261031005400214658",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214658",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/contents/contents.do?ciIdx=1498&menuId=3400",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214658.json",
+      "evidence_sha256": "f6edae3670f59e43e830271d9defef72325188d5cddfffa5f4e6bc7046538a00",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_028": {
+      "official_id": "20261031005400214657",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214657",
+      "application_url": "",
+      "reference_url": "https://www.mohw.go.kr/board.es?mid=a10501010100&bid=0003&act=view&list_no=1489983",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214657.json",
+      "evidence_sha256": "219adc693f1f707e52f01ab3df8f142d012a778c4959edf010443de98d032c1c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_029": {
+      "official_id": "20261031005400214656",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214656",
+      "application_url": "",
+      "reference_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001175",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214656.json",
+      "evidence_sha256": "7b5414bdf0448fecab225960a7cc65f2ad1919e938c0d779e08c749f2d9017d9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_030": {
+      "official_id": "20261031005400214655",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214655",
+      "application_url": "",
+      "reference_url": "https://account.gfgf.kr/main/freshman_main.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214655.json",
+      "evidence_sha256": "654d594b07f89775e9022e4a60577a9a5f120f9d3db60cd16d52643fa8b55363",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_031": {
+      "official_id": "20261031005400214654",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214654",
+      "application_url": "",
+      "reference_url": "www.bokjiro.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261031005400214654.json",
+      "evidence_sha256": "7ab51a1e42278333daaab29d68646b4b2ad11b74b7320f5f7dcd1b08ac7bf91c",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_032": {
+      "official_id": "20261030005400214652",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214652",
+      "application_url": "",
+      "reference_url": "https://www.saha.go.kr/main.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214652.json",
+      "evidence_sha256": "c5ff433594cace43bdef0ac5ca011a6dec526deeeacc4a3c66911f2ef1d03d10",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_033": {
+      "official_id": "20261030005400214651",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214651",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/contents/contents.do?ciIdx=987237&menuId=1534071",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214651.json",
+      "evidence_sha256": "776d2c0c85fdd68ccff6dc0cae0009fed231e6eb381ea2a275f4cc626c6ab3bd",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_034": {
+      "official_id": "20261030005400214650",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214650",
+      "application_url": "",
+      "reference_url": "https://www.saha.go.kr/startup/main.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214650.json",
+      "evidence_sha256": "42f89a57bda2f6f8ea096b7b963ccc6a0645c9c97ced5c2d4fc313ed1a9e135d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_035": {
+      "official_id": "20261030005400214649",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+      "application_url": "",
+      "reference_url": "https://www.bokjiro.go.kr/ssis-tbu/index.do",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214649.json",
+      "evidence_sha256": "0321c68d15faed0d5b1fb45439743e879ed727b987ec6363c4ee020597c86b3d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_036": {
+      "official_id": "20261030005400214648",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214648",
+      "application_url": "",
+      "reference_url": "https://www.saha.go.kr/startup/bbs/list.do?ptIdx=681&mId=0501000000",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214648.json",
+      "evidence_sha256": "0d0cc39ab46804e50385968d008f29067dd25b259b0b416babcda8cffe265e05",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_037": {
+      "official_id": "20261030005400214646",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214646",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-educational-testing.do?mode=view&articleNo=7668&title=%EB%8C%80%ED%95%99%EC%83%9D+%EA%B8%B0%EC%88%99%EC%82%AC+%ED%99%95%EC%B6%A9+%28%EA%B2%BD%EA%B8%B0%ED%91%B8%EB%A5%B8%EB%AF%B8%EB%9E%98%EA%B4%80+%EC%9A%B4%EC%98%81+%EC%A7%80%EC%9B%90%29",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214646.json",
+      "evidence_sha256": "c283204c277964a56917438beb78f31716abca3afcbf71f9ce7b3778273d2aef",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_038": {
+      "official_id": "20261030005400214644",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214644",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-educational-testing.do?mode=view&articleNo=7667&title=%EA%B2%BD%EA%B8%B0%EB%8F%84+%EA%B3%B5%EA%B3%B5%EA%B8%B0%EC%88%99%EC%82%AC+%EC%9A%B4%EC%98%81",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214644.json",
+      "evidence_sha256": "9480a7f81c61120b955659efb59d9a95ac98d6652455d70402befbf6a03d74fe",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_039": {
+      "official_id": "20261030005400214643",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214643",
+      "application_url": "",
+      "reference_url": "https://www.gh.or.kr/gh/index.do#board",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214643.json",
+      "evidence_sha256": "0424795a8e535a6ee4067ce952b296870b155537130a919216c4e34bd7e852f2",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_040": {
+      "official_id": "20261030005400214640",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214640",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214640.json",
+      "evidence_sha256": "1f8621b31fae41e486b5604c1c9cac270c6ceef261f56ee095d3d097948ea12b",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_041": {
+      "official_id": "20261030005400214637",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214637",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-culture-test.do?mode=view&articleNo=8963&title=%EC%B2%AD%EB%85%84%EB%86%8D%EC%97%85%EC%9D%B8+%EA%B2%BD%EC%9F%81%EB%A0%A5+%EC%A0%9C%EA%B3%A0%EC%82%AC%EC%97%85",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214637.json",
+      "evidence_sha256": "acdcca52cb46a302fcfa360aba38cdb0e66fb972f71519f81d4568119bb25ad7",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_042": {
+      "official_id": "20261030005400214635",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214635",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214635.json",
+      "evidence_sha256": "122a284feb732c4a58bc6f3d9ecd3c36e26f5066df946fe4e5b90f592d138459",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_043": {
+      "official_id": "20261030005400214634",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214634.json",
+      "evidence_sha256": "31aba4499909840e6935606209abc224aeed9a3d9acc33965a61b279d5b321af",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_044": {
+      "official_id": "20261030005400214631",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214631",
+      "application_url": "",
+      "reference_url": "https://apply.jobaba.net/bsns/bsnsDetailView.do?bsnsSeq=5362",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214631.json",
+      "evidence_sha256": "54f06f2c8ebdc6ff41013d0ae447b2018962a843b57c12df8d4c4d529d1dbce2",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_045": {
+      "official_id": "20261030005400214629",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214629",
+      "application_url": "",
+      "reference_url": "https://www.gg.go.kr/bbs/board.do?bsIdx=873&menuId=1534177#page=1",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214629.json",
+      "evidence_sha256": "4a65c646182cf9f99105c064f20163de42fe7285401f8046330326ac7a29bc54",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_046": {
+      "official_id": "20261030005400214626",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214626",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214626.json",
+      "evidence_sha256": "d245d373ca1378deaa87923215d6c0645689e12f1a926ddb1cc79997458394d9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_047": {
+      "official_id": "20261030005400214624",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214624",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-job-test.do?mode=view&articleNo=9027&title=%EA%B2%BD%EA%B8%B0%EB%8F%84%ED%98%95+%EC%B0%BD%EC%97%85%ED%8A%B9%ED%99%94%EC%A3%BC%ED%83%9D+%EC%A1%B0%EC%84%B1+%EB%B0%8F+%EC%9A%B4%EC%98%81",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214624.json",
+      "evidence_sha256": "014d04f37e6e9988f099cca1aeb5886630c787216958d8d245fe56f20f08c769",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_048": {
+      "official_id": "20261030005400214623",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214623",
+      "application_url": "",
+      "reference_url": "https://www.gh.or.kr/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214623.json",
+      "evidence_sha256": "8e314e773c0568645179d5fddeaa7e86d8a7262146308cdde301d143637ecf85",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_049": {
+      "official_id": "20261030005400214622",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214622",
+      "application_url": "https://www.jinan.go.kr",
+      "reference_url": "https://www.jinan.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214622.json",
+      "evidence_sha256": "db6e449e1067ff1cb4b315033152c47fe26e32981aad79a3f3d80bb48e646edb",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_050": {
+      "official_id": "20261030005400214621",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214621",
+      "application_url": "https://www.jinan.go.kr",
+      "reference_url": "https://www.jinan.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214621.json",
+      "evidence_sha256": "d4f0fc890a796666fc67508258a5be858d8fb4ec44b9c190dd5026915952c1fc",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_051": {
+      "official_id": "20261030005400214620",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214620",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214620.json",
+      "evidence_sha256": "963e251c8e60a4ddb0d85a29edc451f44c30bc35277470eeb0850a39de0dbd7f",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_052": {
+      "official_id": "20261030005400214619",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214619",
+      "application_url": "https://www.jinan.go.kr",
+      "reference_url": "https://www.jinan.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214619.json",
+      "evidence_sha256": "23533cc27513b2bb4bb2b36dcaee2ff520ca189cb119337ba4a6da7e37d9f750",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_053": {
+      "official_id": "20261030005400214618",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214618",
+      "application_url": "",
+      "reference_url": "https://youth.gg.go.kr/gg/intro/youth-policy-job-test.do?mode=view&articleNo=8998&title=%EC%86%8C%EC%83%81%EA%B3%B5%EC%9D%B8+%EC%B2%AD%EB%85%84+%EC%B0%BD%EC%97%85+%EC%9B%90%EC%8A%A4%ED%85%9D",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214618.json",
+      "evidence_sha256": "9c245c59253ce9d4ed44bcfc00438fc15fa7795021941a12d4931c938a6f4c2d",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_054": {
+      "official_id": "20261030005400214612",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214612",
+      "application_url": "",
+      "reference_url": "https://www.jinan.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214612.json",
+      "evidence_sha256": "9318a459296c8d669ec86cbf6f28dda6771fe0b2e8c5571e415dc9910c273986",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_055": {
+      "official_id": "20261030005400214609",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214609",
+      "application_url": "",
+      "reference_url": "https://www.jeongeup.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214609.json",
+      "evidence_sha256": "a322dfb1cbf6a23f9171ac9a13e8ae0482461048f1a6cc4dd573a5931a1b36a9",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_056": {
+      "official_id": "20261030005400214600",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214600",
+      "application_url": "",
+      "reference_url": "https://www.jbct.or.kr/organ/site/menu/MENU_000000000000238?id=1469",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214600.json",
+      "evidence_sha256": "27310de31f277a528f3a17f9293aaaff40477837998350d02a35dcf6f5b7b380",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_057": {
+      "official_id": "20261030005400214599",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214599",
+      "application_url": "",
+      "reference_url": "https://www.jbct.or.kr/organ/site/menu/MENU_000000000000238?id=1455",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214599.json",
+      "evidence_sha256": "daf9722d5e03eeb1f87d72c0252571a4633b32bdb529433df92b75cb94d3f033",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_058": {
+      "official_id": "20261030005400214598",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214598",
+      "application_url": "",
+      "reference_url": "https://www.jbct.or.kr/organ/site/menu/MENU_000000000000238?id=1546",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214598.json",
+      "evidence_sha256": "e44fa16632b356e355feb274943156338c01aea00f2a5c4b85c02d010629c3db",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_059": {
+      "official_id": "20261030005400214596",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214596",
+      "application_url": "",
+      "reference_url": "https://www.jumf.co.kr/24/?q=YToyOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjtzOjQ6InBhZ2UiO2k6Mjt9&bmode=view&idx=172090002&t=board",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214596.json",
+      "evidence_sha256": "710c385f59afd3489cf7f3b20e728a7ccda9ca3e99bb4788388c0fb742cfc3fc",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_060": {
+      "official_id": "20261030005400214594",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214594",
+      "application_url": "",
+      "reference_url": "https://www.jbct.or.kr/organ/site/menu/MENU_000000000000238?id=1464",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214594.json",
+      "evidence_sha256": "4a378fcb8dcf2db011bc3f321a248f2f20fc652e0d0e54063963ccf787381a33",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_061": {
+      "official_id": "20261030005400214592",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214592",
+      "application_url": "",
+      "reference_url": "https://www.jbct.or.kr/organ/site/menu/MENU_000000000000238?id=1491",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214592.json",
+      "evidence_sha256": "1fb6c69501705445e0cae52abc426dc0c137e14ec7445205ee3b2e99ae2be3b1",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_062": {
+      "official_id": "20261030005400214591",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214591",
+      "application_url": "",
+      "reference_url": "https://www.jeonbuk.go.kr/board/list.jeonbuk?menuCd=DOM_000000102002005000&boardId=BBS_0000129&listCel=1&searchStartDt=&searchEndDt=&categoryCode1=&categoryCode2=&searchType=DATA_TITLE&listRow=10&keyword=%EC%9D%BC%EC%9E%90%EB%A6%AC",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214591.json",
+      "evidence_sha256": "f3d1335f782cee447dc11604fd673c173944efbf6d52bc1774f9c5c894cc63c6",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_063": {
+      "official_id": "20261030005400214584",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214584",
+      "application_url": "",
+      "reference_url": "https://www.gbgs.go.kr/open_content/ko/page.do?mnu_uid=2160&parm_bod_uid=249572&step=258",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214584.json",
+      "evidence_sha256": "5bca9b123a676647b4e860224337e95cef4697080dfdd875d490e3352d6b33a2",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_064": {
+      "official_id": "20261030005400214583",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214583",
+      "application_url": "",
+      "reference_url": "https://www.xn--289ax9fnsqbqat17bcmg.com/",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261030005400214583.json",
+      "evidence_sha256": "cc740cb926b7d96f3532e2f041494014b3ff6504324800736a48ac0de2d6f989",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_YC_065": {
+      "official_id": "20261029005400214581",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "application_url": "https://www.sejong.go.kr",
+      "reference_url": "https://www.sejong.go.kr",
+      "evidence_field": "aplyUrlAddr",
+      "evidence_path": "data/raw/youthcenter/items/20261029005400214581.json",
+      "evidence_sha256": "7134f67055b936e262ad272a982c0471e54bdd6b79e98b73b5dbbaddc1837710",
+      "collected_at": "2026-11-04T19:30:00+09:00"
+    },
+    "POL_STG_MOLIT_002": {
+      "official_id": "161300000103",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2126303&bnefType=all&svcId=161300000103",
+      "application_url": "https://gg24.gg.go.kr",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.937959"
+    },
+    "POL_STG_MOHW_001": {
+      "official_id": "174000000029",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=593069&bnefType=all&svcId=174000000029",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938014"
+    },
+    "POL_STG_DGU_001": {
+      "official_id": "305000000103",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1002556&bnefType=all&svcId=305000000103",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938035"
+    },
+    "POL_STG_NTS_001": {
+      "official_id": "136000000288",
+      "source_url": "https://www.law.go.kr/법령/조세특례제한법/제30조",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938185"
+    },
+    "POL_STG_MOIS_001": {
+      "official_id": "131200000008",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999002&bnefType=all&svcId=131200000008",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938206"
+    },
+    "POL_STG_EX_001": {
+      "official_id": "B50000400042",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+      "application_url": "https://www.hipass.co.kr/main.do",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938227"
+    },
+    "POL_STG_MOLIT_001": {
+      "official_id": "161300000104",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+      "application_url": "https://korea-pass.kr",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938244"
+    },
+    "POL_STG_SEOUL_001": {
+      "official_id": "20260317005400211516",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+      "application_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938281"
+    },
+    "POL_STG_ICN_001": {
+      "official_id": "356100000004",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "official_apply_url",
+      "evidence_path": "data/staging/policies.jsonl",
+      "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
+      "collected_at": "2026-11-06T21:19:05.938296"
+    }
+  }
+}
