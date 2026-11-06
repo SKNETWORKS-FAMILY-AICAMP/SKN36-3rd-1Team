@@ -2,6 +2,7 @@
 
 > **기준일시:** 2026-11-05 (KST)  
 > **버전:** `v1.3.0-final-contract`  
+> **개정 (2026-11-06):** `Policy.official_apply_url`을 선택(Nullable)으로 변경 — 신청 주소가 확인된 경우에만 값이 있다. `Document`의 `doc_type`·`law_article`·`effective_date`·`version` 등 선택 속성 명시. v1.3.2 데이터 자체는 변경 없음(기존 값은 모두 채워져 있어 호환).  
 > **당사자:** 데이터 엔지니어링 파이프라인(생성) ↔ Neo4j Graph DB & Qdrant Vector DB(소비)  
 > **목적:** 데이터 파이프라인과 다운스트림 데이터베이스(Graph/Vector) 간의 무결성, 필드 타입, 제약조건 및 생명주기를 규정하는 공식 법적/기술적 계약
 
@@ -26,11 +27,13 @@
 
 ### 2.1 필수 필드와 선택 필드 구분
 - **정책(`Policy`):**
-  - **필수(NOT NULL):** `policy_id`, `official_id`, `policy_name`, `source_type`, `category`, `agency`, `organization`, `regions`, `life_stages`, `eligibility_attributes`, `requirements`, `eligibility`, `benefit`, `application_period`, `application_method`, `required_documents`, `official_apply_url`, `source_url`, `source_document_ids`, `verification_status`, `reception_status`, `collected_at`
-  - **선택(Nullable):** `application_start`, `application_end`, `lastMdfcnDt`, `review_flags`
+  - **필수(NOT NULL):** `policy_id`, `official_id`, `policy_name`, `source_type`, `category`, `agency`, `organization`, `regions`, `life_stages`, `eligibility_attributes`, `requirements`, `eligibility`, `benefit`, `application_period`, `application_method`, `required_documents`, `source_url`, `source_document_ids`, `verification_status`, `reception_status`, `collected_at`
+  - **선택(Nullable):** `application_start`, `application_end`, `lastMdfcnDt`, `review_flags`, `official_apply_url`
+    - `official_apply_url`: **실제 신청 주소가 확인된 경우에만 값이 있다.** 법령·서비스 안내(정부24·복지로 상세 등) 페이지만 있으면 `null`이며, 해당 주소는 `source_url`에 둔다. 소비 측(UI)은 값이 있을 때만 '신청하기'를 노출한다. (2026-11-06 개정)
 - **근거 문서(`Document`):**
   - **필수(NOT NULL):** `document_id`, `policy_id`, `title`, `source_type`, `source_url`, `local_raw_path`, `content_hash`, `text`, `verification_status`, `collected_at`
-  - **선택(Nullable):** `published_at`, `effective_at`
+  - **선택(Nullable):** `published_at`, `effective_at`, `doc_type`, `law_article`, `effective_date`, `version`, `extracted_text_path`, `official_id`
+    - `law_article`·`effective_date`·`version`은 법령·조례·공고에만 의미가 있어 서비스 안내·FAQ 문서는 `null`이다. (2026-11-06 개정, v1.4.0-candidate 신규 문서 속성)
 - **벡터 청크(`Chunk`):**
   - **필수(NOT NULL):** `chunk_id`, `policy_id`, `document_id`, `policy_name`, `category`, `region`, `life_stages`, `section_title`, `text`, `source_url`, `verification_status`
 

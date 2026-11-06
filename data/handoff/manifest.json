@@ -13,8 +13,8 @@
   },
   "files": {
     "data_contract.md": {
-      "size_bytes": 8846,
-      "sha256": "c35b9fef54fca2fdbbf71c5949e6ef92f7fe2fc2a19d7d8df85eec107f7d7d7c",
+      "size_bytes": 9795,
+      "sha256": "77589e740f469d833cc6cbe7040a3add8dc33933aed04ee996c93fc7e7b9602c",
       "record_count": 113
     },
     "neo4j/cypher_ddl.cypher": {

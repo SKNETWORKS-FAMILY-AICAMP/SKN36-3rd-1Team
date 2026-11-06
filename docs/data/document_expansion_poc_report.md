@@ -135,7 +135,7 @@ pie title 확보 공식 근거 문서 22건 유형별 분포
 
 1. **기존 Handoff Baseline 100% 불변 검증**:
    - `data/handoff/manifest.json`의 SHA-256 해시값:  
-     `a238028ab9c83b1f970ca46b3532d99282b966d52d6a7b3d5a4a7354a7dd7ea8` (2026-11-06 OS 간 줄바꿈 기준(LF) 통일로 manifest 해시 재계산, 데이터 내용 변경 없음)
+     `9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85` (2026-11-06 OS 간 줄바꿈 기준(LF) 통일 및 data_contract.md 개정(official_apply_url Nullable)으로 manifest 해시 재계산, 데이터 내용 변경 없음)
    - Staging 실행 전과 후 해시를 대조한 결과 **100% 동일함(0바이트 변동)**을 증명하였습니다.
 2. **Point ID 결정론적 UUIDv5 검증**:
    - 36개 청크 모두 `uuid5(NAMESPACE_DNS, chunk_id)` 규격으로 생성되어 기존 557개 청크의 Point ID와 1건도 충돌하지 않음을 확인하였습니다.

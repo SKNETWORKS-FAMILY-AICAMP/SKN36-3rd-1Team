@@ -180,7 +180,7 @@ DETACH DELETE cg;
 
 ## 7. 최종 검증 결론
 
-1. **기존 `v1.3.2-verified` 불변 입증**: `manifest.json` 해시 `24844d866f13c6c7...`(현재 `a238028ab9c83b1f...` — 2026-11-06 OS 간 줄바꿈 기준(LF) 통일로 manifest 해시 재계산, 데이터 내용 변경 없음) 전 구간 100% 불변.
+1. **기존 `v1.3.2-verified` 불변 입증**: `manifest.json` 해시 `24844d866f13c6c7...`(현재 `9cdc54322b269bb2...` — 2026-11-06 OS 간 줄바꿈 기준(LF) 통일 및 data_contract.md 개정(official_apply_url Nullable)으로 manifest 해시 재계산, 데이터 내용 변경 없음) 전 구간 100% 불변.
 2. **참조 결함 0건 달성**: 총 3,710개 관계 전수 검증 결과 Broken References = 0건 통과.
 3. **스키마 우선 재사용 100% 준수**: 신규 Category/LifeStage/Region을 생성하지 않고 기존 마스터 노드를 100% 재사용.
 4. **후보 릴리스 상태**: **`CANDIDATE / PENDING_DB_REVIEW` 유지** (DB 담당자 최종 승인 전 임의 승격 금지 원칙 준수).

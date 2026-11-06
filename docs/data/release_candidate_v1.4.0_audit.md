@@ -6,7 +6,7 @@
 - **작성일자**: 2026-11-06
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
-- **기준 베이스라인**: `v1.3.2-verified` (manifest SHA-256: `a238028ab9c83b1f970ca46b3532d99282b966d52d6a7b3d5a4a7354a7dd7ea8`, 100% 무변경 보존; 2026-11-06 OS 간 줄바꿈 기준(LF) 통일로 manifest 해시 재계산, 데이터 내용 변경 없음)
+- **기준 베이스라인**: `v1.3.2-verified` (manifest SHA-256: `9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85`, 100% 무변경 보존; 2026-11-06 OS 간 줄바꿈 기준(LF) 통일 및 data_contract.md 개정(official_apply_url Nullable)으로 manifest 해시 재계산, 데이터 내용 변경 없음)
 - **후보 패키지 위치**: [`data/releases/v1.4.0-candidate/`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/releases/v1.4.0-candidate)
 - **정밀 증분 명세서**: [`release_delta_manifest.json`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/releases/v1.4.0-candidate/release_delta_manifest.json)
 - **책임 파트**: LifePolicy AI 데이터 아키텍처팀

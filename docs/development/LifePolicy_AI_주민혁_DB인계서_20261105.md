@@ -239,7 +239,7 @@ sequenceDiagram
 - `data/handoff/data_contract.md`: 정식 ID/필드/상태 데이터 계약
 - `data/handoff/neo4j/load_neo4j.py`, `cypher_ddl.cypher`, `verify_neo4j.cypher`
 - `data/handoff/qdrant/collection_config.json`, `payload_chunks.jsonl`
-- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `a238028ab9c83b1f970ca46b3532d99282b966d52d6a7b3d5a4a7354a7dd7ea8` (2026-11-06 OS 간 줄바꿈 기준(LF) 통일로 manifest 해시 재계산, 데이터 내용 변경 없음) (2026-11-05 문서 정합성 수정 후 파일 크기·체크섬 갱신, 데이터 내용 변경 없음)
+- `data/handoff/manifest.json`: manifest `v1.3.2` / SHA-256 `9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85` (2026-11-06 OS 간 줄바꿈 기준(LF) 통일 및 data_contract.md 개정(official_apply_url Nullable)으로 manifest 해시 재계산, 데이터 내용 변경 없음) (2026-11-05 문서 정합성 수정 후 파일 크기·체크섬 갱신, 데이터 내용 변경 없음)
 - `data/reports/lifecycle_distribution_report.md`: 생애주기 상세 분석
 
 **인계 판정:** 정제·인계 파일 준비 및 관계 참조 검사는 통과. 현재 로컬은 참조 원본 246개가 없어 전체 검증은 실패합니다. `data/handoff/README.md` §7에 따라 원본을 별도 배치하고 재검증해야 합니다. 실제 DB 적재·임베딩 검증은 NOT_TESTED이며 인수 담당자가 환경·실행 시점·결과를 기록합니다.
