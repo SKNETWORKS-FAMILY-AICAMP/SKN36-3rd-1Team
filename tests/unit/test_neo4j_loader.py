@@ -156,9 +156,12 @@ def _sample_graph() -> lg.GraphInput:
     """작은 가상 그래프 (sample_only)."""
     return lg.GraphInput(
         nodes_by_label={
-            "Policy": [{"policy_id": "POL_S1", "policy_name": "가상 정책 (sample_only)", "life_stages": ["청년"]}],
-            "Document": [{"document_id": "DOC_S1", "policy_id": "POL_S1", "content_hash": "h1"}],
-            "Organization": [{"agency_id": "AGENCY_S1", "name": "가상 기관"}],
+            "Policy": [{**{key: "sample_only" for key in lg.REQUIRED_NODE_STRING_FIELDS["Policy"]},
+                        "policy_id": "POL_S1", "policy_name": "가상 정책 (sample_only)",
+                        "life_stages": ["청년"], "target_groups": ["sample_only"]}],
+            "Document": [{**{key: "sample_only" for key in lg.REQUIRED_NODE_STRING_FIELDS["Document"]},
+                          "document_id": "DOC_S1", "policy_id": "POL_S1", "content_hash": "h1"}],
+            "Organization": [{"agency_id": "AGENCY_S1", "name": "가상 기관", "type": "sample_only"}],
         },
         relationships=[
             {"source_id": "POL_S1", "relation": "SUPPORTED_BY", "target_id": "DOC_S1", "review_status": "sample_only"},
@@ -801,10 +804,10 @@ class TestVerifyProperties(unittest.TestCase):
                 report = lg.verify_node_properties(graph, runner)
                 self.assertEqual(report["counts"][kind], 1, report["counts"])
 
-    def test_null_input_is_rejected_before_load(self):
-        """현재 로더 정책: null 속성은 입력 검증에서 invalid_property로 거부 → 아무것도 쓰지 않는다."""
+    def test_required_null_input_is_rejected_before_load(self):
+        """선택 필드 null을 허용해도 필수 출처의 null은 쓰기 전에 거부한다."""
         graph = _sample_graph()
-        graph.nodes_by_label["Document"][0]["published_at"] = None     # 계약상 Nullable 필드 (sample_only)
+        graph.nodes_by_label["Document"][0]["source_url"] = None
         self.assertIn("invalid_property", lg.validate_graph_input(graph).summary()["error_counts"])
         runner = FakeGraphRunner()
         with self.assertRaises(lg.GraphValidationError):

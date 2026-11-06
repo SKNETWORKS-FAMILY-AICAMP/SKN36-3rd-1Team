@@ -105,11 +105,17 @@ QUALITY_GRAPH_MISSING = "GRAPH_CONTEXT_MISSING"
 QUALITY_STRUCTURE_ISSUE = "CONDITION_STRUCTURE_ISSUE"
 # 2026-11-06 Neo4j 의미 점검 결과로 추가한 그래프 계산 경고 (모두 의심 후보, 확정 아님)
 QUALITY_EMPTY_NOT_GROUP = "EMPTY_NOT_GROUP"
+QUALITY_EMPTY_AND_GROUP = "EMPTY_AND_GROUP"
+QUALITY_NEEDS_REVIEW = "NEEDS_REVIEW"
 QUALITY_REGION_GRANULARITY = "SUSPECTED_REGION_GRANULARITY_LOST"
 QUALITY_REVIEW_STATUS_OVERCLAIM = "SUSPECTED_REVIEW_STATUS_OVERCLAIM"
 # 경고 코드별 메타: severity / evidence_level(근거 종류) / verification(검증 상태) / affects(판정 영향 항목)
 #   / blocks_auto_eligibility(자동 판정 보류 필요). 공식 원문 검증은 모두 하지 않았다.
 QUALITY_CODE_META: dict[str, dict[str, Any]] = {
+    QUALITY_EMPTY_AND_GROUP: {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
+                              "affects": ["all"], "blocks_auto_eligibility": True},
+    QUALITY_NEEDS_REVIEW: {"severity": "high", "evidence_level": "graph_metadata", "verification": "needs_review",
+                           "affects": ["all"], "blocks_auto_eligibility": True},
     "GRAPH_CONTEXT_MISSING": {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
                               "affects": ["all"], "blocks_auto_eligibility": True},
     "UNKNOWN_CONDITION_GROUP": {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
@@ -663,6 +669,8 @@ def _build_condition_tree(policy_id: str, root_id: str, groups: dict[str, dict[s
         return {
             "group_id": group_id,
             "logic": group.get("logic"),               # AND / OR / NOT / UNKNOWN — 그대로
+            **{key: group[key] for key in ("review_status", "verification_status", "eligibility_review_status")
+               if key in group},
             "is_root": group.get("is_root"),
             "description": group.get("description"),
             "relationship": relationship,
@@ -835,10 +843,17 @@ def assess_policy_data_quality(context: dict[str, Any] | None,
     eligibility = context.get("eligibility") or {}
     trees = eligibility.get("condition_tree") or []
     warnings: list[dict[str, Any]] = []
-    if eligibility.get("unknown_logic_groups"):
+    all_groups = [group for tree in trees for group in _tree_groups(tree)]
+    unknown_groups = sorted(set(eligibility.get("unknown_logic_groups") or []) |
+                            {g["group_id"] for g in all_groups if g.get("logic") == "UNKNOWN" and g.get("group_id")})
+    if unknown_groups:
         warnings.append({"code": QUALITY_UNKNOWN_CONDITION, "level": "caution",
-                         "group_ids": list(eligibility["unknown_logic_groups"]),
+                         "group_ids": unknown_groups,
                          "message": DATA_QUALITY_NOTES["unknown"]})
+    for group in all_groups:
+        if group.get("logic") == "AND" and not group.get("conditions") and not group.get("groups"):
+            warnings.append({"code": QUALITY_EMPTY_AND_GROUP, "level": "caution", "group_id": group.get("group_id"),
+                             "message": "AND 그룹에 평가할 조건이 없음. 자동 판정 보류 및 원문 확인 필요"})
     if eligibility.get("structure_issues"):
         warnings.append({"code": QUALITY_STRUCTURE_ISSUE, "level": "caution",
                          "issues": [issue.get("issue") for issue in eligibility["structure_issues"]],
@@ -848,6 +863,16 @@ def assess_policy_data_quality(context: dict[str, Any] | None,
     for key, _relation in POLICY_NEIGHBOR_SPECS:
         relationships.extend(item.get("relationship") or {} for item in context.get(key, []))
     review_counts = Counter(str(rel.get("review_status")) for rel in relationships if rel)
+    review_objects = [context.get("policy") or {}, *all_groups, *relationships]
+    review_objects.extend(condition for group in all_groups for condition in group.get("conditions", []))
+    for key, _relation in POLICY_NEIGHBOR_SPECS:
+        review_objects.extend(context.get(key, []))
+    review_needed = sum(any(item.get(key) == "needs_review" for key in (
+        "review_status", "verification_status", "eligibility_review_status"
+    )) for item in review_objects)
+    if review_needed:
+        warnings.append({"code": QUALITY_NEEDS_REVIEW, "level": "caution", "count": review_needed,
+                         "message": "정책·조건·그룹·근거에 needs_review 상태가 있어 자동 판정 보류"})
     if review_counts.get("extracted"):
         warnings.append({"code": QUALITY_EXTRACTED_NOT_VERIFIED, "level": "caution",
                          "count": review_counts["extracted"], "message": DATA_QUALITY_NOTES["extracted"]})

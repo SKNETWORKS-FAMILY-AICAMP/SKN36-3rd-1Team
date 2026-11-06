@@ -52,8 +52,36 @@ LABEL_ID_FIELDS: dict[str, str] = dict(hd.LABEL_ID_FIELDS)
 RELATIONSHIP_SPECS: dict[str, tuple[str, str]] = dict(hd.RELATIONSHIP_SPECS)
 
 # 관계에 속성으로 옮기는 필드 (relationships.jsonl의 나머지 열)
-RELATIONSHIP_PROPERTY_FIELDS = ("target_name", "evidence_document_id", "evidence_location", "review_status")
+RELATIONSHIP_PROPERTY_FIELDS = (
+    "target_name", "evidence_document_id", "evidence_location", "review_status",
+    "raw_value", "condition_type", "doc_type", "evidence_type", "law_article",
+)
 REQUIRED_RELATIONSHIP_FIELDS = ("source_id", "relation", "target_id")
+
+# 후보 0a09126의 docs/data/data_contract.md §2.1 (2026-11-06 개정).
+# processed 전용 중첩 필드는 Graph 투영 계약에 포함하지 않는다.
+NULLABLE_NODE_STRING_FIELDS = {
+    "Policy": frozenset(("official_apply_url", "application_start", "application_end", "lastMdfcnDt")),
+    "Document": frozenset(("published_at", "effective_at", "doc_type", "law_article", "effective_date",
+                           "version", "extracted_text_path", "official_id")),
+}
+REQUIRED_NODE_STRING_FIELDS = {
+    "Policy": ("policy_id", "official_id", "policy_name", "source_type", "category", "agency", "organization",
+               "region", "eligibility", "benefit", "application_period", "application_method",
+               "source_url", "verification_status", "collected_at"),
+    "Document": ("document_id", "policy_id", "title", "source_type", "source_url", "local_raw_path",
+                 "content_hash", "verification_status"),
+    "Organization": ("agency_id", "name", "type"),
+    "Region": ("region_id", "name"),
+    "Category": ("category_id", "name"),
+    "LifeStage": ("stage_id", "name", "age_range", "description"),
+    "TargetGroup": ("group_id", "name", "description"),
+    "ConditionGroup": ("group_id", "policy_id", "logic", "description"),
+    "EligibilityCondition": ("condition_id", "type", "name", "operator", "value", "unit",
+                             "evidence_location", "description"),
+}
+REQUIRED_NODE_LIST_FIELDS = {"Policy": ("life_stages", "target_groups")}
+REQUIRED_NODE_BOOL_FIELDS = {"ConditionGroup": ("is_root",)}
 
 # 제약조건 이름: 인계 DDL(cypher_ddl.cypher)과 같은 이름을 쓴다. → 이미 같은 제약이 있으면 IF NOT EXISTS로 건너뛴다.
 CONSTRAINT_NAMES: dict[str, str] = {
@@ -147,8 +175,9 @@ def validate_graph_input(graph: GraphInput) -> ValidationReport:
     오류 종류:
       unknown_label          허용 목록에 없는 레이블
       missing_id             고유 ID가 없거나 빈 문자열이거나 문자열이 아님
+      missing_node_field     Graph 투영 계약의 필수 속성 누락
       duplicate_id           같은 레이블 안에서 고유 ID 중복
-      invalid_property       Neo4j에 저장할 수 없는 속성값 (예: dict, 섞인 타입 리스트)
+      invalid_property       계약과 다른 타입/비허용 null 또는 저장 불가 값 (dict, 섞인 타입 리스트)
       missing_field          관계 필수 필드(source_id·relation·target_id) 누락
       unknown_relation       허용 목록에 없는 관계 타입
       missing_source/target  관계 양끝 노드가 해당 레이블에 없음
@@ -172,8 +201,24 @@ def validate_graph_input(graph: GraphInput) -> ValidationReport:
             if node_id in seen:
                 report.add("duplicate_id", (label, node_id))
             seen.add(node_id)
+            for key in (REQUIRED_NODE_STRING_FIELDS.get(label, ()) + REQUIRED_NODE_LIST_FIELDS.get(label, ())
+                        + REQUIRED_NODE_BOOL_FIELDS.get(label, ())):
+                if key not in row:
+                    report.add("missing_node_field", (label, node_id, key))
             for key, value in row.items():
+                if key in NULLABLE_NODE_STRING_FIELDS.get(label, ()):
+                    if value is not None and not isinstance(value, str):
+                        report.add("invalid_property", (label, node_id, key))
+                    continue
                 if not _is_neo4j_property_value(value):
+                    report.add("invalid_property", (label, node_id, key))
+                elif key in REQUIRED_NODE_STRING_FIELDS.get(label, ()) and not isinstance(value, str):
+                    report.add("invalid_property", (label, node_id, key))
+                elif key in REQUIRED_NODE_LIST_FIELDS.get(label, ()) and (
+                    not isinstance(value, list) or any(not isinstance(item, str) for item in value)
+                ):
+                    report.add("invalid_property", (label, node_id, key))
+                elif key in REQUIRED_NODE_BOOL_FIELDS.get(label, ()) and not isinstance(value, bool):
                     report.add("invalid_property", (label, node_id, key))
         ids_by_label[label] = seen
         report.node_counts[label] = len(rows)
@@ -198,7 +243,8 @@ def validate_graph_input(graph: GraphInput) -> ValidationReport:
             report.add("duplicate_relationship", triple)
         seen_triples.add(triple)
         for key in RELATIONSHIP_PROPERTY_FIELDS:
-            if key in row and row[key] is not None and not _is_neo4j_property_value(row[key]):
+            # 선택 관계 메타데이터는 문자열/누락/null. null은 저장 시 속성 없음.
+            if key in row and row[key] is not None and not isinstance(row[key], str):
                 report.add("invalid_relationship_property", (index, key))
         report.relationship_counts[relation] = report.relationship_counts.get(relation, 0) + 1
 
@@ -289,7 +335,9 @@ def build_count_queries() -> dict[str, str]:
 
 
 def _node_row(label: str, node: dict[str, Any]) -> dict[str, Any]:
-    return {"id": node[LABEL_ID_FIELDS[label]], "properties": dict(node)}
+    # 선택 null은 속성 없음으로 전달한다. SET += null에 의한 기존 속성 삭제도 피한다.
+    return {"id": node[LABEL_ID_FIELDS[label]],
+            "properties": {key: value for key, value in node.items() if value is not None}}
 
 
 def _relationship_row(row: dict[str, Any]) -> dict[str, Any]:
