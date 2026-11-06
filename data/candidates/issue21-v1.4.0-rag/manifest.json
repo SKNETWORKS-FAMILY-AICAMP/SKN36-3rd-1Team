@@ -1,0 +1,120 @@
+{
+  "manifest_version": "issue21-v1.4.0-review",
+  "release_status": "REVIEW_ONLY_NOT_FOR_DB",
+  "summary": {
+    "total_policies": 246,
+    "total_documents": 261,
+    "total_chunks": 599,
+    "total_graph_nodes": 1185,
+    "total_graph_edges": 4427
+  },
+  "source_commit": "742a2b04fe120002758215a289a10cade0495e1b",
+  "generator_uncommitted": [],
+  "files": {
+    "age_conflict_candidates.jsonl": {
+      "sha256": "e9ac2f4a6a0dc77857e07370d7f6c900fcf8ef02c24dc49c0585fefa0839978e",
+      "size_bytes": 1141,
+      "record_count": 2
+    },
+    "comparison.json": {
+      "sha256": "1cf167ecb60874535f4b33bca3d50de0ff119d2de414fedcb186f42d235fca39",
+      "size_bytes": 12634,
+      "record_count": 0
+    },
+    "documents.jsonl": {
+      "sha256": "3466e57041ca2a42d391fc39b6fbdbe8d1cd8f0aac7268c968f06e329a9de701",
+      "size_bytes": 878255,
+      "record_count": 261
+    },
+    "neo4j/nodes_category.jsonl": {
+      "sha256": "e668cd7324d693ee5d8e2f2e6875f324a2ad98838a04db70dc58dbae765517c9",
+      "size_bytes": 397,
+      "record_count": 5
+    },
+    "neo4j/nodes_condition_group.jsonl": {
+      "sha256": "602748a973a190311b9f887d8ce24ef87ec7b2a58139e9ec13352c9a9479a611",
+      "size_bytes": 106880,
+      "record_count": 434
+    },
+    "neo4j/nodes_document.jsonl": {
+      "sha256": "f0b67cfa5156c8dcbbf32e23a5db00f6eac5f64367f69103419577ebbeaadd5e",
+      "size_bytes": 127586,
+      "record_count": 261
+    },
+    "neo4j/nodes_eligibility_condition.jsonl": {
+      "sha256": "2369ee19de3a285ba5342ada2cafe0e12171b87d2e461f24174e5b1f93b4c7fc",
+      "size_bytes": 32098,
+      "record_count": 81
+    },
+    "neo4j/nodes_lifestage.jsonl": {
+      "sha256": "4e0f80761cb1d40a2dfc0265ce9861469b3defceffc487850866e9bd57f75ac3",
+      "size_bytes": 883,
+      "record_count": 6
+    },
+    "neo4j/nodes_organization.jsonl": {
+      "sha256": "80cbf7a67bd8710c9439e246883739832377b1fc796d77f21421b5bf5078b4d2",
+      "size_bytes": 17611,
+      "record_count": 123
+    },
+    "neo4j/nodes_policy.jsonl": {
+      "sha256": "e6971535a3a556c9e94839e85eaaeb058927551292aed90d1a80447d85f0c242",
+      "size_bytes": 470383,
+      "record_count": 246
+    },
+    "neo4j/nodes_region.jsonl": {
+      "sha256": "f8e174718e365c756094dcc890d794d1cecd6e3674795ddffe7f6346b7ab600f",
+      "size_bytes": 1054,
+      "record_count": 18
+    },
+    "neo4j/nodes_target_group.jsonl": {
+      "sha256": "8d9b680a4eb367474940485dbebd008639c53965c88116a202cb50450f33b249",
+      "size_bytes": 1710,
+      "record_count": 11
+    },
+    "neo4j/relationships.jsonl": {
+      "sha256": "f652237204ee083f82e1a4bed4827250d11cd8f3aeb84036e8b9b86dbf10f2bd",
+      "size_bytes": 1179413,
+      "record_count": 4427
+    },
+    "policy_changes.jsonl": {
+      "sha256": "a0ac3cfccc300edeaab6908f15aae73013ec7e11a02588dcd40621e8a7879f0b",
+      "size_bytes": 2864475,
+      "record_count": 246
+    },
+    "processed/condition_relationships.jsonl": {
+      "sha256": "f63c348e88382655dd21d909ee7987976d9eca05b1a2d55c4f91a30c8fae5da2",
+      "size_bytes": 758642,
+      "record_count": 2937
+    },
+    "processed/policies.jsonl": {
+      "sha256": "d7fe44d8484b0b5e54dce4bab97aa48cafa053cfe86a0216fa9a6f2b8c171d55",
+      "size_bytes": 1097316,
+      "record_count": 246
+    },
+    "qdrant/payload_chunks.jsonl": {
+      "sha256": "da10d32837d4caf642452928e6e999ac9b221a1769595898cd3dd27609fe5b4a",
+      "size_bytes": 1373773,
+      "record_count": 599
+    },
+    "qdrant/policy_metadata.jsonl": {
+      "sha256": "339d0386f7455e0f015b09ceee5a34adb554a95299822dad932d75d9591d04ef",
+      "size_bytes": 144676,
+      "record_count": 246
+    },
+    "README.md": {
+      "sha256": "5d98ac51a11111880f0456d94250856d738d3f738300fd13e142029e37f08c44",
+      "size_bytes": 797,
+      "record_count": 0
+    },
+    "uncertainty_audit.jsonl": {
+      "sha256": "564ad9ecd251b09b7a42e28cc0cacdde0324feb1846bd465ba4ab4b0c8b3cabe",
+      "size_bytes": 103452,
+      "record_count": 246
+    },
+    "validation.json": {
+      "sha256": "3d416c73d6ff632ff101f7c5235c33dc0c5d23a322378644750ee637e29f8778",
+      "size_bytes": 21170,
+      "record_count": 0
+    }
+  }
+}
