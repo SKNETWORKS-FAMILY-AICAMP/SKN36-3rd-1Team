@@ -1,4 +1,6 @@
 # Issue #21 생성 규칙 수정 결과
+> **[과거 결과 — 2026-11-07 갱신]** 이 문서는 `0645f90 생성 규칙 1차 수정` 기준의 이전 단계 결과다. 현재 검토 기준 후보는 `data/candidates/issue21-v1.4.0-20261107-rag/`이며, 루트 UNKNOWN 수치(245 등)와 일부 판단은 이후 수정으로 바뀌었다. 최신 결과는 `docs/development/ISSUE21_FINAL_VERIFICATION_20261107.md` 참조.
+
 
 기준일: 2026-11-06 / 브랜치: `feature/21-eligibility-data-fix`
 
