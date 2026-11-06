@@ -1,0 +1,142 @@
+{
+  "benchmark_queries_count": 30,
+  "method_A_neo4j_only": {
+    "hit@1_pct": 56.7,
+    "hit@3_pct": 63.3,
+    "hit@5_pct": 73.3,
+    "recall@5_pct": 71.7,
+    "doc_citation_acc_pct": 23.3,
+    "factual_score_pct": 48.3,
+    "avg_latency_ms": 18.5,
+    "avg_tokens": 450,
+    "cost_per_1k_queries_usd": 0.068
+  },
+  "method_B_qdrant_only": {
+    "hit@1_pct": 93.3,
+    "hit@3_pct": 96.7,
+    "hit@5_pct": 96.7,
+    "recall@5_pct": 95.0,
+    "doc_citation_acc_pct": 80.0,
+    "factual_score_pct": 88.3,
+    "avg_latency_ms": 24.2,
+    "avg_tokens": 850,
+    "cost_per_1k_queries_usd": 0.127
+  },
+  "method_C_hybrid_graphrag": {
+    "hit@1_pct": 76.7,
+    "hit@3_pct": 76.7,
+    "hit@5_pct": 76.7,
+    "recall@5_pct": 75.0,
+    "doc_citation_acc_pct": 66.7,
+    "factual_score_pct": 71.7,
+    "avg_latency_ms": 31.0,
+    "avg_tokens": 920,
+    "cost_per_1k_queries_usd": 0.138
+  },
+  "category_breakdown": {
+    "정책 대상자 탐색": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 25.0,
+        "Method_B": 100.0,
+        "Method_C": 50.0
+      },
+      "doc_citation": {
+        "Method_A": 12.5,
+        "Method_B": 62.5,
+        "Method_C": 50.0
+      }
+    },
+    "연령·지역·소득 복합 조건": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 25.0,
+        "Method_B": 100.0,
+        "Method_C": 25.0
+      },
+      "doc_citation": {
+        "Method_A": 0.0,
+        "Method_B": 100.0,
+        "Method_C": 25.0
+      }
+    },
+    "제외 조건과 예외 상황": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 100.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      },
+      "doc_citation": {
+        "Method_A": 12.5,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      }
+    },
+    "신청 서류 및 절차": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 100.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      },
+      "doc_citation": {
+        "Method_A": 12.5,
+        "Method_B": 37.5,
+        "Method_C": 50.0
+      }
+    },
+    "법령 근거": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 100.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      },
+      "doc_citation": {
+        "Method_A": 100.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      }
+    },
+    "신청 종료 또는 개정 정책": {
+      "query_count": 4,
+      "recall@5": {
+        "Method_A": 75.0,
+        "Method_B": 75.0,
+        "Method_C": 75.0
+      },
+      "doc_citation": {
+        "Method_A": 12.5,
+        "Method_B": 50.0,
+        "Method_C": 50.0
+      }
+    },
+    "유사 정책 간 구분": {
+      "query_count": 3,
+      "recall@5": {
+        "Method_A": 50.0,
+        "Method_B": 83.3,
+        "Method_C": 50.0
+      },
+      "doc_citation": {
+        "Method_A": 33.3,
+        "Method_B": 100.0,
+        "Method_C": 66.7
+      }
+    },
+    "공식 FAQ 기반 자연어 질문": {
+      "query_count": 3,
+      "recall@5": {
+        "Method_A": 100.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      },
+      "doc_citation": {
+        "Method_A": 0.0,
+        "Method_B": 100.0,
+        "Method_C": 100.0
+      }
+    }
+  }
+}

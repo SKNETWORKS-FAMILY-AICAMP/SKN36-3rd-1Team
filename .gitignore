@@ -75,3 +75,6 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Temporary backup archives
+*.zip

@@ -1,0 +1,48 @@
+{
+  "collection_name": "lifepolicy_chunks",
+  "vectors_config": {
+    "size": null,
+    "distance": "Cosine",
+    "_instruction": "임베딩 모델 확정 시 model_dimension_presets의 차원으로 주입하여 컬렉션을 생성합니다 (OpenAI 1536, BGE-M3 1024 등)."
+  },
+  "model_dimension_presets": {
+    "OpenAI/text-embedding-3-small": 1536,
+    "OpenAI/text-embedding-3-large": 3072,
+    "BAAI/bge-m3": 1024,
+    "intfloat/multilingual-e5-large": 1024
+  },
+  "on_disk_payload": true,
+  "payload_indexes": [
+    {
+      "field_name": "policy_id",
+      "field_type": "keyword"
+    },
+    {
+      "field_name": "category",
+      "field_type": "keyword"
+    },
+    {
+      "field_name": "region",
+      "field_type": "keyword"
+    },
+    {
+      "field_name": "life_stages",
+      "field_type": "keyword"
+    },
+    {
+      "field_name": "target_groups",
+      "field_type": "keyword"
+    },
+    {
+      "field_name": "verification_status",
+      "field_type": "keyword"
+    }
+  ],
+  "proposed_indexes": [
+    {
+      "field_name": "doc_type",
+      "field_schema": "keyword",
+      "status": "PENDING_DB_REVIEW"
+    }
+  ]
+}

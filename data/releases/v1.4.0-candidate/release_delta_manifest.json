@@ -1,0 +1,577 @@
+{
+  "release_version": "1.4.0-candidate",
+  "created_at": "2026-11-06T16:31:59.378903",
+  "added_policy_ids": [
+    "POL_STG_MOLIT_002",
+    "POL_STG_MOHW_001",
+    "POL_STG_DGU_001",
+    "POL_STG_NTS_001",
+    "POL_STG_MOIS_001",
+    "POL_STG_EX_001",
+    "POL_STG_MOLIT_001",
+    "POL_STG_SEOUL_001",
+    "POL_STG_ICN_001"
+  ],
+  "added_document_ids": [
+    "DOC_STG_001_NOTICE",
+    "DOC_STG_001_FAQ",
+    "DOC_STG_001_LAW",
+    "DOC_STG_MOLIT_002_GDL",
+    "DOC_STG_MOLIT_002_FAQ",
+    "DOC_STG_MOHW_001_GDL",
+    "DOC_STG_MOHW_001_LAW",
+    "DOC_STG_DGU_001_ORD",
+    "DOC_STG_DGU_001_NOT",
+    "DOC_STG_NTS_001_LAW",
+    "DOC_STG_NTS_001_FAQ",
+    "DOC_STG_MOIS_001_LAW",
+    "DOC_STG_MOIS_001_NOT",
+    "DOC_STG_EX_001_LAW",
+    "DOC_STG_EX_001_FAQ",
+    "DOC_STG_MOLIT_001_GDL",
+    "DOC_STG_MOLIT_001_FAQ",
+    "DOC_STG_SEOUL_001_ORD",
+    "DOC_STG_SEOUL_001_NOT",
+    "DOC_STG_SEOUL_001_FAQ",
+    "DOC_STG_ICN_001_ORD",
+    "DOC_STG_ICN_001_NOT"
+  ],
+  "added_organization_ids": [
+    "AGENCY_국세청_기획재정부",
+    "AGENCY_국토교통부_대도시권광역교통위원회",
+    "AGENCY_서울특별시_동대문구_가족정책과",
+    "AGENCY_서울특별시_미래청년기획단",
+    "AGENCY_인천광역시_서구_청년정책일자리과",
+    "AGENCY_한국도로공사_국토교통부",
+    "AGENCY_행정안전부_보건복지부",
+    "AGENCY_행정안전부_지방세특례제도과"
+  ],
+  "added_condition_group_ids": [
+    "GRP_POL_STG_MOLIT_002_ROOT",
+    "GRP_POL_STG_MOHW_001_ROOT",
+    "GRP_POL_STG_DGU_001_ROOT",
+    "GRP_POL_STG_NTS_001_ROOT",
+    "GRP_POL_STG_MOIS_001_ROOT",
+    "GRP_POL_STG_EX_001_ROOT",
+    "GRP_POL_STG_MOLIT_001_ROOT",
+    "GRP_POL_STG_SEOUL_001_ROOT",
+    "GRP_POL_STG_ICN_001_ROOT"
+  ],
+  "added_qdrant_point_ids": [
+    "df517a13-6194-5d62-8801-3dab154932fe",
+    "c65f2367-7f4f-5243-9ccd-22329753e4a7",
+    "89cd940f-dfbe-5968-9c60-59f19f33b0f7",
+    "e6ef6929-0585-52c3-bebc-da73e14f0ef7",
+    "6d76969d-5be4-5c54-bec6-e391aa29eda1",
+    "59c6b456-5901-536f-a45f-a91c3a2af24a",
+    "acbfebe9-f76f-5f5d-a13d-330bcb9b14e0",
+    "abf4b89a-1a05-59e5-b4e3-12ab10f2b55f",
+    "87333fed-4de7-5552-a2de-a37bb51bd4dc",
+    "02e4597a-89a4-5b2a-840d-b3092307d530",
+    "02de13f1-962e-59ae-8364-1d8db247487d",
+    "df150acf-d75c-5a63-b54f-b76d80ac1b74",
+    "45b23a3b-fec5-5ac6-9f4b-776f20bf1882",
+    "0313c727-a06d-52cb-945c-cbea152044e9",
+    "de3fa697-08ee-5953-9dfc-3e8d1addc913",
+    "5b0099be-7f41-5c4c-97ce-fa2b2152fe1d",
+    "fce7e80a-dace-54ff-bec1-425c52984b7e",
+    "d5d74abd-a338-53cf-95fb-5c5bbe6c1eda",
+    "43f1728d-1b2e-52e0-a10f-5a3b1a4d78e3",
+    "0f7b5990-c59e-594e-ae05-d925f1aab30c",
+    "cd53bdec-2072-5288-9432-e22541090b18",
+    "62763832-f6e9-53f7-b079-3985fd2b9788",
+    "c19df4d4-d598-5277-a2bd-8663570e680e",
+    "1ddebebf-35dc-51c4-ada1-cb64c12ed690",
+    "c60a13cc-2096-51c0-89c3-4b751e5d04e0",
+    "9a82f97a-90fc-59aa-b9b8-d21ec00aa68f",
+    "980591b7-ef34-54ba-9e98-eec04d5f4e1a",
+    "f1def0c6-410c-5b94-bf31-d095b61d93a4",
+    "92396e5c-020e-567c-9e59-eb102c2a41b8",
+    "152ed07b-4492-57ca-8d35-163934468cd9",
+    "ba69eefa-a6f3-5fd1-b993-811159dddbb4",
+    "0d59d365-44fa-56f5-a13f-03161a74a7a9",
+    "fc15b895-251e-53b6-a99d-ee647d86463a",
+    "5067d6bf-7972-5cba-b99e-6ad8823dc9a5",
+    "0e0eb9d4-5de3-5868-b2ea-1a9426846e13",
+    "116ced3c-6553-5df0-8cbf-392d07e7d6a9"
+  ],
+  "added_relationships_count": 95,
+  "exact_added_relationships": [
+    {
+      "source_id": "POL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_001_NOTICE"
+    },
+    {
+      "source_id": "POL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_001_FAQ"
+    },
+    {
+      "source_id": "POL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_001_LAW"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_002_GDL"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_002_FAQ"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOHW_001_GDL"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOHW_001_LAW"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_DGU_001_ORD"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_DGU_001_NOT"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_NTS_001_LAW"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_NTS_001_FAQ"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOIS_001_LAW"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOIS_001_NOT"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_EX_001_LAW"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_EX_001_FAQ"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_001_GDL"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_001_FAQ"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_ORD"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_NOT"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_FAQ"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_ICN_001_ORD"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_ICN_001_NOT"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_국토교통부_청년주거정책과"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_HOUSING_FINANCE"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "TARGETS",
+      "target_id": "GROUP_LOW_INCOME"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_002",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_MOLIT_002_ROOT"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_행정안전부_보건복지부"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_BIRTH_CHILDCARE"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_영유아"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_PREGNANT_BIRTH"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_CHILD_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_MOHW_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_MOHW_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_서울특별시_동대문구_가족정책과"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_BIRTH_CHILDCARE"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_SEOUL"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_아동"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청소년"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_CHILD_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_PREGNANT_BIRTH"
+    },
+    {
+      "source_id": "POL_STG_DGU_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_DGU_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_국세청_기획재정부"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_노년"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_WORKER_BIZ"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_SENIOR"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_NTS_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_행정안전부_지방세특례제도과"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_BIRTH_CHILDCARE"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_영유아"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_아동"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_PREGNANT_BIRTH"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_CHILD_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_MOIS_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_MOIS_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_한국도로공사_국토교통부"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_TRANSPORT_MEDICAL_CARE"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_아동"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청소년"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_CHILD_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_PREGNANT_BIRTH"
+    },
+    {
+      "source_id": "POL_STG_EX_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_EX_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_국토교통부_대도시권광역교통위원회"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_TRANSPORT_MEDICAL_CARE"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_GENERAL"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_MOLIT_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_서울특별시_미래청년기획단"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_REGIONAL_WELFARE"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_SEOUL"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_SEOUL_001_ROOT"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_인천광역시_서구_청년정책일자리과"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_INCHEON"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_WORKER_BIZ"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_STG_ICN_001_ROOT"
+    }
+  ],
+  "baseline_manifest_sha256": "24844d866f13c6c7b75ea2d2b43c3180fa9773ed7e84a7ad0fc29383ffdcddb6"
+}
