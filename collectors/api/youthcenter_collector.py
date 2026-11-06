@@ -405,9 +405,11 @@ def run_collection(
 
     # 1. 목록 수집 (pageType=1)
     all_raw_items: List[Dict[str, Any]] = []
+    # all_raw_items와 같은 순서로, 각 레코드를 실제로 읽어 온 API 응답 페이지 파일.
+    # 같은 정책번호가 여러 페이지에 나와도 레코드마다 자기 페이지를 원본으로 기록한다.
+    # (items/ 개별 파일은 일부만 저장되므로 원본 경로로 쓰지 않는다)
+    raw_item_pages: List[str] = []
     seen_plcy_nos: Set[str] = set()
-    # 정책번호 → 원문이 들어 있는 API 응답 페이지 파일 (items/ 개별 파일은 일부만 저장되므로 이 경로를 원본으로 기록)
-    raw_page_by_pno: Dict[str, str] = {}
     page = 1
 
     while not (max_pages and page > max_pages):
@@ -431,6 +433,7 @@ def run_collection(
             break
 
         all_raw_items.extend(items)
+        raw_item_pages.extend([cache_path.relative_to(BASE_DIR).as_posix()] * len(items))
         summary["total_pages_fetched"] += 1
 
         for it in items:
@@ -439,7 +442,6 @@ def run_collection(
                 if pno in seen_plcy_nos:
                     summary["duplicate_count"] += 1
                 seen_plcy_nos.add(pno)
-                raw_page_by_pno.setdefault(pno, cache_path.relative_to(BASE_DIR).as_posix())
 
         logger.info("Page %d: %d items (cumulative: %d)", page, len(items), len(all_raw_items))
         if len(items) < page_size:
@@ -494,7 +496,7 @@ def run_collection(
 
     total_n = len(all_raw_items)
 
-    for it in all_raw_items:
+    for it, raw_page in zip(all_raw_items, raw_item_pages):
         pno = str(it.get("plcyNo", "")).strip()
 
         # 결측률 집계
@@ -514,7 +516,7 @@ def run_collection(
                     code_field_stats[cf]["converted"] += 1
 
         # 정규화 레코드 생성
-        norm_rec = normalize_youthcenter_item(it, code_defs, raw_path=raw_page_by_pno.get(pno))
+        norm_rec = normalize_youthcenter_item(it, code_defs, raw_path=raw_page)
         flags = norm_rec["review_flags"]
         if "검토대상" in flags["age_review_status"]:
             review_counts["age_review_needed"] += 1

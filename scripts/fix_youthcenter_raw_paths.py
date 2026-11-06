@@ -7,8 +7,12 @@ data/processed/youthcenter_policies.jsonl의 local_raw_path를 실제 원문 파
   data/raw/youthcenter/items/{plcyNo}.json으로 기록했지만, items/ 파일은 상위 500개와
   주요 정책 4개만 저장되어 3,861건 중 3,358건이 없는 파일을 가리켰다.
   원문은 전부 API 응답 페이지(data/raw/youthcenter/api/page_*.json)에 있으므로
-  각 레코드가 들어 있는 페이지 파일을 원본 경로로 기록한다.
+  각 레코드를 실제로 읽어 온 페이지 파일을 원본 경로로 기록한다.
   (수집기도 같은 방식으로 수정됨 — 다음 수집부터는 이 스크립트가 필요 없다)
+
+수집기는 페이지 번호순으로 읽은 원본 항목을 같은 순서로 정제해 기록한다. 그래서 정제 레코드
+i번째는 페이지 순서상 i번째 원본 항목에서 나온 것이다. 정책번호로 첫 페이지를 찾는 대신 이 위치
+대응을 쓰므로, 같은 정책번호가 여러 페이지에 나와도 레코드마다 자기 페이지를 가리킨다.
 
 local_raw_path 외의 필드는 바꾸지 않는다.
 
@@ -23,36 +27,36 @@ API_DIR = BASE_DIR / "data" / "raw" / "youthcenter" / "api"
 PROCESSED_PATH = BASE_DIR / "data" / "processed" / "youthcenter_policies.jsonl"
 
 
-def build_page_index() -> dict:
-    """정책번호 → 처음 등장한 API 응답 페이지 경로 (수집기의 처리 순서와 같게 페이지 번호순)."""
-    index = {}
+def read_raw_sequence() -> list:
+    """수집기가 읽은 순서대로 (정책번호, 페이지 경로) 목록을 만든다."""
+    sequence = []
     for page in sorted(API_DIR.glob("page_*.json")):
         data = json.loads(page.read_text(encoding="utf-8"))
+        page_path = page.relative_to(BASE_DIR).as_posix()
         for item in data.get("result", {}).get("youthPolicyList", []):
-            pno = str(item.get("plcyNo", "")).strip()
-            if pno:
-                index.setdefault(pno, page.relative_to(BASE_DIR).as_posix())
-    return index
+            sequence.append((str(item.get("plcyNo", "")).strip(), page_path))
+    return sequence
 
 
 def main() -> None:
-    index = build_page_index()
+    sequence = read_raw_sequence()
     records = [json.loads(line) for line in PROCESSED_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
 
-    missing = [r["plcyNo"] for r in records if r["plcyNo"] not in index]
-    assert not missing, f"API 응답 페이지에서 찾지 못한 정책: {missing[:5]} 외 {len(missing)}건"
+    # 위치 대응이 성립하는지 확인: 건수와 정책번호 순서가 원본 페이지와 완전히 같아야 한다
+    assert len(records) == len(sequence), f"정제 {len(records)}건 ≠ 원본 페이지 항목 {len(sequence)}건"
+    mismatch = [i for i, (r, (pno, _)) in enumerate(zip(records, sequence)) if r["plcyNo"] != pno]
+    assert not mismatch, f"정책번호 순서 불일치 {len(mismatch)}건 (첫 위치 {mismatch[0]})"
 
     changed = 0
-    for r in records:
-        new_path = index[r["plcyNo"]]
-        if r.get("local_raw_path") != new_path:
-            r["local_raw_path"] = new_path
+    for r, (_, page_path) in zip(records, sequence):
+        if r.get("local_raw_path") != page_path:
+            r["local_raw_path"] = page_path
             changed += 1
 
     with open(PROCESSED_PATH, "w", encoding="utf-8", newline="\n") as f:
         for r in records:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    print(f"{len(records)}건 중 {changed}건 local_raw_path 교정 (API 응답 페이지 {len(set(index.values()))}개)")
+    print(f"{len(records)}건 중 {changed}건 local_raw_path 교정 (API 응답 페이지 {len({p for _, p in sequence})}개)")
 
 
 if __name__ == "__main__":
