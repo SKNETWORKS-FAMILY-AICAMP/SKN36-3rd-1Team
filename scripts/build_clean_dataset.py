@@ -37,6 +37,7 @@ from collectors.preprocessing.normalize import (
 )
 from collectors.api.gov24_collector import structure_ja_conditions
 from collectors.api.youthcenter_collector import load_code_definitions, normalize_youthcenter_item
+from collectors.preprocessing.application_urls import application_url_or_none
 
 DATA_DIR = BASE_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
@@ -373,7 +374,7 @@ def make_policy_record(
     application_end: Optional[str],
     application_method: str,
     required_documents: List[str],
-    official_apply_url: str,
+    official_apply_url: Optional[str],
     source_url: str,
     source_document_ids: List[str],
     verification_status: str,
@@ -398,6 +399,8 @@ def make_policy_record(
         if eligibility_attributes is None:
             eligibility_attributes = inferred_attr
 
+    # 수동으로 지정한 주소도 API 주소와 같은 기준으로 검사한다.
+    official_apply_url = application_url_or_none(official_apply_url, source_url)
     return {
         "policy_id": policy_id,
         "official_id": official_id,
@@ -1643,7 +1646,7 @@ def main(output_dir: Path) -> None:
             application_end=None,
             application_method=item.get("신청방법") or "정부24 또는 관할 기관 신청",
             required_documents=req_docs_list,
-            official_apply_url=item.get("온라인신청사이트URL") or detail_url,
+            official_apply_url=application_url_or_none(item.get("온라인신청사이트URL"), detail_url),
             source_url=detail_url,
             source_document_ids=[doc_id],
             verification_status=v_status,

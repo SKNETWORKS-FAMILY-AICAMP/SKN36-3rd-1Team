@@ -45,8 +45,10 @@ from urllib.parse import unquote
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from collectors.preprocessing.application_urls import first_application_url
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
 OUT_RAW = RAW_ROOT / "bokjiro"
@@ -249,7 +251,8 @@ def parse_detail_to_refined_record(
 
     source_url = f"https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId={serv_id}"
     online_apply_urls = [it["link"] for it in applmet_list if it.get("link", "").startswith("http")]
-    official_apply_url = online_apply_urls[0] if online_apply_urls else source_url
+    # 안내 URL로 채우지 않고, 사용 가능한 신청 링크를 순서대로 찾는다.
+    official_apply_url = first_application_url(online_apply_urls, source_url)
 
     agency_full = f"{jur_mnof_nm} {jur_org_nm}".strip() if jur_org_nm else jur_mnof_nm
     sections = [

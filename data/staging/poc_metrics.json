@@ -1,0 +1,38 @@
+{
+  "poc_date": "2026-11-06T14:31:11.351973",
+  "baseline_policies": 237,
+  "staging_policies": 10,
+  "total_secured_documents": 22,
+  "documents_per_policy": 2.2,
+  "total_chunks_generated": 36,
+  "chunks_by_type": {
+    "notice": 7,
+    "faq": 15,
+    "law": 5,
+    "guideline": 6,
+    "ordinance": 3
+  },
+  "chunk_length_distribution": {
+    "min_chars": 84,
+    "max_chars": 455,
+    "mean_chars": 177.4,
+    "median_chars": 151.0
+  },
+  "duplicate_chunk_ratio_pct": 0.0,
+  "linkage_integrity": {
+    "policy_to_document_rate": "100.0%",
+    "document_to_raw_file_rate": "100.0%",
+    "broken_references_count": 0
+  },
+  "temporal_metadata_coverage": {
+    "effective_date_presence_count": 22,
+    "effective_date_presence_pct": 100.0,
+    "version_presence_count": 22,
+    "version_presence_pct": 100.0
+  },
+  "safety_checks": {
+    "handoff_baseline_modified": false,
+    "manifest_hash_unchanged": true,
+    "live_database_access": false
+  }
+}

@@ -38,8 +38,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
 METADATA_ROOT = BASE_DIR / "data" / "metadata"
@@ -222,8 +224,10 @@ def normalize_youthcenter_item(
     sbmsn_dcmnt = (item.get("sbmsnDcmntCn") or "").strip()
     add_aply = (item.get("addAplyQlfcCndCn") or "").strip()
     ptcp_prp = (item.get("ptcpPrpTrgtCn") or "").strip()
-    aply_url = (item.get("aplyUrlAddr") or item.get("refUrlAddr1") or "").strip()
     source_url = f"https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/{pno}"
+    # 참고URL은 신청URL의 대체값이 아니다. 원천 신청 필드만 검토한다.
+    raw_aply_url = (item.get("aplyUrlAddr") or "").strip()
+    aply_url = application_url_or_none(raw_aply_url, source_url)
     last_mdfcn_dt = (item.get("lastMdfcnDt") or "").strip()
 
     # RAG 청킹용 본문 텍스트 생성
@@ -311,8 +315,8 @@ def normalize_youthcenter_item(
         "plcyAplyMthdCn": aply_method,
         "required_documents": [line.strip("- ·*") for line in sbmsn_dcmnt.splitlines() if line.strip()][:8] if sbmsn_dcmnt else [],
         "sbmsnDcmntCn": sbmsn_dcmnt,
-        "official_apply_url": aply_url or source_url,
-        "aplyUrlAddr": aply_url,
+        "official_apply_url": aply_url,
+        "aplyUrlAddr": raw_aply_url,
         "source_url": source_url,
         "lastMdfcnDt": last_mdfcn_dt,
         "local_raw_path": f"data/raw/youthcenter/items/{pno}.json",

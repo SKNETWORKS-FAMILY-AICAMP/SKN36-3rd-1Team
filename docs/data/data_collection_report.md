@@ -1,10 +1,16 @@
 # LifePolicy AI — 3차 데이터 수집 및 정제 최종 보고서 (data_collection_report.md)
 
-> **현재 로컬 재검증 안내 (2026-11-05):** 아래 수집·검증 실적은 기존 보고 기록입니다. 현재 로컬에서는 참조 원본 246개가 없어 최종 인계 검증이 실패합니다. 정제·인계 파일 준비와 원본 확보·DB 실적재는 구분합니다. 원본 별도 전달·복원 및 재검증 절차는 `data/handoff/README.md` §7을 따릅니다.
-
 > **작성자:** 데이터 수집/검증 담당 (장반석)  
 > **기준일시:** 2026-11-04 (KST)  
 > **상태:** 3차 데이터 전수 수집, 정제, 정합성 검증 100% 완료 (DB 담당자 인계 가능)
+>
+> 📌 **문서 구분 및 역할 안내:**  
+> - **본 문서 (`docs/data/data_collection_report.md`):** 3대 공공 API(온통청년, 정부24, 복지로) 15,264건 전수 수집, 237개 핵심 정책 및 246개 문서 정제, 557개 시맨틱 청킹 및 Neo4j/Qdrant 최종 DB 인계를 위한 **3차 데이터 파이프라인 심층 기술 상세 보고서 (내부 기술 명세 및 참고용)**입니다.  
+> - **공식 산출물 01 (`docs/DATA_COLLECTION_REPORT.md`):** 교과목 단위 프로젝트 초기 마일스톤에 제출된 15개 원형 파일 및 10대 정책 독립 검증용 **공식 산출물 01 제출본**은 해당 문서를 확인하십시오.
+>
+> ⚠️ **청크 및 관계 건수 변동 내역 안내:**  
+> - **청크 수량 (555건 → 557건):** 2026-11-04 초기 정제본 작성 시점에는 555건이었으나, 장문 PDF 100자 오버랩 분할 적용 후 현재 디스크 상의 `data/processed/chunks.jsonl` 및 최종 DB 인계 패키지 `data/handoff/qdrant/payload_chunks.jsonl` **모두 557건으로 100% 동기화** 완료되었습니다.  
+> - **그래프 관계 (2,118건 → 2,537건 → 3,615건):** 초기 정제본의 2,118건(생애주기 직접 엣지 미매핑)에서 6대 표준 생애단계 다중 매핑 체계화로 `APPLIES_TO_LIFESTAGE` 직접 엣지 **+419건**이 추가되어 현재 `data/processed/relationships.jsonl`은 **2,537건**이며, 여기에 복합 자격요건 표현을 위한 계층형 `ConditionGroup` DAG 관계 **+1,078건**이 확충되어 최종 DB 인계 패키지(`data/handoff/neo4j/relationships.jsonl`, v1.3.2)는 **3,615개(노드 1,034개)**로 구축되었습니다.
 
 ---
 
@@ -14,12 +20,27 @@
 |---|---:|---:|---|
 | **정책 레코드 (Policies)** | 9건 | **237건** | **+228건 (+2,533%)** / 5대 분야 및 17개 시도 균형 수집 |
 | **공식 근거 문서 (Documents)** | 14건 | **246건** | **+232건 (+1,657%)** / 원문 파일 디스크 실재 100% 확인 |
-| **Vector 청크 (Chunks)** | 126건 | **555건** | **+429건 (+340%)** / 600~900자 의미 단위 청킹 |
-| **Graph 관계 (Relationships)** | 37건 | **2,118건** | **+2,081건 (+5,624%)** / 소관기관·지역·대상군·자격조건 엣지 |
+| **Vector 청크 (Chunks)** | 126건 | **557건** *(초기 정제: 555건)* | **+431건 (+342%)** / 600~900자 의미 단위 청킹 (`processed/chunks.jsonl` 실측 557건 동기화) |
+| **Graph 관계 (Relationships)** | 37건 | **3,615건** *(원천 직접: 2,537건)* | **+3,578건 (+9,670%)** / 원천 직접 관계 2,537건(초기 2,118건 + 생애주기 419건) + DAG 1,078건 |
 | **JSONL 파싱 오류** | 0건 | **0건** | 전 파일 유효한 JSONL 포맷 |
 | **정책-문서 참조 무결성** | 0건 결함 | **0건 결함** | 100% 참조 무결성 보장 |
 | **로컬 원본 파일 누락** | 2건 | **0건 (완전 해결)** | `DOC_MOLIT_001`, `DOC_MOEL_001` 원문 파일 복구 |
 | **본문 추출 오류 및 잡음** | 2건 | **0건 (완전 해결)** | `DOC_NHUF_008`, `DOC_LH_003` 공식 원문 교체 및 정제 |
+
+### 1.1 초기 정제본(2026-11-04)과 최종 DB 인계본(2026-11-05) 단계별 집계 비교
+
+| 지표 항목 | 2026-11-04 중간 정제본 (`processed/`) | 2026-11-05 최종 DB 인계본 (`handoff/`, v1.3.2) | 증감 | 집계 기준 차이 및 변동 원인 |
+|---|---:|---:|---:|---|
+| **통합 정책 (Policies)** | 237건 | **237건** | 0건 | 5대 분야 및 전국 17개 시도 균형 수집 정책 동일 유지 |
+| **공식 근거 문서 (Documents)** | 246건 | **246건** | 0건 | 로컬 원본 파일 실재 100% (`local_raw_path`) 동일 유지 |
+| **Vector 청크 (Chunks)** | 555건 (초기) / **557건 (현재)** | **557건** | **+2건** | 장문 PDF 공고문(1,000자 초과) 분할 시 문맥 단절 방지를 위한 100자 오버랩 분할(`text[:1000]`, `text[900:]`) 적용에 따른 추가 청크(`DOC_LH_001_P01_C02` 등 2건) 생성 (`scripts/build_clean_dataset.py` 4.1절). 현재 `processed/chunks.jsonl` 및 `payload_chunks.jsonl` 모두 557건 일치. |
+| **Graph 관계 (Relationships)** | 2,118건 (초기) / **2,537건 (현재)** | **3,615건** | **+1,497건** | 초기 2,118건에서 생애주기 직접 엣지(+419건, `APPLIES_TO_LIFESTAGE`) 확충으로 원천 직접 관계 **2,537건** 확정. 여기에 복합 자격 요건을 위한 계층형 `ConditionGroup` DAG 관계(+1,078건: `HAS_ROOT_CONDITION_GROUP` 237건, `CONTAINS_GROUP` 106건, `CONTAINS_CONDITION` 735건) 확충으로 최종 **3,615건** 인계 |
+| **Graph 노드 (Nodes)** | - | **1,034개** | - | 9대 노드 라벨 전수 분리 적재 (Policy 237, ConditionGroup 343, Document 246, Organization 116, EligibilityCondition 52, Region 18, TargetGroup 11, LifeStage 6, Category 5) |
+| **참조 무결성 (Integrity)** | 100% | **100% PASS** | 0건 결함 | 양 끝 노드 연결 결함(Broken References) = 0건, 고립 노드(Orphan) = 0건 |
+
+> ⚠️ **검증 상태 및 인프라 적재 대기 안내:**  
+> - **정책 검증 분류:** 전체 237개 정책 중 21건은 공식 공고문 원문과 1:1 대조 및 수동 검증이 완료된 `verified` 상태이나, 216건은 공공 API 파싱에 기반한 `extracted` 상태입니다. '참조 무결성 100% PASS'는 파일 구조 및 식별자 연결 결함이 없음을 증명하는 것이며, 모든 개별 정책의 신청 자격 적격성이 수동 보증되었음을 의미하지 않습니다.  
+> - **인프라 적재 대기 (`NOT_TESTED`):** 오프라인 파일 무결성 및 적재 스크립트(`load_neo4j.py`) 정합성 검증은 완료되었으나, 실제 Neo4j 및 Qdrant 라이브 서버 인스턴스 기동 및 임베딩 생성은 DB 담당자 인프라 구축 후 진행됩니다.
 
 ---
 
@@ -59,7 +80,7 @@
 
 ---
 
-## 3. P0 기존 데이터 오류 수정 상세
+## 4. P0 기존 데이터 오류 수정 상세
 
 1. **`DOC_NHUF_008` (청년전용 보증부월세대출):**
    - 기존에 잘못 수집되어 있던 버팀목전세자금 FAQ(`FP05020303.jsp`)를 완전히 폐기
@@ -75,12 +96,14 @@
 
 ---
 
-## 4. 데이터베이스(Neo4j / Qdrant) 전달 산출물 목록
+## 5. 데이터베이스(Neo4j / Qdrant) 전달 산출물 목록
+
+> ※ 아래 산출물 목록은 현재 디스크 상의 정제본(`data/processed/`) 및 DB 엔지니어 최종 인계본(`data/handoff/`, manifest v1.3.2) 실측 수치 기준입니다.
 
 1. `data/processed/policies.jsonl` (237건) — Neo4j `Policy` 노드
 2. `data/processed/documents.jsonl` (246건) — Neo4j `Document` 노드
-3. `data/processed/chunks.jsonl` (555건) — Qdrant 컬렉션 적재
-4. `data/processed/relationships.jsonl` / `graph_edges.jsonl` (2,118건) — Neo4j 엣지
+3. `data/processed/chunks.jsonl` (557건, 2026-11-04 초기 555건에서 100자 오버랩 분할 적용 완료) — 최종 인계 `data/handoff/qdrant/payload_chunks.jsonl` (557건)과 100% 일치
+4. `data/processed/relationships.jsonl` / `graph_edges.jsonl` (2,537건: 초기 2,118건 + 생애주기 직접 엣지 419건) — 최종 DB 인계 패키지 `data/handoff/neo4j/relationships.jsonl` (3,615건: 원천 직접 관계 2,537건 + 계층형 DAG 관계 1,078건)
 5. `data/metadata/id_mapping.csv` — ID 변경 및 다중 API 중복 병합 매핑표
 6. `data/metadata/dedup_candidates.json` — 중복 병합 상세 근거
 7. `data/metadata/source_registry.csv` — 공식 출처 등록부

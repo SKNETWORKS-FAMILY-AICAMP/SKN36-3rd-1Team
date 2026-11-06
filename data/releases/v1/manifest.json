@@ -43,64 +43,64 @@
     "policies.jsonl": {
       "description": "Neo4j Policy Nodes with life_stages & eligibility_attributes (237)",
       "records": 237,
-      "size_bytes": 976102,
-      "sha256": "1587f15bb53bc4655e20e945f8c8c308bc5ddb1330925bc1d0958c8dd873ecc9",
+      "size_bytes": 975865,
+      "sha256": "673c59ba9f7d0f659ec67225eb7f8ad4a9d7cf4d2fc7ff5159cbd8f36331d304",
       "modified_at": "2026-11-05T01:07:02.865371"
     },
     "documents.jsonl": {
       "description": "Neo4j Document Nodes (246)",
       "records": 246,
-      "size_bytes": 1532477,
-      "sha256": "81f8b1f7c4ae9cbd3d63d23540d5150084fe2c571c9f43c3baaa69a61f30d092",
+      "size_bytes": 1532231,
+      "sha256": "4fafc55aca5c562c2c7976ee306ac2cc61d8d9f3d6693b2fc71e77afeded7153",
       "modified_at": "2026-11-05T01:07:02.876363"
     },
     "chunks.jsonl": {
       "description": "Qdrant Vector Search Chunks (557)",
       "records": 557,
-      "size_bytes": 1794285,
-      "sha256": "552b770faeb47fa5b57bca09c18ab0d7b684af3cdece60af830382e5b6d63b6a",
+      "size_bytes": 1793728,
+      "sha256": "12c798d02dd7a2bca58f531207b7f10c0922fdac14105b4a6cd072489dfd910d",
       "modified_at": "2026-11-05T01:07:02.890363"
     },
     "relationships.jsonl": {
       "description": "Neo4j Graph Relationship Edges including APPLIES_TO_LIFESTAGE (2,537)",
       "records": 2537,
-      "size_bytes": 639540,
-      "sha256": "fa02910c9924e9bcd8e2a48ddeacc08b698b55fa90a4ea2bd7f1b29e305ae2db",
+      "size_bytes": 637003,
+      "sha256": "5156cb2d8ff304c4fa8e2c9b98823af2e140cbd656702dc737e08a3723b35c06",
       "modified_at": "2026-11-05T01:07:02.909592"
     },
     "graph_edges.jsonl": {
       "description": "Neo4j Graph Relationship Edges Mirror (2,537)",
       "records": 2537,
-      "size_bytes": 639540,
-      "sha256": "fa02910c9924e9bcd8e2a48ddeacc08b698b55fa90a4ea2bd7f1b29e305ae2db",
+      "size_bytes": 637003,
+      "sha256": "5156cb2d8ff304c4fa8e2c9b98823af2e140cbd656702dc737e08a3723b35c06",
       "modified_at": "2026-11-05T01:07:02.926207"
     },
     "gov24_public_services.jsonl": {
       "description": "Gov24 Refined Full Public Services (10,942)",
       "records": 10942,
-      "size_bytes": 110208648,
-      "sha256": "08a6d9d123b7c9e5445922a0dc52d4b72301aff8acdec1621c9e074e3ad3510c",
+      "size_bytes": 110197706,
+      "sha256": "9bc11953ae12d1362ac75f3cd0e9457efab79a9126ad365220608a93f8ebda68",
       "modified_at": "2026-11-04T20:11:53.498258"
     },
     "gov24_merged_services.jsonl": {
       "description": "Gov24 Compatibility Alias (10,942)",
       "records": 10942,
-      "size_bytes": 110208648,
-      "sha256": "08a6d9d123b7c9e5445922a0dc52d4b72301aff8acdec1621c9e074e3ad3510c",
+      "size_bytes": 110197706,
+      "sha256": "9bc11953ae12d1362ac75f3cd0e9457efab79a9126ad365220608a93f8ebda68",
       "modified_at": "2026-11-04T20:11:53.498258"
     },
     "youthcenter_policies.jsonl": {
       "description": "YouthCenter Refined Full Policies with 0~0 age normalization (3,861)",
       "records": 3861,
-      "size_bytes": 44765905,
-      "sha256": "e57e152ef7d75093d6222e7d705e5e100a1dcff3a1e2206b9c12396f925cb9f2",
+      "size_bytes": 44762044,
+      "sha256": "10cb8f66e2b97ed8566df461648a8d54a443cf44d47478ce46a2e58781bf8a19",
       "modified_at": "2026-11-05T00:47:55.169147"
     },
     "bokjiro_welfare_services.jsonl": {
       "description": "Bokjiro Refined Welfare Services (99)",
       "records": 99,
-      "size_bytes": 1475913,
-      "sha256": "5d3ded562e1d144d3616f68dd1d0e7deda0b01ddebe529410da93e2e20f41d4c",
+      "size_bytes": 1475814,
+      "sha256": "67cda8e3e6a621457f7f1404a064c497c291ea12c95e266af088dced382173c8",
       "modified_at": "2026-11-04T19:56:36.432483"
     }
   }

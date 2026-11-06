@@ -25,7 +25,7 @@
 | `구비서류` | serviceDetail | String | `required_documents` | 민원인 지참 제출 서류 목록 |
 | `법령` / `자치법규` | serviceDetail | String | `basic_laws` | 정책의 근거 법령 및 조례 |
 | `문의처` / `전화문의` | 공통 | String | `contact_info` | 담당 부서 및 문의 전화번호 |
-| `온라인신청사이트URL` | serviceDetail | String | `official_apply_url` | 온라인 접수 URL (없을 시 상세 URL) |
+| `온라인신청사이트URL` | serviceDetail | String/null | `official_apply_url` | 신청 주소만 저장, 없거나 안내 주소이면 null |
 | `상세조회URL` | serviceList | String | `source_url` | 정부24 공식 상세 안내 웹페이지 |
 
 ---
