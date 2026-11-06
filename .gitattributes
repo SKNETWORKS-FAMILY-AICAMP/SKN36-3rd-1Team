@@ -6,3 +6,10 @@ data/releases/** -text
 # 후보 변경 목록에서 해시로 참조하는 증거와 패키지에 복사하는 로더도 고정한다.
 data/metadata/application_url_evidence_v1.4.0.json -text
 scripts/load_candidate_neo4j.py text eol=lf
+
+# Issue #21: 신청 주소 증거(application_url_evidence_v1.4.0.json)가 SHA-256으로 참조하는 정제 파일.
+# Windows autocrlf 체크아웃에서 해시가 달라지지 않도록 저장소 바이트(LF)로 고정한다.
+data/staging/policies.jsonl -text
+
+# Issue #21: RAG 인계용 최종 후보는 manifest SHA-256으로 검증하므로 저장소 바이트(LF)로 고정한다.
+data/candidates/issue21-v1.4.0-rag/** -text
