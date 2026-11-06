@@ -1,9 +1,9 @@
 # Issue #21 최종 데이터 — RAG/검색 담당 인계
 
-- 대상 브랜치: `feature/21-eligibility-data-fix`
-- 배포 데이터 경로: **`data/candidates/issue21-v1.4.0-rag/`** — 코드 커밋 후 생성해 Git에 함께 커밋한다(약 9MB, 최대 파일 2.8MB, LFS 불필요, `.gitattributes`로 LF 고정).
-- 상태: `REVIEW_ONLY_NOT_FOR_DB` (반석님 검토 전 운영 DB 적재 금지)
-- 호환 확인: Issue #5 `feature/5-hybrid-rag-db` `04a9edc` (읽기 전용 검사)
+- 데이터: **`data/candidates/issue21-v1.4.0-rag/`** (커밋 `7a2515b`, manifest `source_commit` `742a2b0`, 21개 파일 SHA-256 고정, LF 고정)
+- 통합 브랜치: `feature/5-hybrid-rag-db` (Issue #21을 일반 merge, Issue #5 로더가 이 데이터를 직접 읽음)
+- 상태: `REVIEW_ONLY_NOT_FOR_DB` — 반석님 검토 전 운영 DB 적재 금지. 검토용 격리 Neo4j(7688)와 신규 Qdrant 컬렉션 2개에만 적재됨 (§7)
+- 데이터 선택: 환경 변수 `LIFEPOLICY_DATASET_DIR=data/candidates/issue21-v1.4.0-rag` (비우면 기존 v1.3.2 `data/handoff`)
 
 ## 1. 반드시 지킬 판정 규칙
 
@@ -20,7 +20,7 @@
 ## 2. 환경과 데이터 받기
 
 ```bash
-git checkout feature/21-eligibility-data-fix          # 커밋 반영 후
+git checkout feature/5-hybrid-rag-db                  # Issue #21 통합 브랜치 (원격 반영 후)
 python -m venv .venv && .venv/Scripts/python.exe -m pip install -r requirements.txt   # Python 3.12 이상
 # 받은 데이터 검증 (manifest SHA-256 바이트 일치, 참조·DAG·불변 필드, 계약 검증기)
 .venv/Scripts/python.exe scripts/rebuild_eligibility_candidate.py --verify-only data/candidates/issue21-v1.4.0-rag
@@ -94,32 +94,84 @@ OPTIONAL MATCH (root)-[:CONTAINS_GROUP*0..3]->(g)-[:CONTAINS_CONDITION]->(c)
 RETURN root.logic, g.group_id, g.logic, c.condition_id, c.type, c.operator, c.value;
 ```
 
-## 7. Issue #5 연동 — 최소 수정 (Issue #5 브랜치에서 별도 작업)
+## 7. Issue #5 연동 (적용 완료)
 
-검사 결과(`04a9edc` 코드를 임시 사본에서 경로만 바꿔 실행, DB 없음):
-- `verify_candidate_issue5_compat.py`: 입력 검증 오류 0, dry-run 불일치 0, payload 599 링크 정상, 조건 트리 246/246.
-- 색인 계획: manifest 일치, 문서 261개 해시 검증, B2 1,138·B3 1,220 청크, 누락 문서·정책 0, `ready: true`.
+### 7.1 코드
 
-| 파일 / 함수 | 필요한 변경 | 이유 |
-|---|---|---|
-| `database/handoff_data.py` 경로 상수 (`HANDOFF_DIR`, `NEO4J_HANDOFF_DIR`, `QDRANT_HANDOFF_DIR`, `PAYLOAD_CHUNKS_PATH`, `RELATIONSHIPS_PATH`, `MANIFEST_PATH`, `DOCUMENTS_PATH`) | 환경 변수 등으로 후보 폴더를 받도록. `DOCUMENTS_PATH` = `<후보>/documents.jsonl` | 현재 `data/handoff`(v1.3.2)와 `data/processed/documents.jsonl`(246건) 고정 |
-| `database/handoff_data.py` `load_policy_metadata` | `<후보>/qdrant/policy_metadata.jsonl`이 있으면 그 값 사용 | 청크 기준 수집 시 정책 5개 불일치로 `ValueError` (v1.4.0 청크 구조) |
-| `database/handoff_data.py` `EXPECTED_*_COUNT` | 후보 manifest `summary` 값 사용 (246/261/599/1,185/4,427) | v1.3.2 고정값 |
-| `database/full_index.py` `FULL_INDEX_CONFIGS` | 새 구성·새 컬렉션 추가 예: `exp_b2_qwen3emb06b_i21_v1`(1,138), `exp_b3_qwen3emb06b_i21_v1`(1,220) | 기존 컬렉션 보호, `expected_chunks` 고정값 |
-| `database/neo4j/load_graph.py` | 변경 불필요. `read_graph_input("<후보>/neo4j")` | 검증 오류 0 |
+| 파일 | 변경 |
+|---|---|
+| `database/handoff_data.py` | `LIFEPOLICY_DATASET_DIR`로 패키지 선택. 후보는 `documents.jsonl`(본문), manifest `summary` 기대 건수, `dataset_version()`. `load_policy_metadata`는 `qdrant/policy_metadata.jsonl` 우선 |
+| `database/full_index.py` | 후보 전용 구성 `A_B2_I21`(`exp_b2_qwen3emb06b_i21_v1`, 1,138), `B_B3_I21`(`exp_b3_qwen3emb06b_i21_v1`, 1,220). 구성별 `dataset` 확인으로 v1.3.2 구성과 섞이지 않음. `available_configs()`, `manifest_equivalent()` |
+| `database/qdrant/store.py` | 정책 메타데이터에 있으면 `region_detail`·`eligibility_review_status`를 payload에 추가 (v1.3.2 payload 불변) |
+| `database/hybrid_search.py` | `region_detail`이 있으면 `REGION_LIMITED_TO_MUNICIPALITY`(판정 보류) 경고, 시군구 유실 의심 경고는 내지 않음 |
+| `database/data_quality/manifest_equivalence.json` | 반석님 `d500ff2`·`92dfad2`로 v1.3.2 manifest만 바뀐 사실(데이터 파일 18개 동일)을 기록. 고정 평가셋·정적 플래그 파일은 수정하지 않음 |
 
-적재 순서 (기존 v1.3.2 DB·컬렉션은 건드리지 않음):
+### 7.2 Neo4j (격리 인스턴스, 적재·검증 완료)
 
-```python
-# Neo4j: 빈 격리 DB(별도 DBMS 또는 새 database)에만. load_graph는 기본적으로 빈 DB가 아니면 중단한다.
-graph = lg.read_graph_input("data/candidates/issue21-v1.4.0-rag/neo4j")
-assert lg.validate_graph_input(graph).ok
-lg.load_graph(graph, lg.Neo4jDriverRunner(driver, database="<격리 DB>"))
+| 항목 | 값 |
+|---|---|
+| 컨테이너 / 볼륨 | `lifepolicy-neo4j-i21` (`neo4j:5.26-community`) / `lifepolicy-neo4j-i21-data`, `lifepolicy-neo4j-i21-logs` |
+| 접속 | `bolt://127.0.0.1:7688`, 브라우저 `http://127.0.0.1:7475` (로컬 전용, 인증 비활성) |
+| 기존 인스턴스 | `lifepolicy-neo4j` (7687, 볼륨 `skn36-3rd-1team_neo4j_data`) — 접속·변경하지 않음 |
+| 적재 결과 | 노드 1,185 / 관계 4,427, 고립 노드 0, `verify_loaded_graph` ok, `raw_value` 관계 14 |
+
+Issue #5 검색 코드로 연결할 때 (`.env`가 아닌 실행 셸에서만 지정):
+
+```powershell
+$env:LIFEPOLICY_DATASET_DIR="data/candidates/issue21-v1.4.0-rag"
+$env:NEO4J_URI="bolt://127.0.0.1:7688"; $env:NEO4J_USER="neo4j"; $env:NEO4J_PASSWORD="unused"   # 인증 비활성 인스턴스라 값은 쓰이지 않음
 ```
 
-```bash
-# Qdrant: 위 수정 후 새 구성 이름으로 dry-run → --execute --confirm-write
-python -m database.full_index --config A_B2_I21 --no-db
+### 7.3 Qdrant (색인·검증 완료)
+
+| 컬렉션 | 청킹 | 포인트 | 문서 / 정책 | 모델 |
+|---|---|---:|---|---|
+| `exp_b2_qwen3emb06b_i21_v1` (기본 프로필 `b2_06b_i21`) | B2 | 1,138 | 261 / 246 | `qwen3-embedding:0.6b`, 1024, Cosine, 질의 지시문 없음 |
+| `exp_b3_qwen3emb06b_i21_v1` (프로필 `b3_06b_i21`) | B3 | 1,220 | 261 / 246 | 같음 |
+
+- 적재: `full_index --execute --confirm-write` (로컬 Ollama, 유료 API 없음). 임베딩 18.2초 / 17.2초. 기록: `docs/development/experiments/full_index_20261106/execute_{A_B2,B_B3}_I21.json`
+- 검증: ID 집합·청크 본문 위치·`content_hash` 불일치 0, 누락 문서·정책 0, `region_detail` 82포인트(22개 정책), 모든 포인트 `eligibility_review_status=needs_review`. null은 선택 필드(`page_start/end`, `section_group`)뿐. `raw_value`는 Neo4j 관계에만 있다
+- Qdrant↔Neo4j 교차 검증(`verify_cross_db`) 1,138포인트 7개 항목 모두 PASS
+- 기존 컬렉션 5개(107/1,081/1,117/1,141/1,081) 포인트 수 불변
+
+### 7.4 hybrid_search 사용
+
+```python
+import os
+os.environ["LIFEPOLICY_DATASET_DIR"] = "data/candidates/issue21-v1.4.0-rag"   # import 전에 지정
+from database import hybrid_search as hs
+with hs.HybridSearchSession() as session:          # 기본 프로필 b2_06b_i21 (데이터셋에 따라 자동)
+    r = session.search_policy_context("충청남도 거주 29세 미취업자 지원 정책",
+                                      filters={"region": ["충청남도", "전국"]}, k=5)
+for p in r["policies"]:
+    print(p["policy_id"], p["data_quality"]["hold_auto_eligibility"], [w["code"] for w in p["data_quality"]["warnings"]])
+```
+
+- 결과의 `policies[]`: 근거 청크(`evidence`, `source_url` 포함), Neo4j 문맥(`graph`: 지역·조건 트리·문서), `data_quality`(판정 보류 여부·경고).
+- `region_detail`이 있는 정책은 `REGION_LIMITED_TO_MUNICIPALITY` 경고(판정 보류). v1.3.2용 정적 플래그는 이 데이터셋에서 `not_applicable`.
+- 실제 결과(격리 Neo4j + B2 컬렉션): 대표 질문 5개 모두 근거 문서-정책 연결 PASS, 지역 필터 적용, 반환 정책 전부 `evaluated=False`·`hold_auto_eligibility=True`. 부산 질의의 부산 중구 정책 3개, 천안 질의의 `POL_GOV_048`에 시군구 한정 경고. 참조 평가기 기준 지역이 다른 정책(세종 `POL_GOV_058`)은 FALSE, 나머지는 UNKNOWN(TRUE 0).
+
+### 7.5 검색 품질 (retrieval_eval_v0 고정 55문항, 채점 52)
+
+| 컬렉션 | R@1 | R@3 | R@5 | MRR@5 |
+|---|---:|---:|---:|---:|
+| v1.3.2 B2 (`exp_b2_qwen3emb06b_full_v1`) | 0.6923 | 0.8654 | 0.8846 | 0.7731 |
+| **Issue #21 B2** | 0.6731 | 0.8462 | 0.8846 | 0.7554 |
+| v1.3.2 B3 | 0.6346 | 0.8462 | 0.8846 | 0.7436 |
+| **Issue #21 B3** | 0.6154 | 0.8462 | 0.8846 | 0.7276 |
+
+- 같은 질문 벡터·채점 함수로 4개 컬렉션 비교. 평가 파일 해시 불변, 정답 문서 본문 `content_hash` 두 데이터셋 동일 확인. v1.3.2 값은 기존 기록과 같다.
+- 순위 변화는 RQ017·RQ022 두 문항뿐이며, v1.4.0 신규 문서 `DOC_STG_001_FAQ`(LH Q&A)가 정답보다 위에 온 경우다. 평가셋은 v1.3.2 문서로 만들어 신규 문서 15건을 정답으로 세지 않는다.
+- 재실행: `.venv\Scripts\python.exe docs/development/experiments/retrieval_eval_i21_20261107/compare_v132_vs_i21.py` (결과 JSON 같은 폴더)
+
+### 7.6 재시작·재현
+
+```powershell
+docker start lifepolicy-neo4j-i21          # 격리 Neo4j (볼륨 유지). 기존 lifepolicy-neo4j와 별개
+$env:LIFEPOLICY_DATASET_DIR="data/candidates/issue21-v1.4.0-rag"
+$env:RUN_NEO4J_SMOKE="1"; $env:NEO4J_URI="bolt://127.0.0.1:7688"; $env:NEO4J_USER="neo4j"; $env:NEO4J_PASSWORD="unused"
+.venv\Scripts\python.exe -m unittest tests/integration/test_neo4j_smoke.py      # 10/10
+.venv\Scripts\python.exe -m database.full_index --config A_B2_I21 --config B_B3_I21 --no-db   # 색인 계획 재확인
 ```
 
 ## 8. 아직 확정할 수 없는 원천 코드와 영향
