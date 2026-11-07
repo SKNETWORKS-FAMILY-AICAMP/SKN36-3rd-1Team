@@ -114,10 +114,14 @@ def normalize_youthcenter_item(
     code_defs: Dict[str, Dict[str, Any]],
     policy_id: Optional[str] = None,
     document_id: Optional[str] = None,
+    raw_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     온통청년 단일 정책 원본 레코드를 코드정의서 기준으로 정규화하고
     조건 검토 플래그(review_status) 및 구조화 필드를 생성한다.
+
+    raw_path: 이 레코드의 원문이 실제로 저장된 파일 경로. 주지 않으면
+    items/{plcyNo}.json으로 기록하므로, 호출하는 쪽이 그 파일을 저장해야 한다.
     """
     pno = str(item.get("plcyNo", "")).strip()
     pol_id = policy_id or f"POL_YC_{pno}"
@@ -321,7 +325,7 @@ def normalize_youthcenter_item(
         "aplyUrlAddr": raw_aply_url,
         "source_url": source_url,
         "lastMdfcnDt": last_mdfcn_dt,
-        "local_raw_path": f"data/raw/youthcenter/items/{pno}.json",
+        "local_raw_path": raw_path or f"data/raw/youthcenter/items/{pno}.json",
         "full_text": full_text,
         "text": full_text,
         "content": full_text,
@@ -405,6 +409,10 @@ def run_collection(
 
     # 1. 목록 수집 (pageType=1)
     all_raw_items: List[Dict[str, Any]] = []
+    # all_raw_items와 같은 순서로, 각 레코드를 실제로 읽어 온 API 응답 페이지 파일.
+    # 같은 정책번호가 여러 페이지에 나와도 레코드마다 자기 페이지를 원본으로 기록한다.
+    # (items/ 개별 파일은 일부만 저장되므로 원본 경로로 쓰지 않는다)
+    raw_item_pages: List[str] = []
     seen_plcy_nos: Set[str] = set()
     page = 1
 
@@ -429,6 +437,7 @@ def run_collection(
             break
 
         all_raw_items.extend(items)
+        raw_item_pages.extend([cache_path.relative_to(BASE_DIR).as_posix()] * len(items))
         summary["total_pages_fetched"] += 1
 
         for it in items:
@@ -491,7 +500,7 @@ def run_collection(
 
     total_n = len(all_raw_items)
 
-    for it in all_raw_items:
+    for it, raw_page in zip(all_raw_items, raw_item_pages):
         pno = str(it.get("plcyNo", "")).strip()
 
         # 결측률 집계
@@ -511,7 +520,7 @@ def run_collection(
                     code_field_stats[cf]["converted"] += 1
 
         # 정규화 레코드 생성
-        norm_rec = normalize_youthcenter_item(it, code_defs)
+        norm_rec = normalize_youthcenter_item(it, code_defs, raw_path=raw_page)
         flags = norm_rec["review_flags"]
         if "검토대상" in flags["age_review_status"]:
             review_counts["age_review_needed"] += 1
