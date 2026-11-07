@@ -54,6 +54,10 @@ POLICY_METADATA_PATH = QDRANT_HANDOFF_DIR / "policy_metadata.jsonl"
 # 다른 인계 패키지는 패키지 안의 documents.jsonl(본문 + content_hash)을 쓴다.
 DOCUMENTS_PATH = (PROJECT_ROOT / "data" / "processed" / "documents.jsonl" if IS_DEFAULT_DATASET
                   else HANDOFF_DIR / "documents.jsonl")
+# 승인된 데이터 릴리스(data/releases/v1.4.0-candidate 등): 본문·정책 메타데이터 파일이 없어
+# database/release_adapter.py가 원본을 바꾸지 않고 메모리에서 본문·문서별 메타데이터를 만든다.
+IS_RELEASE_PACKAGE = not IS_DEFAULT_DATASET and not DOCUMENTS_PATH.is_file() and (
+    NEO4J_HANDOFF_DIR / "nodes_document.jsonl").is_file() and PAYLOAD_CHUNKS_PATH.is_file()
 
 # 인계 문서(data/handoff/README.md, manifest v1.3.2)에 적힌 기대 건수.
 # 테스트는 실제 파일을 세어 이 값과 비교한다. 데이터가 바뀌면 테스트가 FAIL로 알려준다.
@@ -227,7 +231,13 @@ def load_documents(verify_hash: bool = True) -> list[dict[str, Any]]:
     verify_hash=True 이면 각 문서의 content_hash가 본문(text)의 SHA-256과 같은지 확인한다.
     다르면 "본문이 바뀌었는데 해시는 옛날 값"이라는 뜻이므로, 어떤 문서인지 알려주고 멈춘다.
     (청크의 char_start/char_end는 이 본문 기준 위치이므로, 본문이 바뀌면 위치도 믿을 수 없다.)
+
+    승인된 릴리스 패키지(IS_RELEASE_PACKAGE)는 release_adapter가 Document 노드 순서대로 본문을 조립하고
+    content_hash를 항상 검증한다 (verify_hash와 무관하게 불일치·누락·중복이면 멈춘다).
     """
+    if IS_RELEASE_PACKAGE:
+        from database import release_adapter
+        return release_adapter.load_release_documents(HANDOFF_DIR, PROJECT_ROOT)
     documents = read_jsonl(DOCUMENTS_PATH)
     if verify_hash:
         mismatched = [
@@ -438,3 +448,18 @@ def load_policy_metadata(chunks: list[dict[str, Any]] | None = None) -> dict[str
             raise ValueError(f"정책 메타데이터 불일치: {policy_id} (청크 {chunk['chunk_id']})")
         metadata[policy_id] = values
     return metadata
+
+
+def load_payload_metadata(chunks: list[dict[str, Any]] | None = None) -> dict[str, dict[str, Any]]:
+    """
+    Qdrant payload·임베딩 입력에 붙일 메타데이터.
+
+    - 승인된 릴리스 패키지: document_id → 메타데이터 (release_adapter, 릴리스 청크 값 그대로. 정책 단위로 합치지 않음)
+    - 그 밖(v1.3.2 기본, documents.jsonl이 있는 패키지): 기존과 같은 policy_id → 메타데이터 (load_policy_metadata)
+    청크에서 값을 찾을 때는 store.metadata_for_chunk를 쓴다. 릴리스(DocumentMetadata)는 document_id로만,
+    정책 단위 dict는 policy_id로만 찾고 서로 대체하지 않는다 (없으면 오류).
+    """
+    if IS_RELEASE_PACKAGE:
+        from database import release_adapter
+        return release_adapter.load_release_document_metadata(HANDOFF_DIR, chunks)
+    return load_policy_metadata(chunks)

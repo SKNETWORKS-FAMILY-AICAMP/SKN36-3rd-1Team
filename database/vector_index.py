@@ -89,7 +89,9 @@ def index_chunks(
     반환: {"chunk_count", "upserted", "embedding_seconds", "upsert_seconds", "point_ids"}
     """
     store.assert_experiment_collection(collection)
-    texts = [build_embedding_text(chunk, policy_metadata.get(chunk["policy_id"]), run_info["embedding_input_rule"])
+    # 메타데이터 형식에 따라 문서별(승인된 릴리스) 또는 정책별로만 찾고, 없으면 기존처럼 None (body_only 규칙 허용)
+    texts = [build_embedding_text(chunk, store.metadata_for_chunk(policy_metadata, chunk, required=False),
+                                  run_info["embedding_input_rule"])
              for chunk in chunks]
 
     started = time.perf_counter()
@@ -134,7 +136,7 @@ def run_minimal_index(
         payload_chunks = handoff_data.load_payload_chunks()
     selected = select_documents(documents, document_ids)
     chunks = prepare_chunks(selected, strategy, payload_chunks)
-    policy_metadata = handoff_data.load_policy_metadata(payload_chunks)
+    policy_metadata = handoff_data.load_payload_metadata(payload_chunks)
     content_hashes = {document["document_id"]: document["content_hash"] for document in selected}
 
     collection_status = store.ensure_collection(client, collection, run_info["embedding_dim"])

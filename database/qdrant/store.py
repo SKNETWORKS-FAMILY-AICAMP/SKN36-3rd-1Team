@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from database.chunking import make_point_id
+from database.release_adapter import DocumentMetadata
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ENV_PATH = PROJECT_ROOT / ".env"
@@ -122,6 +123,25 @@ def build_point_payload(
     return payload
 
 
+def metadata_for_chunk(metadata: dict[str, dict[str, Any]], chunk: dict[str, Any],
+                       required: bool = True) -> dict[str, Any] | None:
+    """
+    청크에 붙일 메타데이터. 찾는 키는 메타데이터 형식으로 정하며 서로 대체하지 않는다.
+      - release_adapter.DocumentMetadata(승인된 릴리스): document_id로만
+      - 일반 dict(v1.3.2 등 정책 단위): policy_id로만 (기존 동작)
+    없으면 required=True는 ValueError, required=False는 None (임베딩 body_only 규칙처럼 없음을 허용하는 경로).
+    """
+    if isinstance(metadata, DocumentMetadata):
+        key, label = chunk["document_id"], "문서"
+    else:
+        key, label = chunk["policy_id"], "정책"
+    if key in metadata:
+        return metadata[key]
+    if not required:
+        return None
+    raise ValueError(f"{label} 메타데이터 없음: {key} ({chunk['chunk_id']})")
+
+
 def build_points(
     chunks: list[dict[str, Any]],
     vectors: list[list[float]],
@@ -143,11 +163,10 @@ def build_points(
     for chunk, vector in zip(chunks, vectors):
         if len(vector) != expected_dim:
             raise ValueError(f"{chunk['chunk_id']} 벡터 차원 {len(vector)} ≠ {expected_dim}")
-        if chunk["policy_id"] not in policy_metadata:
-            raise ValueError(f"정책 메타데이터 없음: {chunk['policy_id']} ({chunk['chunk_id']})")
+        meta = metadata_for_chunk(policy_metadata, chunk)
         if chunk["document_id"] not in content_hashes:
             raise ValueError(f"문서 content_hash 없음: {chunk['document_id']}")
-        payload = build_point_payload(chunk, policy_meta=policy_metadata[chunk["policy_id"]],
+        payload = build_point_payload(chunk, policy_meta=meta,
                                       content_hash=content_hashes[chunk["document_id"]], run_info=run_info)
         if payload["point_id"] in seen_ids:
             raise ValueError(f"point_id 중복: {payload['chunk_id']}")

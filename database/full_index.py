@@ -65,6 +65,12 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
                  "dataset": "issue21-v1.4.0-review"},
     "B_B3_I21": {"collection": "exp_b3_qwen3emb06b_i21_v1", "strategy": "B3", "expected_chunks": 1220,
                  "dataset": "issue21-v1.4.0-review"},
+    # 승인된 v1.4.0 릴리스(data/releases/v1.4.0-candidate, PR #16·#17). 본문·문서별 메타데이터는 release_adapter.
+    # 청크 수는 2026-11-07 DB 없는 dry-run 실측. 새 컬렉션에만 쓴다 (기존 컬렉션 보호).
+    "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1138,
+                  "dataset": "1.4.0-candidate"},
+    "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1220,
+                  "dataset": "1.4.0-candidate"},
 }
 # 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다
 # 구성에 dataset이 없으면 v1.3.2 인계 패키지 전용이다.
@@ -243,7 +249,8 @@ def plan_full_index(name: str, *, documents: list[dict[str, Any]], policy_metada
     """구성 하나의 dry-run 계획. client가 있으면 대상 컬렉션을 읽기 전용으로 검사한다. 아무것도 쓰지 않는다."""
     config = get_config(name)
     chunks, info = build_config_chunks(name, documents, proposals_dir)
-    texts = [em.build_embedding_text(chunk, policy_metadata[chunk["policy_id"]], EMBEDDING_INPUT_RULE) for chunk in chunks]
+    texts = [em.build_embedding_text(chunk, store.metadata_for_chunk(policy_metadata, chunk), EMBEDDING_INPUT_RULE)
+             for chunk in chunks]
     point_ids = [chunk["point_id"] for chunk in chunks]
     uuid_ok = all(chunk["point_id"] == chunking.make_point_id(chunk["chunk_id"]) for chunk in chunks)
     by_id = documents_by_id(documents)
@@ -326,7 +333,8 @@ def execute_full_index(name: str, *, client, embedder, documents: list[dict[str,
         todo = [chunk for chunk in chunks if chunk["point_id"] not in existing]
         for start in range(0, len(todo), batch_size):
             batch = todo[start:start + batch_size]
-            texts = [em.build_embedding_text(c, policy_metadata[c["policy_id"]], EMBEDDING_INPUT_RULE) for c in batch]
+            texts = [em.build_embedding_text(c, store.metadata_for_chunk(policy_metadata, c), EMBEDDING_INPUT_RULE)
+                     for c in batch]
             started = time.perf_counter()
             vectors = embedder(texts)
             embed_seconds += time.perf_counter() - started
@@ -380,7 +388,8 @@ def main(argv: list[str] | None = None) -> int:
     bad = [r["file"] for r in handoff_data.verify_manifest_checksums() if not r["matched"]]
     if bad:
         raise FullIndexError(f"manifest 체크섬 불일치: {bad}")
-    policy_metadata = handoff_data.load_policy_metadata()
+    # 승인된 릴리스는 문서별, 그 밖은 정책별 메타데이터 (store.metadata_for_chunk로 찾는다)
+    policy_metadata = handoff_data.load_payload_metadata()
     client = None if args.no_db else store.get_client()
     outputs = []
     for name in args.config:
