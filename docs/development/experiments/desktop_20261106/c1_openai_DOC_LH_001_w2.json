@@ -1,0 +1,100 @@
+{
+  "run_at": "2026-11-06T19:54:19+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 2,
+    "window_count": 7,
+    "window_range": [
+      10899,
+      15289
+    ],
+    "pages": [
+      9,
+      10,
+      11
+    ]
+  },
+  "proposals": [
+    {
+      "title": "■ 기타 제출서류 (아래 표에 해당하는 자만 제출)",
+      "start_text": "■ 기타 제출서류 (아래 표에 해당하는 자만 제출)",
+      "page": 9
+    },
+    {
+      "title": "■ 추가 제출서류 (태아 또는 입양한 자녀를 인정받아 입주자로 선정된 자는 하단 서류 추가 제출)",
+      "start_text": "■ 추가 제출서류 (태아 또는 입양한 자녀를 인정받아 입주자로 선정된 자는 하단 서류 추가 제출)",
+      "page": 9
+    },
+    {
+      "title": "■ 온라인(PC, 모바일) 서류제출 방법",
+      "start_text": "■ 온라인(PC, 모바일) 서류제출 방법",
+      "page": 10
+    },
+    {
+      "title": "✔ 청약서류 온라인 서류제출이란?",
+      "start_text": "✔ 청약서류 온라인 서류제출이란?",
+      "page": 10
+    },
+    {
+      "title": "✔ 서류제출 유의사항",
+      "start_text": "✔ 서류제출 유의사항",
+      "page": 10
+    },
+    {
+      "title": "✔ 스캔 또는 사진촬영(모바일∙디지털기기) 유의사항",
+      "start_text": "✔ 스캔 또는 사진촬영(모바일∙디지털기기) 유의사항",
+      "page": 10
+    },
+    {
+      "title": "5 기타 유의사항",
+      "start_text": "5 기타 유의사항",
+      "page": 11
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"■ 기타 제출서류 (아래 표에 해당하는 자만 제출)\",\"start_text\":\"■ 기타 제출서류 (아래 표에 해당하는 자만 제출)\",\"page\":9},{\"title\":\"■ 추가 제출서류 (태아 또는 입양한 자녀를 인정받아 입주자로 선정된 자는 하단 서류 추가 제출)\",\"start_text\":\"■ 추가 제출서류 (태아 또는 입양한 자녀를 인정받아 입주자로 선정된 자는 하단 서류 추가 제출)\",\"page\":9},{\"title\":\"■ 온라인(PC, 모바일) 서류제출 방법\",\"start_text\":\"■ 온라인(PC, 모바일) 서류제출 방법\",\"page\":10},{\"title\":\"✔ 청약서류 온라인 서류제출이란?\",\"start_text\":\"✔ 청약서류 온라인 서류제출이란?\",\"page\":10},{\"title\":\"✔ 서류제출 유의사항\",\"start_text\":\"✔ 서류제출 유의사항\",\"page\":10},{\"title\":\"✔ 스캔 또는 사진촬영(모바일∙디지털기기) 유의사항\",\"start_text\":\"✔ 스캔 또는 사진촬영(모바일∙디지털기기) 유의사항\",\"page\":10},{\"title\":\"5 기타 유의사항\",\"start_text\":\"5 기타 유의사항\",\"page\":11}]}",
+  "raw_response_sha256": "60a5e7e3a2b7b8d92157701ca687431ed3bc5e30f0fa920d4059143ce4958974",
+  "llm_calls": [
+    {
+      "window": 2,
+      "start": 10899,
+      "end": 15289,
+      "pages": [
+        9,
+        10,
+        11
+      ],
+      "prompt_chars": 4875,
+      "prompt_sha256": "a325a5ad2ac434201b18acea3b92b036e378b3ca6ec288a218041fe3ee2b5d74",
+      "response_sha256": "60a5e7e3a2b7b8d92157701ca687431ed3bc5e30f0fa920d4059143ce4958974",
+      "seconds": 4.144,
+      "proposals": 7
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 5075,
+      "worst_case_usd": 0.05815,
+      "seconds": 4.143,
+      "status": 200,
+      "response_id": "resp_06b86f26def2e8fa016aedb185eb5887d2a9f53615a5b75fc4",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 3045,
+      "cached_input_tokens": 0,
+      "output_tokens": 390,
+      "reasoning_tokens": 86,
+      "cost_usd": 0.01077
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.01077,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 7,
+    "issues": []
+  }
+}

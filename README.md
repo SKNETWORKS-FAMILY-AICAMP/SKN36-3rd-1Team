@@ -111,6 +111,17 @@ cp .env.example .env
 
 `.env`에 실제 값을 입력합니다. `.env`는 `.gitignore`로 제외되며 절대 커밋하지 않습니다.
 
+`requirements.txt`의 `python-dotenv`는 `.env` 로딩에 필요합니다. 검색·로더·색인은 `LIFEPOLICY_DATASET_DIR` 미설정 시 승인된 `data/releases/v1.4.0-candidate/`를 사용합니다. 명시한 경로가 우선이며, v1.3.2 호환 검사는 `data/handoff`를 지정합니다. 잘못된 경로·manifest는 오류로 중단합니다.
+
+데이터셋 선택은 DB 접속 주소를 바꾸지 않습니다. `NEO4J_URI`·`QDRANT_URL`은 해당 데이터셋이 적재된 본인의 환경으로 설정합니다.
+
+기존 v1.3.2 기반 단위 테스트는 입력을 명시해 실행합니다(신규 기본값 검사는 별도 프로세스에서 환경변수를 제거해 검증).
+
+```powershell
+$env:LIFEPOLICY_DATASET_DIR='data/handoff'
+python -m unittest discover -s tests/unit -p 'test_*.py'
+```
+
 | 변수 | 용도 |
 |---|---|
 | `OPENAI_API_KEY` | LLM API 키 (모델 확정 전) |

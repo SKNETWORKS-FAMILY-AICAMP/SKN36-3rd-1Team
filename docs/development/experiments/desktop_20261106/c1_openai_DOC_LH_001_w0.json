@@ -1,0 +1,102 @@
+{
+  "run_at": "2026-11-06T19:54:12+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 0,
+    "window_count": 7,
+    "window_range": [
+      0,
+      5856
+    ],
+    "pages": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "proposals": [
+    {
+      "title": "1 공급개요",
+      "start_text": "1 공급개요",
+      "page": 2
+    },
+    {
+      "title": "공급대상 주택",
+      "start_text": "■ 공급대상 주택 : 총 119호",
+      "page": 2
+    },
+    {
+      "title": "임대기간 및 임대조건",
+      "start_text": "■ 임대기간 및 임대조건",
+      "page": 2
+    },
+    {
+      "title": "2 입주자격 및 입주자 선정기준",
+      "start_text": "2 입주자격 및 입주자 선정기준",
+      "page": 3
+    },
+    {
+      "title": "입주자격",
+      "start_text": "■ 입주자격",
+      "page": 3
+    },
+    {
+      "title": "입주순위",
+      "start_text": "■ 입주순위",
+      "page": 4
+    },
+    {
+      "title": "소득ž자산 기준",
+      "start_text": "■ 소득ž자산 기준 – 공고일(2026.03.31) 시점으로 가구원수별 아래 표 금액 기준 이하",
+      "page": 4
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"1 공급개요\",\"start_text\":\"1 공급개요\",\"page\":2},{\"title\":\"공급대상 주택\",\"start_text\":\"■ 공급대상 주택 : 총 119호\",\"page\":2},{\"title\":\"임대기간 및 임대조건\",\"start_text\":\"■ 임대기간 및 임대조건\",\"page\":2},{\"title\":\"2 입주자격 및 입주자 선정기준\",\"start_text\":\"2 입주자격 및 입주자 선정기준\",\"page\":3},{\"title\":\"입주자격\",\"start_text\":\"■ 입주자격\",\"page\":3},{\"title\":\"입주순위\",\"start_text\":\"■ 입주순위\",\"page\":4},{\"title\":\"소득ž자산 기준\",\"start_text\":\"■ 소득ž자산 기준 – 공고일(2026.03.31) 시점으로 가구원수별 아래 표 금액 기준 이하\",\"page\":4}]}",
+  "raw_response_sha256": "692378f52cc8cee1107ff1900ee9c6cc295ee8d381a22f2257bcae5c6fc28e8e",
+  "llm_calls": [
+    {
+      "window": 0,
+      "start": 0,
+      "end": 5856,
+      "pages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "prompt_chars": 6341,
+      "prompt_sha256": "c2d92d2bd61f61beec02086a9773ae5f3303515351bf7dce11fa9c60d1cb4527",
+      "response_sha256": "692378f52cc8cee1107ff1900ee9c6cc295ee8d381a22f2257bcae5c6fc28e8e",
+      "seconds": 4.756,
+      "proposals": 7
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 6541,
+      "worst_case_usd": 0.061082,
+      "seconds": 4.755,
+      "status": 200,
+      "response_id": "resp_056694a9c0e2952e016aedb17dfb0087d28ef044901714c6ca",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 4113,
+      "cached_input_tokens": 0,
+      "output_tokens": 330,
+      "reasoning_tokens": 117,
+      "cost_usd": 0.012186
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.012186,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 7,
+    "issues": []
+  }
+}

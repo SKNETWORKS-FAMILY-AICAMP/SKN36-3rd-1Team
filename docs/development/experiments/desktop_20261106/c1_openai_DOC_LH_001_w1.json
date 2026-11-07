@@ -1,0 +1,112 @@
+{
+  "run_at": "2026-11-06T19:54:15+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 1,
+    "window_count": 7,
+    "window_range": [
+      5856,
+      10899
+    ],
+    "pages": [
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "proposals": [
+    {
+      "title": "소득 · 자산 산정방법",
+      "start_text": "■ 소득 · 자산 산정방법",
+      "page": 5
+    },
+    {
+      "title": "동일 순위 내 경합 시 우선순위 결정방법",
+      "start_text": "■ 동일 순위 내 경합 시 우선순위 결정방법",
+      "page": 5
+    },
+    {
+      "title": "3 공급일정 및 신청방법 등",
+      "start_text": "3 공급일정 및 신청방법 등",
+      "page": 6
+    },
+    {
+      "title": "4 서류제출 대상자 제출서류 안내",
+      "start_text": "4 서류제출 대상자 제출서류 안내",
+      "page": 7
+    },
+    {
+      "title": "서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후",
+      "start_text": "■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후",
+      "page": 7
+    },
+    {
+      "title": "서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시",
+      "start_text": "■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시",
+      "page": 7
+    },
+    {
+      "title": "서류제출 방법 : 온라인 제출",
+      "start_text": "■ 서류제출 방법 : 온라인 제출",
+      "page": 7
+    },
+    {
+      "title": "공통 제출서류",
+      "start_text": "■ 공통 제출서류",
+      "page": 7
+    },
+    {
+      "title": "자격요건 확인 구비서류 (아래 표에 해당하는 자만 제출)",
+      "start_text": "■ 자격요건 확인 구비서류 (아래 표에 해당하는 자만 제출)",
+      "page": 8
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"소득 · 자산 산정방법\",\"start_text\":\"■ 소득 · 자산 산정방법\",\"page\":5},{\"title\":\"동일 순위 내 경합 시 우선순위 결정방법\",\"start_text\":\"■ 동일 순위 내 경합 시 우선순위 결정방법\",\"page\":5},{\"title\":\"3 공급일정 및 신청방법 등\",\"start_text\":\"3 공급일정 및 신청방법 등\",\"page\":6},{\"title\":\"4 서류제출 대상자 제출서류 안내\",\"start_text\":\"4 서류제출 대상자 제출서류 안내\",\"page\":7},{\"title\":\"서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후\",\"start_text\":\"■ 서류제출대상자 발표 : 2026.04.23.(목) 10:00 이후\",\"page\":7},{\"title\":\"서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시\",\"start_text\":\"■ 서류제출 기간 : 2026.04.28.(화) 10시 ~ 2026.04.30.(목) 16시\",\"page\":7},{\"title\":\"서류제출 방법 : 온라인 제출\",\"start_text\":\"■ 서류제출 방법 : 온라인 제출\",\"page\":7},{\"title\":\"공통 제출서류\",\"start_text\":\"■ 공통 제출서류\",\"page\":7},{\"title\":\"자격요건 확인 구비서류 (아래 표에 해당하는 자만 제출)\",\"start_text\":\"■ 자격요건 확인 구비서류 (아래 표에 해당하는 자만 제출)\",\"page\":8}]}",
+  "raw_response_sha256": "ac3c5ebe93e6bcc1b2082e53847243df5a6211b903ba06816ecc4a79498a8b7a",
+  "llm_calls": [
+    {
+      "window": 1,
+      "start": 5856,
+      "end": 10899,
+      "pages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "prompt_chars": 5528,
+      "prompt_sha256": "ee8ecdb910367ba12c2dd73fbe79fdcfffb26a5f0ae3f4efa9c38b3179d96f58",
+      "response_sha256": "ac3c5ebe93e6bcc1b2082e53847243df5a6211b903ba06816ecc4a79498a8b7a",
+      "seconds": 3.185,
+      "proposals": 9
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 5728,
+      "worst_case_usd": 0.059456,
+      "seconds": 3.184,
+      "status": 200,
+      "response_id": "resp_0c37a7c25b6e5010016aedb182af6487d29852641a40f2e5e3",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 3616,
+      "cached_input_tokens": 0,
+      "output_tokens": 380,
+      "reasoning_tokens": 0,
+      "cost_usd": 0.011792
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.011792,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 9,
+    "issues": []
+  }
+}

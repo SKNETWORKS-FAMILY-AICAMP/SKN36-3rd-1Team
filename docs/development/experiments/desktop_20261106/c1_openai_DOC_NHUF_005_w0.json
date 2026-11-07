@@ -1,0 +1,147 @@
+{
+  "run_at": "2026-11-06T19:54:05+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_NHUF_005",
+    "window": 0,
+    "window_count": 2,
+    "window_range": [
+      0,
+      5996
+    ],
+    "pages": []
+  },
+  "proposals": [
+    {
+      "title": "대출 대상",
+      "start_text": "대출 대상",
+      "page": null
+    },
+    {
+      "title": "신청시기",
+      "start_text": "신청시기",
+      "page": null
+    },
+    {
+      "title": "□ 보증 신청 기한",
+      "start_text": "□ 보증 신청 기한",
+      "page": null
+    },
+    {
+      "title": "대상주택",
+      "start_text": "대상주택",
+      "page": null
+    },
+    {
+      "title": "대출한도",
+      "start_text": "대출한도",
+      "page": null
+    },
+    {
+      "title": "연간인정소득 산정 방법",
+      "start_text": "연간인정소득 산정 방법",
+      "page": null
+    },
+    {
+      "title": "대출금리",
+      "start_text": "대출금리",
+      "page": null
+    },
+    {
+      "title": "금리우대(중복 적용 불가)",
+      "start_text": "금리우대(중복 적용 불가)",
+      "page": null
+    },
+    {
+      "title": "추가우대금리(① ~ ⑤ 중복 적용 가능)",
+      "start_text": "추가우대금리(① ~ ⑤ 중복 적용 가능)",
+      "page": null
+    },
+    {
+      "title": "이용기간",
+      "start_text": "이용기간",
+      "page": null
+    },
+    {
+      "title": "상환방법",
+      "start_text": "상환방법",
+      "page": null
+    },
+    {
+      "title": "담보취득",
+      "start_text": "담보취득",
+      "page": null
+    },
+    {
+      "title": "보증 종류별 안내",
+      "start_text": "보증 종류별 안내",
+      "page": null
+    },
+    {
+      "title": "고객부담비용",
+      "start_text": "고객부담비용",
+      "page": null
+    },
+    {
+      "title": "대출금지급방식",
+      "start_text": "대출금지급방식",
+      "page": null
+    },
+    {
+      "title": "대출취급영업점",
+      "start_text": "대출취급영업점",
+      "page": null
+    },
+    {
+      "title": "중도상환수수료",
+      "start_text": "중도상환수수료",
+      "page": null
+    },
+    {
+      "title": "대출계약 철회",
+      "start_text": "대출계약 철회",
+      "page": null
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"대출 대상\",\"start_text\":\"대출 대상\",\"page\":null},{\"title\":\"신청시기\",\"start_text\":\"신청시기\",\"page\":null},{\"title\":\"□ 보증 신청 기한\",\"start_text\":\"□ 보증 신청 기한\",\"page\":null},{\"title\":\"대상주택\",\"start_text\":\"대상주택\",\"page\":null},{\"title\":\"대출한도\",\"start_text\":\"대출한도\",\"page\":null},{\"title\":\"연간인정소득 산정 방법\",\"start_text\":\"연간인정소득 산정 방법\",\"page\":null},{\"title\":\"대출금리\",\"start_text\":\"대출금리\",\"page\":null},{\"title\":\"금리우대(중복 적용 불가)\",\"start_text\":\"금리우대(중복 적용 불가)\",\"page\":null},{\"title\":\"추가우대금리(① ~ ⑤ 중복 적용 가능)\",\"start_text\":\"추가우대금리(① ~ ⑤ 중복 적용 가능)\",\"page\":null},{\"title\":\"이용기간\",\"start_text\":\"이용기간\",\"page\":null},{\"title\":\"상환방법\",\"start_text\":\"상환방법\",\"page\":null},{\"title\":\"담보취득\",\"start_text\":\"담보취득\",\"page\":null},{\"title\":\"보증 종류별 안내\",\"start_text\":\"보증 종류별 안내\",\"page\":null},{\"title\":\"고객부담비용\",\"start_text\":\"고객부담비용\",\"page\":null},{\"title\":\"대출금지급방식\",\"start_text\":\"대출금지급방식\",\"page\":null},{\"title\":\"대출취급영업점\",\"start_text\":\"대출취급영업점\",\"page\":null},{\"title\":\"중도상환수수료\",\"start_text\":\"중도상환수수료\",\"page\":null},{\"title\":\"대출계약 철회\",\"start_text\":\"대출계약 철회\",\"page\":null}]}",
+  "raw_response_sha256": "3798808a2613e07a46ba50d5f2779146883bf6e877c588198a3ffcea32d625bb",
+  "llm_calls": [
+    {
+      "window": 0,
+      "start": 0,
+      "end": 5996,
+      "pages": [],
+      "prompt_chars": 6481,
+      "prompt_sha256": "a508ce9233d62b27719cac87c37f498cca1ecf7bcf19652f2016aceb2d5cb1b7",
+      "response_sha256": "3798808a2613e07a46ba50d5f2779146883bf6e877c588198a3ffcea32d625bb",
+      "seconds": 11.999,
+      "proposals": 18
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 6681,
+      "worst_case_usd": 0.061362,
+      "seconds": 11.998,
+      "status": 200,
+      "response_id": "resp_07a5e261a8be7e56016aedb1703d4087d29a813b6ef87b7650",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 4593,
+      "cached_input_tokens": 0,
+      "output_tokens": 1075,
+      "reasoning_tokens": 644,
+      "cost_usd": 0.022086
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.022086,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 18,
+    "issues": []
+  }
+}

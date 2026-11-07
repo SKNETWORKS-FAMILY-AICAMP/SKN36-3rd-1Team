@@ -1,0 +1,90 @@
+{
+  "run_at": "2026-11-06T19:54:30+09:00",
+  "simulated": false,
+  "status": "success",
+  "plan": {
+    "document_id": "DOC_LH_001",
+    "window": 5,
+    "window_count": 7,
+    "window_range": [
+      25276,
+      29802
+    ],
+    "pages": [
+      18,
+      19,
+      20
+    ]
+  },
+  "proposals": [
+    {
+      "title": "금융자산 조회 안내",
+      "start_text": "※ 금융자산 조회 안내",
+      "page": 19
+    },
+    {
+      "title": "공공임대주택 청약을 위한 개인정보 수집･이용 및 제3자 제공 동의서",
+      "start_text": "공공임대주택 청약을 위한 개인정보 수집･이용 및 제3자 제공 동의서",
+      "page": 20
+    },
+    {
+      "title": "1. [필수] 개인정보 수집·이용 및 제3자 제공에 동의하는 사람의 성명, 주민등록번호, 청약자와의 관계, 서명 또는 날인",
+      "start_text": "1. [필수] 개인정보 수집·이용 및 제3자 제공에 동의하는 사람의 성명, 주민등록번호, 청약자와의 관계, 서명 또는 날인",
+      "page": 20
+    },
+    {
+      "title": "2. 개인정보 수집·이용 안내",
+      "start_text": "2. 개인정보 수집·이용 안내",
+      "page": 20
+    },
+    {
+      "title": "3. 민감정보 수집·이용 안내",
+      "start_text": "3. 민감정보 수집·이용 안내",
+      "page": 20
+    }
+  ],
+  "raw_response": "{\"sections\":[{\"title\":\"금융자산 조회 안내\",\"start_text\":\"※ 금융자산 조회 안내\",\"page\":19},{\"title\":\"공공임대주택 청약을 위한 개인정보 수집･이용 및 제3자 제공 동의서\",\"start_text\":\"공공임대주택 청약을 위한 개인정보 수집･이용 및 제3자 제공 동의서\",\"page\":20},{\"title\":\"1. [필수] 개인정보 수집·이용 및 제3자 제공에 동의하는 사람의 성명, 주민등록번호, 청약자와의 관계, 서명 또는 날인\",\"start_text\":\"1. [필수] 개인정보 수집·이용 및 제3자 제공에 동의하는 사람의 성명, 주민등록번호, 청약자와의 관계, 서명 또는 날인\",\"page\":20},{\"title\":\"2. 개인정보 수집·이용 안내\",\"start_text\":\"2. 개인정보 수집·이용 안내\",\"page\":20},{\"title\":\"3. 민감정보 수집·이용 안내\",\"start_text\":\"3. 민감정보 수집·이용 안내\",\"page\":20}]}",
+  "raw_response_sha256": "6a80a911bf217f6356e856a7d729b83173852f35bf01fd9abc2edbbf165e7a36",
+  "llm_calls": [
+    {
+      "window": 5,
+      "start": 25276,
+      "end": 29802,
+      "pages": [
+        18,
+        19,
+        20
+      ],
+      "prompt_chars": 5011,
+      "prompt_sha256": "ea5a7153b5f431f557eb1448792323b42db4cc694e916732615d810a7d99da17",
+      "response_sha256": "6a80a911bf217f6356e856a7d729b83173852f35bf01fd9abc2edbbf165e7a36",
+      "seconds": 4.708,
+      "proposals": 5
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 5211,
+      "worst_case_usd": 0.058422,
+      "seconds": 4.705,
+      "status": 200,
+      "response_id": "resp_0d11d0928f5522b4016aedb18ff13087d28450488cc7c5320f",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 3238,
+      "cached_input_tokens": 0,
+      "output_tokens": 426,
+      "reasoning_tokens": 172,
+      "cost_usd": 0.011588
+    }
+  ],
+  "call_issues": [],
+  "cost_usd": 0.011588,
+  "reserved_usd": 0,
+  "window_validation": {
+    "accepted": 5,
+    "issues": []
+  }
+}
