@@ -164,7 +164,29 @@ for p in r["policies"]:
 - 순위 변화는 RQ017·RQ022 두 문항뿐이며, v1.4.0 신규 문서 `DOC_STG_001_FAQ`(LH Q&A)가 정답보다 위에 온 경우다. 평가셋은 v1.3.2 문서로 만들어 신규 문서 15건을 정답으로 세지 않는다.
 - 재실행: `.venv\Scripts\python.exe docs/development/experiments/retrieval_eval_i21_20261107/compare_v132_vs_i21.py` (결과 JSON 같은 폴더)
 
-### 7.6 재시작·재현
+### 7.6 다른 PC에서 처음 구성
+
+전제: Docker, Python 3.12 이상, Ollama + `qwen3-embedding:0.6b`(기준선 모델, 최종 모델 아님), `.env`의 `QDRANT_URL`·`QDRANT_API_KEY`·`OLLAMA_BASE_URL`(값은 팀 공유 경로로 받음, 문서에 쓰지 않음). 유료 API는 쓰지 않는다.
+
+2026-11-07 기준, requirements.txt에 qdrant-client==1.12.2와 neo4j==5.28.8을 추가했으며, .env.example에 OLLAMA_BASE_URL 예시를 추가했다. 별도의 수동 패키지 설치 없이 requirements.txt로 의존성을 설치한다. 아래처럼 검증된 버전을 직접 설치하고 `.env`에 `OLLAMA_BASE_URL`을 추가한다.
+
+```powershell
+git checkout feature/5-hybrid-rag-db; .venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe scripts/rebuild_eligibility_candidate.py --verify-only data/candidates/issue21-v1.4.0-rag
+ollama pull qwen3-embedding:0.6b
+docker compose up -d qdrant                 # 저장소 docker-compose.yml (Qdrant v1.12.4, .env의 QDRANT_API_KEY)
+# 격리 Neo4j: 새 볼륨, 로컬 전용 포트, 인증 비활성 (비밀번호 생성·저장 없음)
+docker run -d --name lifepolicy-neo4j-i21 -p 127.0.0.1:7475:7474 -p 127.0.0.1:7688:7687 `
+  -v lifepolicy-neo4j-i21-data:/data -v lifepolicy-neo4j-i21-logs:/logs -e NEO4J_AUTH=none neo4j:5.26-community
+$env:LIFEPOLICY_DATASET_DIR="data/candidates/issue21-v1.4.0-rag"
+.venv\Scripts\python.exe -c "from neo4j import GraphDatabase; from database.neo4j import load_graph as lg; g=lg.read_graph_input(); assert lg.validate_graph_input(g).ok; print(lg.load_graph(g, lg.Neo4jDriverRunner(GraphDatabase.driver('bolt://127.0.0.1:7688', auth=None)))['ok'])"
+.venv\Scripts\python.exe -m database.full_index --config A_B2_I21 --config B_B3_I21 --no-db                    # 계획
+.venv\Scripts\python.exe -m database.full_index --config A_B2_I21 --config B_B3_I21 --execute --confirm-write  # 임베딩·적재
+```
+
+`load_graph`는 비어 있지 않은 DB에서 멈춘다. `full_index`는 같은 이름 컬렉션이 이미 있고 내용이 다르면 쓰지 않는다.
+
+### 7.7 이 PC에서 재시작·확인
 
 ```powershell
 docker start lifepolicy-neo4j-i21          # 격리 Neo4j (볼륨 유지). 기존 lifepolicy-neo4j와 별개
