@@ -1,0 +1,19 @@
+# 후보 적재 검증 전용 구성. 기존 docker-compose.yml의 컨테이너·볼륨과 분리한다.
+# 비밀번호·키는 프로젝트 .env에서만 읽으며, 인증을 끄지 않는다.
+# 기동은 사용자의 허용 후에만 수행한다.
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?검증 DB 비밀번호를 .env에 설정하세요}
+      NEO4J_server_memory_heap_max__size: 512M
+    ports:
+      - "127.0.0.1:17474:7474"
+      - "127.0.0.1:17687:7687"
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?검증 API 키를 .env에 설정하세요}
+    ports:
+      - "127.0.0.1:16333:6333"
