@@ -116,7 +116,7 @@ def build_point_payload(
     for field in OPTIONAL_CHUNK_FIELDS:
         if field in chunk:
             payload[field] = chunk[field]
-    # Issue #21 후보의 정책 단위 선택 필드 (시군구 상세, 자격 판정 보류). v1.3.2 메타데이터에는 없다.
+    # 입력 메타데이터가 제공한 선택 필드만 보존한다 (시군구 상세, 자격 판정 보류).
     for field in ("region_detail", "eligibility_review_status"):
         if field in policy_meta:
             payload[field] = policy_meta[field]

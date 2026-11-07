@@ -1,7 +1,11 @@
 """실제 DB 없이 평가 분모·중복·출처 경계를 확인한다."""
 
+import json
+import os
+import tempfile
 import unittest
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from database import retrieval_v140_eval as evaluation
 
@@ -53,6 +57,66 @@ class RetrievalV140EvalTests(unittest.TestCase):
         with patch.object(evaluation, "lf_hash", return_value="mismatch"):
             with self.assertRaisesRegex(ValueError, "해시 불일치"):
                 evaluation.load_cases([])
+
+    def test_evaluation_uses_neo4j_environment_and_common_embedding_constants(self):
+        cases = [{"id": "sample_only", "query": "sample question", "source": "sample_only", "targets": []}]
+        session = MagicMock()
+        session.search_policy_evidence.return_value = {"hits": []}
+        session.search_policy_context.return_value = {"policies": [], "missing_policy_ids": [], "data_quality_summary": {}}
+        env = {"NEO4J_URI": "bolt://sample-only.invalid:28765", "NEO4J_USER": "neo4j", "NEO4J_PASSWORD": "sample_only"}
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, env, clear=True), \
+             patch.object(evaluation.em, "load_env_file"), \
+             patch.object(evaluation.hd, "dataset_version", return_value="1.4.0-candidate"), \
+             patch.object(evaluation.hd, "load_documents", return_value=[]), \
+             patch.object(evaluation, "load_cases", return_value=(cases, {})), \
+             patch.object(evaluation.fi, "build_config_chunks", return_value=([], {})), \
+             patch.object(evaluation, "region_cases", return_value=[]), \
+             patch.object(evaluation, "lf_hash", return_value="sample_only_hash"), \
+             patch.object(evaluation.subprocess, "check_output", return_value="sample_only_commit\n"), \
+             patch.object(evaluation.em, "DEFAULT_EMBEDDING_MODEL", "sample_only_model"), \
+             patch.object(evaluation.em, "DEFAULT_EMBEDDING_DIM", 7), \
+             patch.object(evaluation.em, "make_ollama_embedder", return_value=lambda texts: [[0.] * 7 for _ in texts]) as make_embedder, \
+             patch.object(evaluation.store, "get_client") as make_client, \
+             patch.object(evaluation.hs, "HybridSearchSession", return_value=session) as make_session, \
+             patch("neo4j.GraphDatabase.driver") as make_driver:
+            output = Path(folder) / "new"
+            evaluation.run(output)
+            self.assertEqual(make_driver.call_args.args[0], env["NEO4J_URI"])
+            make_driver.return_value.verify_connectivity.assert_called_once()
+            make_embedder.assert_called_once_with(model="sample_only_model", expected_dim=7, batch_size=1)
+            cached = make_session.call_args.kwargs["embedder"]
+            self.assertEqual((cached.embedding_model, cached.embedding_dim), ("sample_only_model", 7))
+            report = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+            self.assertEqual((report["model"], report["dimensions"]), ("sample_only_model", 7))
+            make_driver.return_value.close.assert_called_once()
+            make_client.return_value.close.assert_called_once()
+
+    def test_evaluation_missing_neo4j_uri_fails_before_any_embedding(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {}, clear=True), \
+             patch.object(evaluation.em, "load_env_file"), \
+             patch.object(evaluation.hd, "dataset_version", return_value="1.4.0-candidate"), \
+             patch.object(evaluation.hd, "load_documents", return_value=[]), \
+             patch.object(evaluation, "load_cases", return_value=([], {})), \
+             patch.object(evaluation, "region_cases", return_value=[]), \
+             patch.object(evaluation.fi, "build_config_chunks", return_value=([], {})), \
+             patch.object(evaluation.em, "make_ollama_embedder") as embed, \
+             patch("neo4j.GraphDatabase.driver") as driver:
+            with self.assertRaisesRegex(evaluation.hs.HybridSearchBackendError, "NEO4J_URI"):
+                evaluation.run(Path(folder) / "new")
+            driver.assert_not_called()
+            embed.assert_not_called()
+
+    def test_shared_neo4j_connection_keeps_explicit_environment_over_dotenv(self):
+        with tempfile.TemporaryDirectory() as folder:
+            env_path = Path(folder) / ".env"
+            env_path.write_text("NEO4J_URI=bolt://dotenv.sample-only.invalid:17687\n"
+                                "NEO4J_USER=neo4j\nNEO4J_PASSWORD=sample_only\n", encoding="utf-8")
+            with patch.dict(os.environ, {"NEO4J_URI": "bolt://explicit.sample-only.invalid:29876"}, clear=True), \
+                 patch.object(evaluation.em, "DEFAULT_ENV_PATH", env_path), \
+                 patch("neo4j.GraphDatabase.driver") as make_driver:
+                driver = evaluation.hs._make_neo4j_driver(5, 10)
+                self.assertEqual(make_driver.call_args.args[0], "bolt://explicit.sample-only.invalid:29876")
+                driver.close()
 
 
 if __name__ == "__main__":

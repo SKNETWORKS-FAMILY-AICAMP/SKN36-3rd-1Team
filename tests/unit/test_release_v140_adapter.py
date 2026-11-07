@@ -4,7 +4,7 @@
 - 가상 패키지: 누락·중복·해시 불일치·문서 내 메타데이터 불일치에서 멈추는지, 문서별 값을 합치지 않는지
 - 실제 릴리스(하위 프로세스, LIFEPOLICY_DATASET_DIR): 문서 261·해시 일치, 문서별 메타데이터, B2/B3 청크,
   Qdrant payload 필수 필드, Neo4j 1,074노드/3,703관계 입력 검증, 원본 파일 불변
-- v1.3.2 기본 동작 회귀
+- 명시적 v1.3.2 선택 시 호환 동작 회귀
 공식 정책 내용의 정확성은 검증하지 않는다 (저장된 원천과의 일치만 본다).
 """
 
@@ -261,11 +261,9 @@ class ApprovedReleaseTests(unittest.TestCase):
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):
-    """LIFEPOLICY_DATASET_DIR 없이(v1.3.2) 기존 동작이 그대로인지."""
+    """data/handoff를 명시한 v1.3.2 호환 동작."""
 
-    def test_default_is_not_release_and_metadata_is_policy_keyed(self):
-        if os.environ.get("LIFEPOLICY_DATASET_DIR"):
-            self.skipTest("기본 데이터셋 검사는 LIFEPOLICY_DATASET_DIR 미설정 상태에서만")
+    def test_explicit_legacy_is_not_release_and_metadata_is_policy_keyed(self):
         import database.handoff_data as hd
         from database.qdrant import store
         self.assertFalse(hd.IS_RELEASE_PACKAGE)

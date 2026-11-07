@@ -1,6 +1,6 @@
 """승인 v1.4.0 B2/B3 읽기 전용 비교. 기존 미검수 정답을 공식 gold로 승격하지 않는다.
 
-실행: LIFEPOLICY_DATASET_DIR 지정 후 python -m database.retrieval_v140_eval --output <새 경로>
+실행: python -m database.retrieval_v140_eval --output <새 경로> (기본 승인 v1.4.0)
 질의 임베딩은 한 번 생성해 공유한다. 검색 시간은 임베딩을 제외한 wall time이다.
 """
 
@@ -8,7 +8,6 @@ import argparse
 import hashlib
 import json
 import math
-import os
 import statistics
 import subprocess
 import time
@@ -145,21 +144,22 @@ def run(output):
     probes = region_cases(cases)
     output.mkdir(parents=True)
     em.load_env_file()
-    from neo4j import GraphDatabase
-
-    client = store.get_client()
-    driver = GraphDatabase.driver("bolt://127.0.0.1:17687",
-                                 auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
-                                 connection_timeout=5, connection_acquisition_timeout=10)
+    driver = hs._make_neo4j_driver(hs.NEO4J_CONNECTION_TIMEOUT_SECONDS, hs.NEO4J_ACQUISITION_TIMEOUT_SECONDS)
+    try:
+        client = store.get_client()
+    except Exception:
+        driver.close()
+        raise
     runner = hs.ReadOnlyTimedRunner(driver)
-    real_embedder = em.make_ollama_embedder(model="qwen3-embedding:0.6b", expected_dim=1024, batch_size=1)
+    real_embedder = em.make_ollama_embedder(model=em.DEFAULT_EMBEDDING_MODEL,
+                                          expected_dim=em.DEFAULT_EMBEDDING_DIM, batch_size=1)
     vectors, embedding_seconds = {}, []
 
     def cached_embedder(texts):
         return [vectors[text] for text in texts]
 
-    cached_embedder.embedding_model = "qwen3-embedding:0.6b"
-    cached_embedder.embedding_dim = 1024
+    cached_embedder.embedding_model = em.DEFAULT_EMBEDDING_MODEL
+    cached_embedder.embedding_dim = em.DEFAULT_EMBEDDING_DIM
     records = []
     sessions = {p: hs.HybridSearchSession(client=client, runner=runner, embedder=cached_embedder, profile=p) for p in PROFILES}
     try:
@@ -223,7 +223,7 @@ def run(output):
     report = {"head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "generator_lf_sha256": lf_hash(Path(__file__)),
               "dataset": str(hd.HANDOFF_DIR.relative_to(ROOT)), "manifest_lf_sha256": lf_hash(hd.HANDOFF_DIR / "manifest.json"),
-              "model": "qwen3-embedding:0.6b", "dimensions": 1024, "top_k": 10,
+              "model": em.DEFAULT_EMBEDDING_MODEL, "dimensions": em.DEFAULT_EMBEDDING_DIM, "top_k": 10,
               "question_count": len(cases), "region_probe_count": len(probes), "audit": audit,
               "timing": "Warm connections, one measured call per question/method; rotated method order; excludes cached shared query embedding. p95 nearest rank.",
               "embedding": latency_summary(embedding_seconds), "methods": summarize(records), "vector_hybrid_pairs": paired,

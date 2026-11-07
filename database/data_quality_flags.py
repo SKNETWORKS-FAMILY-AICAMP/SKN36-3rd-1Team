@@ -97,7 +97,7 @@ def load_flags(path: Path = FLAGS_PATH) -> dict[str, Any]:
         return _CACHE[key]
     if not Path(path).is_file():
         result = {"status": "missing", "file": Path(path).name, "flags_by_policy": {}}
-    elif not hd.IS_DEFAULT_DATASET:
+    elif not hd.IS_LEGACY_DATASET:
         # v1.3.2 그래프로 만든 목록이다. 다른 인계 패키지(LIFEPOLICY_DATASET_DIR)에는 적용 대상이 아니다.
         result = {"status": "not_applicable", "file": Path(path).name, "dataset": hd.dataset_version(),
                   "flags_by_policy": {}}

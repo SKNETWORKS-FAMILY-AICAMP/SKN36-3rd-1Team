@@ -1,5 +1,5 @@
 """
-데이터 담당(장반석)이 전달한 인계 패키지(data/handoff/)를 읽고 점검하는 공통 모듈.
+데이터 담당(장반석)이 전달한 승인 릴리스·인계 패키지를 읽고 점검하는 공통 모듈.
 
 왜 필요한가?
 - Qdrant 적재, Neo4j 적재, 학습용 Notebook, 테스트가 모두 "같은 파일을 같은 규칙으로" 읽어야
@@ -24,39 +24,52 @@ from typing import Any
 # ---------------------------------------------------------------------------
 # 이 파일은 <프로젝트 루트>/database/handoff_data.py 에 있으므로 parents[1]이 프로젝트 루트다.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
-# 승인 릴리스(data/releases/v1.4.0-candidate)를 선택할 때 설정한다.
-# 상대 경로는 프로젝트 루트 기준. 설정하지 않으면 기존 v1.3.2(data/handoff) 동작 그대로다.
+LEGACY_HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
+DEFAULT_HANDOFF_DIR = PROJECT_ROOT / "data" / "releases" / "v1.4.0-candidate"
+# 명시한 경로가 우선이며, 미설정·빈 값은 승인 v1.4.0을 사용한다.
+# 상대 경로는 프로젝트 루트 기준. v1.3.2는 data/handoff를 명시한다.
 DATASET_DIR_ENV = "LIFEPOLICY_DATASET_DIR"
 
 
 def _dataset_dir() -> Path:
     value = os.environ.get(DATASET_DIR_ENV, "").strip()
-    if not value:
-        return DEFAULT_HANDOFF_DIR
-    path = Path(value)
-    return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+    path = Path(value) if value else DEFAULT_HANDOFF_DIR
+    path = (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+    if not path.is_dir():
+        raise ValueError(f"데이터셋 폴더가 없습니다: {path}")
+    try:
+        manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
+        if not isinstance(manifest["manifest_version"], str) or not manifest["manifest_version"]:
+            raise ValueError("manifest_version 누락")
+        for key in ("total_chunks", "total_policies", "total_documents", "total_graph_nodes", "total_graph_edges"):
+            count = manifest["summary"][key]
+            if type(count) is not int or count < 0:
+                raise ValueError(f"summary.{key}는 0 이상 정수여야 합니다")
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise ValueError(f"데이터셋 manifest가 없거나 잘못되었습니다: {path / 'manifest.json'}") from error
+    return path
 
 
 HANDOFF_DIR = _dataset_dir()
 IS_DEFAULT_DATASET = HANDOFF_DIR == DEFAULT_HANDOFF_DIR
+IS_LEGACY_DATASET = HANDOFF_DIR == LEGACY_HANDOFF_DIR
 NEO4J_HANDOFF_DIR = HANDOFF_DIR / "neo4j"
 QDRANT_HANDOFF_DIR = HANDOFF_DIR / "qdrant"
 
 PAYLOAD_CHUNKS_PATH = QDRANT_HANDOFF_DIR / "payload_chunks.jsonl"
 RELATIONSHIPS_PATH = NEO4J_HANDOFF_DIR / "relationships.jsonl"
 MANIFEST_PATH = HANDOFF_DIR / "manifest.json"
-# 정책 단위 메타데이터 (Issue #21 후보부터 제공). 없으면 청크에서 모은다.
+# 패키지의 정책 단위 메타데이터. 없으면 청크에서 모은다.
 POLICY_METADATA_PATH = QDRANT_HANDOFF_DIR / "policy_metadata.jsonl"
 
 # 문서 단위 정제본 (재청킹 원천). 반석님 정제 결과이며 읽기만 한다.
 # 기존 청크 557건이 모두 이 파일 본문의 부분 문자열임을 2026-11-05에 확인했다.
 # 다른 인계 패키지는 패키지 안의 documents.jsonl(본문 + content_hash)을 쓴다.
-DOCUMENTS_PATH = (PROJECT_ROOT / "data" / "processed" / "documents.jsonl" if IS_DEFAULT_DATASET
+DOCUMENTS_PATH = (PROJECT_ROOT / "data" / "processed" / "documents.jsonl" if IS_LEGACY_DATASET
                   else HANDOFF_DIR / "documents.jsonl")
 # 승인된 데이터 릴리스(data/releases/v1.4.0-candidate 등): 본문·정책 메타데이터 파일이 없어
 # database/release_adapter.py가 원본을 바꾸지 않고 메모리에서 본문·문서별 메타데이터를 만든다.
-IS_RELEASE_PACKAGE = not IS_DEFAULT_DATASET and not DOCUMENTS_PATH.is_file() and (
+IS_RELEASE_PACKAGE = not IS_LEGACY_DATASET and not DOCUMENTS_PATH.is_file() and (
     NEO4J_HANDOFF_DIR / "nodes_document.jsonl").is_file() and PAYLOAD_CHUNKS_PATH.is_file()
 
 # 인계 문서(data/handoff/README.md, manifest v1.3.2)에 적힌 기대 건수.
@@ -66,7 +79,7 @@ EXPECTED_POLICY_COUNT = 237
 EXPECTED_DOCUMENT_COUNT = 246
 EXPECTED_NODE_COUNT = 1034
 EXPECTED_RELATIONSHIP_COUNT = 3615
-if not IS_DEFAULT_DATASET:
+if not IS_LEGACY_DATASET:
     # 다른 패키지는 그 manifest summary가 기대 건수다 (고정값을 새로 박지 않는다).
     _summary = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["summary"]
     EXPECTED_CHUNK_COUNT = _summary["total_chunks"]
