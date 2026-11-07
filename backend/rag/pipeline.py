@@ -1,9 +1,11 @@
 """정책 검색, 조건 검사, 답변 생성과 출처 검증을 연결한다."""
 
 from collections.abc import Callable
+from json import JSONDecodeError
 import logging
 import re
 
+from httpx import NetworkError, TimeoutException
 from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, AskResponse, EligibilityOutput, GeneratorOutput
@@ -12,6 +14,7 @@ from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
 CITATION = re.compile(r"\[(\d+)\]")
+SCOPED_CONDITION_FIELDS = {"age", "region", "income", "housing", "employment", "exclusion", "marriage", "children"}
 QUALITY_REASON = "데이터가 불확실하여 공식 공고에서 조건을 확인해야 합니다."
 MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했습니다. 정보를 입력하거나 공식 공고에서 확인해 주세요."
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
@@ -43,7 +46,8 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     # 검색이 반환하는 그룹 ID와 구조 오류만으로는 영향받는 필드를 확정할 수 없다.
     hold_all = (
         not graph or policy.get("graph_status") == "MISSING_IN_GRAPH"
-        or "all" in affected or (quality.get("hold_auto_eligibility") and not affected)
+        or bool(affected - SCOPED_CONDITION_FIELDS)
+        or (quality.get("hold_auto_eligibility") and not affected)
         or any(isinstance(warning, dict) and warning.get("blocks_auto_eligibility") and not warning.get("affects")
                for warning in quality.get("warnings", []))
         or structure.get("unknown_logic_groups") or structure.get("structure_issues")
@@ -54,7 +58,8 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
         if condition["status"] == "needs_check":
             continue
         # 보류 원인별로 사유를 다르게 적는다. 입력 누락을 데이터 오류로 안내하지 않는다.
-        if hold_all or field in affected:
+        # 범위가 있는 경고라도 미확인 필드가 그 범위 밖이라고 단정할 수 없다.
+        if hold_all or field in affected or (affected and field not in SCOPED_CONDITION_FIELDS):
             reason = QUALITY_REASON
         elif field in {"age", "region"} and profile[field] is None:
             reason = MISSING_PROFILE_REASON
@@ -137,9 +142,11 @@ def run_ask_pipeline(
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:
         raw = generate_fn(request.question, contexts, checks, history)
-    except TimeoutError as exc:
+    except JSONDecodeError as exc:
+        raise AskError("LLM_OUTPUT_INVALID") from exc
+    except (TimeoutError, TimeoutException) as exc:
         raise AskError("LLM_TIMEOUT") from exc
-    except ConnectionError as exc:
+    except (ConnectionError, NetworkError) as exc:
         raise AskError("LLM_UNAVAILABLE") from exc
     try:
         output = GeneratorOutput.model_validate(raw)

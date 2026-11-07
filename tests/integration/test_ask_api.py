@@ -10,6 +10,7 @@ from database.hybrid_search import HybridSearchBackendError, SearchProfileError
 
 if find_spec("fastapi") is not None and find_spec("httpx") is not None:
     from fastapi.testclient import TestClient
+    from httpx import ConnectError, ReadTimeout
 
     from backend.api.main import create_app
 else:
@@ -104,3 +105,17 @@ class AskApiTests(unittest.TestCase):
                 self.generator.side_effect = exc
                 response = client.post("/api/ask", json=REQUEST)
                 self.assertEqual((response.status_code, response.json()["detail"]["code"]), expected)
+
+
+    def test_httpx_failures_map_to_public_errors(self):
+        with self.client as client:
+            for error, expected in (
+                (ReadTimeout("private-value"), (504, "LLM_TIMEOUT")),
+                (ConnectError("private-value"), (502, "LLM_UNAVAILABLE")),
+                (ValueError("private-value"), (500, "INTERNAL_ERROR")),
+            ):
+                with self.subTest(error=type(error).__name__):
+                    self.generator.side_effect = error
+                    response = client.post("/api/ask", json=REQUEST)
+                    self.assertEqual((response.status_code, response.json()["detail"]["code"]), expected)
+                    self.assertNotIn("private-value", response.text)
