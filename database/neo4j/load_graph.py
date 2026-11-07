@@ -35,6 +35,7 @@ Neo4j 그래프 적재 로더 (안전 버전).
 읽기 전용 확인은 tests/integration/test_neo4j_smoke.py (RUN_NEO4J_SMOKE=1).
 """
 
+import math
 import re
 from collections import Counter
 from dataclasses import dataclass, field
@@ -58,10 +59,11 @@ RELATIONSHIP_PROPERTY_FIELDS = (
 )
 REQUIRED_RELATIONSHIP_FIELDS = ("source_id", "relation", "target_id")
 
-# 후보 0a09126의 docs/data/data_contract.md §2.1 (2026-11-06 개정).
-# processed 전용 중첩 필드는 Graph 투영 계약에 포함하지 않는다.
+# 후보 0a09126의 docs/data/data_contract.md §2.1 (2026-11-06 개정)·scripts/load_candidate_neo4j.py NULLABLE_FIELDS.
+# 선택(Nullable) 필드는 null 허용(적재 시 속성 생략), 값이 있으면 문자열이어야 한다.
+# review_flags는 processed 전용 중첩 객체라 Graph에는 값으로 저장할 수 없다 → null만 허용, 객체는 invalid_property.
 NULLABLE_NODE_STRING_FIELDS = {
-    "Policy": frozenset(("official_apply_url", "application_start", "application_end", "lastMdfcnDt")),
+    "Policy": frozenset(("official_apply_url", "application_start", "application_end", "lastMdfcnDt", "review_flags")),
     "Document": frozenset(("published_at", "effective_at", "doc_type", "law_article", "effective_date",
                            "version", "extracted_text_path", "official_id")),
 }
@@ -80,7 +82,9 @@ REQUIRED_NODE_STRING_FIELDS = {
     "EligibilityCondition": ("condition_id", "type", "name", "operator", "value", "unit",
                              "evidence_location", "description"),
 }
-REQUIRED_NODE_LIST_FIELDS = {"Policy": ("life_stages", "target_groups")}
+REQUIRED_NODE_LIST_FIELDS = {"Policy": ("life_stages",)}
+# 값이 있으면 문자열 리스트여야 하는 필드 (target_groups는 계약 필수가 아니므로 누락은 허용, null은 불허)
+TYPED_NODE_LIST_FIELDS = {"Policy": ("life_stages", "target_groups")}
 REQUIRED_NODE_BOOL_FIELDS = {"ConditionGroup": ("is_root",)}
 
 # 제약조건 이름: 인계 DDL(cypher_ddl.cypher)과 같은 이름을 쓴다. → 이미 같은 제약이 있으면 IF NOT EXISTS로 건너뛴다.
@@ -141,11 +145,14 @@ def read_graph_input(directory: Path | str | None = None) -> GraphInput:
 # ---------------------------------------------------------------------------
 def _is_neo4j_property_value(value: Any) -> bool:
     """Neo4j에 속성으로 저장할 수 있는 값인가: 문자열·숫자·불리언, 또는 같은 종류 기본값만 담은 리스트. (dict 불가)"""
-    if isinstance(value, (str, bool, int, float)):
+    if isinstance(value, float):
+        return math.isfinite(value)          # NaN·±inf는 비교·정렬이 깨진다 (scripts/load_candidate_neo4j.validate_property와 같음)
+    if isinstance(value, (str, bool, int)):
         return True
     if isinstance(value, list):
         kinds = {type(item) for item in value}
-        return all(kind in (str, bool, int, float) for kind in kinds) and len(kinds) <= 1
+        return (all(kind in (str, bool, int, float) for kind in kinds) and len(kinds) <= 1
+                and all(math.isfinite(item) for item in value if isinstance(item, float)))
     return False
 
 
@@ -214,7 +221,7 @@ def validate_graph_input(graph: GraphInput) -> ValidationReport:
                     report.add("invalid_property", (label, node_id, key))
                 elif key in REQUIRED_NODE_STRING_FIELDS.get(label, ()) and not isinstance(value, str):
                     report.add("invalid_property", (label, node_id, key))
-                elif key in REQUIRED_NODE_LIST_FIELDS.get(label, ()) and (
+                elif key in TYPED_NODE_LIST_FIELDS.get(label, ()) and (
                     not isinstance(value, list) or any(not isinstance(item, str) for item in value)
                 ):
                     report.add("invalid_property", (label, node_id, key))
