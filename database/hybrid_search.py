@@ -51,14 +51,11 @@ DEFAULT_COLLECTION = LEGACY_EXPERIMENT_COLLECTION   # 이름 호환용 별칭 (�
 SEARCH_PROFILES: dict[str, dict[str, str]] = {
     "b2_06b_baseline": {"index_config": "A_B2", "query_template_name": "none"},          # 기본 (0.6B 기준선)
     "b2_4b_instruct": {"index_config": "A_B2_4B", "query_template_name": "instruct_v1"},  # 유력 후보 (최종 미확정)
-    # Issue #21 후보 데이터셋(LIFEPOLICY_DATASET_DIR) 전용. v1.3.2에서는 full_index의 dataset 확인으로 거부된다.
-    "b2_06b_i21": {"index_config": "A_B2_I21", "query_template_name": "none"},
-    "b3_06b_i21": {"index_config": "B_B3_I21", "query_template_name": "none"},
     "b2_06b_v140": {"index_config": "A_B2_V140", "query_template_name": "none"},
     "b3_06b_v140": {"index_config": "B_B3_V140", "query_template_name": "none"},
 }
 DEFAULT_PROFILE = "b2_06b_baseline"
-DATASET_DEFAULT_PROFILES = {"issue21-v1.4.0-review": "b2_06b_i21", "1.4.0-candidate": "b2_06b_v140"}
+DATASET_DEFAULT_PROFILES = {"1.4.0-candidate": "b2_06b_v140"}
 _UNSET = object()     # query_template을 "넘기지 않음"과 "None(지시문 없음)"을 구분하기 위한 표시
 DEFAULT_K = 5
 MAX_K = 200                                     # 진단용 전체 순위(107개)까지 허용하되 무제한은 막는다

@@ -59,12 +59,6 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
     # 2026-11-06 모델 비교: 청킹(B2)은 A_B2와 같고 임베딩 모델·차원만 다르다. 차원 2560은 다운로드 후 실측값
     "A_B2_4B": {"collection": "exp_b2_qwen3emb4b_full_v1", "strategy": "B2", "expected_chunks": 1081,
                 "model": "qwen3-embedding:4b", "dim": 2560},
-    # 2026-11-07 Issue #21 최종 후보(data/candidates/issue21-v1.4.0-rag, 문서 261). 새 컬렉션에만 쓴다.
-    # LIFEPOLICY_DATASET_DIR로 후보를 고른 경우에만 사용 가능 (dataset 확인).
-    "A_B2_I21": {"collection": "exp_b2_qwen3emb06b_i21_v1", "strategy": "B2", "expected_chunks": 1138,
-                 "dataset": "issue21-v1.4.0-review"},
-    "B_B3_I21": {"collection": "exp_b3_qwen3emb06b_i21_v1", "strategy": "B3", "expected_chunks": 1220,
-                 "dataset": "issue21-v1.4.0-review"},
     # 승인된 v1.4.0 릴리스(data/releases/v1.4.0-candidate, PR #16·#17). 본문·문서별 메타데이터는 release_adapter.
     # 청크 수는 2026-11-07 DB 없는 dry-run 실측. 새 컬렉션에만 쓴다 (기존 컬렉션 보호).
     "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1138,

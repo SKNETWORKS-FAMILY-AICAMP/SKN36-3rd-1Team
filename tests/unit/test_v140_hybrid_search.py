@@ -136,16 +136,17 @@ class V140ProfileTests(unittest.TestCase):
                 self.assertEqual((settings["embedding_model"], settings["embedding_dim"], settings["query_template"]),
                                  ("qwen3-embedding:0.6b", 1024, None))
 
-    def test_legacy_default_and_issue21_profile_definitions_unchanged(self):
+    def test_legacy_default_is_unchanged_and_retired_profiles_are_rejected(self):
         with patch.object(hd, "dataset_version", return_value="1.3.2"):
             self.assertEqual(hs.default_profile(), "b2_06b_baseline")
             self.assertEqual(hs.resolve_search_settings()["collection"], "exp_b2_qwen3emb06b_full_v1")
-        with patch.object(hd, "dataset_version", return_value="issue21-v1.4.0-review"):
-            self.assertEqual(hs.default_profile(), "b2_06b_i21")
+        for retired in ("b2_06b_i21", "b3_06b_i21"):
+            with self.subTest(profile=retired), self.assertRaises(hs.SearchProfileError):
+                hs.resolve_search_settings(profile=retired)
 
     def test_wrong_dataset_profiles_and_known_custom_collections_are_blocked(self):
         for version, profile in (("1.3.2", "b2_06b_v140"), ("1.4.0-candidate", "b2_06b_baseline"),
-                                 ("issue21-v1.4.0-review", "b3_06b_v140")):
+                                 ("unapproved-dataset", "b3_06b_v140")):
             with self.subTest(version=version, profile=profile), patch.object(hd, "dataset_version", return_value=version):
                 with self.assertRaises(fi.FullIndexError):
                     hs.resolve_search_settings(profile=profile)

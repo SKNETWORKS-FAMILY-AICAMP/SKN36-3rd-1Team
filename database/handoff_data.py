@@ -25,7 +25,7 @@ from typing import Any
 # 이 파일은 <프로젝트 루트>/database/handoff_data.py 에 있으므로 parents[1]이 프로젝트 루트다.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
-# 다른 인계 패키지(예: Issue #21 후보 data/candidates/issue21-v1.4.0-rag)를 쓸 때만 설정한다.
+# 승인 릴리스(data/releases/v1.4.0-candidate)를 선택할 때 설정한다.
 # 상대 경로는 프로젝트 루트 기준. 설정하지 않으면 기존 v1.3.2(data/handoff) 동작 그대로다.
 DATASET_DIR_ENV = "LIFEPOLICY_DATASET_DIR"
 

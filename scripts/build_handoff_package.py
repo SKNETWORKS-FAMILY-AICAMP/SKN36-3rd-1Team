@@ -17,615 +17,474 @@ from collections import defaultdict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
-HANDOFF_DIR = BASE_DIR / "data" / "candidates" / "issue21-handoff"
+HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 NEO4J_DIR = HANDOFF_DIR / "neo4j"
 QDRANT_DIR = HANDOFF_DIR / "qdrant"
 
-def build_condition_nodes(edges):
-    """관계의 근거·검토 상태를 보존하는 조건 노드를 메모리에서 생성한다."""
-    cond_edges = [e for e in edges if e.get("relation") == "REQUIRES_CONDITION"]
-    conditions_dict = {}
-    for e in cond_edges:
-        cid = e["target_id"]
-        cname = e.get("target_name") or cid
-        ev_loc = e.get("evidence_location") or ""
+NEO4J_DIR.mkdir(parents=True, exist_ok=True)
+QDRANT_DIR.mkdir(parents=True, exist_ok=True)
 
-        # 타입 및 연산자 분류
-        if cid.startswith("COND_YC_INCOME_"):
-            # 무관/기타를 금액 조건으로 승격하지 않는다. 원값 해석은 확인 대기.
-            ctype = "OTHER"
-            op = "UNKNOWN"
-            val = e.get("raw_value", "")
-            unit = "unknown"
-        elif cid.startswith("COND_AGE_"):
-            ctype = "AGE"
-            op = "UNKNOWN" if "UNKNOWN" in cid else "BETWEEN"
-            parts = cid.replace("COND_AGE_", "").split("_")
-            val = f"{parts[0]}~{parts[1]}" if len(parts) >= 2 else parts[0]
-            unit = "세"
-        elif cid.startswith("COND_HH_"):
-            ctype = "HOUSING_HOUSEHOLD"
-            op = "EQUAL"
-            val = cid.replace("COND_HH_", "")
-            unit = "유형"
-        elif cid.startswith("COND_INC_"):
-            ctype = "INCOME"
-            op = "IN_RANGE"
-            val = cid.replace("COND_INC_", "")
-            unit = "%"
+# 1. 원천 정제 데이터 로드
+with open(PROCESSED_DIR / "policies.jsonl", "r", encoding="utf-8") as f:
+    policies = [json.loads(line) for line in f]
+
+with open(PROCESSED_DIR / "documents.jsonl", "r", encoding="utf-8") as f:
+    documents = [json.loads(line) for line in f]
+
+with open(PROCESSED_DIR / "chunks.jsonl", "r", encoding="utf-8") as f:
+    chunks = [json.loads(line) for line in f]
+
+with open(PROCESSED_DIR / "relationships.jsonl", "r", encoding="utf-8") as f:
+    existing_edges = [json.loads(line) for line in f]
+
+print(f"Loaded: {len(policies)} policies, {len(documents)} docs, {len(chunks)} chunks, {len(existing_edges)} existing edges.")
+
+# 2. 노드 ID 수집 및 노드 엔티티 정의
+all_node_ids = set()
+
+# 2.1 Policies 노드 (237건)
+policy_nodes = []
+for p in policies:
+    pid = p["policy_id"]
+    all_node_ids.add(pid)
+    node = {
+        "policy_id": pid,
+        "official_id": p.get("official_id"),
+        "policy_name": p.get("policy_name"),
+        "source_type": p.get("source_type"),
+        "category": p.get("category"),
+        "agency": p.get("agency"),
+        "organization": p.get("organization"),
+        "region": p.get("region"),
+        "life_stages": p.get("life_stages", p.get("life_cycles", [])),
+        "target_groups": p.get("target_groups", []),
+        "eligibility": p.get("eligibility"),
+        "benefit": p.get("benefit"),
+        "application_period": p.get("application_period"),
+        "application_method": p.get("application_method"),
+        "official_apply_url": p.get("official_apply_url"),
+        "source_url": p.get("source_url"),
+        "verification_status": p.get("verification_status"),
+        "collected_at": p.get("collected_at")
+    }
+    policy_nodes.append(node)
+
+with open(NEO4J_DIR / "nodes_policy.jsonl", "w", encoding="utf-8") as f:
+    for node in policy_nodes:
+        f.write(json.dumps(node, ensure_ascii=False) + "\n")
+
+# 2.2 Organizations 노드 (116건) — relationships.jsonl의 target_id(AGENCY_*)와 100% 일치
+org_edges = [e for e in existing_edges if e.get("relation") == "ADMINISTERED_BY"]
+org_dict = {}
+for e in org_edges:
+    tgt_id = e["target_id"]
+    if tgt_id not in org_dict:
+        org_dict[tgt_id] = {
+            "agency_id": tgt_id,
+            "name": e.get("target_name") or tgt_id.replace("AGENCY_", "").replace("_", " "),
+            "type": "소관부처/지자체"
+        }
+        all_node_ids.add(tgt_id)
+
+with open(NEO4J_DIR / "nodes_organization.jsonl", "w", encoding="utf-8") as f:
+    for o in org_dict.values():
+        f.write(json.dumps(o, ensure_ascii=False) + "\n")
+
+# 2.3 Regions 노드 (18건) — relationships.jsonl의 target_id(REGION_*)와 100% 일치
+region_edges = [e for e in existing_edges if e.get("relation") == "AVAILABLE_IN"]
+region_dict = {}
+for e in region_edges:
+    tgt_id = e["target_id"]
+    if tgt_id not in region_dict:
+        region_dict[tgt_id] = {
+            "region_id": tgt_id,
+            "name": e.get("target_name") or tgt_id.replace("REGION_", "")
+        }
+        all_node_ids.add(tgt_id)
+
+with open(NEO4J_DIR / "nodes_region.jsonl", "w", encoding="utf-8") as f:
+    for r in region_dict.values():
+        f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+# 2.4 Categories 노드 (5건) — relationships.jsonl의 target_id(CAT_*)와 100% 일치
+cat_edges = [e for e in existing_edges if e.get("relation") == "HAS_CATEGORY"]
+cat_dict = {}
+for e in cat_edges:
+    tgt_id = e["target_id"]
+    if tgt_id not in cat_dict:
+        cat_dict[tgt_id] = {
+            "category_id": tgt_id,
+            "name": e.get("target_name") or tgt_id.replace("CAT_", "")
+        }
+        all_node_ids.add(tgt_id)
+
+with open(NEO4J_DIR / "nodes_category.jsonl", "w", encoding="utf-8") as f:
+    for c in cat_dict.values():
+        f.write(json.dumps(c, ensure_ascii=False) + "\n")
+
+# 2.5 LifeStages 노드 (6대 표준 생애단계)
+lifestages = [
+    {"stage_id": "LIFESTAGE_영유아", "name": "영유아", "age_range": "0~5세", "description": "취학 전 영유아 및 보육 지원"},
+    {"stage_id": "LIFESTAGE_아동", "name": "아동", "age_range": "6~12세", "description": "초등 학령기 아동 및 방과후 돌봄 지원"},
+    {"stage_id": "LIFESTAGE_청소년", "name": "청소년", "age_range": "13~18세", "description": "중고등 청소년, 진로 및 자립 지원"},
+    {"stage_id": "LIFESTAGE_청년", "name": "청년", "age_range": "19~39세", "description": "청년 구직·주거·자산형성·일자리 지원"},
+    {"stage_id": "LIFESTAGE_중장년", "name": "중장년", "age_range": "40~64세", "description": "중장년 재취업, 노후 준비 및 전직 지원"},
+    {"stage_id": "LIFESTAGE_노년", "name": "노년", "age_range": "65세 이상", "description": "어르신 기초연금, 노후 건강 및 돌봄 지원"}
+]
+for ls in lifestages:
+    all_node_ids.add(ls["stage_id"])
+
+with open(NEO4J_DIR / "nodes_lifestage.jsonl", "w", encoding="utf-8") as f:
+    for ls in lifestages:
+        f.write(json.dumps(ls, ensure_ascii=False) + "\n")
+
+# 2.6 TargetGroup 노드 (11건) — relationships.jsonl의 target_id(GROUP_*)와 100% 일치
+target_edges = [e for e in existing_edges if e.get("relation") == "TARGETS"]
+target_group_dict = {}
+for e in target_edges:
+    tgt_id = e["target_id"]
+    if tgt_id not in target_group_dict:
+        target_group_dict[tgt_id] = {
+            "group_id": tgt_id,
+            "name": e.get("target_name") or tgt_id.replace("GROUP_", ""),
+            "description": f"생애주기 외 특정 자격/가구/사회적 집단 ({e.get('target_name')})"
+        }
+        all_node_ids.add(tgt_id)
+
+with open(NEO4J_DIR / "nodes_target_group.jsonl", "w", encoding="utf-8") as f:
+    for tg in target_group_dict.values():
+        f.write(json.dumps(tg, ensure_ascii=False) + "\n")
+
+# 2.7 Documents 노드 (246건)
+for d in documents:
+    doc_id = d["document_id"]
+    all_node_ids.add(doc_id)
+
+with open(NEO4J_DIR / "nodes_document.jsonl", "w", encoding="utf-8") as f:
+    for d in documents:
+        doc_node = {
+            "document_id": d["document_id"],
+            "policy_id": d["policy_id"],
+            "title": d["title"],
+            "source_type": d["source_type"],
+            "source_url": d["source_url"],
+            "local_raw_path": d.get("local_raw_path"),
+            "content_hash": d.get("content_hash"),
+            "verification_status": d.get("verification_status")
+        }
+        f.write(json.dumps(doc_node, ensure_ascii=False) + "\n")
+
+# 2.8 EligibilityConditions 노드 (52건) — relationships.jsonl의 target_id(COND_*)와 100% 일치
+cond_edges = [e for e in existing_edges if e.get("relation") == "REQUIRES_CONDITION"]
+conditions_dict = {}
+
+for e in cond_edges:
+    cid = e["target_id"]
+    cname = e.get("target_name") or cid
+    ev_loc = e.get("evidence_location") or ""
+    
+    # 타입 및 연산자 분류
+    if cid.startswith("COND_AGE_"):
+        ctype = "AGE"
+        op = "BETWEEN"
+        parts = cid.replace("COND_AGE_", "").split("_")
+        val = f"{parts[0]}~{parts[1]}" if len(parts) >= 2 else parts[0]
+        unit = "세"
+    elif cid.startswith("COND_HH_"):
+        ctype = "HOUSING_HOUSEHOLD"
+        op = "EQUAL"
+        val = cid.replace("COND_HH_", "")
+        unit = "유형"
+    elif cid.startswith("COND_INC_"):
+        ctype = "INCOME"
+        op = "IN_RANGE"
+        val = cid.replace("COND_INC_", "")
+        unit = "%"
+    elif cid.startswith("COND_JOB_"):
+        ctype = "EMPLOYMENT"
+        op = "IN"
+        val = cid.replace("COND_JOB_", "")
+        unit = "상태"
+    elif cid.startswith("COND_EDU_"):
+        ctype = "EDUCATION"
+        op = "IN"
+        val = cid.replace("COND_EDU_", "")
+        unit = "학력"
+    elif cid.startswith("COND_SP_"):
+        ctype = "SPECIAL_TARGET"
+        op = "IN"
+        val = cid.replace("COND_SP_", "")
+        unit = "특성"
+    else:
+        ctype = "OTHER"
+        op = "EQUAL"
+        val = cid
+        unit = ""
+
+    if cid not in conditions_dict:
+        conditions_dict[cid] = {
+            "condition_id": cid,
+            "type": ctype,
+            "name": cname,
+            "operator": op,
+            "value": val,
+            "unit": unit,
+            "evidence_location": ev_loc,
+            "description": f"정책 지원 자격 조건 ({cname})"
+        }
+        all_node_ids.add(cid)
+
+with open(NEO4J_DIR / "nodes_eligibility_condition.jsonl", "w", encoding="utf-8") as f:
+    for ec in conditions_dict.values():
+        f.write(json.dumps(ec, ensure_ascii=False) + "\n")
+
+# 2.9 ConditionGroups 노드 & 계층적 DAG 관계 구축 (P0-2)
+pol_conditions = defaultdict(list)
+for e in cond_edges:
+    pol_conditions[e["source_id"]].append(e["target_id"])
+
+condition_groups = []
+handoff_edges = list(existing_edges) # 기존 2,537건 보존
+
+for p in policies:
+    pid = p["policy_id"]
+    pname = p.get("policy_name", pid)
+    req = p.get("requirements") or {}
+    v_stat = p.get("verification_status", "extracted")
+    ev_doc = p.get("source_document_ids", [None])[0] if p.get("source_document_ids") else None
+    
+    cond_list = pol_conditions.get(pid, [])
+    has_exclusion = bool(req.get("exclusion_criteria"))
+    
+    # 루트 그룹 식별자
+    root_grp_id = f"GRP_{pid}_ROOT"
+    all_node_ids.add(root_grp_id)
+    
+    # 엣지: Policy -> Root Condition Group
+    handoff_edges.append({
+        "source_id": pid,
+        "relation": "HAS_ROOT_CONDITION_GROUP",
+        "target_id": root_grp_id,
+        "target_name": f"Root Condition Group ({pid})",
+        "evidence_document_id": ev_doc,
+        "evidence_location": "기본자격요건",
+        "review_status": v_stat
+    })
+    
+    # 조건이 전혀 없는 정책 (155건): UNKNOWN 3값 논리 적용
+    if not cond_list and not has_exclusion:
+        condition_groups.append({
+            "group_id": root_grp_id,
+            "policy_id": pid,
+            "logic": "UNKNOWN",
+            "is_root": True,
+            "description": f"{pname} 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"
+        })
+        continue
+    
+    # 조건이 있는 정책: 복합 DAG 구성
+    type_groups = defaultdict(list)
+    for cid in cond_list:
+        if cid.startswith("COND_INC_"):
+            type_groups["INC"].append(cid)
+        elif cid.startswith("COND_HH_") and cid != "COND_HH_무주택세대":
+            type_groups["HH"].append(cid)
         elif cid.startswith("COND_JOB_"):
-            ctype = "EMPLOYMENT"
-            op = "IN"
-            val = cid.replace("COND_JOB_", "")
-            unit = "상태"
+            type_groups["JOB"].append(cid)
         elif cid.startswith("COND_EDU_"):
-            ctype = "EDUCATION"
-            op = "IN"
-            val = cid.replace("COND_EDU_", "")
-            unit = "학력"
+            type_groups["EDU"].append(cid)
         elif cid.startswith("COND_SP_"):
-            ctype = "SPECIAL_TARGET"
-            op = "IN"
-            val = cid.replace("COND_SP_", "")
-            unit = "특성"
+            type_groups["SP"].append(cid)
         else:
-            ctype = "OTHER"
-            op = "EQUAL"
-            val = cid
-            unit = ""
-
-        if cid not in conditions_dict:
-            conditions_dict[cid] = {
-                "condition_id": cid,
-                "type": ctype,
-                "name": cname,
-                "operator": op,
-                "value": val,
-                "unit": unit,
-                "evidence_location": ev_loc,
-                "review_status": e.get("review_status", "needs_review"),
-                "description": f"정책 지원 자격 조건 ({cname})"
-            }
-
-    return conditions_dict
-
-
-def build_condition_groups(policies, existing_edges, conditions_dict):
-    """조건 DAG만 메모리에서 생성한다. 파일/DB 접근 없음."""
-    all_node_ids = set()
-    cond_edges = [e for e in existing_edges if e.get("relation") == "REQUIRES_CONDITION"]
-    pol_conditions = defaultdict(list)
-    policy_condition_edges = defaultdict(dict)
-    for e in cond_edges:
-        pol_conditions[e["source_id"]].append(e["target_id"])
-        policy_condition_edges[e["source_id"]][e["target_id"]] = e
-
-    condition_groups = []
-    handoff_edges = list(existing_edges) # 기존 2,537건 보존
-
-    for p in policies:
-        pid = p["policy_id"]
-        pname = p.get("policy_name", pid)
-        req = p.get("requirements") or {}
-        v_stat = p.get("verification_status", "extracted")
-        ev_doc = p.get("source_document_ids", [None])[0] if p.get("source_document_ids") else None
-
-        cond_list = pol_conditions.get(pid, [])
-        exclusion = req.get("exclusion_criteria") or req.get("excluded_participants")
-        has_exclusion = bool(exclusion)
-        structured = req.get("structured_support_conditions") or {}
-        ja_categories = {"INC": "소득구간조건", "HH": "가구주거조건", "JOB": "취업경제활동조건"}
-        # 구조화 객체가 있다는 사실이나 지역 검토만으로 명확한 자격식을 지우지 않는다.
-        # JA의 실제 적용 코드와 결합 의미는 확인 전까지 보류한다.
-        ja_uncertain = {category for category, field in ja_categories.items() if any(
-            status == "적용대상" for status in (structured.get(field) or {}).values()
-        )}
-        uncertain = bool(ja_uncertain) or any(
-            e.get("review_status") == "needs_review" for e in cond_edges if e["source_id"] == pid
-        ) or req.get("age_review_needed") or (
-            "age_limit_yn" in req and req["age_limit_yn"] != "Y"
-        )
-        if uncertain or has_exclusion or req.get("region_review_needed") or not cond_list:
-            v_stat = "needs_review"
-
-        def condition_review(cid):
-            # 공유 조건 노드가 아니라 이 정책의 근거 관계를 기준으로 한다.
-            return policy_condition_edges[pid][cid].get("review_status", "needs_review")
-
-        # 루트 그룹 식별자
-        root_grp_id = f"GRP_{pid}_ROOT"
-        all_node_ids.add(root_grp_id)
-
-        # 엣지: Policy -> Root Condition Group
+            type_groups["DIRECT"].append(cid)
+    
+    # 루트 그룹 생성 (logic: AND)
+    condition_groups.append({
+        "group_id": root_grp_id,
+        "policy_id": pid,
+        "logic": "AND",
+        "is_root": True,
+        "description": f"{pname} 복합 자격 조건 루트 그룹 (AND 결합)"
+    })
+    
+    # 직결 필수 조건 (연령, 무주택 등)
+    for cid in type_groups.get("DIRECT", []):
         handoff_edges.append({
-            "source_id": pid,
-            "relation": "HAS_ROOT_CONDITION_GROUP",
-            "target_id": root_grp_id,
-            "target_name": f"Root Condition Group ({pid})",
+            "source_id": root_grp_id,
+            "relation": "CONTAINS_CONDITION",
+            "target_id": cid,
+            "target_name": conditions_dict[cid]["name"],
             "evidence_document_id": ev_doc,
-            "evidence_location": "기본자격요건",
+            "evidence_location": "필수조건",
             "review_status": v_stat
         })
-
-        # 조건이 전혀 없는 정책 (155건): UNKNOWN 3값 논리 적용
-        if not cond_list and not has_exclusion:
-            condition_groups.append({
-                "group_id": root_grp_id,
-                "policy_id": pid,
-                "logic": "UNKNOWN",
-                "is_root": True,
-                "description": f"{pname} 기본 자격 조건 그룹 (구조화 조건 미제공 / 제한 없음 여부도 미확인)"
-            })
+    
+    # 선택형 서브그룹 (OR DAG)
+    subgroup_configs = [
+        ("INC", "소득선택조건그룹", "소득 구간 중 하나 충족 시 지원 가능 (OR)"),
+        ("HH", "가구유형선택그룹", "가구 형태 중 하나 충족 시 지원 가능 (OR)"),
+        ("JOB", "취업상태선택그룹", "취업 상태 중 하나 충족 시 지원 가능 (OR)"),
+        ("EDU", "학력선택그룹", "학력 조건 중 하나 충족 시 지원 가능 (OR)"),
+        ("SP", "특화대상선택그룹", "특화 대상자 중 하나 충족 시 지원 가능 (OR)")
+    ]
+    
+    for t_key, t_title, t_desc in subgroup_configs:
+        items = type_groups.get(t_key, [])
+        if not items:
             continue
-
-        # 조건이 있는 정책: 복합 DAG 구성
-        type_groups = defaultdict(list)
-        for cid in cond_list:
-            if cid.startswith("COND_INC_"):
-                type_groups["INC"].append(cid)
-            elif cid.startswith("COND_HH_"):
-                type_groups["HH"].append(cid)
-            elif cid.startswith("COND_JOB_"):
-                type_groups["JOB"].append(cid)
-            elif cid.startswith("COND_EDU_"):
-                type_groups["EDU"].append(cid)
-            elif cid.startswith("COND_SP_"):
-                type_groups["SP"].append(cid)
-            else:
-                type_groups["DIRECT"].append(cid)
-
-        # 3값 논리(db_schema): 검토 대기 조건은 UNKNOWN 하위 그룹에만 둔다.
-        # 확인된 하위 조건이 하나라도 있으면 루트 AND로 부분 판정(FALSE)을 보존하고,
-        # 모두 검토 대기이면 AND를 주장하지 않고 루트 UNKNOWN을 유지한다.
-        def pending(cid):
-            return condition_review(cid) == "needs_review"
-
-        def group_uncertain(t_key):
-            return t_key in ja_uncertain or any(pending(cid) for cid in type_groups.get(t_key, []))
-
-        typed_keys = ("INC", "HH", "JOB", "EDU", "SP")
-        evaluable = any(not pending(cid) for cid in type_groups.get("DIRECT", [])) or any(
-            type_groups.get(t_key) and not group_uncertain(t_key) for t_key in typed_keys
-        )
-        root_logic = "AND" if evaluable else "UNKNOWN"
-        review_grp_id = f"GRP_{pid}_UNKNOWN_REVIEW"
-        review_members = []
-
-        def attach(cid, location, uncertain_member):
-            # AND 루트 아래의 검토 대기 원자 조건은 FALSE를 만들지 않도록 UNKNOWN 그룹으로 격리한다.
-            if root_logic == "AND" and (uncertain_member or pending(cid)):
-                review_members.append(cid)
-                return
+        if len(items) == 1:
+            cid = items[0]
             handoff_edges.append({
                 "source_id": root_grp_id,
                 "relation": "CONTAINS_CONDITION",
                 "target_id": cid,
                 "target_name": conditions_dict[cid]["name"],
                 "evidence_document_id": ev_doc,
-                "evidence_location": location,
-                "review_status": condition_review(cid)
+                "evidence_location": "조건요건",
+                "review_status": v_stat
             })
-
-        if root_logic == "AND":
-            description = f"{pname} 복합 자격 조건 (AND" + (", 일부 하위 조건 확인 필요)" if uncertain or has_exclusion else ")")
         else:
-            description = f"{pname} 복합 자격 조건 (원천 해석 확인 필요)"
-        condition_groups.append({
-            "group_id": root_grp_id,
-            "policy_id": pid,
-            "logic": root_logic,
-            "is_root": True,
-            "description": description
-        })
-
-        # 직결 필수 조건 (연령, 무주택 등)
-        for cid in type_groups.get("DIRECT", []):
-            attach(cid, "필수조건", pending(cid))
-
-        # 선택형 서브그룹 (OR DAG)
-        subgroup_configs = [
-            ("INC", "소득선택조건그룹", "소득 구간 중 하나 충족 시 지원 가능 (OR)"),
-            ("HH", "가구유형선택그룹", "가구 형태 중 하나 충족 시 지원 가능 (OR)"),
-            ("JOB", "취업상태선택그룹", "취업 상태 중 하나 충족 시 지원 가능 (OR)"),
-            ("EDU", "학력선택그룹", "학력 조건 중 하나 충족 시 지원 가능 (OR)"),
-            ("SP", "특화대상선택그룹", "특화 대상자 중 하나 충족 시 지원 가능 (OR)")
-        ]
-
-        for t_key, t_title, t_desc in subgroup_configs:
-            items = type_groups.get(t_key, [])
-            if not items:
-                continue
-            if len(items) == 1:
-                attach(items[0], "조건요건", group_uncertain(t_key))
-            else:
-                sub_grp_id = f"GRP_{pid}_OR_{t_key}"
-                all_node_ids.add(sub_grp_id)
-                subgroup_uncertain = group_uncertain(t_key)
-                condition_groups.append({
-                    "group_id": sub_grp_id,
-                    "policy_id": pid,
-                    "logic": "UNKNOWN" if subgroup_uncertain else "OR",
-                    "is_root": False,
-                    "description": f"{pname} {t_title}: 결합 의미 확인 필요" if subgroup_uncertain else f"{pname} {t_title}: {t_desc}"
-                })
-                handoff_edges.append({
-                    "source_id": root_grp_id,
-                    "relation": "CONTAINS_GROUP",
-                    "target_id": sub_grp_id,
-                    "target_name": f"{t_title} ({sub_grp_id})",
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "선택조건그룹",
-                    "review_status": "needs_review" if subgroup_uncertain else p.get("verification_status", "extracted")
-                })
-                for cid in items:
-                    handoff_edges.append({
-                        "source_id": sub_grp_id,
-                        "relation": "CONTAINS_CONDITION",
-                        "target_id": cid,
-                        "target_name": conditions_dict[cid]["name"],
-                        "evidence_document_id": ev_doc,
-                        "evidence_location": "선택조건",
-                        "review_status": condition_review(cid)
-                    })
-
-        if review_members:
-            all_node_ids.add(review_grp_id)
+            sub_grp_id = f"GRP_{pid}_OR_{t_key}"
+            all_node_ids.add(sub_grp_id)
             condition_groups.append({
-                "group_id": review_grp_id,
+                "group_id": sub_grp_id,
                 "policy_id": pid,
-                "logic": "UNKNOWN",
+                "logic": "OR",
                 "is_root": False,
-                "description": f"{pname} 검토 대기 조건: 원천 의미 확인 전 판정에 사용하지 않음"
+                "description": f"{pname} {t_title}: {t_desc}"
             })
             handoff_edges.append({
                 "source_id": root_grp_id,
                 "relation": "CONTAINS_GROUP",
-                "target_id": review_grp_id,
-                "target_name": f"검토대기조건그룹 ({review_grp_id})",
+                "target_id": sub_grp_id,
+                "target_name": f"{t_title} ({sub_grp_id})",
                 "evidence_document_id": ev_doc,
-                "evidence_location": "검토대기조건그룹",
-                "review_status": "needs_review"
+                "evidence_location": "선택조건그룹",
+                "review_status": v_stat
             })
-            for cid in review_members:
+            for cid in items:
                 handoff_edges.append({
-                    "source_id": review_grp_id,
+                    "source_id": sub_grp_id,
                     "relation": "CONTAINS_CONDITION",
                     "target_id": cid,
                     "target_name": conditions_dict[cid]["name"],
                     "evidence_document_id": ev_doc,
-                    "evidence_location": "검토대기조건",
-                    "review_status": condition_review(cid)
+                    "evidence_location": "선택조건",
+                    "review_status": v_stat
                 })
-
-        # 확인된 조건만으로 TRUE(적격)가 나오지 않도록, 구조화하지 못한 원문 자격 문장을 UNKNOWN으로 남긴다.
-        # 온통청년 eligibility는 코드값으로 생성한 문장이므로 원문으로 보지 않는다.
-        free_text = [req.get("additional_qualification"), req.get("selection_criteria")]
-        if "age_limit_yn" not in req:
-            free_text.append(p.get("eligibility"))
-        free_text = [str(t).strip() for t in free_text if str(t or "").strip()]
-        residual = ["원문 자격 문장"] if free_text else []
-        known_age = any(cid.startswith("COND_AGE_") and not pending(cid) for cid in cond_list)
-        if req.get("age_review_needed") and not known_age:
-            residual.append("연령 값 검토(트리에 확인된 연령 조건 없음)")
-        if req.get("region_review_needed"):
-            residual.append("지역 상세 검토")
-        if root_logic == "AND" and residual:
-            text_grp_id = f"GRP_{pid}_UNKNOWN_UNSTRUCTURED"
-            all_node_ids.add(text_grp_id)
-            condition_groups.append({
-                "group_id": text_grp_id,
-                "policy_id": pid,
-                "logic": "UNKNOWN",
-                "is_root": False,
-                "description": (f"{pname} 구조화하지 않은 자격 요소 ({', '.join(residual)}): 판정에 사용하지 않음"
-                                + (f". 원문: {free_text[0][:300]}" if free_text else ""))
-            })
-            handoff_edges.append({
-                "source_id": root_grp_id,
-                "relation": "CONTAINS_GROUP",
-                "target_id": text_grp_id,
-                "target_name": f"미구조화자격요소그룹 ({text_grp_id})",
-                "evidence_document_id": ev_doc,
-                "evidence_location": "미구조화자격요소",
-                "review_status": "needs_review"
-            })
-
-        # 비정형 제외 문장만으로 비어 있는 NOT을 만들지 않는다.
-        if has_exclusion:
-            not_grp_id = f"GRP_{pid}_UNKNOWN_EXCL"
-            all_node_ids.add(not_grp_id)
-            condition_groups.append({
-                "group_id": not_grp_id,
-                "policy_id": pid,
-                "logic": "UNKNOWN",
-                "is_root": False,
-                "description": f"{pname} 참여 제외 대상 (구조화 확인 필요): {json.dumps(exclusion, ensure_ascii=False)}"
-            })
-            handoff_edges.append({
-                "source_id": root_grp_id,
-                "relation": "CONTAINS_GROUP",
-                "target_id": not_grp_id,
-                "target_name": f"참여제외그룹 ({not_grp_id})",
-                "evidence_document_id": ev_doc,
-                "evidence_location": "제외조건그룹",
-                "review_status": v_stat
-            })
-
-    return condition_groups, handoff_edges, all_node_ids
-
-
-def main():
-    if HANDOFF_DIR.exists():
-        raise FileExistsError("기존 데이터 덮어쓰기 금지: 새 후보 출력 디렉터리를 사용하세요.")
-    NEO4J_DIR.mkdir(parents=True, exist_ok=True)
-    QDRANT_DIR.mkdir(parents=True, exist_ok=True)
-
-    # 1. 원천 정제 데이터 로드
-    with open(PROCESSED_DIR / "policies.jsonl", "r", encoding="utf-8") as f:
-        policies = [json.loads(line) for line in f]
-
-    with open(PROCESSED_DIR / "documents.jsonl", "r", encoding="utf-8") as f:
-        documents = [json.loads(line) for line in f]
-
-    with open(PROCESSED_DIR / "chunks.jsonl", "r", encoding="utf-8") as f:
-        chunks = [json.loads(line) for line in f]
-
-    with open(PROCESSED_DIR / "relationships.jsonl", "r", encoding="utf-8") as f:
-        existing_edges = [json.loads(line) for line in f]
-
-    # raw/API 재호출 없이 정제 데이터에서 조건만 재구성한다.
-    import sys
-    if str(BASE_DIR) not in sys.path:
-        sys.path.insert(0, str(BASE_DIR))
-    from scripts.build_clean_dataset import rebuild_condition_relationships, rebuild_policy_conditions
-    policies = rebuild_policy_conditions(policies)
-    existing_edges = rebuild_condition_relationships(policies, existing_edges)
-
-    print(f"Loaded: {len(policies)} policies, {len(documents)} docs, {len(chunks)} chunks, {len(existing_edges)} existing edges.")
-
-    # 2. 노드 ID 수집 및 노드 엔티티 정의
-    all_node_ids = set()
-
-    # 2.1 Policies 노드 (237건)
-    policy_nodes = []
-    for p in policies:
-        pid = p["policy_id"]
-        all_node_ids.add(pid)
-        node = {
+    
+    # 제외 조건 (NOT DAG) — POL_005 국민내일배움카드 등
+    if has_exclusion:
+        not_grp_id = f"GRP_{pid}_NOT_EXCL"
+        all_node_ids.add(not_grp_id)
+        condition_groups.append({
+            "group_id": not_grp_id,
             "policy_id": pid,
-            "official_id": p.get("official_id"),
-            "policy_name": p.get("policy_name"),
-            "source_type": p.get("source_type"),
-            "category": p.get("category"),
-            "agency": p.get("agency"),
-            "organization": p.get("organization"),
-            "region": p.get("region"),
-            "life_stages": p.get("life_stages", p.get("life_cycles", [])),
-            "target_groups": p.get("target_groups", []),
-            "eligibility": p.get("eligibility"),
-            "benefit": p.get("benefit"),
-            "application_period": p.get("application_period"),
-            "application_method": p.get("application_method"),
-            "official_apply_url": p.get("official_apply_url"),
-            "source_url": p.get("source_url"),
-            "verification_status": p.get("verification_status"),
-            "eligibility_review_status": p.get("eligibility_review_status", "needs_review"),
-            "collected_at": p.get("collected_at")
+            "logic": "NOT",
+            "is_root": False,
+            "description": f"{pname} 참여 제외 대상 그룹: {', '.join(req.get('exclusion_criteria', []))[:80]}"
+        })
+        handoff_edges.append({
+            "source_id": root_grp_id,
+            "relation": "CONTAINS_GROUP",
+            "target_id": not_grp_id,
+            "target_name": f"참여제외그룹 ({not_grp_id})",
+            "evidence_document_id": ev_doc,
+            "evidence_location": "제외조건그룹",
+            "review_status": v_stat
+        })
+
+with open(NEO4J_DIR / "nodes_condition_group.jsonl", "w", encoding="utf-8") as f:
+    for cg in condition_groups:
+        f.write(json.dumps(cg, ensure_ascii=False) + "\n")
+
+with open(NEO4J_DIR / "relationships.jsonl", "w", encoding="utf-8") as f:
+    for edge in handoff_edges:
+        f.write(json.dumps(edge, ensure_ascii=False) + "\n")
+
+# 3. 전수 참조 무결성 검증 (Broken Reference 검사)
+print("\n" + "="*50)
+print("Verifying Referential Integrity across all edges...")
+broken_sources = []
+broken_targets = []
+for i, edge in enumerate(handoff_edges):
+    src = edge["source_id"]
+    tgt = edge["target_id"]
+    if src not in all_node_ids:
+        broken_sources.append((i, edge["relation"], src))
+    if tgt not in all_node_ids:
+        broken_targets.append((i, edge["relation"], tgt))
+
+print(f"Total Edges in Handoff: {len(handoff_edges)}")
+print(f"Total Unique Node IDs: {len(all_node_ids)}")
+print(f"Broken Source References: {len(broken_sources)}")
+print(f"Broken Target References: {len(broken_targets)}")
+
+if broken_sources or broken_targets:
+    raise ValueError(f"CRITICAL: Found broken references! Sources: {broken_sources[:5]}, Targets: {broken_targets[:5]}")
+else:
+    print("SUCCESS: 100% Referential Integrity Verified! Broken References = 0")
+print("="*50 + "\n")
+
+# 4. Qdrant Payload Chunks (557건) — Point ID: RFC 4122 규격 표준 UUIDv5(결정론적 생성)
+with open(QDRANT_DIR / "payload_chunks.jsonl", "w", encoding="utf-8") as f:
+    for chk in chunks:
+        pid = chk.get("policy_id")
+        pol = next((p for p in policies if p["policy_id"] == pid), {})
+        l_stages = pol.get("life_stages", pol.get("life_cycles", []))
+        
+        # Qdrant 서버/클라이언트 표준 RFC 4122 규격 UUIDv5 생성 (chunk_id 기준 결정론적)
+        uuid_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, chk["chunk_id"]))
+        
+        payload_record = {
+            "point_id": uuid_point_id,
+            "chunk_id": chk["chunk_id"],
+            "policy_id": chk["policy_id"],
+            "document_id": chk["document_id"],
+            "policy_name": chk["policy_name"],
+            "category": chk["category"],
+            "region": chk["region"],
+            "life_stages": l_stages,
+            "target_groups": pol.get("target_groups", []),
+            "eligibility_attributes": pol.get("eligibility_attributes", {}),
+            "section_title": chk.get("section_title", "본문"),
+            "text": chk["text"],
+            "source_url": chk["source_url"],
+            "verification_status": chk["verification_status"]
         }
-        policy_nodes.append(node)
+        f.write(json.dumps(payload_record, ensure_ascii=False) + "\n")
 
-    with open(NEO4J_DIR / "nodes_policy.jsonl", "w", encoding="utf-8") as f:
-        for node in policy_nodes:
-            f.write(json.dumps(node, ensure_ascii=False) + "\n")
+print(f"Qdrant payload chunks written: {len(chunks)} (with standard UUIDv5 point_ids)")
 
-    # 2.2 Organizations 노드 (116건) — relationships.jsonl의 target_id(AGENCY_*)와 100% 일치
-    org_edges = [e for e in existing_edges if e.get("relation") == "ADMINISTERED_BY"]
-    org_dict = {}
-    for e in org_edges:
-        tgt_id = e["target_id"]
-        if tgt_id not in org_dict:
-            org_dict[tgt_id] = {
-                "agency_id": tgt_id,
-                "name": e.get("target_name") or tgt_id.replace("AGENCY_", "").replace("_", " "),
-                "type": "소관부처/지자체"
-            }
-            all_node_ids.add(tgt_id)
-
-    with open(NEO4J_DIR / "nodes_organization.jsonl", "w", encoding="utf-8") as f:
-        for o in org_dict.values():
-            f.write(json.dumps(o, ensure_ascii=False) + "\n")
-
-    # 2.3 Regions 노드 (18건) — relationships.jsonl의 target_id(REGION_*)와 100% 일치
-    region_edges = [e for e in existing_edges if e.get("relation") == "AVAILABLE_IN"]
-    region_dict = {}
-    for e in region_edges:
-        tgt_id = e["target_id"]
-        if tgt_id not in region_dict:
-            region_dict[tgt_id] = {
-                "region_id": tgt_id,
-                "name": e.get("target_name") or tgt_id.replace("REGION_", "")
-            }
-            all_node_ids.add(tgt_id)
-
-    with open(NEO4J_DIR / "nodes_region.jsonl", "w", encoding="utf-8") as f:
-        for r in region_dict.values():
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-
-    # 2.4 Categories 노드 (5건) — relationships.jsonl의 target_id(CAT_*)와 100% 일치
-    cat_edges = [e for e in existing_edges if e.get("relation") == "HAS_CATEGORY"]
-    cat_dict = {}
-    for e in cat_edges:
-        tgt_id = e["target_id"]
-        if tgt_id not in cat_dict:
-            cat_dict[tgt_id] = {
-                "category_id": tgt_id,
-                "name": e.get("target_name") or tgt_id.replace("CAT_", "")
-            }
-            all_node_ids.add(tgt_id)
-
-    with open(NEO4J_DIR / "nodes_category.jsonl", "w", encoding="utf-8") as f:
-        for c in cat_dict.values():
-            f.write(json.dumps(c, ensure_ascii=False) + "\n")
-
-    # 2.5 LifeStages 노드 (6대 표준 생애단계)
-    lifestages = [
-        {"stage_id": "LIFESTAGE_영유아", "name": "영유아", "age_range": "0~5세", "description": "취학 전 영유아 및 보육 지원"},
-        {"stage_id": "LIFESTAGE_아동", "name": "아동", "age_range": "6~12세", "description": "초등 학령기 아동 및 방과후 돌봄 지원"},
-        {"stage_id": "LIFESTAGE_청소년", "name": "청소년", "age_range": "13~18세", "description": "중고등 청소년, 진로 및 자립 지원"},
-        {"stage_id": "LIFESTAGE_청년", "name": "청년", "age_range": "19~39세", "description": "청년 구직·주거·자산형성·일자리 지원"},
-        {"stage_id": "LIFESTAGE_중장년", "name": "중장년", "age_range": "40~64세", "description": "중장년 재취업, 노후 준비 및 전직 지원"},
-        {"stage_id": "LIFESTAGE_노년", "name": "노년", "age_range": "65세 이상", "description": "어르신 기초연금, 노후 건강 및 돌봄 지원"}
+# 5. Qdrant Collection Config (임베딩 모델 확정 전 고정값 방지: size=null 및 프리셋 명시)
+collection_cfg = {
+    "collection_name": "lifepolicy_chunks",
+    "vectors_config": {
+        "size": None,
+        "distance": "Cosine",
+        "_instruction": "임베딩 모델 확정 시 model_dimension_presets의 차원으로 주입하여 컬렉션을 생성합니다 (OpenAI 1536, BGE-M3 1024 등)."
+    },
+    "model_dimension_presets": {
+        "OpenAI/text-embedding-3-small": 1536,
+        "OpenAI/text-embedding-3-large": 3072,
+        "BAAI/bge-m3": 1024,
+        "intfloat/multilingual-e5-large": 1024
+    },
+    "on_disk_payload": True,
+    "payload_indexes": [
+        {"field_name": "policy_id", "field_type": "keyword"},
+        {"field_name": "category", "field_type": "keyword"},
+        {"field_name": "region", "field_type": "keyword"},
+        {"field_name": "life_stages", "field_type": "keyword"},
+        {"field_name": "target_groups", "field_type": "keyword"},
+        {"field_name": "verification_status", "field_type": "keyword"}
     ]
-    for ls in lifestages:
-        all_node_ids.add(ls["stage_id"])
+}
+with open(QDRANT_DIR / "collection_config.json", "w", encoding="utf-8") as f:
+    json.dump(collection_cfg, f, ensure_ascii=False, indent=2)
 
-    with open(NEO4J_DIR / "nodes_lifestage.jsonl", "w", encoding="utf-8") as f:
-        for ls in lifestages:
-            f.write(json.dumps(ls, ensure_ascii=False) + "\n")
-
-    # 2.6 TargetGroup 노드 (11건) — relationships.jsonl의 target_id(GROUP_*)와 100% 일치
-    target_edges = [e for e in existing_edges if e.get("relation") == "TARGETS"]
-    target_group_dict = {}
-    for e in target_edges:
-        tgt_id = e["target_id"]
-        if tgt_id not in target_group_dict:
-            target_group_dict[tgt_id] = {
-                "group_id": tgt_id,
-                "name": e.get("target_name") or tgt_id.replace("GROUP_", ""),
-                "description": f"생애주기 외 특정 자격/가구/사회적 집단 ({e.get('target_name')})"
-            }
-            all_node_ids.add(tgt_id)
-
-    with open(NEO4J_DIR / "nodes_target_group.jsonl", "w", encoding="utf-8") as f:
-        for tg in target_group_dict.values():
-            f.write(json.dumps(tg, ensure_ascii=False) + "\n")
-
-    # 2.7 Documents 노드 (246건)
-    for d in documents:
-        doc_id = d["document_id"]
-        all_node_ids.add(doc_id)
-
-    with open(NEO4J_DIR / "nodes_document.jsonl", "w", encoding="utf-8") as f:
-        for d in documents:
-            doc_node = {
-                "document_id": d["document_id"],
-                "policy_id": d["policy_id"],
-                "title": d["title"],
-                "source_type": d["source_type"],
-                "source_url": d["source_url"],
-                "local_raw_path": d.get("local_raw_path"),
-                "content_hash": d.get("content_hash"),
-                "verification_status": d.get("verification_status")
-            }
-            f.write(json.dumps(doc_node, ensure_ascii=False) + "\n")
-
-    # 2.8 EligibilityConditions 노드 (52건) — relationships.jsonl의 target_id(COND_*)와 100% 일치
-    cond_edges = [e for e in existing_edges if e.get("relation") == "REQUIRES_CONDITION"]
-    conditions_dict = {}
-
-    conditions_dict = build_condition_nodes(existing_edges)
-    all_node_ids.update(conditions_dict)
-
-    with open(NEO4J_DIR / "nodes_eligibility_condition.jsonl", "w", encoding="utf-8") as f:
-        for ec in conditions_dict.values():
-            f.write(json.dumps(ec, ensure_ascii=False) + "\n")
-
-    # 2.9 ConditionGroups 노드 & 계층적 DAG 관계 구축 (P0-2)
-    condition_groups, handoff_edges, group_ids = build_condition_groups(policies, existing_edges, conditions_dict)
-    all_node_ids.update(group_ids)
-
-    with open(NEO4J_DIR / "nodes_condition_group.jsonl", "w", encoding="utf-8") as f:
-        for cg in condition_groups:
-            f.write(json.dumps(cg, ensure_ascii=False) + "\n")
-
-    with open(NEO4J_DIR / "relationships.jsonl", "w", encoding="utf-8") as f:
-        for edge in handoff_edges:
-            f.write(json.dumps(edge, ensure_ascii=False) + "\n")
-
-    # 3. 전수 참조 무결성 검증 (Broken Reference 검사)
-    print("\n" + "="*50)
-    print("Verifying Referential Integrity across all edges...")
-    broken_sources = []
-    broken_targets = []
-    for i, edge in enumerate(handoff_edges):
-        src = edge["source_id"]
-        tgt = edge["target_id"]
-        if src not in all_node_ids:
-            broken_sources.append((i, edge["relation"], src))
-        if tgt not in all_node_ids:
-            broken_targets.append((i, edge["relation"], tgt))
-
-    print(f"Total Edges in Handoff: {len(handoff_edges)}")
-    print(f"Total Unique Node IDs: {len(all_node_ids)}")
-    print(f"Broken Source References: {len(broken_sources)}")
-    print(f"Broken Target References: {len(broken_targets)}")
-
-    if broken_sources or broken_targets:
-        raise ValueError(f"CRITICAL: Found broken references! Sources: {broken_sources[:5]}, Targets: {broken_targets[:5]}")
-    else:
-        print("SUCCESS: 100% Referential Integrity Verified! Broken References = 0")
-    print("="*50 + "\n")
-
-    # 4. Qdrant Payload Chunks (557건) — Point ID: RFC 4122 규격 표준 UUIDv5(결정론적 생성)
-    with open(QDRANT_DIR / "payload_chunks.jsonl", "w", encoding="utf-8") as f:
-        for chk in chunks:
-            pid = chk.get("policy_id")
-            pol = next((p for p in policies if p["policy_id"] == pid), {})
-            l_stages = pol.get("life_stages", pol.get("life_cycles", []))
-
-            # Qdrant 서버/클라이언트 표준 RFC 4122 규격 UUIDv5 생성 (chunk_id 기준 결정론적)
-            uuid_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, chk["chunk_id"]))
-
-            payload_record = {
-                "point_id": uuid_point_id,
-                "chunk_id": chk["chunk_id"],
-                "policy_id": chk["policy_id"],
-                "document_id": chk["document_id"],
-                "policy_name": chk["policy_name"],
-                "category": chk["category"],
-                "region": pol.get("region", chk["region"]),
-                "life_stages": l_stages,
-                "target_groups": pol.get("target_groups", []),
-                "eligibility_attributes": pol.get("eligibility_attributes", {}),
-                "eligibility_review_status": pol.get("eligibility_review_status", "needs_review"),
-                "section_title": chk.get("section_title", "본문"),
-                "text": chk["text"],
-                "source_url": chk["source_url"],
-                "verification_status": chk["verification_status"]
-            }
-            f.write(json.dumps(payload_record, ensure_ascii=False) + "\n")
-
-    print(f"Qdrant payload chunks written: {len(chunks)} (with standard UUIDv5 point_ids)")
-
-    # 5. Qdrant Collection Config (임베딩 모델 확정 전 고정값 방지: size=null 및 프리셋 명시)
-    collection_cfg = {
-        "collection_name": "lifepolicy_chunks",
-        "vectors_config": {
-            "size": None,
-            "distance": "Cosine",
-            "_instruction": "임베딩 모델 확정 시 model_dimension_presets의 차원으로 주입하여 컬렉션을 생성합니다 (OpenAI 1536, BGE-M3 1024 등)."
-        },
-        "model_dimension_presets": {
-            "OpenAI/text-embedding-3-small": 1536,
-            "OpenAI/text-embedding-3-large": 3072,
-            "BAAI/bge-m3": 1024,
-            "intfloat/multilingual-e5-large": 1024
-        },
-        "on_disk_payload": True,
-        "payload_indexes": [
-            {"field_name": "policy_id", "field_type": "keyword"},
-            {"field_name": "category", "field_type": "keyword"},
-            {"field_name": "region", "field_type": "keyword"},
-            {"field_name": "life_stages", "field_type": "keyword"},
-            {"field_name": "target_groups", "field_type": "keyword"},
-            {"field_name": "verification_status", "field_type": "keyword"}
-        ]
-    }
-    with open(QDRANT_DIR / "collection_config.json", "w", encoding="utf-8") as f:
-        json.dump(collection_cfg, f, ensure_ascii=False, indent=2)
-
-    # 6. Cypher DDL (9대 노드 라벨 제약조건 및 인덱스 완비)
-    cypher_ddl = """// ========================================================
+# 6. Cypher DDL (9대 노드 라벨 제약조건 및 인덱스 완비)
+cypher_ddl = """// ========================================================
 // LifePolicy AI — Neo4j Constraints & Indexes (DDL)
 // 9대 노드 레이블 유니크 제약조건 및 고속 탐색 인덱스 (총 13개 DDL)
 // ========================================================
@@ -671,11 +530,11 @@ FOR (g:ConditionGroup) ON (g.logic);
 CREATE INDEX index_eligibility_condition_type IF NOT EXISTS
 FOR (ec:EligibilityCondition) ON (ec.type);
 """
-    with open(NEO4J_DIR / "cypher_ddl.cypher", "w", encoding="utf-8") as f:
-        f.write(cypher_ddl)
+with open(NEO4J_DIR / "cypher_ddl.cypher", "w", encoding="utf-8") as f:
+    f.write(cypher_ddl)
 
-    # 7. Neo4j 검증 쿼리 스크립트 (verify_neo4j.cypher)
-    verify_cypher = """// ========================================================
+# 7. Neo4j 검증 쿼리 스크립트 (verify_neo4j.cypher)
+verify_cypher = """// ========================================================
 // LifePolicy AI — Neo4j 적재 검증 쿼리 세트
 // 주민혁 님 (Neo4j & Qdrant 엔지니어) 검증용 Cypher
 // ========================================================
@@ -708,11 +567,11 @@ MATCH (p)-[:APPLIES_TO_LIFESTAGE]->(ls:LifeStage {stage_id: 'LIFESTAGE_청년'})
 MATCH (p)-[:TARGETS]->(tg:TargetGroup {group_id: 'GROUP_NEWLYWED'})
 RETURN p.policy_id, p.policy_name, p.benefit, p.official_apply_url;
 """
-    with open(NEO4J_DIR / "verify_neo4j.cypher", "w", encoding="utf-8") as f:
-        f.write(verify_cypher)
+with open(NEO4J_DIR / "verify_neo4j.cypher", "w", encoding="utf-8") as f:
+    f.write(verify_cypher)
 
-    # 8. Neo4j 파이썬 일괄 적재 및 자동 실측 검증 스크립트 (load_neo4j.py)
-    load_script = '''"""
+# 8. Neo4j 파이썬 일괄 적재 및 자동 실측 검증 스크립트 (load_neo4j.py)
+load_script = '''"""
 LifePolicy AI — Neo4j 일괄 적재 및 실제 건수 자동 검증 스크립트 (load_neo4j.py)
 주민혁 님을 위한 멱등성 보장 9대 노드 및 관계 안전 적재 파이프라인
 - DDL 주석 제거 및 13개 제약조건/인덱스 전수 적용
@@ -785,7 +644,7 @@ def run_pipeline():
     print("=" * 70)
     print("       LifePolicy AI — Neo4j DB 일괄 적재 및 전수 검증 파이프라인")
     print("=" * 70)
-
+    
     if not NEO4J_AVAILABLE:
         print("\\n>> [NOT_TESTED] neo4j 파이썬 드라이버 라이브러리 미설치 ('pip install neo4j' 필요) <<")
         print("   안내: DB 엔지니어(주민혁 님) 인프라 환경에서 패키지 설치 및 서버 기동 후 실행하십시오.")
@@ -809,7 +668,7 @@ def run_pipeline():
         ddl_file = DATA_DIR / "cypher_ddl.cypher"
         with open(ddl_file, "r", encoding="utf-8") as f:
             ddl_statements = parse_cypher_ddl(f.read())
-
+        
         print(f"  Parsed {len(ddl_statements)} DDL statements (Target: 13).")
         for i, stmt in enumerate(ddl_statements, 1):
             session.run(stmt)
@@ -833,13 +692,13 @@ def run_pipeline():
             fpath = DATA_DIR / fname
             with open(fpath, "r", encoding="utf-8") as f:
                 rows = [json.loads(line) for line in f if line.strip()]
-
+            
             # Execute transactional write
             session.execute_write(
                 lambda tx, b: tx.run(f"UNWIND $batch AS row {cypher_clause}", batch=b),
                 rows
             )
-
+            
             # Actual count verification in DB
             result = session.run(f"MATCH (n:{label}) RETURN count(n) AS cnt").single()
             actual_cnt = result["cnt"]
@@ -909,11 +768,7 @@ def run_pipeline():
 if __name__ == "__main__":
     run_pipeline()
 '''
-    with open(NEO4J_DIR / "load_neo4j.py", "w", encoding="utf-8") as f:
-        f.write(load_script)
+with open(NEO4J_DIR / "load_neo4j.py", "w", encoding="utf-8") as f:
+    f.write(load_script)
 
-    print("build_handoff_package.py successfully written!")
-
-
-if __name__ == "__main__":
-    main()
+print("build_handoff_package.py successfully written!")

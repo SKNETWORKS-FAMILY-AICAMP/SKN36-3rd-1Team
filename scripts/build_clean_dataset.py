@@ -14,7 +14,6 @@ LifePolicy AI - 3차 데이터 오류 수정 및 3종 공식 API 통합 정제 �
 from __future__ import annotations
 
 import csv
-import copy
 import json
 import re
 import sys
@@ -43,6 +42,9 @@ DATA_DIR = BASE_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
 METADATA_DIR = DATA_DIR / "metadata"
+
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+METADATA_DIR.mkdir(parents=True, exist_ok=True)
 
 NOW = "2026-11-04T19:30:00+09:00"
 
@@ -93,17 +95,9 @@ def infer_region_from_text(org_name: str, title: str = "") -> List[str]:
     found: List[str] = []
     for short_nm, full_nm in SGG_TO_REGION.items():
         if full_nm in combined or combined.startswith(short_nm):
-            # 명시된 시군구만 보존한다. 기관명에서 없는 지명을 복원하지 않는다.
-            match = re.search(
-                rf"(?:{full_nm}|{short_nm})(?:\s+([가-힣]+[시군구]))(?:\s+([가-힣]+구))?",
-                combined,
-            )
-            region = full_nm
-            if match:
-                region += " " + " ".join(part for part in match.groups() if part)
-            if region not in found:
-                found.append(region)
-    return found if found else ["unknown"]
+            if full_nm not in found:
+                found.append(full_nm)
+    return found if found else ["전국"]
 
 
 def infer_category(raw_cat: str, title: str, text: str) -> str:
@@ -142,17 +136,6 @@ def infer_target_groups(life_str: str, trg_str: str, title: str, text: str) -> L
     if not groups:
         groups.append("일반국민")
     return groups
-
-
-def get_structured_conditions(requirements):
-    """정제본에 남은 JA0410/JA0322 원값으로 누락만 복구하며 입력은 수정하지 않는다."""
-    structured = copy.deepcopy(requirements.get("structured_support_conditions") or {})
-    raw = requirements.get("support_conditions") or {}
-    # 두 코드 모두 '해당사항없음'. 의미 해석 없이 원천 코드의 존재만 보존한다.
-    for code, group in (("JA0410", "가구주거조건"), ("JA0322", "생애주기특수조건")):
-        if code in raw:
-            structured.setdefault(group, {})["해당사항없음"] = structure_ja_conditions(raw)[group]["해당사항없음"]
-    return structured
 
 
 def extract_lifecycles_and_attributes(
@@ -239,7 +222,7 @@ def extract_lifecycles_and_attributes(
             lifecycles.add("노년")
 
     # 3. 정부24 구조화 지원조건 (JA 코드)
-    s_cond = get_structured_conditions(req)
+    s_cond = req.get("structured_support_conditions") or {}
     if s_cond:
         hh = s_cond.get("가구주거조건", {})
         if hh.get("한부모가정/조손가정") == "적용대상":
@@ -251,7 +234,7 @@ def extract_lifecycles_and_attributes(
         if hh.get("북한이탈주민") == "적용대상":
             spec.add("다문화·탈북민")
 
-        emp_c = s_cond.get("취업경제활동조건", s_cond.get("취업활동조건", {}))
+        emp_c = s_cond.get("취업활동조건", {})
         if emp_c.get("근로자/직장인") == "적용대상":
             emp.add("재직자·근로자")
         if emp_c.get("구직자/실업자") == "적용대상":
@@ -266,8 +249,10 @@ def extract_lifecycles_and_attributes(
             spec.add("국가보훈대상자")
 
         inc_c = s_cond.get("소득구간조건", {})
-        # 구간을 상한으로 축약하거나 첫 구간만 선택하지 않는다.
-        inc.update(name for name, status in inc_c.items() if status == "적용대상")
+        if inc_c.get("중위소득 0~50%") == "적용대상":
+            inc.add("기준중위소득_50%이하")
+        elif inc_c.get("중위소득 51~75%") == "적용대상":
+            inc.add("기준중위소득_75%이하")
 
         lc_cond = s_cond.get("생애주기조건", {})
         if any(lc_cond.get(k) == "적용대상" for k in ["예비부모/난임", "임산부", "출산/입양"]):
@@ -430,10 +415,7 @@ def make_policy_record(
         "source_url": source_url,
         "source_document_ids": source_document_ids,
         "reception_status": reception_status,
-        "eligibility_review_status": "needs_review" if (
-            get_structured_conditions(requirements) or "age_limit_yn" in requirements
-            or "income_condition_code" in requirements
-        ) else verification_status,
+        "eligibility_review_status": verification_status,
         "verification_status": verification_status,
         "retrieved_at": NOW,
         "collected_at": NOW,
@@ -515,288 +497,7 @@ def load_youthcenter_all() -> Dict[str, Dict[str, Any]]:
     return items
 
 
-def build_condition_edges(pol: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """정제 정책 한 건에서 조건만 재구성한다. 파일/DB 접근 없음."""
-    edges = []
-    pid = pol["policy_id"]
-    ev_doc = (pol.get("source_document_ids") or [None])[0]
-    v_stat = pol.get("verification_status", "needs_review")
-    # 6. REQUIRES_CONDITION (구조화 지원조건 엣지 - 연령·소득·가구)
-    reqs = pol.get("requirements", {})
-    s_cond = get_structured_conditions(reqs)
-    def add_condition(cid, name, location, **metadata):
-        edges.append({
-            "source_id": pid, "relation": "REQUIRES_CONDITION", "target_id": cid,
-            "target_name": name, "evidence_document_id": ev_doc,
-            "evidence_location": location, "review_status": "needs_review", **metadata,
-        })
-
-    # 청년 API 범위 및 소득 원값을 버리지 않는다. N 및 소득 단위/해석은 보류한다.
-    if not s_cond and "age_limit_yn" in reqs:
-        low, high = reqs.get("min_age"), reqs.get("max_age")
-        if low is not None or high is not None:
-            # Y와 정상 범위가 명시된 연령까지 소득 검토 때문에 보류하지 않는다.
-            # N, 누락 경계, 역전 범위 및 기존 검토 표시는 그대로 보류한다.
-            age_is_explicit = (
-                reqs.get("age_limit_yn") == "Y" and reqs.get("age_review_needed") is False
-                and type(low) is int and type(high) is int and 0 < low <= high
-            ) or bool(reqs.get("age_text_evidence"))
-            add_condition(
-                f"COND_AGE_{low if low is not None else 'UNKNOWN'}_{high if high is not None else 'UNKNOWN'}",
-                f"연령조건: {low}~{high}", "온통청년 sprtTrgtMinAge/sprtTrgtMaxAge/sprtTrgtAgeLmtYn",
-                review_status=v_stat if age_is_explicit else "needs_review",
-            )
-    # 공식 코드 '무관'은 다른 '제한없음' 라벨처럼 조건 관계를 만들지 않는다. 원값은 requirements에 남는다.
-    if "income_condition_code" in reqs and not youth_income_unrestricted(reqs):
-        income = {key: reqs.get(key) for key in (
-            "income_condition_code", "income_condition_label", "income_min_amount",
-            "income_max_amount", "income_etc_details",
-        )}
-        raw_value = json.dumps(income, ensure_ascii=False, sort_keys=True)
-        add_condition(
-            "COND_YC_INCOME_" + compute_sha256(raw_value)[:16].upper(),
-            "온통청년 소득조건 (원값/해석 확인 필요)", "온통청년 earnCndSeCd/earnMinAmt/earnMaxAmt/earnEtcCn",
-            condition_type="OTHER", raw_value=raw_value,
-        )
-    if s_cond:
-        age_c = s_cond.get("연령조건", {})
-        min_a = age_c.get("대상연령_시작")
-        max_a = age_c.get("대상연령_종료")
-        if min_a is not None or max_a is not None:
-            edges.append(
-                {
-                    "source_id": pid,
-                    "relation": "REQUIRES_CONDITION",
-                    "target_id": f"COND_AGE_{min_a if min_a is not None else 'UNKNOWN'}_{max_a if max_a is not None else 'UNKNOWN'}",
-                    "target_name": f"연령조건: 만 {min_a}세~{max_a}세 (누락 경계는 미확인)",
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "지원조건 JA0110/JA0111",
-                    "review_status": v_stat,
-                }
-            )
-        for hh_name, hh_val in s_cond.get("가구주거조건", {}).items():
-            if hh_val == "적용대상":
-                edges.append(
-                    {
-                        "source_id": pid,
-                        "relation": "REQUIRES_CONDITION",
-                        "target_id": f"COND_HH_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', hh_name)}",
-                        "target_name": f"가구주거조건: {hh_name}",
-                        "evidence_document_id": ev_doc,
-                        "evidence_location": "지원조건 JA04",
-                        "review_status": v_stat,
-                    }
-                )
-        for inc_name, inc_val in s_cond.get("소득구간조건", {}).items():
-            if inc_val == "적용대상":
-                edges.append(
-                    {
-                        "source_id": pid,
-                        "relation": "REQUIRES_CONDITION",
-                        "target_id": f"COND_INC_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', inc_name)}",
-                        "target_name": f"소득조건: {inc_name}",
-                        "evidence_document_id": ev_doc,
-                        "evidence_location": "지원조건 JA02",
-                        "review_status": v_stat,
-                    }
-                )
-
-        for name, status in s_cond.get("취업경제활동조건", {}).items():
-            if status == "적용대상":
-                slug = re.sub(r"[^0-9A-Za-z가-힣]+", "_", name)
-                add_condition(f"COND_JOB_{slug}", f"취업경제활동조건: {name}", "지원조건 JA03/JA11")
-        # JA의 선택/필수 의미와 본문 충돌이 확인되기 전 적격 판정 금지.
-        # 단, 연령은 JA0110/JA0111과 지원대상 원문이 같은 범위 하나만 말할 때 출처 상태를 유지한다.
-        for edge in edges:
-            if edge["target_id"].startswith("COND_AGE_") and reqs.get("age_text_evidence"):
-                edge["review_status"] = v_stat
-                edge["evidence_location"] = "지원조건 JA0110/JA0111 + 원문 일치: " + reqs["age_text_evidence"][:200]
-            else:
-                edge["review_status"] = "needs_review"
-
-    # 7. 온통청년 구조화 요건 엣지 (혼인, 취업, 학력, 특화)
-    mrg_lbl = reqs.get("marriage_status_label")
-    if mrg_lbl in ("기혼", "미혼"):
-        edges.append(
-            {
-                "source_id": pid,
-                "relation": "REQUIRES_CONDITION",
-                "target_id": f"COND_MRG_{mrg_lbl}",
-                "target_name": f"혼인조건: {mrg_lbl}",
-                "evidence_document_id": ev_doc,
-                "evidence_location": "온통청년 mrgSttsCd",
-                "review_status": v_stat,
-            }
-        )
-    for j_lbl in reqs.get("job_labels", []):
-        if j_lbl and j_lbl != "제한없음":
-            edges.append(
-                {
-                    "source_id": pid,
-                    "relation": "REQUIRES_CONDITION",
-                    "target_id": f"COND_JOB_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', j_lbl)}",
-                    "target_name": f"취업조건: {j_lbl}",
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "온통청년 jobCd",
-                    "review_status": v_stat,
-                }
-            )
-    for s_lbl in reqs.get("school_labels", []):
-        if s_lbl and s_lbl != "제한없음":
-            edges.append(
-                {
-                    "source_id": pid,
-                    "relation": "REQUIRES_CONDITION",
-                    "target_id": f"COND_EDU_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', s_lbl)}",
-                    "target_name": f"학력조건: {s_lbl}",
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "온통청년 schoolCd",
-                    "review_status": v_stat,
-                }
-            )
-    for sp_lbl in reqs.get("special_labels", []):
-        if sp_lbl and sp_lbl != "제한없음":
-            edges.append(
-                {
-                    "source_id": pid,
-                    "relation": "REQUIRES_CONDITION",
-                    "target_id": f"COND_SP_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', sp_lbl)}",
-                    "target_name": f"특화조건: {sp_lbl}",
-                    "evidence_document_id": ev_doc,
-                    "evidence_location": "온통청년 sbizCd",
-                    "review_status": v_stat,
-                }
-            )
-
-    return edges
-
-
-AGE_RANGE_PATTERN = r"(?:만\s*)?(\d{1,3})\s*세?\s*(?:~|∼|～|-|부터)\s*(?:만\s*)?(\d{1,3})\s*세"
-
-
-def age_text_evidence(low, high, texts):
-    """독립 원문에 같은 연령 범위 하나만 명시된 경우에만 근거 문장을 돌려준다.
-
-    코드 플래그(age_limit_yn)의 의미는 해석하지 않는다. 다른 범위가 함께 있거나
-    범위가 없으면 None. 생성기가 만든 문장(온통청년 eligibility)은 입력하지 않는다.
-    """
-    if type(low) is not int or type(high) is not int or not 0 < low <= high:
-        return None
-    found = []
-    for name, text in texts:
-        for match in re.finditer(AGE_RANGE_PATTERN, str(text or "")):
-            found.append((int(match.group(1)), int(match.group(2)), name, match.group(0)))
-    if not found or {(a, b) for a, b, _, _ in found} != {(low, high)}:
-        return None
-    return "; ".join(sorted({f"{name}: {snippet}" for _, _, name, snippet in found}))
-
-
-OFFICIAL_AGE_REVIEW = json.loads(
-    (BASE_DIR / "data/metadata/issue21_official_age_review.json").read_text(encoding="utf-8"))["decisions"]
-
-
-def youth_income_unrestricted(req):
-    """온통청년 공식 코드표(API코드정보.xlsx) earnCndSeCd 0043001='무관'이고 다른 소득 정보가 없을 때만 True."""
-    return (req.get("income_condition_code") == "0043001"
-            and not str(req.get("income_etc_details") or "").strip()
-            and str(req.get("income_min_amount") or "0") in ("0", "")
-            and str(req.get("income_max_amount") or "0") in ("0", ""))
-
-
-def rebuild_policy_conditions(policies):
-    """원본 정책·출처는 보존하고 후보의 조건 메타데이터만 갱신한다."""
-    candidates = copy.deepcopy(policies)
-    for policy in candidates:
-        req = policy.get("requirements") or {}
-        # 기관명만으로 적용 지역을 단정하지 않는다. 기존 광역지역과 일치하고
-        # 자격 원문에도 같은 시군구가 명시된 경우에만 상세 표기를 보존한다.
-        regions = policy.get("regions") or []
-        detailed = infer_region_from_text(policy.get("agency", ""))
-        evidence = "\n".join(str(value or "") for value in (
-            policy.get("eligibility"), req.get("selection_criteria"),
-            req.get("additional_qualification"),
-        ))
-        if len(regions) == len(detailed) == 1 and detailed[0].startswith(regions[0] + " "):
-            municipality = detailed[0][len(regions[0]) + 1:]
-            if municipality in evidence:
-                # 계약(AVAILABLE_IN: 전국 또는 17개 시도)과 시도 검색을 유지한다.
-                # 시군구는 별도 필드로만 보존해 시도 전체 적용으로 오판하지 않게 한다.
-                policy["region_detail"] = detailed[0]
-                policy.setdefault("requirements", req)
-                req["region_review_needed"] = True
-                req["region_evidence"] = evidence
-                policy["eligibility_review_status"] = "needs_review"
-        structured = get_structured_conditions(req)
-        if structured:
-            req["structured_support_conditions"] = structured
-            _, attrs = extract_lifecycles_and_attributes(
-                policy_name=policy.get("policy_name", ""),
-                target_groups=policy.get("target_groups", []),
-                requirements=req, eligibility_text=policy.get("eligibility", ""),
-            )
-            policy.setdefault("eligibility_attributes", {})["income_level"] = attrs["income_level"]
-            policy["eligibility_review_status"] = "needs_review"
-        if "age_limit_yn" in req and req["age_limit_yn"] != "Y":
-            req["age_limit"] = None
-            req["age_review_needed"] = True
-            policy["eligibility_review_status"] = "needs_review"
-        # 연령 코드값과 독립 원문이 같은 범위를 말할 때만 연령 조건을 확인된 조건으로 쓴다.
-        age = (structured or {}).get("연령조건") or {}
-        if age:
-            texts = [("지원대상", policy.get("eligibility")), ("선정기준", req.get("selection_criteria")),
-                     ("추가자격", req.get("additional_qualification"))]
-            evidence = age_text_evidence(age.get("대상연령_시작"), age.get("대상연령_종료"), texts)
-        elif "age_limit_yn" in req:
-            evidence = age_text_evidence(req.get("min_age"), req.get("max_age"),
-                                         sorted((req.get("source_free_text") or {}).items()))
-        else:
-            evidence = None
-        review = OFFICIAL_AGE_REVIEW.get(policy.get("policy_id"), {})
-        if review.get("status") == "confirmed" and list(review.get("structured_age") or []) == [
-                age.get("대상연령_시작"), age.get("대상연령_종료")]:
-            evidence = "공식 원문 검토(data/metadata/issue21_official_age_review.json): " + review["confirmed_condition"]
-        elif review.get("status") == "unresolved":
-            evidence = None
-        if evidence:
-            req["age_text_evidence"] = evidence
-        if "income_condition_code" in req:
-            if youth_income_unrestricted(req):
-                req["income_review_needed"] = False
-                req["income_condition_basis"] = "온통청년 API코드정보.xlsx earnCndSeCd 0043001=무관, 기타/금액 없음"
-            else:
-                req["income_review_needed"] = True
-                policy["eligibility_review_status"] = "needs_review"
-    return candidates
-
-
-def rebuild_condition_relationships(policies, existing_edges):
-    """지원하는 원천의 조건만 교체한다. 그 외 관계와 정책 객체는 보존한다."""
-    supported = [p for p in policies if (
-        (p.get("requirements") or {}).get("structured_support_conditions")
-        or "age_limit_yn" in (p.get("requirements") or {})
-        or "income_condition_code" in (p.get("requirements") or {})
-    )]
-    policy_ids = {p["policy_id"] for p in supported}
-    edges = [dict(e) for e in existing_edges if not (
-        e.get("relation") == "REQUIRES_CONDITION" and e["source_id"] in policy_ids
-    )]
-    for policy in supported:
-        edges.extend(build_condition_edges(policy))
-    # AVAILABLE_IN은 기존 시도 관계를 그대로 둔다. 시군구는 Policy.region_detail에만 기록한다.
-    return edges
-
-
-def main(output_dir: Path) -> None:
-    global PROCESSED_DIR, METADATA_DIR
-    output_dir = Path(output_dir).resolve()
-    candidate_root = (DATA_DIR / "candidates").resolve()
-    if not output_dir.is_relative_to(candidate_root) or output_dir == candidate_root:
-        raise ValueError("출력은 data/candidates 아래 새 디렉터리여야 합니다.")
-    output_dir.mkdir(parents=True, exist_ok=False)
-    PROCESSED_DIR = output_dir / "processed"
-    METADATA_DIR = output_dir / "metadata"
-    PROCESSED_DIR.mkdir()
-    METADATA_DIR.mkdir()
+def main() -> None:
     print("=== [Step 1] Loading Raw Files & Extracting Cleaned Texts ===")
 
     gov24_all = load_gov24_merged()
@@ -2030,7 +1731,105 @@ def main(output_dir: Path) -> None:
                 }
             )
 
-        edges.extend(build_condition_edges(pol))
+        # 6. REQUIRES_CONDITION (구조화 지원조건 엣지 - 연령·소득·가구)
+        reqs = pol.get("requirements", {})
+        s_cond = reqs.get("structured_support_conditions") or {}
+        if s_cond:
+            age_c = s_cond.get("연령조건", {})
+            min_a = age_c.get("대상연령_시작")
+            max_a = age_c.get("대상연령_종료")
+            if min_a or max_a:
+                edges.append(
+                    {
+                        "source_id": pid,
+                        "relation": "REQUIRES_CONDITION",
+                        "target_id": f"COND_AGE_{min_a or 0}_{max_a or 99}",
+                        "target_name": f"연령조건: 만 {min_a or 0}세~{max_a or 99}세",
+                        "evidence_document_id": ev_doc,
+                        "evidence_location": "지원조건 JA0110/JA0111",
+                        "review_status": v_stat,
+                    }
+                )
+            for hh_name, hh_val in s_cond.get("가구주거조건", {}).items():
+                if hh_val == "적용대상":
+                    edges.append(
+                        {
+                            "source_id": pid,
+                            "relation": "REQUIRES_CONDITION",
+                            "target_id": f"COND_HH_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', hh_name)}",
+                            "target_name": f"가구주거조건: {hh_name}",
+                            "evidence_document_id": ev_doc,
+                            "evidence_location": "지원조건 JA04",
+                            "review_status": v_stat,
+                        }
+                    )
+            for inc_name, inc_val in s_cond.get("소득구간조건", {}).items():
+                if inc_val == "적용대상":
+                    edges.append(
+                        {
+                            "source_id": pid,
+                            "relation": "REQUIRES_CONDITION",
+                            "target_id": f"COND_INC_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', inc_name)}",
+                            "target_name": f"소득조건: {inc_name}",
+                            "evidence_document_id": ev_doc,
+                            "evidence_location": "지원조건 JA02",
+                            "review_status": v_stat,
+                        }
+                    )
+
+        # 7. 온통청년 구조화 요건 엣지 (혼인, 취업, 학력, 특화)
+        mrg_lbl = reqs.get("marriage_status_label")
+        if mrg_lbl in ("기혼", "미혼"):
+            edges.append(
+                {
+                    "source_id": pid,
+                    "relation": "REQUIRES_CONDITION",
+                    "target_id": f"COND_MRG_{mrg_lbl}",
+                    "target_name": f"혼인조건: {mrg_lbl}",
+                    "evidence_document_id": ev_doc,
+                    "evidence_location": "온통청년 mrgSttsCd",
+                    "review_status": v_stat,
+                }
+            )
+        for j_lbl in reqs.get("job_labels", []):
+            if j_lbl and j_lbl != "제한없음":
+                edges.append(
+                    {
+                        "source_id": pid,
+                        "relation": "REQUIRES_CONDITION",
+                        "target_id": f"COND_JOB_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', j_lbl)}",
+                        "target_name": f"취업조건: {j_lbl}",
+                        "evidence_document_id": ev_doc,
+                        "evidence_location": "온통청년 jobCd",
+                        "review_status": v_stat,
+                    }
+                )
+        for s_lbl in reqs.get("school_labels", []):
+            if s_lbl and s_lbl != "제한없음":
+                edges.append(
+                    {
+                        "source_id": pid,
+                        "relation": "REQUIRES_CONDITION",
+                        "target_id": f"COND_EDU_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', s_lbl)}",
+                        "target_name": f"학력조건: {s_lbl}",
+                        "evidence_document_id": ev_doc,
+                        "evidence_location": "온통청년 schoolCd",
+                        "review_status": v_stat,
+                    }
+                )
+        for sp_lbl in reqs.get("special_labels", []):
+            if sp_lbl and sp_lbl != "제한없음":
+                edges.append(
+                    {
+                        "source_id": pid,
+                        "relation": "REQUIRES_CONDITION",
+                        "target_id": f"COND_SP_{re.sub(r'[^0-9A-Za-z가-힣]+', '_', sp_lbl)}",
+                        "target_name": f"특화조건: {sp_lbl}",
+                        "evidence_document_id": ev_doc,
+                        "evidence_location": "온통청년 sbizCd",
+                        "review_status": v_stat,
+                    }
+                )
 
     # 정책 간 조건 변경 관계 (POL_002 -> POL_003)
     edges.append(
@@ -2099,7 +1898,4 @@ def main(output_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="기존 버전을 보존하는 후보 데이터 생성")
-    parser.add_argument("--output-dir", type=Path, required=True)
-    main(parser.parse_args().output_dir)
+    main()
