@@ -33,6 +33,7 @@ from database import embedding as em
 from database import full_index as fi
 from database import handoff_data as hd
 from database import retrieval_run as rr
+from database import region_search as rs
 from database.chunking import make_point_id
 from database.neo4j import load_graph as lg
 from database.qdrant import store
@@ -53,9 +54,11 @@ SEARCH_PROFILES: dict[str, dict[str, str]] = {
     # Issue #21 후보 데이터셋(LIFEPOLICY_DATASET_DIR) 전용. v1.3.2에서는 full_index의 dataset 확인으로 거부된다.
     "b2_06b_i21": {"index_config": "A_B2_I21", "query_template_name": "none"},
     "b3_06b_i21": {"index_config": "B_B3_I21", "query_template_name": "none"},
+    "b2_06b_v140": {"index_config": "A_B2_V140", "query_template_name": "none"},
+    "b3_06b_v140": {"index_config": "B_B3_V140", "query_template_name": "none"},
 }
 DEFAULT_PROFILE = "b2_06b_baseline"
-DATASET_DEFAULT_PROFILES = {"issue21-v1.4.0-review": "b2_06b_i21"}   # 데이터셋별 기본 프로필 (없으면 DEFAULT_PROFILE)
+DATASET_DEFAULT_PROFILES = {"issue21-v1.4.0-review": "b2_06b_i21", "1.4.0-candidate": "b2_06b_v140"}
 _UNSET = object()     # query_template을 "넘기지 않음"과 "None(지시문 없음)"을 구분하기 위한 표시
 DEFAULT_K = 5
 MAX_K = 200                                     # 진단용 전체 순위(107개)까지 허용하되 무제한은 막는다
@@ -72,7 +75,7 @@ B_CHUNK_ID_PATTERN = re.compile(r"^CHK_[A-Z0-9]+_(DOC_[A-Z0-9_]+)_C\d+$")
 # 검색 결과 한 건에 담는 payload 필드 (원문 근거·위치·출처·버전)
 HIT_PAYLOAD_FIELDS = (
     "policy_id", "document_id", "chunk_id", "point_id", "policy_name",
-    "text", "char_start", "char_end", "page_start", "page_end", "section_title",
+    "text", "char_start", "char_end", "page_start", "page_end", "section_title", "region",
     "source_url", "source_type", "content_hash", "verification_status",
     "chunking_version", "embedding_model", "embedding_input_rule", "index_run_id",
 )
@@ -115,10 +118,14 @@ QUALITY_NEEDS_REVIEW = "NEEDS_REVIEW"
 QUALITY_REGION_GRANULARITY = "SUSPECTED_REGION_GRANULARITY_LOST"
 # Issue #21 후보: 시군구가 Policy.region_detail로 보존된 경우 (유실이 아니라 시군구 한정 확인 필요)
 QUALITY_REGION_DETAIL = "REGION_LIMITED_TO_MUNICIPALITY"
+QUALITY_SEARCH_REGION = "SEARCH_REGION_REQUIRES_REVIEW"
 QUALITY_REVIEW_STATUS_OVERCLAIM = "SUSPECTED_REVIEW_STATUS_OVERCLAIM"
 # 경고 코드별 메타: severity / evidence_level(근거 종류) / verification(검증 상태) / affects(판정 영향 항목)
 #   / blocks_auto_eligibility(자동 판정 보류 필요). 공식 원문 검증은 모두 하지 않았다.
 QUALITY_CODE_META: dict[str, dict[str, Any]] = {
+    QUALITY_SEARCH_REGION: {"severity": "medium", "evidence_level": "stored_region_string",
+                            "verification": "not_officially_checked", "affects": ["region"],
+                            "blocks_auto_eligibility": True},
     QUALITY_EMPTY_AND_GROUP: {"severity": "high", "evidence_level": "graph_structure", "verification": "not_modeled",
                               "affects": ["all"], "blocks_auto_eligibility": True},
     QUALITY_NEEDS_REVIEW: {"severity": "high", "evidence_level": "graph_metadata", "verification": "needs_review",
@@ -225,7 +232,7 @@ def _qdrant_error(error: BaseException) -> HybridSearchBackendError | None:
         return None   # 응답 형식 검증 실패 등은 서버 장애가 아닐 수 있다 → 그대로 올린다
     if UnexpectedResponse is not None and isinstance(error, UnexpectedResponse):
         status = getattr(error, "status_code", None)
-        kind = "auth" if status in (401, 403) else "server"
+        kind = "auth" if status in (401, 403) else "not_found" if status == 404 else "server"
         return HybridSearchBackendError("qdrant", f"서버 오류 응답 (HTTP {status})", kind)
     if httpx is not None and isinstance(error, httpx.TimeoutException):
         return HybridSearchBackendError("qdrant", f"요청 시간 초과: {_safe_message(error)}", "timeout")
@@ -468,6 +475,12 @@ def resolve_search_settings(*, profile: str | None = None, collection: str | Non
         if profile is not None:
             raise SearchProfileError("profile과 collection을 함께 줄 수 없습니다 (하나만 선택).")
         store.assert_experiment_collection(collection)
+        # 이름을 아는 컬렉션은 직접 지정 모드에서도 기존 데이터셋 guard를 거친다.
+        for name, config in fi.FULL_INDEX_CONFIGS.items():
+            if config["collection"] == collection:
+                fi.get_config(name)
+        if collection == LEGACY_EXPERIMENT_COLLECTION and hd.dataset_version() != fi.DEFAULT_DATASET_VERSION:
+            raise SearchProfileError("기존 107 Point 컬렉션은 v1.3.2 전용입니다.")
         return {"mode": "custom", "name": None, "index_config": None, "collection": collection,
                 "embedding_model": em.DEFAULT_EMBEDDING_MODEL if embedder is None else getattr(embedder, "embedding_model", None),
                 "embedding_dim": em.DEFAULT_EMBEDDING_DIM if embedder is None else getattr(embedder, "embedding_dim", None),
@@ -490,9 +503,13 @@ def _collection_vector_size(client, collection: str) -> int:
     try:
         return int(client.get_collection(collection).config.params.vectors.size)
     except Exception as error:
+        if isinstance(error, ValueError) and str(error) == f"Collection {collection} not found":
+            raise HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found") from error
         converted = _qdrant_error(error)
         if converted is None:
             raise
+        if converted.kind == "not_found":
+            raise HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found") from error
         raise converted from error
 
 
@@ -539,6 +556,9 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
     # (1) 컬렉션 벡터 크기와 설정 차원을 검색 전에 비교한다 (프로필, 또는 차원을 표시한 embedder)
     #     사용자 지정 방식에서 embedder를 주지 않으면 기본값으로 단정하지 않고 (2)의 실제 벡터 차원 검사로 막는다
     vector_size = _collection_vector_size(client, collection)
+    region_plan = (rs.plan_region_search(filters, hd.load_payload_chunks())
+                   if hd.dataset_version() == "1.4.0-candidate" else None)
+    applied_filters = region_plan["applied_filters"] if region_plan is not None else filters
     declared_dim = settings["embedding_dim"] if (settings["mode"] == "profile" or settings["embedder"] is not None) else None
     if declared_dim is not None and declared_dim != vector_size:
         raise SearchProfileError(f"{collection} 벡터 크기 {vector_size} ≠ 임베딩 차원 {settings['embedding_dim']} "
@@ -569,7 +589,7 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
 
     started = time.perf_counter()
     try:
-        hits = store.search_chunks(client, collection, query_vector, k=k, filters=filters)
+        hits = store.search_chunks(client, collection, query_vector, k=k, filters=applied_filters)
     except Exception as error:
         converted = _qdrant_error(error)
         if converted is None:
@@ -579,6 +599,11 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
 
     records = [_hit_record(hit) for hit in hits]
     warnings = []
+    if region_plan is not None:
+        for record in records:
+            record["region_match"] = rs.describe_hit_region(record["region"], region_plan)
+        if any(record["region_match"]["review_required"] for record in records):
+            warnings.append(rs.REVIEW_NOTE)
     index_models = sorted({record["embedding_model"] for record in records if record["embedding_model"]})
     if query_model and index_models and index_models != [query_model]:
         warnings.append(f"질의 임베딩 모델({query_model})과 색인 모델({index_models})이 다름 → 점수 비교 불가")
@@ -587,6 +612,7 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
                                                         "distance", "embedding_input_rule")}
     profile_meta["collection_vector_size"] = vector_size
     return {"query": query, "query_template": query_template, "filters": filters, "k": k, "collection": collection,
+            **({"region_search": region_plan} if region_plan is not None else {}),
             "query_embedding_model": query_model,
             "latency_seconds": {"query_embedding": round(embed_seconds, 4), "qdrant_search": round(search_seconds, 4)},
             "warnings": warnings, "hits": records, "search_profile": profile_meta}
@@ -971,9 +997,23 @@ def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[s
             for hit in entry["evidence"]}
         entry["data_quality"] = assess_policy_data_quality(        # 추가 키 (기존 키·순서는 그대로)
             context, static["flags_by_policy"].get(entry["policy_id"]) if context is not None else None)
+        if search_result.get("region_search") is not None:
+            matches = [hit["region_match"] for hit in entry["evidence"] if "region_match" in hit]
+            entry["region_search"] = {
+                "matches": matches, "graph_available_in": list((context or {}).get("regions", [])),
+                "graph_usage": "post_retrieval_evidence_only", "is_eligibility_decision": False,
+                "review_required": any(match["review_required"] for match in matches),
+            }
+            if entry["region_search"]["review_required"]:
+                entry["data_quality"]["warnings"].append(_annotate({
+                    "code": QUALITY_SEARCH_REGION, "level": "caution", "message": rs.REVIEW_NOTE,
+                    "stored_regions": [match["original_region"] for match in matches],
+                }))
+                entry["data_quality"].update(_hold_summary(entry["data_quality"]["warnings"]))
         policies.append(entry)
     quality_summary = Counter(warning["code"] for entry in policies for warning in entry["data_quality"]["warnings"])
     return {"query": search_result.get("query"), "filters": search_result.get("filters"),
+            **({"region_search": search_result["region_search"]} if "region_search" in search_result else {}),
             "k": search_result.get("k"), "collection": search_result.get("collection"),
             "query_template": search_result.get("query_template"),
             "policies": policies, "unlinked_hits": unlinked,
