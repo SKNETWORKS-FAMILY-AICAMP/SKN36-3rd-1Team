@@ -1,0 +1,62 @@
+/**
+ * 정책 하나를 가운데 두고 이웃을 둘레에 놓는 원형 배치.
+ * 그래프 라이브러리를 새로 설치하지 않고(AGENTS.md §5) 같은 종류끼리 모아 각도만 나눠 준다.
+ */
+import { KIND_ORDER } from '../config/graph';
+import type { Neighbor } from './graphModel';
+
+export const MAP_WIDTH = 760;
+export const MAP_HEIGHT = 520;
+const CENTER = { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 };
+const RADIUS_OUTER = 205;
+const RADIUS_INNER = 150;
+/** 이웃이 이보다 많으면 안쪽·바깥쪽 원을 번갈아 써서 이름이 겹치지 않게 한다 */
+const TWO_RING_FROM = 12;
+
+export interface PlacedNeighbor extends Neighbor {
+  x: number;
+  y: number;
+}
+
+export function layoutNeighbors(neighbors: Neighbor[]): { center: { x: number; y: number }; placed: PlacedNeighbor[] } {
+  const rank = (n: Neighbor) => {
+    const i = KIND_ORDER.indexOf(n.node.kind);
+    return i < 0 ? KIND_ORDER.length : i;
+  };
+  const sorted = [...neighbors].sort((a, b) => rank(a) - rank(b) || a.node.label.localeCompare(b.node.label, 'ko'));
+  const twoRings = sorted.length >= TWO_RING_FROM;
+  const placed = sorted.map((n, i) => {
+    // 12시 방향부터 시계 방향으로 고르게 나눈다
+    const angle = -Math.PI / 2 + (2 * Math.PI * i) / Math.max(sorted.length, 1);
+    const r = twoRings && i % 2 === 1 ? RADIUS_INNER : RADIUS_OUTER;
+    return { ...n, x: CENTER.x + r * Math.cos(angle), y: CENTER.y + r * Math.sin(angle) };
+  });
+  return { center: CENTER, placed };
+}
+
+/**
+ * 지도 보기 상태: 지도 좌표(viewBox 단위)에서 scale배 확대하고 (x, y)만큼 옮긴다.
+ * 화면에는 <g transform="translate(x y) scale(scale)">로 그린다.
+ */
+export interface MapView { scale: number; x: number; y: number }
+export const INITIAL_VIEW: MapView = { scale: 1, x: 0, y: 0 };
+
+/**
+ * 한 점(지도 좌표)을 기준으로 확대·축소한다. 그 점이 화면에서 제자리에 있도록 이동값을 함께 바꾼다.
+ * 배율은 [min, max] 안으로 자른다.
+ */
+export function zoomAt(view: MapView, factor: number, point: { x: number; y: number }, min: number, max: number): MapView {
+  const scale = Math.min(max, Math.max(min, view.scale * factor));
+  const ratio = scale / view.scale;
+  return { scale, x: point.x - (point.x - view.x) * ratio, y: point.y - (point.y - view.y) * ratio };
+}
+
+/** 지도 가운데를 기준으로 확대·축소 (버튼용) */
+export const zoomCenter = (view: MapView, factor: number, min: number, max: number) =>
+  zoomAt(view, factor, { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 }, min, max);
+
+/** 지도에 쓸 짧은 이름 */
+export function shortLabel(label: string, max: number): string {
+  const chars = [...label];
+  return chars.length > max ? `${chars.slice(0, max - 1).join('')}…` : label;
+}

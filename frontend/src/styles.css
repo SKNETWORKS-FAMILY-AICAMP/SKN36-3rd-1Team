@@ -11,6 +11,8 @@
   --ok:#5b8a4f; --ok-bg:#e8f0e0; --warn:#b87517; --warn-bg:#fbefd8; --bad:#c45a4a; --bad-bg:#f8e4de; --muted-bg:#f1e8dc;
   --shadow:0 3px 0 rgba(74,58,51,.06),0 12px 26px rgba(176,120,72,.12);
   --sk:#f1e6d8; --sk-hi:#fbf4ea; --glow:rgba(176,120,72,.22);
+  --map-line:#eadfcf; --map-label:#8b7768; --map-node-edge:rgba(74,58,51,.3);
+  --char-bg:#f6eee3;
 }
 
 :root[data-theme="dark"]{
@@ -21,6 +23,10 @@
   --c1:#41342a; --c2:#3a332b; --c3:#433b28; --c4:#343a2d; --c5:#3d3129;
   --ok:#a5d394; --ok-bg:#2f3a29; --warn:#f2c27a; --warn-bg:#443622; --bad:#f0a092; --bad-bg:#46302a; --muted-bg:#3b3128;
   --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --sk:#3b3128; --sk-hi:#463a2f; --glow:rgba(226,185,142,.18);
+  /* 어두운 배경에서 관계 지도의 선·글자·원 테두리가 묻히지 않게 밝게 */
+  --map-line:#6e5c4b; --map-label:#c4b3a1; --map-node-edge:rgba(232,221,208,.45);
+  /* 손그림 캐릭터는 갈색 선이라 어두운 바탕에서 묻힌다 → 캐릭터 뒤만 밝은 크림색 */
+  --char-bg:#eadccb;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -310,3 +316,168 @@ body.has-mini .jump{bottom:100px}
 /* 나이 입력 오류 */
 .cin.invalid{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
 .cond-error{margin-top:8px;font-size:14px;color:var(--bad)}
+
+/* ===== 화면 이동 탭 (상담하기 / 정책 관계 지도) ===== */
+nav.tabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line)}
+nav.tabs a{height:34px;display:inline-flex;align-items:center;white-space:nowrap;padding:0 14px;border-radius:999px;text-decoration:none;font-family:"Jua","Gowun Dodum",sans-serif;font-size:15px;color:var(--ink-2);transition:background .2s,color .2s}
+nav.tabs a:hover{color:var(--primary)}
+nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-shadow:0 2px 6px rgba(74,58,51,.08)}
+
+/* ===== 대표 상황(PRD 시나리오) 카드: 상담 결과가 비어 있을 때만 ===== */
+.empty.start{padding:28px 22px 18px}
+.empty.start>span{font-size:14.5px}
+.persona-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;margin-top:14px}
+.persona-note{margin-top:8px;font-size:12.5px;color:var(--ink-3)}
+.persona{display:flex;align-items:flex-start;gap:12px;text-align:left;padding:14px 16px;border-radius:18px;background:var(--card);border:2px solid var(--line);transition:border-color .2s,transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.persona:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:var(--shadow)}
+.persona .ic{flex:none;width:64px;height:64px;padding:4px;border-radius:18px;background:var(--char-bg);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.persona:hover .ic{transform:translateY(-3px) rotate(-6deg)}
+.persona b{display:block;font-size:16px}
+.persona small{display:block;font-size:13px;color:var(--ink-3)}
+.persona em{display:block;margin-top:4px;font-style:normal;font-size:14px;color:var(--ink-2)}
+
+/* ===== 정책 관계 지도 ===== */
+.board.map{padding-top:36px}
+.map-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;font-size:13.5px;color:var(--ink-3)}
+.map-msg{padding:40px 0;text-align:center;color:var(--ink-3)}
+.map-note{margin-top:14px;font-size:13px;color:var(--ink-3)}
+.map-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+.map-side{position:sticky;top:84px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 110px)}
+.map-search{height:44px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);outline:0}
+.map-search:focus{border-color:var(--primary)}
+.map-list{list-style:none;margin:0;padding:0;overflow:auto;border:2px solid var(--line);border-radius:16px;background:var(--card)}
+.map-list a{display:block;padding:10px 12px;text-decoration:none;border-bottom:1px solid var(--line)}
+.map-list a:hover{background:var(--bg-2)}
+.map-list a[aria-current="page"]{background:var(--primary-soft)}
+.map-list b{display:block;font-size:14px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.map-list small{display:block;font-size:12px;color:var(--ink-3)}
+.map-none,.map-more,.map-dim{font-size:13px;color:var(--ink-3)}
+.map-none{padding:14px 12px}
+.map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:360px;padding:30px;text-align:center;border:2px dashed var(--line);border-radius:20px;background:var(--bg-2);color:var(--ink-3)}
+.map-empty img{width:60px;height:60px}
+.map-empty b{color:var(--ink-2);font-size:17px}
+.map-main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;min-width:0}
+.map-head{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.map-head b{font-size:20px;line-height:1.35}
+.map-head small{color:var(--ink-3);font-size:13.5px}
+.map-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.map-stage{min-width:0}
+.map-canvas{position:relative;min-width:0;overflow:hidden;border:2px solid var(--line);border-radius:22px;background:radial-gradient(circle at center,var(--card),var(--bg-2));padding:8px}
+.map-canvas:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.map-canvas svg{display:block;width:100%;height:auto;cursor:grab;touch-action:none;user-select:none}
+.map-canvas svg:active{cursor:grabbing}
+.map-canvas.full{display:flex;flex-direction:column;justify-content:center;border-radius:0;padding:24px}
+.map-canvas.full svg{height:calc(100vh - 90px)}
+.map-zoom{position:absolute;top:10px;right:10px;z-index:1;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);box-shadow:var(--shadow)}
+.map-zoom button{min-width:34px;height:32px;padding:0 8px;border-radius:10px;font-family:"Jua","Gowun Dodum",sans-serif;font-size:15px;color:var(--ink-2);transition:background .2s,color .2s}
+.map-zoom button:hover:not(:disabled){background:var(--primary-soft);color:var(--primary)}
+.map-zoom button:disabled{opacity:.35;cursor:default}
+.map-hint{margin:2px 8px 0;font-size:12px;color:var(--ink-3)}
+.map-legend{list-style:none;margin:6px 8px 4px;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2)}
+.map-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1.5px solid var(--ink-3)}
+.map-detail{min-width:0}
+.map-info{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;border:2px solid var(--line);border-radius:18px;background:var(--card)}
+.map-info>b{font-size:17px;line-height:1.4}
+.map-info dl{margin:0;display:flex;flex-direction:column;gap:6px;width:100%}
+.map-info dt{font-size:12.5px;color:var(--ink-3)}
+.map-info dd{margin:0;font-size:14px;max-height:9em;overflow:auto;white-space:pre-line}
+.ctree{margin-top:6px}
+.ctree ul{margin:6px 0 0;padding-left:16px;border-left:2px solid var(--line)}
+.ctree li{font-size:14px;margin:4px 0;list-style:none}
+.ctree li::before{content:"· ";color:var(--ink-3)}
+.ctree.l-and>.badge{background:var(--ok-bg);color:var(--ok)}
+.ctree.l-or>.badge{background:var(--primary-soft);color:var(--primary)}
+.ctree.l-not>.badge{background:var(--bad-bg);color:var(--bad)}
+.ctree.l-unknown>.badge{background:var(--warn-bg);color:var(--warn)}
+
+/* 지도 노드·선 (색은 :root 토큰) */
+.gl{stroke:var(--map-line);stroke-width:2}
+.gl.on{stroke:var(--primary);stroke-width:3}
+.ge{font-size:11px;fill:var(--map-label);paint-order:stroke;stroke:var(--card);stroke-width:4px;pointer-events:none}
+.gn{cursor:pointer;outline:none}
+.gn circle{stroke:var(--map-node-edge);stroke-width:2;transition:transform .25s cubic-bezier(.34,1.56,.64,1),stroke .2s}
+.gn:hover circle,.gn:focus-visible circle{transform:scale(1.08);stroke:var(--primary)}
+.gn.on circle{stroke:var(--primary);stroke-width:4}
+.gn text{font-size:12.5px;fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:4px;pointer-events:none}
+.gn.center text{font-family:"Jua","Gowun Dodum",sans-serif;font-size:14px;fill:var(--on-primary);stroke:none}
+.k-policy circle,i.k-policy{fill:var(--primary);background:var(--primary)}
+.k-group circle,i.k-group{fill:var(--warn-bg);background:var(--warn-bg)}
+.k-organization circle,i.k-organization{fill:var(--c1);background:var(--c1)}
+.k-category circle,i.k-category{fill:var(--c3);background:var(--c3)}
+.k-region circle,i.k-region{fill:var(--c4);background:var(--c4)}
+.k-target circle,i.k-target{fill:var(--bad-bg);background:var(--bad-bg)}
+.k-lifestage circle,i.k-lifestage{fill:var(--ok-bg);background:var(--ok-bg)}
+.k-document circle,i.k-document{fill:var(--c2);background:var(--c2)}
+.gn.k-policy:not(.center) circle{fill:var(--primary-soft)}
+
+@media (max-width:960px){
+  .map-grid,.map-main{grid-template-columns:minmax(0,1fr)}
+  .map-side{position:static;max-height:none}
+  .map-list{max-height:260px}
+  .persona-row{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  /* 좁은 화면: 탭이 3개라 로고를 가리지 않게 두 번째 줄로 내린다 */
+  header.gnb .wrap{flex-wrap:wrap;gap:6px 8px;height:auto;padding-top:8px;padding-bottom:8px}
+  .logo{font-size:17px;gap:6px}
+  .logo .mk{width:30px;height:30px}
+  nav.tabs{order:3;width:100%;justify-content:center}
+  nav.tabs a{flex:1;justify-content:center;padding:0 8px;font-size:13.5px}
+  nav.tabs .long{display:none}
+  .map-count{margin-left:0}
+}
+
+/* ===== 생애주기 타임라인 ===== */
+.badge.b-age{background:var(--primary-soft);color:var(--primary)}
+.life-line{list-style:none;margin:6px 0 0;padding:26px 0 4px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;position:relative}
+.life-line::before{content:"";position:absolute;left:6%;right:6%;top:74px;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--c1),var(--primary-soft),var(--c4),var(--c3))}
+.life-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px 12px;border-radius:20px;text-decoration:none;text-align:center;border:2px solid transparent;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s,background .2s}
+.life-stage:hover{transform:translateY(-3px)}
+.life-stage .ic{width:64px;height:64px;padding:6px;border-radius:50%;background:var(--char-bg);border:2px solid var(--line);position:relative;z-index:1;transition:border-color .2s,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.life-stage:hover .ic{transform:rotate(-8deg)}
+.life-stage b{margin-top:4px;font-size:16px}
+.life-stage small{font-size:12.5px;color:var(--ink-3)}
+.life-count{margin-top:4px;font-size:12.5px;font-weight:700;color:var(--ink-2);padding:2px 10px;border-radius:999px;background:var(--bg-2)}
+.life-stage.on{background:var(--card);border-color:var(--primary);box-shadow:var(--shadow)}
+.life-stage.on .ic{border-color:var(--primary)}
+.life-stage.on .life-count{background:var(--primary);color:var(--on-primary)}
+.life-me{position:absolute;top:-24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:"Jua","Gowun Dodum",sans-serif;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}
+.life-panel{margin-top:18px;padding:20px;border:2px solid var(--line);border-radius:22px;background:var(--card)}
+.life-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.life-head b{font-size:20px}
+.life-caution{margin-top:6px;font-size:13px;color:var(--ink-3)}
+.life-cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.life-cat{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 8px 0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg-2);font-family:"Jua","Gowun Dodum",sans-serif;font-size:14.5px;color:var(--ink-2);transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.life-cat span{min-width:26px;height:24px;padding:0 7px;border-radius:999px;display:grid;place-items:center;background:var(--card);font-size:12.5px}
+.life-cat:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-2px)}
+.life-cat.on{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.life-cat.on span{background:color-mix(in srgb,var(--on-primary) 25%,transparent);color:var(--on-primary)}
+.life-pick{margin-top:14px;font-size:13.5px;color:var(--ink-3)}
+.life-list{list-style:none;margin:14px 0 0;padding:0;border-top:1px solid var(--line);animation:rise .35s cubic-bezier(.22,1,.36,1) both}
+.life-row{display:flex;align-items:center;gap:10px;width:100%;padding:11px 6px;border-bottom:1px solid var(--line);text-align:left;transition:background .2s,padding .2s}
+.life-row:hover{background:var(--bg-2);padding-left:12px}
+.life-caret{flex:none;color:var(--ink-3);transition:transform .25s}
+.life-list li.open .life-row{background:var(--bg-2);border-bottom-color:transparent}
+.life-list li.open .life-caret{transform:rotate(180deg);color:var(--primary)}
+.life-detail{padding:4px 12px 16px;border-bottom:1px solid var(--line);background:var(--bg-2);animation:rise .3s cubic-bezier(.22,1,.36,1) both}
+.life-detail dl{margin:0;display:flex;flex-direction:column;gap:8px}
+.life-detail dt{font-size:12.5px;color:var(--ink-3)}
+.life-detail dd{margin:0;font-size:14px;max-height:7.5em;overflow:auto;white-space:pre-line}
+.life-dim{margin-top:10px;font-size:12px;color:var(--ink-3)}
+.life-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.life-actions .btn{height:38px;padding:0 14px;font-size:14px}
+.life-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.life-name b{font-size:14.5px}
+.life-name small{font-size:12.5px;color:var(--ink-3)}
+.life-list .badge{flex:none;font-size:12px;padding:3px 9px}
+.life-foot{margin-top:12px;font-size:12px;color:var(--ink-3)}
+@media (max-width:960px){
+  .life-line{grid-template-columns:repeat(6,120px);overflow-x:auto;padding-left:4px;padding-right:4px}
+  .life-line::before{display:none}
+}
+
+/* ===== 답변 정책 카드의 생애단계 칩 (누르면 생애주기 화면으로) ===== */
+.pstages{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;margin-top:-4px;background:var(--bg-2)}
+.stage-chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 8px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-family:"Jua","Gowun Dodum",sans-serif;font-size:12.5px;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+.stage-chip::before{content:"";width:7px;height:9px;border-radius:7px 0 7px 0;background:currentColor;opacity:.75}
+.stage-chip:hover{transform:translateY(-2px);box-shadow:0 4px 10px var(--glow)}

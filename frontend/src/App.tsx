@@ -1,15 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { askPolicy, usingSample } from './api/client';
 import type { AskRequest, ChatTurnMessage, FollowUp, UserProfile } from './api/types';
 import { CATEGORIES } from './config/categories';
 import { infoField } from './config/infoFields';
+import { PERSONAS, type Persona } from './config/personas';
 import { HISTORY_MAX_ITEMS } from './config/request';
 import { describeProfile, parseProfile } from './lib/parseProfile';
+import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { checkAge } from './lib/validate';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
+import { PersonaStart } from './components/PersonaStart';
 import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
-import { Icon, type IconName } from './components/Icon';
+import type { IconName } from './components/Icon';
+
+// 관계 지도는 그 페이지를 열 때만 코드와 데이터를 내려받는다
+const PolicyMap = lazy(() => import('./components/PolicyMap'));
+const LifeTimeline = lazy(() => import('./components/LifeTimeline'));
 
 const josa = (w: string) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를'; };
 
@@ -19,6 +26,8 @@ function readTheme(): 'light' | 'dark' {
 }
 
 export default function App() {
+  const route = useRoute();
+  const onAskPage = route.page === 'ask';
   const reduceMotion = useMemo(() => matchMedia('(prefers-reduced-motion: reduce)').matches, []);
   const [theme, setTheme] = useState<'light' | 'dark'>(readTheme);
   const [age, setAge] = useState('');
@@ -53,15 +62,26 @@ export default function App() {
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* 저장 불가 환경은 무시 */ }
   }, [theme]);
 
-  // 큰 검색창이 화면 위로 사라지면 아래 입력창을 보여 준다
+  // 큰 검색창이 화면 위로 사라지면 아래 입력창을 보여 준다 (관계 지도 화면에는 검색창이 없어 숨긴다)
   useEffect(() => {
-    const check = () => { const box = askBoxRef.current; if (box) setMiniOn(box.getBoundingClientRect().bottom < 70); };
+    const check = () => { const box = askBoxRef.current; setMiniOn(box ? box.getBoundingClientRect().bottom < 70 : false); };
     check();
     addEventListener('scroll', check, { passive: true });
     addEventListener('resize', check);
     return () => { removeEventListener('scroll', check); removeEventListener('resize', check); };
-  }, []);
+  }, [onAskPage]);
   useEffect(() => { document.body.classList.toggle('has-mini', miniOn); }, [miniOn]);
+
+  // 화면을 바꾸면 맨 위에서 시작한다. 다른 화면에서 질문을 보내고 넘어온 경우엔 그 답변 위치로 간다
+  const showLatestTurn = useRef(false);
+  useEffect(() => {
+    if (onAskPage && showLatestTurn.current) {
+      showLatestTurn.current = false;
+      setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 80);
+    } else {
+      scrollTo({ top: 0 });
+    }
+  }, [route.page, onAskPage, reduceMotion]);
 
   // 새 대화가 생기면 그 위치로 스크롤
   useEffect(() => {
@@ -103,8 +123,11 @@ export default function App() {
 
   const requests = useRef(new Map<number, AskRequest>());
 
-  /** 질문 보내기: 질문 속 나이·지역·소득을 먼저 '내 조건'에 반영한다. */
-  const ask = useCallback((raw: string, origin: HTMLElement | null) => {
+  /**
+   * 질문 보내기: 질문 속 나이·지역·소득을 먼저 '내 조건'에 반영한다.
+   * base: 이번 질문에 쓸 '내 조건'. 대표 상황 카드처럼 조건을 바꾸면서 바로 보낼 때 넘긴다(상태 반영을 기다리지 않게).
+   */
+  const ask = useCallback((raw: string, origin: HTMLElement | null, base: UserProfile = profile) => {
     const question = raw.trim();
     if (!question) return;
     if (pending.current.has(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return; }
@@ -112,7 +135,7 @@ export default function App() {
 
     const found = parseProfile(question, awaiting);
     const next: UserProfile = {
-      age: found.age ?? profile.age, region: found.region ?? profile.region, income: found.income ?? profile.income,
+      age: found.age ?? base.age, region: found.region ?? base.region, income: found.income ?? base.income,
     };
     if (found.age != null) setAge(String(found.age));
     if (found.region) setRegion(found.region);
@@ -149,6 +172,25 @@ export default function App() {
     setTimeout(() => (miniOn ? miniInputRef : heroInputRef).current?.focus({ preventScroll: true }), 300);
   }, [ask, miniOn]);
 
+  /** 대표 상황 카드: PRD 시나리오의 조건을 '내 조건'에 넣고 대표 질문을 바로 보낸다 (소득은 비운다). */
+  const startPersona = useCallback((p: Persona, origin: HTMLElement | null) => {
+    const base: UserProfile = { age: p.profile.age, region: p.profile.region, income: null };
+    setAge(base.age != null ? String(base.age) : '');
+    setRegion(base.region);
+    setIncome(null);
+    ask(p.question, origin, base);
+  }, [ask]);
+
+  /** 생애주기 화면의 '이 정책 물어보기': 상담 화면으로 넘어가 질문을 보내고, 그 답변 위치를 보여 준다 */
+  const askFromOtherPage = useCallback((question: string) => {
+    showLatestTurn.current = true;
+    ask(question, null);
+    location.hash = askHref;
+  }, [ask]);
+
+  /** 처음으로: 주소의 화면 표시(#)까지 지우고 새로 시작한다 */
+  const restart = () => { window.history.replaceState(null, '', location.pathname + location.search); location.reload(); };
+
   const profileText = describeProfile(profile);
   const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
 
@@ -163,21 +205,34 @@ export default function App() {
             <span className="mk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
             LifePolicy <em>AI</em>
           </div>
+          <nav className="tabs" aria-label="화면">
+            {/* 좁은 화면에서는 로고가 가려지지 않게 '하기'·'정책'을 줄여 보여 준다 */}
+            <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>상담<span className="long">하기</span></a>
+            <a href={lifeHref()} aria-current={route.page === 'life' ? 'page' : undefined}>생애주기</a>
+            <a href={mapHref()} aria-current={route.page === 'map' ? 'page' : undefined}><span className="long">정책&nbsp;</span>관계 지도</a>
+          </nav>
           <div className="right">
-            <button className="ghost" type="button" onClick={() => location.reload()}><span className="sp" aria-hidden="true">↺</span><span className="t">처음으로</span></button>
+            <button className="ghost" type="button" onClick={restart}><span className="sp" aria-hidden="true">↺</span><span className="t">처음으로</span></button>
             <button className="ghost" type="button" aria-label="화면 테마 바꾸기" onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}><span className="sp" aria-hidden="true">◐</span><span className="t">테마</span></button>
           </div>
         </div>
       </header>
 
-      <Hero age={age} ageError={ageError} region={region} onAge={setAge} onRegion={setRegion} categories={CATEGORIES} onAsk={ask}
-        askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
+      {route.page !== 'ask' ? (
+        <Suspense fallback={<section className="board"><div className="wrap map-msg" role="status">화면을 여는 중이에요…</div></section>}>
+          {route.page === 'map'
+            ? <PolicyMap policyId={route.policyId} />
+            : <LifeTimeline stageName={route.stage} myAge={profile.age} onAsk={askFromOtherPage} />}
+        </Suspense>
+      ) : (<>
+      <Hero age={age} ageError={ageError} region={region} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
+        onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
       <section className="board" id="board">
         <div className="wrap">
           <div className="board-h"><h2>상담 <span>결과</span></h2><p>답변마다 근거 출처를 함께 보여 드려요</p></div>
           {turns.length === 0 && (
-            <div className="empty"><Icon name="mascot" /><b>아직 질문이 없어요</b>위 검색창에 물어보거나 분야 카드를 눌러 보세요.</div>
+            <PersonaStart personas={PERSONAS} onPersona={startPersona} />
           )}
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
@@ -186,10 +241,11 @@ export default function App() {
           ))}
         </div>
       </section>
+      </>)}
 
       <footer><div className="wrap">LifePolicy AI · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요. 아이콘은 이 화면용으로 직접 그린 SVG예요.</div></footer>
 
-      <BottomBar visible={miniOn} condText={condText} placeholder={miniPlaceholder} inputRef={miniInputRef} onAsk={ask}
+      <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder={miniPlaceholder} inputRef={miniInputRef} onAsk={ask}
         onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), 400); }} />
       <JumpButtons reduceMotion={reduceMotion} watch={turns} />
       <Toast message={toast} />

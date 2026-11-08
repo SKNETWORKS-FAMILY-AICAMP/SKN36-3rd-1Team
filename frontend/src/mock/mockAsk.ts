@@ -8,6 +8,7 @@
  */
 import type { AskRequest, AskResponse, ConditionResult, FollowUp, PolicyCheck, UserProfile } from '../api/types';
 import { CATEGORIES } from '../config/categories';
+import { PERSONAS } from '../config/personas';
 import { describeProfile, hasProfileInfo, parseProfile } from '../lib/parseProfile';
 
 const SAMPLE_CHECKED_AT = '2026-11-06'; // 시연용 예시 날짜
@@ -84,7 +85,16 @@ function build(ex: Example, profile: UserProfile, answer = ex.answer): AskRespon
   };
 }
 
-const findExample = (q: string) => EXAMPLES.find((e) => e.question === q.trim());
+/** 대표 상황 카드(config/personas)의 질문은 같은 분야 예시 답변을 쓴다 */
+const PERSONA_EXAMPLE: Record<string, string> = { job: 'work', newlywed: 'housing', parent: 'welfare' };
+const personaExampleKey = (q: string) => {
+  const persona = PERSONAS.find((p) => p.question === q.trim());
+  return persona ? PERSONA_EXAMPLE[persona.key] : undefined;
+};
+const findExample = (q: string) => {
+  const key = personaExampleKey(q);
+  return EXAMPLES.find((e) => (key ? e.key === key : e.question === q.trim()));
+};
 const failedOnce = new Set<string>();
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { Icon, type IconName } from './Icon';
 import { safeHttpUrl } from '../lib/validate';
+import { lifeHref, mapHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
 import { LOADING_STAGES } from '../config/request';
 
@@ -155,6 +156,30 @@ function Block({ title, icon, tag, children }: { title: string; icon: IconName; 
   );
 }
 
+/**
+ * 정책 카드의 생애단계 칩. 누르면 생애주기 화면의 그 단계로 간다.
+ * 그래프 데이터는 필요할 때만 불러온다(상담 화면 첫 용량에 넣지 않음). 못 읽거나 연결된 단계가 없으면 아무것도 그리지 않는다.
+ */
+function StageChips({ policyId }: { policyId: string }) {
+  const [stages, setStages] = useState<string[]>([]);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([import('../graph/loadGraph'), import('../graph/lifeStages')])
+      .then(async ([{ loadGraphDataset }, { policyLifeStages }]) => {
+        const { index } = await loadGraphDataset();
+        if (alive) setStages(policyLifeStages(index, policyId));
+      })
+      .catch(() => { /* 생애단계는 보조 정보라 못 읽어도 답변 표시는 그대로 둔다 */ });
+    return () => { alive = false; };
+  }, [policyId]);
+  if (stages.length === 0) return null;
+  return (
+    <div className="pstages" aria-label="생애단계">
+      {stages.map((name) => <a key={name} className="stage-chip" href={lifeHref(name)} title={`생애주기에서 '${name}' 정책 보기`}>{name}</a>)}
+    </div>
+  );
+}
+
 function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolean; onDemoApply: () => void }) {
   const [rcls, rlabel] = RECEPTION_LABEL[p.reception_status];
   const sourceHref = safeHttpUrl(p.source_url);
@@ -168,6 +193,8 @@ function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolea
         <div><b>{p.policy_name}</b><small>{p.agency}</small></div>
         <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>
       </div>
+      {/* 예시 정책은 실제 데이터에 없어 생애단계를 찾지 않는다 */}
+      {!sample && <StageChips policyId={p.policy_id} />}
       <ul className="rows">
         {p.conditions.map((c, i) => {
           const [cls, label] = CONDITION_LABEL[c.status];
@@ -181,6 +208,8 @@ function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolea
       </ul>
       <div className="pfoot">
         <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>
+        {/* 예시 정책은 실제 데이터에 없어 관계 지도로 연결하지 않는다 */}
+        {!sample && <a className="btn btn-o" href={mapHref(p.policy_id)}>관계 지도</a>}
         {sourceHref && <a className="btn btn-o" href={sourceHref} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>}
         {canApply && (sample
           ? <button type="button" className="btn btn-p" onClick={onDemoApply}>신청하기</button>

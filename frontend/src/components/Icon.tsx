@@ -18,6 +18,18 @@ function face(x: number, y: number, mood: Mood = 'smile'): string {
   return eye(x - 7) + eye(x + 7) + brows + mouth + blush(x - 11) + blush(x + 11);
 }
 
+/** 작은 얼굴 (두 사람이 함께 있거나 아기처럼 머리가 작은 캐릭터용). gap: 두 눈 사이 절반 */
+function smallFace(x: number, y: number, gap = 4.5): string {
+  const eye = (cx: number) => `<ellipse cx="${cx}" cy="${y}" rx="1.15" ry="1.45" fill="${O}"/><circle cx="${cx + 0.35}" cy="${y - 0.55}" r=".35" fill="#fff"/>`;
+  const mouth = `<path d="M${x - 1.4} ${y + 2.2} q.7 .9 1.4 0 q.7 .9 1.4 0" fill="none" ${S} stroke-width="1.1"/>`;
+  const blush = (cx: number) => `<ellipse cx="${cx}" cy="${y + 2.4}" rx="1.8" ry="1" fill="#ffb3c1"/>`;
+  return eye(x - gap) + eye(x + gap) + mouth + blush(x - gap - 2.8) + blush(x + gap + 2.8);
+}
+
+/** 사람 캐릭터 공통: 둥근 찹쌀떡 머리 */
+const head = (cx: number, cy: number, r: number) =>
+  `<path d="M${cx - r} ${cy}c0-${r * 0.75} ${r * 0.45}-${r} ${r}-${r}s${r} ${r * 0.25} ${r} ${r}c0 ${r * 0.6}-${r * 0.45} ${r * 0.85}-${r} ${r * 0.85}s-${r}-${r * 0.25}-${r}-${r * 0.85}z" fill="#fff4e8" ${S}/>`;
+
 const SVG = {
   /** 마스코트 '모찌싹': 새싹이 난 찹쌀떡 */
   mascot: `<path d="M32 17c-1-5 2-9 6-8-1 4-3 6-6 8z" fill="#bfeccb" ${S}/><path d="M32 17c0-4-3-7-6-6 0 3 2 5 6 6z" fill="#d8f5df" ${S}/><path d="M9 43c0-14 10-25 23-25s23 11 23 25c0 8-10 12-23 12S9 51 9 43z" fill="#fffdf9" ${S}/><path d="M12 44c-3 0-4 3-2 4M52 44c3 0 4 3 2 4" fill="none" ${S} stroke-width="1.5"/>${face(32, 39)}`,
@@ -38,6 +50,36 @@ const SVG = {
   check: `<rect x="9" y="9" width="46" height="46" rx="14" fill="#c9f2d8" ${S}/><path d="M20 33l8 8 16-17" fill="none" stroke="#3f9c6a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
   mail: `<rect x="8" y="16" width="48" height="34" rx="8" fill="#fff6e3" ${S}/><path d="M10 19l22 16 22-16" fill="none" ${S}/><path d="M32 40c-3-3-7-1-5 2l5 5 5-5c2-3-2-5-5-2z" fill="#ff8fa3" stroke="${O}" stroke-width="1.6" stroke-linejoin="round"/>`,
   heart: `<path d="M32 52S10 39 10 25c0-7 5-12 11-12 5 0 9 3 11 7 2-4 6-7 11-7 6 0 11 5 11 12 0 14-22 27-22 27z" fill="#ffaabb" ${S}/>`,
+
+  /* ── 대표 상황(PRD 시나리오) 캐릭터: 마스코트와 같은 둥근 찹쌀떡 얼굴 ── */
+  /** 청년 취업준비생: 셔츠에 넥타이, 손에 든 이력서 */
+  personaJob: `<path d="M13 61c0-10 8-16 19-16s19 6 19 16z" fill="#cfe1f5" ${S}/>`
+    + `<path d="M26.5 45.5l5.5 6 5.5-6" fill="#ffffff" ${S}/><path d="M32 51.5l-2.2 5 2.2 3 2.2-3z" fill="#e8a07a" ${S} stroke-width="1.5"/>`
+    + head(32, 27, 18)
+    + `<path d="M14.5 25c.8-10 8-16 17.5-16s16.7 6 17.5 16c-3.5-4.5-8.5-5.5-12.5-3.5-3-3.8-9-4.6-13-1.8-4 .2-7.3 2-9.5 5.3z" fill="#7a5a48" ${S}/>`
+    + face(32, 30)
+    + `<rect x="44" y="47" width="12" height="14" rx="2.5" fill="#fffdf6" ${S} stroke-width="1.6"/><path d="M47 51.5h6M47 55h6M47 58h4" stroke="#c9b8a6" stroke-width="1.4" stroke-linecap="round"/>`,
+
+  /** 신혼 무주택 가구: 나란히 선 두 사람과 작은 하트 */
+  personaNewlywed: `<path d="M5 62c0-8 6-12.5 14-12.5S33 54 33 62z" fill="#5b6b8c" ${S}/><path d="M16 50l3 4 3-4" fill="#ffffff" ${S} stroke-width="1.5"/>`
+    + `<path d="M31 62c1-8 6.5-12.5 14-12.5S58 54 59 62z" fill="#ffffff" ${S}/>`
+    + `<path d="M33 33c0-10 5-15 12-15s12 5 12 15v15c-4 2.5-20 2.5-24 0z" fill="#fbfbff" ${S} stroke-width="1.6"/>`
+    + head(19, 38, 12) + `<path d="M7.5 36.5c.6-7 5.2-11 11.5-11s10.9 4 11.5 11c-3.2-2.8-7-3.6-11.5-2.8-4.5-.8-8.3 0-11.5 2.8z" fill="#6b4e3d" ${S}/>`
+    + smallFace(19, 41)
+    + head(45, 38, 11) + `<path d="M34.5 36c.8-6.5 5-10 10.5-10s9.7 3.5 10.5 10c-3-3.5-6.5-4.4-10.5-3.4-4-1-7.5-.1-10.5 3.4z" fill="#9a6b4f" ${S}/>`
+    + `<circle cx="53" cy="27" r="2.8" fill="#ffaabb" ${S} stroke-width="1.3"/><circle cx="49.5" cy="25.5" r="2" fill="#fff0b8" ${S} stroke-width="1.2"/>`
+    + smallFace(45, 41, 4)
+    + `<path d="M32 15.5s-5-3-5-6.2c0-1.8 1.4-3 3-3 1 0 1.6.5 2 1.2.4-.7 1-1.2 2-1.2 1.6 0 3 1.2 3 3 0 3.2-5 6.2-5 6.2z" fill="#ff9fb2" ${S} stroke-width="1.4"/>`,
+
+  /** 출산·육아 가구: 아기를 안은 보호자 (아기 머리엔 마스코트 같은 새싹) */
+  personaParent: `<path d="M10 62c0-11 9-17 22-17s22 6 22 17z" fill="#f6d8c8" ${S}/>`
+    + head(32, 25, 17)
+    + `<circle cx="32" cy="8.5" r="4.8" fill="#8a6450" ${S}/><path d="M15.5 23c.9-9 8-14 16.5-14s15.6 5 16.5 14c-4.5-3.6-10.2-4.8-16.5-4.8S20 19.4 15.5 23z" fill="#8a6450" ${S}/>`
+    + face(32, 27)
+    + `<path d="M31.5 40.5c-.6-3 1-5.2 3.6-4.7-.6 2.6-1.6 3.7-3.6 4.7z" fill="#bfeccb" ${S} stroke-width="1.3"/>`
+    + `<path d="M23 49c0-5.5 4-9 9-9s9 3.5 9 9c0 4.5-4 6.5-9 6.5s-9-2-9-6.5z" fill="#fffdf9" ${S}/>`
+    + smallFace(32, 48, 3)
+    + `<path d="M15 53c5 6.5 29 6.5 34 0" fill="none" ${S} stroke-width="2.2"/>`,
 } as const;
 
 export type IconName = keyof typeof SVG;

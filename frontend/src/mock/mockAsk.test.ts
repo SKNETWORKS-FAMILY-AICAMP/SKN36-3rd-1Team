@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AskRequest, UserProfile } from '../api/types';
 import { EXAMPLES, mockAsk } from './mockAsk';
+import { PERSONAS } from '../config/personas';
 
 const empty: UserProfile = { age: null, region: '', income: null };
 const work = EXAMPLES.find((e) => e.key === 'work')!;
@@ -46,6 +47,13 @@ describe('mockAsk 예시 응답', () => {
     expect(r.status).toBe('answered');
     expect(r.answer).toContain('다시 확인');
     expect(r.follow_up_questions.some((f) => f.field === 'income')).toBe(false);
+  });
+
+  it('대표 상황 카드(PRD 시나리오) 질문에도 같은 분야 예시로 답한다', async () => {
+    for (const p of PERSONAS) {
+      const r = await ask({ question: p.question, profile: { ...empty, age: p.profile.age, region: p.profile.region } });
+      expect(r.status).toBe('answered');
+    }
   });
 
   it('정보 요청(ask_info) 버튼은 계약대로 나이·지역·소득만 쓴다', async () => {
