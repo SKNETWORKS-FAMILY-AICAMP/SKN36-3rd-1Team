@@ -82,3 +82,31 @@ def test_duplicate_source_ids_rejected(monkeypatch):
 def test_used_ids_mismatch_body_is_authoritative(monkeypatch):
     fake_model(monkeypatch, {"status": "answered", "answer": "본문 근거 [1]", "used_source_ids": [9], "follow_up_questions": []})
     assert g.generate_answer("질문", CTX, CHECKS)["used_source_ids"] == [1]
+
+import pytest
+from backend.llm.generator import generate_answer
+
+
+@pytest.mark.parametrize(
+    "invalid_contexts",
+    [None, {}, "", 123],
+)
+def test_invalid_contexts_rejected(invalid_contexts):
+    with pytest.raises(ValueError, match="contexts는 리스트"):
+        generate_answer(
+            question="청년 지원 정책 알려줘",
+            contexts=invalid_contexts,
+            policy_checks=[],
+        )
+
+
+def test_empty_contexts_returns_no_evidence():
+    result = generate_answer(
+        question="청년 지원 정책 알려줘",
+        contexts=[],
+        policy_checks=[],
+    )
+
+    assert result["status"] == "no_evidence"
+    assert result["used_source_ids"] == []
+    assert result["follow_up_questions"] == []
