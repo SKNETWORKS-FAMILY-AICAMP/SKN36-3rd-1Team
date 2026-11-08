@@ -1,23 +1,21 @@
 {
-  "checked_at": "2026-11-06T22:08:12.190026+09:00",
-  "qdrant": {
-    "status": "PASS",
-    "mode": "PAYLOAD_ONLY",
-    "embedding_search": "NOT_TESTED",
-    "points": 599,
-    "two_upserts_verified": true,
-    "all_payloads_verified": true,
-    "policy_filters_verified": true,
-    "temporary_collection_removed": true
-  },
+  "checked_at": "2026-11-09T01:31:41.024281+09:00",
+  "git_commit": "987057eea87124a6d88bcd73d81a63c4c3908ce2",
+  "issue": 31,
+  "dataset": "data/releases/v1.4.0-candidate",
+  "manifest_sha256": "16d6843f245ff1624686dddf815d0aeb6e6b76a87ecb674db1ea33701a46386e",
+  "generator": "venv/issue31_20261109/run.py",
+  "scope": "Local PR29 corrected data; old instances and collections retained. HTTP/LLM integration not tested.",
+  "previous_evidence": "data/metadata/verification_history/issue31_before_20261109.json",
+  "status": "PASS",
   "offline": {
     "status": "PASS",
     "counts": {
       "total_policies": 246,
       "total_documents": 261,
       "total_chunks": 599,
-      "total_graph_nodes": 1074,
-      "total_graph_edges": 3703
+      "total_graph_nodes": 1030,
+      "total_graph_edges": 2921
     },
     "nodes_by_label": {
       "Policy": 246,
@@ -27,8 +25,8 @@
       "Category": 5,
       "LifeStage": 6,
       "TargetGroup": 11,
-      "ConditionGroup": 352,
-      "EligibilityCondition": 52
+      "ConditionGroup": 306,
+      "EligibilityCondition": 54
     },
     "relations_by_type": {
       "ADMINISTERED_BY": 246,
@@ -37,11 +35,11 @@
       "TARGETS": 443,
       "APPLIES_TO_LIFESTAGE": 437,
       "SUPPORTED_BY": 261,
-      "REQUIRES_CONDITION": 735,
+      "REQUIRES_CONDITION": 367,
       "MODIFIES_CONDITION_OF": 1,
       "HAS_ROOT_CONDITION_GROUP": 246,
-      "CONTAINS_GROUP": 106,
-      "CONTAINS_CONDITION": 735
+      "CONTAINS_GROUP": 60,
+      "CONTAINS_CONDITION": 367
     },
     "nullable_properties": {
       "Policy.official_apply_url": 224,
@@ -52,5 +50,303 @@
     "manifest_files_checked": 20,
     "document_text_hashes_checked": 0
   },
-  "status": "PASS"
+  "qdrant": {
+    "status": "PASS",
+    "url": "http://127.0.0.1:36333",
+    "mode": "RESTORED_EMBEDDED_COLLECTIONS_REGION_ONLY",
+    "payload_only_599_collection_test": "NOT_RUN",
+    "collections": {
+      "exp_b2_qwen3emb06b_v140_v1": {
+        "points": 1138,
+        "updated": 16,
+        "updates": [
+          {
+            "point_id": "585d3dfa-fea6-5178-a14e-8696f5f006fb",
+            "chunk_id": "CHK_B2_DOC_GOV_028_C001",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "7201f8df-ab22-5f00-a8f1-9cabeb032a4f",
+            "chunk_id": "CHK_B2_DOC_GOV_028_C002",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "d274638d-c851-5ceb-8d35-247a17870c4c",
+            "chunk_id": "CHK_B2_DOC_GOV_028_C003",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "03037413-9f23-5bcd-8704-6c53d62dccad",
+            "chunk_id": "CHK_B2_DOC_GOV_029_C004",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "238ab166-deba-51e7-86a1-e638b2432865",
+            "chunk_id": "CHK_B2_DOC_GOV_029_C001",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "3104c8a7-3623-5411-a36f-45ed9b1b3da6",
+            "chunk_id": "CHK_B2_DOC_GOV_029_C003",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "33f6b8a8-81bb-52f8-a6ca-ebcf2771725b",
+            "chunk_id": "CHK_B2_DOC_GOV_029_C002",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "c94091e0-51dd-5e50-9cf7-2dd18942184a",
+            "chunk_id": "CHK_B2_DOC_GOV_029_C005",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "33bed3d6-62ab-54f0-9d35-6e9f5e3cfae1",
+            "chunk_id": "CHK_B2_DOC_GOV_030_C002",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "40ca3c9f-26c9-53df-a9a9-101fd293c4b7",
+            "chunk_id": "CHK_B2_DOC_GOV_030_C004",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "66140a6c-b159-5c4d-bd5d-3e4cfaa1e151",
+            "chunk_id": "CHK_B2_DOC_GOV_030_C003",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "905a5838-f4c0-5af0-9365-f6981305e886",
+            "chunk_id": "CHK_B2_DOC_GOV_030_C001",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "3eec0123-c492-58ba-851d-71bad818c1bf",
+            "chunk_id": "CHK_B2_DOC_YC_002_C003",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "738fbe94-bbd8-5b9d-8a0e-d7d37077ea38",
+            "chunk_id": "CHK_B2_DOC_YC_002_C002",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "7f245747-3386-5a4b-99cb-41e5761a58bc",
+            "chunk_id": "CHK_B2_DOC_YC_002_C004",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "a564daed-8868-57b4-9b44-279b8617c062",
+            "chunk_id": "CHK_B2_DOC_YC_002_C001",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          }
+        ],
+        "before_sha256": "f28e7211888ecda72a8864315e98c406f976e9af370236bc86e5478315235d9c",
+        "after_sha256": "ac5a129f764cb1fd4a5de25c40aab464875e6db01c0a031b778085448ea3a3a9",
+        "only_region_changed": true,
+        "all_vectors_ids_text_sources_preserved": true
+      },
+      "exp_b3_qwen3emb06b_v140_v1": {
+        "points": 1220,
+        "updated": 16,
+        "updates": [
+          {
+            "point_id": "1e684e8d-17c8-5e6e-9762-f4b78775594b",
+            "chunk_id": "CHK_B3_DOC_GOV_028_C003",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "716e00cf-b212-5b89-acd2-44c2c0fe73f1",
+            "chunk_id": "CHK_B3_DOC_GOV_028_C001",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "e23f962b-7cc2-5c06-b407-42a2f5c1ddd0",
+            "chunk_id": "CHK_B3_DOC_GOV_028_C002",
+            "policy_id": "POL_GOV_028",
+            "document_id": "DOC_GOV_028",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "3aef16f2-4e29-5b69-bb75-7d806d7250b6",
+            "chunk_id": "CHK_B3_DOC_GOV_029_C001",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "50ddea0b-272f-5a6c-a143-06f21a3019df",
+            "chunk_id": "CHK_B3_DOC_GOV_029_C004",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "6847b91e-071d-563a-bb4f-ca659394e011",
+            "chunk_id": "CHK_B3_DOC_GOV_029_C005",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "7e61a8c3-a0bc-5b26-866b-5d63b0f7b8a7",
+            "chunk_id": "CHK_B3_DOC_GOV_029_C002",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "88d23773-7cd0-55fd-aae8-6a171817f63f",
+            "chunk_id": "CHK_B3_DOC_GOV_029_C003",
+            "policy_id": "POL_GOV_029",
+            "document_id": "DOC_GOV_029",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "2d8f79ec-ef39-5d7c-98b5-7d18dbfccd13",
+            "chunk_id": "CHK_B3_DOC_GOV_030_C001",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "550115a2-a176-5a74-b4a4-9eed2934b794",
+            "chunk_id": "CHK_B3_DOC_GOV_030_C003",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "6a03ba10-a9c8-512c-a812-2ccf17806718",
+            "chunk_id": "CHK_B3_DOC_GOV_030_C002",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "72de1179-1223-5e90-9ec9-30aa31020a98",
+            "chunk_id": "CHK_B3_DOC_GOV_030_C004",
+            "policy_id": "POL_GOV_030",
+            "document_id": "DOC_GOV_030",
+            "before": "전라남도",
+            "after": "광주광역시"
+          },
+          {
+            "point_id": "682e06d1-3f17-5e0b-bf9d-768f38a27564",
+            "chunk_id": "CHK_B3_DOC_YC_002_C004",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "a4babb1d-ab33-56a5-ab11-2a19a75bfc36",
+            "chunk_id": "CHK_B3_DOC_YC_002_C002",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "a5f8a77f-fd78-5eed-a6fa-92f50340a145",
+            "chunk_id": "CHK_B3_DOC_YC_002_C001",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          },
+          {
+            "point_id": "c91b34dd-8971-54ed-b666-a6dc5d79294a",
+            "chunk_id": "CHK_B3_DOC_YC_002_C003",
+            "policy_id": "POL_YC_002",
+            "document_id": "DOC_YC_002",
+            "before": "전국",
+            "after": "전라남도"
+          }
+        ],
+        "before_sha256": "fd7dc8ffe06045508f890d654ad297d7bd3c118ab383b046d8bf80badae3cd42",
+        "after_sha256": "d545b8cf3431cbcf6c098ecd6076a8bcde1a89bb1322a259cf3ce74a6bb5b9c8",
+        "only_region_changed": true,
+        "all_vectors_ids_text_sources_preserved": true
+      }
+    },
+    "backup_restore_verified": true,
+    "original_9_collections_unchanged": true,
+    "profiles": [
+      "b2_06b_v140",
+      "b3_06b_v140"
+    ],
+    "hybrid_regression": {
+      "paired_queries": 22,
+      "regional_probes": 28,
+      "unfiltered_chunk_ranks_unchanged": true,
+      "expected_regional_changes_verified": true,
+      "overall_eligibility_hold_verified": true,
+      "consumer_reference": "b5fdf65ffcc123bdeeb063dffb85aef7958d55ef",
+      "http_llm_integration": "NOT_TESTED"
+    }
+  }
 }
