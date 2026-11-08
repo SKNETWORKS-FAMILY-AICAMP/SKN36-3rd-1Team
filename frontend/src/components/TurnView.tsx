@@ -1,7 +1,9 @@
-import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { Icon, type IconName } from './Icon';
 import { safeHttpUrl } from '../lib/validate';
+import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
+import { LOADING_STAGES } from '../config/request';
 
 export type Turn =
   | { id: number; kind: 'qa'; question: string; tags: { icon: IconName; text: string }[]; state: 'loading' | 'done' | 'error'; response?: AskResponse; error?: string }
@@ -21,9 +23,11 @@ interface Props {
   onFollowUp: (followUp: FollowUp, origin: HTMLElement) => void;
   onRetry: (id: number) => void;
   onDemoApply: () => void;
+  /** 예시 응답 모드(백엔드 주소 없음)인지. 응답이 오기 전 표시와 시연 안내에 쓴다. */
+  sampleMode: boolean;
 }
 
-export function TurnView({ turn, onFollowUp, onRetry, onDemoApply }: Props) {
+export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode }: Props) {
   if (turn.kind === 'prompt') {
     return (
       <div className="turn">
@@ -43,12 +47,13 @@ export function TurnView({ turn, onFollowUp, onRetry, onDemoApply }: Props) {
         <div className="qtags">{turn.tags.map((t) => <span key={t.text}><Icon name={t.icon} className="ic" />{t.text}</span>)}</div>
       )}
       <div className={'acard' + (turn.state === 'loading' ? ' thinking' : '')}>
-        <BotHead sub="공식 원문 기반 답변" sample={!r || r.is_sample} />
+        <BotHead sub="공식 원문 기반 답변" sample={r ? r.is_sample : sampleMode} />
         <div className="abody">
           {turn.state === 'loading' && <Loading />}
           {turn.state === 'error' && (
             <>
-              <NoticeBox kind="bad" icon="warning" title="답변을 불러오지 못했어요" text={`${turn.error ?? ''} 잠시 후 다시 시도해 주세요. (시연: 질문에 “오류”를 넣으면 이 화면이 나와요)`} />
+              <NoticeBox kind="bad" icon="warning" title="답변을 불러오지 못했어요"
+                text={`${turn.error ?? ''}${sampleMode ? ' (시연: 질문에 “오류”를 넣으면 이 화면이 나와요)' : ''}`} />
               <button type="button" className="chip stag" style={{ marginTop: 12, animationDelay: '.12s' }} onClick={() => onRetry(turn.id)}>다시 시도</button>
             </>
           )}
@@ -69,10 +74,16 @@ function BotHead({ sub, sample }: { sub: string; sample?: boolean }) {
   );
 }
 
+/** 기다린 시간에 따라 안내 문구를 바꾼다 (config/request의 LOADING_STAGES). */
 function Loading() {
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    const timers = LOADING_STAGES.slice(1).map((s, i) => window.setTimeout(() => setStage(i + 1), s.after));
+    return () => timers.forEach((t) => clearTimeout(t));
+  }, []);
   return (
     <div className="loading" role="status">
-      <div className="lt">공식 원문을 찾고 있어요<i /><i /><i /></div>
+      <div className="lt">{LOADING_STAGES[stage].text}<i /><i /><i /></div>
       {[92, 78, 60].map((w) => <div key={w} className="sk" style={{ width: `${w}%` }} />)}
     </div>
   );
@@ -91,18 +102,20 @@ function AnswerText({ text }: { text: string }) {
 }
 
 function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Props['onFollowUp']; onDemoApply: () => void }) {
+  const view = answerView(r);
   const blocks: ReactElement[] = [];
-  if (r.status === 'answered' && r.answer) blocks.push(<AnswerText key="a" text={r.answer} />);
-  if (r.status !== 'answered' && r.notice) {
-    blocks.push(<NoticeBox key="n" kind={r.notice.kind === 'warn' ? 'warn' : 'info'} icon={r.notice.kind === 'warn' ? 'search' : 'info'} title={r.notice.title} text={r.notice.text} />);
+  if (view.warning) blocks.push(<NoticeBox key="w" kind="warn" icon="search" title={view.warning.title} text={view.warning.text} />);
+  if (view.answerText) blocks.push(<AnswerText key="a" text={view.answerText} />);
+  if (view.guide) {
+    blocks.push(<NoticeBox key="g" kind={view.guide.kind} icon={view.guide.kind === 'warn' ? 'search' : 'info'} title={view.guide.title} text={view.guide.text} />);
   }
   r.policy_checks.forEach((p) => blocks.push(
     <Block key={p.policy_id} title="조건 확인" icon="check" tag={r.is_sample ? '시연용 가상 데이터' : undefined}>
       <PolicyCard p={p} sample={r.is_sample} onDemoApply={onDemoApply} />
     </Block>,
   ));
-  if (r.status === 'answered' && r.notice) {
-    blocks.push(<Block key="apply" title="신청 방법" icon="mail"><NoticeBox kind="info" icon="info" title={r.notice.title} text={r.notice.text} /></Block>);
+  if (view.extraInfo) {
+    blocks.push(<NoticeBox key="i" kind="info" icon="info" title={view.extraInfo.title} text={view.extraInfo.text} />);
   }
   if (r.citations.length > 0) {
     blocks.push(
@@ -110,14 +123,14 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
         <div className="srcs">
           {r.citations.map((c, i) => {
             const href = safeHttpUrl(c.url);
-            const inner = <><span className="n">{i + 1}</span><span><b>{c.title}</b><span>{href ? hostOf(href) : '링크 확인 필요'}</span></span>{href && <span className="arr">↗</span>}</>;
+            const inner = <><span className="n">{i + 1}</span><span><b>{c.title}</b><span>{sourceDetail(href, c.page_number)}</span></span>{href && <span className="arr">↗</span>}</>;
             // 안전하지 않은 주소는 링크로 만들지 않고 제목만 보여 준다
             return href
               ? <a key={i} className="src" href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
               : <div key={i} className="src">{inner}</div>;
           })}
         </div>
-        {r.checked_at && <p className="fresh">확인 시점 {r.checked_at.replace(/-/g, '.')}{r.is_sample ? ' (시연용 예시 날짜)' : ''} · 최신 내용은 공식 원문에서 확인해 주세요</p>}
+        <p className="fresh">{freshnessNote(r.checked_at, r.is_sample)}</p>
       </Block>,
     );
   }
@@ -125,7 +138,7 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     blocks.push(
       <Block key="f" title="이것도 알려 주시면 더 정확해요" icon="bulb">
         <div className="chips">
-          {r.follow_up_questions.map((f) => <button key={f.text} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
+          {r.follow_up_questions.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
         </div>
       </Block>,
     );
@@ -159,7 +172,8 @@ function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolea
         {p.conditions.map((c, i) => {
           const [cls, label] = CONDITION_LABEL[c.status];
           return (
-            <li key={c.field} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
+            // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
+            <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
               <span className="k">{c.label}</span><span className="why">{c.reason}</span><span className={'badge ' + cls}>{label}</span>
             </li>
           );
@@ -183,8 +197,4 @@ export function NoticeBox({ kind, icon, title, text }: { kind: 'info' | 'warn' |
       <div><b>{title}</b><p>{text}</p></div>
     </div>
   );
-}
-
-function hostOf(url: string) {
-  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }

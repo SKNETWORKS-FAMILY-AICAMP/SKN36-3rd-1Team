@@ -3,10 +3,11 @@
  * 백엔드 연동 전 화면 흐름을 시연하기 위한 가상 응답이다. '예시 정책 A'와 조건 판정 기준(만 19~34세, 전국)은
  * 실제 정책이 아니다. 실제 사이트 링크는 각 기관 메인 페이지만 쓴다.
  * VITE_ASK_API_URL을 설정하면 이 파일은 쓰이지 않는다.
+ * 응답 모양은 실제 백엔드(ask_contract v1.0)와 같게 만든다: ask_info는 age·region·income만,
+ * 근거 없음은 notice 없이 고정 문장만 보낸다.
  */
 import type { AskRequest, AskResponse, ConditionResult, FollowUp, PolicyCheck, UserProfile } from '../api/types';
 import { CATEGORIES } from '../config/categories';
-import { infoField } from '../config/infoFields';
 import { describeProfile, hasProfileInfo, parseProfile } from '../lib/parseProfile';
 
 const SAMPLE_CHECKED_AT = '2026-11-06'; // 시연용 예시 날짜
@@ -36,19 +37,19 @@ const askQuestion = (text: string): FollowUp => ({ kind: 'question', text });
 export const EXAMPLES: Example[] = [
   { key: 'work', question: q('work'), withPolicy: true,
     answer: '청년 정책은 온통청년에서 지역·분야별로 모아 볼 수 있어요[1]. 실제 서비스에서는 검색된 정책 원문을 근거로 나이·지역 조건을 하나씩 확인해 드려요. 아래 정책 카드는 화면 구성을 보여 주기 위한 가상 예시예요.',
-    citations: [SRC.youth], followUps: [askInfo('income', '가구 소득도 알려줄게요'), askQuestion('신청 서류는 뭐가 필요해요?')] },
+    citations: [SRC.youth], followUps: [askInfo('income', '연 소득도 알려줄게요'), askQuestion('신청 서류는 뭐가 필요해요?')] },
   { key: 'housing', question: q('housing'), noApplyUrl: true,
     answer: '임대주택 모집공고와 첨부 서류 목록은 LH청약플러스에서 확인할 수 있어요[1]. 공고마다 제출 서류가 달라서, 실제 서비스에서는 해당 공고 원문의 서류 항목을 그대로 인용해 드려요.',
-    citations: [SRC.lh], followUps: [askInfo('marriage_period', '혼인 기간도 알려줄게요'), askQuestion('주거 대출 정책도 알려줘')] },
+    citations: [SRC.lh], followUps: [askQuestion('혼인 기간 조건도 알려줘'), askQuestion('주거 대출 정책도 알려줘')] },
   { key: 'edu', question: q('edu'),
     answer: '청년 대상 교육·훈련 정책은 온통청년에서 분야별로 찾아볼 수 있어요[1]. 실제 서비스에서는 훈련 과정별 원문 공고를 근거로 대상과 신청 기간을 정리해 드려요.',
-    citations: [SRC.youth], followUps: [askInfo('school_work', '지금 다니는 학교·직장도 알려줄게요')] },
+    citations: [SRC.youth], followUps: [askQuestion('재학생·직장인 조건도 알려줘')] },
   { key: 'money', question: q('money'),
     answer: '복지·금융 지원은 복지로[1]와 정부24[2]에서 서비스별로 확인할 수 있어요. 소득·재산 기준이 붙는 경우가 많아, 실제 서비스에서는 원문 기준을 인용하고 자동 판정이 어려운 항목은 ‘추가 확인 필요’로 안내해요.',
-    citations: [SRC.bokjiro, SRC.gov24], followUps: [askInfo('household_size', '가구원 수도 알려줄게요')] },
+    citations: [SRC.bokjiro, SRC.gov24], followUps: [askQuestion('가구원 수 기준도 알려줘')] },
   { key: 'welfare', question: q('welfare'),
     answer: '출산·육아 관련 복지 서비스는 복지로[1]와 정부24[2]에서 찾아볼 수 있어요. 지역별로 지원이 달라서 거주 지역을 알려 주시면 더 좁혀 볼 수 있어요.',
-    citations: [SRC.bokjiro, SRC.gov24], followUps: [askInfo('child_age', '자녀 나이도 알려줄게요')] },
+    citations: [SRC.bokjiro, SRC.gov24], followUps: [askQuestion('자녀 나이 조건도 알려줘')] },
 ];
 
 /** 가상 정책 A의 조건 판정 (예시 기준) */
@@ -93,7 +94,7 @@ export async function mockAsk(req: AskRequest): Promise<AskResponse> {
   // 시연: 질문에 '오류'가 들어 있으면 처음 한 번은 실패한다 → '다시 시도'로 성공
   if (req.question.includes('오류') && !failedOnce.has(req.question)) {
     failedOnce.add(req.question);
-    throw new Error('예시 오류: 답변 서버에 연결하지 못했어요');
+    throw new Error('예시 오류: 답변 서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.');
   }
 
   const direct = findExample(req.question);
@@ -102,8 +103,7 @@ export async function mockAsk(req: AskRequest): Promise<AskResponse> {
   // 앞 대화에서 마지막으로 답한 예시를 이어서 쓴다
   const context = [...req.history].reverse().map((m) => (m.role === 'user' ? findExample(m.text) : undefined)).find(Boolean);
   if (context) {
-    const said = parseProfile(req.question);
-    if (req.awaiting_field) delete said.age; // '아이가 3살' 같은 대답을 내 나이로 쓰지 않는다
+    const said = parseProfile(req.question, req.awaiting_field);
     if (hasProfileInfo(said)) {
       const intro = `알려 주신 조건(${describeProfile(said)})으로 다시 확인했어요.` + (context.withPolicy
         ? ' 나이·지역은 예시 기준과 비교했고, 소득은 원문 기준이 복잡해서 ‘추가 확인 필요’로 남겨 뒀어요.'
@@ -113,12 +113,14 @@ export async function mockAsk(req: AskRequest): Promise<AskResponse> {
     if (/서류/.test(req.question)) {
       return build(context, req.profile, '제출 서류는 정책마다, 같은 정책이라도 공고마다 달라요[1]. 실제 서비스에서는 해당 공고 원문의 ‘제출 서류’ 항목을 그대로 인용하고, 원문에 없으면 ‘확인 필요’라고 알려 드려요.');
     }
-    if (req.awaiting_field) {
-      return { status: 'info', answer: '', citations: [], policy_checks: [], follow_up_questions: [], checked_at: null, is_sample: true,
-        notice: { kind: 'info', title: '알려 주셔서 고마워요', text: `시연판에서는 나이·지역·소득만 조건 비교에 반영돼요. ‘${infoField(req.awaiting_field).label}’ 정보는 백엔드 연동 후 반영할 예정이에요.` } };
+    // 예시 답변의 추가 질문 버튼(혼인 기간 조건 등): 예시 데이터에는 그 조건 원문이 없으므로 확정 답 없이 안내만 한다
+    if (context.followUps.some((f) => f.kind === 'question' && f.text === req.question.trim())) {
+      return { status: 'info', citations: [], policy_checks: [], follow_up_questions: [], checked_at: null, is_sample: true, notice: null,
+        answer: '예시 응답에는 이 조건을 확인할 공고 원문이 없어요. 실제 서비스에서는 해당 공고 원문의 조건 항목을 찾아 인용해 드려요.' };
     }
   }
 
-  return { status: 'no_evidence', answer: '', citations: [], policy_checks: [], follow_up_questions: [], checked_at: null, is_sample: true,
-    notice: { kind: 'warn', title: '공식 문서에서 근거를 찾지 못했어요', text: '근거 없이 답하지 않을게요. 분야 카드를 눌러 보거나, 질문을 조금 더 구체적으로 적어 주세요.' } };
+  // 실제 백엔드처럼 notice 없이 고정 문장만 보낸다. 화면은 이 상태에서 자체 안내 문구를 보여 준다
+  return { status: 'no_evidence', answer: '인용할 수 있는 공식 원문을 찾지 못했습니다.', citations: [], policy_checks: [],
+    follow_up_questions: [], checked_at: null, is_sample: true, notice: null };
 }

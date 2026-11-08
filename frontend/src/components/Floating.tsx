@@ -33,7 +33,9 @@ export function JumpButtons({ reduceMotion, watch }: { reduceMotion: boolean; wa
   useEffect(() => {
     const check = () => {
       const max = document.documentElement.scrollHeight - innerHeight;
-      setState({ top: scrollY >= 300, bottom: max - scrollY >= 300 });
+      const top = scrollY >= 300, bottom = max - scrollY >= 300;
+      // 스크롤마다 새 객체를 넣으면 값이 같아도 다시 그리므로, 바뀔 때만 상태를 바꾼다
+      setState((prev) => (prev.top === top && prev.bottom === bottom ? prev : { top, bottom }));
     };
     check();
     addEventListener('scroll', check, { passive: true });

@@ -9,11 +9,13 @@ const REGION_ALIASES: Record<string, string[]> = {
 /**
  * 사용자가 말로 적은 나이·지역·소득을 찾아낸다. (예: "26살, 서울, 소득은 4000만원이야")
  * 확실히 읽히는 값만 돌려주고, 나머지는 비워 둔다.
+ * awaitingField: AI가 되물은 항목에 대한 대답이면 그 항목 키. 이때는 '26'이나 '4000만 원'처럼
+ * 단위·'소득' 같은 말이 빠진 대답도 그 항목 값으로 읽는다.
  */
-export function parseProfile(text: string): Partial<UserProfile> {
+export function parseProfile(text: string, awaitingField?: string | null): Partial<UserProfile> {
   const out: Partial<UserProfile> = {};
 
-  const age = text.match(/(\d{1,3})\s*(?:살|세)/);
+  const age = text.match(/(\d{1,3})\s*(?:살|세)/) ?? (awaitingField === 'age' ? text.match(/^\s*(\d{1,3})\s*$/) : null);
   if (age && Number(age[1]) <= 120) out.age = Number(age[1]);
 
   for (const region of REGIONS) {
@@ -22,7 +24,7 @@ export function parseProfile(text: string): Partial<UserProfile> {
   }
 
   const money = text.replace(/,/g, '').match(/(\d+(?:\.\d+)?)\s*(억|천만|만)\s*원?/);
-  if (money && /소득|연봉|월급|수입|벌/.test(text)) {
+  if (money && (awaitingField === 'income' || /소득|연봉|월급|수입|벌/.test(text))) {
     const n = Number(money[1]);
     out.income = Math.round(money[2] === '억' ? n * 10000 : money[2] === '천만' ? n * 1000 : n);
   }

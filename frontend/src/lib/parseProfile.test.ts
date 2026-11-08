@@ -16,6 +16,13 @@ describe('parseProfile', () => {
     expect(parseProfile('보증금 3000만원 전세').income).toBeUndefined();
   });
 
+  it('AI가 되물은 항목의 대답은 단위·소득 같은 말이 빠져도 읽는다', () => {
+    expect(parseProfile('4000만 원', 'income').income).toBe(4000);
+    expect(parseProfile('26', 'age').age).toBe(26);
+    expect(parseProfile('26').age).toBeUndefined(); // 되묻지 않았으면 숫자만으로 나이를 정하지 않는다
+    expect(parseProfile('보증금 3000만원', 'age').income).toBeUndefined();
+  });
+
   it('범위를 넘는 나이는 버린다', () => {
     expect(parseProfile('200살').age).toBeUndefined();
   });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { REGIONS } from '../lib/parseProfile';
 import { Icon, type IconName } from './Icon';
 import type { Category } from '../config/categories';
@@ -19,17 +19,9 @@ interface Props {
 const TITLE: [string, boolean, boolean][] = [['나에게', false, false], ['필요한', false, false], ['정부 지원 정책', true, false], ['을', false, true], ['물어보세요!', false, false]];
 
 export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
-  const [text, setText] = useState('');
-  const placeholder = useTypewriter(categories.map((c) => '예: ' + c.question), reduceMotion || text.length > 0);
   const heroRef = useRef<HTMLElement>(null);
   useParallax(heroRef, reduceMotion);
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!text.trim()) return;
-    onAsk(text, e.currentTarget.querySelector('.go'));
-    setText('');
-  };
+  const examples = useMemo(() => categories.map((c) => '예: ' + c.question), [categories]);
 
   let delay = 0;
   return (
@@ -56,12 +48,7 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
         <p className="sub">공식 원문을 근거로 조건과 신청 방법을 정리해 드려요</p>
 
         <div className="ask" ref={askBoxRef}>
-          <form onSubmit={submit}>
-            <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} aria-label="정책 질문" autoComplete="off" />
-            <button className="go" type="submit" aria-label="질문하기" disabled={!text.trim()}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
-            </button>
-          </form>
+          <AskForm examples={examples} onAsk={onAsk} inputRef={inputRef} reduceMotion={reduceMotion} />
         </div>
 
         <p className="cond-hint"><b>내 조건</b>을 넣으면 정책 조건과 바로 비교해 드려요 <span>(선택)</span></p>
@@ -92,6 +79,31 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * 큰 질문 입력창. 안내 문구가 한 글자씩 바뀌어도 이 입력창만 다시 그리도록
+ * 입력값과 타자 효과 상태를 첫 화면 전체(Hero)와 분리해 둔다.
+ */
+function AskForm({ examples, onAsk, inputRef, reduceMotion }: {
+  examples: string[]; onAsk: Props['onAsk']; inputRef: RefObject<HTMLInputElement>; reduceMotion: boolean;
+}) {
+  const [text, setText] = useState('');
+  const placeholder = useTypewriter(examples, reduceMotion || text.length > 0);
+  const submit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    onAsk(text, e.currentTarget.querySelector('.go'));
+    setText('');
+  };
+  return (
+    <form onSubmit={submit}>
+      <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} aria-label="정책 질문" autoComplete="off" />
+      <button className="go" type="submit" aria-label="질문하기" disabled={!text.trim()}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+      </button>
+    </form>
   );
 }
 

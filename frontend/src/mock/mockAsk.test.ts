@@ -48,19 +48,35 @@ describe('mockAsk 예시 응답', () => {
     expect(r.follow_up_questions.some((f) => f.field === 'income')).toBe(false);
   });
 
-  it('되물은 항목에 대한 대답의 나이는 내 나이로 쓰지 않는다', async () => {
-    const r = await ask({
-      question: '아이가 3살이에요', awaiting_field: 'child_age',
-      history: [{ role: 'user', text: EXAMPLES.find((e) => e.key === 'welfare')!.question }],
-    });
-    expect(r.status).toBe('info');
-    expect(r.notice?.text).toContain('자녀 나이');
+  it('정보 요청(ask_info) 버튼은 계약대로 나이·지역·소득만 쓴다', async () => {
+    for (const ex of EXAMPLES) {
+      const r = await ask({ question: ex.question });
+      for (const f of r.follow_up_questions) {
+        if (f.kind === 'ask_info') expect(['age', 'region', 'income']).toContain(f.field);
+      }
+    }
   });
 
-  it('예시에 없는 질문은 근거 없음', async () => {
+  it('되물은 소득에 단위만 적어 답해도 소득으로 읽는다', async () => {
+    const r = await ask({
+      question: '4000만 원이요', awaiting_field: 'income',
+      history: [{ role: 'user', text: work.question }],
+    });
+    expect(r.answer).toContain('연 4,000만 원');
+  });
+
+  it('예시 답변의 추가 질문 버튼은 확정 답 없이 안내(info)만 한다', async () => {
+    const housing = EXAMPLES.find((e) => e.key === 'housing')!;
+    const r = await ask({ question: '혼인 기간 조건도 알려줘', history: [{ role: 'user', text: housing.question }] });
+    expect(r.status).toBe('info');
+    expect(r.citations).toHaveLength(0);
+  });
+
+  it('예시에 없는 질문은 근거 없음 (실제 백엔드처럼 notice 없이)', async () => {
     const r = await ask({ question: '아무거나' });
     expect(r.status).toBe('no_evidence');
     expect(r.citations).toHaveLength(0);
+    expect(r.notice).toBeNull();
   });
 
   it("'오류'가 든 질문은 처음 한 번 실패한다", async () => {

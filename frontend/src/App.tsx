@@ -3,6 +3,7 @@ import { askPolicy, usingSample } from './api/client';
 import type { AskRequest, ChatTurnMessage, FollowUp, UserProfile } from './api/types';
 import { CATEGORIES } from './config/categories';
 import { infoField } from './config/infoFields';
+import { HISTORY_MAX_ITEMS } from './config/request';
 import { describeProfile, parseProfile } from './lib/parseProfile';
 import { checkAge } from './lib/validate';
 import { Hero } from './components/Hero';
@@ -67,25 +68,36 @@ export default function App() {
     if (turns.length) setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 60);
   }, [turns.length, reduceMotion]);
 
+  // 알림을 연달아 띄워도 앞 알림의 타이머가 새 알림을 일찍 끄지 않도록 타이머를 하나만 둔다
+  const toastTimer = useRef<number>();
   const showToast = useCallback((text: string, icon: IconName = 'info') => {
     setToast({ text, icon });
-    window.setTimeout(() => setToast(null), 2000);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 2000);
   }, []);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
+  /** 앞선 대화를 계약 형식으로 만든다. 최근 HISTORY_MAX_ITEMS개만 보낸다. */
   const history = (list: Turn[]): ChatTurnMessage[] => list.flatMap((t): ChatTurnMessage[] => {
     if (t.kind === 'prompt') return [{ role: 'assistant', text: t.text }];
     const out: ChatTurnMessage[] = [{ role: 'user', text: t.question }];
     if (t.response?.answer) out.push({ role: 'assistant', text: t.response.answer });
     return out;
-  });
+  }).slice(-HISTORY_MAX_ITEMS);
+
+  // 답변을 기다리는 질문. 같은 질문이 연달아 눌려 요청이 두 번 나가지 않게 한다 (LLM 호출 비용)
+  const pending = useRef(new Set<string>());
 
   const run = useCallback(async (id: number, request: AskRequest) => {
+    pending.current.add(request.question);
     try {
       const response = await askPolicy(request);
       setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'done', response } : t)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : '알 수 없는 오류';
+      const message = err instanceof Error ? err.message : '일시적인 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
       setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'error', error: message } : t)));
+    } finally {
+      pending.current.delete(request.question);
     }
   }, []);
 
@@ -95,10 +107,10 @@ export default function App() {
   const ask = useCallback((raw: string, origin: HTMLElement | null) => {
     const question = raw.trim();
     if (!question) return;
+    if (pending.current.has(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return; }
     burst(origin, reduceMotion);
 
-    const found = parseProfile(question);
-    if (awaiting) delete found.age; // 되물은 항목(예: 자녀 나이)에 대한 '3살'은 내 나이가 아니다
+    const found = parseProfile(question, awaiting);
     const next: UserProfile = {
       age: found.age ?? profile.age, region: found.region ?? profile.region, income: found.income ?? profile.income,
     };
@@ -117,11 +129,11 @@ export default function App() {
     void run(id, request);
     setAwaiting(null);
     setMiniPlaceholder('이어서 물어보세요');
-  }, [awaiting, profile, reduceMotion, run]);
+  }, [awaiting, profile, reduceMotion, run, showToast]);
 
   const retry = useCallback((id: number) => {
     const request = requests.current.get(id);
-    if (!request) return;
+    if (!request || pending.current.has(request.question)) return;
     setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'loading', error: undefined } : t)));
     void run(id, request);
   }, [run]);
@@ -129,15 +141,16 @@ export default function App() {
   /** 추가 질문 버튼: 정보 요청(ask_info)이면 AI가 먼저 되묻고, 일반 질문이면 바로 보낸다. */
   const followUp = useCallback((f: FollowUp, origin: HTMLElement) => {
     if (f.kind !== 'ask_info') { ask(f.text, origin); return; }
-    const { label, example, usedForCheck } = infoField(f.field);
-    // 나이·지역·소득은 화면이 문장에서 읽어 조건에 반영하므로 따로 기다리지 않는다
-    setAwaiting(usedForCheck ? null : f.field ?? null);
+    const { label, example } = infoField(f.field);
+    // 대답 속 값은 화면이 문장에서 읽어 profile에 넣고, 서버에는 어떤 항목의 대답인지만 알린다 (계약 §3.2)
+    setAwaiting(f.field ?? null);
     setTurns((list) => [...list, { id: nextId.current++, kind: 'prompt', text: `좋아요! ${label}${josa(label)} 알려 주세요. 아래 입력창에 편하게 적어 주시면 그 조건으로 다시 확인해 드릴게요. (${example})` }]);
     setMiniPlaceholder(example);
     setTimeout(() => (miniOn ? miniInputRef : heroInputRef).current?.focus({ preventScroll: true }), 300);
   }, [ask, miniOn]);
 
-  const condText = describeProfile(profile) ? `내 조건 · ${describeProfile(profile)}` : '내 조건 없음';
+  const profileText = describeProfile(profile);
+  const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
 
   return (
     <>
@@ -168,7 +181,7 @@ export default function App() {
           )}
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
-              <TurnView turn={t} onFollowUp={followUp} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} />
+              <TurnView turn={t} onFollowUp={followUp} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
             </div>
           ))}
         </div>
