@@ -50,3 +50,5 @@
 {"condition_id": "COND_EDU_기타", "type": "EDUCATION", "name": "학력조건: 기타", "operator": "IN", "value": "기타", "unit": "학력", "evidence_location": "온통청년 schoolCd", "description": "정책 지원 자격 조건 (학력조건: 기타)"}
 {"condition_id": "COND_JOB__예비_창업자", "type": "EMPLOYMENT", "name": "취업조건: (예비)창업자", "operator": "IN", "value": "_예비_창업자", "unit": "상태", "evidence_location": "온통청년 jobCd", "description": "정책 지원 자격 조건 (취업조건: (예비)창업자)"}
 {"condition_id": "COND_EDU_고졸_예정", "type": "EDUCATION", "name": "학력조건: 고졸 예정", "operator": "IN", "value": "고졸_예정", "unit": "학력", "evidence_location": "온통청년 schoolCd", "description": "정책 지원 자격 조건 (학력조건: 고졸 예정)"}
+{"condition_id": "COND_AGE_12_24", "type": "AGE", "name": "연령조건: 만 12세~24세", "operator": "BETWEEN", "value": "12~24", "unit": "세", "evidence_location": "원문 대조 교정", "description": "정책 지원 자격 조건 (연령조건: 만 12세~24세)"}
+{"condition_id": "COND_AGE_6_64", "type": "AGE", "name": "연령조건: 만 6세~64세", "operator": "BETWEEN", "value": "6~64", "unit": "세", "evidence_location": "원문 대조 교정", "description": "정책 지원 자격 조건 (연령조건: 만 6세~64세)"}
