@@ -8,11 +8,9 @@ import os
 import re
 from typing import Any
 
-from dotenv import load_dotenv
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
 
-load_dotenv()
 
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT_SECONDS = 25.0
