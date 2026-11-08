@@ -12,8 +12,9 @@ from unittest.mock import Mock
 
 from collectors.preprocessing.application_urls import application_url_or_none, first_application_url
 from collectors.api.gov24_collector import normalize_gov24_record
-from collectors.api.youthcenter_collector import load_code_definitions, normalize_youthcenter_item
+from collectors.api.youthcenter_collector import load_code_definitions, map_zip_codes_to_regions, normalize_youthcenter_item
 from collectors.preprocessing.normalize import parse_bokjiro_detail_xml
+from scripts import data_corrections as dc
 from scripts.load_candidate_neo4j import (
     NODE_CONFIG, relationship_query, validate_package, validate_property, verify_live,
 )
@@ -64,18 +65,28 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1074)
-        self.assertEqual(report["counts"]["total_graph_edges"], 3703)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1028)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2915)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
         declared = {row["policy_id"]: row for row in delta["updated_policy_properties"]}
         actual_changes = set()
+        corrections = dc.load_corrections()
+        removed_groups = dc.removed_group_ids(corrections)
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
+            if name == "policy":
+                # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
+                corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections")
+                                 for item in corrections[group]}
+                dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids], corrections)
             new = {row[key]: row for row in rows(PACKAGE / "neo4j" / f"nodes_{name}.jsonl")}
             for original in old:
+                if name == "condition_group" and original[key] in removed_groups:
+                    self.assertNotIn(original[key], new)
+                    continue
                 current = dict(new[original[key]])
                 if name == "policy" and original != current:
                     change = declared[original[key]]
@@ -85,10 +96,40 @@ class CandidateIntegrityTests(unittest.TestCase):
                     current["official_apply_url"] = original["official_apply_url"]
                 self.assertEqual(original, current)
         self.assertEqual(actual_changes, set(declared))
-        for relative in ["neo4j/relationships.jsonl", "qdrant/payload_chunks.jsonl"]:
-            old = rows(ROOT / "data/handoff" / relative)
-            new = {json.dumps(row, sort_keys=True) for row in rows(PACKAGE / relative)}
-            self.assertTrue(all(json.dumps(row, sort_keys=True) in new for row in old))
+        removed = {(r["source_id"], r["relation"], r["target_id"]) for r in delta["data_corrections"]["removed_relationships"]}
+        region_policies = {item["policy_id"]: item for item in corrections["region_corrections"]}
+        new_edges = {json.dumps(row, sort_keys=True) for row in rows(PACKAGE / "neo4j/relationships.jsonl")}
+        for row in rows(ROOT / "data/handoff/neo4j/relationships.jsonl"):
+            if (row["source_id"], row["relation"], row["target_id"]) in removed:
+                self.assertNotIn(json.dumps(row, sort_keys=True), new_edges)
+                continue
+            if row["relation"] == "AVAILABLE_IN" and row["source_id"] in region_policies:
+                item = region_policies[row["source_id"]]
+                row = {**row, "target_id": item["after_region_id"], "target_name": item["after"]}
+            self.assertIn(json.dumps(row, sort_keys=True), new_edges)
+        new_chunks = {json.dumps(row, sort_keys=True) for row in rows(PACKAGE / "qdrant/payload_chunks.jsonl")}
+        for row in rows(ROOT / "data/handoff/qdrant/payload_chunks.jsonl"):
+            if row["policy_id"] in region_policies:
+                row = {**row, "region": region_policies[row["policy_id"]]["after"]}
+            self.assertIn(json.dumps(row, sort_keys=True), new_chunks)
+
+    def test_merged_gwangju_jeonnam_code_is_not_nationwide(self):
+        self.assertEqual(map_zip_codes_to_regions("12870"), ["광주광역시", "전라남도"])
+
+    def test_data_corrections_reach_the_package(self):
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
+        self.assertNotIn(("POL_GOV_023", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)
+        self.assertNotIn(("GRP_POL_GOV_023_ROOT", "CONTAINS_GROUP", "GRP_POL_GOV_023_OR_HH"), edges)
+        self.assertNotIn(("POL_GOV_008", "REQUIRES_CONDITION", "COND_AGE_60_120"), edges)
+        # 원문에 무주택 요건이 있는 정책과 API가 무주택만 지정한 정책은 유지한다
+        self.assertIn(("POL_GOV_025", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)
+        self.assertIn(("POL_GOV_001", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)
+        self.assertIn(("POL_GOV_028", "AVAILABLE_IN", "REGION_GWANGJU"), edges)
+        self.assertIn(("POL_YC_002", "AVAILABLE_IN", "REGION_JEONNAM"), edges)
+        self.assertIn("총자산 3억 4,500만원", policies["POL_001"]["eligibility"])
+        self.assertIn("3.45억원", policies["POL_003"]["eligibility"])
+        self.assertIn("일반형 연 1.8%", policies["POL_006"]["benefit"])
 
     def test_frozen_manifests_match_actual_files(self):
         for directory in [ROOT / "data/handoff", ROOT / "data/releases/v1"]:

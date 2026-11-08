@@ -1,0 +1,350 @@
+{
+  "description": "v1.4.0 후보에만 적용하는 원문 대조 교정. data/handoff(v1.3.2)는 수정하지 않는다. 노드·관계 유형과 응답 구조 변경 없음.",
+  "checked_at": "2026-11-08",
+  "text_corrections": [
+    {
+      "policy_id": "POL_001",
+      "field": "eligibility",
+      "find": "소득 기준 70%(맞벌이 90%, 신생아가구 최대 20%p 가산), 총자산 3억 3,700만원(신생아 가구 3억 5,400만원) 이하, 자동차 4,563만원 이하.",
+      "replace": "소득 기준 전년도 도시근로자 월평균소득 70%(본인·배우자 모두 소득이 있으면 90%, 1인가구 20%p·2인가구 10%p 가산), 총자산 3억 4,500만원 이하, 자동차 4,542만원 이하('23.03.28 이후 출산 자녀 1인당 10%p 완화, 최대 2자녀: 총자산 4억 1,300만원, 자동차 5,451만원).",
+      "evidence": "DOC_LH_001 소득·자산 기준 표"
+    },
+    {
+      "policy_id": "POL_003",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_003 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_004",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_004 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_006",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_006 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_007",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_007 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_006",
+      "field": "benefit",
+      "find": "일반형 연 2.3%",
+      "replace": "일반형 연 1.8%",
+      "evidence": "POL_006 근거 문서 대출금리 항목"
+    },
+    {
+      "policy_id": "POL_010",
+      "field": "eligibility",
+      "find": "(18~34세 청년 5억원 이하)",
+      "replace": "(15~34세 청년 5억원 이하)",
+      "evidence": "POL_010 근거 문서 지원대상 항목"
+    },
+    {
+      "policy_id": "POL_010",
+      "field": "eligibility",
+      "find": "선발형 청년특례(18~34세)",
+      "replace": "선발형 청년특례(15~34세)",
+      "evidence": "POL_010 근거 문서 지원대상 항목"
+    }
+  ],
+  "region_corrections": [
+    {
+      "policy_id": "POL_GOV_028",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_GOV_030",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_YC_002",
+      "before": "전국",
+      "after": "전라남도",
+      "before_region_id": "REGION_NATIONWIDE",
+      "after_region_id": "REGION_JEONNAM",
+      "evidence": "운영기관 영광군, 지역코드 1개(12번대). 코드 매핑 실패로 전국 처리됐음"
+    }
+  ],
+  "household_condition_removals": [
+    {
+      "policy_id": "POL_GOV_002",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_005",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_011",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_022",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_025",
+      "remove_homeless_requirement": false,
+      "evidence": "원문에 무주택 요건이 있어 무주택 조건은 유지하고, API 전체 선택에서 생긴 가구유형 OR 그룹만 제거"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_031",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_032",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_033",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_035",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_036",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_040",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_041",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_042",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_044",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_045",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_047",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_049",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_052",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_055",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_059",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_060",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_062",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_063",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_064",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    }
+  ],
+  "age_condition_removals": [
+    {
+      "policy_id": "POL_GOV_008",
+      "condition_id": "COND_AGE_60_120",
+      "evidence": "60세 이상은 고령가산금 대상만 해당. 한부모·장애 등 다른 가산금에는 적용되지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_011",
+      "condition_id": "COND_AGE_13_18",
+      "evidence": "원문 선정기준 만 12세~만 24세, 그래프 13~18세"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "condition_id": "COND_AGE_18_65",
+      "evidence": "원문 만 19세 이상(상한 없음), 그래프 18~65세"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "condition_id": "COND_AGE_0_120",
+      "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세"
+    }
+  ]
+}

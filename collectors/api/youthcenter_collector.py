@@ -101,9 +101,11 @@ def map_zip_codes_to_regions(zip_cd_str: Any) -> List[str]:
     regions: List[str] = []
     for z in raw_zips:
         prefix = z[:2]
-        reg_name = ZIP_CODE_TO_REGION.get(prefix)
-        if reg_name and reg_name not in regions:
-            regions.append(reg_name)
+        # 12번대는 전남광주통합특별시 코드라 코드만으로 광주·전남을 구분할 수 없어 둘 다 기록한다 (전국 처리 방지)
+        names = ["광주광역시", "전라남도"] if prefix == "12" else [ZIP_CODE_TO_REGION.get(prefix)]
+        for reg_name in names:
+            if reg_name and reg_name not in regions:
+                regions.append(reg_name)
     if len(regions) >= 15:
         return ["전국"]
     return regions if regions else ["전국"]

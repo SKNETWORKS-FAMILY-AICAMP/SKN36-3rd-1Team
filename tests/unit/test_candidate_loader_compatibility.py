@@ -89,8 +89,8 @@ class TestCandidateGitInput(unittest.TestCase):
         self.assertTrue(report.ok, report.summary())
         self.assertEqual(report.node_counts["Policy"], 246)
         self.assertEqual(report.node_counts["Document"], 261)
-        self.assertEqual(sum(report.node_counts.values()), 1074)
-        self.assertEqual(sum(report.relationship_counts.values()), 3703)
+        self.assertEqual(sum(report.node_counts.values()), 1028)
+        self.assertEqual(sum(report.relationship_counts.values()), 2915)
         policies = {p["policy_id"] for p in self.graph.nodes_by_label["Policy"]}
         documents = {d["document_id"] for d in self.graph.nodes_by_label["Document"]}
         for document in self.graph.nodes_by_label["Document"]:
@@ -119,8 +119,8 @@ class TestCandidateGitInput(unittest.TestCase):
         runner = FakeGraphRunner()
         result = lg.load_graph(self.graph, runner)
         self.assertTrue(result["ok"], result["verification"])
-        self.assertEqual(len(runner.nodes), 1074)
-        self.assertEqual(len(runner.relationships), 3703)
+        self.assertEqual(len(runner.nodes), 1028)
+        self.assertEqual(len(runner.relationships), 2915)
         for p in self.graph.nodes_by_label["Policy"]:
             if p.get("official_apply_url", "not_null") is None:
                 self.assertNotIn("official_apply_url", runner.nodes[("Policy", p["policy_id"])])

@@ -32,6 +32,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 from scripts.review_candidate_application_urls import EVIDENCE_PATH, review_candidate_policies
+from scripts import data_corrections as dc
 HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 STAGING_DIR = BASE_DIR / "data" / "staging"
 CANDIDATE_DIR = BASE_DIR / "data" / "releases" / "v1.4.0-candidate"
@@ -189,6 +190,8 @@ def build_candidate_release():
     application_reviews, application_changes = review_candidate_policies(
         merged_policies, baseline_policies,
     )
+    corrections = dc.load_corrections()
+    dc.apply_policy_corrections(merged_policies, corrections)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
         json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8", newline="\n",
@@ -272,7 +275,7 @@ def build_candidate_release():
             "description": f"{p['policy_name']} 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"
         })
 
-    merged_cgroups = cgroups + new_cgroups
+    merged_cgroups = dc.apply_group_corrections(cgroups + new_cgroups, corrections)
     with open(neo4j_out / "nodes_condition_group.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for cg in merged_cgroups:
             f.write(json.dumps(cg, ensure_ascii=False) + "\n")
@@ -429,7 +432,7 @@ def build_candidate_release():
             "review_status": "verified"
         })
 
-    merged_rels = relationships + new_rels
+    merged_rels, removed_rels = dc.apply_relationship_corrections(relationships + new_rels, corrections)
     with open(neo4j_out / "relationships.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for r in merged_rels:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -457,6 +460,7 @@ def build_candidate_release():
             new_chunks.append(sc)
 
     merged_chunks = chunks + new_chunks
+    region_chunks_corrected = dc.apply_region_to_chunks(merged_chunks, corrections)
     with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for c in merged_chunks:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
@@ -528,6 +532,13 @@ def build_candidate_release():
         "added_qdrant_point_ids": [c["point_id"] for c in new_chunks],
         "added_relationships_count": len(new_rels),
         "updated_policy_properties": application_changes,
+        "data_corrections": {
+            "source": "data/metadata/data_corrections_v1.4.0.json",
+            "source_sha256": get_file_sha256(dc.CORRECTIONS_PATH),
+            "removed_relationships": removed_rels,
+            "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
+            "region_corrected_chunks": region_chunks_corrected,
+        },
         "application_url_evidence_sha256": get_file_sha256(
             BASE_DIR / "data/metadata/application_url_evidence_v1.4.0.json"
         ),
@@ -576,6 +587,12 @@ def build_candidate_release():
         "- 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).",
         "- 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.",
         "- 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.",
+        "",
+        "## 1-2. 원문 대조 교정 (2026-11-09)",
+        "",
+        f"- 설명 문구 {len(corrections['text_corrections'])}건, 지역 {len(corrections['region_corrections'])}건, 연령 조건 제거 {len(corrections['age_condition_removals'])}건, 가구 조건 교정 {len(corrections['household_condition_removals'])}건을 적용했다.",
+        f"- 조건 관계 {len(removed_rels)}개와 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
+        "- `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.",
     ]
     counts_section = "\n".join(rows)
 
@@ -594,7 +611,7 @@ def build_candidate_release():
 
 ## 1-2. 기존 정책의 신청 주소 교정
 
-- 기존 정책 {len(application_changes)}건에서 `official_apply_url`만 변경했다. 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
+- 기존 정책 {len(application_changes)}건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
 - `data/handoff/`, 기존 정제본, 기존 문서·관계·청크·원문 해시는 수정하지 않는다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
