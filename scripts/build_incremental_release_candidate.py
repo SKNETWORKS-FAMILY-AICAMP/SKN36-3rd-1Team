@@ -292,6 +292,7 @@ def build_candidate_release():
         dst = neo4j_out / static_name
         if src.exists():
             dst.write_bytes(src.read_bytes())
+    dc.add_condition_nodes(neo4j_out / "nodes_eligibility_condition.jsonl", corrections)
 
     # 동결 인계본의 로더 대신 후보용 안전 로더를 패키지에 포함한다.
     (neo4j_out / "load_neo4j.py").write_bytes(
@@ -432,7 +433,7 @@ def build_candidate_release():
             "review_status": "verified"
         })
 
-    merged_rels, removed_rels = dc.apply_relationship_corrections(relationships + new_rels, corrections)
+    merged_rels, removed_rels, replaced_rels = dc.apply_relationship_corrections(relationships + new_rels, corrections)
     with open(neo4j_out / "relationships.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for r in merged_rels:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -536,6 +537,8 @@ def build_candidate_release():
             "source": "data/metadata/data_corrections_v1.4.0.json",
             "source_sha256": get_file_sha256(dc.CORRECTIONS_PATH),
             "removed_relationships": removed_rels,
+            "replacement_relationships": replaced_rels,
+            "added_condition_ids": [node["condition_id"] for node in corrections["new_condition_nodes"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
         },
@@ -590,8 +593,8 @@ def build_candidate_release():
         "",
         "## 1-2. 원문 대조 교정 (2026-11-09)",
         "",
-        f"- 설명 문구 {len(corrections['text_corrections'])}건, 지역 {len(corrections['region_corrections'])}건, 연령 조건 제거 {len(corrections['age_condition_removals'])}건, 가구 조건 교정 {len(corrections['household_condition_removals'])}건을 적용했다.",
-        f"- 조건 관계 {len(removed_rels)}개와 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
+        f"- 설명 문구 {len(corrections['text_corrections'])}건, 지역 {len(corrections['region_corrections'])}건, 연령 조건 제거 {len(corrections['age_condition_removals'])}건·원문 값 교체 {len(corrections['age_condition_replacements'])}건, 가구 조건 교정 {len(corrections['household_condition_removals'])}건을 적용했다.",
+        f"- 조건 관계 {len(removed_rels) - len(replaced_rels)}개(교체 제외)와 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
         "- `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.",
     ]
     counts_section = "\n".join(rows)

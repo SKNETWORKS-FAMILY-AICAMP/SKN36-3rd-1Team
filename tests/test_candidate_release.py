@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1028)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2915)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1030)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2921)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -122,6 +122,17 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertNotIn(("POL_GOV_023", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)
         self.assertNotIn(("GRP_POL_GOV_023_ROOT", "CONTAINS_GROUP", "GRP_POL_GOV_023_OR_HH"), edges)
         self.assertNotIn(("POL_GOV_008", "REQUIRES_CONDITION", "COND_AGE_60_120"), edges)
+        # 원문에 나이가 분명한 3건은 조건을 지우지 않고 원문 값으로 교체한다
+        for policy_id, before, after in [("POL_GOV_011", "COND_AGE_13_18", "COND_AGE_12_24"),
+                                         ("POL_GOV_016", "COND_AGE_18_65", "COND_AGE_19_120"),
+                                         ("POL_GOV_023", "COND_AGE_0_120", "COND_AGE_6_64")]:
+            self.assertNotIn((policy_id, "REQUIRES_CONDITION", before), edges)
+            self.assertNotIn((f"GRP_{policy_id}_ROOT", "CONTAINS_CONDITION", before), edges)
+            self.assertIn((policy_id, "REQUIRES_CONDITION", after), edges)
+            self.assertIn((f"GRP_{policy_id}_ROOT", "CONTAINS_CONDITION", after), edges)
+        conditions = {row["condition_id"]: row for row in rows(PACKAGE / "neo4j/nodes_eligibility_condition.jsonl")}
+        self.assertEqual(conditions["COND_AGE_12_24"]["value"], "12~24")
+        self.assertEqual(conditions["COND_AGE_6_64"]["value"], "6~64")
         # 원문에 무주택 요건이 있는 정책과 API가 무주택만 지정한 정책은 유지한다
         self.assertIn(("POL_GOV_025", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)
         self.assertIn(("POL_GOV_001", "REQUIRES_CONDITION", "COND_HH_무주택세대"), edges)

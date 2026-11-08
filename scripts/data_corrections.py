@@ -55,7 +55,7 @@ def removed_group_ids(corrections: dict) -> set:
 
 
 def apply_relationship_corrections(relationships: list, corrections: dict) -> tuple:
-    """잘못 연결된 조건 관계를 제거하고 지역 관계를 교정한다. (교정된 목록, 제거한 관계) 반환."""
+    """잘못 연결된 조건 관계를 제거·교체하고 지역 관계를 교정한다. (교정된 목록, 제거한 관계, 추가한 관계) 반환."""
     groups = removed_group_ids(corrections)
     remove = set()
     for item in corrections["household_condition_removals"]:
@@ -69,10 +69,16 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
         remove.add(("REQUIRES_CONDITION", item["policy_id"], item["condition_id"]))
         remove.add(("CONTAINS_CONDITION", f"GRP_{item['policy_id']}_ROOT", item["condition_id"]))
 
+    # 연령 교체: 원문에 나이가 분명한 정책은 조건을 지우지 않고 원문 값으로 바꾼다
+    replacements = {}
+    for item in corrections["age_condition_replacements"]:
+        replacements[("REQUIRES_CONDITION", item["policy_id"], item["before"])] = item
+        replacements[("CONTAINS_CONDITION", f"GRP_{item['policy_id']}_ROOT", item["before"])] = item
+
     household_policies = {f"{item['policy_id']}" for item in corrections["household_condition_removals"]}
     region_by_policy = {item["policy_id"]: item for item in corrections["region_corrections"]}
     seen_regions = set()
-    kept, removed, matched = [], [], set()
+    kept, removed, added, matched = [], [], [], set()
     for row in relationships:
         key = (row["relation"], row["source_id"], row["target_id"])
         is_group_member = row["relation"] == "CONTAINS_CONDITION" and row["source_id"] in groups
@@ -85,16 +91,29 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
             matched.add(key)
             removed.append({"source_id": row["source_id"], "relation": row["relation"], "target_id": row["target_id"]})
             continue
+        if key in replacements:
+            matched.add(key)
+            item = replacements[key]
+            removed.append({"source_id": row["source_id"], "relation": row["relation"], "target_id": row["target_id"]})
+            row = {**row, "target_id": item["after"], "target_name": item["after_name"], "evidence_location": "원문 대조 교정"}
+            added.append({"source_id": row["source_id"], "relation": row["relation"], "target_id": row["target_id"]})
         if row["relation"] == "AVAILABLE_IN" and row["source_id"] in region_by_policy:
             item = region_by_policy[row["source_id"]]
             assert row["target_id"] == item["before_region_id"], f"지역 관계 교정 전 값 불일치: {row['source_id']}"
             row = {**row, "target_id": item["after_region_id"], "target_name": item["after"]}
             seen_regions.add(row["source_id"])
         kept.append(row)
-    missing = remove - matched
+    missing = (remove | set(replacements)) - matched
     assert not missing, f"제거 대상 관계를 찾지 못함: {sorted(missing)[:5]}"
     assert seen_regions == set(region_by_policy), "지역 교정 대상 관계 누락"
-    return kept, removed
+    return kept, removed, added
+
+
+def add_condition_nodes(path: Path, corrections: dict) -> None:
+    """원문 값으로 교체할 때 필요한 연령 조건 노드를 후보의 조건 노드 파일에 덧붙인다."""
+    with open(path, "a", encoding="utf-8", newline=chr(10)) as f:
+        for node in corrections["new_condition_nodes"]:
+            f.write(json.dumps(node, ensure_ascii=False) + chr(10))
 
 
 def apply_group_corrections(groups: list, corrections: dict) -> list:

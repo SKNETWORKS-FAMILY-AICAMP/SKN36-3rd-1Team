@@ -330,21 +330,51 @@
       "policy_id": "POL_GOV_008",
       "condition_id": "COND_AGE_60_120",
       "evidence": "60세 이상은 고령가산금 대상만 해당. 한부모·장애 등 다른 가산금에는 적용되지 않음"
+    }
+  ],
+  "new_condition_nodes": [
+    {
+      "condition_id": "COND_AGE_12_24",
+      "type": "AGE",
+      "name": "연령조건: 만 12세~24세",
+      "operator": "BETWEEN",
+      "value": "12~24",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 12세~24세)"
     },
     {
+      "condition_id": "COND_AGE_6_64",
+      "type": "AGE",
+      "name": "연령조건: 만 6세~64세",
+      "operator": "BETWEEN",
+      "value": "6~64",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 6세~64세)"
+    }
+  ],
+  "age_condition_replacements": [
+    {
       "policy_id": "POL_GOV_011",
-      "condition_id": "COND_AGE_13_18",
-      "evidence": "원문 선정기준 만 12세~만 24세, 그래프 13~18세"
+      "before": "COND_AGE_13_18",
+      "after": "COND_AGE_12_24",
+      "evidence": "원문 선정기준 만 12세~만 24세, 그래프 13~18세",
+      "after_name": "연령조건: 만 12세~24세"
     },
     {
       "policy_id": "POL_GOV_016",
-      "condition_id": "COND_AGE_18_65",
-      "evidence": "원문 만 19세 이상(상한 없음), 그래프 18~65세"
+      "before": "COND_AGE_18_65",
+      "after": "COND_AGE_19_120",
+      "evidence": "원문 만 19세 이상(상한 없음), 그래프 18~65세. 120은 기존 데이터의 상한 없음 표기",
+      "after_name": "연령조건: 만 19세~120세"
     },
     {
       "policy_id": "POL_GOV_023",
-      "condition_id": "COND_AGE_0_120",
-      "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세"
+      "before": "COND_AGE_0_120",
+      "after": "COND_AGE_6_64",
+      "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세",
+      "after_name": "연령조건: 만 6세~64세"
     }
   ]
 }
