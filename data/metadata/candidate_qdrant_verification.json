@@ -1,16 +1,21 @@
 {
-  "checked_at": "2026-11-06T22:00:25.263590+09:00",
-  "qdrant": {
-    "status": "NOT_TESTED"
-  },
+  "checked_at": "2026-11-09T01:31:41.024281+09:00",
+  "git_commit": "987057eea87124a6d88bcd73d81a63c4c3908ce2",
+  "issue": 31,
+  "dataset": "data/releases/v1.4.0-candidate",
+  "manifest_sha256": "16d6843f245ff1624686dddf815d0aeb6e6b76a87ecb674db1ea33701a46386e",
+  "generator": "venv/issue31_20261109/run.py",
+  "scope": "Local PR29 corrected data; old instances and collections retained. HTTP/LLM integration not tested.",
+  "previous_evidence": "data/metadata/verification_history/issue31_before_20261109.json",
+  "status": "PASS",
   "offline": {
     "status": "PASS",
     "counts": {
       "total_policies": 246,
       "total_documents": 261,
       "total_chunks": 599,
-      "total_graph_nodes": 1074,
-      "total_graph_edges": 3703
+      "total_graph_nodes": 1030,
+      "total_graph_edges": 2921
     },
     "nodes_by_label": {
       "Policy": 246,
@@ -20,8 +25,8 @@
       "Category": 5,
       "LifeStage": 6,
       "TargetGroup": 11,
-      "ConditionGroup": 352,
-      "EligibilityCondition": 52
+      "ConditionGroup": 306,
+      "EligibilityCondition": 54
     },
     "relations_by_type": {
       "ADMINISTERED_BY": 246,
@@ -30,11 +35,11 @@
       "TARGETS": 443,
       "APPLIES_TO_LIFESTAGE": 437,
       "SUPPORTED_BY": 261,
-      "REQUIRES_CONDITION": 735,
+      "REQUIRES_CONDITION": 367,
       "MODIFIES_CONDITION_OF": 1,
       "HAS_ROOT_CONDITION_GROUP": 246,
-      "CONTAINS_GROUP": 106,
-      "CONTAINS_CONDITION": 735
+      "CONTAINS_GROUP": 60,
+      "CONTAINS_CONDITION": 367
     },
     "nullable_properties": {
       "Policy.official_apply_url": 224,
@@ -45,5 +50,8 @@
     "manifest_files_checked": 20,
     "document_text_hashes_checked": 0
   },
-  "status": "PASS"
+  "qdrant": {
+    "status": "NOT_TESTED",
+    "scope": "Offline release payload contract only; see live record for B2/B3"
+  }
 }
