@@ -1,0 +1,39 @@
+{
+  "description": "Issue #5 v1.3.2 데이터셋 식별(manifest_sha256) 동등성 기록. 고정 평가셋·정적 플래그 파일은 수정하지 않고, 아래 데이터 파일이 그대로일 때만 새 manifest를 같은 데이터로 인정한다.",
+  "equivalences": [
+    {
+      "from_manifest_sha256": "7783d578ce1834a121e0e23f24df2d489644d93842eca73fb3cf25895164ffc9",
+      "to_manifest_sha256": "9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85",
+      "reason": "반석님 d500ff2(인계 체크섬 LF 기준 재계산), 92dfad2(data_contract.md official_apply_url Nullable 문구)로 manifest만 변경. data/handoff 데이터 파일은 04a9edc와 LF 기준 바이트 동일",
+      "changed_files": [
+        "manifest.json",
+        "data_contract.md"
+      ],
+      "verified_at": "2026-11-07",
+      "verified_between": [
+        "04a9edc",
+        "d62ebcd"
+      ],
+      "unchanged_data_files": {
+        "README.md": "6c462cbea473ca06ea83e6232459d776f47077c59bd69ad1d89f9a69dc84f359",
+        "neo4j/cypher_ddl.cypher": "787fbd9f6c8de8a17fd346edee4a00f280e26b7a766c4a4f22893760ecee8118",
+        "neo4j/load_neo4j.py": "01f53a54221d3003d454715428faaf7b06b55bdce477fbf25679ffa7b41af96c",
+        "neo4j/nodes_category.jsonl": "e668cd7324d693ee5d8e2f2e6875f324a2ad98838a04db70dc58dbae765517c9",
+        "neo4j/nodes_condition_group.jsonl": "730582bb2d4270fc63bb1ed64b2cb6d3f4a2ab668eed754783741bef98c93ca7",
+        "neo4j/nodes_document.jsonl": "5a9ca37006169396dbe2a51777b349b17d0cd503fe59c031104f56cce37cf3c6",
+        "neo4j/nodes_eligibility_condition.jsonl": "e7ac5ceda4c70d65bc2280ea411e5b3260522ec9f1a2a8e621448e35dffc1422",
+        "neo4j/nodes_lifestage.jsonl": "4e0f80761cb1d40a2dfc0265ce9861469b3defceffc487850866e9bd57f75ac3",
+        "neo4j/nodes_organization.jsonl": "645f4587d6d3a9d57e24cb10619e314895b2301c6dbdb7b16ac9fed9a5c353f3",
+        "neo4j/nodes_policy.jsonl": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
+        "neo4j/nodes_region.jsonl": "f8e174718e365c756094dcc890d794d1cecd6e3674795ddffe7f6346b7ab600f",
+        "neo4j/nodes_target_group.jsonl": "8d9b680a4eb367474940485dbebd008639c53965c88116a202cb50450f33b249",
+        "neo4j/relationships.jsonl": "1dede09755dc2f1907f115d2e509b256c23a4e9c20f31f8ddc14e3e148a5aa82",
+        "neo4j/schema_constraints.cypher": "e6f55be7de7658bc03a637c1d980284e47001b71624280a69aa1b5589279b9ce",
+        "neo4j/verification_queries.cypher": "c431eb1bd8a3e9adf4c7ddf3ebef04743bfb7d1bebad8df623b9f2285e7346bc",
+        "neo4j/verify_neo4j.cypher": "63fe6b20a4d644c27523ade12a26355cf6d92725514620d473fccabe131df0fc",
+        "qdrant/collection_config.json": "d20725172771f53ce63dc1cdd92bfe2b26b7931b9bcb02ecc523cf8998df201b",
+        "qdrant/payload_chunks.jsonl": "23bf72248e6fef33dce366edc47b1965832136f59f14e262eab0b652425dea86"
+      }
+    }
+  ]
+}

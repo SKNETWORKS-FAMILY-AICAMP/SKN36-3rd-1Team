@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "records_by_source": {
+    "bokjiro": 99,
+    "gov24": 65,
+    "youthcenter": 65
+  },
+  "application_url_mismatch_policy_ids": [],
+  "network_calls": 0,
+  "raw_or_processed_files_written": 0
+}

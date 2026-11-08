@@ -1,0 +1,604 @@
+{
+  "run_at": "2026-11-06T19:37:40+09:00",
+  "model_access": {
+    "model": "gpt-5.6-terra",
+    "accessible": true,
+    "status": 200,
+    "id": "gpt-5.6-terra",
+    "owned_by": "system"
+  },
+  "plan": {
+    "document_id": "DOC_NHUF_003",
+    "window": 0,
+    "window_count": 2,
+    "window_range": [
+      0,
+      5891
+    ],
+    "prompt_chars": 6376,
+    "prompt_sha256": "b5beb8dd6d0043f8baa6db3d1f926452b80f32fa704c6ddf5a96260df104f5fa",
+    "estimated_input_tokens_upper": 6576,
+    "max_output_tokens": 4000,
+    "reasoning_effort": "low",
+    "worst_case_usd": 0.061152,
+    "budget_usd": 3.0,
+    "prices_per_1m": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 12.0
+    }
+  },
+  "proposals": [
+    {
+      "title": "대출대상",
+      "start_text": "대출대상",
+      "page": null
+    },
+    {
+      "title": "대출금리",
+      "start_text": "대출금리",
+      "page": null
+    },
+    {
+      "title": "대출한도",
+      "start_text": "대출한도",
+      "page": null
+    },
+    {
+      "title": "대출기간",
+      "start_text": "대출기간",
+      "page": null
+    },
+    {
+      "title": "대출 대상",
+      "start_text": "대출 대상",
+      "page": null
+    },
+    {
+      "title": "신청시기",
+      "start_text": "신청시기",
+      "page": null
+    },
+    {
+      "title": "□ 보증 신청 기한",
+      "start_text": "□ 보증 신청 기한",
+      "page": null
+    },
+    {
+      "title": "대상주택",
+      "start_text": "대상주택",
+      "page": null
+    },
+    {
+      "title": "대출한도",
+      "start_text": "대출한도",
+      "page": null
+    },
+    {
+      "title": "대출금리",
+      "start_text": "대출금리",
+      "page": null
+    },
+    {
+      "title": "금리우대",
+      "start_text": "금리우대",
+      "page": null
+    },
+    {
+      "title": "추가우대금리(①,② 중복 적용 가능)",
+      "start_text": "추가우대금리(①,② 중복 적용 가능)",
+      "page": null
+    },
+    {
+      "title": "이용기간",
+      "start_text": "이용기간",
+      "page": null
+    },
+    {
+      "title": "상환방법",
+      "start_text": "상환방법",
+      "page": null
+    },
+    {
+      "title": "담보취득",
+      "start_text": "담보취득",
+      "page": null
+    },
+    {
+      "title": "보증 종류별 안내",
+      "start_text": "보증 종류별 안내",
+      "page": null
+    },
+    {
+      "title": "대출금지급방식",
+      "start_text": "대출금지급방식",
+      "page": null
+    },
+    {
+      "title": "대출취급영업점",
+      "start_text": "대출취급영업점",
+      "page": null
+    },
+    {
+      "title": "중도상환수수료",
+      "start_text": "중도상환수수료",
+      "page": null
+    },
+    {
+      "title": "대출계약 철회",
+      "start_text": "대출계약 철회",
+      "page": null
+    },
+    {
+      "title": "유의사항",
+      "start_text": "유의사항",
+      "page": null
+    }
+  ],
+  "used_fallback": false,
+  "fallback_reasons": [],
+  "chunking_version": "C1",
+  "accepted_sections": [
+    {
+      "index": 0,
+      "title": "대출대상",
+      "start": 81,
+      "page": null,
+      "line": "대출대상"
+    },
+    {
+      "index": 1,
+      "title": "대출금리",
+      "start": 221,
+      "page": null,
+      "line": "대출금리"
+    },
+    {
+      "index": 2,
+      "title": "대출한도",
+      "start": 242,
+      "page": null,
+      "line": "대출한도"
+    },
+    {
+      "index": 3,
+      "title": "대출기간",
+      "start": 288,
+      "page": null,
+      "line": "대출기간"
+    },
+    {
+      "index": 5,
+      "title": "신청시기",
+      "start": 2287,
+      "page": null,
+      "line": "신청시기"
+    },
+    {
+      "index": 6,
+      "title": "□ 보증 신청 기한",
+      "start": 2577,
+      "page": null,
+      "line": "□ 보증 신청 기한"
+    },
+    {
+      "index": 7,
+      "title": "대상주택",
+      "start": 2911,
+      "page": null,
+      "line": "대상주택"
+    },
+    {
+      "index": 10,
+      "title": "금리우대",
+      "start": 3899,
+      "page": null,
+      "line": "금리우대"
+    },
+    {
+      "index": 11,
+      "title": "추가우대금리(①,② 중복 적용 가능)",
+      "start": 4010,
+      "page": null,
+      "line": "추가우대금리(①,② 중복 적용 가능)"
+    },
+    {
+      "index": 12,
+      "title": "이용기간",
+      "start": 4499,
+      "page": null,
+      "line": "이용기간"
+    },
+    {
+      "index": 13,
+      "title": "상환방법",
+      "start": 4638,
+      "page": null,
+      "line": "상환방법"
+    },
+    {
+      "index": 14,
+      "title": "담보취득",
+      "start": 4656,
+      "page": null,
+      "line": "담보취득"
+    },
+    {
+      "index": 15,
+      "title": "보증 종류별 안내",
+      "start": 4973,
+      "page": null,
+      "line": "보증 종류별 안내"
+    },
+    {
+      "index": 16,
+      "title": "대출금지급방식",
+      "start": 5360,
+      "page": null,
+      "line": "대출금지급방식"
+    },
+    {
+      "index": 17,
+      "title": "대출취급영업점",
+      "start": 5432,
+      "page": null,
+      "line": "대출취급영업점"
+    },
+    {
+      "index": 18,
+      "title": "중도상환수수료",
+      "start": 5555,
+      "page": null,
+      "line": "중도상환수수료"
+    },
+    {
+      "index": 19,
+      "title": "대출계약 철회",
+      "start": 5566,
+      "page": null,
+      "line": "대출계약 철회"
+    },
+    {
+      "index": 20,
+      "title": "유의사항",
+      "start": 5763,
+      "page": null,
+      "line": "유의사항"
+    }
+  ],
+  "issues": [
+    {
+      "index": 4,
+      "issue": "duplicate_title",
+      "title": "대출 대상",
+      "position": 391
+    },
+    {
+      "index": 8,
+      "issue": "duplicate_title",
+      "title": "대출한도",
+      "position": 3148
+    },
+    {
+      "index": 9,
+      "issue": "duplicate_title",
+      "title": "대출금리",
+      "position": 3610
+    }
+  ],
+  "coverage": {
+    "document_id": "DOC_NHUF_003",
+    "missing_chars": 0,
+    "missing_sample": "",
+    "intentional_overlap_chars": 382,
+    "unintended_overlap_chars": 0,
+    "excluded_in_chunks": 0,
+    "restore_mismatch": 0,
+    "ok": true
+  },
+  "llm_calls": [
+    {
+      "window": 0,
+      "start": 0,
+      "end": 5891,
+      "pages": [],
+      "prompt_chars": 6376,
+      "prompt_sha256": "b5beb8dd6d0043f8baa6db3d1f926452b80f32fa704c6ddf5a96260df104f5fa",
+      "response_sha256": "f8b2882a37ca5fe22b9ea614869c6b35aec0276b44f1dcefe08263245ac3904a",
+      "seconds": 10.292,
+      "proposals": 21
+    }
+  ],
+  "api_call_log": [
+    {
+      "model": "gpt-5.6-terra",
+      "attempt": 0,
+      "estimated_input_tokens": 6576,
+      "worst_case_usd": 0.061152,
+      "seconds": 10.292,
+      "status": 200,
+      "response_id": "resp_055cb36390935c46016aedad9a63c487d2a9793f148f7f374c",
+      "response_model": "gpt-5.6-terra",
+      "response_status": "completed",
+      "input_tokens": 4515,
+      "cached_input_tokens": 0,
+      "output_tokens": 825,
+      "reasoning_tokens": 371,
+      "cost_usd": 0.01893
+    }
+  ],
+  "cost": {
+    "attempts": 1,
+    "calls_with_usage": 1,
+    "spent_usd": 0.01893,
+    "budget_usd": 3.0,
+    "max_calls": 1,
+    "prices_per_1m": {
+      "input": 2.0,
+      "cached_input": 0.2,
+      "output": 12.0
+    },
+    "input_tokens": 4515,
+    "output_tokens": 825,
+    "reasoning_tokens": 371
+  },
+  "chunks": [
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C001",
+      "char_start": 0,
+      "char_end": 80,
+      "page_start": null,
+      "section_title": "(첫 제목 이전)",
+      "chars": 80
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C002",
+      "char_start": 81,
+      "char_end": 220,
+      "page_start": null,
+      "section_title": "대출대상",
+      "chars": 139
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C003",
+      "char_start": 221,
+      "char_end": 287,
+      "page_start": null,
+      "section_title": "대출한도",
+      "chars": 66
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C004",
+      "char_start": 288,
+      "char_end": 972,
+      "page_start": null,
+      "section_title": "대출기간",
+      "chars": 684
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C005",
+      "char_start": 897,
+      "char_end": 1436,
+      "page_start": null,
+      "section_title": "대출기간",
+      "chars": 539
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C006",
+      "char_start": 1358,
+      "char_end": 2073,
+      "page_start": null,
+      "section_title": "대출기간",
+      "chars": 715
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C007",
+      "char_start": 1997,
+      "char_end": 2286,
+      "page_start": null,
+      "section_title": "대출기간",
+      "chars": 289
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C008",
+      "char_start": 2287,
+      "char_end": 2576,
+      "page_start": null,
+      "section_title": "신청시기",
+      "chars": 289
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C009",
+      "char_start": 2577,
+      "char_end": 2910,
+      "page_start": null,
+      "section_title": "□ 보증 신청 기한",
+      "chars": 333
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C010",
+      "char_start": 2911,
+      "char_end": 3609,
+      "page_start": null,
+      "section_title": "대상주택",
+      "chars": 698
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C011",
+      "char_start": 3534,
+      "char_end": 3898,
+      "page_start": null,
+      "section_title": "대상주택",
+      "chars": 364
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C012",
+      "char_start": 3899,
+      "char_end": 4009,
+      "page_start": null,
+      "section_title": "금리우대",
+      "chars": 110
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C013",
+      "char_start": 4010,
+      "char_end": 4498,
+      "page_start": null,
+      "section_title": "추가우대금리(①,② 중복 적용 가능)",
+      "chars": 488
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C014",
+      "char_start": 4499,
+      "char_end": 4637,
+      "page_start": null,
+      "section_title": "이용기간",
+      "chars": 138
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C015",
+      "char_start": 4638,
+      "char_end": 4972,
+      "page_start": null,
+      "section_title": "담보취득",
+      "chars": 334
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C016",
+      "char_start": 4973,
+      "char_end": 5359,
+      "page_start": null,
+      "section_title": "보증 종류별 안내",
+      "chars": 386
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C017",
+      "char_start": 5360,
+      "char_end": 5431,
+      "page_start": null,
+      "section_title": "대출금지급방식",
+      "chars": 71
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C018",
+      "char_start": 5432,
+      "char_end": 5554,
+      "page_start": null,
+      "section_title": "대출취급영업점",
+      "chars": 122
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C019",
+      "char_start": 5555,
+      "char_end": 5762,
+      "page_start": null,
+      "section_title": "대출계약 철회",
+      "chars": 207
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C020",
+      "char_start": 5763,
+      "char_end": 6505,
+      "page_start": null,
+      "section_title": "유의사항",
+      "chars": 742
+    },
+    {
+      "chunk_id": "CHK_C1_DOC_NHUF_003_C021",
+      "char_start": 6427,
+      "char_end": 6515,
+      "page_start": null,
+      "section_title": "유의사항",
+      "chars": 88
+    }
+  ],
+  "b3_comparison": {
+    "common": [
+      221,
+      288,
+      2287,
+      2577,
+      2911
+    ],
+    "llm_only": [
+      81,
+      242,
+      3899,
+      4010,
+      4499,
+      4638,
+      4656,
+      4973,
+      5360,
+      5432,
+      5555,
+      5566,
+      5763
+    ],
+    "b3_only": [
+      331,
+      391,
+      415,
+      2935,
+      3148,
+      3169,
+      3615,
+      4672
+    ],
+    "lines": {
+      "81": "대출대상",
+      "221": "대출금리",
+      "242": "대출한도",
+      "288": "대출기간",
+      "331": "대출신청",
+      "391": "대출 대상",
+      "415": "0. (중복대출 금지) 주택도시기금대출, 은행재원 전세자금대출(이주비대출",
+      "2287": "신청시기",
+      "2577": "□ 보증 신청 기한",
+      "2911": "대상주택",
+      "2935": "1. 임차 전용면적",
+      "3148": "대출한도",
+      "3169": "1. 호당대출한도",
+      "3615": "[변동금리(국토교통부 고시)]",
+      "3899": "금리우대",
+      "4010": "추가우대금리(①,② 중복 적용 가능)",
+      "4499": "이용기간",
+      "4638": "상환방법",
+      "4656": "담보취득",
+      "4672": "1. 한국주택금융공사 전세대출보증",
+      "4973": "보증 종류별 안내",
+      "5360": "대출금지급방식",
+      "5432": "대출취급영업점",
+      "5555": "중도상환수수료",
+      "5566": "대출계약 철회",
+      "5763": "유의사항"
+    },
+    "orphans": {
+      "b3": 0,
+      "c1": 0
+    },
+    "heading_alignment": {
+      "b3": {
+        "document_id": "DOC_NHUF_003",
+        "headings": 9,
+        "at_chunk_start": 9,
+        "with_body": 9
+      },
+      "c1": {
+        "document_id": "DOC_NHUF_003",
+        "headings": 9,
+        "at_chunk_start": 5,
+        "with_body": 9
+      }
+    },
+    "chunk_counts": {
+      "b3": 17,
+      "c1_or_fallback": 21
+    },
+    "short_under_100": {
+      "b3": 3,
+      "c1_or_fallback": 4
+    }
+  },
+  "note": "창 하나만 호출한 결과다. 나머지 창 구간은 LLM 제안 없이 마지막 섹션에 이어진다. 검색 성능 평가 아님."
+}

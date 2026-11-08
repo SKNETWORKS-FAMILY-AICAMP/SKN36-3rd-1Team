@@ -1,0 +1,13 @@
+{
+  "neo4j_server_version": "5.26.32",
+  "qdrant_server_version": "1.12.4",
+  "neo4j_image": "neo4j:5.26-community",
+  "qdrant_image": "qdrant/qdrant:v1.12.4",
+  "neo4j_image_digest": "sha256:42ef3ebfd671ebd01fdebb6dcbe80cf7b45eef2aa3d346ef4132f7ef31e67d2f",
+  "qdrant_image_digest": "sha256:241edb9d7778327516ef218f8c74e1bd61b5ea42cd4f193cb8d0896199705636",
+  "temporary_project_cleanup": "PASS",
+  "neo4j_data_rolled_back": true,
+  "qdrant_temporary_collection_removed": true,
+  "temporary_containers_remaining": 0,
+  "images_retained_in_local_cache": true
+}

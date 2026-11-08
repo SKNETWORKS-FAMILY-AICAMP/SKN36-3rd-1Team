@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-11-06T22:09:05.425105+09:00",
+  "status": "PASS",
+  "ddl_statements_applied": 13,
+  "unique_constraints_verified": 9,
+  "secondary_indexes_verified": 4,
+  "all_indexes_online": true,
+  "ddl_sha256": "787fbd9f6c8de8a17fd346edee4a00f280e26b7a766c4a4f22893760ecee8118",
+  "live_with_constraints": {
+    "status": "PASS",
+    "two_loads_verified": true,
+    "all_properties_verified": true,
+    "transaction": "ROLLED_BACK",
+    "remaining_nodes": 0,
+    "schema_constraints_applied": false
+  }
+}

@@ -111,6 +111,17 @@ cp .env.example .env
 
 `.env`에 실제 값을 입력합니다. `.env`는 `.gitignore`로 제외되며 절대 커밋하지 않습니다.
 
+`requirements.txt`의 `python-dotenv`는 `.env` 로딩에 필요합니다. 검색·로더·색인은 `LIFEPOLICY_DATASET_DIR` 미설정 시 승인된 `data/releases/v1.4.0-candidate/`를 사용합니다. 명시한 경로가 우선이며, v1.3.2 호환 검사는 `data/handoff`를 지정합니다. 잘못된 경로·manifest는 오류로 중단합니다.
+
+데이터셋 선택은 DB 접속 주소를 바꾸지 않습니다. `NEO4J_URI`·`QDRANT_URL`은 해당 데이터셋이 적재된 본인의 환경으로 설정합니다.
+
+기존 v1.3.2 기반 단위 테스트는 입력을 명시해 실행합니다(신규 기본값 검사는 별도 프로세스에서 환경변수를 제거해 검증).
+
+```powershell
+$env:LIFEPOLICY_DATASET_DIR='data/handoff'
+python -m unittest discover -s tests/unit -p 'test_*.py'
+```
+
 | 변수 | 용도 |
 |---|---|
 | `OPENAI_API_KEY` | LLM API 키 (모델 확정 전) |
@@ -135,7 +146,36 @@ docker compose up -d
 pytest
 ```
 
-아직 테스트 코드는 없습니다.
+후보 데이터 검증에는 추가 설치 없이 Python 기본 테스트 도구를 사용할 수 있습니다.
+
+```bash
+python -m unittest discover -s tests -p "test_candidate_release.py" -v
+python scripts/load_candidate_neo4j.py
+python scripts/verify_candidate_qdrant.py
+python scripts/verify_candidate_sources.py
+```
+
+위 명령은 파일·계약·참조·해시를 검사하며 실제 DB에는 쓰지 않습니다.
+전체 회귀 테스트와 원본 본문 검사는 Git 제외 원본 및 v1 정부24 대용량 파일 2개를 복원한 환경에서 실행합니다. 새 체크아웃의 후보 파일 사전 검증은 `load_candidate_neo4j.py`와 `verify_candidate_qdrant.py`로 별도 수행할 수 있습니다.
+실제 DB 검사와 신청 주소 교정 범위는 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요.
+
+2026-11-06 임시 Neo4j에서 노드 1,074개·관계 3,703개의 적재·재적재·속성 대조와 DDL 13개 적용 검사를 통과했습니다.
+임시 Qdrant에서도 599개 청크의 ID·payload 저장 검사를 통과했습니다. 검증 후 데이터와 컨테이너를 정리했으며, 임베딩·의미 검색·서비스 통합 완료를 뜻하지 않습니다.
+
+### 후보 릴리스 재생성 및 DB 검사
+
+```bash
+python scripts/build_incremental_release_candidate.py
+# Neo4j: 비어 있는 검증 DB에서 적재·재적재·속성을 대조한 뒤 롤백
+python scripts/load_candidate_neo4j.py --apply --http-url http://127.0.0.1:7474
+# Qdrant: 새 임시 컬렉션에서 ID·payload를 대조한 뒤 컬렉션 정리
+python scripts/verify_candidate_qdrant.py --apply --url http://127.0.0.1:6333
+```
+
+- DB 검사 전 `.env`에 `NEO4J_USER`, `NEO4J_PASSWORD`, `QDRANT_API_KEY`를 설정합니다. 접속 값은 로그에 출력하지 않습니다.
+- Neo4j에 기존 노드가 있거나 Qdrant 검증 컬렉션이 이미 있으면 쓰기를 거절합니다. 기존 DB를 초기화하지 않습니다.
+- Qdrant 검사는 **벡터 없는 ID·payload 저장 검사**입니다. 임베딩 생성·유사도 검색은 별도 검증이 필요합니다. 모델·차원은 임의로 확정하지 않습니다.
+- 후보는 기존 정책의 신청 주소를 교정하며 `data/handoff/` 인계 원본은 보존합니다. 변경 전후 값은 후보의 `release_delta_manifest.json`에 기록합니다.
 
 ## 데이터 원칙 (요약)
 

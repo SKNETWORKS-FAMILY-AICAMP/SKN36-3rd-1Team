@@ -1,0 +1,40 @@
+{
+  "eval_set": "retrieval_eval_v0",
+  "frozen_at": "2026-11-06T20:33:08+09:00",
+  "frozen_by": "주민혁 (임베딩·DB 담당) 지시로 고정, 사용자 검수·RAG 담당 형식 합의 전",
+  "rule": "이 파일의 해시와 다른 질문·정답으로 평가하지 않는다. 바꿔야 하면 v1을 새로 만들고 이유를 남긴다. 검색 결과를 보고 정답을 바꾸지 않는다.",
+  "files": {
+    "questions_candidates_v0.source.json": "434619c0f6ca51210cbcb7fea6578681814391fc892854cfdf330cd7424fe58f",
+    "questions_candidates_v0.jsonl": "9507e4dbaecc2a3306e3881337600d148ba7c08b862cb60c5add6c8f0b978862"
+  },
+  "data_version": "v1.3.2-verified",
+  "manifest_sha256": "7783d578ce1834a121e0e23f24df2d489644d93842eca73fb3cf25895164ffc9",
+  "questions": 55,
+  "scored_questions": 52,
+  "general_questions": 3,
+  "verified": 55,
+  "question_types": {
+    "age_income_asset": 8,
+    "application": 5,
+    "disambiguation": 4,
+    "eligibility": 4,
+    "exclusion_exception": 8,
+    "general_no_single_answer": 3,
+    "natural_no_name": 4,
+    "numeric_table": 11,
+    "policy_named": 8
+  },
+  "scoring": {
+    "k": 5,
+    "metrics": [
+      "recall_at_5",
+      "mrr",
+      "first_hit_rank",
+      "outcomes"
+    ],
+    "evidence_match": "full_containment",
+    "module": "database/retrieval_eval.py"
+  },
+  "hash_method": "sha256(UTF-8 텍스트, 줄바꿈 CRLF→LF 정규화) — Windows 체크아웃 줄바꿈 변환과 무관하게 같은 값",
+  "manifest_hash_method": "sha256(data/handoff/manifest.json, 줄바꿈 LF 정규화) — database.full_index.manifest_sha256과 같은 값"
+}

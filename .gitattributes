@@ -1,0 +1,11 @@
+# 인계·릴리스 패키지는 manifest.json의 SHA-256으로 검증한다.
+# OS별 줄바꿈 변환(CRLF/LF)이 일어나면 해시가 달라지므로, 저장소의 바이트(LF) 그대로 내려받도록 고정한다.
+data/handoff/** -text
+data/releases/** -text
+
+# 후보 변경 목록에서 해시로 참조하는 증거와 패키지에 복사하는 로더도 고정한다.
+data/metadata/application_url_evidence_v1.4.0.json -text
+scripts/load_candidate_neo4j.py text eol=lf
+
+# 증거 목록이 해시로 가리키는 staging 파일(정책·문서·청크·공식 원문)도 저장소 바이트(LF) 그대로 받는다.
+data/staging/** -text
