@@ -614,6 +614,16 @@
       "unit": "세",
       "evidence_location": "원문 대조 교정",
       "description": "정책 지원 자격 조건 (연령조건: 만 65세 이하)"
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 24개월 미만",
+      "operator": "LT",
+      "value": "24",
+      "unit": "개월",
+      "evidence_location": "정부24 지원대상",
+      "description": "양육 자녀의 연령 조건. 신청자 나이가 아니다."
     }
   ],
   "age_condition_replacements": [
@@ -644,6 +654,13 @@
       "after": "COND_AGE_0_65",
       "after_name": "연령조건: 만 65세 이하",
       "evidence": "공식 페이지 재조회(2026-11-09): 사업신청 연도기준 만 65세 이하, 하한 없음. 0은 하한 없음 표기"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "before": "COND_AGE_0_1",
+      "after": "COND_CHILD_AGE_UNDER_24M",
+      "after_name": "대상 자녀 연령: 24개월 미만",
+      "evidence": "정부24 지원대상 '24개월 미만 아이'. 같은 페이지의 '24개월 이하' 표기는 담당자 검토 결과 오기로 판단. 신청자 나이와 구분하려고 SPECIAL_TARGET으로 기록"
     }
   ],
   "group_condition_additions": [
@@ -843,7 +860,7 @@
     "POL_STG_NTS_001"
   ],
   "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",

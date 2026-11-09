@@ -65,7 +65,7 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1004)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1005)
         self.assertEqual(report["counts"]["total_graph_edges"], 2444)
         self.assertEqual(len(chunks), 599)
 
@@ -231,6 +231,10 @@ class CandidateIntegrityTests(unittest.TestCase):
                 self.assertNotIn((item["policy_id"], "REQUIRES_CONDITION", item["condition_id"]), edges)
                 self.assertNotIn((f"GRP_{item['policy_id']}_ROOT", "CONTAINS_CONDITION", item["condition_id"]), edges)
         self.assertIn(("POL_GOV_002", "REQUIRES_CONDITION", "COND_AGE_0_65"), edges)
+        self.assertNotIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_AGE_0_1"), edges)
+        self.assertIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
+        conditions = {row["condition_id"]: row for row in rows(PACKAGE / "neo4j/nodes_eligibility_condition.jsonl")}
+        self.assertEqual(conditions["COND_CHILD_AGE_UNDER_24M"]["type"], "SPECIAL_TARGET")
 
     def test_detail_targets_stay_and_review_corrections_apply(self):
         chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")

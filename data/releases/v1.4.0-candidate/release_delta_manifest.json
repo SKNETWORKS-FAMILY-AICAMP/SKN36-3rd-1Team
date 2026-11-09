@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-09T23:49:23.499922+09:00",
+  "created_at": "2026-11-09T23:56:04.543393+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "1d577d021627118ccf74ecaddf4e46c8617782edbfe98a0d6e365d1012d3eb53",
+    "source_sha256": "8a509ab1b0600cc0d235374d7d8223bf752264c8dc33f7c17efe09b38a45be24",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -3827,6 +3827,11 @@
         "source_id": "POL_GOV_049",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_050",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_0_1"
       },
       {
         "source_id": "POL_GOV_050",
@@ -7141,6 +7146,11 @@
       {
         "source_id": "GRP_POL_GOV_050_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_0_1"
+      },
+      {
+        "source_id": "GRP_POL_GOV_050_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -8076,6 +8086,11 @@
         "target_id": "COND_AGE_6_64"
       },
       {
+        "source_id": "POL_GOV_050",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
         "source_id": "GRP_POL_GOV_002_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_AGE_0_65"
@@ -8094,6 +8109,11 @@
         "source_id": "GRP_POL_GOV_023_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_AGE_6_64"
+      },
+      {
+        "source_id": "GRP_POL_GOV_050_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
       },
       {
         "source_id": "GRP_POL_005_OR_EXCL",
@@ -8198,7 +8218,8 @@
       "COND_EXCL_FRAUD_RESTRICTED",
       "COND_EXCL_FRAUD_UNPAID",
       "COND_EXCL_NO_NEED",
-      "COND_AGE_0_65"
+      "COND_AGE_0_65",
+      "COND_CHILD_AGE_UNDER_24M"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",
