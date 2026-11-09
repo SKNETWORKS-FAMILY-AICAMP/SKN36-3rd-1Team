@@ -1,17 +1,61 @@
 {
-  "checked_at": "2026-11-06T22:09:05.425105+09:00",
+  "checked_at": "2026-11-09T01:31:41.024281+09:00",
+  "git_commit": "987057eea87124a6d88bcd73d81a63c4c3908ce2",
+  "issue": 31,
+  "dataset": "data/releases/v1.4.0-candidate",
+  "manifest_sha256": "16d6843f245ff1624686dddf815d0aeb6e6b76a87ecb674db1ea33701a46386e",
+  "generator": "venv/issue31_20261109/run.py",
+  "scope": "Local PR29 corrected data; old instances and collections retained. HTTP/LLM integration not tested.",
+  "previous_evidence": "data/metadata/verification_history/issue31_before_20261109.json",
   "status": "PASS",
+  "uri": "bolt://127.0.0.1:18687",
   "ddl_statements_applied": 13,
-  "unique_constraints_verified": 9,
-  "secondary_indexes_verified": 4,
-  "all_indexes_online": true,
-  "ddl_sha256": "787fbd9f6c8de8a17fd346edee4a00f280e26b7a766c4a4f22893760ecee8118",
-  "live_with_constraints": {
-    "status": "PASS",
-    "two_loads_verified": true,
-    "all_properties_verified": true,
-    "transaction": "ROLLED_BACK",
-    "remaining_nodes": 0,
-    "schema_constraints_applied": false
+  "schema": {
+    "phase": "post",
+    "ok": true,
+    "problems": {},
+    "constraints": {
+      "expected": 9,
+      "matched": [
+        "constraint_agency_id",
+        "constraint_category_id",
+        "constraint_condition_group_id",
+        "constraint_document_id",
+        "constraint_eligibility_condition_id",
+        "constraint_policy_id",
+        "constraint_region_id",
+        "constraint_stage_id",
+        "constraint_target_group_id"
+      ],
+      "missing": []
+    },
+    "indexes": {
+      "expected": 4,
+      "matched": [
+        "index_condition_group_logic",
+        "index_eligibility_condition_type",
+        "index_policy_category",
+        "index_policy_verification"
+      ],
+      "missing": []
+    },
+    "constraint_owned_indexes": [
+      "constraint_agency_id",
+      "constraint_category_id",
+      "constraint_condition_group_id",
+      "constraint_document_id",
+      "constraint_eligibility_condition_id",
+      "constraint_policy_id",
+      "constraint_region_id",
+      "constraint_stage_id",
+      "constraint_target_group_id"
+    ],
+    "default_lookup_indexes": [
+      "index_343aff4e",
+      "index_f7700477"
+    ],
+    "actual_constraint_types": [
+      "UNIQUENESS"
+    ]
   }
 }
