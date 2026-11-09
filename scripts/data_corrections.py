@@ -220,4 +220,8 @@ def apply_group_corrections(groups: list, corrections: dict) -> list:
             assert group["logic"] == "OR", f"소득 그룹 논리 불일치: {item['group_id']}"
             group["logic"] = "UNKNOWN"
             group["description"] = f"{group['description']} (자동 판정 보류: {item['evidence']})"
+    for item in corrections["empty_group_logic_corrections"]:
+        group = by_id[item["group_id"]]
+        assert group["logic"] == item["before"], f"빈 그룹 논리 불일치: {item['group_id']}"
+        group["logic"] = item["after"]
     return kept + [dict(group) for group in corrections["new_condition_groups"]]

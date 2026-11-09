@@ -216,6 +216,13 @@ class CandidateIntegrityTests(unittest.TestCase):
             else:
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
 
+    def test_group_without_children_is_unknown(self):
+        parents = {edge["source_id"] for edge in rows(PACKAGE / "neo4j/relationships.jsonl")
+                   if edge["relation"] in ("CONTAINS_CONDITION", "CONTAINS_GROUP")}
+        for group in rows(PACKAGE / "neo4j/nodes_condition_group.jsonl"):
+            if group["group_id"] not in parents:
+                self.assertEqual(group["logic"], "UNKNOWN", group["group_id"])
+
     def test_application_dates_are_iso_and_period_status_is_gone(self):
         policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
         for policy_id, policy in policies.items():

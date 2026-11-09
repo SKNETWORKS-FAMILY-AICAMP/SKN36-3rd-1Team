@@ -873,7 +873,7 @@
     "POL_GOV_050"
   ],
   "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -2305,5 +2305,119 @@
   "application_status_notes": {
     "POL_GOV_006": "정부24 표시 신청기간이 2025.10.~12월 중으로 날짜가 특정되지 않음. 2026년 일정 미기재",
     "POL_GOV_020": "2025.9.30. 이전 출생아 대상이며 출생일로부터 6개월 이내 신청. 후속 제도 미확인"
-  }
+  },
+  "empty_group_logic_corrections": [
+    {
+      "group_id": "GRP_POL_GOV_003_ROOT",
+      "policy_id": "POL_GOV_003",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_004_ROOT",
+      "policy_id": "POL_GOV_004",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_006_ROOT",
+      "policy_id": "POL_GOV_006",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_018_ROOT",
+      "policy_id": "POL_GOV_018",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_019_ROOT",
+      "policy_id": "POL_GOV_019",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_020_ROOT",
+      "policy_id": "POL_GOV_020",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_021_ROOT",
+      "policy_id": "POL_GOV_021",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_027_ROOT",
+      "policy_id": "POL_GOV_027",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_034_ROOT",
+      "policy_id": "POL_GOV_034",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_043_ROOT",
+      "policy_id": "POL_GOV_043",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_048_ROOT",
+      "policy_id": "POL_GOV_048",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_051_ROOT",
+      "policy_id": "POL_GOV_051",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_056_ROOT",
+      "policy_id": "POL_GOV_056",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_057_ROOT",
+      "policy_id": "POL_GOV_057",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_058_ROOT",
+      "policy_id": "POL_GOV_058",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_061_ROOT",
+      "policy_id": "POL_GOV_061",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    }
+  ]
 }
