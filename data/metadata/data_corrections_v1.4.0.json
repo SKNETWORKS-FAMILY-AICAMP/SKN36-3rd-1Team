@@ -880,7 +880,7 @@
     "POL_GOV_050"
   ],
   "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -1472,7 +1472,7 @@
     },
     {
       "policy_id": "POL_GOV_054",
-      "action": "mark_unknown",
+      "action": "remove",
       "group_id": "GRP_POL_GOV_054_OR_INC",
       "before": [
         "COND_INC_중위소득_0_50_",
@@ -1481,14 +1481,8 @@
         "COND_INC_중위소득_101_200_",
         "COND_INC_중위소득_200_초과"
       ],
-      "after": [
-        "COND_INC_중위소득_0_50_",
-        "COND_INC_중위소득_51_75_",
-        "COND_INC_중위소득_76_100_",
-        "COND_INC_중위소득_101_200_",
-        "COND_INC_중위소득_200_초과"
-      ],
-      "evidence": "원문의 취약가구 정의가 없어 소득 기준 여부를 확인할 수 없음"
+      "after": [],
+      "evidence": "정부24 안내에 소득 기준 미기재. 포항시 일반 장애인활동지원 안내는 소득수준과 무관하게 신청가능. 포항시 자체 지침은 미확인"
     },
     {
       "policy_id": "POL_GOV_057",
@@ -1827,7 +1821,7 @@
       "POL_GOV_016": {
         "status": "needs_review",
         "followup": "ask_user",
-        "note": "재가장애인은 기초생활수급자·차상위계층, 거주시설 장애인은 소득제한 없음",
+        "note": "정부24는 거주시설 장애인 소득제한 없음, 재가장애인 기초생활수급자·차상위계층이고, 서울시복지재단 표는 구분 없이 수급자·차상위로 표기해 서로 다름",
         "check_point": "거주시설 이용 여부와 재가장애인의 수급·차상위 여부"
       },
       "POL_GOV_036": {
@@ -1849,8 +1843,8 @@
       "POL_GOV_007": {
         "status": "needs_review",
         "followup": "check_notice",
-        "note": "전월소득이 근로자가구 소득 9분위 미만이라는 기준",
-        "check_point": "통계청 전년도 소득 10분위별 근로자가구 9분위 소득 금액"
+        "note": "통일부 운영 지침(2021-01-04 시행, 연혁본)에 전월 임금소득이 근로자가구 소득 9분위 이상이면 제외, 고용보험 가입 사업장 근로소득 기준. 원화 금액 미기재",
+        "check_point": "현행 지침과 적용되는 9분위 소득 금액"
       },
       "POL_GOV_035": {
         "status": "needs_review",
@@ -1860,15 +1854,15 @@
       },
       "POL_GOV_039": {
         "status": "needs_review",
-        "followup": "check_notice",
-        "note": "경기도형 긴급복지 사업 기준 준용이라고만 적혀 있음",
-        "check_point": "경기도형 긴급복지 소득·재산 기준 수치"
+        "followup": "ask_user",
+        "note": "정부24는 경기도형 긴급복지 기준 준용. 경기도 안내: 기준 중위소득 100% 이하, 특례시 재산 372백만원 이하, 금융재산 18,494천원 이하(4인 기준). 외국인 주민 동일 적용은 미확인",
+        "check_point": "기준 중위소득 100% 이하 여부와 재산·금융재산"
       },
       "POL_GOV_042": {
         "status": "needs_review",
-        "followup": "check_notice",
-        "note": "춘천시 사업. 지원내용에 국비사업 소득기준(중위소득 180%) 초과자 문구가 있으나 대상 범위가 불명확",
-        "check_point": "국비 발달재활서비스 소득기준과 시 자체사업의 대상 범위"
+        "followup": "ask_user",
+        "note": "춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과",
+        "check_point": "기준중위소득 180% 초과 여부"
       },
       "POL_GOV_045": {
         "status": "needs_review",
@@ -1878,15 +1872,13 @@
       },
       "POL_GOV_047": {
         "status": "needs_review",
-        "followup": "check_notice",
-        "note": "대출 당시 가구소득 1~8분위 기준",
+        "followup": "ask_user",
+        "note": "천안시 2026년 하반기 공고에 대출 당시 가구소득 1~8분위",
         "check_point": "학자금 대출 당시 가구소득 분위"
       },
       "POL_GOV_054": {
-        "status": "needs_review",
-        "followup": "check_notice",
-        "note": "독거 및 취약가구 대상이나 취약가구 정의 없음",
-        "check_point": "취약가구 해당 기준"
+        "status": "not_specified",
+        "note": "정부24 안내에 소득 기준 미기재. 포항시 일반 장애인활동지원 안내는 소득수준과 무관하게 신청가능. 포항시 자체 지침은 미확인"
       }
     },
     "household": {
@@ -2085,6 +2077,12 @@
       "POL_GOV_025": {
         "status": "specified",
         "note": "원문에 무주택 세대 구성원 요건이 있어 무주택 조건 유지"
+      },
+      "POL_GOV_054": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "독거 및 취약가구 대상. 2025 장애인활동지원 사업안내의 취약가구는 수급자 외 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상인 경우이나 포항시 적용은 미확인",
+        "check_point": "독거 또는 취약가구 해당 여부"
       }
     }
   },

@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
-- **최종 검증 일시**: 2026-11-10 02:14:13 KST
+- **최종 검증 일시**: 2026-11-10 02:59:07 KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -18,18 +18,18 @@
 | • 신규 문서 `verified_official_raw` | - | 1 | +1 |
 | • 신규 문서 `verified_official_text` | - | 6 | +6 |
 | 벡터 청크 (`Chunk`) | 557 | 599 | +42 |
-| 그래프 노드 (전체) | 1034 | 1005 | +-29 |
+| 그래프 노드 (전체) | 1034 | 1004 | +-30 |
 | • Organization | 116 | 123 | +7 |
-| • ConditionGroup | 343 | 266 | +9 (루트 UNKNOWN) |
-| 그래프 관계 (전체) | 3615 | 2442 | +88 |
+| • ConditionGroup | 343 | 265 | +9 (루트 UNKNOWN) |
+| 그래프 관계 (전체) | 3615 | 2431 | +88 |
 | • ADMINISTERED_BY | 237 | 246 | +9 |
 | • APPLIES_TO_LIFESTAGE | 419 | 437 | +18 |
 | • AVAILABLE_IN | 238 | 247 | +9 |
-| • CONTAINS_CONDITION | 735 | 154 | +-581 |
-| • CONTAINS_GROUP | 106 | 20 | +-86 |
+| • CONTAINS_CONDITION | 735 | 149 | +-586 |
+| • CONTAINS_GROUP | 106 | 19 | +-87 |
 | • HAS_CATEGORY | 237 | 246 | +9 |
 | • HAS_ROOT_CONDITION_GROUP | 237 | 246 | +9 |
-| • REQUIRES_CONDITION | 735 | 141 | +-594 |
+| • REQUIRES_CONDITION | 735 | 136 | +-599 |
 | • SUPPORTED_BY | 246 | 261 | +15 |
 | • TARGETS | 424 | 443 | +19 |
 
@@ -42,7 +42,7 @@
 ## 1-2. 원문 대조 교정 (2026-11-09)
 
 - 설명 문구 10건, 지역 4건, 연령 조건 제거 24건·원문 값 교체 5건, 가구 조건 교정 46건을 적용했다.
-- 관계 1288개 제거·교체, 27개 추가(교체분 포함), 표기 교정 청크 89개. 함께 가구유형 OR 그룹 87개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.
+- 관계 1299개 제거·교체, 27개 추가(교체분 포함), 표기 교정 청크 89개. 함께 가구유형 OR 그룹 88개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.
 - `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.
 
 ## 1-2. 기존 정책의 신청 주소 교정
