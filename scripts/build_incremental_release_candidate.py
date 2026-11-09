@@ -194,6 +194,7 @@ def build_candidate_release():
     new_policies_for_edges = [dict(policy) for policy in new_policies]
     corrections = dc.load_corrections()
     dc.apply_policy_corrections(merged_policies, corrections)
+    dc.apply_source_review(merged_policies, corrections)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
         json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8", newline="\n",

@@ -12,6 +12,9 @@ from pathlib import Path
 CORRECTIONS_PATH = Path(__file__).resolve().parent.parent / "data" / "metadata" / "data_corrections_v1.4.0.json"
 HOUSEHOLD_CONDITION_PREFIX = "COND_HH_"
 HOMELESS_CONDITION_ID = "COND_HH_무주택세대"
+SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
+SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
+                             for suffix in ("source_review", "source_note", "followup", "check_point"))
 
 
 def load_corrections() -> dict:
@@ -41,6 +44,21 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy = by_id[item["policy_id"]]
         assert sorted(policy["life_stages"]) == sorted(item["before"]), f"생애단계 교정 전 값 불일치: {item['policy_id']}"
         policy["life_stages"] = list(item["after"])
+
+
+def apply_source_review(policies: list, corrections: dict) -> None:
+    """정책 노드에 소득·가구 항목별 원문 확인 결과를 남긴다. 값이 없는 속성은 만들지 않는다."""
+    review = corrections["source_review"]
+    known = {policy["policy_id"] for policy in policies}
+    for attribute in SOURCE_REVIEW_ATTRIBUTES:
+        assert set(review[attribute]) <= known, f"원문 확인 대상 정책 불일치: {attribute}"
+    for policy in policies:
+        for attribute in SOURCE_REVIEW_ATTRIBUTES:
+            item = review[attribute].get(policy["policy_id"], {})
+            policy[f"{attribute}_source_review"] = item.get("status", "not_reviewed")
+            for field, suffix in (("note", "source_note"), ("followup", "followup"), ("check_point", "check_point")):
+                if field in item:
+                    policy[f"{attribute}_{suffix}"] = item[field]
 
 
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:

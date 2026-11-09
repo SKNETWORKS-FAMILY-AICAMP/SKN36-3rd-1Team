@@ -91,6 +91,9 @@ class CandidateIntegrityTests(unittest.TestCase):
                     self.assertNotIn(original[key], new)
                     continue
                 current = dict(new[original[key]])
+                if name == "policy":
+                    for field in dc.SOURCE_REVIEW_FIELDS:
+                        current.pop(field, None)
                 if name == "policy" and original != current:
                     change = declared[original[key]]
                     self.assertEqual(change["before"], original["official_apply_url"])
@@ -191,6 +194,27 @@ class CandidateIntegrityTests(unittest.TestCase):
                     self.assertFalse({(item["policy_id"], "REQUIRES_CONDITION", band) for band in item["before"]} & edges)
                 else:
                     self.assertEqual(groups[item["group_id"]]["logic"], "UNKNOWN")
+
+    def test_source_review_is_on_every_policy_and_consistent(self):
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        review = dc.load_corrections()["source_review"]
+        allowed = {"not_specified", "specified", "needs_review", "not_reviewed"}
+        for policy_id, policy in policies.items():
+            for attribute in dc.SOURCE_REVIEW_ATTRIBUTES:
+                with self.subTest(policy=policy_id, attribute=attribute):
+                    status = policy[f"{attribute}_source_review"]
+                    self.assertIn(status, allowed)
+                    self.assertEqual(status, review[attribute].get(policy_id, {}).get("status", "not_reviewed"))
+                    if status == "needs_review":
+                        self.assertIn(policy[f"{attribute}_followup"], {"ask_user", "check_notice"})
+                        self.assertTrue(policy[f"{attribute}_check_point"])
+                    if status != "not_reviewed":
+                        self.assertTrue(policy[f"{attribute}_source_note"])
+        for item in dc.load_corrections()["income_condition_corrections"]:
+            if item["action"] == "remove":
+                self.assertEqual(policies[item["policy_id"]]["income_source_review"], "not_specified", item["policy_id"])
+            else:
+                self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
 
     def test_age_corrections_from_official_recheck(self):
         corrections = dc.load_corrections()

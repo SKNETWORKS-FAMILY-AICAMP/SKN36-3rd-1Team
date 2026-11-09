@@ -30,6 +30,10 @@
   - **필수(NOT NULL):** `policy_id`, `official_id`, `policy_name`, `source_type`, `category`, `agency`, `organization`, `regions`, `life_stages`, `eligibility_attributes`, `requirements`, `eligibility`, `benefit`, `application_period`, `application_method`, `required_documents`, `source_url`, `source_document_ids`, `verification_status`, `reception_status`, `collected_at`
   - **선택(Nullable):** `application_start`, `application_end`, `lastMdfcnDt`, `review_flags`, `official_apply_url`
     - `official_apply_url`: **실제 신청 주소가 확인된 경우에만 값이 있다.** 법령·서비스 안내(정부24·복지로 상세 등) 페이지만 있으면 `null`이며, 해당 주소는 `source_url`에 둔다. 소비 측(UI)은 값이 있을 때만 '신청하기'를 노출한다. (2026-11-06 개정)
+  - **선택(원문 확인 결과, v1.4.0):** `income_source_review`, `household_source_review`는 v1.4.0 후보의 모든 정책에 있다. 값은 `not_specified`(공고에 별도 기준 명시 없음, 다시 묻지 않고 나머지 조건 확인. 제한 없음 확정은 아님), `specified`(원문 기준과 그래프 조건 일치), `needs_review`(기준이 있으나 구조화되지 않았거나 불명확), `not_reviewed`(정책별 원문 대조 안 함, 기존 조건 그대로 사용).
+    - `income_source_note`, `household_source_note`: 원문에서 확인한 내용 (대조한 정책만).
+    - `income_followup`, `household_followup`: `needs_review`일 때만 있다. `ask_user`는 사용자 정보를 더 받으면 판정 가능, `check_notice`는 공고 확인 안내.
+    - `income_check_point`, `household_check_point`: `needs_review`일 때 공고에서 볼 항목. 링크는 `source_url`을 쓴다.
 - **근거 문서(`Document`):**
   - **필수(NOT NULL):** `document_id`, `policy_id`, `title`, `source_type`, `source_url`, `local_raw_path`, `content_hash`, `text`, `verification_status`, `collected_at`
   - **선택(Nullable):** `published_at`, `effective_at`, `doc_type`, `law_article`, `effective_date`, `version`, `extracted_text_path`, `official_id`
