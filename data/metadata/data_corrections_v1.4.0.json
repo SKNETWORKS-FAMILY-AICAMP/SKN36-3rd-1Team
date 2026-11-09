@@ -57,6 +57,13 @@
       "find": "선발형 청년특례(18~34세)",
       "replace": "선발형 청년특례(15~34세)",
       "evidence": "POL_010 근거 문서 지원대상 항목"
+    },
+    {
+      "policy_id": "POL_005",
+      "field": "eligibility",
+      "find": "2년 이내인 경우 발급 가능",
+      "replace": "2년 미만인 경우 발급 가능",
+      "evidence": "고용24 안내(DOC_WORK24_001): 졸업까지 남은 수업연한이 2년 이상인 재학생은 지원 제외"
     }
   ],
   "region_corrections": [
@@ -509,7 +516,7 @@
   ],
   "group_condition_additions": [
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_AGE_75_120",
       "target_name": "연령조건: 75세 이상",
       "evidence_document_id": "DOC_WORK24_001",
@@ -517,7 +524,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
       "target_name": "제외: 공무원, 사립학교 교직원",
       "evidence_document_id": "DOC_WORK24_001",
@@ -525,7 +532,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
       "target_name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
       "evidence_document_id": "DOC_WORK24_001",
@@ -533,7 +540,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_SPECIAL_WORKER",
       "target_name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
       "evidence_document_id": "DOC_WORK24_001",
@@ -541,7 +548,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_CORP_REP",
       "target_name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
       "evidence_document_id": "DOC_WORK24_001",
@@ -549,7 +556,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_SELF_EMPLOYED",
       "target_name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
       "evidence_document_id": "DOC_WORK24_001",
@@ -557,7 +564,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_NONPROFIT_REP",
       "target_name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
       "evidence_document_id": "DOC_WORK24_001",
@@ -565,7 +572,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_STUDENT",
       "target_name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
       "evidence_document_id": "DOC_WORK24_001",
@@ -573,7 +580,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
       "target_name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
       "evidence_document_id": "DOC_WORK24_001",
@@ -581,7 +588,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_OTHER_SUBSIDY",
       "target_name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
       "evidence_document_id": "DOC_WORK24_001",
@@ -589,7 +596,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
       "target_name": "제외: 지원·융자·수강제한 기간인 부정수급자",
       "evidence_document_id": "DOC_WORK24_001",
@@ -597,7 +604,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_FRAUD_UNPAID",
       "target_name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
       "evidence_document_id": "DOC_WORK24_001",
@@ -605,7 +612,7 @@
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
     },
     {
-      "group_id": "GRP_POL_005_NOT_EXCL",
+      "group_id": "GRP_POL_005_OR_EXCL",
       "condition_id": "COND_EXCL_NO_NEED",
       "target_name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
       "evidence_document_id": "DOC_WORK24_001",
@@ -691,7 +698,8 @@
         "청년",
         "중장년"
       ],
-      "evidence": "원문 선정기준 만 14세~64세"
+      "evidence": "원문 선정기준 만 14세~64세",
+      "evidence_location": "지원조건 JA0110/JA0111"
     }
   ],
   "chunk_life_stage_alignment_policies": [
@@ -699,6 +707,709 @@
     "POL_GOV_017",
     "POL_STG_MOHW_001",
     "POL_STG_MOIS_001",
-    "POL_STG_EX_001"
+    "POL_STG_EX_001",
+    "POL_STG_NTS_001"
+  ],
+  "revised_at": "2026-11-09",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가",
+  "new_condition_groups": [
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "policy_id": "POL_005",
+      "logic": "OR",
+      "is_root": false,
+      "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외"
+    }
+  ],
+  "group_group_additions": [
+    {
+      "source_id": "GRP_POL_005_NOT_EXCL",
+      "target_id": "GRP_POL_005_OR_EXCL",
+      "target_name": "참여제외 OR 그룹 (GRP_POL_005_OR_EXCL)",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상"
+    }
+  ],
+  "group_description_corrections": [
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "before_prefix": "고용24 국민내일배움카드 참여 제외 대상 그룹:",
+      "after": "고용24 국민내일배움카드 참여 제외 대상 그룹: 하위 OR 그룹의 제외 조건 중 하나라도 해당하면 참여 제외"
+    }
+  ],
+  "income_condition_corrections_note": "정부24 API 소득 항목 JA0201~JA0205가 45건 모두 Y로 전체 선택되어 있었다. remove는 '소득 제한 없음 확정'이 아니라 자동 판정하지 않는다는 뜻이다. mark_unknown은 임의로 구간을 정하지 않고 그룹 logic을 UNKNOWN으로 둔다.",
+  "income_condition_corrections": [
+    {
+      "policy_id": "POL_GOV_002",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_002_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_003_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_004_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_005",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_005_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_006_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_007",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_007_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 전월소득이 근로자가구 소득 9분위 미만이라는 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_008",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_008_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_009",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_009_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_010",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_010_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_011",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_011_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_012",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_012_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_013",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_013_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_014",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_014_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_015_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_016_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "재가장애인은 기초생활수급자·차상위계층, 거주시설 장애인은 소득제한 없음으로 대상별 기준이 다름"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_017_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "기초생활수급자는 중증장애인·국가유공자·시설 거주자와 나란한 대상 중 하나이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_018_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_019_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_020_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_021_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_022",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_022_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "경제적 빈곤은 아동 보호조치 사유의 예시이며 위탁가정의 소득 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_023_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_024",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_024_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_027_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_028",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_028_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_029_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_032",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_032_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_034_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_038",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_038_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_039",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_039_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 경기도형 긴급복지 사업 기준 준용이라고만 적혀 있어 구체 수치를 확인할 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_041",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_041_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_042",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_042_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 국비사업 소득기준(중위소득 180%) 초과자로, 중위소득 101~200% 구간과 경계가 맞지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_043",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_043_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_047",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_047_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 가구소득 1~8분위 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_048_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_050_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_051_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_053",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_053_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_054_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문의 취약가구 정의가 없어 소득 기준 여부를 확인할 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_057_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_058_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_059",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_059_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_061_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "소득연계형 국가장학금은 중복수혜 제한이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_064",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_064_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 기초생활보장수급자(생계·의료급여)를 지원 제외로 두어 소득 관련 제외가 있으나 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_065",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_065_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "국민기초생활수급자는 여러 감면 대상 중 하나이며 소득 구간 기준은 없음"
+    }
   ]
 }

@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1043)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2936)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1006)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2519)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -77,6 +77,8 @@ class CandidateIntegrityTests(unittest.TestCase):
         removed_groups = dc.removed_group_ids(corrections)
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
+            if name == "condition_group":
+                old = dc.apply_group_corrections(old, corrections)
             if name == "policy":
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
@@ -162,6 +164,30 @@ class CandidateIntegrityTests(unittest.TestCase):
         for chunk in chunks:
             self.assertEqual(chunk["category"], by_id[chunk["policy_id"]]["category"], chunk["chunk_id"])
             self.assertLessEqual(set(chunk["life_stages"]), standard_stages, chunk["chunk_id"])
+            self.assertEqual(set(chunk["life_stages"]), set(by_id[chunk["policy_id"]]["life_stages"]), chunk["chunk_id"])
+
+    def test_no_or_group_selects_every_income_band(self):
+        bands = {row["condition_id"] for row in rows(PACKAGE / "neo4j/nodes_eligibility_condition.jsonl") if row["type"] == "INCOME"}
+        members = {}
+        for edge in rows(PACKAGE / "neo4j/relationships.jsonl"):
+            if edge["relation"] == "CONTAINS_CONDITION" and edge["target_id"] in bands:
+                members.setdefault(edge["source_id"], set()).add(edge["target_id"])
+        for group in rows(PACKAGE / "neo4j/nodes_condition_group.jsonl"):
+            if group["logic"] == "OR":
+                self.assertNotEqual(members.get(group["group_id"], set()), bands, group["group_id"])
+
+    def test_income_corrections_match_declared_actions(self):
+        corrections = dc.load_corrections()["income_condition_corrections"]
+        groups = {row["group_id"]: row for row in rows(PACKAGE / "neo4j/nodes_condition_group.jsonl")}
+        edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
+        self.assertEqual(len(corrections), 45)
+        for item in corrections:
+            with self.subTest(policy=item["policy_id"]):
+                if item["action"] == "remove":
+                    self.assertNotIn(item["group_id"], groups)
+                    self.assertFalse({(item["policy_id"], "REQUIRES_CONDITION", band) for band in item["before"]} & edges)
+                else:
+                    self.assertEqual(groups[item["group_id"]]["logic"], "UNKNOWN")
 
     def test_detail_targets_stay_and_review_corrections_apply(self):
         chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
@@ -171,7 +197,9 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertNotIn(("POL_001", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_노년"), edges)
         self.assertIn(("POL_GOV_017", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_중장년"), edges)
         members = {target for source, relation, target in edges
-                   if source == "GRP_POL_005_NOT_EXCL" and relation == "CONTAINS_CONDITION"}
+                   if source == "GRP_POL_005_OR_EXCL" and relation == "CONTAINS_CONDITION"}
+        # 3값 논리에서 NOT은 단일 하위만 받는다
+        self.assertEqual({target for source, relation, target in edges if source == "GRP_POL_005_NOT_EXCL"}, {"GRP_POL_005_OR_EXCL"})
         self.assertEqual(len(members), 13)
         self.assertIn("COND_AGE_75_120", members)
         # 제외 조건을 필수 조건으로 연결하면 뜻이 반대가 된다

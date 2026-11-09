@@ -418,7 +418,7 @@ class TestLoadPlanAndFakeRunner(unittest.TestCase):
         self.assertEqual(sum(len(s.rows) for s in plan if s.kind == "node"), hd.EXPECTED_NODE_COUNT)
         self.assertEqual(sum(len(s.rows) for s in plan if s.kind == "relationship"), hd.EXPECTED_RELATIONSHIP_COUNT)
         relation_steps = [s for s in plan if s.name == "REQUIRES_CONDITION"]
-        expected_batches = [500, 235] if hd.IS_LEGACY_DATASET else [367]
+        expected_batches = [500, 235] if hd.IS_LEGACY_DATASET else [177]
         self.assertEqual([len(s.rows) for s in relation_steps], expected_batches)
         row = relation_steps[0].rows[0]
         self.assertEqual(set(row), {"source_id", "target_id", "properties"})

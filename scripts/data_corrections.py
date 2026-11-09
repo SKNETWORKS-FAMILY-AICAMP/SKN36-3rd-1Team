@@ -79,7 +79,8 @@ def _household_group(policy_id: str) -> str:
 
 def removed_group_ids(corrections: dict) -> set:
     """API 가구 항목 전체 선택에서 잘못 만들어진 가구유형 OR 그룹."""
-    return {_household_group(item["policy_id"]) for item in corrections["household_condition_removals"]}
+    groups = {_household_group(item["policy_id"]) for item in corrections["household_condition_removals"]}
+    return groups | {item["group_id"] for item in corrections["income_condition_corrections"] if item["action"] == "remove"}
 
 
 def apply_relationship_corrections(relationships: list, corrections: dict) -> tuple:
@@ -97,6 +98,10 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
         remove.add(("REQUIRES_CONDITION", item["policy_id"], item["condition_id"]))
         remove.add(("CONTAINS_CONDITION", f"GRP_{item['policy_id']}_ROOT", item["condition_id"]))
 
+    for item in corrections["income_condition_corrections"]:
+        if item["action"] == "remove":
+            remove.add(("CONTAINS_GROUP", f"GRP_{item['policy_id']}_ROOT", item["group_id"]))
+            remove.update(("REQUIRES_CONDITION", item["policy_id"], condition_id) for condition_id in item["before"])
     for item in corrections["life_stage_corrections"]:
         for stage in set(item["before"]) - set(item["after"]) - {"unknown"}:
             remove.add(("APPLIES_TO_LIFESTAGE", item["policy_id"], f"LIFESTAGE_{stage}"))
@@ -144,12 +149,16 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
                  "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
                  "evidence_location": item["evidence_location"], "review_status": "extracted"}
                 for item in corrections["group_condition_additions"]]
+    new_rows += [{"source_id": item["source_id"], "relation": "CONTAINS_GROUP", "target_id": item["target_id"],
+                  "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
+                  "evidence_location": item["evidence_location"], "review_status": "extracted"}
+                 for item in corrections["group_group_additions"]]
     for item in corrections["life_stage_corrections"]:
         for stage in [value for value in item["after"] if value not in item["before"]]:
             new_rows.append({"source_id": item["policy_id"], "relation": "APPLIES_TO_LIFESTAGE",
                              "target_id": f"LIFESTAGE_{stage}", "target_name": stage,
                              "evidence_document_id": item["policy_id"].replace("POL_", "DOC_", 1),
-                             "evidence_location": "원문 대조 교정", "review_status": "extracted"})
+                             "evidence_location": item.get("evidence_location", "원문 대조 교정"), "review_status": "extracted"})
     kept.extend(new_rows)
     added.extend({"source_id": row["source_id"], "relation": row["relation"], "target_id": row["target_id"]} for row in new_rows)
     return kept, removed, added
@@ -165,4 +174,16 @@ def add_condition_nodes(path: Path, corrections: dict) -> None:
 def apply_group_corrections(groups: list, corrections: dict) -> list:
     remove = removed_group_ids(corrections)
     assert remove <= {group["group_id"] for group in groups}, "제거 대상 조건 그룹을 찾지 못함"
-    return [group for group in groups if group["group_id"] not in remove]
+    kept = [dict(group) for group in groups if group["group_id"] not in remove]
+    by_id = {group["group_id"]: group for group in kept}
+    for item in corrections["group_description_corrections"]:
+        group = by_id[item["group_id"]]
+        assert group["description"].startswith(item["before_prefix"]), f"그룹 설명 불일치: {item['group_id']}"
+        group["description"] = item["after"]
+    for item in corrections["income_condition_corrections"]:
+        if item["action"] == "mark_unknown":
+            group = by_id[item["group_id"]]
+            assert group["logic"] == "OR", f"소득 그룹 논리 불일치: {item['group_id']}"
+            group["logic"] = "UNKNOWN"
+            group["description"] = f"{group['description']} (자동 판정 보류: {item['evidence']})"
+    return kept + [dict(group) for group in corrections["new_condition_groups"]]
