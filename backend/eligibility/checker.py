@@ -61,8 +61,100 @@ def _field(condition: dict) -> str:
     }.get(kind, "eligibility")
 
 
+def _child_age_condition(condition: dict, profile: dict) -> dict:
+    """자녀 개월 수 조건은 신청자 나이가 아니라 자녀 나이로 비교한다."""
+
+    label = "자녀 나이"
+    rule = condition.get("name") or "자녀 연령 조건"
+    months = profile.get("child_age_months")
+
+    if months is None:
+        return _result(
+            "children",
+            CHECK,
+            f"자녀의 개월 수를 확인해야 합니다. 기준: {rule}",
+            label,
+        )
+
+    limit = str(condition.get("value") or "")
+
+    if (
+        isinstance(months, bool)
+        or not isinstance(months, int)
+        or months < 0
+        or condition.get("operator") != "LT"
+        or not limit.isdigit()
+    ):
+        return _result(
+            "children",
+            CHECK,
+            f"자녀의 개월 수를 비교할 수 없어 확인이 필요합니다. 기준: {rule}",
+            label,
+        )
+
+    status = OK if months < int(limit) else NO
+
+    return _result(
+        "children",
+        status,
+        f"{rule} 기준에 입력한 {months}개월이 "
+        + ("포함됩니다." if status == OK else "포함되지 않습니다."),
+        label,
+    )
+
+
+def _source_review_items(graph_policy: object) -> list[dict]:
+    """원문 확인 결과 중 추가 확인이 필요한 항목만 안내로 만든다.
+
+    not_specified는 공고에 별도 기준이 없다는 뜻이므로 다시 묻지 않는다.
+    not_reviewed와 specified는 기존 조건 판정을 그대로 따른다.
+    """
+
+    if not isinstance(graph_policy, dict):
+        return []
+
+    items = []
+
+    for attribute, field, label in (
+        ("income", "income", "소득"),
+        ("household", "housing", "가구 조건"),
+    ):
+        if graph_policy.get(f"{attribute}_source_review") != "needs_review":
+            continue
+
+        # 알 수 없는 값은 사용자에게 묻지 않고 공고 확인으로 안내한다.
+        followup = graph_policy.get(f"{attribute}_followup")
+        if followup != "ask_user":
+            followup = "check_notice"
+
+        guide = (
+            "추가로 확인할 내용"
+            if followup == "ask_user"
+            else "공식 공고에서 확인할 내용"
+        )
+        note = graph_policy.get(f"{attribute}_source_note")
+        point = graph_policy.get(f"{attribute}_check_point")
+        parts = [f"확인된 내용: {note}" if note else ""]
+        parts.append(f"{guide}: {point}" if point else "")
+
+        item = _result(
+            field,
+            CHECK,
+            " / ".join(part for part in parts if part)
+            or "공식 공고 확인이 필요합니다.",
+            label,
+        )
+        item["followup"] = followup
+        items.append(item)
+
+    return items
+
+
 def _condition(condition: dict, profile: dict) -> dict:
     field = _field(condition)
+
+    if field == "target" and condition.get("unit") == "개월":
+        return _child_age_condition(condition, profile)
 
     if field == "age":
         age = profile.get("age")
@@ -516,6 +608,8 @@ def check_eligibility(
                         " 일부 조건이 검증되지 않아 "
                         "종합 판정을 보류합니다."
                     )
+
+    conditions.extend(_source_review_items(graph.get("policy")))
 
     return {
         "policy_id": policy_id,
