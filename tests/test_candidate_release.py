@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1005)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2455)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1004)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2444)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -215,6 +215,13 @@ class CandidateIntegrityTests(unittest.TestCase):
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "not_specified", item["policy_id"])
             else:
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
+
+    def test_application_status_review(self):
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        ended = [row for row in policies if row["application_status_review"] == "period_ended"]
+        self.assertEqual(len(ended), 29)
+        self.assertTrue(all(row["application_status_note"] for row in ended))
+        self.assertEqual({row["application_status_review"] for row in policies}, {"period_ended", "not_reviewed"})
 
     def test_age_corrections_from_official_recheck(self):
         corrections = dc.load_corrections()

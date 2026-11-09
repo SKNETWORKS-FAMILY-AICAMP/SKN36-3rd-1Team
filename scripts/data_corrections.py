@@ -14,7 +14,8 @@ HOUSEHOLD_CONDITION_PREFIX = "COND_HH_"
 HOMELESS_CONDITION_ID = "COND_HH_무주택세대"
 SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
 SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
-                             for suffix in ("source_review", "source_note", "followup", "check_point"))
+                             for suffix in ("source_review", "source_note", "followup", "check_point")) + (
+    "application_status_review", "application_status_note")
 
 
 def load_corrections() -> dict:
@@ -59,6 +60,12 @@ def apply_source_review(policies: list, corrections: dict) -> None:
             for field, suffix in (("note", "source_note"), ("followup", "followup"), ("check_point", "check_point")):
                 if field in item:
                     policy[f"{attribute}_{suffix}"] = item[field]
+    assert set(review["application"]) <= known, "신청 기간 확인 대상 정책 불일치"
+    for policy in policies:
+        item = review["application"].get(policy["policy_id"])
+        policy["application_status_review"] = item["status"] if item else "not_reviewed"
+        if item:
+            policy["application_status_note"] = item["note"]
 
 
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:

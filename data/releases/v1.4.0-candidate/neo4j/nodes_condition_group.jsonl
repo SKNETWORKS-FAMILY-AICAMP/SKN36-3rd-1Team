@@ -180,7 +180,6 @@
 {"group_id": "GRP_POL_GOV_062_ROOT", "policy_id": "POL_GOV_062", "logic": "AND", "is_root": true, "description": "저소득층 희귀난치성 및 중증질환자 교통비 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
 {"group_id": "GRP_POL_GOV_063_ROOT", "policy_id": "POL_GOV_063", "logic": "AND", "is_root": true, "description": "어르신 이·미용료 및 목욕료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
 {"group_id": "GRP_POL_GOV_064_ROOT", "policy_id": "POL_GOV_064", "logic": "AND", "is_root": true, "description": "참전유공자 TV수신료 지원 복합 자격 조건 루트 그룹 (AND 결합)"}
-{"group_id": "GRP_POL_GOV_064_OR_INC", "policy_id": "POL_GOV_064", "logic": "UNKNOWN", "is_root": false, "description": "참전유공자 TV수신료 지원 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR) (자동 판정 보류: 원문은 기초생활보장수급자(생계·의료급여)를 지원 제외로 두어 소득 관련 제외가 있으나 중위소득 구간으로 옮길 수 없음)"}
 {"group_id": "GRP_POL_GOV_065_ROOT", "policy_id": "POL_GOV_065", "logic": "AND", "is_root": true, "description": "승촌보 캠핑장 이용요금 감면 복합 자격 조건 루트 그룹 (AND 결합)"}
 {"group_id": "GRP_POL_YC_001_ROOT", "policy_id": "POL_YC_001", "logic": "UNKNOWN", "is_root": true, "description": "신혼부부 및 청년 임대주택 임대보증금 지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_YC_002_ROOT", "policy_id": "POL_YC_002", "logic": "AND", "is_root": true, "description": "사회초년생 청년인턴제 운영 복합 자격 조건 루트 그룹 (AND 결합)"}
