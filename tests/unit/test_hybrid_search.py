@@ -435,33 +435,6 @@ class TestCombinePolicyEvidence(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # 5) 통합 진입 함수
 # ---------------------------------------------------------------------------
-class TestApplicationPeriodEnded(unittest.TestCase):
-    def _combined(self):
-        search = {"query": "q", "filters": {}, "k": 3, "collection": "c", "hits": [
-            _hit(1, 0.9, "CHK_B2_DOC_A_C001", "POL_A", "DOC_A"),
-            _hit(2, 0.8, "CHK_B2_DOC_B_C001", "POL_B", "DOC_B"),
-            _hit(3, 0.7, "CHK_B2_DOC_C_C001", "POL_C", "DOC_C"),
-        ]}
-        contexts = {pid: {"policy_id": pid, "documents": [], "eligibility": {}, "policy": dict(extra)} for pid, extra in (
-            ("POL_A", {"application_status_review": "period_ended", "application_status_note": "기간 경과"}),
-            ("POL_B", {"application_status_review": "not_reviewed"}),
-            ("POL_C", {}),
-        )}
-        return hs.combine_policy_evidence(search, {"policies": contexts, "missing_policy_ids": []})
-
-    def test_ended_policy_moves_last_but_is_kept(self):
-        policies = self._combined()["policies"]
-        self.assertEqual([p["policy_id"] for p in policies], ["POL_B", "POL_C", "POL_A"])
-        self.assertEqual(policies[-1]["best_rank"], 1)
-
-    def test_ended_policy_gets_guidance_without_holding_eligibility(self):
-        ended = self._combined()["policies"][-1]["data_quality"]
-        warning = next(w for w in ended["warnings"] if w["code"] == hs.QUALITY_APPLICATION_PERIOD_ENDED)
-        self.assertIn("신청 기간 확인 필요", warning["message"])
-        self.assertEqual(warning["note"], "기간 경과")
-        self.assertNotIn(hs.QUALITY_APPLICATION_PERIOD_ENDED, ended["hold_reasons"])
-
-
 @unittest.skipUnless(HAS_QDRANT, "qdrant-client 미설치 → NOT_TESTED")
 class TestSearchPolicyContext(unittest.TestCase):
     def test_end_to_end_with_fakes(self):

@@ -15,7 +15,7 @@ HOMELESS_CONDITION_ID = "COND_HH_무주택세대"
 SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
 SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
                              for suffix in ("source_review", "source_note", "followup", "check_point")) + (
-    "application_status_review", "application_status_note")
+    "application_start", "application_end", "application_status_note")
 
 
 def load_corrections() -> dict:
@@ -60,12 +60,17 @@ def apply_source_review(policies: list, corrections: dict) -> None:
             for field, suffix in (("note", "source_note"), ("followup", "followup"), ("check_point", "check_point")):
                 if field in item:
                     policy[f"{attribute}_{suffix}"] = item[field]
-    assert set(review["application"]) <= known, "신청 기간 확인 대상 정책 불일치"
+    dates, notes = corrections["application_dates"], corrections["application_status_notes"]
+    assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
+    assert not set(dates) & set(notes), "날짜와 확인 메모는 함께 쓰지 않는다"
     for policy in policies:
-        item = review["application"].get(policy["policy_id"])
-        policy["application_status_review"] = item["status"] if item else "not_reviewed"
-        if item:
-            policy["application_status_note"] = item["note"]
+        item = dates.get(policy["policy_id"], {})
+        if "start" in item:
+            policy["application_start"] = item["start"]
+        if "end" in item:
+            policy["application_end"] = item["end"]
+        if policy["policy_id"] in notes:
+            policy["application_status_note"] = notes[policy["policy_id"]]
 
 
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:

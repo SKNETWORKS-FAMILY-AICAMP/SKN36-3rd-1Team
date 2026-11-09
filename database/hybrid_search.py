@@ -117,7 +117,6 @@ QUALITY_REGION_GRANULARITY = "SUSPECTED_REGION_GRANULARITY_LOST"
 QUALITY_REGION_DETAIL = "REGION_LIMITED_TO_MUNICIPALITY"
 QUALITY_SEARCH_REGION = "SEARCH_REGION_REQUIRES_REVIEW"
 QUALITY_REVIEW_STATUS_OVERCLAIM = "SUSPECTED_REVIEW_STATUS_OVERCLAIM"
-QUALITY_APPLICATION_PERIOD_ENDED = "APPLICATION_PERIOD_ENDED"
 # 경고 코드별 메타: severity / evidence_level(근거 종류) / verification(검증 상태) / affects(판정 영향 항목)
 #   / blocks_auto_eligibility(자동 판정 보류 필요). 공식 원문 검증은 모두 하지 않았다.
 QUALITY_CODE_META: dict[str, dict[str, Any]] = {
@@ -149,8 +148,6 @@ QUALITY_CODE_META: dict[str, dict[str, Any]] = {
                             "affects": ["region"], "blocks_auto_eligibility": True},
     QUALITY_REVIEW_STATUS_OVERCLAIM: {"severity": "low", "evidence_level": "graph_metadata", "verification": "suspected",
                                       "affects": [], "blocks_auto_eligibility": False},
-    QUALITY_APPLICATION_PERIOD_ENDED: {"severity": "medium", "evidence_level": "graph_metadata", "verification": "period_ended",
-                                       "affects": ["application_period"], "blocks_auto_eligibility": False},
     # 정적 목록(data_quality_flags) 코드: 심각도·근거 수준은 목록 값을 그대로 쓴다
     "EMPLOYMENT_NOT_MODELED": {"affects": ["employment"], "blocks_auto_eligibility": True},
     "AGE_SOURCE_GRAPH_MISMATCH": {"affects": ["age"], "blocks_auto_eligibility": True},
@@ -940,19 +937,11 @@ def assess_policy_data_quality(context: dict[str, Any] | None,
                                              "소득 조건으로 해석하지 말고 공고 원문 확인 (확정 아님)")})
     _graph_quality_patterns(context, trees, warnings)
     _apply_static_flags(static_flags or [], warnings)
-    if _application_period_ended(context):
-        warnings.append({"code": QUALITY_APPLICATION_PERIOD_ENDED, "level": "caution",
-                         "note": (context.get("policy") or {}).get("application_status_note"),
-                         "message": "신청 기간 확인 필요: 표시된 신청기간이 지났음. 사업 종료 확정이 아니므로 공고에서 다음 모집을 확인할 것"})
     warnings = [_annotate(warning) for warning in warnings]
     policy = context.get("policy") or {}
     return {"warnings": warnings, "review_status_counts": dict(review_counts),
             "graph_text_fields": [name for name in GRAPH_EXTRACTED_TEXT_FIELDS if policy.get(name)],
             **_hold_summary(warnings)}
-
-
-def _application_period_ended(context: dict[str, Any] | None) -> bool:
-    return ((context or {}).get("policy") or {}).get("application_status_review") == "period_ended"
 
 
 def _hold_summary(warnings: list[dict[str, Any]]) -> dict[str, Any]:
@@ -969,7 +958,7 @@ def _hold_summary(warnings: list[dict[str, Any]]) -> dict[str, Any]:
 def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[str, Any]) -> dict[str, Any]:
     """
     Qdrant 검색 결과와 Neo4j 정책 문맥을 policy_id로 묶는다. (DB 접속 없음)
-    - 정책 순서: 그 정책 근거 청크의 가장 좋은 순위(best_rank) 순. 신청기간이 지난 정책(period_ended)은 삭제하지 않고 뒤로 보낸다
+    - 정책 순서: 그 정책 근거 청크의 가장 좋은 순위(best_rank) 순
     - 정책 안 근거 청크: 검색 순위 순, chunk_id 중복 제거
     - evidence(원문 근거)와 graph(그래프 정보)를 다른 키로 나눈다. graph가 없으면 graph_status="MISSING_IN_GRAPH", graph=None
     - evidence_document_check: 근거 청크의 document_id가 그래프에서 그 정책의 SUPPORTED_BY 문서인지 (PASS/MISMATCH/NOT_TESTED)
@@ -1019,7 +1008,6 @@ def combine_policy_evidence(search_result: dict[str, Any], graph_context: dict[s
                 }))
                 entry["data_quality"].update(_hold_summary(entry["data_quality"]["warnings"]))
         policies.append(entry)
-    policies.sort(key=lambda entry: _application_period_ended(entry["graph"]))   # 안정 정렬: 각 묶음 안의 순위는 유지
     quality_summary = Counter(warning["code"] for entry in policies for warning in entry["data_quality"]["warnings"])
     return {"query": search_result.get("query"), "filters": search_result.get("filters"),
             **({"region_search": search_result["region_search"]} if "region_search" in search_result else {}),

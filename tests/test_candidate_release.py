@@ -216,12 +216,22 @@ class CandidateIntegrityTests(unittest.TestCase):
             else:
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
 
-    def test_application_status_review(self):
-        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
-        ended = [row for row in policies if row["application_status_review"] == "period_ended"]
-        self.assertEqual(len(ended), 29)
-        self.assertTrue(all(row["application_status_note"] for row in ended))
-        self.assertEqual({row["application_status_review"] for row in policies}, {"period_ended", "not_reviewed"})
+    def test_application_dates_are_iso_and_period_status_is_gone(self):
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        for policy_id, policy in policies.items():
+            self.assertNotIn("application_status_review", policy)
+            for field in ("application_start", "application_end"):
+                if field in policy:
+                    self.assertRegex(policy[field], r"^\d{4}-\d{2}-\d{2}$", policy_id)
+            if "application_start" in policy and "application_end" in policy:
+                self.assertLessEqual(policy["application_start"], policy["application_end"], policy_id)
+        self.assertEqual((policies["POL_001"]["application_start"], policies["POL_001"]["application_end"]), ("2026-04-15", "2026-04-17"))
+        self.assertEqual(policies["POL_009"]["application_start"], "2026-03-30")
+        self.assertNotIn("application_end", policies["POL_002"])
+        for policy_id in ("POL_GOV_006", "POL_GOV_020"):
+            self.assertNotIn("application_start", policies[policy_id])
+            self.assertNotIn("application_end", policies[policy_id])
+            self.assertTrue(policies[policy_id]["application_status_note"])
 
     def test_age_corrections_from_official_recheck(self):
         corrections = dc.load_corrections()

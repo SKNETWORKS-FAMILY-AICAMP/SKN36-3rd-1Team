@@ -108,9 +108,11 @@
 
 `needs_review`의 `followup`이 `ask_user`이면 사용자에게 추가로 물을 수 있고, `check_notice`이면 공고 확인을 안내한다.
 
-## 신청 기간 확인 결과 (2026-11-09)
+## 신청 기간 (2026-11-09)
 
-표시된 신청기간이 기준일에 지난 29건에 `application_status_review: period_ended`와 확인 내용을 넣었다(온통청년 21건, `POL_001`, `POL_009`, `POL_STG_SEOUL_001`, `POL_GOV_006`, `020`, `033`, `059`, `061`). 사업 종료 확정이 아니고 다음 모집 일정은 넣지 않았다. 검색 결과에서는 삭제 없이 뒤로 보내고 "신청 기간 확인 필요"로 안내한다. 나머지는 `not_reviewed`이다. `application_period` 값은 바꾸지 않았다.
+날짜가 분명한 정책은 `application_start`, `application_end`에 ISO 날짜로 넣었다. 종료 여부는 고정값으로 저장하지 않고 이 날짜로 판단한다. `POL_002`는 종료일이 없어 시작일만 넣었고, `POL_009`는 복지로의 현재 사업 기간(2026-03-30~05-29)을 넣었다.
+
+"출생일로부터 6개월 이내"(`POL_GOV_020`), "10~12월 중"(`POL_GOV_006`)처럼 날짜로 쓸 수 없는 정책은 비워 두고 `application_status_note`에 확인 내용을 남겼다. `application_period` 값은 바꾸지 않았다.
 
 ## 재적재 안내
 

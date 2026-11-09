@@ -34,8 +34,8 @@
     - `income_source_note`, `household_source_note`: 원문에서 확인한 내용 (대조한 정책만).
     - `income_followup`, `household_followup`: `needs_review`일 때만 있다. `ask_user`는 사용자 정보를 더 받으면 판정 가능, `check_notice`는 공고 확인 안내.
     - `income_check_point`, `household_check_point`: `needs_review`일 때 공고에서 볼 항목. 링크는 `source_url`을 쓴다.
-    - `application_status_review`: `period_ended`(표시된 신청기간이 지남, 다음 모집 여부는 별도 확인) 또는 `not_reviewed`. 사업 종료 확정이 아니다. 검색 결과에서는 삭제하지 않고 뒤로 보내며 `APPLICATION_PERIOD_ENDED` 경고로 "신청 기간 확인 필요"를 안내한다.
-    - `application_status_note`: `period_ended`일 때 확인 내용.
+    - `application_start`, `application_end`: 공식 원문에 날짜가 분명할 때만 ISO 날짜(`YYYY-MM-DD`)로 넣는다. 종료일이 없으면 `application_end`는 비운다.
+    - `application_status_note`: 날짜로 쓸 수 없는 신청 기간의 확인 내용.
 - **근거 문서(`Document`):**
   - **필수(NOT NULL):** `document_id`, `policy_id`, `title`, `source_type`, `source_url`, `local_raw_path`, `content_hash`, `text`, `verification_status`, `collected_at`
   - **선택(Nullable):** `published_at`, `effective_at`, `doc_type`, `law_article`, `effective_date`, `version`, `extracted_text_path`, `official_id`
