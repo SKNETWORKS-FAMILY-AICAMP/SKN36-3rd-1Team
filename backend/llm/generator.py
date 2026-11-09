@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 from typing import Any
@@ -18,6 +19,150 @@ DEFAULT_MAX_OUTPUT_TOKENS = 1000
 
 CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 ALLOWED_FIELDS = {"age", "region", "income"}
+
+
+def _normalize_profile(profile: dict | None) -> dict | None:
+    """상위 Pipeline에서 전달하는 정규화 프로필의 허용 필드만 사용한다."""
+    if profile is None:
+        return None
+
+    if not isinstance(profile, dict):
+        raise ValueError("profile은 객체 또는 None이어야 합니다.")
+
+    age = profile.get("age")
+    if type(age) is not int or not 0 <= age <= 120:
+        age = None
+
+    region = profile.get("region")
+    if not isinstance(region, str) or not region.strip():
+        region = None
+    else:
+        region = region.strip()
+
+    income = profile.get("income")
+    # 유한하지 않은 수치, 음수, bool, 비정상적으로 큰 정수는 미입력 처리.
+    try:
+        valid_income = (
+            type(income) in (int, float)
+            and income >= 0
+            and math.isfinite(income)
+        )
+    except (TypeError, ValueError, OverflowError):
+        valid_income = False
+    if not valid_income:
+        income = None
+
+    return {"age": age, "region": region, "income": income}
+
+
+def _region_has_detail(region: str) -> bool:
+    """정규화 시·도 이름 외에 시/군/구 정보가 포함된 경우만 True."""
+    return bool(re.search(r"(?:^|\s)[^\s]+(?:시|군|구)(?:\s|$)", region)) and bool(
+        re.search(r"\s[^\s]+(?:시|군|구)(?:\s|$)", region)
+    )
+
+
+def _requests_profile_value(text: str, field: str) -> bool:
+    """후속 질문이 일반 사용자 입력값 자체를 묻는지 보수적으로 감지한다.
+
+    정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
+    """
+    if field == "age":
+        return bool(
+            re.search(
+                r"(?:나이|연령|생년월일).{0,25}(?:알려|입력|말씀|몇\s*세|몇\s*살|어떻게\s*되|어떻게\s*되시)|"
+                r"몇\s*(?:살|세)(?:이신|인지|인가요|세요|입니까|입니까요|되시)",
+                text,
+            )
+        )
+    if field == "region":
+        return bool(
+            re.search(
+                r"(?:거주|사시는|사는|살고|주소|지역|시[·\s/-]?도).{0,40}(?:어디|어느|알려|입력|말씀|무엇)|"
+                r"어디.{0,25}(?:거주|사시|살고|주소|지역)",
+                text,
+            )
+        )
+    if field == "income":
+        return bool(
+            re.search(
+                r"(?:소득|수입|급여).{0,35}(?:얼마|알려|입력|말씀|어떻게\s*되)|"
+                r"얼마.{0,20}(?:소득|수입|급여)",
+                text,
+            )
+        )
+    return False
+
+
+def _is_detail_region_request(text: str) -> bool:
+    """시·도 재질문과 세부 시·군·구 정보 요청을 구분한다."""
+    return bool(
+        re.search(
+            r"시\s*[·/\-]?\s*군\s*[·/\-]?\s*구|시군구|"
+            r"(?:어느|어떤)\s*(?:시|군|구|동|읍|면)|"
+            r"(?:시|군|구|동|읍|면)\s*(?:까지|단위|이신가요|인가요|알려)|"
+            r"세부\s*(?:거주지|지역|주소)|구체적인\s*(?:거주지|지역|주소)",
+            text,
+        )
+    )
+
+
+def _is_redundant_request(text: str, profile: dict | None) -> bool:
+    if profile is None:
+        return False
+
+    # '이 정책의 연령 기준은?' 같은 정책 질문은 개인 정보 재요청이 아니다.
+    if re.search(r"정책|공고|지원|자격|요건|기준|조건", text):
+        return False
+
+    for field in ALLOWED_FIELDS:
+        value = profile[field]
+        if value is None:
+            continue
+
+        if not _requests_profile_value(text, field):
+            continue
+
+        if (
+            field == "region"
+            and not _region_has_detail(value)
+            and _is_detail_region_request(text)
+        ):
+            # 시·도만 받았으므로 세부 주소 확인은 별도의 정보 요청이다.
+            return False
+
+        return True
+
+    return False
+
+
+def _remove_redundant_answer_requests(answer: str, profile: dict | None) -> str:
+    """인용 없는 독립된 중복 입력 요구 문장만 제거한다.
+
+    인용이 있거나 정책 설명과 결합된 문장은 삭제하지 않고 프롬프트 규칙에 맡긴다.
+    """
+    if profile is None:
+        return answer.strip()
+
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=\])\s+|\n+", answer.strip())
+    kept = []
+    removed = False
+
+    for sentence in sentences:
+        if (
+            len(sentence) <= 75
+            and not CITATION_PATTERN.search(sentence)
+            and _is_redundant_request(sentence, profile)
+            and not re.search(r"(?:정책|공고|지원\s*대상|자격\s*기준)", sentence)
+        ):
+            removed = True
+            continue
+        kept.append(sentence)
+
+    if not removed or not kept:
+        return answer.strip()
+
+    return " ".join(kept).strip()
 
 
 class LLMUnavailableError(RuntimeError):
@@ -94,6 +239,7 @@ def _validated_contexts(
 def _validate_model_response(
     raw: Any,
     source_ids: set[int],
+    profile: dict | None = None,
 ) -> dict:
     if not isinstance(raw, dict):
         raise LLMOutputError(
@@ -111,6 +257,8 @@ def _validate_model_response(
         raise LLMOutputError(
             "LLM answer가 비어 있습니다."
         )
+
+    answer = _remove_redundant_answer_requests(answer, profile)
 
     cited = [
         int(number)
@@ -168,18 +316,38 @@ def _validate_model_response(
 
         result = {
             "kind": item["kind"],
-            "text": item["text"],
+            "text": item["text"].strip(),
         }
 
         if item["kind"] == "ask_info":
-            if item.get("field") not in ALLOWED_FIELDS:
-                raise LLMOutputError(
-                    "ask_info.field는 age/region/income만 허용됩니다."
-                )
+            field = item.get("field")
 
-            result["field"] = item["field"]
+            if not isinstance(field, str) or field not in ALLOWED_FIELDS:
+                # ask_contract v1.0: 허용하지 않은 필드는 일반 question으로 안내.
+                # API 응답 스키마를 확장하지 않고 502를 피한다.
+                result["kind"] = "question"
+            elif profile is not None and profile[field] is not None:
+                # 이미 입력한 값은 다시 묻지 않는다. 시·군·구는 본문에서 안내.
+                continue
+            else:
+                result["field"] = field
 
-        normalized.append(result)
+        if result["kind"] == "question":
+            # question은 사용자가 AI에게 이어서 물을 수 있는 실제 의문문이어야 한다.
+            # 안내문에 '?'만 붙여 의문문으로 바꾸면 의미가 왜곡되므로 제거한다.
+            if not result["text"].endswith(("?", "？")):
+                continue
+
+            if _is_redundant_request(result["text"], profile):
+                continue
+
+        if not any(
+            existing["kind"] == result["kind"]
+            and existing["text"].strip() == result["text"].strip()
+            and existing.get("field") == result.get("field")
+            for existing in normalized
+        ):
+            normalized.append(result)
 
     return {
         "status": raw["status"],
@@ -290,6 +458,7 @@ def generate_answer(
     contexts: list[dict],
     policy_checks: list[dict],
     history: list[dict] | None = None,
+    profile: dict | None = None,
 ) -> dict:
     """
     검색 원문 근거와 판정 결과로만 답한다.
@@ -325,6 +494,10 @@ def generate_answer(
             "history는 객체 리스트여야 합니다."
         )
 
+    # 상위 Pipeline에서 정규화된 사용자 프로필을 전달받는다.
+    # 기존 4개 인자 호출은 profile=None으로 호환된다.
+    cleaned_profile = _normalize_profile(profile)
+
     if not cleaned_contexts:
         return _no_evidence()
 
@@ -346,6 +519,8 @@ def generate_answer(
         "policy_checks": policy_checks,
         "history_for_conversation_only": trimmed_history,
     }
+    if cleaned_profile is not None:
+        prompt_data["user_profile"] = cleaned_profile
 
     messages = [
         {
@@ -379,4 +554,5 @@ def generate_answer(
     return _validate_model_response(
         parsed,
         source_ids,
+        cleaned_profile,
     )
