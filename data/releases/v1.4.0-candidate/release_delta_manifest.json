@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-09T00:34:27.742584+09:00",
+  "created_at": "2026-11-09T20:31:47.239633+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,8 +1631,13 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "9d264ca027c0e13c0a35ee83547cf7a9e5df89562e084a2461993f440fa2cb80",
+    "source_sha256": "be8a114cc4e32ea5963a456a0bd950e8bb26274f7dcb133b89b1c880a9a19258",
     "removed_relationships": [
+      {
+        "source_id": "POL_001",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_노년"
+      },
       {
         "source_id": "POL_GOV_002",
         "relation": "REQUIRES_CONDITION",
@@ -5604,11 +5609,105 @@
         "source_id": "GRP_POL_GOV_023_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_AGE_6_64"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_75_120"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_PUBLIC_EMPLOYEE"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_LARGE_FIRM_WORKER"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_SPECIAL_WORKER"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_CORP_REP"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_SELF_EMPLOYED"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_NONPROFIT_REP"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_STUDENT"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_LIVELIHOOD_BENEFIT"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_OTHER_SUBSIDY"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_FRAUD_RESTRICTED"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_FRAUD_UNPAID"
+      },
+      {
+        "source_id": "GRP_POL_005_NOT_EXCL",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_EXCL_NO_NEED"
+      },
+      {
+        "source_id": "POL_GOV_017",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_청소년"
+      },
+      {
+        "source_id": "POL_GOV_017",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_청년"
+      },
+      {
+        "source_id": "POL_GOV_017",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_중장년"
       }
     ],
+    "taxonomy_corrected_chunks": 87,
     "added_condition_ids": [
       "COND_AGE_12_24",
-      "COND_AGE_6_64"
+      "COND_AGE_6_64",
+      "COND_AGE_75_120",
+      "COND_EXCL_PUBLIC_EMPLOYEE",
+      "COND_EXCL_LARGE_FIRM_WORKER",
+      "COND_EXCL_SPECIAL_WORKER",
+      "COND_EXCL_CORP_REP",
+      "COND_EXCL_SELF_EMPLOYED",
+      "COND_EXCL_NONPROFIT_REP",
+      "COND_EXCL_STUDENT",
+      "COND_EXCL_LIVELIHOOD_BENEFIT",
+      "COND_EXCL_OTHER_SUBSIDY",
+      "COND_EXCL_FRAUD_RESTRICTED",
+      "COND_EXCL_FRAUD_UNPAID",
+      "COND_EXCL_NO_NEED"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",

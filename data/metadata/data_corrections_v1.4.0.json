@@ -352,6 +352,136 @@
       "unit": "세",
       "evidence_location": "원문 대조 교정",
       "description": "정책 지원 자격 조건 (연령조건: 만 6세~64세)"
+    },
+    {
+      "condition_id": "COND_AGE_75_120",
+      "type": "AGE",
+      "name": "연령조건: 75세 이상",
+      "operator": "BETWEEN",
+      "value": "75~120",
+      "unit": "세",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (연령조건: 75세 이상)"
+    },
+    {
+      "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
+      "type": "EMPLOYMENT",
+      "name": "제외: 공무원, 사립학교 교직원",
+      "operator": "IN",
+      "value": "공무원, 사립학교 교직원",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 공무원, 사립학교 교직원)"
+    },
+    {
+      "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
+      "type": "EMPLOYMENT",
+      "name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "operator": "IN",
+      "value": "대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_SPECIAL_WORKER",
+      "type": "EMPLOYMENT",
+      "name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+      "operator": "IN",
+      "value": "월 소득 500만원 이상의 특수형태근로종사자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득 500만원 이상의 특수형태근로종사자)"
+    },
+    {
+      "condition_id": "COND_EXCL_CORP_REP",
+      "type": "EMPLOYMENT",
+      "name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "operator": "IN",
+      "value": "사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표)"
+    },
+    {
+      "condition_id": "COND_EXCL_SELF_EMPLOYED",
+      "type": "EMPLOYMENT",
+      "name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "operator": "IN",
+      "value": "사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자)"
+    },
+    {
+      "condition_id": "COND_EXCL_NONPROFIT_REP",
+      "type": "EMPLOYMENT",
+      "name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+      "operator": "IN",
+      "value": "월 소득이 300만원 이상인 비영리단체 대표",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득이 300만원 이상인 비영리단체 대표)"
+    },
+    {
+      "condition_id": "COND_EXCL_STUDENT",
+      "type": "EDUCATION",
+      "name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "operator": "IN",
+      "value": "졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생)"
+    },
+    {
+      "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "operator": "IN",
+      "value": "생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능))"
+    },
+    {
+      "condition_id": "COND_EXCL_OTHER_SUBSIDY",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "operator": "IN",
+      "value": "다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+      "operator": "IN",
+      "value": "지원·융자·수강제한 기간인 부정수급자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 지원·융자·수강제한 기간인 부정수급자)"
+    },
+    {
+      "condition_id": "COND_EXCL_FRAUD_UNPAID",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+      "operator": "IN",
+      "value": "부정행위에 따른 지원금을 반환하지 않은 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 부정행위에 따른 지원금을 반환하지 않은 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_NO_NEED",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+      "operator": "IN",
+      "value": "기타 지원 필요성이 인정되지 않는 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 기타 지원 필요성이 인정되지 않는 사람)"
     }
   ],
   "age_condition_replacements": [
@@ -376,5 +506,199 @@
       "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세",
       "after_name": "연령조건: 만 6세~64세"
     }
+  ],
+  "group_condition_additions": [
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_AGE_75_120",
+      "target_name": "연령조건: 75세 이상",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
+      "target_name": "제외: 공무원, 사립학교 교직원",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
+      "target_name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_SPECIAL_WORKER",
+      "target_name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_CORP_REP",
+      "target_name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_SELF_EMPLOYED",
+      "target_name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_NONPROFIT_REP",
+      "target_name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_STUDENT",
+      "target_name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
+      "target_name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_OTHER_SUBSIDY",
+      "target_name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
+      "target_name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_FRAUD_UNPAID",
+      "target_name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "condition_id": "COND_EXCL_NO_NEED",
+      "target_name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    }
+  ],
+  "category_corrections": [
+    {
+      "policy_id": "POL_STG_MOHW_001",
+      "before": "출산·육아",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_DGU_001",
+      "before": "출산·육아",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_NTS_001",
+      "before": "중소기업 취업",
+      "after": "청년 취업·교육·자산형성"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "before": "중소기업 취업",
+      "after": "청년 취업·교육·자산형성"
+    },
+    {
+      "policy_id": "POL_STG_MOIS_001",
+      "before": "세제 혜택",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_EX_001",
+      "before": "교통비·생활비",
+      "after": "교통·생활비·의료·돌봄"
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "before": "교통비·생활비",
+      "after": "교통·생활비·의료·돌봄"
+    },
+    {
+      "policy_id": "POL_STG_SEOUL_001",
+      "before": "지역 복지",
+      "after": "지역별 생활지원·복지"
+    }
+  ],
+  "target_group_code_names": {
+    "YOUTH": "청년",
+    "PREGNANT_BIRTH": "임산부·출산가구",
+    "CHILD_YOUTH": "영유아·아동·청소년",
+    "WORKER_BIZ": "소상공인·재직자",
+    "JOBSEEKER": "구직자·취업준비생",
+    "LOW_INCOME": "저소득·취약계층",
+    "SENIOR": "어르신·노년층",
+    "GENERAL": "일반국민"
+  },
+  "life_stage_corrections": [
+    {
+      "policy_id": "POL_001",
+      "before": [
+        "노년",
+        "영유아",
+        "중장년",
+        "청년"
+      ],
+      "after": [
+        "영유아",
+        "중장년",
+        "청년"
+      ],
+      "evidence": "LH 공고의 대상은 신생아가구·신혼부부·예비신혼부부·6세 이하 자녀 가구이며, 65세는 직계존속 부양 가점 항목에만 나온다"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "before": [
+        "unknown"
+      ],
+      "after": [
+        "청소년",
+        "청년",
+        "중장년"
+      ],
+      "evidence": "원문 선정기준 만 14세~64세"
+    }
+  ],
+  "chunk_life_stage_alignment_policies": [
+    "POL_001",
+    "POL_GOV_017",
+    "POL_STG_MOHW_001",
+    "POL_STG_MOIS_001",
+    "POL_STG_EX_001"
   ]
 }

@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1030)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2921)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1043)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2936)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -79,9 +79,10 @@ class CandidateIntegrityTests(unittest.TestCase):
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
             if name == "policy":
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
-                corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections")
+                corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
                                  for item in corrections[group]}
-                dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids], corrections)
+                dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids],
+                                            {**corrections, "category_corrections": []})
             new = {row[key]: row for row in rows(PACKAGE / "neo4j" / f"nodes_{name}.jsonl")}
             for original in old:
                 if name == "condition_group" and original[key] in removed_groups:
@@ -107,10 +108,13 @@ class CandidateIntegrityTests(unittest.TestCase):
                 item = region_policies[row["source_id"]]
                 row = {**row, "target_id": item["after_region_id"], "target_name": item["after"]}
             self.assertIn(json.dumps(row, sort_keys=True), new_edges)
+        life_stage_policies = {item["policy_id"]: item for item in corrections["life_stage_corrections"]}
         new_chunks = {json.dumps(row, sort_keys=True) for row in rows(PACKAGE / "qdrant/payload_chunks.jsonl")}
         for row in rows(ROOT / "data/handoff/qdrant/payload_chunks.jsonl"):
             if row["policy_id"] in region_policies:
                 row = {**row, "region": region_policies[row["policy_id"]]["after"]}
+            if row["policy_id"] in life_stage_policies:
+                row = {**row, "life_stages": life_stage_policies[row["policy_id"]]["after"]}
             self.assertIn(json.dumps(row, sort_keys=True), new_chunks)
 
     def test_merged_gwangju_jeonnam_code_is_not_nationwide(self):
@@ -141,6 +145,38 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertIn("총자산 3억 4,500만원", policies["POL_001"]["eligibility"])
         self.assertIn("3.45억원", policies["POL_003"]["eligibility"])
         self.assertIn("일반형 연 1.8%", policies["POL_006"]["benefit"])
+
+    def test_taxonomy_uses_standard_labels_everywhere(self):
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        edges = rows(PACKAGE / "neo4j/relationships.jsonl")
+        names = lambda relation, policy_id: sorted(e["target_name"] for e in edges  # noqa: E731
+                                                   if e["source_id"] == policy_id and e["relation"] == relation)
+        standard_stages = {row["name"] for row in rows(PACKAGE / "neo4j/nodes_lifestage.jsonl")} | {"unknown"}
+        by_id = {row["policy_id"]: row for row in policies}
+        for policy in policies:
+            self.assertEqual(names("HAS_CATEGORY", policy["policy_id"]), [policy["category"]], policy["policy_id"])
+            self.assertEqual(names("TARGETS", policy["policy_id"]), sorted(policy["target_groups"]), policy["policy_id"])
+            if policy["life_stages"] != ["unknown"]:
+                self.assertEqual(names("APPLIES_TO_LIFESTAGE", policy["policy_id"]), sorted(policy["life_stages"]), policy["policy_id"])
+        for chunk in chunks:
+            self.assertEqual(chunk["category"], by_id[chunk["policy_id"]]["category"], chunk["chunk_id"])
+            self.assertLessEqual(set(chunk["life_stages"]), standard_stages, chunk["chunk_id"])
+
+    def test_detail_targets_stay_and_review_corrections_apply(self):
+        chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        detail = {value for chunk in chunks for value in chunk["target_groups"]}
+        self.assertLessEqual({"예비신혼부부", "신생아가구", "한부모가족"}, detail)
+        edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
+        self.assertNotIn(("POL_001", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_노년"), edges)
+        self.assertIn(("POL_GOV_017", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_중장년"), edges)
+        members = {target for source, relation, target in edges
+                   if source == "GRP_POL_005_NOT_EXCL" and relation == "CONTAINS_CONDITION"}
+        self.assertEqual(len(members), 13)
+        self.assertIn("COND_AGE_75_120", members)
+        # 제외 조건을 필수 조건으로 연결하면 뜻이 반대가 된다
+        self.assertFalse(members & {target for source, relation, target in edges
+                                    if source == "POL_005" and relation == "REQUIRES_CONDITION"})
 
     def test_frozen_manifests_match_actual_files(self):
         for directory in [ROOT / "data/handoff", ROOT / "data/releases/v1"]:

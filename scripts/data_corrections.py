@@ -30,6 +30,34 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy = by_id[item["policy_id"]]
         assert policy["region"] == item["before"], f"지역 교정 전 값 불일치: {item['policy_id']}"
         policy["region"] = item["after"]
+    for item in corrections["category_corrections"]:
+        policy = by_id[item["policy_id"]]
+        assert policy["category"] == item["before"], f"분야 교정 전 값 불일치: {item['policy_id']}"
+        policy["category"] = item["after"]
+    codes = corrections["target_group_code_names"]
+    for policy in policies:
+        policy["target_groups"] = [codes.get(value, value) for value in policy["target_groups"]]
+    for item in corrections["life_stage_corrections"]:
+        policy = by_id[item["policy_id"]]
+        assert sorted(policy["life_stages"]) == sorted(item["before"]), f"생애단계 교정 전 값 불일치: {item['policy_id']}"
+        policy["life_stages"] = list(item["after"])
+
+
+def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:
+    """청크의 분야를 정책과 맞추고, 지정 정책의 life_stages를 정책의 표준 생애단계로 맞춘다. 본문은 그대로다."""
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    category_policies = {item["policy_id"] for item in corrections["category_corrections"]}
+    align = set(corrections["chunk_life_stage_alignment_policies"])
+    changed = 0
+    for chunk in chunks:
+        policy = by_id[chunk["policy_id"]]
+        before = (chunk["category"], chunk["life_stages"])
+        if chunk["policy_id"] in category_policies:
+            chunk["category"] = policy["category"]
+        if chunk["policy_id"] in align:
+            chunk["life_stages"] = list(policy["life_stages"])
+        changed += before != (chunk["category"], chunk["life_stages"])
+    return changed
 
 
 def apply_region_to_chunks(chunks: list, corrections: dict) -> int:
@@ -69,6 +97,10 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
         remove.add(("REQUIRES_CONDITION", item["policy_id"], item["condition_id"]))
         remove.add(("CONTAINS_CONDITION", f"GRP_{item['policy_id']}_ROOT", item["condition_id"]))
 
+    for item in corrections["life_stage_corrections"]:
+        for stage in set(item["before"]) - set(item["after"]) - {"unknown"}:
+            remove.add(("APPLIES_TO_LIFESTAGE", item["policy_id"], f"LIFESTAGE_{stage}"))
+
     # 연령 교체: 원문에 나이가 분명한 정책은 조건을 지우지 않고 원문 값으로 바꾼다
     replacements = {}
     for item in corrections["age_condition_replacements"]:
@@ -106,6 +138,20 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
     missing = (remove | set(replacements)) - matched
     assert not missing, f"제거 대상 관계를 찾지 못함: {sorted(missing)[:5]}"
     assert seen_regions == set(region_by_policy), "지역 교정 대상 관계 누락"
+    # 원문 근거로 새로 잇는 관계. 제외 조건은 NOT 그룹 안에만 둔다
+    # (REQUIRES_CONDITION으로 이으면 "공무원이어야 한다"는 반대 뜻이 되기 때문이다)
+    new_rows = [{"source_id": item["group_id"], "relation": "CONTAINS_CONDITION", "target_id": item["condition_id"],
+                 "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
+                 "evidence_location": item["evidence_location"], "review_status": "extracted"}
+                for item in corrections["group_condition_additions"]]
+    for item in corrections["life_stage_corrections"]:
+        for stage in [value for value in item["after"] if value not in item["before"]]:
+            new_rows.append({"source_id": item["policy_id"], "relation": "APPLIES_TO_LIFESTAGE",
+                             "target_id": f"LIFESTAGE_{stage}", "target_name": stage,
+                             "evidence_document_id": item["policy_id"].replace("POL_", "DOC_", 1),
+                             "evidence_location": "원문 대조 교정", "review_status": "extracted"})
+    kept.extend(new_rows)
+    added.extend({"source_id": row["source_id"], "relation": row["relation"], "target_id": row["target_id"]} for row in new_rows)
     return kept, removed, added
 
 

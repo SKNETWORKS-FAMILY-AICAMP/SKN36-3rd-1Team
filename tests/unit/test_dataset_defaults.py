@@ -40,7 +40,7 @@ print(json.dumps({'version':hd.dataset_version(),'release':hd.IS_RELEASE_PACKAGE
         self.assertEqual((result["profile"], result["collection"]),
                          ("b2_06b_v140", "exp_b2_qwen3emb06b_v140_v1"))
         self.assertTrue(result["release"])
-        self.assertEqual(result["nodes"], 1030)
+        self.assertEqual(result["nodes"], 1043)
         self.assertEqual(result["flags"], "not_applicable")
         self.assertEqual(set(result["configs"]), {"A_B2_V140", "B_B3_V140"})
 

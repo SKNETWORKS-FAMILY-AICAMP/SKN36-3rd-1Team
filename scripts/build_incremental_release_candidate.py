@@ -190,6 +190,8 @@ def build_candidate_release():
     application_reviews, application_changes = review_candidate_policies(
         merged_policies, baseline_policies,
     )
+    # 신규 정책의 그래프 관계는 수집 단계의 코드값으로 만들므로 표기 교정 전 값을 보관한다
+    new_policies_for_edges = [dict(policy) for policy in new_policies]
     corrections = dc.load_corrections()
     dc.apply_policy_corrections(merged_policies, corrections)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
@@ -328,7 +330,7 @@ def build_candidate_release():
     # B. 9개 신규 정책에 대한 표준 관계 생성
     org_map = {o["name"]: o["agency_id"] for o in orgs}
 
-    for p in new_policies:
+    for p in new_policies_for_edges:
         pid = p["policy_id"]
         
         # 1. ADMINISTERED_BY
@@ -462,6 +464,7 @@ def build_candidate_release():
 
     merged_chunks = chunks + new_chunks
     region_chunks_corrected = dc.apply_region_to_chunks(merged_chunks, corrections)
+    taxonomy_chunks_corrected = dc.apply_taxonomy_to_chunks(merged_chunks, merged_policies, corrections)
     with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for c in merged_chunks:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
@@ -538,6 +541,7 @@ def build_candidate_release():
             "source_sha256": get_file_sha256(dc.CORRECTIONS_PATH),
             "removed_relationships": removed_rels,
             "replacement_relationships": replaced_rels,
+            "taxonomy_corrected_chunks": taxonomy_chunks_corrected,
             "added_condition_ids": [node["condition_id"] for node in corrections["new_condition_nodes"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
@@ -594,7 +598,7 @@ def build_candidate_release():
         "## 1-2. 원문 대조 교정 (2026-11-09)",
         "",
         f"- 설명 문구 {len(corrections['text_corrections'])}건, 지역 {len(corrections['region_corrections'])}건, 연령 조건 제거 {len(corrections['age_condition_removals'])}건·원문 값 교체 {len(corrections['age_condition_replacements'])}건, 가구 조건 교정 {len(corrections['household_condition_removals'])}건을 적용했다.",
-        f"- 조건 관계 {len(removed_rels) - len(replaced_rels)}개(교체 제외)와 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
+        f"- 관계 {len(removed_rels)}개 제거·교체, {len(replaced_rels)}개 추가(교체분 포함), 표기 교정 청크 {taxonomy_chunks_corrected}개. 함께 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
         "- `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.",
     ]
     counts_section = "\n".join(rows)
