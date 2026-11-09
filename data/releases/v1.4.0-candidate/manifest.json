@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-09T23:56:04.579670+09:00",
+  "created_at": "2026-11-10T00:06:35.572843+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
@@ -9,7 +9,7 @@
     "total_documents": 261,
     "total_chunks": 599,
     "total_graph_nodes": 1005,
-    "total_graph_edges": 2444,
+    "total_graph_edges": 2442,
     "referential_integrity": "100% PASS (Broken References = 0)",
     "qdrant_point_id_standard": "RFC 4122 UUIDv5 (Deterministic)",
     "delta_from_baseline": {
@@ -31,12 +31,12 @@
     },
     "CHANGELOG.md": {
       "size_bytes": 5939,
-      "sha256": "d0bbe62b4af339dcc355d2425811957481e5b0768d247200412e715a2a5698f3",
+      "sha256": "f0430d9ef99434271bfc57ce92e237e13f6e29a40a0c1fd6fa770081d1d3a3fd",
       "record_count": 0
     },
     "release_delta_manifest.json": {
-      "size_bytes": 271775,
-      "sha256": "198424e31c500ed5520227d675fc193364df15e302cf637644581300f87e83aa",
+      "size_bytes": 272052,
+      "sha256": "cdfd2fa4332f91b57d0c316c96137fb3f5de1d7926969c4917ca4897a42d0da7",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -80,8 +80,8 @@
       "record_count": 123
     },
     "neo4j/nodes_policy.jsonl": {
-      "size_bytes": 505274,
-      "sha256": "36e82d61dd2a3aad14b8500e54e464cae975d54845a7b6ab7a268cb6ad8de02d",
+      "size_bytes": 505251,
+      "sha256": "35db7266a7855e386d6a5fecd9eac5d63bfb7560db4b563f6ae54da8ee3e0d97",
       "record_count": 246
     },
     "neo4j/nodes_region.jsonl": {
@@ -95,9 +95,9 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 612421,
-      "sha256": "357b2a7bf20fa0bc7dec44c8c55d9338d841013fdacc62cab5f0144c53107e13",
-      "record_count": 2444
+      "size_bytes": 611957,
+      "sha256": "dc20d78ced59351e9593926b930e6798f68793bc1aabb193a5260c725cf73fb0",
+      "record_count": 2442
     },
     "neo4j/schema_constraints.cypher": {
       "size_bytes": 1208,
@@ -120,8 +120,8 @@
       "record_count": 0
     },
     "qdrant/payload_chunks.jsonl": {
-      "size_bytes": 1333522,
-      "sha256": "29c6a1fae80084d4bc9a6910ee387967da4aace19d4165b29b1d9496b0c3cdf0",
+      "size_bytes": 1333476,
+      "sha256": "acba957e7e3c0780f7590f6fdd0d83e7ef2ad98b3ac77979a78c8d38d57f7578",
       "record_count": 599
     }
   }

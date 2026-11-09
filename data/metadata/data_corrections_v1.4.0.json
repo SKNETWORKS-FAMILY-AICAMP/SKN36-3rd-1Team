@@ -849,6 +849,18 @@
       ],
       "evidence": "원문 선정기준 만 14세~64세",
       "evidence_location": "지원조건 JA0110/JA0111"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "before": [
+        "아동",
+        "영유아",
+        "청소년"
+      ],
+      "after": [
+        "영유아"
+      ],
+      "evidence": "정부24 지원대상 24개월 미만 아이. 아동(6~12세)·청소년(13~18세) 구간에 해당하지 않음"
     }
   ],
   "chunk_life_stage_alignment_policies": [
@@ -857,10 +869,11 @@
     "POL_STG_MOHW_001",
     "POL_STG_MOIS_001",
     "POL_STG_EX_001",
-    "POL_STG_NTS_001"
+    "POL_STG_NTS_001",
+    "POL_GOV_050"
   ],
   "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",

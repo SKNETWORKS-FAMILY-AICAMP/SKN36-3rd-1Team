@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-09T23:56:04.543393+09:00",
+  "created_at": "2026-11-10T00:06:35.410399+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "8a509ab1b0600cc0d235374d7d8223bf752264c8dc33f7c17efe09b38a45be24",
+    "source_sha256": "c650fbe2cc2e82a89d4585325a5ae0cfbee8fc8204990570d5f3243d3a16eb82",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -3827,6 +3827,16 @@
         "source_id": "POL_GOV_049",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_050",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_아동"
+      },
+      {
+        "source_id": "POL_GOV_050",
+        "relation": "APPLIES_TO_LIFESTAGE",
+        "target_id": "LIFESTAGE_청소년"
       },
       {
         "source_id": "POL_GOV_050",
@@ -8201,7 +8211,7 @@
         "target_id": "LIFESTAGE_중장년"
       }
     ],
-    "taxonomy_corrected_chunks": 87,
+    "taxonomy_corrected_chunks": 89,
     "added_condition_ids": [
       "COND_AGE_12_24",
       "COND_AGE_6_64",

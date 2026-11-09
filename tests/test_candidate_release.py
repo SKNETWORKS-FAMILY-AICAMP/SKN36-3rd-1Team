@@ -66,7 +66,7 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
         self.assertEqual(report["counts"]["total_graph_nodes"], 1005)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2444)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2442)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -242,6 +242,8 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertLessEqual({"예비신혼부부", "신생아가구", "한부모가족"}, detail)
         edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
         self.assertNotIn(("POL_001", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_노년"), edges)
+        self.assertEqual({target for source, relation, target in edges
+                          if source == "POL_GOV_050" and relation == "APPLIES_TO_LIFESTAGE"}, {"LIFESTAGE_영유아"})
         self.assertIn(("POL_GOV_017", "APPLIES_TO_LIFESTAGE", "LIFESTAGE_중장년"), edges)
         members = {target for source, relation, target in edges
                    if source == "GRP_POL_005_OR_EXCL" and relation == "CONTAINS_CONDITION"}
