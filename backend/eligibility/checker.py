@@ -106,11 +106,17 @@ def _condition(condition: dict, profile: dict) -> dict:
             )
 
         status = OK if low <= age <= high else NO
+        # v1.4.0에서는 상한값 120을 '상한 없음'의 표기로 사용한다.
+        age_rule = (
+            f"만 {low}세 이상(상한 없음)"
+            if high == 120
+            else f"만 {low}~{high}세"
+        )
 
         return _result(
             field,
             status,
-            f"만 {low}~{high}세 기준에 입력한 만 {age}세가 "
+            f"{age_rule} 기준에 입력한 만 {age}세가 "
             + (
                 "포함됩니다."
                 if status == OK
@@ -284,13 +290,44 @@ def _affected_fields(
     if not isinstance(attrs, list) or not attrs:
         return {"all"}
 
-    valid = {
-        str(x).lower()
-        for x in attrs
-        if isinstance(x, str) and x.strip()
+    # 품질 경고의 속성명은 출력 필드명으로 정규화한다.
+    # 인식하지 못하는 속성이 있으면 해당 경고를 무시하지 않고
+    # 전체 조건의 자동 판정을 보류한다 (fail closed).
+    aliases = {
+        "residence": "region",
+        "location": "region",
+        "housing_household": "housing",
+        "household": "housing",
+        "special_target": "target",
+    }
+    supported = {
+        "all",
+        "age",
+        "region",
+        "income",
+        "eligibility",
+        "employment",
+        "education",
+        "housing",
+        "target",
+        "exclusion",
+        "marriage",
+        "children",
     }
 
-    return valid if valid and len(valid) == len(attrs) else {"all"}
+    normalized = set()
+    for attr in attrs:
+        if not isinstance(attr, str) or not attr.strip():
+            return {"all"}
+
+        name = attr.strip().lower()
+        field = aliases.get(name, name)
+        if field not in supported:
+            return {"all"}
+
+        normalized.add(field)
+
+    return normalized or {"all"}
 
 
 def _reception_status(policy: dict) -> str:
@@ -456,22 +493,18 @@ def check_eligibility(
                     " 데이터 품질 경고로 자동 판정을 보류합니다."
                 )
 
-    # 일부 조건이 검증되지 않으면
-    # 그룹의 종합 판정도 보류한다.
+    # 품질 경고가 있는 속성의 조건 노드가 아예 누락될 수도 있다.
+    # 다른 조건이 eligible이어도 그룹의 종합 판정은 보류한다.
     if affected and "all" not in affected:
-        if any(
-            item["field"] in affected
-            for item in conditions
-        ):
-            for item in conditions:
-                if item["field"] == "eligibility":
-                    item["status"] = CHECK
+        for item in conditions:
+            if item["field"] == "eligibility":
+                item["status"] = CHECK
 
-                    if "데이터 품질 경고" not in item["reason"]:
-                        item["reason"] += (
-                            " 일부 조건이 검증되지 않아 "
-                            "종합 판정을 보류합니다."
-                        )
+                if "데이터 품질 경고" not in item["reason"]:
+                    item["reason"] += (
+                        " 일부 조건이 검증되지 않아 "
+                        "종합 판정을 보류합니다."
+                    )
 
     return {
         "policy_id": policy_id,
