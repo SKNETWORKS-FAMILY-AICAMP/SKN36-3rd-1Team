@@ -216,6 +216,17 @@ class CandidateIntegrityTests(unittest.TestCase):
             else:
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
 
+    def test_application_is_ongoing_only_when_source_confirms(self):
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        ongoing = [row for row in policies if "application_is_ongoing" in row]
+        self.assertEqual(len(ongoing), 39)
+        for row in ongoing:
+            self.assertIs(row["application_is_ongoing"], True, row["policy_id"])
+            self.assertIn(row["application_period"], ("상시신청", "상시"), row["policy_id"])
+            self.assertNotIn("application_end", row, row["policy_id"])
+        excluded = {"POL_002", "POL_GOV_003", "POL_003", "POL_004", "POL_006", "POL_007"}
+        self.assertFalse(excluded & {row["policy_id"] for row in ongoing})
+
     def test_group_without_children_is_unknown(self):
         parents = {edge["source_id"] for edge in rows(PACKAGE / "neo4j/relationships.jsonl")
                    if edge["relation"] in ("CONTAINS_CONDITION", "CONTAINS_GROUP")}

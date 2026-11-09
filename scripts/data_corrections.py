@@ -15,7 +15,7 @@ HOMELESS_CONDITION_ID = "COND_HH_무주택세대"
 SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
 SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
                              for suffix in ("source_review", "source_note", "followup", "check_point")) + (
-    "application_start", "application_end", "application_status_note")
+    "application_start", "application_end", "application_status_note", "application_is_ongoing")
 
 
 def load_corrections() -> dict:
@@ -71,6 +71,9 @@ def apply_source_review(policies: list, corrections: dict) -> None:
             policy["application_end"] = item["end"]
         if policy["policy_id"] in notes:
             policy["application_status_note"] = notes[policy["policy_id"]]
+        if policy["policy_id"] in corrections["application_ongoing"]:
+            assert "end" not in item, f"종료일과 상시 접수를 함께 쓸 수 없음: {policy['policy_id']}"
+            policy["application_is_ongoing"] = True
 
 
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:
