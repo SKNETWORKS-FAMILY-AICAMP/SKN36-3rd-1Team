@@ -102,7 +102,7 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
     """
     if re.search(
         r"시\s*[·/\-]?\s*군\s*[·/\-]?\s*구|시군구|"
-        r"(?:어느|어떤)\s*(?:시|군|구|동|읍|면)|"
+        r"(?:어느|어떤)\s*(?:시(?!\s*[·/\-]?\s*도)|군|구|동|읍|면)|"
         r"(?:시|군|구|동|읍|면)(?:가|를|을|은|는)?\s*(?:어디|어느|알려)|"
         r"(?:시|군|구|동|읍|면)\s*(?:까지|단위|이신가요|인가요|알려)|"
         r"세부\s*(?:거주지|지역|주소)|구체적인\s*(?:거주지|지역|주소)",
@@ -123,24 +123,42 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
         ("울산광역시", "울산시"),
         ("세종특별자치시", "세종시"),
     )
+    known_sido_aliases: set[str] = set()
     if known_region:
         remaining = remaining.replace(known_region, "")
         for names in sido_name_sets:
             if known_region in names:
+                known_sido_aliases.update(names)
                 for name in names:
                     remaining = remaining.replace(name, "")
-
-    sido_aliases = {name for names in sido_name_sets for name in names}
 
     # 예: 강남구에 / 수원시에 / 영광군 거주 / 역삼동 주민등록.
     named_area = re.compile(
         r"(?<![가-힣])([가-힣]{2,}(?:시|군|구|동|읍|면))"
         r"(?=$|[\s?？.,!]|에|에서|의|로|가|은|는|를|을|인지|인가요|이신가요)"
     )
-    return any(
-        match.group(1) not in sido_aliases
-        for match in named_area.finditer(remaining)
-    )
+    for match in named_area.finditer(remaining):
+        candidate = match.group(1)
+        suffix = remaining[match.end():]
+
+        # 시·도 자체의 공식명과 약칭은 세부 지역으로 간주하지 않는다.
+        if candidate in known_sido_aliases:
+            continue
+
+        # `거주하시는`, `이용하시는`는 '...하시' + '는'으로,
+        # `알려주시면`은 '...시면'으로 잘못 끊길 수 있다.
+        # 지명을 찾는 패턴이 이런 동사 활용형을 인식하지 않도록 제외한다.
+        if candidate.endswith(("시면", "하시면", "주시면", "되면")):
+            continue
+        if (
+            suffix.startswith(("는", "면"))
+            and len(candidate) >= 4
+            and candidate.endswith(("하시", "주시", "되시", "이시", "계시"))
+        ):
+            continue
+
+        return True
+    return False
 
 
 

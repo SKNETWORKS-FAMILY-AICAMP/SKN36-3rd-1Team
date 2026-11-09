@@ -368,3 +368,67 @@ def test_plain_question_without_question_mark_is_preserved(monkeypatch):
     assert result["follow_up_questions"] == [
         {"kind": "question", "text": "이 정책의 신청 절차는 어떻게 되나요?"}
     ]
+
+# ==========================================================
+# P1 regression: 동사 활용형을 시군구 지명으로 오인하지 않기
+# ==========================================================
+
+
+def test_p1_reasking_sido_ask_info_is_removed(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "거주하시는 시도는 어디인가요?"}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert actual["follow_up_questions"] == []
+
+
+def test_p1_reasking_region_question_with_polite_verb_is_removed(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "거주하시는 지역을 알려주세요."}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert actual["follow_up_questions"] == []
+
+
+def test_p1_reasking_sido_answer_body_is_removed(monkeypatch):
+    stub(monkeypatch, response(
+        status="answered",
+        answer="지원 대상은 만 19~34세입니다.[5] 거주하시는 시도는 어디인가요?",
+    ))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert "거주하시는 시도는 어디인가요?" not in actual["answer"]
+    assert actual["used_source_ids"] == [5]
+
+
+def test_p1_district_ask_info_is_preserved_as_question(monkeypatch):
+    text = "서울특별시의 어느 구에 거주하시나요?"
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": text}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+def test_p1_named_gu_ask_info_is_preserved_as_question(monkeypatch):
+    text = "강남구에 주민등록되어 있나요?"
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": text}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("phrase", [
+    "이용하시는", "알려주시면", "거주하시는", "확인하시면", "입력하시는",
+    "거주하시는 시도는 어디인가요?", "어느 시도에 거주하시나요?",
+])
+def test_p1_verb_forms_and_sido_are_not_district_requests(phrase):
+    assert not g._is_detail_region_request(phrase, "서울특별시")
+
+
+@pytest.mark.parametrize("phrase", [
+    "수원시에 거주하고 있나요?", "영광군 거주자인가요?", "강남구는 거주지인가요?",
+    "어느 구에 거주하시나요?", "광주시에 거주하나요?",
+])
+def test_p1_real_municipalities_are_still_detail_requests(phrase):
+    assert g._is_detail_region_request(phrase, "경기도")
