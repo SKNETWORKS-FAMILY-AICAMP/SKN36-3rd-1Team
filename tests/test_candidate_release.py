@@ -235,7 +235,9 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertEqual((policies["POL_001"]["application_start"], policies["POL_001"]["application_end"]), ("2026-04-15", "2026-04-17"))
         self.assertEqual((policies["POL_009"]["application_start"], policies["POL_009"]["application_end"]), ("2024-02-26", "2025-02-25"))
         self.assertIn("2026-03-30", policies["POL_009"]["application_status_note"])
+        self.assertEqual(policies["POL_002"]["application_start"], "2026-10-19")
         self.assertNotIn("application_end", policies["POL_002"])
+        self.assertIn("종료일은 미기재", policies["POL_002"]["application_status_note"])
         for policy_id in ("POL_GOV_006", "POL_GOV_020"):
             self.assertNotIn("application_start", policies[policy_id])
             self.assertNotIn("application_end", policies[policy_id])

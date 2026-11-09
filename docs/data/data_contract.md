@@ -35,7 +35,7 @@
     - `income_followup`, `household_followup`: `needs_review`일 때만 있다. `ask_user`는 사용자 정보를 더 받으면 판정 가능, `check_notice`는 공고 확인 안내.
     - `income_check_point`, `household_check_point`: `needs_review`일 때 공고에서 볼 항목. 링크는 `source_url`을 쓴다.
     - `application_start`, `application_end`: 공식 원문에 날짜가 분명할 때만 ISO 날짜(`YYYY-MM-DD`)로 넣는다. 종료일이 없으면 `application_end`는 비운다.
-    - `application_status_note`: 날짜로 쓸 수 없는 신청 기간의 확인 내용. 후속 사업 안내처럼 날짜와 함께 필요한 예외(`POL_009`)에도 쓴다.
+    - `application_status_note`: 날짜로 쓸 수 없는 신청 기간의 확인 내용. 후속 사업 안내나 종료일 미기재처럼 날짜와 함께 필요한 예외(`POL_002`, `POL_009`)에도 쓴다.
 - **근거 문서(`Document`):**
   - **필수(NOT NULL):** `document_id`, `policy_id`, `title`, `source_type`, `source_url`, `local_raw_path`, `content_hash`, `text`, `verification_status`, `collected_at`
   - **선택(Nullable):** `published_at`, `effective_at`, `doc_type`, `law_article`, `effective_date`, `version`, `extracted_text_path`, `official_id`
