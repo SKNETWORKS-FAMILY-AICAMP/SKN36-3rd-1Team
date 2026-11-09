@@ -12,6 +12,9 @@
   --shadow:0 3px 0 rgba(74,58,51,.06),0 12px 26px rgba(176,120,72,.12);
   --sk:#f1e6d8; --sk-hi:#fbf4ea; --glow:rgba(176,120,72,.22);
   --map-line:#eadfcf; --map-label:#8b7768; --map-node-edge:rgba(74,58,51,.3);
+  /* SSOK 로고 */
+  --logo-text:#6b3a1c; --logo-o:#c2702a; --logo-star:#f4b623; --logo-lens:#fffaf2;
+  --logo-line:#6b3a1c; --logo-paper:#f9d48a; --logo-fold:#fff8ec; --logo-pocket:#f6a587; --logo-cheek:#f39a86;
   --char-bg:#f6eee3;
 }
 
@@ -25,6 +28,8 @@
   --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --sk:#3b3128; --sk-hi:#463a2f; --glow:rgba(226,185,142,.18);
   /* 어두운 배경에서 관계 지도의 선·글자·원 테두리가 묻히지 않게 밝게 */
   --map-line:#6e5c4b; --map-label:#c4b3a1; --map-node-edge:rgba(232,221,208,.45);
+  /* 로고: 어두운 배경에서 글자만 밝게, 캐릭터는 원래 색 그대로 */
+  --logo-text:#f1dcc3; --logo-o:#df9452;
   /* 손그림 캐릭터는 갈색 선이라 어두운 바탕에서 묻힌다 → 캐릭터 뒤만 밝은 크림색 */
   --char-bg:#eadccb;
 }
@@ -49,11 +54,11 @@ p,h1,h2,h3{margin:0}
 .util .ut{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header.gnb{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px)}
 header.gnb .wrap{display:flex;align-items:center;gap:28px;height:68px}
-.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:21px;letter-spacing:-.04em}
-.logo .mk{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ring-a),var(--primary));box-shadow:0 6px 16px var(--glow);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
-.logo:hover .mk{transform:rotate(-12deg) scale(1.08)}
-.logo .mk svg{width:20px;height:20px}
-.logo em{font-style:normal;color:var(--primary)}
+/* SSOK 로고 (components/Logo.tsx). 높이만 정하고 가로는 비율대로. 마우스를 올리면 캐릭터가 주머니에서 살짝 더 나온다 */
+.logo{display:flex;align-items:center;flex:none}
+.logo-svg{display:block;height:40px;width:auto;aspect-ratio:196/60;overflow:visible}
+.logo-peek{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.logo:hover .logo-peek{transform:translateY(-2.5px)}
 nav.menu{display:flex;gap:26px;font-weight:650;font-size:16px}
 nav.menu a{position:relative;text-decoration:none;padding:22px 0}
 nav.menu a::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:var(--primary);transform:scaleX(0);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
@@ -341,7 +346,6 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;font-size:13.5px;color:var(--ink-3)}
 .map-msg{padding:40px 0;text-align:center;color:var(--ink-3)}
 .map-note{margin-top:14px;font-size:13px;color:var(--ink-3)}
-.map-side{display:flex;flex-direction:column;gap:8px;min-width:0}
 .map-search{height:44px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);outline:0}
 .map-search:focus{border-color:var(--primary)}
 .map-list{list-style:none;margin:0;padding:0;overflow:auto;max-height:420px;border:2px solid var(--line);border-radius:16px;background:var(--card)}
@@ -357,20 +361,57 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-empty b{color:var(--ink-2);font-size:17px}
 .map-main{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* 지도 아래: 정책 찾기 | 상세 정보 | 자격 조건 */
-.map-below{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:4px}
-.map-tree{padding:16px;border:2px solid var(--line);border-radius:18px;background:var(--card);min-width:0}
-.map-tree h3{font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.map-tree h3 .ic{width:20px;height:20px}
-.map-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
-.map-head b{font-size:20px;line-height:1.35}
-.map-head small{color:var(--ink-3);font-size:13.5px}
-.map-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.map-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.map-title{display:flex;flex-direction:column;gap:2px;min-width:0}
+.map-title b{font-size:20px;line-height:1.35}
+.map-title small{color:var(--ink-3);font-size:13.5px}
+/* 다른 정책 찾기: 제목 옆 검색창, 입력하면 결과가 아래로 겹쳐 펼쳐진다 */
+.map-find{position:relative;width:min(320px,100%)}
+.map-find .map-search{width:100%}
+.map-find-pop{position:absolute;z-index:5;top:calc(100% + 6px);left:0;right:0;box-shadow:var(--shadow);border-radius:16px}
+.map-find-pop .map-list{max-height:340px}
+.map-find-pop .map-more{padding:8px 12px;margin:0;background:var(--card);border-radius:0 0 16px 16px}
+.map-find.static{width:min(460px,100%);margin-top:10px;text-align:left}
+.map-find.static .map-find-pop{position:static;margin-top:8px;box-shadow:none}
+/* 지도 아래 정책 카드 한 장: 안쪽은 상자 대신 구분선으로 나눈다 */
+.pcard-map{display:flex;flex-direction:column;gap:16px;padding:22px 24px;border:2px solid var(--line);border-radius:22px;background:var(--card);scroll-margin-top:96px;outline:0}
+/* 지도 가운데 원을 누르면 카드 테두리가 잠깐 반짝인다 (움직임 줄이기면 전역 규칙으로 바로 끝남) */
+.pcard-map.flash{animation:cardFlash 1.2s ease}
+@keyframes cardFlash{0%,60%{border-color:var(--primary);box-shadow:0 0 0 6px var(--primary-soft)}}
+.pc-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px 20px}
+.pc-head h3{font-size:21px;line-height:1.35;margin:2px 0 4px}
+.pc-meta{margin:0;font-size:13.5px;color:var(--ink-3)}
+.pc-actions{display:flex;flex-wrap:wrap;gap:8px}
+.pc-actions .btn{height:40px;padding:0 16px;font-size:14px}
+.pc-facts{margin:0;display:flex;flex-direction:column;gap:10px}
+.pc-facts>div{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 14px}
+.pc-facts dt{font-size:13px;color:var(--ink-3);padding-top:2px}
+.pc-facts dd{margin:0;font-size:14.5px;line-height:1.65}
+.clamp{margin:0;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:var(--clamp-lines,3);-webkit-box-orient:vertical;overflow:hidden}
+.clamp.open{display:block;overflow:visible}
+.pc-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;padding-top:16px;border-top:1px solid var(--line)}
+.pc-split section{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pc-split h4{margin:0;font-size:14px;color:var(--ink-2)}
+.pc-note{margin:0;font-size:13px;color:var(--ink-3);line-height:1.6}
+.pc-similar{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;width:100%}
+.pc-similar li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px dashed var(--line)}
+.pc-similar li:last-child{border-bottom:0}
+.pc-similar a{text-decoration:none;font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-similar a:hover{color:var(--primary)}
+.pc-n{flex:none;min-width:26px;height:22px;padding:0 7px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--primary-soft);color:var(--primary)}
+@media (max-width:700px){
+  .pc-split,.pc-facts>div{grid-template-columns:minmax(0,1fr)}
+  .map-find{width:100%}
+  .pcard-map{padding:18px 16px}
+}
 .map-stage{min-width:0}
-.map-canvas{position:relative;min-width:0;overflow:hidden;border:2px solid var(--line);border-radius:22px;background:radial-gradient(circle at center,var(--card),var(--bg-2));padding:8px}
-.map-canvas:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+/* 지도는 네모 틀 없이 페이지 배경 위에 바로 놓는다 (끌어서 옮긴 내용이 틀 밖으로 넘치지 않게 잘라 내기만 한다) */
+.map-canvas{position:relative;min-width:0;overflow:hidden;padding:8px 0}
+.map-canvas:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:22px}
 .map-canvas svg{display:block;width:100%;height:auto;max-height:72vh;cursor:grab;touch-action:none;user-select:none}
 .map-canvas svg:active{cursor:grabbing}
-.map-canvas.full{display:flex;flex-direction:column;justify-content:center;border-radius:0;padding:24px}
+/* 전체 화면에서는 브라우저 기본 검은 배경 대신 페이지 배경색을 깐다 */
+.map-canvas.full{display:flex;flex-direction:column;justify-content:center;padding:24px;background:var(--bg)}
 .map-canvas.full svg{height:calc(100vh - 90px)}
 .map-zoom{position:absolute;top:10px;right:10px;z-index:1;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);box-shadow:var(--shadow)}
 .map-zoom button{min-width:34px;height:32px;padding:0 8px;border-radius:10px;font-family:"Jua","Gowun Dodum",sans-serif;font-size:15px;color:var(--ink-2);transition:background .2s,color .2s}
@@ -379,7 +420,6 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-hint{margin:2px 8px 0;font-size:12px;color:var(--ink-3)}
 .map-legend{list-style:none;margin:6px 8px 4px;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2)}
 .map-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1.5px solid var(--ink-3)}
-.map-detail{min-width:0}
 .map-info{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;border:2px solid var(--line);border-radius:18px;background:var(--card)}
 .map-info>b{font-size:17px;line-height:1.4}
 .map-info dl{margin:0;display:flex;flex-direction:column;gap:6px;width:100%}
@@ -389,6 +429,8 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .ctree ul{margin:6px 0 0;padding-left:16px;border-left:2px solid var(--line)}
 .ctree li{font-size:14px;margin:4px 0;list-style:none}
 .ctree li::before{content:"· ";color:var(--ink-3)}
+/* 하위 묶음을 담은 줄은 점 대신 묶음 뱃지가 머리 역할을 한다 */
+.ctree li:has(>.ctree)::before{content:none}
 .ctree.l-and>.badge{background:var(--ok-bg);color:var(--ok)}
 .ctree.l-or>.badge{background:var(--primary-soft);color:var(--primary)}
 .ctree.l-not>.badge{background:var(--bad-bg);color:var(--bad)}
@@ -415,19 +457,15 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .gn.k-policy:not(.center) circle{fill:var(--primary-soft)}
 
 @media (max-width:960px){
-  .map-below{grid-template-columns:minmax(0,1fr)}
-  .map-list{max-height:260px}
   .persona-row{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:600px){
   /* 좁은 화면: 탭이 3개라 로고를 가리지 않게 두 번째 줄로 내린다 */
   header.gnb .wrap{flex-wrap:wrap;gap:6px 8px;height:auto;padding-top:8px;padding-bottom:8px}
-  .logo{font-size:17px;gap:6px}
-  .logo .mk{width:30px;height:30px}
+  .logo-svg{height:32px}
   nav.tabs{order:3;width:100%;justify-content:center}
   nav.tabs a{flex:1;justify-content:center;padding:0 8px;font-size:13.5px}
   nav.tabs .long{display:none}
-  .map-count{margin-left:0}
 }
 
 /* ===== 생애주기 타임라인 ===== */
@@ -500,3 +538,94 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .life-cat.on .life-dot{background:var(--on-primary)}
 .badge.b-chat{background:var(--primary);color:var(--on-primary)}
 .from-chat-q small{font-size:12px;color:var(--ink-3);margin-left:4px}
+
+/* ===== 관계 지도 움직임 =====
+   1) 등장: 가운데 원이 톡 → 선이 가운데에서 바깥으로 그어짐 → 원이 순서대로 퐁 (정책을 열 때 한 번)
+   2) 마우스를 올린 이웃(선·관계 이름·원)만 진하게, 나머지는 흐리게
+   3) 가운데 원 뒤 옅은 빛 테두리가 천천히 퍼짐
+   시간 값은 아래 변수에서만 바꾼다. 움직임 줄이기 설정이면 전역 규칙으로 바로 완성된 모습이 보인다 */
+.map-graph{--enter-center:.35s;--enter-line:.5s;--enter-node:.4s;--pulse:3.2s}
+@keyframes mapPop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes mapDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes mapFade{from{opacity:0}to{opacity:1}}
+@keyframes mapPulse{0%{transform:scale(1);opacity:.45}100%{transform:scale(1.55);opacity:0}}
+.map-graph .pop{transform-box:fill-box;transform-origin:50% 50%}
+.map-graph.enter .gn.center .pop{animation:mapPop var(--enter-center) cubic-bezier(.34,1.56,.64,1) both}
+.map-graph.enter .nb .gl{stroke-dasharray:1;animation:mapDraw var(--enter-line) ease-out both;animation-delay:calc(var(--enter-center) + var(--d))}
+.map-graph.enter .nb .pop{animation:mapPop var(--enter-node) cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--enter-center) + var(--enter-line) * .6 + var(--d))}
+.map-graph.enter .nb .ge{animation:mapFade .3s ease-out both;animation-delay:calc(var(--enter-center) + var(--enter-line) + var(--d))}
+.map-graph .pulse{fill:none;stroke:var(--primary);stroke-width:3;transform-box:fill-box;transform-origin:50% 50%;pointer-events:none;opacity:0}
+.map-graph.enter .pulse{animation:mapPulse var(--pulse) ease-out infinite;animation-delay:calc(var(--enter-center) + var(--enter-line))}
+.map-graph .nb{transition:opacity .25s}
+.map-graph:has(.nb:hover) .nb:not(:hover),.map-graph:has(.nb:focus-within) .nb:not(:focus-within){opacity:.28}
+.map-graph .nb:hover .gl,.map-graph .nb:focus-within .gl{stroke:var(--primary);stroke-width:3}
+.map-graph .nb:hover .ge,.map-graph .nb:focus-within .ge{fill:var(--primary);font-size:12.5px}
+
+/* ===== 관계 지도 팝업 (원을 눌렀을 때) ===== */
+.map-dialog{width:min(760px,calc(100vw - 32px));max-height:min(88vh,960px);padding:0;border:2px solid var(--line);border-radius:22px;background:var(--card);color:var(--ink);box-shadow:var(--shadow);overflow:auto}
+.map-dialog::backdrop{background:color-mix(in srgb,var(--ink) 35%,transparent);backdrop-filter:blur(2px)}
+.map-dialog[open]{animation:mapPop .3s cubic-bezier(.34,1.56,.64,1)}
+.map-dialog-body{position:relative;padding:22px 22px 20px}
+.map-dialog-body .map-info{border:0;padding:0;background:none}
+.map-dialog-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);background:var(--bg-2);transition:background .2s,color .2s}
+.map-dialog-x:hover{background:var(--primary-soft);color:var(--primary)}
+/* 팝업 내용: 지도와 같은 색 원으로 머리를 달고, 연결·근거·함께 연결된 정책을 칸으로 나눈다 */
+.pd-head{display:flex;align-items:center;gap:12px;padding-right:40px}
+.pd-head b{display:block;font-size:19px;line-height:1.35}
+.pd-kind{font-size:12.5px;color:var(--ink-3)}
+.pd-dot{flex:none;display:inline-block;width:40px;height:40px;border-radius:50%;border:2px solid var(--map-node-edge)}
+.pd-actions{display:flex;flex-wrap:wrap;gap:8px}
+/* 팝업은 넓게 쓰므로 긴 설명도 안쪽 스크롤 없이 다 보여 주고, 비슷한 정책은 두 줄로 놓는다 */
+.map-dialog-content{display:flex;flex-direction:column;gap:14px}
+/* 이전·다음: 내용이 길어도 팝업 아래에 붙어 있게 한다 */
+.map-dialog-nav{position:sticky;bottom:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:16px -22px -20px;padding:12px 22px;background:var(--card);border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+.map-dialog-nav .btn{height:36px;padding:0 14px;font-size:13.5px}
+.nav-step{display:flex;align-items:center;gap:10px}
+.nav-step .btn{width:36px;padding:0;justify-content:center}
+.pd-ask{color:var(--primary);border-color:var(--primary)}
+.pd-ask:hover{background:var(--primary-soft)}
+/* 팝업 내용: 상자·뱃지·점선 없이 여백과 작은 제목으로만 나눈다 */
+.map-dialog-body .map-info{gap:22px}
+.pd-sub{margin:4px 0 0;font-size:13.5px;color:var(--ink-2)}
+.pd-block{display:flex;flex-direction:column;gap:6px;width:100%;min-width:0}
+.pd-block h4{margin:0;font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.pd-block h4 span{color:var(--primary)}
+.pd-text{margin:0;font-size:14.5px;line-height:1.6}
+.pd-text small{color:var(--ink-3);font-size:12.5px}
+.pd-meta{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12.5px;color:var(--ink-3)}
+.pd-status{display:inline-flex;align-items:center;gap:6px}
+.pd-status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.pd-status.ok{color:var(--ok)}
+.pd-status.ok::before{background:var(--ok)}
+.pd-plist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px}
+.pd-plist a{display:block;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-plist a:hover{color:var(--primary)}
+
+/* 분야(지역)별 막대: 누르면 그 묶음만 목록에 남는다. 이 정책의 분야는 진한 색 */
+.pd-bars{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.pd-bars button{width:100%;display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 32px;align-items:center;gap:12px;padding:5px 8px;margin:0 -8px;border-radius:10px;text-align:left;font-size:13.5px;color:var(--ink-2);transition:background .2s}
+.pd-bars button:hover{background:var(--bg-2)}
+.pd-bars button[aria-pressed="true"]{background:var(--primary-soft);color:var(--ink)}
+.bar-name{display:flex;align-items:center;gap:6px;min-width:0}
+.bar-name>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-name small{flex:none;font-size:11px;padding:1px 6px;border-radius:999px;background:var(--primary);color:var(--on-primary)}
+.bar{height:8px;border-radius:999px;background:var(--bg-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:var(--ring-a);transition:width .4s ease}
+.mine .bar i{background:var(--primary)}
+.bar-n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.pd-block h4{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pd-clear{margin-left:auto;font-size:12.5px;color:var(--primary)}
+.pd-foot{padding-top:14px;border-top:1px solid var(--line)}
+.pd-foot>span:first-child{color:var(--ink-2)}
+.pd-foot a{color:var(--ink-2);text-decoration:none}
+.pd-foot a:hover{color:var(--primary)}
+/* 좁은 화면: 다른 정책은 한 줄, 막대는 이름을 넓게 */
+@media (max-width:600px){.pd-plist{grid-template-columns:minmax(0,1fr)}.pd-bars button{grid-template-columns:minmax(0,1fr) 72px 28px;gap:8px}}
+.pd-more{align-self:flex-start;padding:4px 0;font-size:13px;color:var(--primary)}
+.pd-more:hover{text-decoration:underline;text-underline-offset:3px}
+/* 팝업이 열릴 때 칸이 차례로 올라온다 (움직임 줄이기면 아래 전역 규칙으로 꺼진다) */
+.map-dialog[open] .map-info>*{animation:pdRise .35s ease both}
+.map-dialog[open] .map-info>:nth-child(2){animation-delay:.05s}
+.map-dialog[open] .map-info>:nth-child(3){animation-delay:.1s}
+.map-dialog[open] .map-info>:nth-child(n+4){animation-delay:.15s}
+@keyframes pdRise{from{opacity:0;transform:translateY(6px)}}

@@ -69,7 +69,7 @@ function BotHead({ sub, sample }: { sub: string; sample?: boolean }) {
   return (
     <div className="ahead">
       <span className="bot"><Icon name="mascot" /></span>
-      <div><b>LifePolicy AI</b><small>{sub}</small></div>
+      <div><b>SSOK</b><small>{sub}</small></div>
       {sample && <span className="badge b-warn">예시 응답</span>}
     </div>
   );

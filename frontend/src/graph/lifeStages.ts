@@ -4,8 +4,9 @@
  * - 나이 조건: 정책 → REQUIRES_CONDITION → type이 AGE인 조건 (실제 나이 기준이 확인된 정책만 있다)
  * 화면은 둘을 구분해서 보여 주고, 어느 쪽도 자격 확정으로 표현하지 않는다.
  */
-import { AGE_NO_UPPER, LIFE_STAGES } from '../config/graph';
+import { AGE_NO_UPPER, LIFE_STAGES, SHARED_GROUP_DEFAULT, ungroupedLabel } from '../config/graph';
 import type { GraphIndex, GraphNode } from './graphModel';
+import { groupByField } from './relatedPolicies';
 
 export interface AgeRange { min: number; max: number | null }
 
@@ -89,13 +90,7 @@ export function stageForAge(stages: LifeStage[], age: number | null): string | n
   return hit ? hit.id : null;
 }
 
-/** 분야별로 묶는다. 정책이 많은 분야부터 */
+/** 분야별로 묶는다. 정책이 많은 분야부터 (묶는 방법은 relatedPolicies의 groupByField와 같다) */
 export function groupByCategory(list: StagePolicy[]): { category: string; items: StagePolicy[] }[] {
-  const groups = new Map<string, StagePolicy[]>();
-  for (const item of list) {
-    const category = typeof item.policy.data.category === 'string' && item.policy.data.category.trim() ? item.policy.data.category : '분야 미분류';
-    (groups.get(category) ?? groups.set(category, []).get(category)!).push(item);
-  }
-  return [...groups].map(([category, items]) => ({ category, items }))
-    .sort((a, b) => b.items.length - a.items.length || a.category.localeCompare(b.category, 'ko'));
+  return groupByField(list, SHARED_GROUP_DEFAULT.key, ungroupedLabel(SHARED_GROUP_DEFAULT.label)).map(({ value, items }) => ({ category: value, items }));
 }

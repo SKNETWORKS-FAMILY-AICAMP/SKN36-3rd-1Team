@@ -16,6 +16,11 @@ const WIDE = 1.75;
 /** 이웃이 이보다 많으면 안쪽·바깥쪽 원을 번갈아 써서 이름이 겹치지 않게 한다 */
 const TWO_RING_FROM = 12;
 
+/** 원 크기·이름 위치 (viewBox 단위). 가운데 정책 원은 크게, 이름은 원 아래 LABEL_GAP 만큼 띄운다 */
+export const NODE_R = 30;
+export const CENTER_R = 46;
+export const LABEL_GAP = 16;
+
 export interface PlacedNeighbor extends Neighbor {
   x: number;
   y: number;

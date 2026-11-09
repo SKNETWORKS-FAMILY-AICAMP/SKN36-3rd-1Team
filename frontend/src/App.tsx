@@ -13,6 +13,7 @@ import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Logo } from './components/Logo';
 import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
 import type { IconName } from './components/Icon';
 
@@ -183,7 +184,7 @@ export default function App() {
     ask(p.question, origin, base);
   }, [ask]);
 
-  /** 생애주기 화면의 '이 정책 물어보기': 상담 화면으로 넘어가 질문을 보내고, 그 답변 위치를 보여 준다 */
+  /** 생애주기·관계 지도의 '물어보기': 상담 화면으로 넘어가 질문을 보내고, 그 답변 위치를 보여 준다 */
   const askFromOtherPage = useCallback((question: string) => {
     showLatestTurn.current = true;
     ask(question, null);
@@ -206,10 +207,7 @@ export default function App() {
       </div>
       <header className="gnb">
         <div className="wrap">
-          <div className="logo">
-            <span className="mk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
-            LifePolicy <em>AI</em>
-          </div>
+          <div className="logo"><Logo /></div>
           <nav className="tabs" aria-label="화면">
             {/* 좁은 화면에서는 로고가 가려지지 않게 '하기'·'정책'을 줄여 보여 준다 */}
             <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>상담<span className="long">하기</span></a>
@@ -227,7 +225,7 @@ export default function App() {
         <ErrorBoundary resetKey={location.hash}>
           <Suspense fallback={<section className="board"><div className="wrap map-msg" role="status">화면을 여는 중이에요…</div></section>}>
             {route.page === 'map'
-              ? <PolicyMap policyId={route.policyId} recent={recent} />
+              ? <PolicyMap policyId={route.policyId} recent={recent} reduceMotion={reduceMotion} onAsk={askFromOtherPage} />
               : <LifeTimeline stageName={route.stage} myAge={profile.age} onAsk={askFromOtherPage} recent={recent} />}
           </Suspense>
         </ErrorBoundary>
@@ -250,7 +248,7 @@ export default function App() {
       </section>
       </>)}
 
-      <footer><div className="wrap">LifePolicy AI · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요. 아이콘은 이 화면용으로 직접 그린 SVG예요.</div></footer>
+      <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요. 아이콘은 이 화면용으로 직접 그린 SVG예요.</div></footer>
 
       <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder={miniPlaceholder} inputRef={miniInputRef} onAsk={ask}
         onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), 400); }} />

@@ -1,19 +1,24 @@
 import {
-  useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
+  useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
 } from 'react';
 import {
-  CHAT_MATCH_LIMIT, DRAG_CLICK_TOLERANCE, KIND_LABEL, LOGIC_LABEL, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT, RELATION_LABEL, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
+  CENTER_LABEL_MAX, CHAT_MATCH_LIMIT, DRAG_CLICK_TOLERANCE, POLICY_LIST_META_FIELDS, POLICY_META_FIELDS, ungroupedLabel, KIND_LABEL, KIND_ORDER, LIFE_STAGES, LOGIC_LABEL, MAP_ENTER_STAGGER_S, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT,
+  RELATION_LABEL, REVIEW_STATUS, SHARED_BAR_LIMIT, SHARED_GROUP_BY, SHARED_GROUP_DEFAULT, SHARED_POLICY_LIMIT, SIMILAR_MIN_SHARED, SIMILAR_POLICY_LIMIT, SIMILAR_RELATIONS, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
+  type NodeKind,
 } from '../config/graph';
+import { TOPIC_QUESTION, conditionQuestion, policyQuestion } from '../config/request';
 import {
-  conditionTrees, countConditions, policyNeighbors, searchPolicies,
+  conditionTrees, policyNeighbors, searchPolicies,
   type ConditionTree, type GraphNode,
 } from '../graph/graphModel';
 import {
-  INITIAL_VIEW, MAP_HEIGHT, MAP_WIDTH, layoutNeighbors, shortLabel, zoomAt, zoomCenter, type MapView, type PlacedNeighbor,
+  CENTER_R, INITIAL_VIEW, LABEL_GAP, MAP_HEIGHT, MAP_WIDTH, NODE_R, layoutNeighbors, shortLabel, zoomAt, zoomCenter, type MapView, type PlacedNeighbor,
 } from '../graph/graphLayout';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
-import { policiesForDocuments, policiesForQuestion } from '../graph/relatedPolicies';
-import { mapHref } from '../lib/route';
+import {
+  groupByField, policiesForDocuments, policiesForQuestion, policiesSharing, similarPolicies, type SimilarPolicy,
+} from '../graph/relatedPolicies';
+import { lifeHref, mapHref } from '../lib/route';
 import type { RecentPolicies } from '../lib/recentPolicies';
 import { safeHttpUrl } from '../lib/validate';
 import { Icon } from './Icon';
@@ -24,14 +29,17 @@ type LoadState = { kind: 'loading' } | { kind: 'error'; message: string } | { ki
  * 정책 관계 지도: 정책 하나를 가운데 두고 Neo4j에 저장된 기관·지역·대상·근거 문서·자격 조건 연결을 보여 준다.
  * 실제 팀 데이터(data/releases)를 그대로 읽는다. 그래프 연결은 정책 구조이지 자격 확정이 아니다.
  */
-export default function PolicyMap({ policyId, recent }: {
+export default function PolicyMap({ policyId, recent, reduceMotion, onAsk }: {
   policyId: string | null;
+  /** 팝업의 '물어보기': 상담 화면으로 가서 질문을 보낸다 (App의 askFromOtherPage) */
+  onAsk: (question: string) => void;
+  /** 움직임 줄이기 설정 (App에서 한 번 계산해 넘긴다) */
+  reduceMotion: boolean;
   /** 상담 화면에서 가장 최근 답변으로 나온 정책. 주소에 정책이 없으면 이 중 첫 정책을 연다 */
   recent: RecentPolicies | null;
 }) {
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -45,8 +53,6 @@ export default function PolicyMap({ policyId, recent }: {
   const fromChat = useMemo(() => (state.kind === 'ready' && recent ? chatPolicies(state.data, recent) : null), [state, recent]);
   const openId = policyId ?? fromChat?.policies[0]?.id ?? null;
 
-  // 다른 정책으로 바뀌면 선택한 노드를 정책 자신으로 되돌린다
-  useEffect(() => { setSelectedId(openId); }, [openId]);
 
   if (state.kind === 'loading') {
     return <MapShell><div className="map-msg" role="status">정책 관계 데이터를 불러오고 있어요…</div></MapShell>;
@@ -57,7 +63,7 @@ export default function PolicyMap({ policyId, recent }: {
 
   const { index } = state.data;
   const policy = openId ? index.nodes.get(openId) : undefined;
-  const search = <PolicySearch data={state.data} query={query} onQuery={setQuery} currentId={policy?.id ?? null} />;
+  const searchProps = { data: state.data, query, onQuery: setQuery, currentId: policy?.id ?? null };
   return (
     <MapShell data={state.data}>
       {recent && fromChat && fromChat.policies.length > 0 && (
@@ -73,17 +79,17 @@ export default function PolicyMap({ policyId, recent }: {
           ))}
         </div>
       )}
-      {/* 지도를 맨 위에 크게, 정책 찾기·상세·자격 조건은 그 아래에 둔다 */}
+      {/* 지도를 맨 위에 크게, 정책 카드는 그 아래에 둔다. 다른 정책 찾기는 지도 제목 옆 검색창 */}
       {policy && policy.kind === 'policy'
-        ? <PolicyGraph data={state.data} policy={policy} selectedId={selectedId ?? policy.id} onSelect={setSelectedId} search={search} />
+        ? <PolicyGraph key={policy.id} data={state.data} policy={policy} search={<PolicySearch {...searchProps} />} reduceMotion={reduceMotion} onAsk={onAsk} />
         : (
           <>
             <div className="map-empty">
               <Icon name="search" />
-              <b>{policyId ? '이 정책을 데이터에서 찾지 못했어요' : '아래에서 정책을 골라 주세요'}</b>
+              <b>{policyId ? '이 정책을 데이터에서 찾지 못했어요' : '정책을 골라 주세요'}</b>
               <span>정책을 고르면 기관·지역·대상·근거 문서·자격 조건이 어떻게 연결돼 있는지 보여 드려요.</span>
+              <PolicySearch {...searchProps} open />
             </div>
-            <div className="map-below">{search}</div>
           </>
         )}
     </MapShell>
@@ -124,80 +130,223 @@ function MapShell({ data, children }: { data?: GraphDataset; children: ReactNode
   );
 }
 
-function PolicySearch({ data, query, onQuery, currentId }: { data: GraphDataset; query: string; onQuery: (v: string) => void; currentId: string | null }) {
-  const results = useMemo(() => searchPolicies(data.index, query, POLICY_SEARCH_LIMIT), [data, query]);
+/** 정책 이름·분야·지역 한 줄 (지도 제목·검색 결과·정책 카드가 같이 쓴다) */
+const policyMeta = (p: GraphNode, keys: string[]) => keys.map((k) => p.data[k]).filter((v): v is string => typeof v === 'string').join(' · ');
+
+/**
+ * 다른 정책 찾기. 지도 제목 옆의 검색창이고, 입력하면 결과가 아래로 펼쳐진다 (고르거나 Esc면 닫힘).
+ * open: 정책을 아직 고르지 않은 빈 화면에서는 결과를 늘 보여 준다. 결과는 보일 때만 계산한다.
+ */
+function PolicySearch({ data, query, onQuery, currentId, open }: {
+  data: GraphDataset; query: string; onQuery: (v: string) => void; currentId: string | null; open?: boolean;
+}) {
+  const show = open || query.trim() !== '';
+  const results = useMemo(() => (show ? searchPolicies(data.index, query, POLICY_SEARCH_LIMIT) : []), [data, query, show]);
   return (
-    <aside className="map-side" aria-label="정책 찾기">
-      <input className="map-search" value={query} onChange={(e) => onQuery(e.target.value)} placeholder="정책 이름·지역·분야로 찾기" aria-label="정책 찾기" />
-      <ul className="map-list">
-        {results.map((p) => (
-          <li key={p.id}>
-            <a href={mapHref(p.id)} aria-current={p.id === currentId ? 'page' : undefined}>
-              <b>{p.label}</b>
-              <small>{[p.data.category, p.data.region].filter((v) => typeof v === 'string').join(' · ')}</small>
-            </a>
-          </li>
-        ))}
-        {results.length === 0 && <li className="map-none">찾는 정책이 없어요</li>}
-      </ul>
-      {results.length === POLICY_SEARCH_LIMIT && <p className="map-more">결과가 많아 {POLICY_SEARCH_LIMIT}개까지만 보여 드려요. 더 좁혀 찾아보세요.</p>}
-    </aside>
+    <div className={'map-find' + (open ? ' static' : '')} role="search">
+      <input className="map-search" value={query} onChange={(e) => onQuery(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Escape') onQuery(''); }}
+        placeholder="다른 정책 찾기 (이름·지역·분야)" aria-label="정책 찾기" />
+      {show && (
+        <div className="map-find-pop">
+          <ul className="map-list">
+            {results.map((p) => (
+              <li key={p.id}>
+                <a href={mapHref(p.id)} aria-current={p.id === currentId ? 'page' : undefined} onClick={() => onQuery('')}>
+                  <b>{p.label}</b>
+                  <small>{policyMeta(p, POLICY_LIST_META_FIELDS)}</small>
+                </a>
+              </li>
+            ))}
+            {results.length === 0 && <li className="map-none">찾는 정책이 없어요</li>}
+          </ul>
+          {results.length === POLICY_SEARCH_LIMIT && <p className="map-more">{POLICY_SEARCH_LIMIT}개까지만 보여 드려요. 더 좁혀 찾아보세요.</p>}
+        </div>
+      )}
+    </div>
   );
 }
 
-function PolicyGraph({ data, policy, selectedId, onSelect, search }: {
-  data: GraphDataset; policy: GraphNode; selectedId: string; onSelect: (id: string) => void; search: ReactNode;
+/** 정책 하나의 지도. 정책이 바뀌면 key로 새로 그려서 열린 팝업·선택이 자연스럽게 초기화된다 */
+function PolicyGraph({ data, policy, search, reduceMotion, onAsk }: {
+  data: GraphDataset; policy: GraphNode; search: ReactNode; reduceMotion: boolean; onAsk: (question: string) => void;
 }) {
+  // 누른 둘레 원의 번호: 그 원을 강조하고 팝업으로 자세히 보여 준다 (null이면 팝업 닫힘).
+  // 같은 노드가 다른 관계로 두 번 놓일 수 있어 노드 ID 대신 놓인 순서로 고른다.
+  const [sel, setSel] = useState<number | null>(null);
+  const cardRef = useRef<HTMLElement>(null);
+  const closeDialog = () => setSel(null);
   const { index } = data;
   const neighbors = useMemo(() => policyNeighbors(index, policy.id), [index, policy.id]);
   const trees = useMemo(() => conditionTrees(index, policy.id), [index, policy.id]);
   const { center, placed } = useMemo(() => layoutNeighbors(neighbors), [neighbors]);
-  const selected = selectedId === policy.id ? null : placed.find((n) => n.node.id === selectedId) ?? null;
+  // 정책마다 한 번만 계산
+  const similar = useMemo(
+    () => similarPolicies(index, policy.id, SIMILAR_RELATIONS, SIMILAR_MIN_SHARED, SIMILAR_POLICY_LIMIT),
+    [index, policy.id],
+  );
+  const selected = sel != null ? placed[sel] ?? null : null;
+  // 이전·다음: 둘레 원을 시계 방향으로 돈다 (마지막 다음은 처음)
+  const total = placed.length;
+  const step = (d: number) => setSel((s) => (s == null ? s : (s + d + total) % total));
+  // 가운데 원: 같은 내용을 팝업으로 또 띄우지 않고, 아래 정책 카드로 내려가 잠깐 반짝여 위치를 알려 준다
+  const showCard = () => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    card.focus({ preventScroll: true });
+    // 같은 클래스를 다시 붙여도 애니메이션이 처음부터 돌도록 한 번 떼고 다시 붙인다
+    card.classList.remove('flash');
+    void card.offsetWidth;
+    card.classList.add('flash');
+  };
   // 범례: 가운데 정책 + 둘레에 실제로 있는 종류 (정책끼리 연결돼도 '정책'은 한 번만)
   const kinds = [...new Set(['policy' as const, ...placed.map((n) => n.node.kind)])];
+  // 지도 제목과 정책 카드가 같이 쓴다
+  const meta = policyMeta(policy, POLICY_META_FIELDS);
 
   return (
     <div className="map-main">
       <div className="map-head">
-        <b>{policy.label}</b>
-        <small>{[policy.data.agency, policy.data.category, policy.data.region].filter((v) => typeof v === 'string').join(' · ')}</small>
-        <span className="map-count">연결 {neighbors.length}개 · 자격 조건 {countConditions(trees)}개</span>
+        <div className="map-title">
+          <b>{policy.label}</b>
+          <small>{meta} · 연결 {neighbors.length}개</small>
+        </div>
+        {search}
       </div>
 
       <div className="map-stage">
-      <ZoomCanvas resetKey={policy.id} label={`${policy.label} 관계 지도`}>
-          {placed.map((n) => (
-            <line key={`l-${n.node.id}-${n.edge.relation}`} x1={center.x} y1={center.y} x2={n.x} y2={n.y}
-              className={'gl' + (n.node.id === selectedId ? ' on' : '')} />
-          ))}
-          {placed.map((n) => <EdgeLabel key={`e-${n.node.id}-${n.edge.relation}`} n={n} cx={center.x} cy={center.y} />)}
-          <MapNode x={center.x} y={center.y} r={46} kind="policy" label={policy.label} title={policy.label}
-            active={selectedId === policy.id} onSelect={() => onSelect(policy.id)} center />
-          {placed.map((n) => (
-            <MapNode key={`n-${n.node.id}-${n.edge.relation}`} x={n.x} y={n.y} r={30} kind={n.node.kind}
-              label={n.node.kind === 'group' ? KIND_LABEL.group : n.node.label}
-              title={n.node.kind === 'group' ? nodeTitle(n.node) : `${RELATION_LABEL[n.edge.relation] ?? n.edge.relation}: ${n.node.label}`}
-              active={n.node.id === selectedId} onSelect={() => onSelect(n.node.id)} />
-          ))}
-      </ZoomCanvas>
-      <ul className="map-legend" aria-label="범례">
-        {kinds.map((k) => <li key={k}><i className={`k-${k}`} />{KIND_LABEL[k]}</li>)}
-      </ul>
+        <ZoomCanvas resetKey={policy.id} label={`${policy.label} 관계 지도`}>
+          {/*
+            정책을 열 때(또는 바꿀 때) 한 번 펼쳐지는 등장 효과: key로 정책마다 새로 그려 애니메이션을 다시 시작한다.
+            이웃 하나(선·관계 이름·원)를 한 묶음으로 둬서, 마우스를 올린 묶음만 진하게 하고 나머지는 CSS로 흐리게 한다.
+          */}
+          <g key={policy.id} className={'map-graph' + (reduceMotion ? '' : ' enter')}>
+            {placed.map((n, i) => (
+              <g key={`${n.node.id}-${n.edge.relation}`} className="nb" style={{ '--d': `${i * MAP_ENTER_STAGGER_S}s` } as CSSProperties}>
+                <line x1={center.x} y1={center.y} x2={n.x} y2={n.y} pathLength={1} className={'gl' + (i === sel ? ' on' : '')} />
+                <EdgeLabel n={n} cx={center.x} cy={center.y} />
+                <MapNode x={n.x} y={n.y} r={NODE_R} kind={n.node.kind}
+                  label={n.node.kind === 'group' ? KIND_LABEL.group : n.node.label}
+                  title={n.node.kind === 'group' ? nodeTitle(n.node) : `${RELATION_LABEL[n.edge.relation] ?? n.edge.relation}: ${n.node.label}`}
+                  active={i === sel} onSelect={() => setSel(i)} />
+              </g>
+            ))}
+            {/* 가운데 정책: 뒤에서 옅은 빛 테두리가 천천히 퍼진다 (중심 표시) */}
+            <circle className="pulse" cx={center.x} cy={center.y} r={CENTER_R} aria-hidden="true" />
+            <MapNode x={center.x} y={center.y} r={CENTER_R} kind="policy" label={policy.label} title={`${policy.label} (아래 정책 설명으로 이동)`}
+              active={false} onSelect={showCard} center />
+          </g>
+        </ZoomCanvas>
+        <ul className="map-legend" aria-label="범례">
+          {kinds.map((k) => <li key={k}><i className={`k-${k}`} />{KIND_LABEL[k]}</li>)}
+        </ul>
       </div>
 
-      <div className="map-below">
-        {search}
-        <div className="map-detail">
-          {selected ? <NodeDetail n={selected} data={data} /> : <PolicyDetail policy={policy} />}
+      {/* 지도 아래 정책 카드 한 장: 요약(긴 글은 3줄) → 자격 조건 | 비슷한 정책. 기관·분야 등 연결은 지도가 보여 준다 */}
+      <article ref={cardRef} className="pcard-map" tabIndex={-1} aria-label={`${policy.label} 정책 설명`}
+        onAnimationEnd={(e) => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('flash'); }}>
+        <header className="pc-head">
+          <div>
+            <span className="pd-kind">정책</span>
+            <h3>{policy.label}</h3>
+            <p className="pc-meta">{meta}</p>
+          </div>
+          <div className="pc-actions">
+            <button type="button" className="btn btn-p" onClick={() => onAsk(policyQuestion(policy.label))} title={policyQuestion(policy.label)}>상담에서 물어보기</button>
+            <SourceLink policy={policy} />
+          </div>
+        </header>
+        <PolicyFacts policy={policy} />
+        <div className="pc-split">
+          <section>
+            <h4>자격 조건</h4>
+            <Conditions trees={trees} />
+          </section>
+          <section>
+            <h4>연결 구조가 비슷한 정책</h4>
+            <SimilarPolicies similar={similar} />
+          </section>
         </div>
-        <div className="map-tree">
-          <h3><Icon name="check" className="ic" />자격 조건 구조</h3>
-          {trees.length === 0
-            ? <p className="map-dim">연결된 자격 조건 묶음이 없어요.</p>
-            : trees.map((t) => <TreeView key={t.id} tree={t} />)}
-        </div>
-      </div>
+        <p className="map-dim">데이터에 정리된 내용이에요. 지도의 둘레 원을 누르면 그 연결을 자세히 보여 드려요.</p>
+      </article>
+
+      {/* 원을 누르면 지도 위에 뜨는 팝업. 이미 읽은 데이터만 쓰고, 열려 있을 때만 내용을 그린다 */}
+      <NodeDialog open={sel != null} title={selected ? nodeTitle(selected.node) : policy.label} onClose={closeDialog}
+        onStep={total > 1 ? step : undefined} position={sel == null ? '' : `${sel + 1} / ${total}`}
+        action={selected && <AskButton question={askQuestion(selected.node, policy)} onAsk={onAsk} />}>
+        {selected && (
+          <NodeDetail key={sel} n={selected} data={data} policy={policy}>
+            {selected.node.kind === 'group' && (
+              <section className="pd-block">
+                <h4>자격 조건 구조</h4>
+                <Conditions trees={trees.filter((t) => t.id === selected.node.id)} />
+              </section>
+            )}
+          </NodeDetail>
+        )}
+      </NodeDialog>
     </div>
+  );
+}
+
+/**
+ * 지도 위에 뜨는 팝업 (브라우저 기본 <dialog>: 초점 가두기·Esc 닫기·닫은 뒤 초점 되돌리기를 기본 제공).
+ * 바깥(어두운 배경)을 누르거나 ✕·Esc로 닫는다. 닫혀 있으면 내용을 그리지 않는다.
+ */
+function NodeDialog({ open, title, onClose, onStep, position, action, children }: {
+  open: boolean; title: string; onClose: () => void;
+  /** 이전(-1)·다음(+1) 원으로 넘기기. 없으면 넘기기 버튼을 숨긴다 */
+  onStep?: (d: number) => void; position: string;
+  /** 아래 줄 오른쪽에 둘 버튼 (상담에서 물어보기) */
+  action?: ReactNode; children: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  // Esc 등 브라우저가 직접 닫을 때도 화면 상태를 맞춘다. React 18의 onClose는 dialog에서 확실히 오지 않아 직접 등록한다.
+  // 최신 onClose는 ref에 두어 렌더마다 이벤트를 다시 등록하지 않는다
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const handle = () => onCloseRef.current();
+    dialog.addEventListener('close', handle);
+    return () => dialog.removeEventListener('close', handle);
+  }, []);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+  return (
+    <dialog ref={ref} className="map-dialog" aria-label={title}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => {
+        if (!onStep || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+        e.preventDefault();
+        onStep(e.key === 'ArrowLeft' ? -1 : 1);
+      }}>
+      {open && (
+        <div className="map-dialog-body">
+          <button type="button" className="map-dialog-x" onClick={onClose} aria-label="닫기">✕</button>
+          {/* 넘길 때마다 내용 칸이 다시 올라오도록 위치를 key로 쓴다 */}
+          <div key={position} className="map-dialog-content">{children}</div>
+          {(onStep || action) && (
+            <div className="map-dialog-nav">
+              {onStep && (
+                <div className="nav-step">
+                  <button type="button" className="btn btn-o" onClick={() => onStep(-1)} aria-label="이전 원">←</button>
+                  <span aria-live="polite">{position}</span>
+                  <button type="button" className="btn btn-o" onClick={() => onStep(1)} aria-label="다음 원">→</button>
+                </div>
+              )}
+              {action}
+            </div>
+          )}
+        </div>
+      )}
+    </dialog>
   );
 }
 
@@ -311,7 +460,7 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
 
 /** 조건 묶음 노드는 이름 대신 논리(모두 충족 등)를 보여 준다 */
 function nodeTitle(node: GraphNode): string {
-  return node.kind === 'group' ? `${KIND_LABEL.group} (${LOGIC_LABEL[node.label] ?? node.label})` : node.label;
+  return node.kind === 'group' ? `${KIND_LABEL.group} · ${LOGIC_LABEL[node.label] ?? node.label}` : node.label;
 }
 
 function MapNode({ x, y, r, kind, label, title, active, onSelect, center }: {
@@ -322,8 +471,10 @@ function MapNode({ x, y, r, kind, label, title, active, onSelect, center }: {
     <g className={`gn k-${kind}${active ? ' on' : ''}${center ? ' center' : ''}`} transform={`translate(${x} ${y})`}
       role="button" tabIndex={0} aria-label={title} aria-pressed={active} onClick={onSelect} onKeyDown={onKey}>
       <title>{title}</title>
-      <circle r={r} />
-      <text y={center ? 4 : r + 16} textAnchor="middle">{shortLabel(label, center ? 9 : NODE_LABEL_MAX)}</text>
+      <g className="pop">
+        <circle r={r} />
+        <text y={center ? 4 : r + LABEL_GAP} textAnchor="middle">{shortLabel(label, center ? CENTER_LABEL_MAX : NODE_LABEL_MAX)}</text>
+      </g>
     </g>
   );
 }
@@ -333,42 +484,225 @@ function EdgeLabel({ n, cx, cy }: { n: PlacedNeighbor; cx: number; cy: number })
   return <text className="ge" x={(cx + n.x) / 2} y={(cy + n.y) / 2} textAnchor="middle">{label}</text>;
 }
 
-function PolicyDetail({ policy }: { policy: GraphNode }) {
-  const source = safeHttpUrl(typeof policy.data.source_url === 'string' ? policy.data.source_url : null);
-  const rows: [string, unknown][] = [['지원 대상', policy.data.eligibility], ['지원 내용', policy.data.benefit], ['신청 기간', policy.data.application_period]];
+/** 정책 요약 항목: 화면 이름 → 정책 노드의 필드 (data_contract의 정책 필드) */
+const POLICY_FACTS: [string, string][] = [['지원 대상', 'eligibility'], ['지원 내용', 'benefit'], ['신청 기간', 'application_period']];
+
+function PolicyFacts({ policy }: { policy: GraphNode }) {
+  const rows = POLICY_FACTS
+    .map(([label, key]) => [label, policy.data[key]] as const)
+    .filter((row): row is readonly [string, string] => typeof row[1] === 'string' && row[1].trim() !== '');
+  if (rows.length === 0) return null;
   return (
-    <div className="map-info">
-      <span className="badge b-muted">정책</span>
-      <b>{policy.label}</b>
-      <dl>
-        {rows.filter(([, v]) => typeof v === 'string' && v.trim()).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v as string}</dd></div>)}
-      </dl>
-      <p className="map-dim">데이터에 정리된 내용이에요. 지도의 원을 누르면 연결된 항목을 자세히 보여 드려요.</p>
-      {source && <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>}
+    <dl className="pc-facts">
+      {rows.map(([label, text]) => <div key={label}><dt>{label}</dt><dd><Clamp text={text} /></dd></div>)}
+    </dl>
+  );
+}
+
+/** 긴 글은 몇 줄(CSS --clamp-lines)만 보여 주고, 실제로 넘칠 때만 '더 보기'를 단다 */
+function Clamp({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [open, setOpen] = useState(false);
+  const [long, setLong] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el && !open) setLong(el.scrollHeight > el.clientHeight + 1);
+  }, [text, open]);
+  return (
+    <>
+      <p ref={ref} className={'clamp' + (open ? ' open' : '')}>{text}</p>
+      {long && <button type="button" className="pd-more" onClick={() => setOpen((v) => !v)} aria-expanded={open}>{open ? '접기' : '더 보기'}</button>}
+    </>
+  );
+}
+
+function SourceLink({ policy }: { policy: GraphNode }) {
+  const source = safeHttpUrl(typeof policy.data.source_url === 'string' ? policy.data.source_url : null);
+  return source ? <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a> : null;
+}
+
+/** 자격 조건: 원천 데이터에 조건이 정리되지 않은 묶음(UNKNOWN, 비어 있음)만 있으면 트리 대신 한 줄 안내 */
+function Conditions({ trees }: { trees: ConditionTree[] }) {
+  if (trees.length === 0) return <p className="pc-note">연결된 자격 조건 묶음이 없어요.</p>;
+  const empty = trees.every((t) => t.logic === 'UNKNOWN' && t.conditions.length === 0 && t.groups.length === 0);
+  if (empty) return <p className="pc-note">원천 데이터에 조건이 정리되지 않아 자동으로 판정하지 않아요. 공식 원문에서 확인해 주세요.</p>;
+  return <>{trees.map((t) => <TreeView key={t.id} tree={t} />)}</>;
+}
+
+/** 팝업·상세 머리: 지도와 같은 색 원 + 종류 + 이름 */
+function PopHead({ kind, title, sub }: { kind: NodeKind; title: string; sub?: string }) {
+  return (
+    <div className="pd-head">
+      <i className={`pd-dot k-${kind}`} aria-hidden="true" />
+      <div>
+        <span className="pd-kind">{KIND_LABEL[kind]}</span>
+        <b>{title}</b>
+        {sub && <p className="pd-sub">{sub}</p>}
+      </div>
     </div>
   );
 }
 
-/** 종류와 관계 이름이 같으면(예: 소관 기관) 한 번만 쓴다 */
-const relationBadge = (kind: string, relation: string) => (kind === relation ? kind : `${kind} · ${relation}`);
-
-function NodeDetail({ n, data }: { n: PlacedNeighbor; data: GraphDataset }) {
+/**
+ * 둘레 원 팝업: 무엇인지 한 줄 → 이 원에 연결된 다른 정책이 어느 분야에 몰려 있는지(막대, 누르면 그 분야만)
+ * → 정책 목록(이 정책과 같은 분야 먼저) → 맨 아래 근거 한 줄.
+ * 같은 말을 되풀이하지 않도록 제목이 그대로 들어 있는 설명은 숨긴다. '받을 수 있는' 같은 자격 표현은 쓰지 않는다.
+ */
+function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: GraphDataset; policy: GraphNode; children?: ReactNode }) {
   const { node, edge } = n;
-  const evidence = edge.evidenceDocumentId ? data.index.nodes.get(edge.evidenceDocumentId) : undefined;
-  const docUrl = node.kind === 'document' ? safeHttpUrl(typeof node.data.source_url === 'string' ? node.data.source_url : null) : null;
+  const [showAll, setShowAll] = useState(false);
+  const [filter, setFilter] = useState<string | null>(null);
+  const { index } = data;
+  const relation = RELATION_LABEL[edge.relation] ?? edge.relation;
+  // 머리에 종류('자격 조건')가 이미 있으니 조건 묶음은 논리만 제목으로 쓴다
+  const title = node.kind === 'group' ? LOGIC_LABEL[node.label] ?? node.label : node.label;
+  // 근거 문서 원이면 그 문서가 곧 근거라 문서 이름을 또 쓰지 않는다
+  const evidence = edge.evidenceDocumentId && edge.evidenceDocumentId !== node.id ? index.nodes.get(edge.evidenceDocumentId) : undefined;
+  const urlOf = (doc?: GraphNode) => safeHttpUrl(typeof doc?.data.source_url === 'string' ? doc.data.source_url : null);
+  const evidenceUrl = urlOf(evidence);
+  const docUrl = node.kind === 'document' ? urlOf(node) : null;
+  const review = edge.reviewStatus ? REVIEW_STATUS[edge.reviewStatus] : undefined;
+  const stage = node.kind === 'lifestage' ? LIFE_STAGES.find((s) => s.id === node.id) : undefined;
+  const ageRange = typeof node.data.age_range === 'string' ? node.data.age_range : null;
+  const rawDescription = typeof node.data.description === 'string' && node.kind !== 'group' ? node.data.description : null;
+  const description = rawDescription && !rawDescription.includes(node.label) ? rawDescription : null;
+  // 무엇인지 한 줄: 정책 → 이 원이면 'OO 정책의 지원 대상', 다른 정책이 이 정책을 가리키면 관계 이름만
+  const sub = n.direction === 'out' ? `${policy.label}의 ${relation}` : `이 정책과 연결: ${relation}`;
+  const group = SHARED_GROUP_BY[node.kind] ?? SHARED_GROUP_DEFAULT;
+  const mine = typeof policy.data[group.key] === 'string' ? policy.data[group.key] as string : null;
+  // 팝업이 열렸을 때 한 번만 계산한다 (정책·조건 묶음은 다른 정책과 공유하는 노드가 아니라 건너뛴다)
+  const { shared, groups, ordered } = useMemo(() => {
+    const list = node.kind === 'policy' || node.kind === 'group' ? [] : policiesSharing(index, node.id, policy.id);
+    const grouped = groupByField(list.map((p) => ({ policy: p })), group.key, ungroupedLabel(group.label));
+    // 목록은 이 정책과 같은 분야(지역)부터. 같은 묶음 안에서는 이름순(policiesSharing 순서)을 그대로 둔다
+    const same = grouped.find((g) => g.value === mine)?.items.map((i) => i.policy) ?? [];
+    return { shared: list, groups: grouped, ordered: [...same, ...list.filter((p) => !same.includes(p))] };
+  }, [index, node.id, node.kind, policy.id, group.key, group.label, mine]);
+  const listed = filter ? groups.find((g) => g.value === filter)?.items.map((i) => i.policy) ?? [] : ordered;
+  const shown = showAll ? listed : listed.slice(0, SHARED_POLICY_LIMIT);
+  const maxCount = groups[0]?.items.length ?? 1;
+  const hiddenGroups = groups.length - SHARED_BAR_LIMIT;
+
   return (
     <div className="map-info">
-      <span className="badge b-muted">{relationBadge(KIND_LABEL[node.kind], RELATION_LABEL[edge.relation] ?? edge.relation)}</span>
-      <b>{nodeTitle(node)}</b>
-      <dl>
-        {evidence && <div><dt>근거 문서</dt><dd>{evidence.label}</dd></div>}
-        {edge.evidenceLocation && <div><dt>근거 위치</dt><dd>{edge.evidenceLocation}</dd></div>}
-        {edge.reviewStatus && <div><dt>검수 상태</dt><dd>{edge.reviewStatus}</dd></div>}
-        {typeof node.data.description === 'string' && node.kind !== 'group' && <div><dt>설명</dt><dd>{node.data.description}</dd></div>}
-      </dl>
-      {docUrl && <a className="btn btn-o" href={docUrl} target="_blank" rel="noopener noreferrer">문서 원문 ↗</a>}
-      {node.kind === 'policy' && <a className="btn btn-o" href={mapHref(node.id)}>이 정책 지도 보기</a>}
+      <PopHead kind={node.kind} title={title} sub={sub} />
+
+      {(description || ageRange) && (
+        <section className="pd-block">
+          {description && <p className="pd-text">{description}</p>}
+          {ageRange && <p className="pd-text">데이터의 나이 구분 {ageRange} <small>· 분류 기준이지 자격 조건이 아니에요</small></p>}
+        </section>
+      )}
+
+      {children}
+
+      {shared.length > 0 && (
+        <>
+          <section className="pd-block">
+            <h4>{title}에 연결된 다른 정책 <span>{shared.length.toLocaleString('ko-KR')}개</span> · {group.label}별</h4>
+            <ul className="pd-bars">
+              {groups.slice(0, SHARED_BAR_LIMIT).map((g) => (
+                <li key={g.value}>
+                  <button type="button" aria-pressed={filter === g.value} className={g.value === mine ? 'mine' : undefined}
+                    onClick={() => { setFilter((f) => (f === g.value ? null : g.value)); setShowAll(false); }}>
+                    <span className="bar-name" title={g.value}><span>{g.value}</span>{g.value === mine && <small>이 정책</small>}</span>
+                    <span className="bar" aria-hidden="true"><i style={{ width: `${(g.items.length / maxCount) * 100}%` }} /></span>
+                    <span className="bar-n">{g.items.length}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {hiddenGroups > 0 && <p className="pd-meta">그 외 {hiddenGroups}개 {group.label}</p>}
+          </section>
+
+          <section className="pd-block">
+            <h4>
+              {filter ? <>{filter} <span>{listed.length}개</span></> : mine ? `이 정책과 같은 ${group.label}부터` : '정책 목록'}
+              {filter && <button type="button" className="pd-clear" onClick={() => setFilter(null)}>전체 보기</button>}
+            </h4>
+            <ul className="pd-plist">
+              {shown.map((p) => <li key={p.id}><a href={mapHref(p.id)} title={p.label}>{p.label}</a></li>)}
+            </ul>
+            {listed.length > SHARED_POLICY_LIMIT && (
+              <button type="button" className="pd-more" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+                {showAll ? '접기 ▴' : `모두 보기 (${listed.length.toLocaleString('ko-KR')}개) ▾`}
+              </button>
+            )}
+          </section>
+        </>
+      )}
+
+      {(docUrl || stage || node.kind === 'policy') && (
+        <div className="pd-actions">
+          {docUrl && <a className="btn btn-o" href={docUrl} target="_blank" rel="noopener noreferrer">문서 원문 ↗</a>}
+          {stage && <a className="btn btn-o" href={lifeHref(stage.name)}>생애주기에서 {stage.name} 보기</a>}
+          {node.kind === 'policy' && <a className="btn btn-o" href={mapHref(node.id)}>이 정책 지도 보기</a>}
+        </div>
+      )}
+
+      {(evidence || edge.evidenceLocation || edge.reviewStatus) && (
+        <p className="pd-meta pd-foot">
+          <span>근거</span>
+          {evidence && (evidenceUrl
+            ? <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">{evidence.label} ↗</a>
+            : <span>{evidence.label}</span>)}
+          {edge.evidenceLocation && <span>원문 ‘{edge.evidenceLocation}’ 항목</span>}
+          {edge.reviewStatus && (
+            <span className={`pd-status ${review?.tone ?? 'muted'}`} title={review?.label ?? edge.reviewStatus}>
+              {review?.short ?? edge.reviewStatus}
+            </span>
+          )}
+        </p>
+      )}
     </div>
+  );
+}
+
+/** 둘레 원에서 상담으로 보낼 질문: 정책은 정책 질문, 조건 묶음은 자격 조건 질문, 나머지는 종류별 주제 질문(없으면 가운데 정책 질문) */
+function askQuestion(node: GraphNode, policy: GraphNode): string {
+  if (node.kind === 'policy') return policyQuestion(node.label);
+  if (node.kind === 'group') return conditionQuestion(policy.label);
+  return TOPIC_QUESTION[node.kind]?.(node.label) ?? policyQuestion(policy.label);
+}
+
+/** 상담 화면으로 가서 질문 보내기. 보낼 질문은 마우스를 올리면(그리고 화면 읽기 프로그램에) 보여 준다 */
+function AskButton({ question, onAsk }: { question: string; onAsk: (question: string) => void }) {
+  return (
+    <button type="button" className="btn btn-o pd-ask" onClick={() => onAsk(question)}
+      title={`“${question}” 보내기`} aria-label={`상담에서 물어보기: ${question}`}>
+      상담에서 물어보기
+    </button>
+  );
+}
+
+/** 겹친 노드를 종류별로: '대상 청년'과 '생애단계 청년'처럼 이름이 같아도 구분되게 한다 */
+function sharedByKind(nodes: GraphNode[]): string {
+  return KIND_ORDER
+    .map((k) => [k, nodes.filter((n) => n.kind === k).map((n) => n.label)] as const)
+    .filter(([, names]) => names.length > 0)
+    .map(([k, names]) => `${KIND_LABEL[k]} ${names.join(', ')}`)
+    .join(' · ');
+}
+
+/** 기관·지역·분야·대상·생애단계가 많이 겹치는 정책 (계산은 PolicyGraph에서 한 번) */
+function SimilarPolicies({ similar }: { similar: SimilarPolicy[] }) {
+  if (similar.length === 0) return <p className="pc-note">연결이 많이 겹치는 정책이 없어요.</p>;
+  return (
+    <>
+      <ol className="pc-similar">
+        {similar.map(({ policy: p, shared }) => {
+          // 무엇이 겹쳤는지는 마우스를 올리면 보여 준다 (화면은 이름과 개수만). 문장은 한 번만 만든다
+          const overlap = sharedByKind(shared);
+          return (
+            <li key={p.id} title={overlap}>
+              <a href={mapHref(p.id)}>{p.label}</a>
+              <span className="pc-n" aria-label={`연결 ${shared.length}개 겹침: ${overlap}`}>{shared.length}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="pc-note">기관·지역·분야·대상·생애단계 연결이 겹친 개수예요. 자격이 비슷하다는 뜻은 아니에요.</p>
+    </>
   );
 }
 
