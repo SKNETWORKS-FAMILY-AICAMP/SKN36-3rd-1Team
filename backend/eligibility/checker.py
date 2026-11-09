@@ -106,7 +106,18 @@ def _condition(condition: dict, profile: dict) -> dict:
             )
 
         status = OK if low <= age <= high else NO
-        # v1.4.0에서는 상한값 120을 '상한 없음'의 표기로 사용한다.
+
+        # 0~120은 광범위한 추출값일 수 있으므로 '연령 제한 없음'으로
+        # 해석하지 않는다. 나이 비교 상태는 유지하고 표현만 신중하게 변경.
+        if low == 0 and high == 120:
+            return _result(
+                field,
+                status,
+                f"입력한 만 {age}세는 데이터에 저장된 연령 범위에 포함됩니다. "
+                "다만 실제 적용 연령 제한은 공식 공고로 확인해야 합니다.",
+            )
+
+        # v1.4.0의 120은 상한 없음 표기로 사용된다.
         age_rule = (
             f"만 {low}세 이상(상한 없음)"
             if high == 120
@@ -511,3 +522,40 @@ def check_eligibility(
         "conditions": conditions,
         "reception_status": _reception_status(policy),
     }
+
+
+def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
+    """동일한 소득 확인 안내만 화면용으로 합친다.
+
+    중요:
+    - check_eligibility()가 반환한 개별 조건·AND/OR/NOT·상태는 바꾸지 않는다.
+    - 동일한 소득 needs_check 사유만 화면에서 한 번 표시한다.
+    - 서로 다른 사유, 확정 상태 및 다른 필드/그룹 결과는 유지한다.
+    - 반드시 정책 한 건의 conditions마다 별도로 호출한다.
+
+    이 함수는 화면 표시용이므로 최종 응답을 구성하는 Pipeline 또는
+    Frontend에서 사용해야 한다. 원본 conditions는 판정/감사용으로 보존한다.
+    """
+    if not isinstance(conditions, list):
+        raise TypeError("conditions는 리스트여야 합니다.")
+
+    displayed: list[dict] = []
+    income_notices: set[tuple[str, str, str]] = set()
+
+    for item in conditions:
+        if not isinstance(item, dict):
+            raise TypeError("각 condition은 dict여야 합니다.")
+
+        if item.get("field") == "income" and item.get("status") == CHECK:
+            key = (
+                str(item.get("field")),
+                str(item.get("label")),
+                str(item.get("reason")),
+            )
+            if key in income_notices:
+                continue
+            income_notices.add(key)
+
+        displayed.append(item.copy())
+
+    return displayed

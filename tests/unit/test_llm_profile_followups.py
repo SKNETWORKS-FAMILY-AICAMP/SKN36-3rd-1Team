@@ -138,7 +138,9 @@ def test_district_request_in_body_is_preserved_when_only_sido_given(monkeypatch)
     ))
     result = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
     assert "어느 구에 거주하시나요?" in result["answer"]
-    assert result["follow_up_questions"] == []  # 시·도 입력 칸을 다시 쓰지 않음
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "어느 구에 거주하나요?"}
+    ]  # 시·도 입력 칸을 다시 쓰지 않고 세부 지역 질문을 보존
 
 
 def test_question_policy_eligibility_not_suppressed(monkeypatch):
@@ -202,4 +204,167 @@ def test_valid_question_remains_after_explanatory_text_removed(monkeypatch):
     result = g.generate_answer("질문", CONTEXTS, CHECKS)
     assert result["follow_up_questions"] == [
         {"kind": "question", "text": "신청 절차는 어떻게 되나요?"}
+    ]
+
+
+# ==========================================================
+# 회귀: 시·도 기입 후 시·군·구 질문이 사라지지 않도록 보존
+# ==========================================================
+
+
+def test_district_ask_info_is_converted_to_question(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "현재 강남구에 거주하나요?"}
+    ]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시"})
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "현재 강남구에 거주하나요?"}
+    ]
+
+
+def test_district_resident_registration_is_converted(monkeypatch):
+    question = "신청일 기준 서울특별시 강남구에 주민등록이 되어 있나요?"
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": question}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시"})
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": question}
+    ]
+
+
+def test_municipality_ask_info_is_converted(monkeypatch):
+    question = "경기도 수원시에 거주하고 있나요?"
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": question}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "경기도"})
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": question}
+    ]
+
+
+def test_plain_sido_repeat_is_still_removed(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "서울특별시에 거주하나요?"},
+        {"kind": "ask_info", "field": "region", "text": "현재 거주 지역은 어디인가요?"},
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시"})
+    assert result["follow_up_questions"] == []
+
+
+def test_sido_alias_is_not_mistaken_for_district(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "서울시에 거주하나요?"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시"})
+    assert result["follow_up_questions"] == []
+
+
+def test_district_already_given_is_not_asked_again(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "어느 구에 거주하나요?"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시 강남구"})
+    assert result["follow_up_questions"] == []
+
+
+def test_region_ask_info_is_retained_if_profile_missing(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "어느 구에 거주하나요?"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"age": 25})
+    assert result["follow_up_questions"] == [
+        {"kind": "ask_info", "field": "region", "text": "어느 구에 거주하나요?"}
+    ]
+
+
+def test_full_sido_is_not_detail_when_profile_uses_abbreviation(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "서울특별시에 거주하나요?"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS,
+                               profile={"region": "서울시"})
+    assert result["follow_up_questions"] == []
+
+
+# ==========================================================
+# 회귀: 2번 - 허용되지 않은 ask_info의 물음표 누락
+# ==========================================================
+
+
+def test_unknown_field_polite_request_without_question_mark(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "household_size", "text": "가구원 수를 알려주세요."}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "가구원 수를 알려주실 수 있나요?"}
+    ]
+
+
+def test_unknown_field_interrogative_without_question_mark(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "child_age", "text": "자녀 나이는 몇 세인가요"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "자녀 나이는 몇 세인가요?"}
+    ]
+
+
+def test_unknown_field_input_request_without_question_mark(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "household_size", "text": "가구원 수를 입력해 주세요!"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "가구원 수를 알려주실 수 있나요?"}
+    ]
+
+
+def test_guide_statement_not_converted_into_question(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "household_size", "text": "가구원 수 확인이 필요합니다."},
+        {"kind": "question", "text": "별도 공고를 확인해 주세요."},
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == []
+
+
+def test_existing_profile_duplicate_still_removed_without_question_mark(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "household_size", "text": "거주 지역을 알려주세요"}
+    ]))
+    result = g.generate_answer(
+        "질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"}
+    )
+    assert result["follow_up_questions"] == []
+
+
+def test_district_follow_up_without_question_mark_is_preserved(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "강남구에 거주하나요"}
+    ]))
+    result = g.generate_answer(
+        "질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"}
+    )
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "강남구에 거주하나요?"}
+    ]
+
+
+def test_plain_question_without_question_mark_is_preserved(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "이 정책의 신청 절차는 어떻게 되나요"}
+    ]))
+    result = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [
+        {"kind": "question", "text": "이 정책의 신청 절차는 어떻게 되나요?"}
     ]

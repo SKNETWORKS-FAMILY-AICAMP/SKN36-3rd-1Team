@@ -94,17 +94,93 @@ def _requests_profile_value(text: str, field: str) -> bool:
     return False
 
 
-def _is_detail_region_request(text: str) -> bool:
-    """시·도 재질문과 세부 시·군·구 정보 요청을 구분한다."""
-    return bool(
-        re.search(
-            r"시\s*[·/\-]?\s*군\s*[·/\-]?\s*구|시군구|"
-            r"(?:어느|어떤)\s*(?:시|군|구|동|읍|면)|"
-            r"(?:시|군|구|동|읍|면)\s*(?:까지|단위|이신가요|인가요|알려)|"
-            r"세부\s*(?:거주지|지역|주소)|구체적인\s*(?:거주지|지역|주소)",
-            text,
-        )
+def _is_detail_region_request(text: str, known_region: str | None = None) -> bool:
+    """시·도 재질문과 시·군·구 등 *추가* 지역 정보 요청을 구분한다.
+
+    LLM이 ``강남구에 주민등록되어 있나요?``처럼 명시적 행정구역을
+    질문하는 경우도 포함한다. 시·도 자체의 별칭(서울시 등)은 제외한다.
+    """
+    if re.search(
+        r"시\s*[·/\-]?\s*군\s*[·/\-]?\s*구|시군구|"
+        r"(?:어느|어떤)\s*(?:시|군|구|동|읍|면)|"
+        r"(?:시|군|구|동|읍|면)(?:가|를|을|은|는)?\s*(?:어디|어느|알려)|"
+        r"(?:시|군|구|동|읍|면)\s*(?:까지|단위|이신가요|인가요|알려)|"
+        r"세부\s*(?:거주지|지역|주소)|구체적인\s*(?:거주지|지역|주소)",
+        text,
+    ):
+        return True
+
+    # 알고 있는 시·도의 공식명·약칭을 모두 제거하여 시·도 재질문을
+    # 세부 지역 질문으로 오인하지 않는다. 예: 서울시 ↔ 서울특별시.
+    remaining = text
+    sido_name_sets = (
+        ("서울특별시", "서울시"),
+        ("부산광역시", "부산시"),
+        ("대구광역시", "대구시"),
+        ("인천광역시", "인천시"),
+        ("광주광역시", "광주시"),
+        ("대전광역시", "대전시"),
+        ("울산광역시", "울산시"),
+        ("세종특별자치시", "세종시"),
     )
+    if known_region:
+        remaining = remaining.replace(known_region, "")
+        for names in sido_name_sets:
+            if known_region in names:
+                for name in names:
+                    remaining = remaining.replace(name, "")
+
+    sido_aliases = {name for names in sido_name_sets for name in names}
+
+    # 예: 강남구에 / 수원시에 / 영광군 거주 / 역삼동 주민등록.
+    named_area = re.compile(
+        r"(?<![가-힣])([가-힣]{2,}(?:시|군|구|동|읍|면))"
+        r"(?=$|[\s?？.,!]|에|에서|의|로|가|은|는|를|을|인지|인가요|이신가요)"
+    )
+    return any(
+        match.group(1) not in sido_aliases
+        for match in named_area.finditer(remaining)
+    )
+
+
+
+def _normalize_followup_question(text: str) -> str | None:
+    """명확한 정보 요청만 질문으로 정규화한다.
+
+    LLM의 `?` 누락 때문에 실제 질문이 삭제되는 문제를 해결하지만,
+    안내문이나 단순 지시문을 억지로 질문으로 바꾸지 않는다.
+    """
+    original = text.strip()
+    if not original:
+        return None
+
+    if original.endswith(("?", "？")):
+        return original
+
+    candidate = original.rstrip(" \t\r\n.!。！")
+    if not candidate:
+        return None
+
+    # 물음표만 빠진 완성형 의문문: "몇 명인가요" → "몇 명인가요?"
+    if re.search(
+        r"(?:인가요|입니까|인가|되나요|되세요|되십니까|하나요|하시나요|있나요|"
+        r"없나요|일까요|할까요|까요|하실래요|알려주실래요|"
+        r"무엇인가요|누구인가요|어디인가요|어떤가요)$",
+        candidate,
+    ):
+        return candidate + "?"
+
+    # 단순 정보 입력 요청: "가구원 수를 알려주세요." → 실제 의문문.
+    # "공고를 확인해 주세요"처럼 별도의 조치를 요구하는 문장은 제외한다.
+    request = re.search(
+        r"(?:알려\s*주세요|알려\s*주십시오|말씀\s*해\s*주세요|"
+        r"입력\s*해\s*주세요|답변\s*해\s*주세요)$",
+        candidate,
+    )
+    if request and candidate[: request.start()].strip():
+        return candidate[: request.start()] + "알려주실 수 있나요?"
+
+    return None
 
 
 def _is_redundant_request(text: str, profile: dict | None) -> bool:
@@ -126,7 +202,7 @@ def _is_redundant_request(text: str, profile: dict | None) -> bool:
         if (
             field == "region"
             and not _region_has_detail(value)
-            and _is_detail_region_request(text)
+            and _is_detail_region_request(text, value)
         ):
             # 시·도만 받았으므로 세부 주소 확인은 별도의 정보 요청이다.
             return False
@@ -327,16 +403,28 @@ def _validate_model_response(
                 # API 응답 스키마를 확장하지 않고 502를 피한다.
                 result["kind"] = "question"
             elif profile is not None and profile[field] is not None:
-                # 이미 입력한 값은 다시 묻지 않는다. 시·군·구는 본문에서 안내.
-                continue
+                if (
+                    field == "region"
+                    and not _region_has_detail(profile[field])
+                    and _is_detail_region_request(result["text"], profile[field])
+                ):
+                    # 시·도만 주어진 경우 세부 지역 확인 질문은 보존한다.
+                    # ask_info(region)는 기존 시·도 입력 칸을 덮어쓸 수 있으므로
+                    # 일반 question으로 반환하며 field를 추가하지 않는다.
+                    result["kind"] = "question"
+                else:
+                    # 이미 제공한 값 자체를 다시 묻는 질문은 제거한다.
+                    continue
             else:
                 result["field"] = field
 
         if result["kind"] == "question":
-            # question은 사용자가 AI에게 이어서 물을 수 있는 실제 의문문이어야 한다.
-            # 안내문에 '?'만 붙여 의문문으로 바꾸면 의미가 왜곡되므로 제거한다.
-            if not result["text"].endswith(("?", "？")):
+            # 실제 정보 요청은 물음표가 빠져도 자연스러운 질문으로 보존한다.
+            # 안내문은 질문으로 둔갑시키지 않고 제거한다.
+            question_text = _normalize_followup_question(result["text"])
+            if question_text is None:
                 continue
+            result["text"] = question_text
 
             if _is_redundant_request(result["text"], profile):
                 continue
