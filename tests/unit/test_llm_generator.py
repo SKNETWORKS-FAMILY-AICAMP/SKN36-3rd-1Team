@@ -123,7 +123,7 @@ def test_follow_up_field(monkeypatch):
 
 
 def test_invalid_follow_up_field(monkeypatch):
-    """허용되지 않은 ask_info 필드는 question으로 변환한다."""
+    """허용되지 않은 ask_info 필드는 question 버튼으로 반환하지 않는다."""
 
     fake_model(
         monkeypatch,
@@ -143,12 +143,7 @@ def test_invalid_follow_up_field(monkeypatch):
 
     result = g.generate_answer("질문", CTX, CHECKS)
 
-    assert result["follow_up_questions"] == [
-        {
-            "kind": "question",
-            "text": "자녀 나이?",
-        }
-    ]
+    assert result["follow_up_questions"] == []
 
 
 def test_timeout_propagates(monkeypatch):
@@ -248,3 +243,40 @@ def test_empty_contexts_returns_no_evidence():
     assert result["status"] == "no_evidence"
     assert result["used_source_ids"] == []
     assert result["follow_up_questions"] == []
+
+@pytest.mark.parametrize(
+    "question, expected",
+    [
+        ("신청 서류도 알려드릴까요?", []),
+        (
+            "신청 서류는 무엇이 필요한가요?",
+            [
+                {
+                    "kind": "question",
+                    "text": "신청 서류는 무엇이 필요한가요?",
+                }
+            ],
+        ),
+    ],
+)
+def test_question_button_user_perspective(monkeypatch, question, expected):
+    """question 버튼에는 사용자가 AI에게 묻는 질문만 남긴다."""
+
+    fake_model(
+        monkeypatch,
+        {
+            "status": "info",
+            "answer": "정책 안내",
+            "used_source_ids": [],
+            "follow_up_questions": [
+                {
+                    "kind": "question",
+                    "text": question,
+                }
+            ],
+        },
+    )
+
+    result = g.generate_answer("신청 관련 문의", CTX, CHECKS)
+
+    assert result["follow_up_questions"] == expected

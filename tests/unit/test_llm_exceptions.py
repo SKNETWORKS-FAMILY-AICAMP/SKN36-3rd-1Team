@@ -126,3 +126,21 @@ def test_options_respect_environment_override(fake_openai, monkeypatch):
     assert fake_openai.recorded["request"]["model"] == "test-custom-model"
     assert fake_openai.recorded["request"]["max_completion_tokens"] == 600
     assert fake_openai.recorded["client"]["timeout"] == 11.0
+
+
+def test_blank_llm_env_values_fall_back_to_defaults(fake_openai, monkeypatch):
+    """.env.example에 이름만 추가한 빈 설정은 기본값으로 처리한다."""
+    monkeypatch.setenv("LLM_MODEL", "")
+    monkeypatch.setenv("LLM_MAX_OUTPUT_TOKENS", "")
+    monkeypatch.setenv("LLM_TIMEOUT_SECONDS", "")
+    _invoke()
+    assert fake_openai.recorded["request"]["model"] == g.DEFAULT_MODEL
+    assert fake_openai.recorded["request"]["max_completion_tokens"] == g.DEFAULT_MAX_OUTPUT_TOKENS
+    assert fake_openai.recorded["client"]["timeout"] == g.DEFAULT_TIMEOUT_SECONDS
+
+
+@pytest.mark.parametrize("timeout", ["nan", "inf", "-inf", "0", "-1"])
+def test_invalid_timeout_is_rejected(fake_openai, monkeypatch, timeout):
+    monkeypatch.setenv("LLM_TIMEOUT_SECONDS", timeout)
+    with pytest.raises(ValueError, match="LLM_TIMEOUT_SECONDS"):
+        _invoke()

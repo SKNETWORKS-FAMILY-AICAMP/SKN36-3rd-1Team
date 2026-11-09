@@ -94,9 +94,8 @@ def test_unknown_ask_info_converts_to_question(monkeypatch):
         {"kind": "ask_info", "text": "가구원 수는 어떻게 확인하나요?", "field": "household_size"}
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS)
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "가구원 수는 어떻게 확인하나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "가구원 수를 알려 주세요." in result["answer"]
 
 
 @pytest.mark.parametrize("invalid_field", [None, {}, [], 123])
@@ -138,9 +137,8 @@ def test_district_request_in_body_is_preserved_when_only_sido_given(monkeypatch)
     ))
     result = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
     assert "어느 구에 거주하시나요?" in result["answer"]
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "어느 구에 거주하나요?"}
-    ]  # 시·도 입력 칸을 다시 쓰지 않고 세부 지역 질문을 보존
+    assert result["follow_up_questions"] == []
+    assert "어느 구에 거주하시나요?" in result["answer"]  # 시·도 입력 칸을 다시 쓰지 않고 세부 지역 질문을 보존
 
 
 def test_question_policy_eligibility_not_suppressed(monkeypatch):
@@ -218,9 +216,8 @@ def test_district_ask_info_is_converted_to_question(monkeypatch):
     ]))
     result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,
                                profile={"region": "서울특별시"})
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "현재 강남구에 거주하나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "거주하시는 시·군·구를 알려 주세요." in result["answer"]
 
 
 def test_district_resident_registration_is_converted(monkeypatch):
@@ -230,9 +227,8 @@ def test_district_resident_registration_is_converted(monkeypatch):
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS,
                                profile={"region": "서울특별시"})
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": question}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "강남구 주민등록 여부를 알려 주세요." in result["answer"]
 
 
 def test_municipality_ask_info_is_converted(monkeypatch):
@@ -242,9 +238,8 @@ def test_municipality_ask_info_is_converted(monkeypatch):
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS,
                                profile={"region": "경기도"})
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": question}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "거주하시는 시·군·구를 알려 주세요." in result["answer"]
 
 
 def test_plain_sido_repeat_is_still_removed(monkeypatch):
@@ -280,9 +275,8 @@ def test_region_ask_info_is_retained_if_profile_missing(monkeypatch):
         {"kind": "ask_info", "field": "region", "text": "어느 구에 거주하나요?"}
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"age": 25})
-    assert result["follow_up_questions"] == [
-        {"kind": "ask_info", "field": "region", "text": "어느 구에 거주하나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "거주하시는 시·군·구를 알려 주세요." in result["answer"]
 
 
 def test_full_sido_is_not_detail_when_profile_uses_abbreviation(monkeypatch):
@@ -304,9 +298,8 @@ def test_unknown_field_polite_request_without_question_mark(monkeypatch):
         {"kind": "ask_info", "field": "household_size", "text": "가구원 수를 알려주세요."}
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS)
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "가구원 수를 알려주실 수 있나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "가구원 수를 알려 주세요." in result["answer"]
 
 
 def test_unknown_field_interrogative_without_question_mark(monkeypatch):
@@ -314,9 +307,8 @@ def test_unknown_field_interrogative_without_question_mark(monkeypatch):
         {"kind": "ask_info", "field": "child_age", "text": "자녀 나이는 몇 세인가요"}
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS)
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "자녀 나이는 몇 세인가요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "자녀 나이를 알려 주세요." in result["answer"]
 
 
 def test_unknown_field_input_request_without_question_mark(monkeypatch):
@@ -324,9 +316,8 @@ def test_unknown_field_input_request_without_question_mark(monkeypatch):
         {"kind": "ask_info", "field": "household_size", "text": "가구원 수를 입력해 주세요!"}
     ]))
     result = g.generate_answer("질문", CONTEXTS, CHECKS)
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "가구원 수를 알려주실 수 있나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "가구원 수를 알려 주세요." in result["answer"]
 
 
 def test_guide_statement_not_converted_into_question(monkeypatch):
@@ -355,9 +346,8 @@ def test_district_follow_up_without_question_mark_is_preserved(monkeypatch):
     result = g.generate_answer(
         "질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"}
     )
-    assert result["follow_up_questions"] == [
-        {"kind": "question", "text": "강남구에 거주하나요?"}
-    ]
+    assert result["follow_up_questions"] == []
+    assert "거주하시는 시·군·구를 알려 주세요." in result["answer"]
 
 
 def test_plain_question_without_question_mark_is_preserved(monkeypatch):
@@ -406,7 +396,8 @@ def test_p1_district_ask_info_is_preserved_as_question(monkeypatch):
         {"kind": "ask_info", "field": "region", "text": text}
     ]))
     actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
-    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+    assert actual["follow_up_questions"] == []
+    assert "거주하시는 시·군·구를 알려 주세요." in actual["answer"]
 
 
 def test_p1_named_gu_ask_info_is_preserved_as_question(monkeypatch):
@@ -415,7 +406,8 @@ def test_p1_named_gu_ask_info_is_preserved_as_question(monkeypatch):
         {"kind": "ask_info", "field": "region", "text": text}
     ]))
     actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
-    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+    assert actual["follow_up_questions"] == []
+    assert "강남구 주민등록 여부를 알려 주세요." in actual["answer"]
 
 
 @pytest.mark.parametrize("phrase", [
@@ -432,3 +424,105 @@ def test_p1_verb_forms_and_sido_are_not_district_requests(phrase):
 ])
 def test_p1_real_municipalities_are_still_detail_requests(phrase):
     assert g._is_detail_region_request(phrase, "경기도")
+
+
+# ==========================================================
+# PR review: question 버튼과 AI 사용자 정보 요청의 방향 분리
+# ==========================================================
+
+@pytest.mark.parametrize("request_text,field,expected", [
+    ("현재 나이가 몇 살인가요?", "age", "age"),
+    ("거주 지역은 어디인가요?", "region", "region"),
+    ("현재 소득이 얼마인가요?", "income", "income"),
+])
+def test_pr_user_info_question_becomes_allowed_ask_info(monkeypatch, request_text, field, expected):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": request_text}]))
+    actual = g.generate_answer("신청 가능?", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "field": expected, "text": request_text}
+    ]
+
+
+@pytest.mark.parametrize("request_text", [
+    "서울특별시의 어느 구에 거주하시나요?",
+    "강남구에 주민등록되어 있나요?",
+    "가구원 수가 몇 명인가요?",
+    "가구원 수를 알려주세요.",
+])
+def test_pr_personal_information_request_never_question_button(monkeypatch, request_text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": request_text}]))
+    actual = g.generate_answer("신청할 수 있나요?", CONTEXTS, CHECKS, profile={"region": "서울특별시"})
+    assert actual["follow_up_questions"] == []
+    assert "알려 주세요." in actual["answer"]
+
+
+def test_pr_user_oriented_question_button_preserved(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "신청 서류는 무엇이 필요한가요?"},
+        {"kind": "question", "text": "이 정책의 연령 기준은 어떻게 되나요?"},
+    ]))
+    actual = g.generate_answer("정책 안내", CONTEXTS, CHECKS, profile={"age": 25})
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": "신청 서류는 무엇이 필요한가요?"},
+        {"kind": "question", "text": "이 정책의 연령 기준은 어떻게 되나요?"},
+    ]
+
+
+def test_pr_no_unsupported_reason_is_invented(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "household_size", "text": "가구원 수를 알려주세요."},
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["answer"] == "자격 조건은 추가 확인이 필요합니다. 가구원 수를 알려 주세요."
+    assert "지원 금액" not in actual["answer"]
+
+
+def test_pr_request_in_answer_not_repeated(monkeypatch):
+    stub(monkeypatch, response(
+        answer="가구원 수를 알려 주세요.",
+        follows=[{"kind": "ask_info", "field": "household_size", "text": "가구원 수를 알려주세요."}]
+    ))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["answer"].count("가구원 수를 알려 주세요.") == 1
+
+
+def test_pr_unknown_non_request_is_not_shown_as_button(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "unknown", "text": "추가 확인이 필요합니다."}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == []
+    assert actual["answer"] == "자격 조건은 추가 확인이 필요합니다."
+
+
+@pytest.mark.parametrize("user_question", [
+    "몇 살부터 신청할 수 있나요?",
+    "가구원 수가 몇 명이어야 하나요?",
+    "강남구에 주민등록되어야 하나요?",
+    "강남구에서 주민등록등본은 어디서 발급하나요?",
+])
+def test_pr_policy_questions_are_not_mistaken_for_personal_info(monkeypatch, user_question):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": user_question}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": user_question}]
+
+
+@pytest.mark.parametrize("personal_request,expected", [
+    ("직업이 무엇인가요?", "직업 정보를 알려 주세요."),
+    ("학력을 알려주세요.", "학력을 알려 주세요."),
+    ("근로 형태가 어떻게 되나요?", "근로 형태를 알려 주세요."),
+])
+def test_pr_other_personal_questions_move_into_answer(monkeypatch, personal_request, expected):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": personal_request}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == []
+    assert expected in actual["answer"]
+
+
+def test_pr_sensitive_personal_info_is_never_a_question_button(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "주민등록번호를 알려주세요."}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == []
+    assert "주민등록번호" not in actual["answer"]

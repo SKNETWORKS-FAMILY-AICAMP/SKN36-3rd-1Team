@@ -9,9 +9,11 @@ DB/LLM 호출이나 입력 변형을 하지 않는다.
 
 from __future__ import annotations
 
+import math
 import re
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9))
 
 OK, NO, CHECK = "eligible", "ineligible", "needs_check"
 
@@ -19,8 +21,37 @@ _LABELS = {
     "age": "나이",
     "region": "거주 지역",
     "income": "소득",
+    "housing": "가구·주거 조건",
+    "children": "자녀 월령",
     "eligibility": "자격 요건",
 }
+
+MAX_VALID_AGE = 120
+NO_UPPER_LIMIT_SENTINEL = 120
+
+
+def _is_valid_age(age: object) -> bool:
+    """사용자 만 나이가 유효한 범위(0~120)인지 확인한다."""
+    return (
+        isinstance(age, int)
+        and not isinstance(age, bool)
+        and 0 <= age <= MAX_VALID_AGE
+    )
+
+
+def _is_valid_age_range(low: int, high: int) -> bool:
+    """추출 데이터가 허용하는 연령 구간의 순서·범위를 확인한다."""
+    return 0 <= low <= high <= MAX_VALID_AGE
+
+
+def _has_no_upper_limit(low: int, high: int) -> bool:
+    """상한 120 관례를 무제한으로 표현할지 결정한다.
+
+    0~120은 광범위한 추출 범위이므로 자동으로
+    연령 무제한이라 단정하지 않는다.
+    """
+    return low > 0 and high == NO_UPPER_LIMIT_SENTINEL
+
 
 _AGE_RANGE = re.compile(
     r"^\s*(\d{1,3})\s*(?:~|～|–|—|-)\s*(\d{1,3})\s*$"
@@ -53,6 +84,12 @@ def _field(condition: dict) -> str:
     if kind == "INCOME":
         return "income"
 
+    if (
+        kind == "SPECIAL_TARGET"
+        and str(condition.get("unit") or "").strip() == "개월"
+    ):
+        return "children"
+
     return {
         "EMPLOYMENT": "employment",
         "EDUCATION": "education",
@@ -64,6 +101,62 @@ def _field(condition: dict) -> str:
 def _condition(condition: dict, profile: dict) -> dict:
     field = _field(condition)
 
+    if field == "children":
+        # 자녀 월령은 신청자의 age 필드와 혼용하지 않는다.
+        # MVP에서는 미입력 시 needs_check.
+        raw = str(condition.get("value") or "").strip()
+        operator = str(
+            condition.get("operator") or ""
+        ).strip().upper()
+
+        # LT / 24개월 미만만 자동 비교한다.
+        match = re.fullmatch(
+            r"(\d{1,3})\s*(?:개월)?", raw
+        )
+
+        if (
+            operator != "LT"
+            or match is None
+            or int(match.group(1)) <= 0
+        ):
+            return _result(
+                "children",
+                CHECK,
+                "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다.",
+            )
+
+        limit = int(match.group(1))
+        months = profile.get("child_age_months")
+
+        if months is None:
+            return _result(
+                "children",
+                CHECK,
+                f"자녀 월령(개월 수)을 확인해야 합니다. "
+                f"기준: {limit}개월 미만.",
+            )
+
+        if type(months) is not int or months < 0:
+            return _result(
+                "children",
+                CHECK,
+                "유효한 자녀 월령을 확인할 수 없습니다.",
+            )
+
+        status = OK if months < limit else NO
+
+        return _result(
+            "children",
+            status,
+            f"자녀 월령 {limit}개월 미만 기준에 "
+            f"입력한 {months}개월은 "
+            + (
+                "포함됩니다."
+                if status == OK
+                else "포함되지 않습니다."
+            ),
+        )
+
     if field == "age":
         age = profile.get("age")
 
@@ -74,11 +167,7 @@ def _condition(condition: dict, profile: dict) -> dict:
                 "사용자의 만 나이가 입력되지 않았습니다.",
             )
 
-        if (
-            isinstance(age, bool)
-            or not isinstance(age, int)
-            or not 0 <= age <= 120
-        ):
+        if not _is_valid_age(age):
             return _result(
                 field,
                 CHECK,
@@ -89,16 +178,20 @@ def _condition(condition: dict, profile: dict) -> dict:
             str(condition.get("value") or "")
         )
 
-        if condition.get("operator") != "BETWEEN" or not match:
+        if (
+            condition.get("operator") != "BETWEEN"
+            or not match
+        ):
             return _result(
                 field,
                 CHECK,
-                "연령 조건 형식을 해석할 수 없어 원문 확인이 필요합니다.",
+                "연령 조건 형식을 해석할 수 없어 "
+                "원문 확인이 필요합니다.",
             )
 
         low, high = map(int, match.groups())
 
-        if not (0 <= low <= high <= 120):
+        if not _is_valid_age_range(low, high):
             return _result(
                 field,
                 CHECK,
@@ -107,20 +200,19 @@ def _condition(condition: dict, profile: dict) -> dict:
 
         status = OK if low <= age <= high else NO
 
-        # 0~120은 광범위한 추출값일 수 있으므로 '연령 제한 없음'으로
-        # 해석하지 않는다. 나이 비교 상태는 유지하고 표현만 신중하게 변경.
-        if low == 0 and high == 120:
+        if low == 0 and high == NO_UPPER_LIMIT_SENTINEL:
             return _result(
                 field,
                 status,
-                f"입력한 만 {age}세는 데이터에 저장된 연령 범위에 포함됩니다. "
-                "다만 실제 적용 연령 제한은 공식 공고로 확인해야 합니다.",
+                f"입력한 만 {age}세는 데이터에 저장된 "
+                "연령 범위에 포함됩니다. "
+                "다만 실제 적용 연령 제한은 "
+                "공식 공고로 확인해야 합니다.",
             )
 
-        # v1.4.0의 120은 상한 없음 표기로 사용된다.
         age_rule = (
             f"만 {low}세 이상(상한 없음)"
-            if high == 120
+            if _has_no_upper_limit(low, high)
             else f"만 {low}~{high}세"
         )
 
@@ -136,8 +228,6 @@ def _condition(condition: dict, profile: dict) -> dict:
         )
 
     if field == "region":
-        # 지역 데이터의 신뢰성이 확보되지 않았으므로
-        # 사용자의 주소와 정책의 지역을 자동 비교하지 않는다.
         return _result(
             field,
             CHECK,
@@ -145,7 +235,6 @@ def _condition(condition: dict, profile: dict) -> dict:
         )
 
     if field == "income":
-        # 개인/가구 소득 구분 및 중위소득 기준이 불명확하다.
         return _result(
             field,
             CHECK,
@@ -209,11 +298,14 @@ def _walk(
             _result(
                 "eligibility",
                 CHECK,
-                "조건 그룹이 누락·순환되었거나 깊이 제한을 초과했습니다.",
+                "조건 그룹이 누락·순환되었거나 "
+                "깊이 제한을 초과했습니다.",
             )
         ]
 
-    logic = str(group.get("logic") or "UNKNOWN").upper()
+    logic = str(
+        group.get("logic") or "UNKNOWN"
+    ).upper()
 
     if logic not in {"AND", "OR", "NOT"}:
         return CHECK, [
@@ -230,7 +322,10 @@ def _walk(
     conditions = group.get("conditions")
     children = group.get("groups")
 
-    if not isinstance(conditions, list) or not isinstance(children, list):
+    if (
+        not isinstance(conditions, list)
+        or not isinstance(children, list)
+    ):
         return CHECK, [
             _result(
                 "eligibility",
@@ -264,8 +359,6 @@ def _walk(
 
     group_status = _combine(logic, states)
 
-    # NOT 및 OR 집합의 의미는 개별 항목으로 표현할 수 없으므로
-    # 그룹별 결론을 함께 남긴다.
     items.append(
         _result(
             "eligibility",
@@ -301,38 +394,34 @@ def _affected_fields(
     if not isinstance(attrs, list) or not attrs:
         return {"all"}
 
-    # 품질 경고의 속성명은 출력 필드명으로 정규화한다.
-    # 인식하지 못하는 속성이 있으면 해당 경고를 무시하지 않고
-    # 전체 조건의 자동 판정을 보류한다 (fail closed).
     aliases = {
         "residence": "region",
         "location": "region",
         "housing_household": "housing",
         "household": "housing",
-        "special_target": "target",
     }
+
     supported = {
         "all",
         "age",
         "region",
         "income",
-        "eligibility",
-        "employment",
-        "education",
         "housing",
-        "target",
+        "employment",
         "exclusion",
         "marriage",
         "children",
     }
 
     normalized = set()
+
     for attr in attrs:
         if not isinstance(attr, str) or not attr.strip():
             return {"all"}
 
         name = attr.strip().lower()
         field = aliases.get(name, name)
+
         if field not in supported:
             return {"all"}
 
@@ -341,47 +430,191 @@ def _affected_fields(
     return normalized or {"all"}
 
 
-def _reception_status(policy: dict) -> str:
-    """검증된 ISO 날짜를 가진 별도 명시 구조만 분류한다.
+def _safe_review_text(value: object) -> str:
+    """검토 메모는 문자열만 사용하고 비정상 입력은 제외한다."""
+    if not isinstance(value, str):
+        return ""
 
-    실제 graph.policy.application_period는 자유 텍스트이며
-    여기서는 사용하지 않는다.
+    return " ".join(value.split())[:300]
+
+
+def _source_review_conditions(
+    policy_node: dict,
+    profile: dict,
+) -> list[dict]:
+    """소득·가구 원문 검토 정보를 기존 reason으로 전달한다.
+
+    not_specified / not_reviewed / specified:
+        별도 확인 항목 생성하지 않음
+
+    needs_review:
+        needs_check 항목 및 확인 사유 생성
+
+    별도 followup 출력 키는 추가하지 않는다.
     """
 
-    proof = policy.get("verified_reception_period")
+    results = []
+
+    for prefix, field, label in (
+        ("income", "income", "소득 요건"),
+        ("household", "housing", "가구 요건"),
+    ):
+        status = policy_node.get(
+            f"{prefix}_source_review"
+        )
+
+        if status != "needs_review":
+            continue
+
+        followup = policy_node.get(
+            f"{prefix}_followup"
+        )
+
+        if (
+            not isinstance(followup, str)
+            or followup not in {"ask_user", "check_notice"}
+        ):
+            followup = "check_notice"
+
+        parts = [
+            f"{label}의 공식 원문 기준을 "
+            "추가 확인해야 합니다."
+        ]
+
+        check_point = _safe_review_text(
+            policy_node.get(f"{prefix}_check_point")
+        )
+
+        source_note = _safe_review_text(
+            policy_node.get(f"{prefix}_source_note")
+        )
+
+        if check_point:
+            parts.append(
+                f"확인할 항목: {check_point}"
+            )
+
+        if source_note:
+            parts.append(
+                f"원문 검토 메모: {source_note}"
+            )
+
+        if followup == "ask_user":
+            if prefix == "income":
+                income = profile.get("income")
+
+                if (
+                    type(income) in (int, float)
+                    and income >= 0
+                    and math.isfinite(income)
+                ):
+                    parts.append(
+                        "입력된 소득에 적용할 공식 "
+                        "비교 기준을 확인해 주세요."
+                    )
+                else:
+                    parts.append(
+                        "필요한 소득 정보를 추가로 "
+                        "확인해 주세요."
+                    )
+            else:
+                parts.append(
+                    "가구 관련 추가 정보를 "
+                    "답변 본문에서 확인해 주세요."
+                )
+        else:
+            parts.append(
+                "공식 공고의 해당 항목을 확인해 주세요."
+            )
+
+        results.append(
+            _result(
+                field,
+                CHECK,
+                " ".join(parts),
+                label,
+            )
+        )
+
+    return results
+
+
+def _reception_status(policy: dict) -> str:
+    """공식 날짜 및 상시 접수 여부로 신청 상태를 판정한다.
+
+    날짜는 Hybrid 검색 결과의 graph.policy에서 읽는다.
+    """
+
+    graph = policy.get("graph")
+    if not isinstance(graph, dict):
+        return "unknown"
+
+    policy_node = graph.get("policy")
+    if not isinstance(policy_node, dict):
+        return "unknown"
+
+    start_value = policy_node.get("application_start")
+    end_value = policy_node.get("application_end")
+    ongoing_value = policy_node.get("application_is_ongoing")
+
+    def parse_iso_date(
+        value: object,
+    ) -> tuple[date | None, bool]:
+
+        if (
+            value is None
+            or (
+                isinstance(value, str)
+                and not value.strip()
+            )
+        ):
+            return None, True
+
+        if (
+            not isinstance(value, str)
+            or not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}", value
+            )
+        ):
+            return None, False
+
+        try:
+            return date.fromisoformat(value), True
+        except ValueError:
+            return None, False
+
+    begin, start_valid = parse_iso_date(start_value)
+    finish, end_valid = parse_iso_date(end_value)
+
+    if not start_valid or not end_valid:
+        return "unknown"
 
     if (
-        not isinstance(proof, dict)
-        or proof.get("official_source_checked") is not True
+        begin is not None
+        and finish is not None
+        and begin > finish
     ):
         return "unknown"
 
-    start = proof.get("start_date")
-    end = proof.get("end_date")
-
-    if not isinstance(start, str) or not isinstance(end, str):
+    if ongoing_value is True and finish is not None:
         return "unknown"
 
-    try:
-        begin = date.fromisoformat(start)
-        finish = date.fromisoformat(end)
-    except ValueError:
-        return "unknown"
+    today = datetime.now(KST).date()
 
-    if begin > finish:
-        return "unknown"
-
-    today = datetime.now(
-        ZoneInfo("Asia/Seoul")
-    ).date()
-
-    if today < begin:
+    if begin is not None and today < begin:
         return "before"
 
-    if today > finish:
-        return "closed"
+    if begin is not None and finish is not None:
+        return (
+            "closed"
+            if today > finish
+            else "open"
+        )
 
-    return "open"
+    if finish is None and ongoing_value is True:
+        return "open"
+
+    return "unknown"
 
 
 def check_eligibility(
@@ -390,14 +623,20 @@ def check_eligibility(
 ) -> dict:
     """정규화된 프로필과 Hybrid 검색 정책 한 건을 비교한다."""
 
-    if not isinstance(profile, dict) or not isinstance(policy, dict):
+    if (
+        not isinstance(profile, dict)
+        or not isinstance(policy, dict)
+    ):
         raise TypeError(
             "profile과 policy는 dict여야 합니다."
         )
 
     policy_id = policy.get("policy_id")
 
-    if not isinstance(policy_id, str) or not policy_id.strip():
+    if (
+        not isinstance(policy_id, str)
+        or not policy_id.strip()
+    ):
         raise ValueError(
             "policy.policy_id는 비어 있지 않은 문자열이어야 합니다."
         )
@@ -420,6 +659,12 @@ def check_eligibility(
         else {}
     )
 
+    policy_node = (
+        graph.get("policy")
+        if isinstance(graph.get("policy"), dict)
+        else {}
+    )
+
     trees = eligibility.get("condition_tree")
 
     missing = (
@@ -429,12 +674,17 @@ def check_eligibility(
 
     conditions: list[dict] = []
 
-    if missing or not isinstance(trees, list) or not trees:
+    if (
+        missing
+        or not isinstance(trees, list)
+        or not trees
+    ):
         conditions = [
             _result(
                 "eligibility",
                 CHECK,
-                "확인 가능한 자격 조건 구조가 없어 공식 공고 확인이 필요합니다.",
+                "확인 가능한 자격 조건 구조가 없어 "
+                "공식 공고 확인이 필요합니다.",
             )
         ]
 
@@ -443,18 +693,16 @@ def check_eligibility(
 
         for tree in trees:
             state, details = _walk(tree, profile)
-
             roots.append(state)
             conditions.extend(details)
 
-        # 루트 그룹 여러 개의 결합 관계는 명세되지 않았으므로
-        # 임의로 AND 처리하지 않는다.
         if len(roots) > 1:
             conditions.append(
                 _result(
                     "eligibility",
                     CHECK,
-                    "여러 루트 조건 그룹의 결합 논리가 확인되지 않았습니다.",
+                    "여러 루트 조건 그룹의 결합 논리가 "
+                    "확인되지 않았습니다.",
                 )
             )
 
@@ -464,17 +712,20 @@ def check_eligibility(
         missing,
     )
 
-    # 그래프에서 누락된 영향을 받은 조건도 표시한다.
     for field in sorted(affected - {"all"}):
-        if field in {"age", "region", "income"} and not any(
-            item["field"] == field
-            for item in conditions
+        if (
+            field in {"age", "region", "income"}
+            and not any(
+                item["field"] == field
+                for item in conditions
+            )
         ):
             conditions.append(
                 _result(
                     field,
                     CHECK,
-                    "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다.",
+                    "데이터 품질 경고로 해당 자격 요건의 "
+                    "확인이 필요합니다.",
                 )
             )
 
@@ -501,11 +752,10 @@ def check_eligibility(
             ):
                 item["status"] = CHECK
                 item["reason"] += (
-                    " 데이터 품질 경고로 자동 판정을 보류합니다."
+                    " 데이터 품질 경고로 "
+                    "자동 판정을 보류합니다."
                 )
 
-    # 품질 경고가 있는 속성의 조건 노드가 아예 누락될 수도 있다.
-    # 다른 조건이 eligible이어도 그룹의 종합 판정은 보류한다.
     if affected and "all" not in affected:
         for item in conditions:
             if item["field"] == "eligibility":
@@ -517,6 +767,25 @@ def check_eligibility(
                         "종합 판정을 보류합니다."
                     )
 
+    review_items = _source_review_conditions(
+        policy_node,
+        profile,
+    )
+
+    if review_items:
+        conditions.extend(review_items)
+
+        for item in conditions:
+            if (
+                item["field"] == "eligibility"
+                and item["status"] == OK
+            ):
+                item["status"] = CHECK
+                item["reason"] += (
+                    " 소득·가구 원문 확인이 남아 "
+                    "종합 판정을 보류합니다."
+                )
+
     return {
         "policy_id": policy_id,
         "conditions": conditions,
@@ -524,36 +793,43 @@ def check_eligibility(
     }
 
 
-def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
+def summarize_conditions_for_display(
+    conditions: list[dict],
+) -> list[dict]:
     """동일한 소득 확인 안내만 화면용으로 합친다.
 
-    중요:
-    - check_eligibility()가 반환한 개별 조건·AND/OR/NOT·상태는 바꾸지 않는다.
-    - 동일한 소득 needs_check 사유만 화면에서 한 번 표시한다.
-    - 서로 다른 사유, 확정 상태 및 다른 필드/그룹 결과는 유지한다.
-    - 반드시 정책 한 건의 conditions마다 별도로 호출한다.
-
-    이 함수는 화면 표시용이므로 최종 응답을 구성하는 Pipeline 또는
-    Frontend에서 사용해야 한다. 원본 conditions는 판정/감사용으로 보존한다.
+    원본 개별 조건·논리 조건·상태는 변경하지 않는다.
     """
+
     if not isinstance(conditions, list):
-        raise TypeError("conditions는 리스트여야 합니다.")
+        raise TypeError(
+            "conditions는 리스트여야 합니다."
+        )
 
     displayed: list[dict] = []
-    income_notices: set[tuple[str, str, str]] = set()
+    income_notices: set[
+        tuple[str, str, str]
+    ] = set()
 
     for item in conditions:
         if not isinstance(item, dict):
-            raise TypeError("각 condition은 dict여야 합니다.")
+            raise TypeError(
+                "각 condition은 dict여야 합니다."
+            )
 
-        if item.get("field") == "income" and item.get("status") == CHECK:
+        if (
+            item.get("field") == "income"
+            and item.get("status") == CHECK
+        ):
             key = (
                 str(item.get("field")),
                 str(item.get("label")),
                 str(item.get("reason")),
             )
+
             if key in income_notices:
                 continue
+
             income_notices.add(key)
 
         displayed.append(item.copy())

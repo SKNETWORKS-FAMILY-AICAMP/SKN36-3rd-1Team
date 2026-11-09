@@ -94,3 +94,17 @@ def test_quality_guard_keeps_inputs_unchanged():
     snapshot = deepcopy(policy)
     check_eligibility({"age": 25}, policy)
     assert policy == snapshot
+
+
+@pytest.mark.parametrize("attribute", ["target", "education", "eligibility", "not_in_search_warning_fields"])
+def test_out_of_search_scope_attribute_holds_all(attribute):
+    """검색 경고의 8개+all 외 속성은 안전하게 전체 보류."""
+    result = check_eligibility({"age": 25}, _policy([attribute]))
+    assert _status(result, "age") == ["needs_check"]
+    assert _status(result, "eligibility") == ["needs_check"]
+
+
+@pytest.mark.parametrize("attribute", ["age", "region", "income", "housing", "employment", "exclusion", "marriage", "children", "all"])
+def test_search_scoped_attributes_are_supported(attribute):
+    result = check_eligibility({"age": 25}, _policy([attribute]))
+    assert _status(result, "eligibility") == ["needs_check"]
