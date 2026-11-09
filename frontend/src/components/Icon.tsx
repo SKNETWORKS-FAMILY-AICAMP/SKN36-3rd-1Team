@@ -15,7 +15,7 @@ function face(x: number, y: number, mood: Mood = 'smile'): string {
     : mood === 'open' ? `<path d="M${x - 2} ${y + 2.6} q2 3.4 4 0z" fill="#f08a96" ${S} stroke-width="1.2"/>`
     : `<path d="M${x - 2.2} ${y + 2.8} q1.1 1.3 2.2 0 q1.1 1.3 2.2 0" fill="none" ${S} stroke-width="1.3"/>`;
   const blush = (cx: number) => `<path d="M${cx - 2.6} ${y + 4.2} l1.6 -2.6M${cx - 0.4} ${y + 4.2} l1.6 -2.6M${cx + 1.8} ${y + 4.2} l1.6 -2.6" stroke="#ff8fa6" stroke-width="1.1" stroke-linecap="round"/>`;
-  return eye(x - 7) + eye(x + 7) + brows + mouth + blush(x - 11) + blush(x + 11);
+  return `<g class="icon-face">${eye(x - 7) + eye(x + 7) + brows + mouth + blush(x - 11) + blush(x + 11)}</g>`;
 }
 
 /** 작은 얼굴 (두 사람이 함께 있거나 아기처럼 머리가 작은 캐릭터용). gap: 두 눈 사이 절반 */
@@ -84,9 +84,33 @@ const SVG = {
 
 export type IconName = keyof typeof SVG;
 
-export const iconUrl = (name: IconName) =>
-  'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g stroke-width="1.9">${SVG[name]}</g></svg>`);
+const objectDetails: Partial<Record<IconName, string>> = {
+  briefcase: '<path d="M10 35q22 9 44 0"/><rect x="28" y="37" width="8" height="6" rx="2" fill="#fff0b8"/>',
+  house: '<rect x="21" y="34" width="10" height="10" rx="1" fill="#cfe7ff"/><path d="M26 34v10m-5-5h10"/><path d="M36 53V40h8v13" fill="#f8dcc0"/>',
+  books: '<path d="M16 45h23m-23 4h17"/>',
+  money: '<circle cx="32" cy="39" r="8" fill="#ffe27a"/><path d="m29 36 1.5 6 1.5-5 1.5 5 1.5-6m-7 3h8"/>',
+  bottle: '<path d="M35 33h6m-4 5h4m-6 5h6"/>',
+  cloud: '<path d="M18 39q5 3 11 1" stroke="#a6bac7"/>',
+  bulb: '<path d="m29 40-3-15 6 4 6-4-3 15" stroke="#9a713a"/>',
+  star: '<path d="M30 25q0 6-6 6 6 0 6 6 0-6 6-6-6 0-6-6z" fill="#fff5d6" stroke="#a47738"/>',
+};
 
-export function Icon({ name, className, style }: { name: IconName; className?: string; style?: CSSProperties }) {
-  return <img src={iconUrl(name)} alt="" aria-hidden="true" className={className} style={style} decoding="async" />;
+const iconUrls = new Map<string, string>();
+
+export function iconUrl(name: IconName, hideFace = false): string {
+  const key = hideFace ? `plain:${name}` : name;
+  const cached = iconUrls.get(key);
+  if (cached) return cached;
+
+  const detail = objectDetails[name];
+  const shapes = hideFace
+    ? SVG[name].replace(/<g class="icon-face">.*?<\/g>/g, detail ? `<g ${S} fill="none" stroke-width="1.3">${detail}</g>` : '')
+    : SVG[name];
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g stroke-width="1.9">${shapes}</g></svg>`);
+  iconUrls.set(key, url);
+  return url;
+}
+
+export function Icon({ name, className, style, hideFace }: { name: IconName; className?: string; style?: CSSProperties; hideFace?: boolean }) {
+  return <img src={iconUrl(name, hideFace)} alt="" aria-hidden="true" className={className} style={style} decoding="async" />;
 }

@@ -59,13 +59,7 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
               aria-invalid={!!ageError} aria-describedby={ageError ? 'age-error' : undefined} />
             <small>세</small>
           </label>
-          <label className={'cin' + (region ? ' filled' : '')}>
-            <Icon name="pin" className="ic" /><span className="lbl">지역</span>
-            <select id="region" value={region} onChange={(e) => onRegion(e.target.value)}>
-              <option value="">선택</option>
-              {REGIONS.map((r) => <option key={r}>{r}</option>)}
-            </select>
-          </label>
+          <RegionPicker region={region} onRegion={onRegion} />
         </div>
 
         {ageError && <p className="cond-error" id="age-error" role="alert">{ageError}</p>}
@@ -73,12 +67,43 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
         <div className="cats" id="cats">
           {categories.map((c, i) => (
             <TiltCard key={c.key} className={`cat k${i + 1}`} reduceMotion={reduceMotion} onClick={(el) => onAsk(c.question, el.querySelector('.em'))}>
-              <small>{c.sub}</small><b>{c.title}</b><span className="go-arr">질문하기 →</span><Icon name={c.icon} className="em" />
+              <small>{c.sub}</small><b>{c.title}</b><span className="go-arr">질문하기 →</span><Icon name={c.icon} className="em" hideFace />
             </TiltCard>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function RegionPicker({ region, onRegion }: Pick<Props, 'region' | 'onRegion'>) {
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+
+  return (
+    <div className="region-picker" onBlur={(e) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+    }} onKeyDown={(e) => {
+      if (open && e.key === 'Escape') {
+        setOpen(false);
+        trigger.current?.focus();
+      }
+    }}>
+      <button ref={trigger} id="region" type="button" className={'cin region-trigger' + (region ? ' filled' : '')}
+        aria-expanded={open} aria-controls="region-options" onClick={() => setOpen(!open)}>
+        <Icon name="pin" className="ic" /><span className="lbl">지역</span>
+        <span className="region-value">{region || '선택'}</span><span className="region-arrow" aria-hidden="true" />
+      </button>
+      <div id="region-options" className="region-options" hidden={!open} role="group" aria-label="지역 선택">
+        {['', ...REGIONS].map((value) => (
+          <button key={value} type="button" aria-pressed={region === value} onClick={() => {
+            onRegion(value);
+            setOpen(false);
+            trigger.current?.focus();
+          }}>{value || '선택 안 함'}</button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -110,7 +135,7 @@ function AskForm({ examples, onAsk, inputRef, reduceMotion }: {
 function Deco({ name, depth, style, delay = 0 }: { name: IconName; depth: number; style: CSSProperties; delay?: number }) {
   return (
     <span className="deco" data-depth={depth} style={style} aria-hidden="true">
-      <Icon name={name} style={{ animationDelay: `${delay}s` }} />
+      <Icon name={name} style={{ animationDelay: `${delay}s` }} hideFace />
     </span>
   );
 }

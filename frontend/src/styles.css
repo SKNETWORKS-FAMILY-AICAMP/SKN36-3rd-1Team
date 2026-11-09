@@ -3,25 +3,27 @@
    - 색은 :root 토큰으로만 바꾼다. */
 :root{
   color-scheme:light;
-  --bg:#fdf8f1; --bg-2:#f6eee3; --card:#fffcf7; --ink:#4a3a33; --ink-2:#7a675b; --ink-3:#8b7768; --line:#eadfcf;
-  --primary:#b07848; --primary-soft:#f4e8d9; --on-primary:#ffffff;
-  --hero-a:#f7ecdf; --hero-b:#fbf5ec; --ring-a:#e3c3a0; --ring-b:#f0dcc0; --ring-c:#d8e2cb;
-  --blob-a:rgba(227,195,160,.38); --blob-b:rgba(240,220,192,.40); --blob-c:rgba(216,226,203,.38);
-  --c1:#f5e6d3; --c2:#efe7dc; --c3:#f7eed4; --c4:#e7ecdd; --c5:#ede0d4;
+  --bg:#f8f8f3; --bg-2:#eeefe8; --card:#fdfdf9; --ink:#35443d; --ink-2:#53645b; --ink-3:#64736b; --line:#dce2d9;
+  --primary:#47675a; --primary-soft:#e0eee4; --on-primary:#ffffff;
+  --accent-light:#58786a; --accent-mid:#4d6e61;
+  --hero-a:#f0f4ec; --hero-b:#faf9f0; --ring-a:#cbded1; --ring-b:#f2e7ba; --ring-c:#dce9df;
+  --blob-a:rgba(207,225,211,.30); --blob-b:rgba(247,235,186,.28); --blob-c:rgba(216,232,223,.25);
+  --c1:#e3eee5; --c2:#f2f2eb; --c3:#f7edca; --c4:#dcebe2; --c5:#f1f0e8;
   --ok:#5b8a4f; --ok-bg:#e8f0e0; --warn:#b87517; --warn-bg:#fbefd8; --bad:#c45a4a; --bad-bg:#f8e4de; --muted-bg:#f1e8dc;
-  --shadow:0 3px 0 rgba(74,58,51,.06),0 12px 26px rgba(176,120,72,.12);
-  --sk:#f1e6d8; --sk-hi:#fbf4ea; --glow:rgba(176,120,72,.22);
-  --map-line:#eadfcf; --map-label:#8b7768; --map-node-edge:rgba(74,58,51,.3);
+  --shadow:0 3px 0 rgba(53,68,61,.06),0 12px 26px rgba(71,103,90,.12);
+  --sk:#e7ece4; --sk-hi:#f4f7f0; --glow:rgba(71,103,90,.20);
+  --map-line:#dce2d9; --map-label:#64736b; --map-node-edge:rgba(53,68,61,.3);
   /* SSOK 로고 */
   --logo-text:#6b3a1c; --logo-o:#c2702a; --logo-star:#f4b623; --logo-lens:#fffaf2;
   --logo-line:#6b3a1c; --logo-paper:#f9d48a; --logo-fold:#fff8ec; --logo-pocket:#f6a587; --logo-cheek:#f39a86;
-  --char-bg:#f6eee3;
+  --char-bg:#f3ede3;
 }
 
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#262019; --bg-2:#2e271f; --card:#352c24; --ink:#e8ddd0; --ink-2:#c4b3a1; --ink-3:#958473; --line:#473b30;
   --primary:#e2b98e; --primary-soft:#46382b; --on-primary:#262019;
+  --accent-light:#d4a373;
   --hero-a:#33291f; --hero-b:#2b241c; --blob-a:rgba(227,195,160,.10); --blob-b:rgba(240,220,192,.08); --blob-c:rgba(216,226,203,.08);
   --c1:#41342a; --c2:#3a332b; --c3:#433b28; --c4:#343a2d; --c5:#3d3129;
   --ok:#a5d394; --ok-bg:#2f3a29; --warn:#f2c27a; --warn-bg:#443622; --bad:#f0a092; --bad-bg:#46302a; --muted-bg:#3b3128;
@@ -83,7 +85,7 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .hero .wrap{position:relative;z-index:2}
 .hero h1{font-size:clamp(26px,3.6vw,40px);font-weight:600;letter-spacing:-.04em;line-height:1.3}
 .hero h1 .w{display:inline-block;opacity:0;transform:translateY(18px);animation:rise .7s cubic-bezier(.22,1,.36,1) forwards}
-.hero h1 b{font-weight:400;background:linear-gradient(90deg,var(--primary),#d4a373,#c98b5e,var(--primary));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .7s cubic-bezier(.22,1,.36,1) forwards,shine 6s linear infinite}
+.hero h1 b{font-weight:400;background:linear-gradient(90deg,var(--primary),var(--accent-light),var(--accent-mid),var(--primary));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .7s cubic-bezier(.22,1,.36,1) forwards,shine 6s linear infinite}
 @keyframes rise{to{opacity:1;transform:none}}
 @keyframes shine{to{background-position:300% 0}}
 .hero .sub{margin-top:10px;color:var(--ink-2);opacity:0;animation:rise .5s .25s cubic-bezier(.22,1,.36,1) forwards;transform:translateY(12px)}
@@ -100,17 +102,16 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .go:disabled{opacity:.35;cursor:default}
 .go:not(:disabled){animation:beat 1.6s ease-in-out infinite}
 .go:not(:disabled):hover{transform:scale(1.1) rotate(-8deg)}
-@keyframes beat{0%,100%{box-shadow:0 0 0 0 rgba(176,120,72,.4)}50%{box-shadow:0 0 0 10px rgba(176,120,72,0)}}
+@keyframes beat{0%,100%{box-shadow:0 0 0 0 var(--glow)}50%{box-shadow:0 0 0 10px transparent}}
 .go svg{width:20px;height:20px}
 .conds-in{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}
 .cin{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 6px 0 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;color:var(--ink-2);box-shadow:0 2px 6px rgba(40,48,110,.04);opacity:0;animation:pop .6s cubic-bezier(.34,1.56,.64,1) forwards;transition:border-color .2s,transform .2s}
-.cin:nth-child(1){animation-delay:.35s}.cin:nth-child(2){animation-delay:.42s}
+.conds-in>.cin{animation-delay:.35s}
 .cin:hover{transform:translateY(-2px)}
 .cin:focus-within{border-color:var(--primary)}
 .cin .ic{font-size:22px}
-.cin input,.cin select{border:0;outline:0;background:transparent;font-weight:650;color:var(--ink);height:32px}
+.cin input{border:0;outline:0;background:transparent;font-weight:650;color:var(--ink);height:32px}
 .cin input{width:64px}
-.cin select option{background:var(--card);color:var(--ink)}
 .cin .lbl{font-weight:600}
 .cin small{color:var(--ink-3);padding-right:8px}
 
@@ -193,7 +194,7 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .pfoot .note{font-size:12.5px;color:var(--ink-3);margin-right:auto}
 .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 18px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none;white-space:nowrap;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
 .btn:hover{transform:translateY(-2px)}
-.btn-p{background:linear-gradient(135deg,var(--primary),#d4a373);color:#fff;box-shadow:0 6px 16px var(--glow)}
+.btn-p{background:linear-gradient(135deg,var(--primary),var(--accent-light));color:#fff;box-shadow:0 6px 16px var(--glow)}
 .btn-p::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:sweep 2.8s ease-in-out infinite}
 @keyframes sweep{0%,60%{left:-80%}100%{left:140%}}
 .btn-o{border:1px solid var(--line);background:var(--card)}
@@ -277,11 +278,22 @@ h1,h2,h3,b,strong,.logo,nav.menu,.btn,.chip,.badge,.ghost,.cat b,.qb,.lbl,.go-ar
 .conds-in{margin-top:10px}
 .cin{height:48px;border:2px dashed color-mix(in srgb,var(--primary) 45%,var(--line));font-size:15px}
 .cin.filled{border-style:solid;border-color:var(--primary);background:var(--primary-soft)}
+.region-picker{position:relative;z-index:3;width:136px}
+.region-trigger,.region-options button{font-family:"Jua","Gowun Dodum",sans-serif;font-size:15px;font-weight:400;line-height:1.2}
+.region-trigger{width:100%;padding-right:12px;cursor:pointer;animation-delay:.42s}
+.region-value{flex:1;text-align:right;color:var(--ink)}
+.region-arrow{width:7px;height:7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg)}
+.region-trigger[aria-expanded="true"] .region-arrow{transform:translateY(2px) rotate(225deg)}
+.region-options{position:absolute;top:calc(100% + 6px);inset-inline:0;max-height:230px;overflow-y:auto;overscroll-behavior:contain;padding:5px;border:2px solid var(--line);border-radius:20px;background:var(--card);box-shadow:0 10px 24px rgba(40,26,14,.14)}
+.region-options button{display:block;width:100%;min-height:36px;padding:4px 10px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:16px;cursor:pointer}
+.region-options button:hover,.region-options button:focus-visible,.region-options button[aria-pressed="true"]{background:var(--primary-soft)}
+.region-options button[aria-pressed="true"]{color:var(--primary)}
 /* 확인 시점 */
 .fresh{margin-top:10px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
 .fresh::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}
 @media (max-width:600px){.mini-cond{display:none}.mini form{margin:0 10px 10px}}
-body.has-mini .board{padding-bottom:140px}
+/* 아래 입력창이 마지막 답변 카드의 버튼을 가리지 않게 넉넉히 띄운다 */
+body.has-mini .board{padding-bottom:180px}
 body.has-mini .toast{bottom:96px}
 
 /* 맨 위로 / 맨 아래로 버튼 */
