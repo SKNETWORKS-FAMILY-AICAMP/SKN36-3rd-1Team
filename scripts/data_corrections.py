@@ -62,7 +62,7 @@ def apply_source_review(policies: list, corrections: dict) -> None:
                     policy[f"{attribute}_{suffix}"] = item[field]
     dates, notes = corrections["application_dates"], corrections["application_status_notes"]
     assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
-    assert not set(dates) & set(notes), "날짜와 확인 메모는 함께 쓰지 않는다"
+    assert set(dates) & set(notes) <= set(corrections["application_notes_with_dates"]), "날짜와 확인 메모는 허용된 정책만 함께 쓴다"
     for policy in policies:
         item = dates.get(policy["policy_id"], {})
         if "start" in item:

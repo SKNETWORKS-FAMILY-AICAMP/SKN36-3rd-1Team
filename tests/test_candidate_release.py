@@ -233,7 +233,8 @@ class CandidateIntegrityTests(unittest.TestCase):
             if "application_start" in policy and "application_end" in policy:
                 self.assertLessEqual(policy["application_start"], policy["application_end"], policy_id)
         self.assertEqual((policies["POL_001"]["application_start"], policies["POL_001"]["application_end"]), ("2026-04-15", "2026-04-17"))
-        self.assertEqual(policies["POL_009"]["application_start"], "2026-03-30")
+        self.assertEqual((policies["POL_009"]["application_start"], policies["POL_009"]["application_end"]), ("2024-02-26", "2025-02-25"))
+        self.assertIn("2026-03-30", policies["POL_009"]["application_status_note"])
         self.assertNotIn("application_end", policies["POL_002"])
         for policy_id in ("POL_GOV_006", "POL_GOV_020"):
             self.assertNotIn("application_start", policies[policy_id])
