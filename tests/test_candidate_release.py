@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1006)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2519)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1005)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2455)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -180,14 +180,26 @@ class CandidateIntegrityTests(unittest.TestCase):
         corrections = dc.load_corrections()["income_condition_corrections"]
         groups = {row["group_id"]: row for row in rows(PACKAGE / "neo4j/nodes_condition_group.jsonl")}
         edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
-        self.assertEqual(len(corrections), 45)
+        self.assertEqual(len(corrections), 51)
         for item in corrections:
             with self.subTest(policy=item["policy_id"]):
                 if item["action"] == "remove":
                     self.assertNotIn(item["group_id"], groups)
                     self.assertFalse({(item["policy_id"], "REQUIRES_CONDITION", band) for band in item["before"]} & edges)
+                elif item["action"] == "remove_condition":
+                    self.assertFalse({(item["group_id"], "CONTAINS_CONDITION", band) for band in item["before"]} & edges)
+                    self.assertFalse({(item["policy_id"], "REQUIRES_CONDITION", band) for band in item["before"]} & edges)
                 else:
                     self.assertEqual(groups[item["group_id"]]["logic"], "UNKNOWN")
+
+    def test_age_corrections_from_official_recheck(self):
+        corrections = dc.load_corrections()
+        edges = {(r["source_id"], r["relation"], r["target_id"]) for r in rows(PACKAGE / "neo4j/relationships.jsonl")}
+        for item in corrections["age_condition_removals"]:
+            with self.subTest(policy=item["policy_id"]):
+                self.assertNotIn((item["policy_id"], "REQUIRES_CONDITION", item["condition_id"]), edges)
+                self.assertNotIn((f"GRP_{item['policy_id']}_ROOT", "CONTAINS_CONDITION", item["condition_id"]), edges)
+        self.assertIn(("POL_GOV_002", "REQUIRES_CONDITION", "COND_AGE_0_65"), edges)
 
     def test_detail_targets_stay_and_review_corrections_apply(self):
         chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")

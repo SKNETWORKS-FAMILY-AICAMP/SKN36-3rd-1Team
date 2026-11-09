@@ -337,6 +337,121 @@
       "policy_id": "POL_GOV_008",
       "condition_id": "COND_AGE_60_120",
       "evidence": "60세 이상은 고령가산금 대상만 해당. 한부모·장애 등 다른 가산금에는 적용되지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "condition_id": "COND_AGE_18_55",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_028",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_053",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "condition_id": "COND_AGE_18_64",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_044",
+      "condition_id": "COND_AGE_18_64",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "condition_id": "COND_AGE_18_60",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_026",
+      "condition_id": "COND_AGE_65_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_043",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_065",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_001",
+      "condition_id": "COND_AGE_19_35",
+      "evidence": "공식 페이지 재조회(2026-11-09): 만 35세 이하는 우대형의 취업준비생·사회초년생에만 해당하고 일반형에는 나이 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "condition_id": "COND_AGE_15_39",
+      "evidence": "공식 페이지 재조회(2026-11-09): 만 15~39세는 청년내일저축에만 해당하고 희망저축계좌 I·II에는 나이 기준 없음"
     }
   ],
   "new_condition_nodes": [
@@ -489,6 +604,16 @@
       "unit": "해당 여부",
       "evidence_location": "DOC_WORK24_001 지원 제외 대상",
       "description": "국민내일배움카드 참여 제외 조건 (제외: 기타 지원 필요성이 인정되지 않는 사람)"
+    },
+    {
+      "condition_id": "COND_AGE_0_65",
+      "type": "AGE",
+      "name": "연령조건: 만 65세 이하",
+      "operator": "BETWEEN",
+      "value": "0~65",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 65세 이하)"
     }
   ],
   "age_condition_replacements": [
@@ -512,6 +637,13 @@
       "after": "COND_AGE_6_64",
       "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세",
       "after_name": "연령조건: 만 6세~64세"
+    },
+    {
+      "policy_id": "POL_GOV_002",
+      "before": "COND_AGE_18_65",
+      "after": "COND_AGE_0_65",
+      "after_name": "연령조건: 만 65세 이하",
+      "evidence": "공식 페이지 재조회(2026-11-09): 사업신청 연도기준 만 65세 이하, 하한 없음. 0은 하한 없음 표기"
     }
   ],
   "group_condition_additions": [
@@ -711,7 +843,7 @@
     "POL_STG_NTS_001"
   ],
   "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -1410,6 +1542,82 @@
       ],
       "after": [],
       "evidence": "국민기초생활수급자는 여러 감면 대상 중 하나이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_001",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_001_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "evidence": "공식 페이지 재조회: 부부합산 연소득 등 금액 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_035",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_035_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "evidence": "공식 페이지 재조회: 최저보험료 이하 차상위계층 기준이며 중위소득 51~75% 근거 없음"
+    },
+    {
+      "policy_id": "POL_GOV_037",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_037_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_056_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_036",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_036_ROOT",
+      "before": [
+        "COND_INC_중위소득_0_50_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 수급자·차상위·한부모·중위소득 52% 이하 가구 등으로 0~50% 필수 조건과 맞지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_045",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_045_ROOT",
+      "before": [
+        "COND_INC_중위소득_0_50_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 저소득가정은 여러 대상 중 하나이며 소득 필수 조건이 아님"
     }
   ]
 }

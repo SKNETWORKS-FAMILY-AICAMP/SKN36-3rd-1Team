@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-09T21:19:34.860856+09:00",
+  "created_at": "2026-11-09T21:59:37.190131+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "5a98791969c3c95d4c0d3ee49a96921360baaa8f8be58ca97dcd1c4ed62a0a43",
+    "source_sha256": "d5ffd0a45dba0f5d3d35952d3432d558e1f9e343acac99223f4a18d32d9ad1e7",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -1639,6 +1639,16 @@
         "target_id": "LIFESTAGE_노년"
       },
       {
+        "source_id": "POL_GOV_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_35"
+      },
+      {
+        "source_id": "POL_GOV_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_65"
+      },
+      {
         "source_id": "POL_GOV_002",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
@@ -1706,6 +1716,11 @@
       {
         "source_id": "POL_GOV_003",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_GOV_003",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -1771,6 +1786,11 @@
       {
         "source_id": "POL_GOV_004",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_GOV_004",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -1897,6 +1917,11 @@
         "source_id": "POL_GOV_005",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_006",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
       },
       {
         "source_id": "POL_GOV_006",
@@ -2366,6 +2391,11 @@
       {
         "source_id": "POL_GOV_018",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_55"
+      },
+      {
+        "source_id": "POL_GOV_018",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -2431,6 +2461,11 @@
       {
         "source_id": "POL_GOV_019",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "POL_GOV_019",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -2496,6 +2531,11 @@
       {
         "source_id": "POL_GOV_020",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "POL_GOV_020",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -2557,6 +2597,11 @@
         "source_id": "POL_GOV_020",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_021",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "POL_GOV_021",
@@ -2819,6 +2864,16 @@
         "target_id": "COND_HH_확대가족"
       },
       {
+        "source_id": "POL_GOV_026",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_65_120"
+      },
+      {
+        "source_id": "POL_GOV_027",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_64"
+      },
+      {
         "source_id": "POL_GOV_027",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
@@ -2882,6 +2937,11 @@
         "source_id": "POL_GOV_027",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_028",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "POL_GOV_028",
@@ -3121,6 +3181,11 @@
       {
         "source_id": "POL_GOV_034",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "POL_GOV_034",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -3262,6 +3327,21 @@
         "source_id": "POL_GOV_036",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_036",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_037",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_037",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
       },
       {
         "source_id": "POL_GOV_038",
@@ -3436,6 +3516,11 @@
       {
         "source_id": "POL_GOV_043",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "POL_GOV_043",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -3461,6 +3546,11 @@
       {
         "source_id": "POL_GOV_044",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_64"
+      },
+      {
+        "source_id": "POL_GOV_044",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -3539,6 +3629,16 @@
         "target_id": "COND_HH_확대가족"
       },
       {
+        "source_id": "POL_GOV_045",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_046",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
         "source_id": "POL_GOV_046",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
@@ -3617,6 +3717,11 @@
         "source_id": "POL_GOV_047",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_048",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "POL_GOV_048",
@@ -3787,6 +3892,11 @@
         "source_id": "POL_GOV_050",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_051",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "POL_GOV_051",
@@ -3896,6 +4006,11 @@
       {
         "source_id": "POL_GOV_053",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "POL_GOV_053",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -3961,6 +4076,11 @@
       {
         "source_id": "POL_GOV_056",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_GOV_056",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -3997,6 +4117,31 @@
         "source_id": "POL_GOV_056",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_056",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_056",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "POL_GOV_056",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "POL_GOV_056",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
+      },
+      {
+        "source_id": "POL_GOV_057",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_60"
       },
       {
         "source_id": "POL_GOV_057",
@@ -4066,6 +4211,11 @@
       {
         "source_id": "POL_GOV_058",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "POL_GOV_058",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
       },
       {
@@ -4232,6 +4382,11 @@
         "source_id": "POL_GOV_060",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "POL_GOV_061",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
       },
       {
         "source_id": "POL_GOV_061",
@@ -4421,6 +4576,11 @@
       {
         "source_id": "POL_GOV_065",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "POL_GOV_065",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -4442,6 +4602,16 @@
         "source_id": "POL_GOV_065",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "GRP_POL_GOV_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_35"
+      },
+      {
+        "source_id": "GRP_POL_GOV_002_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_65"
       },
       {
         "source_id": "GRP_POL_GOV_002_ROOT",
@@ -4521,6 +4691,11 @@
       {
         "source_id": "GRP_POL_GOV_003_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_003_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -4592,6 +4767,11 @@
         "source_id": "GRP_POL_GOV_003_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_004_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
       },
       {
         "source_id": "GRP_POL_GOV_004_ROOT",
@@ -4742,6 +4922,11 @@
         "source_id": "GRP_POL_GOV_005_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_006_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
       },
       {
         "source_id": "GRP_POL_GOV_006_ROOT",
@@ -5286,6 +5471,11 @@
       {
         "source_id": "GRP_POL_GOV_018_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_55"
+      },
+      {
+        "source_id": "GRP_POL_GOV_018_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -5357,6 +5547,11 @@
         "source_id": "GRP_POL_GOV_018_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_019_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "GRP_POL_GOV_019_ROOT",
@@ -5436,6 +5631,11 @@
       {
         "source_id": "GRP_POL_GOV_020_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "GRP_POL_GOV_020_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -5507,6 +5707,11 @@
         "source_id": "GRP_POL_GOV_020_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_021_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "GRP_POL_GOV_021_ROOT",
@@ -5809,6 +6014,16 @@
         "target_id": "COND_HH_확대가족"
       },
       {
+        "source_id": "GRP_POL_GOV_026_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_65_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_027_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_64"
+      },
+      {
         "source_id": "GRP_POL_GOV_027_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
@@ -5882,6 +6097,11 @@
         "source_id": "GRP_POL_GOV_027_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_028_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "GRP_POL_GOV_028_ROOT",
@@ -6156,6 +6376,11 @@
       {
         "source_id": "GRP_POL_GOV_034_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "GRP_POL_GOV_034_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -6280,6 +6505,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_036_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_036_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_036_OR_HH"
       },
@@ -6317,6 +6547,21 @@
         "source_id": "GRP_POL_GOV_036_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_037_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_037_OR_INC"
+      },
+      {
+        "source_id": "GRP_POL_GOV_037_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_037_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
       },
       {
         "source_id": "GRP_POL_GOV_038_ROOT",
@@ -6515,6 +6760,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_043_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_043_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_043_OR_INC"
       },
@@ -6542,6 +6792,11 @@
         "source_id": "GRP_POL_GOV_043_OR_INC",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "GRP_POL_GOV_044_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_64"
       },
       {
         "source_id": "GRP_POL_GOV_044_ROOT",
@@ -6595,6 +6850,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_045_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_045_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_045_OR_HH"
       },
@@ -6632,6 +6892,11 @@
         "source_id": "GRP_POL_GOV_045_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_046_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_15_39"
       },
       {
         "source_id": "GRP_POL_GOV_046_ROOT",
@@ -6722,6 +6987,11 @@
         "source_id": "GRP_POL_GOV_047_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_048_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "GRP_POL_GOV_048_ROOT",
@@ -6921,6 +7191,11 @@
       {
         "source_id": "GRP_POL_GOV_051_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "GRP_POL_GOV_051_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
       },
       {
@@ -7040,6 +7315,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_053_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
+      },
+      {
+        "source_id": "GRP_POL_GOV_053_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_053_OR_INC"
       },
@@ -7116,7 +7396,37 @@
       {
         "source_id": "GRP_POL_GOV_056_ROOT",
         "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_ROOT",
+        "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_056_OR_INC"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_056_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
       },
       {
         "source_id": "GRP_POL_GOV_056_ROOT",
@@ -7157,6 +7467,11 @@
         "source_id": "GRP_POL_GOV_056_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_057_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_60"
       },
       {
         "source_id": "GRP_POL_GOV_057_ROOT",
@@ -7232,6 +7547,11 @@
         "source_id": "GRP_POL_GOV_057_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_058_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_44"
       },
       {
         "source_id": "GRP_POL_GOV_058_ROOT",
@@ -7427,6 +7747,11 @@
         "source_id": "GRP_POL_GOV_060_OR_HH",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_확대가족"
+      },
+      {
+        "source_id": "GRP_POL_GOV_061_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
       },
       {
         "source_id": "GRP_POL_GOV_061_ROOT",
@@ -7640,6 +7965,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_065_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_065_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_065_OR_INC"
       },
@@ -7671,6 +8001,11 @@
     ],
     "replacement_relationships": [
       {
+        "source_id": "POL_GOV_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_0_65"
+      },
+      {
         "source_id": "POL_GOV_011",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_AGE_12_24"
@@ -7684,6 +8019,11 @@
         "source_id": "POL_GOV_023",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_AGE_6_64"
+      },
+      {
+        "source_id": "GRP_POL_GOV_002_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_0_65"
       },
       {
         "source_id": "GRP_POL_GOV_011_ROOT",
@@ -7802,7 +8142,8 @@
       "COND_EXCL_OTHER_SUBSIDY",
       "COND_EXCL_FRAUD_RESTRICTED",
       "COND_EXCL_FRAUD_UNPAID",
-      "COND_EXCL_NO_NEED"
+      "COND_EXCL_NO_NEED",
+      "COND_AGE_0_65"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",
@@ -7855,6 +8196,7 @@
       "GRP_POL_GOV_034_OR_INC",
       "GRP_POL_GOV_035_OR_HH",
       "GRP_POL_GOV_036_OR_HH",
+      "GRP_POL_GOV_037_OR_INC",
       "GRP_POL_GOV_038_OR_INC",
       "GRP_POL_GOV_040_OR_HH",
       "GRP_POL_GOV_041_OR_HH",
@@ -7876,6 +8218,7 @@
       "GRP_POL_GOV_053_OR_INC",
       "GRP_POL_GOV_055_OR_HH",
       "GRP_POL_GOV_056_OR_HH",
+      "GRP_POL_GOV_056_OR_INC",
       "GRP_POL_GOV_057_OR_HH",
       "GRP_POL_GOV_057_OR_INC",
       "GRP_POL_GOV_058_OR_HH",

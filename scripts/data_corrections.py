@@ -102,6 +102,10 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
         if item["action"] == "remove":
             remove.add(("CONTAINS_GROUP", f"GRP_{item['policy_id']}_ROOT", item["group_id"]))
             remove.update(("REQUIRES_CONDITION", item["policy_id"], condition_id) for condition_id in item["before"])
+        elif item["action"] == "remove_condition":
+            for condition_id in item["before"]:
+                remove.add(("REQUIRES_CONDITION", item["policy_id"], condition_id))
+                remove.add(("CONTAINS_CONDITION", item["group_id"], condition_id))
     for item in corrections["life_stage_corrections"]:
         for stage in set(item["before"]) - set(item["after"]) - {"unknown"}:
             remove.add(("APPLIES_TO_LIFESTAGE", item["policy_id"], f"LIFESTAGE_{stage}"))
