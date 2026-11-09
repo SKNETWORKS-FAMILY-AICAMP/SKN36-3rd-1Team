@@ -5,11 +5,14 @@
 import { KIND_ORDER } from '../config/graph';
 import type { Neighbor } from './graphModel';
 
-export const MAP_WIDTH = 760;
-export const MAP_HEIGHT = 520;
+/** 지도를 페이지 위쪽에 가로로 넓게 쓰므로 가로가 긴 판에 타원으로 놓는다 */
+export const MAP_WIDTH = 1000;
+export const MAP_HEIGHT = 540;
 const CENTER = { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 };
 const RADIUS_OUTER = 205;
-const RADIUS_INNER = 150;
+const RADIUS_INNER = 145;
+/** 가로 방향으로 더 벌려 이름이 덜 겹치게 한다 */
+const WIDE = 1.75;
 /** 이웃이 이보다 많으면 안쪽·바깥쪽 원을 번갈아 써서 이름이 겹치지 않게 한다 */
 const TWO_RING_FROM = 12;
 
@@ -29,7 +32,7 @@ export function layoutNeighbors(neighbors: Neighbor[]): { center: { x: number; y
     // 12시 방향부터 시계 방향으로 고르게 나눈다
     const angle = -Math.PI / 2 + (2 * Math.PI * i) / Math.max(sorted.length, 1);
     const r = twoRings && i % 2 === 1 ? RADIUS_INNER : RADIUS_OUTER;
-    return { ...n, x: CENTER.x + r * Math.cos(angle), y: CENTER.y + r * Math.sin(angle) };
+    return { ...n, x: CENTER.x + r * WIDE * Math.cos(angle), y: CENTER.y + r * Math.sin(angle) };
   });
   return { center: CENTER, placed };
 }

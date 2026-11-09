@@ -7,10 +7,12 @@ import { PERSONAS, type Persona } from './config/personas';
 import { HISTORY_MAX_ITEMS } from './config/request';
 import { describeProfile, parseProfile } from './lib/parseProfile';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
+import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { checkAge } from './lib/validate';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
 import type { IconName } from './components/Icon';
 
@@ -191,6 +193,9 @@ export default function App() {
   /** 처음으로: 주소의 화면 표시(#)까지 지우고 새로 시작한다 */
   const restart = () => { window.history.replaceState(null, '', location.pathname + location.search); location.reload(); };
 
+  // 상담에서 가장 최근에 나온 정책: 생애주기·관계 지도가 이어서 보여 준다
+  const recent = useMemo(() => recentPoliciesFromTurns(turns), [turns]);
+
   const profileText = describeProfile(profile);
   const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
 
@@ -219,11 +224,13 @@ export default function App() {
       </header>
 
       {route.page !== 'ask' ? (
-        <Suspense fallback={<section className="board"><div className="wrap map-msg" role="status">화면을 여는 중이에요…</div></section>}>
-          {route.page === 'map'
-            ? <PolicyMap policyId={route.policyId} />
-            : <LifeTimeline stageName={route.stage} myAge={profile.age} onAsk={askFromOtherPage} />}
-        </Suspense>
+        <ErrorBoundary resetKey={location.hash}>
+          <Suspense fallback={<section className="board"><div className="wrap map-msg" role="status">화면을 여는 중이에요…</div></section>}>
+            {route.page === 'map'
+              ? <PolicyMap policyId={route.policyId} recent={recent} />
+              : <LifeTimeline stageName={route.stage} myAge={profile.age} onAsk={askFromOtherPage} recent={recent} />}
+          </Suspense>
+        </ErrorBoundary>
       ) : (<>
       <Hero age={age} ageError={ageError} region={region} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />

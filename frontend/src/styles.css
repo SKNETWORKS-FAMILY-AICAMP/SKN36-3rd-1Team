@@ -341,11 +341,10 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;font-size:13.5px;color:var(--ink-3)}
 .map-msg{padding:40px 0;text-align:center;color:var(--ink-3)}
 .map-note{margin-top:14px;font-size:13px;color:var(--ink-3)}
-.map-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
-.map-side{position:sticky;top:84px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 110px)}
+.map-side{display:flex;flex-direction:column;gap:8px;min-width:0}
 .map-search{height:44px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);outline:0}
 .map-search:focus{border-color:var(--primary)}
-.map-list{list-style:none;margin:0;padding:0;overflow:auto;border:2px solid var(--line);border-radius:16px;background:var(--card)}
+.map-list{list-style:none;margin:0;padding:0;overflow:auto;max-height:420px;border:2px solid var(--line);border-radius:16px;background:var(--card)}
 .map-list a{display:block;padding:10px 12px;text-decoration:none;border-bottom:1px solid var(--line)}
 .map-list a:hover{background:var(--bg-2)}
 .map-list a[aria-current="page"]{background:var(--primary-soft)}
@@ -356,15 +355,20 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:360px;padding:30px;text-align:center;border:2px dashed var(--line);border-radius:20px;background:var(--bg-2);color:var(--ink-3)}
 .map-empty img{width:60px;height:60px}
 .map-empty b{color:var(--ink-2);font-size:17px}
-.map-main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;min-width:0}
-.map-head{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.map-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+/* 지도 아래: 정책 찾기 | 상세 정보 | 자격 조건 */
+.map-below{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:4px}
+.map-tree{padding:16px;border:2px solid var(--line);border-radius:18px;background:var(--card);min-width:0}
+.map-tree h3{font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.map-tree h3 .ic{width:20px;height:20px}
+.map-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 .map-head b{font-size:20px;line-height:1.35}
 .map-head small{color:var(--ink-3);font-size:13.5px}
 .map-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
 .map-stage{min-width:0}
 .map-canvas{position:relative;min-width:0;overflow:hidden;border:2px solid var(--line);border-radius:22px;background:radial-gradient(circle at center,var(--card),var(--bg-2));padding:8px}
 .map-canvas:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
-.map-canvas svg{display:block;width:100%;height:auto;cursor:grab;touch-action:none;user-select:none}
+.map-canvas svg{display:block;width:100%;height:auto;max-height:72vh;cursor:grab;touch-action:none;user-select:none}
 .map-canvas svg:active{cursor:grabbing}
 .map-canvas.full{display:flex;flex-direction:column;justify-content:center;border-radius:0;padding:24px}
 .map-canvas.full svg{height:calc(100vh - 90px)}
@@ -411,8 +415,7 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .gn.k-policy:not(.center) circle{fill:var(--primary-soft)}
 
 @media (max-width:960px){
-  .map-grid,.map-main{grid-template-columns:minmax(0,1fr)}
-  .map-side{position:static;max-height:none}
+  .map-below{grid-template-columns:minmax(0,1fr)}
   .map-list{max-height:260px}
   .persona-row{grid-template-columns:minmax(0,1fr)}
 }
@@ -481,3 +484,19 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .stage-chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 8px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-family:"Jua","Gowun Dodum",sans-serif;font-size:12.5px;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
 .stage-chip::before{content:"";width:7px;height:9px;border-radius:7px 0 7px 0;background:currentColor;opacity:.75}
 .stage-chip:hover{transform:translateY(-2px);box-shadow:0 4px 10px var(--glow)}
+
+/* 화면 오류 안내(ErrorBoundary)의 돌아가기 버튼 */
+.err-back{margin-top:12px}
+
+/* ===== 상담에서 이어진 표시 (관계 지도 배너, 생애주기 표시) ===== */
+.from-chat{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;padding:10px 14px;border-radius:16px;background:var(--primary-soft);border:1.5px solid color-mix(in srgb,var(--primary) 35%,transparent)}
+.from-chat-q{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);margin-right:4px}
+.from-chat-q .ic{width:20px;height:20px}
+.from-chat a{height:30px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);text-decoration:none;font-family:"Jua","Gowun Dodum",sans-serif;font-size:13.5px;color:var(--ink-2);transition:all .2s}
+.from-chat a:hover{border-color:var(--primary);color:var(--primary)}
+.from-chat a[aria-current="page"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.life-chat{position:absolute;top:2px;right:6px;z-index:2;font-family:"Jua","Gowun Dodum",sans-serif;font-size:11.5px;padding:1px 8px;border-radius:999px;background:var(--primary);color:var(--on-primary)}
+.life-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-right:-2px}
+.life-cat.on .life-dot{background:var(--on-primary)}
+.badge.b-chat{background:var(--primary);color:var(--on-primary)}
+.from-chat-q small{font-size:12px;color:var(--ink-3);margin-left:4px}

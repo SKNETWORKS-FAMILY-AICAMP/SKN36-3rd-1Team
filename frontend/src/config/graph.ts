@@ -41,6 +41,12 @@ export const LOGIC_LABEL: Record<string, string> = {
 /** 지도에서 정책 둘레에 놓는 순서 (같은 종류끼리 모이게) */
 export const KIND_ORDER: NodeKind[] = ['group', 'organization', 'category', 'region', 'target', 'lifestage', 'document', 'policy'];
 
+/** 상담 질문과 이름·분야가 비슷한 정책을 관계 지도 위에 몇 개까지 보여 줄지 (답변에 실제 정책이 없을 때) */
+export const CHAT_MATCH_LIMIT = 3;
+
+/** 질문 단어로 정책을 찾을 때 겹친 위치별 점수 (이름이 가장 강한 신호) */
+export const QUESTION_MATCH_WEIGHT = { name: 3, area: 2, detail: 1 } as const;
+
 /** 정책 검색 결과 최대 개수 */
 export const POLICY_SEARCH_LIMIT = 40;
 

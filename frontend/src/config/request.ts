@@ -9,6 +9,9 @@ export const ASK_TIMEOUT_MS = 60_000;
 /** 함께 보내는 대화 이력 개수. 계약: 최근 10개까지 (백엔드도 최근 10개만 쓴다). */
 export const HISTORY_MAX_ITEMS = 10;
 
+/** 생애주기 화면의 '이 정책 물어보기'가 상담 화면에 보내는 질문 */
+export const policyQuestion = (policyName: string) => `${policyName} 지원 대상이랑 신청 방법, 필요한 서류 알려줘`;
+
 /** 기다리는 동안 바꿔 보여 줄 안내 문구. after: 요청 후 지난 시간(ms) */
 export const LOADING_STAGES = [
   { after: 0, text: '공식 원문을 찾고 있어요' },

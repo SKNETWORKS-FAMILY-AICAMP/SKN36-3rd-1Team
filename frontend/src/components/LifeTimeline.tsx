@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LIFE_STAGES } from '../config/graph';
+import { policyQuestion } from '../config/request';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
 import {
   formatAgeRange, groupByCategory, lifeStageSummary, stageForAge, type AgeRange, type LifeStage, type StagePolicy,
 } from '../graph/lifeStages';
 import { lifeHref, mapHref } from '../lib/route';
+import type { RecentPolicies } from '../lib/recentPolicies';
 import { safeHttpUrl } from '../lib/validate';
 import { Icon } from './Icon';
 
@@ -15,12 +17,11 @@ type LoadState = { kind: 'loading' } | { kind: 'error'; message: string } | { ki
  * 생애단계는 데이터의 분류라 넓게 붙은 정책도 있다. 나이 조건이 확인된 정책과 분류만 있는 정책을 구분해 표시하고,
  * 어느 쪽도 자격 확정으로 표현하지 않는다.
  */
-/** 정책 줄의 '이 정책 물어보기'가 상담 화면에 보낼 질문 */
-const askAboutPolicy = (name: string) => `${name} 지원 대상이랑 신청 방법, 필요한 서류 알려줘`;
-
-export default function LifeTimeline({ stageName, myAge, onAsk }: {
+export default function LifeTimeline({ stageName, myAge, onAsk, recent }: {
   stageName: string | null;
   myAge: number | null;
+  /** 상담에서 가장 최근에 나온 정책. 그 정책이 들어 있는 단계·분야를 먼저 열고 표시한다 */
+  recent: RecentPolicies | null;
   /** 상담 화면으로 가서 질문을 보낸다 */
   onAsk: (question: string) => void;
 }) {
@@ -46,21 +47,29 @@ export default function LifeTimeline({ stageName, myAge, onAsk }: {
         {state.kind === 'loading' && <div className="map-msg" role="status">정책 데이터를 불러오고 있어요…</div>}
         {state.kind === 'error' && <div className="notice bad"><Icon name="warning" /><div><b>타임라인을 열지 못했어요</b><p>{state.message}</p></div></div>}
         {state.kind === 'ready' && summary && (
-          <Timeline data={state.data} summary={summary} stageName={stageName} myAge={myAge} onAsk={onAsk} />
+          <Timeline data={state.data} summary={summary} stageName={stageName} myAge={myAge} onAsk={onAsk} recent={recent} />
         )}
       </div>
     </section>
   );
 }
 
-function Timeline({ data, summary, stageName, myAge, onAsk }: {
+function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
   data: GraphDataset; summary: ReturnType<typeof lifeStageSummary>; stageName: string | null; myAge: number | null;
-  onAsk: (question: string) => void;
+  onAsk: (question: string) => void; recent: RecentPolicies | null;
 }) {
   const { stages, unclassified } = summary;
   const myStage = stageForAge(stages, myAge);
-  // 고른 단계 → 내 나이 단계 → 정책이 가장 많은 단계 순으로 연다
+  const recentIds = useMemo(() => new Set(recent?.policies.map((p) => p.id) ?? []), [recent]);
+  // 상담 정책이 들어 있는 단계: 렌더마다 단계별 정책을 다시 훑지 않게 한 번만 계산한다
+  const recentStageIds = useMemo(
+    () => new Set(stages.filter((s) => s.policies.some((p) => recentIds.has(p.policy.id))).map((s) => s.id)),
+    [stages, recentIds],
+  );
+  const hasRecent = (s: LifeStage) => recentStageIds.has(s.id);
+  // 고른 단계 → 방금 상담에 나온 정책이 있는 단계 → 내 나이 단계 → 정책이 가장 많은 단계 순으로 연다
   const selected = stages.find((s) => s.name === stageName)
+    ?? stages.find(hasRecent)
     ?? stages.find((s) => s.id === myStage)
     ?? [...stages].sort((a, b) => b.policies.length - a.policies.length)[0];
   const withAge = selected.policies.filter((p) => limitedAges(p.ages).length > 0).length;
@@ -85,6 +94,7 @@ function Timeline({ data, summary, stageName, myAge, onAsk }: {
             <li key={s.id}>
               <a href={lifeHref(s.name)} className={'life-stage' + (on ? ' on' : '')} aria-current={on ? 'step' : undefined}>
                 {s.id === myStage && <span className="life-me">지금 나 · {myAge}세</span>}
+                {hasRecent(s) && <span className="life-chat" title="방금 상담에서 나온 정책이 있어요">상담</span>}
                 <Icon name={icon} className="ic" />
                 <b>{s.name}</b>
                 <small>{s.range ? stageRangeText(s.range) : '나이 범위 미상'}</small>
@@ -96,7 +106,7 @@ function Timeline({ data, summary, stageName, myAge, onAsk }: {
       </ol>
 
       {/* 단계를 바꾸면 펼친 분야를 닫는다 (key로 새로 그림) */}
-      <StagePanel key={selected.id} stage={selected} withAge={withAge} onAsk={onAsk} />
+      <StagePanel key={selected.id} stage={selected} withAge={withAge} onAsk={onAsk} recentIds={recentIds} />
 
       <p className="life-foot">
         데이터 {data.version}{data.status ? ` · ${data.status}` : ''} · 정책 {data.index.policies.length.toLocaleString('ko-KR')}개 중 생애단계가 연결된 정책만 보여 드려요 (미분류 {unclassified}개)
@@ -108,9 +118,13 @@ function Timeline({ data, summary, stageName, myAge, onAsk }: {
 /**
  * 고른 생애단계의 정책: 처음에는 분야 칩만 보여 주고, 누른 분야 하나만 펼친다 (한 번에 정보가 쏟아지지 않게).
  */
-function StagePanel({ stage, withAge, onAsk }: { stage: LifeStage; withAge: number; onAsk: (question: string) => void }) {
+function StagePanel({ stage, withAge, onAsk, recentIds }: {
+  stage: LifeStage; withAge: number; onAsk: (question: string) => void; recentIds: Set<string>;
+}) {
   const groups = useMemo(() => groupByCategory(stage.policies), [stage]);
-  const [open, setOpen] = useState<string | null>(null);
+  const isRecent = (g: { items: StagePolicy[] }) => g.items.some((i) => recentIds.has(i.policy.id));
+  // 방금 상담에 나온 정책이 있는 분야는 처음부터 펼쳐 둔다
+  const [open, setOpen] = useState<string | null>(() => groups.find(isRecent)?.category ?? null);
   // 펼친 정책 하나 (분야를 바꾸면 닫는다)
   const [openPolicy, setOpenPolicy] = useState<string | null>(null);
   const opened = groups.find((g) => g.category === open);
@@ -132,7 +146,7 @@ function StagePanel({ stage, withAge, onAsk }: { stage: LifeStage; withAge: numb
               return (
                 <button key={g.category} type="button" className={'life-cat' + (on ? ' on' : '')} aria-expanded={on}
                   onClick={() => { setOpen(on ? null : g.category); setOpenPolicy(null); }}>
-                  {g.category}<span>{g.items.length}</span>
+                  {isRecent(g) && <i className="life-dot" aria-label="상담에서 나온 정책 있음" />}{g.category}<span>{g.items.length}</span>
                 </button>
               );
             })}
@@ -141,7 +155,7 @@ function StagePanel({ stage, withAge, onAsk }: { stage: LifeStage; withAge: numb
 
       {opened
         ? <ul className="life-list" aria-label={`${opened.category} 정책`}>{opened.items.map((item) => (
-            <PolicyRow key={item.policy.id} item={item} open={openPolicy === item.policy.id}
+            <PolicyRow key={item.policy.id} item={item} fromChat={recentIds.has(item.policy.id)} open={openPolicy === item.policy.id}
               onToggle={() => setOpenPolicy(openPolicy === item.policy.id ? null : item.policy.id)} onAsk={onAsk} />
           ))}</ul>
         : groups.length > 0 && <p className="life-pick">분야를 누르면 정책 목록이 펼쳐져요</p>}
@@ -159,8 +173,8 @@ const limitedAges = (ages: AgeRange[]) => ages.filter((a) => !(a.min === 0 && a.
  * 정책 한 줄. 누르면 그 자리에서 데이터에 정리된 요약(대상·내용·기간)과
  * 원문 보기 / 이 정책 물어보기 / 관계 지도 보기 버튼을 펼친다.
  */
-function PolicyRow({ item, open, onToggle, onAsk }: {
-  item: StagePolicy; open: boolean; onToggle: () => void; onAsk: (question: string) => void;
+function PolicyRow({ item, fromChat, open, onToggle, onAsk }: {
+  item: StagePolicy; fromChat: boolean; open: boolean; onToggle: () => void; onAsk: (question: string) => void;
 }) {
   const { policy } = item;
   const ages = [...new Set(limitedAges(item.ages).map((a) => formatAgeRange(a).replace('만 ', '')))];
@@ -173,6 +187,7 @@ function PolicyRow({ item, open, onToggle, onAsk }: {
     <li className={open ? 'open' : undefined}>
       <button type="button" className="life-row" aria-expanded={open} aria-controls={detailId} onClick={onToggle}>
         <span className="life-name"><b>{policy.label}</b>{region && <small> · {region}</small>}</span>
+        {fromChat && <span className="badge b-chat">상담에서 나옴</span>}
         {ages.length > 0 && <span className="badge b-age">나이 {ages.join(', ')}</span>}
         <span className="life-caret" aria-hidden="true">⌄</span>
       </button>
@@ -184,7 +199,7 @@ function PolicyRow({ item, open, onToggle, onAsk }: {
           {rows.every(([, v]) => !v) && <p className="map-dim">데이터에 정리된 요약이 없어요. 원문에서 확인해 주세요.</p>}
           <p className="life-dim">데이터에 정리된 내용이에요. 최종 자격과 신청 가능 여부는 공식 원문에서 확인해 주세요.</p>
           <div className="life-actions">
-            <button type="button" className="btn btn-p" onClick={() => onAsk(askAboutPolicy(policy.label))}>이 정책 물어보기</button>
+            <button type="button" className="btn btn-p" onClick={() => onAsk(policyQuestion(policy.label))}>이 정책 물어보기</button>
             {source && <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>}
             <a className="btn btn-o" href={mapHref(policy.id)}>관계 지도 보기</a>
           </div>

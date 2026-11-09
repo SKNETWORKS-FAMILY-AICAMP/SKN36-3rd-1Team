@@ -2,7 +2,7 @@ import {
   useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
 } from 'react';
 import {
-  DRAG_CLICK_TOLERANCE, KIND_LABEL, LOGIC_LABEL, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT, RELATION_LABEL, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
+  CHAT_MATCH_LIMIT, DRAG_CLICK_TOLERANCE, KIND_LABEL, LOGIC_LABEL, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT, RELATION_LABEL, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
 } from '../config/graph';
 import {
   conditionTrees, countConditions, policyNeighbors, searchPolicies,
@@ -12,7 +12,9 @@ import {
   INITIAL_VIEW, MAP_HEIGHT, MAP_WIDTH, layoutNeighbors, shortLabel, zoomAt, zoomCenter, type MapView, type PlacedNeighbor,
 } from '../graph/graphLayout';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
+import { policiesForDocuments, policiesForQuestion } from '../graph/relatedPolicies';
 import { mapHref } from '../lib/route';
+import type { RecentPolicies } from '../lib/recentPolicies';
 import { safeHttpUrl } from '../lib/validate';
 import { Icon } from './Icon';
 
@@ -22,7 +24,11 @@ type LoadState = { kind: 'loading' } | { kind: 'error'; message: string } | { ki
  * 정책 관계 지도: 정책 하나를 가운데 두고 Neo4j에 저장된 기관·지역·대상·근거 문서·자격 조건 연결을 보여 준다.
  * 실제 팀 데이터(data/releases)를 그대로 읽는다. 그래프 연결은 정책 구조이지 자격 확정이 아니다.
  */
-export default function PolicyMap({ policyId }: { policyId: string | null }) {
+export default function PolicyMap({ policyId, recent }: {
+  policyId: string | null;
+  /** 상담 화면에서 가장 최근 답변으로 나온 정책. 주소에 정책이 없으면 이 중 첫 정책을 연다 */
+  recent: RecentPolicies | null;
+}) {
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -35,8 +41,12 @@ export default function PolicyMap({ policyId }: { policyId: string | null }) {
     return () => { alive = false; };
   }, []);
 
+  // 방금 상담과 이어지는 정책: 답변의 정책·출처 문서 → (없으면) 질문과 비슷한 정책 검색
+  const fromChat = useMemo(() => (state.kind === 'ready' && recent ? chatPolicies(state.data, recent) : null), [state, recent]);
+  const openId = policyId ?? fromChat?.policies[0]?.id ?? null;
+
   // 다른 정책으로 바뀌면 선택한 노드를 정책 자신으로 되돌린다
-  useEffect(() => { setSelectedId(policyId); }, [policyId]);
+  useEffect(() => { setSelectedId(openId); }, [openId]);
 
   if (state.kind === 'loading') {
     return <MapShell><div className="map-msg" role="status">정책 관계 데이터를 불러오고 있어요…</div></MapShell>;
@@ -46,23 +56,47 @@ export default function PolicyMap({ policyId }: { policyId: string | null }) {
   }
 
   const { index } = state.data;
-  const policy = policyId ? index.nodes.get(policyId) : undefined;
+  const policy = openId ? index.nodes.get(openId) : undefined;
+  const search = <PolicySearch data={state.data} query={query} onQuery={setQuery} currentId={policy?.id ?? null} />;
   return (
     <MapShell data={state.data}>
-      <div className="map-grid">
-        <PolicySearch data={state.data} query={query} onQuery={setQuery} currentId={policy?.id ?? null} />
-        {policy && policy.kind === 'policy'
-          ? <PolicyGraph data={state.data} policy={policy} selectedId={selectedId ?? policy.id} onSelect={setSelectedId} />
-          : (
+      {recent && fromChat && fromChat.policies.length > 0 && (
+        <div className="from-chat" aria-label="상담과 이어지는 정책">
+          <span className="from-chat-q">
+            <Icon name="info" className="ic" />
+            {fromChat.kind === 'answer'
+              ? <>방금 상담한 “{recent.question}” 질문의 답변에 나온 정책</>
+              : <>방금 상담한 “{recent.question}” 질문과 이름·분야가 비슷한 정책 <small>(질문 단어로 찾은 검색 결과예요. 답변 근거나 자격 판정이 아니에요)</small></>}
+          </span>
+          {fromChat.policies.map((p) => (
+            <a key={p.id} href={mapHref(p.id)} aria-current={p.id === openId ? 'page' : undefined}>{p.label}</a>
+          ))}
+        </div>
+      )}
+      {/* 지도를 맨 위에 크게, 정책 찾기·상세·자격 조건은 그 아래에 둔다 */}
+      {policy && policy.kind === 'policy'
+        ? <PolicyGraph data={state.data} policy={policy} selectedId={selectedId ?? policy.id} onSelect={setSelectedId} search={search} />
+        : (
+          <>
             <div className="map-empty">
               <Icon name="search" />
-              <b>{policyId ? '이 정책을 데이터에서 찾지 못했어요' : '왼쪽에서 정책을 골라 주세요'}</b>
+              <b>{policyId ? '이 정책을 데이터에서 찾지 못했어요' : '아래에서 정책을 골라 주세요'}</b>
               <span>정책을 고르면 기관·지역·대상·근거 문서·자격 조건이 어떻게 연결돼 있는지 보여 드려요.</span>
             </div>
-          )}
-      </div>
+            <div className="map-below">{search}</div>
+          </>
+        )}
     </MapShell>
   );
+}
+
+/** 상담 맥락 → 지도에서 열 정책들. answer: 답변의 정책·출처(근거 있음), search: 질문 단어 검색 */
+function chatPolicies(data: GraphDataset, recent: RecentPolicies): { kind: 'answer' | 'search'; policies: GraphNode[] } {
+  const { index } = data;
+  const answered = recent.policies.map((p) => index.nodes.get(p.id)).filter((n): n is GraphNode => n?.kind === 'policy');
+  const fromDocs = policiesForDocuments(index, recent.documentIds).filter((p) => !answered.includes(p));
+  if (answered.length + fromDocs.length > 0) return { kind: 'answer', policies: [...answered, ...fromDocs] };
+  return { kind: 'search', policies: policiesForQuestion(index, recent.question, CHAT_MATCH_LIMIT) };
 }
 
 function MapShell({ data, children }: { data?: GraphDataset; children: ReactNode }) {
@@ -111,7 +145,9 @@ function PolicySearch({ data, query, onQuery, currentId }: { data: GraphDataset;
   );
 }
 
-function PolicyGraph({ data, policy, selectedId, onSelect }: { data: GraphDataset; policy: GraphNode; selectedId: string; onSelect: (id: string) => void }) {
+function PolicyGraph({ data, policy, selectedId, onSelect, search }: {
+  data: GraphDataset; policy: GraphNode; selectedId: string; onSelect: (id: string) => void; search: ReactNode;
+}) {
   const { index } = data;
   const neighbors = useMemo(() => policyNeighbors(index, policy.id), [index, policy.id]);
   const trees = useMemo(() => conditionTrees(index, policy.id), [index, policy.id]);
@@ -149,9 +185,12 @@ function PolicyGraph({ data, policy, selectedId, onSelect }: { data: GraphDatase
       </ul>
       </div>
 
-      <div className="map-detail">
-        {selected ? <NodeDetail n={selected} data={data} /> : <PolicyDetail policy={policy} />}
-        <div className="blk">
+      <div className="map-below">
+        {search}
+        <div className="map-detail">
+          {selected ? <NodeDetail n={selected} data={data} /> : <PolicyDetail policy={policy} />}
+        </div>
+        <div className="map-tree">
           <h3><Icon name="check" className="ic" />자격 조건 구조</h3>
           {trees.length === 0
             ? <p className="map-dim">연결된 자격 조건 묶음이 없어요.</p>
@@ -176,6 +215,9 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
+  // 끌 때 pointermove가 화면 그리기보다 자주 와서, 다음 프레임에 마지막 위치만 반영한다
+  const frame = useRef(0);
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   // 다른 정책을 열면 원래 보기로 돌아간다
   useEffect(() => { setView(INITIAL_VIEW); }, [resetKey]);
@@ -214,6 +256,8 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
 
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
     if (e.button !== 0) return;
+    // 지난번 끌기 뒤 클릭이 오지 않았으면 남은 표시를 지운다 (다음 정상 클릭이 무시되지 않게)
+    suppressClick.current = false;
     drag.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   };
   const onPointerMove = (e: PointerEvent<SVGSVGElement>) => {
@@ -223,12 +267,16 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
     if (!d.moved && Math.hypot(dx, dy) < DRAG_CLICK_TOLERANCE) return;
     if (!d.moved) { d.moved = true; e.currentTarget.setPointerCapture(e.pointerId); }
     const r = e.currentTarget.getBoundingClientRect();
-    setView((v) => ({ ...v, x: d.vx + (dx / r.width) * MAP_WIDTH, y: d.vy + (dy / r.height) * MAP_HEIGHT }));
+    const x = d.vx + (dx / r.width) * MAP_WIDTH, y = d.vy + (dy / r.height) * MAP_HEIGHT;
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => setView((v) => ({ ...v, x, y })));
   };
   const onPointerUp = () => {
     suppressClick.current = !!drag.current?.moved;
     drag.current = null;
   };
+  // 끌기가 취소되면(창 전환 등) 뒤따르는 클릭이 없으므로 표시를 남기지 않는다
+  const onPointerCancel = () => { suppressClick.current = false; drag.current = null; };
   // 끌기를 마친 직후의 클릭은 노드 선택으로 보지 않는다
   const onClickCapture = (e: MouseEvent<SVGSVGElement>) => {
     if (suppressClick.current) { e.stopPropagation(); suppressClick.current = false; }
@@ -252,7 +300,7 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
         <button type="button" onClick={toggleFullscreen} aria-label={fullscreen ? '전체 화면 끝내기' : '전체 화면으로 보기'}>{fullscreen ? '닫기' : '전체'}</button>
       </div>
       <svg ref={svgRef} viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="group" aria-label={label}
-        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerCancel}
         onClickCapture={onClickCapture}>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>{children}</g>
       </svg>
