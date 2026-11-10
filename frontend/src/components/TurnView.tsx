@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
@@ -6,6 +6,8 @@ import { safeHttpUrl } from '../lib/validate';
 import { lifeHref, mapHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
 import { LOADING_STAGES } from '../config/request';
+import type { GraphIndex } from '../graph/graphModel';
+import { policyLifeStages } from '../graph/lifeStages';
 
 export type Turn =
   | { id: number; kind: 'qa'; question: string; tags: { icon: IconName; text: string }[]; state: 'loading' | 'done' | 'error'; response?: AskResponse; error?: string }
@@ -92,44 +94,120 @@ function Loading() {
 }
 
 /** 본문 속 [1] 표시를 출처 번호 위첨자로 바꾼다 (HTML을 넣지 않고 텍스트로만 그린다). */
-function AnswerText({ text }: { text: string }) {
+function AnswerText({ text, sources }: { text: string; sources?: AskResponse['citations'] }) {
   return (
-    <p className="answer">
-      {text.split(/(\[\d+\])/).map((part, i) => {
-        const m = part.match(/^\[(\d+)\]$/);
-        return m ? <sup key={i}>{m[1]}</sup> : <span key={i}>{part}</span>;
-      })}
-    </p>
+    <div className="answer">
+      {text.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).map((paragraph, index) => (
+        <p key={index}>
+          {paragraph.split(/((?:\[\d+\])+)/).map((part, i) => {
+            const citations = /^\[\d+\]/.test(part) ? part.match(/\d+/g) : null;
+            if (!citations) return <span key={i}>{part}</span>;
+            return (
+              <sup key={i}>
+                {citations.map((number, position) => {
+                  const source = sources?.[Number(number) - 1];
+                  const href = source ? safeHttpUrl(source.url) : null;
+                  return (
+                    <span key={position}>
+                      {position > 0 && ', '}
+                      {href && source ? (
+                        <a href={href} target="_blank" rel="noopener noreferrer"
+                          aria-label={`출처 ${number} 원문 보기 · ${source.title} (새 탭)`}>{number}</a>
+                      ) : number}
+                    </span>
+                  );
+                })}
+              </sup>
+            );
+          })}
+        </p>
+      ))}
+    </div>
   );
 }
 
 function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Props['onFollowUp']; onDemoApply: () => void }) {
+  const policyGroup = useId();
+  const [policyIndex, setPolicyIndex] = useState<GraphIndex | null>(null);
+  const hasLivePolicies = !r.is_sample && r.policy_checks.length > 0;
+  useEffect(() => {
+    if (!hasLivePolicies) return;
+    let active = true;
+    import('../graph/loadGraph').then(({ loadGraphDataset }) => loadGraphDataset())
+      .then(({ index }) => { if (active) setPolicyIndex(index); })
+      .catch(() => { /* 신청 기간을 확인할 수 없으면 카드에서 안내한다. */ });
+    return () => { active = false; };
+  }, [hasLivePolicies]);
   const view = answerView(r);
   const blocks: ReactElement[] = [];
-  if (view.warning) blocks.push(<NoticeBox key="w" kind="warn" icon="search" title={view.warning.title} text={view.warning.text} />);
-  if (view.answerText) blocks.push(<AnswerText key="a" text={view.answerText} />);
-  if (view.guide) {
-    blocks.push(<NoticeBox key="g" kind={view.guide.kind} icon={view.guide.kind === 'warn' ? 'search' : 'info'} title={view.guide.title} text={view.guide.text} />);
+  if (view.answerText) blocks.push(<AnswerText key="a" text={view.answerText} sources={r.citations} />);
+  if (r.status === 'info' && view.guide) {
+    blocks.push(
+      <NoticeBox key="g" kind={view.warning ? 'warn' : 'info'}
+        icon={view.warning ? 'search' : 'info'} title={view.guide.title}
+        text={view.warning?.text ?? '공식 원문에서 추가로 확인해 주세요.'} />,
+    );
+    if (r.answer.trim()) {
+      blocks.push(
+        <details key="info-answer" className="policy-reasons">
+          <summary>확인한 근거 설명 보기</summary>
+          <AnswerText text={r.answer} sources={r.citations} />
+        </details>,
+      );
+    }
+  } else if (view.guide) {
+    blocks.push(
+      <NoticeBox key="g" kind={view.warning ? 'warn' : view.guide.kind}
+        icon={view.warning || view.guide.kind === 'warn' ? 'search' : 'info'}
+        title={view.guide.title} text={[view.guide.text, view.warning?.text].filter(Boolean).join('\n\n')} />,
+    );
+  } else if (view.warning) {
+    blocks.push(<NoticeBox key="w" kind="warn" icon="search" title={view.warning.title} text={view.warning.text} />);
   }
-  r.policy_checks.forEach((p) => blocks.push(
-    <Block key={p.policy_id} title="조건 확인" icon="check" tag={r.is_sample ? '시연용 가상 데이터' : undefined}>
-      <PolicyCard p={p} sample={r.is_sample} onDemoApply={onDemoApply} />
-    </Block>,
-  ));
+  if (r.policy_checks.length > 0) {
+    blocks.push(
+      <Block key="policies" title={`관련 정책 ${r.policy_checks.length}개`} icon="check" tag={r.is_sample ? '시연용 가상 데이터' : undefined}>
+        <div className="policy-list">
+          {policyRows(r.policy_checks, r.is_sample ? null : policyIndex).map(({ policy, period }) => (
+            <PolicyCard key={policy.policy_id} p={policy} period={period}
+              stages={!r.is_sample && policyIndex ? policyLifeStages(policyIndex, policy.policy_id) : []}
+              group={policyGroup} sample={r.is_sample} onDemoApply={onDemoApply} />
+          ))}
+        </div>
+      </Block>,
+    );
+  }
   if (view.extraInfo) {
     blocks.push(<NoticeBox key="i" kind="info" icon="info" title={view.extraInfo.title} text={view.extraInfo.text} />);
   }
   if (r.citations.length > 0) {
+    const sources = new Map<string | number, {
+      href: ReturnType<typeof safeHttpUrl>;
+      title: string;
+      numbers: number[];
+      details: Set<string>;
+    }>();
+    r.citations.forEach((citation, index) => {
+      const href = safeHttpUrl(citation.url);
+      const key = href ?? index;
+      const detail = sourceDetail(href, citation.page_number);
+      const source = sources.get(key);
+      if (source) {
+        source.numbers.push(index + 1);
+        source.details.add(detail);
+      } else {
+        sources.set(key, { href, title: citation.title, numbers: [index + 1], details: new Set([detail]) });
+      }
+    });
     blocks.push(
       <Block key="src" title="근거 출처" icon="books">
         <div className="srcs">
-          {r.citations.map((c, i) => {
-            const href = safeHttpUrl(c.url);
-            const inner = <><span className="n">{i + 1}</span><span><b>{c.title}</b><span>{sourceDetail(href, c.page_number)}</span></span>{href && <span className="arr">↗</span>}</>;
+          {[...sources].map(([key, { href, title, numbers, details }]) => {
+            const inner = <><span className="n">{numbers.join(', ')}</span><span><b>{title}</b><span>{[...details].join(' · ')}</span></span>{href && <span className="arr">↗</span>}</>;
             // 안전하지 않은 주소는 링크로 만들지 않고 제목만 보여 준다
             return href
-              ? <a key={i} className="src" href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
-              : <div key={i} className="src">{inner}</div>;
+              ? <a key={key} className="src" href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
+              : <div key={key} className="src">{inner}</div>;
           })}
         </div>
         <p className="fresh">{freshnessNote(r.checked_at, r.is_sample)}</p>
@@ -161,18 +239,7 @@ function Block({ title, icon, tag, children }: { title: string; icon: IconName; 
  * 정책 카드의 생애단계 칩. 누르면 생애주기 화면의 그 단계로 간다.
  * 그래프 데이터는 필요할 때만 불러온다(상담 화면 첫 용량에 넣지 않음). 못 읽거나 연결된 단계가 없으면 아무것도 그리지 않는다.
  */
-function StageChips({ policyId }: { policyId: string }) {
-  const [stages, setStages] = useState<string[]>([]);
-  useEffect(() => {
-    let alive = true;
-    Promise.all([import('../graph/loadGraph'), import('../graph/lifeStages')])
-      .then(async ([{ loadGraphDataset }, { policyLifeStages }]) => {
-        const { index } = await loadGraphDataset();
-        if (alive) setStages(policyLifeStages(index, policyId));
-      })
-      .catch(() => { /* 생애단계는 보조 정보라 못 읽어도 답변 표시는 그대로 둔다 */ });
-    return () => { alive = false; };
-  }, [policyId]);
+function StageChips({ stages }: { stages: string[] }) {
   if (stages.length === 0) return null;
   return (
     <div className="pstages" aria-label="생애단계">
@@ -181,33 +248,108 @@ function StageChips({ policyId }: { policyId: string }) {
   );
 }
 
-function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolean; onDemoApply: () => void }) {
+function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
+  return policies.map((policy) => {
+    const data = index?.nodes.get(policy.policy_id)?.data;
+    const text = (value: unknown) => typeof value === 'string' ? value.trim() : '';
+    const start = text(data?.application_start);
+    const end = text(data?.application_end);
+    const deadline = policy.reception_status === 'open' && /^\d{4}-\d{2}-\d{2}$/.test(end) ? end : '';
+    const period = start && end ? `${start} ~ ${end}`
+      : end ? `종료일 ${end}`
+      : start ? `시작일 ${start}${data?.application_is_ongoing === true ? ' · 상시 접수' : ''}`
+      : text(data?.application_period);
+    return { policy, deadline, period };
+  }).sort((a, b) => {
+    const closedOrder = Number(a.policy.reception_status === 'closed') - Number(b.policy.reception_status === 'closed');
+    if (closedOrder) return closedOrder;
+    if (!a.deadline || !b.deadline) return Number(!a.deadline) - Number(!b.deadline);
+    return a.deadline.localeCompare(b.deadline);
+  });
+}
+
+function conditionReasonForDisplay(reason: string) {
+  const reviewMessage = '신청 자격은 공식 공고에서 확인해 주세요.';
+  const detail = reason
+    .replace('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '')
+    .replace('데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다.', '')
+    .replace('데이터 품질 경고로 자동 판정을 보류합니다.', '')
+    .trim();
+
+  return detail === reason ? reason : [detail, reviewMessage].filter(Boolean).join(' ');
+}
+
+function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
+  p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
+}) {
+  const incomeNotices = new Set<string>();
+  const displayedConditions = p.conditions.filter(({ field, status, label, reason }) => {
+    if (field !== 'income' || status !== 'needs_check') return true;
+    const key = JSON.stringify([label, reason]);
+    if (incomeNotices.has(key)) return false;
+    incomeNotices.add(key);
+    return true;
+  });
   const [rcls, rlabel] = RECEPTION_LABEL[p.reception_status];
+  const labelsByStatus = new Map<ConditionStatus, Set<string>>();
+  for (const { status, label } of displayedConditions) {
+    const labels = labelsByStatus.get(status) ?? new Set<string>();
+    labels.add(label);
+    labelsByStatus.set(status, labels);
+  }
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
   // '신청하기'는 신청 주소가 확인됐고 출처 주소와 다를 때만 보여 준다.
   // 예시 응답은 실제 주소가 없으므로 버튼 모양만 보여 주고 알림을 띄운다.
-  const canApply = sample ? !!p.official_apply_url && p.official_apply_url !== p.source_url : !!applyHref && applyHref !== sourceHref;
+  const hasApplyLink = sample
+    ? !!p.official_apply_url && p.official_apply_url !== p.source_url
+    : !!applyHref && applyHref !== sourceHref;
+  const canApply = hasApplyLink && p.reception_status !== 'closed' && p.reception_status !== 'before';
   return (
-    <div className="pcard">
-      <div className="ptop">
-        <div><b>{p.policy_name}</b><small>{p.agency}</small></div>
-        <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>
+    <details className="pcard" name={group}>
+      <summary className="ptop">
+        <b>{p.policy_name}</b>
+        {p.reception_status !== 'unknown' && <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>}
+      </summary>
+      <div className="policy-meta">
+        {p.agency && <small>{p.agency}</small>}
+        {p.reception_status === 'unknown' && <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>}
       </div>
-      {/* 예시 정책은 실제 데이터에 없어 생애단계를 찾지 않는다 */}
-      {!sample && <StageChips policyId={p.policy_id} />}
-      {p.conditions.length > 0 && (
-        <ul className="rows">
-          {p.conditions.map((c, i) => {
+      <StageChips stages={stages} />
+      <ul className="rows">
+        <li>
+          <span className="k">신청 기간</span>
+          <span className="why">{period || '공식 원문에서 확인해 주세요.'}</span>
+        </li>
+      </ul>
+      {displayedConditions.length > 0 && (
+        <>
+          <div className="policy-condition-summary">
+            {Array.from(labelsByStatus, ([status, labels]) => {
+              const [cls, label] = CONDITION_LABEL[status];
+              return (
+                <div key={status}>
+                  <span className={`badge ${cls}`}>{label}</span>
+                  <span>{Array.from(labels).join(' · ')}</span>
+                </div>
+              );
+            })}
+          </div>
+          <details className="policy-reasons">
+            <summary>판정 사유 자세히 보기</summary>
+            <ul className="rows">
+              {displayedConditions.map((c, i) => {
             const [cls, label] = CONDITION_LABEL[c.status];
             return (
               // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
               <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
-                <span className="k">{c.label}</span><span className="why">{c.reason}</span><span className={'badge ' + cls}>{label}</span>
+                <span className="k">{c.label}</span><span className="why">{conditionReasonForDisplay(c.reason)}</span><span className={'badge ' + cls}>{label}</span>
               </li>
             );
-          })}
-        </ul>
+              })}
+            </ul>
+          </details>
+        </>
       )}
       <div className="pfoot">
         <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>
@@ -218,7 +360,7 @@ function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolea
           ? <button type="button" className="btn btn-p" onClick={onDemoApply}>신청하기</button>
           : <a className="btn btn-p" href={applyHref!} target="_blank" rel="noopener noreferrer">신청하기 ↗</a>)}
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -226,7 +368,7 @@ export function NoticeBox({ kind, icon, title, text }: { kind: 'info' | 'warn' |
   return (
     <div className={'notice ' + kind}>
       <Icon name={icon} />
-      <div><b>{title}</b><p>{text}</p></div>
+      <div><b>{title}</b><AnswerText text={text} /></div>
     </div>
   );
 }
