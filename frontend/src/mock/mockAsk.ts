@@ -9,7 +9,6 @@
 import type { AskRequest, AskResponse, ConditionResult, FollowUp, PolicyCheck, UserProfile } from '../api/types';
 import { CATEGORIES } from '../config/categories';
 import { PERSONAS } from '../config/personas';
-import { describeProfile, hasProfileInfo, parseProfile } from '../lib/parseProfile';
 
 const SAMPLE_CHECKED_AT = '2026-11-06'; // 시연용 예시 날짜
 
@@ -113,13 +112,6 @@ export async function mockAsk(req: AskRequest): Promise<AskResponse> {
   // 앞 대화에서 마지막으로 답한 예시를 이어서 쓴다
   const context = [...req.history].reverse().map((m) => (m.role === 'user' ? findExample(m.text) : undefined)).find(Boolean);
   if (context) {
-    const said = parseProfile(req.question, req.awaiting_field);
-    if (hasProfileInfo(said)) {
-      const intro = `알려 주신 조건(${describeProfile(said)})으로 다시 확인했어요.` + (context.withPolicy
-        ? ' 나이·지역은 예시 기준과 비교했고, 소득은 원문 기준이 복잡해서 ‘추가 확인 필요’로 남겨 뒀어요.'
-        : ' 이 질문에는 조건을 비교할 정책 카드가 없어서 확인할 곳을 다시 안내해 드려요.');
-      return build(context, req.profile, intro);
-    }
     if (/서류/.test(req.question)) {
       return build(context, req.profile, '제출 서류는 정책마다, 같은 정책이라도 공고마다 달라요[1]. 실제 서비스에서는 해당 공고 원문의 ‘제출 서류’ 항목을 그대로 인용하고, 원문에 없으면 ‘확인 필요’라고 알려 드려요.');
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { requestErrorMessage, serverErrorMessage } from './client';
+import { isAskResponse, requestErrorMessage, serverErrorMessage } from './client';
 
 describe('오류 문구', () => {
   it('서버 오류 code를 보고 화면이 정한 문구를 쓴다 (서버 message는 보여 주지 않는다)', () => {
@@ -30,4 +30,19 @@ describe('오류 문구', () => {
     expect(requestErrorMessage(new TypeError('Failed to fetch')))
       .toBe('답변 서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.');
   });
+});
+
+it('응답 본문과 후속 입력 항목의 형식을 검증한다', () => {
+  const response = {
+    status: 'no_evidence', answer: '공식 근거를 찾지 못했어요.', citations: [],
+    policy_checks: [], follow_up_questions: [], checked_at: null, is_sample: false,
+  };
+  expect(isAskResponse(response)).toBe(true);
+  expect(isAskResponse({ ...response, policy_checks: [null] })).toBe(false);
+  expect(isAskResponse({ ...response, follow_up_questions: [
+    { kind: 'ask_info', text: '지역을 알려 주세요.', field: 'region' },
+  ] })).toBe(true);
+  expect(isAskResponse({ ...response, follow_up_questions: [
+    { kind: 'ask_info', text: '추가 정보를 알려 주세요.', field: 'other' },
+  ] })).toBe(false);
 });
