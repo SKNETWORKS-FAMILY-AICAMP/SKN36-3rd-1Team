@@ -28,6 +28,7 @@ node_modules/
 frontend/dist/
 frontend/build/
 frontend/.next/
+frontend/.vite/
 
 # ===== DB 로컬 저장 파일 =====
 # docker-compose.yml은 named volume을 쓰지만, 바인드 마운트로 바꾸는 경우 대비
