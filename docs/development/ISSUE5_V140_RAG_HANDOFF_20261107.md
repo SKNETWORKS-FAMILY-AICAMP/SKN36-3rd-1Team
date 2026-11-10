@@ -1,3 +1,33 @@
+# Issue #43 RAG 최종 인계 — PR #35·#37 반영 (2026-11-10)
+
+현재 기준은 a44bf08의 v1.4.0-candidate다. 정책 246개·문서 261개·원본 청크 599개,
+Neo4j **1,004노드 / 2,431관계 / REQUIRES_CONDITION 136개**,
+Qdrant B2 **1,138 Points / qwen3-embedding:0.6b / 1,024차원 / Cosine**을 검증했다.
+기본 프로필은 b2_06b_v140이며 4B 부분 색인은 서비스 검색에 사용하지 않는다.
+
+PR #37의 POL_002 신청 시작일·상시접수 39건·POL_GOV_054 소득 그룹 교정과
+PR #35의 Eligibility Checker/LLM Generator 코드가 dev에 반영됐다.
+실제 노드/관계 ID·속성·정책/문서 연결과 전체 Qdrant payload를 검사했다.
+0.6B 벡터를 재생성하지 않고 category/life_stages 정합화와 벡터 불변성을 확인했다.
+
+- [최종 재적재 및 #43 독립 검증 기록](FINAL_DB_RELOAD_20261110.md)
+- [팀원용 복원 안내](ISSUE43_RESTORE_GUIDE.md)
+- [깨끗한 환경 복원 검증 결과](ISSUE43_RESTORE_VALIDATION_20261110.json)
+- 복원 도구: scripts/restore_final_v140.py (기본 사전 검사, --apply로 빈 DB에만 복원)
+- 담당자 최종 로컬 주소: Qdrant 46336, Neo4j HTTP 47474 / Bolt 47687.
+- 팀원용 Compose 예시: Qdrant 56336, Neo4j HTTP 57474 / Bolt 57687.
+- #43 독립 테스트는 411개 중 409개 통과 / 1 failure / 1 error다. 레거시 프로필 클래스 skip은 별도다.
+- 실제 DB 스모크 18개 통과를 확인했고, 새 빈 DB 패키지 복원 후에도 같은 검증이 통과했다.
+- 원본 누락·CRLF 문제와 과거 혼합 작업 트리 결과는 독립 결과와 구분한다.
+- 정답 사람 검수와 실제 LLM HTTP/UI E2E는 완료로 표시하지 않는다.
+
+**rag-local-v140-pr29-20261109.zip은 과거 PR29 자료이며 최신 최종본이 아니다.**
+최신 패키지에는 정합화된 단일 0.6B snapshot, #41 변경을 제외한 소스, checksum, Compose와 복원 도구를 포함한다.
+.env·비밀값·4B 데이터·모델 파일은 포함하지 않으며 대용량 파일은 Git/PR에서 제외한다.
+
+<details>
+<summary>과거 PR29 안내 — 아래 수치·포트·ZIP·평가 기록을 현행 기준으로 사용하지 않음</summary>
+
 # Issue #31 RAG 로컬 복원 안내 — PR #29 교정 반영 (2026-11-09)
 
 사용 환경은 승인 `data/releases/v1.4.0-candidate/`, 기본 프로필은 **`b2_06b_v140`(잠정)**이다. Qdrant `exp_b2_qwen3emb06b_v140_v1`(1,138 Points)과 Neo4j v1.4.0(1,030노드/2,921관계)을 사용한다. 임베딩은 Ollama `qwen3-embedding:0.6b`, 1,024차원이다. B3는 비교용이며 RAG에서 따로 설정하지 않는다.
@@ -91,3 +121,5 @@ with HybridSearchSession() as search:
 탐색적 평가: 기존 85문항+지역 8사례 × 4방식 = 372회, 오류 0. 네 방식의 미검수 참조 정책 탐지는 Top-5/10 모두 80/80, 지정 본문 근거 포함은 46/52·48/52였다. 사람 검수 gold가 없어 **공식 Hit/Recall/MRR은 미산출**, B2/B3 우열도 미확정이다. Vector/Hybrid 청크 순위는 동일했다. B2는 기존 기본값으로 잠정 유지하며, 필요한 근거가 Top-10에 없던 4문항과 중복 청크를 후속 검수한다. 상세 로그는 로컬 보존하고 PR에는 포함하지 않는다.
 
 Issue #31 검증: 교정 환경의 B2/B3 22개 질의 전후 비교와 지역 필터 28개 사례를 검사했다. 실제 HTTP·LLM 응답 통합은 미검증이며, 상세 실행 근거는 `data/metadata/candidate_*_verification.json`에 기록한다.
+
+</details>

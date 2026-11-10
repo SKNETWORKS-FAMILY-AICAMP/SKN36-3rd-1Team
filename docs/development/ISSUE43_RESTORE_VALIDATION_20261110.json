@@ -1,0 +1,180 @@
+{
+  "source_base_commit": "a44bf08dcd30515bbaaf73fc258350f1e9bcdfc1",
+  "branch": "feature/43-final-db-reload-handoff",
+  "python": "3.13.15",
+  "neo4j_server": "Neo4j/5.26.32",
+  "snapshot_sha256": "552edbf61b65d364f3e90eb6760527a29ce11b01196dc41e1c736f0e809c762f",
+  "snapshot_state": "latest_aligned_single_06b_collection",
+  "restore_tool_sha256": "e33d949022d5bec8f3c3c9c13c8c2f1ad4bafbe6df018da304b4274ddf23b2b9",
+  "independent_worktree_tests": {
+    "run": 411,
+    "passed": 409,
+    "failures": 1,
+    "errors": 1,
+    "legacy_profile_class_skipped": 1,
+    "release": 49,
+    "legacy": 319,
+    "candidate": 25,
+    "live": 18
+  },
+  "clean_unpack_and_restore": {
+    "preflight": "PASS_NO_WRITES",
+    "restore": {
+      "status": "PASS",
+      "counts": [
+        246,
+        261,
+        599,
+        1138,
+        1004,
+        2431,
+        136
+      ],
+      "collection": "exp_b2_qwen3emb06b_v140_v1",
+      "metadata_points_updated": 0,
+      "metadata_field_updates": {},
+      "all_vectors_and_protected_payload_unchanged": true,
+      "vector_digest": "f5ec8c25f42f68726438879199860897f5e62baaf4549fcc02103747073a67df",
+      "graph_totals": {
+        "nodes": 1004,
+        "relationships": 2431
+      },
+      "full_graph_properties_verified": true,
+      "cross_db": {
+        "qdrant_points": 1138,
+        "summary": {
+          "point_id": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "chunk_id_document": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "policy_exists": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "document_exists": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "supported_by": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "document_policy_id": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "content_hash": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          }
+        },
+        "failures": []
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "embedding_calls": 0,
+      "verify_only": false
+    },
+    "verify_only": {
+      "status": "PASS",
+      "counts": [
+        246,
+        261,
+        599,
+        1138,
+        1004,
+        2431,
+        136
+      ],
+      "collection": "exp_b2_qwen3emb06b_v140_v1",
+      "metadata_points_updated": 0,
+      "metadata_field_updates": {},
+      "all_vectors_and_protected_payload_unchanged": true,
+      "vector_digest": "f5ec8c25f42f68726438879199860897f5e62baaf4549fcc02103747073a67df",
+      "graph_totals": {
+        "nodes": 1004,
+        "relationships": 2431
+      },
+      "full_graph_properties_verified": true,
+      "cross_db": {
+        "qdrant_points": 1138,
+        "summary": {
+          "point_id": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "chunk_id_document": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "policy_exists": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "document_exists": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "supported_by": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "document_policy_id": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          },
+          "content_hash": {
+            "PASS": 1138,
+            "MISSING": 0,
+            "MISMATCH": 0,
+            "NOT_TESTED": 0
+          }
+        },
+        "failures": []
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "embedding_calls": 0,
+      "verify_only": true
+    },
+    "smoke_and_guard_tests": {
+      "run": 26,
+      "passed": 26,
+      "legacy_profile_class_skipped": 1
+    },
+    "existing_env_copied": false,
+    "same_pc_new_empty_volumes": true,
+    "other_pc_os_installation_tested": false
+  },
+  "existing_docker_assets_unchanged": true,
+  "issue41_changes_in_source": false,
+  "real_llm_http_ui_e2e_tested": false
+}
