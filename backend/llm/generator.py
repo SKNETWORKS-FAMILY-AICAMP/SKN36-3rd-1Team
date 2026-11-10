@@ -474,15 +474,19 @@ def _validate_model_response(
 
     answer = _remove_redundant_answer_requests(answer, profile)
 
-    cited = [
-        int(number)
-        for number in CITATION_PATTERN.findall(answer)
-    ]
-
-    if any(number not in source_ids for number in cited):
-        raise LLMOutputError(
-            "제공되지 않은 source_id를 인용했습니다."
-        )
+    # LLM이 수천 자리의 [숫자]를 반환해도 int() 변환 한도 때문에
+    # ValueError(서버 500)가 발생하지 않도록 허용된 출처 문자열과 비교한다.
+    # [0001]처럼 앞에 0을 붙인 기존 인용의 숫자 의미는 유지한다.
+    source_id_by_text = {str(source_id): source_id for source_id in source_ids}
+    cited = []
+    for number in CITATION_PATTERN.findall(answer):
+        normalized_number = number.lstrip("0") or "0"
+        source_id = source_id_by_text.get(normalized_number)
+        if source_id is None:
+            raise LLMOutputError(
+                "제공되지 않은 source_id를 인용했습니다."
+            )
+        cited.append(source_id)
 
     if raw["status"] == "answered" and not cited:
         raise LLMOutputError(
@@ -783,7 +787,9 @@ def generate_answer(
     try:
         parsed = json.loads(content)
 
-    except (json.JSONDecodeError, TypeError) as error:
+    except (ValueError, TypeError) as error:
+        # json.loads는 4300자리 초과 정수 등에서 JSONDecodeError가 아닌
+        # ValueError를 발생시킬 수 있다. Pipeline 오류 계약에 맞게 변환한다.
         raise LLMOutputError(
             "LLM이 유효한 JSON을 반환하지 않았습니다."
         ) from error
