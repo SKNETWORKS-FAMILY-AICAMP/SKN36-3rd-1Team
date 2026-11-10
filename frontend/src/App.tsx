@@ -36,7 +36,7 @@ export default function App() {
   const [region, setRegion] = useState('');
   const [income, setIncome] = useState<number | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [awaiting, setAwaiting] = useState<{ field: string; question: string } | null>(null);
+  const [awaiting, setAwaiting] = useState<{ field: string; question: string; turnId: number } | null>(null);
   const [toast, setToast] = useState<{ text: string; icon: IconName } | null>(null);
   const [miniOn, setMiniOn] = useState(false);
 
@@ -154,10 +154,10 @@ export default function App() {
     void run(id, request);
   }, [run]);
 
-  const followUp = (f: FollowUp, origin: HTMLElement, question: string) => {
+  const followUp = (f: FollowUp, origin: HTMLElement, question: string, turnId: number) => {
     if (f.kind === 'question') { ask(f.text, origin); return; }
     if (f.field === 'age' || f.field === 'region' || f.field === 'income') {
-      setAwaiting({ field: f.field, question });
+      setAwaiting({ field: f.field, question, turnId });
     }
   };
 
@@ -227,19 +227,19 @@ export default function App() {
           )}
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
-              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
+              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
             </div>
           ))}
           {awaiting && (
-            <form key={awaiting.field} className="conds-in" onSubmit={(event) => {
+            <form key={awaiting.turnId + ":" + awaiting.field} className="conds-in" onSubmit={(event) => {
               event.preventDefault();
               const value = String(new FormData(event.currentTarget).get('condition') ?? '');
               if (!value) return;
               const { field, question } = awaiting;
-              const parsedAge = checkAge(value);
               const numeric = Number(value);
               const next = { ...profile };
               if (field === 'age') {
+                const parsedAge = checkAge(String(numeric));
                 if (!parsedAge.ok || parsedAge.value == null) return;
                 next.age = parsedAge.value;
               } else if (field === 'region') {
@@ -249,7 +249,7 @@ export default function App() {
                 next.income = numeric;
               }
               if (!ask(question, null, next, field)) return;
-              if (field === 'age') setAge(value);
+              if (field === 'age') setAge(String(numeric));
               if (field === 'region') setRegion(value);
               if (field === 'income') setIncome(numeric);
             }}>
