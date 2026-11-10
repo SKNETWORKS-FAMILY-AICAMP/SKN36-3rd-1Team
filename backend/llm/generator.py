@@ -10,7 +10,6 @@ import re
 from functools import lru_cache
 from typing import Any
 
-
 from ai.prompts.system_prompt import SYSTEM_PROMPT
 from backend.eligibility.checker import _is_valid_age
 from database.region_search import ALIASES, SIDOS
@@ -27,15 +26,17 @@ ALLOWED_FIELDS = {"age", "region", "income"}
 # 연령 검사는 Checker의 단일 구현을 사용한다(순환 import 없음).
 # 전국 시·도 공식명/약칭은 검색 모듈에서 가져온다.
 _SIDO_VARIANTS: dict[str, frozenset[str]] = {}
+
 for _short, _official in ALIASES.items():
     if _official not in SIDOS:
         continue
+
     _names = {_official, _short}
+
     if _official.endswith(("특별시", "광역시", "자치시")):
         _names.add(f"{_short}시")
-    _SIDO_VARIANTS[_official] = frozenset(_names)
 
-# 지역명 정규화는 긴 표현부터 처리해야 '서울시'가 '서울'로 잘리지 않는다.
+    _SIDO_VARIANTS[_official] = frozenset(_names)
 
 
 def _normalize_profile(profile: dict | None) -> dict | None:
@@ -47,16 +48,19 @@ def _normalize_profile(profile: dict | None) -> dict | None:
         raise ValueError("profile은 객체 또는 None이어야 합니다.")
 
     age = profile.get("age")
+
     if not _is_valid_age(age):
         age = None
 
     region = profile.get("region")
+
     if not isinstance(region, str) or not region.strip():
         region = None
     else:
         region = region.strip()
 
     income = profile.get("income")
+
     # 유한하지 않은 수치, 음수, bool, 비정상적으로 큰 정수는 미입력 처리.
     try:
         valid_income = (
@@ -66,16 +70,29 @@ def _normalize_profile(profile: dict | None) -> dict | None:
         )
     except (TypeError, ValueError, OverflowError):
         valid_income = False
+
     if not valid_income:
         income = None
 
-    return {"age": age, "region": region, "income": income}
+    return {
+        "age": age,
+        "region": region,
+        "income": income,
+    }
 
 
 def _region_has_detail(region: str) -> bool:
     """정규화 시·도 이름 외에 시/군/구 정보가 포함된 경우만 True."""
-    return bool(re.search(r"(?:^|\s)[^\s]+(?:시|군|구)(?:\s|$)", region)) and bool(
-        re.search(r"\s[^\s]+(?:시|군|구)(?:\s|$)", region)
+    return bool(
+        re.search(
+            r"(?:^|\s)[^\s]+(?:시|군|구)(?:\s|$)",
+            region,
+        )
+    ) and bool(
+        re.search(
+            r"\s[^\s]+(?:시|군|구)(?:\s|$)",
+            region,
+        )
     )
 
 
@@ -92,6 +109,7 @@ def _requests_profile_value(text: str, field: str) -> bool:
                 text,
             )
         )
+
     if field == "region":
         return bool(
             re.search(
@@ -100,6 +118,7 @@ def _requests_profile_value(text: str, field: str) -> bool:
                 text,
             )
         )
+
     if field == "income":
         return bool(
             re.search(
@@ -108,13 +127,17 @@ def _requests_profile_value(text: str, field: str) -> bool:
                 text,
             )
         )
+
     return False
 
 
-def _is_detail_region_request(text: str, known_region: str | None = None) -> bool:
-    """시·도 재질문과 시·군·구 등 *추가* 지역 정보 요청을 구분한다.
+def _is_detail_region_request(
+    text: str,
+    known_region: str | None = None,
+) -> bool:
+    """시·도 재질문과 시·군·구 등 추가 지역 정보 요청을 구분한다.
 
-    LLM이 ``강남구에 주민등록되어 있나요?``처럼 명시적 행정구역을
+    LLM이 '강남구에 주민등록되어 있나요?'처럼 명시적 행정구역을
     질문하는 경우도 포함한다. 시·도 자체의 별칭(서울시 등)은 제외한다.
     """
     if re.search(
@@ -127,18 +150,25 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
     ):
         return True
 
-    # 알고 있는 시·도의 공식명·약칭을 모두 제거하여 시·도 재질문을
-    # 세부 지역 질문으로 오인하지 않는다. 예: 서울시 ↔ 서울특별시.
+    # 알고 있는 시·도의 공식명·약칭을 모두 제거하여
+    # 시·도 재질문을 세부 지역 질문으로 오인하지 않는다.
     remaining = text
     known_sido_aliases: set[str] = set()
+
     if known_region:
         remaining = remaining.replace(known_region, "")
         known_first_token = known_region.split()[0]
+
         for names in _SIDO_VARIANTS.values():
             if known_region in names or known_first_token in names:
                 known_sido_aliases.update(names)
+
                 # '서울시'보다 '서울'을 먼저 지우면 '시'가 남을 수 있다.
-                for name in sorted(names, key=len, reverse=True):
+                for name in sorted(
+                    names,
+                    key=len,
+                    reverse=True,
+                ):
                     remaining = remaining.replace(name, "")
 
     # 예: 강남구에 / 수원시에 / 영광군 거주 / 역삼동 주민등록.
@@ -146,31 +176,34 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
         r"(?<![가-힣])([가-힣]{2,}(?:시|군|구|동|읍|면))"
         r"(?=$|[\s?？.,!]|에|에서|의|로|가|은|는|를|을|인지|인가요|이신가요)"
     )
+
     for match in named_area.finditer(remaining):
         candidate = match.group(1)
         suffix = remaining[match.end():]
 
         # 시·도 자체의 공식명과 약칭은 세부 지역으로 간주하지 않는다.
         # 같은 이름이라도 다른 시·도에서는 실제 기초자치단체일 수 있다.
-        # 예: 경기도 광주시와 광주광역시의 약칭 '광주시'.
         if candidate in known_sido_aliases:
             continue
 
-        # `거주하시는`, `이용하시는`는 '...하시' + '는'으로,
-        # `알려주시면`은 '...시면'으로 잘못 끊길 수 있다.
-        # 지명을 찾는 패턴이 이런 동사 활용형을 인식하지 않도록 제외한다.
-        if candidate.endswith(("시면", "하시면", "주시면", "되면")):
+        # 동사 활용형을 지명으로 잘못 인식하지 않도록 제외.
+        if candidate.endswith(
+            ("시면", "하시면", "주시면", "되면")
+        ):
             continue
+
         if (
             suffix.startswith(("는", "면"))
             and len(candidate) >= 4
-            and candidate.endswith(("하시", "주시", "되시", "이시", "계시"))
+            and candidate.endswith(
+                ("하시", "주시", "되시", "이시", "계시")
+            )
         ):
             continue
 
         return True
-    return False
 
+    return False
 
 
 def _is_ai_offer_question(text: str) -> bool:
@@ -183,6 +216,7 @@ def _is_ai_offer_question(text: str) -> bool:
         return False
 
     candidate = text.strip().rstrip(" ?？.!。！")
+
     return bool(
         re.search(
             r"(?:드릴까요|드릴래요|드려도\s*될까요|"
@@ -194,12 +228,13 @@ def _is_ai_offer_question(text: str) -> bool:
 
 
 def _normalize_followup_question(text: str) -> str | None:
-    """사용자가 AI에게 보낼 수 있는 *의문문*만 정규화한다.
+    """사용자가 AI에게 보낼 수 있는 의문문만 정규화한다.
 
     '알려주세요' 같은 사용자 입력 요청을 임의로 의문문으로 바꾸지 않는다.
     그런 요청은 ask_info 또는 answer 본문으로 분리한다.
     """
     original = text.strip()
+
     if not original:
         return None
 
@@ -207,6 +242,7 @@ def _normalize_followup_question(text: str) -> str | None:
         return original
 
     candidate = original.rstrip(" \t\r\n.!。！")
+
     if re.search(
         r"(?:인가요|입니까|인가|되나요|되세요|되십니까|하나요|하시나요|있나요|"
         r"없나요|일까요|할까요|까요|하실래요|무엇인가요|누구인가요|"
@@ -214,42 +250,59 @@ def _normalize_followup_question(text: str) -> str | None:
         candidate,
     ):
         return candidate + "?"
+
     return None
 
 
-def _personal_information_request(text: str, profile: dict | None) -> str | None:
+def _personal_information_request(
+    text: str,
+    profile: dict | None,
+) -> str | None:
     """AI→사용자 정보 요청을 버튼용 사용자 질문과 구별한다.
 
     반환값: age/region/income/detail_region/other 또는 None.
-    정책의 기준·지원금·서류 등을 묻는 *사용자* 질문은 None이어야 한다.
+    정책의 기준·지원금·서류 등을 묻는 사용자 질문은 None이어야 한다.
     """
     text = text.strip()
+
     # 정책 설명을 사용자가 묻는 문장은 개인정보 요청으로 오인하지 않는다.
     if re.search(
         r"(?:정책|공고|지원금|지원액|서류|등본|증명서|발급|제출|신청\s*절차|"
         r"연령\s*기준|소득\s*기준|지원\s*대상|자격\s*조건|"
         r"몇\s*(?:명|세|살)\s*(?:이상|이하|부터|까지|이어야|여야)|"
-        r"주민등록\s*(?:되어야|해야))", text,
+        r"주민등록\s*(?:되어야|해야))",
+        text,
     ):
         return None
 
     # 정보 요청 또는 본인 여부 확인을 나타내는 문장만 분류한다.
-    asks_value = bool(re.search(
-        r"알려|입력|말씀|몇\s*(?:명|세|살)|얼마|어디|어느|"
-        r"거주\s*하|거주하시|거주하나|주민등록|되셨|"
-        r"(?:혼인|결혼)\s*여부|본인\s*의|귀하의", text,
-    ))
+    asks_value = bool(
+        re.search(
+            r"알려|입력|말씀|몇\s*(?:명|세|살)|얼마|어디|어느|"
+            r"거주\s*하|거주하시|거주하나|주민등록|되셨|"
+            r"(?:혼인|결혼)\s*여부|본인\s*의|귀하의",
+            text,
+        )
+    )
+
     # 보유한 사용자 속성을 직접 묻는 의문문도 AI→사용자 요청이다.
-    # 예: '직업이 무엇인가요?' / '학력이 어떻게 되나요?'
-    if re.search(r"(?:직업|직종|학력|고용\s*형태|근로\s*형태|주택\s*보유|"
-                 r"세대주|혼인\s*여부|장애\s*여부).{0,25}(?:무엇|어떤|어떻게|"
-                 r"여부|있나요|인가요|되나요)", text):
+    if re.search(
+        r"(?:직업|직종|학력|고용\s*형태|근로\s*형태|주택\s*보유|"
+        r"세대주|혼인\s*여부|장애\s*여부).{0,25}(?:무엇|어떤|어떻게|"
+        r"여부|있나요|인가요|되나요)",
+        text,
+    ):
         asks_value = True
+
     if not asks_value:
         return None
 
-    if _is_detail_region_request(text, (profile or {}).get("region")) and re.search(
-        r"거주|주민등록|주소|지역|시군구|어느\s*(?:시|군|구|동|읍|면)", text
+    if _is_detail_region_request(
+        text,
+        (profile or {}).get("region"),
+    ) and re.search(
+        r"거주|주민등록|주소|지역|시군구|어느\s*(?:시|군|구|동|읍|면)",
+        text,
     ):
         return "detail_region"
 
@@ -257,80 +310,136 @@ def _personal_information_request(text: str, profile: dict | None) -> str | None
         if _requests_profile_value(text, field):
             return field
 
-    if re.search(r"가구원|가족\s*수|세대원|자녀|혼인|결혼|자산|재산|"
-                 r"세대주|직업|직종|학력|고용\s*형태|근로\s*형태|주택\s*보유|장애\s*여부", text):
+    if re.search(
+        r"가구원|가족\s*수|세대원|자녀|혼인|결혼|자산|재산|"
+        r"세대주|직업|직종|학력|고용\s*형태|근로\s*형태|"
+        r"주택\s*보유|장애\s*여부",
+        text,
+    ):
         return "other"
 
     # '알려 주세요' 형태의 지시문은 지원하지 않는 필드라도
     # 사용자가 AI에게 보낼 수 있는 question 버튼이 아니다.
-    if re.search(r"알려\s*(?:주세요|주십시오|주실)|입력\s*해\s*주세요|말씀\s*해\s*주세요", text):
+    if re.search(
+        r"알려\s*(?:주세요|주십시오|주실)|"
+        r"입력\s*해\s*주세요|말씀\s*해\s*주세요",
+        text,
+    ):
         return "other"
+
     return None
 
 
-def _info_request_to_answer(text: str, field: str | None = None) -> str | None:
+def _info_request_to_answer(
+    text: str,
+    field: str | None = None,
+) -> str | None:
     """허용되지 않은 추가 정보 요청을 근거 없는 설명 없이 본문용으로 바꾼다."""
     if field == "detail_region" or _is_detail_region_request(text):
-        named_gu = re.search(r"(?<![가-힣])([가-힣]{2,}구)(?:에|의|는|에서|\s|$)", text)
+        named_gu = re.search(
+            r"(?<![가-힣])([가-힣]{2,}구)(?:에|의|는|에서|\s|$)",
+            text,
+        )
+
         if named_gu and "주민등록" in text:
             return f"{named_gu.group(1)} 주민등록 여부를 알려 주세요."
+
         return "거주하시는 시·군·구를 알려 주세요."
+
     if "가구원" in text or field == "household_size":
         return "가구원 수를 알려 주세요."
+
     if "자녀" in text or field == "child_age":
         return "자녀 나이를 알려 주세요."
+
     if "혼인" in text or "결혼" in text:
         return "혼인 여부를 알려 주세요."
+
     if "자산" in text or "재산" in text:
         return "자산 정보를 알려 주세요."
+
     if "세대주" in text:
         return "세대주 여부를 알려 주세요."
+
     if "직업" in text or "직종" in text:
         return "직업 정보를 알려 주세요."
+
     if "학력" in text:
         return "학력을 알려 주세요."
+
     if "근로" in text or "고용" in text:
         return "근로 형태를 알려 주세요."
+
     if "주택" in text and "보유" in text:
         return "주택 보유 여부를 알려 주세요."
+
     # 연락처·주민등록번호·계좌·비밀번호 등 민감한 값은 자동 요청하지 않는다.
     return None
 
 
-def _append_info_requests(answer: str, requests: list[str]) -> str:
+def _append_info_requests(
+    answer: str,
+    requests: list[str],
+) -> str:
     """필요한 정보 확인 문장을 답변 본문에만 넣는다.
 
     이미 같은 안내를 본문에 제시했다면 반복하지 않는다.
     정책적 필요성이나 이유를 새로 만들어 덧붙이지 않는다.
     """
     normalized = []
+
     for request in requests:
         key = request.replace(" ", "")
-        existing_text = (answer + " ".join(normalized)).replace(" ", "")
+        existing_text = (
+            answer + " ".join(normalized)
+        ).replace(" ", "")
+
         if key in existing_text:
             continue
-        if request == "거주하시는 시·군·구를 알려 주세요." and re.search(
-            r"(?:어느\s*(?:시|군|구)|시[·\s-]?군[·\s-]?구).{0,22}(?:거주|알려)", answer
+
+        if (
+            request == "거주하시는 시·군·구를 알려 주세요."
+            and re.search(
+                r"(?:어느\s*(?:시|군|구)|시[·\s-]?군[·\s-]?구).{0,22}(?:거주|알려)",
+                answer,
+            )
         ):
             continue
-        if request == "가구원 수를 알려 주세요." and re.search(
-            r"가구원\s*수.{0,18}(?:알려|입력|몇\s*명)", answer
+
+        if (
+            request == "가구원 수를 알려 주세요."
+            and re.search(
+                r"가구원\s*수.{0,18}(?:알려|입력|몇\s*명)",
+                answer,
+            )
         ):
             continue
+
         normalized.append(request)
-    return " ".join([answer.strip(), *normalized]).strip()
+
+    return " ".join(
+        [answer.strip(), *normalized]
+    ).strip()
 
 
-def _is_redundant_request(text: str, profile: dict | None) -> bool:
+def _is_redundant_request(
+    text: str,
+    profile: dict | None,
+) -> bool:
     if profile is None:
         return False
 
-    # '이 정책의 연령 기준은?' 같은 정책 질문은 개인 정보 재요청이 아니다.
-    if re.search(r"정책|공고|지원|자격|요건|기준|조건", text):
+    # '이 정책의 연령 기준은?' 같은 정책 질문은
+    # 개인 정보 재요청이 아니다.
+    if re.search(
+        r"정책|공고|지원|자격|요건|기준|조건",
+        text,
+    ):
         return False
 
     for field in ALLOWED_FIELDS:
         value = profile[field]
+
         if value is None:
             continue
 
@@ -350,15 +459,23 @@ def _is_redundant_request(text: str, profile: dict | None) -> bool:
     return False
 
 
-def _remove_redundant_answer_requests(answer: str, profile: dict | None) -> str:
+def _remove_redundant_answer_requests(
+    answer: str,
+    profile: dict | None,
+) -> str:
     """인용 없는 독립된 중복 입력 요구 문장만 제거한다.
 
-    인용이 있거나 정책 설명과 결합된 문장은 삭제하지 않고 프롬프트 규칙에 맡긴다.
+    인용이 있거나 정책 설명과 결합된 문장은
+    삭제하지 않고 프롬프트 규칙에 맡긴다.
     """
     if profile is None:
         return answer.strip()
 
-    sentences = re.split(r"(?<=[.!?])\s+|(?<=\])\s+|\n+", answer.strip())
+    sentences = re.split(
+        r"(?<=[.!?])\s+|(?<=\])\s+|\n+",
+        answer.strip(),
+    )
+
     kept = []
     removed = False
 
@@ -367,10 +484,14 @@ def _remove_redundant_answer_requests(answer: str, profile: dict | None) -> str:
             len(sentence) <= 75
             and not CITATION_PATTERN.search(sentence)
             and _is_redundant_request(sentence, profile)
-            and not re.search(r"(?:정책|공고|지원\s*대상|자격\s*기준)", sentence)
+            and not re.search(
+                r"(?:정책|공고|지원\s*대상|자격\s*기준)",
+                sentence,
+            )
         ):
             removed = True
             continue
+
         kept.append(sentence)
 
     if not removed or not kept:
@@ -407,14 +528,18 @@ def _validated_contexts(
     contexts: list[dict],
 ) -> tuple[list[dict], set[int]]:
     if not isinstance(contexts, list):
-        raise ValueError("contexts는 리스트여야 합니다.")
+        raise ValueError(
+            "contexts는 리스트여야 합니다."
+        )
 
     cleaned: list[dict] = []
     ids: set[int] = set()
 
     for ctx in contexts:
         if not isinstance(ctx, dict):
-            raise ValueError("각 context는 객체여야 합니다.")
+            raise ValueError(
+                "각 context는 객체여야 합니다."
+            )
 
         source_id = ctx.get("source_id")
 
@@ -443,7 +568,9 @@ def _validated_contexts(
                 "policy_id": ctx.get("policy_id"),
                 "policy_name": ctx.get("policy_name"),
                 "text": ctx["text"],
-                "quality_warnings": ctx.get("quality_warnings") or [],
+                "quality_warnings": (
+                    ctx.get("quality_warnings") or []
+                ),
             }
         )
 
@@ -472,21 +599,52 @@ def _validate_model_response(
             "LLM answer가 비어 있습니다."
         )
 
-    answer = _remove_redundant_answer_requests(answer, profile)
+    answer = _remove_redundant_answer_requests(
+        answer,
+        profile,
+    )
 
-    # LLM이 수천 자리의 [숫자]를 반환해도 int() 변환 한도 때문에
-    # ValueError(서버 500)가 발생하지 않도록 허용된 출처 문자열과 비교한다.
-    # [0001]처럼 앞에 0을 붙인 기존 인용의 숫자 의미는 유지한다.
-    source_id_by_text = {str(source_id): source_id for source_id in source_ids}
-    cited = []
-    for number in CITATION_PATTERN.findall(answer):
-        normalized_number = number.lstrip("0") or "0"
-        source_id = source_id_by_text.get(normalized_number)
+    # 허용된 출처 ID만 문자열로 검증하면서
+    # 답변 본문 인용 번호도 표준 형식으로 정규화한다.
+    #
+    # [1]      → [1]
+    # [0001]   → [1]
+    # [0012]   → [12]
+    #
+    # 초장문 인용 번호에도 int()를 적용하지 않는다.
+    # 허용되지 않은 출처는 LLMOutputError로 처리한다.
+    source_id_by_text = {
+        str(source_id): source_id
+        for source_id in source_ids
+    }
+
+    cited: list[int] = []
+
+    def _canonicalize_citation(
+        match: re.Match[str],
+    ) -> str:
+        normalized_number = (
+            match.group(1).lstrip("0") or "0"
+        )
+
+        source_id = source_id_by_text.get(
+            normalized_number
+        )
+
         if source_id is None:
             raise LLMOutputError(
                 "제공되지 않은 source_id를 인용했습니다."
             )
+
         cited.append(source_id)
+
+        # 최종 answer 본문도 표준 ID로 변환한다.
+        return f"[{source_id}]"
+
+    answer = CITATION_PATTERN.sub(
+        _canonicalize_citation,
+        answer,
+    )
 
     if raw["status"] == "answered" and not cited:
         raise LLMOutputError(
@@ -497,14 +655,17 @@ def _validate_model_response(
 
     if (
         not isinstance(used, list)
-        or any(type(number) is not int for number in used)
+        or any(
+            type(number) is not int
+            for number in used
+        )
     ):
         raise LLMOutputError(
             "used_source_ids는 정수 리스트여야 합니다."
         )
 
-    # 실제 본문 인용 번호가 최종 기준이다.
-    # Pipeline에서 출처를 다시 검증하고 재번호 처리한다.
+    # 실제 본문에 나타난 인용 번호를 최종 기준으로 사용한다.
+    # Pipeline은 정규화된 본문과 ID를 받아 추가 검증한다.
 
     follows = raw.get("follow_up_questions")
 
@@ -519,77 +680,164 @@ def _validate_model_response(
     for item in follows:
         if (
             not isinstance(item, dict)
-            or item.get("kind") not in {"question", "ask_info"}
+            or item.get("kind") not in {
+                "question",
+                "ask_info",
+            }
         ):
-            raise LLMOutputError("후속 질문 kind가 유효하지 않습니다.")
-        if not isinstance(item.get("text"), str) or not item["text"].strip():
-            raise LLMOutputError("후속 질문 text가 비어 있습니다.")
+            raise LLMOutputError(
+                "후속 질문 kind가 유효하지 않습니다."
+            )
+
+        if (
+            not isinstance(item.get("text"), str)
+            or not item["text"].strip()
+        ):
+            raise LLMOutputError(
+                "후속 질문 text가 비어 있습니다."
+            )
 
         kind = item["kind"]
         text = item["text"].strip()
-        detected_field = _personal_information_request(text, profile)
-        field = item.get("field") if kind == "ask_info" else None
+
+        detected_field = _personal_information_request(
+            text,
+            profile,
+        )
+
+        field = (
+            item.get("field")
+            if kind == "ask_info"
+            else None
+        )
 
         if kind == "ask_info":
-            if not isinstance(field, str) or field not in ALLOWED_FIELDS:
+            if (
+                not isinstance(field, str)
+                or field not in ALLOWED_FIELDS
+            ):
                 # 비허용 필드는 버튼으로 변환하지 않는다.
-                # 구체적으로 파악할 수 있는 정보 요청만 answer로 옮긴다.
+                # 파악 가능한 정보 요청만 본문으로 옮긴다.
                 if _is_redundant_request(text, profile):
                     continue
-                request = _info_request_to_answer(text, field if isinstance(field, str) else None)
+
+                request = _info_request_to_answer(
+                    text,
+                    field if isinstance(field, str) else None,
+                )
+
                 if request:
                     body_requests.append(request)
+
                 continue
 
-            if field == "region" and _is_detail_region_request(
-                text, (profile or {}).get("region")
+            if (
+                field == "region"
+                and _is_detail_region_request(
+                    text,
+                    (profile or {}).get("region"),
+                )
             ):
                 # 시군구 확인은 기존 region 입력 UI의 범위를 벗어난다.
-                # question 버튼으로 변환하지 않고 answer에서 안내한다.
-                if profile and profile.get("region") and _region_has_detail(profile["region"]):
+                if (
+                    profile
+                    and profile.get("region")
+                    and _region_has_detail(
+                        profile["region"]
+                    )
+                ):
                     continue
-                request = _info_request_to_answer(text, "detail_region")
+
+                request = _info_request_to_answer(
+                    text,
+                    "detail_region",
+                )
+
                 if request:
                     body_requests.append(request)
+
                 continue
 
-            if profile is not None and profile[field] is not None:
+            if (
+                profile is not None
+                and profile[field] is not None
+            ):
                 continue
 
-            result = {"kind": "ask_info", "text": text, "field": field}
+            result = {
+                "kind": "ask_info",
+                "text": text,
+                "field": field,
+            }
 
-        else:  # kind == question
+        else:
             # question 버튼은 사용자→AI 질문만 허용한다.
-            # AI의 서비스 제안(예: '서류도 알려드릴까요?')은 전송하지 않는다.
             if _is_ai_offer_question(text):
                 continue
 
             if detected_field in ALLOWED_FIELDS:
-                if profile is not None and profile[detected_field] is not None:
+                if (
+                    profile is not None
+                    and profile[detected_field] is not None
+                ):
                     continue
-                result = {"kind": "ask_info", "text": text, "field": detected_field}
-            elif detected_field in {"detail_region", "other"}:
+
+                result = {
+                    "kind": "ask_info",
+                    "text": text,
+                    "field": detected_field,
+                }
+
+            elif detected_field in {
+                "detail_region",
+                "other",
+            }:
                 if _is_redundant_request(text, profile):
                     continue
-                request = _info_request_to_answer(text, detected_field)
+
+                request = _info_request_to_answer(
+                    text,
+                    detected_field,
+                )
+
                 if request:
                     body_requests.append(request)
+
                 continue
+
             else:
-                question_text = _normalize_followup_question(text)
-                if question_text is None or _is_redundant_request(question_text, profile):
+                question_text = (
+                    _normalize_followup_question(text)
+                )
+
+                if (
+                    question_text is None
+                    or _is_redundant_request(
+                        question_text,
+                        profile,
+                    )
+                ):
                     continue
-                result = {"kind": "question", "text": question_text}
+
+                result = {
+                    "kind": "question",
+                    "text": question_text,
+                }
 
         if not any(
             existing["kind"] == result["kind"]
-            and existing["text"].strip() == result["text"].strip()
-            and existing.get("field") == result.get("field")
+            and existing["text"].strip()
+            == result["text"].strip()
+            and existing.get("field")
+            == result.get("field")
             for existing in normalized
         ):
             normalized.append(result)
 
-    answer = _append_info_requests(answer, body_requests)
+    answer = _append_info_requests(
+        answer,
+        body_requests,
+    )
 
     return {
         "status": raw["status"],
@@ -600,12 +848,21 @@ def _validate_model_response(
 
 
 @lru_cache(maxsize=8)
-def _get_openai_client(openai_class: type, api_key: str, timeout: float) -> Any:
+def _get_openai_client(
+    openai_class: type,
+    api_key: str,
+    timeout: float,
+) -> Any:
     """같은 SDK·API 키·타임아웃 설정으로 만든 클라이언트를 재사용한다.
 
-    SDK 생성자를 캐시 키에 포함해 모의 SDK 테스트 간 객체가 섞이지 않게 한다.
+    SDK 생성자를 캐시 키에 포함해 모의 SDK 테스트 간 객체가
+    섞이지 않게 한다.
     """
-    return openai_class(api_key=api_key, timeout=timeout, max_retries=0)
+    return openai_class(
+        api_key=api_key,
+        timeout=timeout,
+        max_retries=0,
+    )
 
 
 def _call_openai(
@@ -631,18 +888,26 @@ def _call_openai(
             "openai SDK를 설치해야 합니다."
         ) from error
 
-    model = os.getenv("LLM_MODEL") or DEFAULT_MODEL
+    model = (
+        os.getenv("LLM_MODEL") or DEFAULT_MODEL
+    )
 
     try:
         timeout = float(
-            os.getenv("LLM_TIMEOUT_SECONDS") or str(DEFAULT_TIMEOUT_SECONDS)
+            os.getenv("LLM_TIMEOUT_SECONDS")
+            or str(DEFAULT_TIMEOUT_SECONDS)
         )
 
         max_tokens = int(
-            os.getenv("LLM_MAX_OUTPUT_TOKENS") or str(DEFAULT_MAX_OUTPUT_TOKENS)
+            os.getenv("LLM_MAX_OUTPUT_TOKENS")
+            or str(DEFAULT_MAX_OUTPUT_TOKENS)
         )
 
-        if not math.isfinite(timeout) or timeout <= 0 or max_tokens <= 0:
+        if (
+            not math.isfinite(timeout)
+            or timeout <= 0
+            or max_tokens <= 0
+        ):
             raise ValueError
 
     except (ValueError, OverflowError) as error:
@@ -652,14 +917,20 @@ def _call_openai(
         ) from error
 
     try:
-        client = _get_openai_client(OpenAI, api_key, timeout)
+        client = _get_openai_client(
+            OpenAI,
+            api_key,
+            timeout,
+        )
 
         response = client.chat.completions.create(
             model=model,
             messages=messages,
             temperature=0,
             max_completion_tokens=max_tokens,
-            response_format={"type": "json_object"},
+            response_format={
+                "type": "json_object",
+            },
         )
 
         if (
@@ -701,8 +972,8 @@ def generate_answer(
     history: list[dict] | None = None,
     profile: dict | None = None,
 ) -> dict:
-    """
-    검색 원문 근거와 판정 결과로만 답한다.
+    """검색 원문 근거와 판정 결과로만 답한다.
+
     입력을 변경하지 않는다.
 
     실제 URL 연결 및 인용 번호 재부여는
@@ -714,10 +985,11 @@ def generate_answer(
             "question은 비어 있지 않은 문자열이어야 합니다."
         )
 
-    # 수정: Context 형식 검증을 먼저 수행한다.
-    # None, {}, "" 등은 잘못된 입력으로 처리한다.
-    # 유효한 빈 리스트 []만 no_evidence로 처리한다.
-    cleaned_contexts, source_ids = _validated_contexts(contexts)
+    # Context 형식 검증을 먼저 수행한다.
+    # 유효한 빈 리스트만 no_evidence로 처리한다.
+    cleaned_contexts, source_ids = _validated_contexts(
+        contexts
+    )
 
     if not isinstance(policy_checks, list) or any(
         not isinstance(item, dict)
@@ -729,7 +1001,10 @@ def generate_answer(
 
     if history is not None and (
         not isinstance(history, list)
-        or any(not isinstance(item, dict) for item in history)
+        or any(
+            not isinstance(item, dict)
+            for item in history
+        )
     ):
         raise ValueError(
             "history는 객체 리스트여야 합니다."
@@ -760,6 +1035,7 @@ def generate_answer(
         "policy_checks": policy_checks,
         "history_for_conversation_only": trimmed_history,
     }
+
     if cleaned_profile is not None:
         prompt_data["user_profile"] = cleaned_profile
 
@@ -788,8 +1064,7 @@ def generate_answer(
         parsed = json.loads(content)
 
     except (ValueError, TypeError) as error:
-        # json.loads는 4300자리 초과 정수 등에서 JSONDecodeError가 아닌
-        # ValueError를 발생시킬 수 있다. Pipeline 오류 계약에 맞게 변환한다.
+        # 비정상적으로 긴 JSON 정수도 LLMOutputError로 처리한다.
         raise LLMOutputError(
             "LLM이 유효한 JSON을 반환하지 않았습니다."
         ) from error
