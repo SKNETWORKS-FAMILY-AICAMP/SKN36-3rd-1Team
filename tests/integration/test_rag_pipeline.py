@@ -284,10 +284,10 @@ class PipelineTests(unittest.TestCase):
 
     def test_only_sentence_citing_conflicting_policy_is_replaced(self):
         policies = [policy("A", 1, policy_name="접수 중 정책"), policy("B", 2, policy_name="마감 정책")]
-        text = "A는 지금 신청할 수 있어요 [1]. B도 지금 신청할 수 있어요 [2]. 자세한 서류는 공고를 보세요 [1]."
+        text = "접수 중 정책은 지금 신청할 수 있어요 [1]. 마감 정책도 지금 신청할 수 있어요 [2]. 자세한 서류는 공고를 보세요 [1]."
         response = self.conflict_case({"A": "open", "B": "closed"}, "eligible", text, policies)
         self.assertEqual(response.answer,
-                         "A는 지금 신청할 수 있어요 [1]. 마감 정책: 접수가 마감됐어요. [2] 자세한 서류는 공고를 보세요 [1].")
+                         "접수 중 정책은 지금 신청할 수 있어요 [1]. 마감 정책: 접수가 마감됐어요. [2] 자세한 서류는 공고를 보세요 [1].")
         self.assertEqual([c.document_id for c in response.citations], ["DA", "DB"])
 
     def test_uncited_claim_is_replaced_only_when_every_policy_conflicts(self):
@@ -330,6 +330,66 @@ class PipelineTests(unittest.TestCase):
         # A는 마감이라 Context 후순위([2]), B는 접수 중([1]).
         policies = [policy("A", 1, policy_name=names[0]), policy("B", 2, policy_name=names[1])]
         return self.conflict_case({"A": "closed", "B": "open"}, "eligible", text, policies, changed=changed)
+
+    def test_named_closed_policy_cannot_borrow_open_policy_citation(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        response = self.two_policy_case("청년월세 특별지원은 지금 신청할 수 있어요 [1].", names)
+        self.assertIn("청년월세 특별지원", response.answer)
+        self.assertIn("접수가 마감됐어요", response.answer)
+        self.assertNotIn("신청할 수 있어요", response.answer)
+        self.assertNotIn("[1]", response.answer)
+        self.assertEqual(response.citations, [])
+        self.assertEqual(response.status, "info")
+        self.assertEqual({p.policy_id: p.reception_status for p in response.policy_checks},
+                         {"A": "closed", "B": "open"})
+
+    def test_wrong_policy_citation_removed_without_losing_valid_other_sentence(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        response = self.two_policy_case(
+            "청년월세 특별지원은 지금 신청할 수 있어요 [1]. 청년 주거 상담은 제출 서류가 필요해요 [1].", names)
+        self.assertIn("청년월세 특별지원: 접수가 마감됐어요", response.answer)
+        self.assertIn("청년 주거 상담은 제출 서류가 필요해요 [1]", response.answer)
+        self.assertEqual([c.document_id for c in response.citations], ["DB"])
+        self.assertEqual(response.status, "answered")
+
+    def test_wrong_citation_in_first_clause_keeps_correct_second_clause(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        response = self.two_policy_case(
+            "청년월세 특별지원은 지금 신청할 수 있어요 [1], 청년 주거 상담은 지금 신청할 수 있어요 [1].", names)
+        self.assertIn("청년월세 특별지원: 접수가 마감됐어요", response.answer)
+        self.assertIn("청년 주거 상담은 지금 신청할 수 있어요 [1]", response.answer)
+        self.assertEqual([c.document_id for c in response.citations], ["DB"])
+
+    def test_remaining_second_source_is_renumbered_after_wrong_first_source_removed(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        response = self.two_policy_case(
+            "청년월세 특별지원은 지금 신청할 수 있어요 [1]. 청년월세 특별지원 공고 원문은 [2]에서 확인해 주세요.",
+            names)
+        self.assertIn("접수가 마감됐어요", response.answer)
+        self.assertNotIn("[2]", response.answer)
+        self.assertIn("공고 원문은 [1]", response.answer)
+        self.assertEqual([c.document_id for c in response.citations], ["DA"])
+
+    def test_correct_policy_citations_remain_attached(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        corrected = self.two_policy_case("청년월세 특별지원은 지금 신청할 수 있어요 [2].", names)
+        self.assertIn("접수가 마감됐어요", corrected.answer)
+        self.assertEqual([c.document_id for c in corrected.citations], ["DA"])
+        kept = self.two_policy_case("청년 주거 상담은 지금 신청할 수 있어요 [1].", names, changed=False)
+        self.assertEqual(kept.answer, "청년 주거 상담은 지금 신청할 수 있어요 [1].")
+        self.assertEqual([c.document_id for c in kept.citations], ["DB"])
+
+    def test_uncertain_or_short_policy_name_does_not_choose_open_checker(self):
+        for names, text in (
+            (("청년월세 특별지원", "청년 주거 상담"), "지금 신청할 수 있어요 [1]."),
+            (("청년월세 특별지원", "청년월세 특별지원 연장"), "청년월세는 지금 신청할 수 있어요 [1]."),
+            (("정책 A", "정책 B"), "A는 지금 신청할 수 있어요 [1]."),
+        ):
+            with self.subTest(names=names, text=text):
+                response = self.two_policy_case(text, names)
+                self.assertNotIn("신청할 수 있어요", response.answer)
+                self.assertEqual(response.citations, [])
+                self.assertEqual(response.status, "info")
 
     def test_uncited_claim_about_other_policy_does_not_borrow_sentence_citation(self):
         # 팀장 리뷰 사례: 문장 끝 [1]은 B 출처다. 어느 정책인지 확실하지 않은 A의 신청 가능 안내는 빼고 B 안내·출처는 남긴다.

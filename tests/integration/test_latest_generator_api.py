@@ -130,7 +130,9 @@ class LatestGeneratorApiTests(unittest.TestCase):
     def test_real_generator_answer_conflicting_with_checker_is_corrected(self):
         # 실제 Generator 검증을 통과한 본문이라도 Checker 판정과 충돌하는 단정은 확인된 상태로 바뀐다.
         # Context 순서: [1]=B(open, 소득 needs_review), [2]=A(closed)
-        response = self.ask(llm_output(answer="A는 지금 신청할 수 있어요 [2]. B는 모든 신청 자격을 충족했어요 [1]."))
+        response = self.ask(llm_output(answer=(
+            "가상 정책 A(sample_only)는 지금 신청할 수 있어요 [2]. "
+            "가상 정책 B(sample_only)는 모든 신청 자격을 충족했어요 [1].")))
         self.assertEqual(response.status_code, 200, response.text)
         body = response.json()
         self.assertEqual(body["status"], "answered")
@@ -142,6 +144,28 @@ class LatestGeneratorApiTests(unittest.TestCase):
         self.assertEqual([c["document_id"] for c in body["citations"]], ["D_B", "D_A"])
         self.assertEqual([(p["policy_id"], p["reception_status"]) for p in body["policy_checks"]],
                          [("B", "open"), ("A", "closed")])
+
+    def test_named_closed_policy_with_other_policy_source_becomes_uncited_info(self):
+        response = self.ask(llm_output(answer="가상 정책 A(sample_only)는 지금 신청할 수 있어요 [1]."))
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertEqual(body["status"], "info")
+        self.assertIn("접수가 마감됐어요", body["answer"])
+        self.assertNotIn("신청할 수 있어요", body["answer"])
+        self.assertEqual(body["citations"], [])
+        self.assertEqual([(p["policy_id"], p["reception_status"]) for p in body["policy_checks"]],
+                         [("B", "open"), ("A", "closed")])
+
+    def test_bad_a_citation_removed_b_document_claim_and_source_preserved(self):
+        self.policies[1]["evidence"][0]["text"] = "제출 서류가 필요합니다."
+        response = self.ask(llm_output(answer=(
+            "가상 정책 A(sample_only)는 지금 신청할 수 있어요 [1]. "
+            "가상 정책 B(sample_only)는 제출 서류가 필요해요 [1].")))
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertIn("접수가 마감됐어요", body["answer"])
+        self.assertIn("가상 정책 B(sample_only)는 제출 서류가 필요해요 [1]", body["answer"])
+        self.assertEqual([item["document_id"] for item in body["citations"]], ["D_B"])
 
     def test_missing_profile_value_can_still_be_asked(self):
         request = {**REQUEST, "profile": {"age": 25, "region": "서울", "income": None}}

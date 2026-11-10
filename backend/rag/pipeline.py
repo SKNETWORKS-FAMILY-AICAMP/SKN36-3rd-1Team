@@ -192,16 +192,32 @@ def _inline(text: str, later: str) -> str:
 
 
 def _clause_correction(
-    clause: str, numbers: list[str], policy_of: dict[str, str], by_policy: dict[str, dict], whole_sentence: bool,
+    clause: str, numbers: list[str], policy_of: dict[str, str], by_policy: dict[str, dict],
+    whole_sentence: bool,
 ) -> str | None:
     """단정 절 하나를 판정에 맞게 고친 문구. 충돌이 없거나 출처를 확정할 수 없으면 None."""
     claims = _claims(clause)
     if not claims:
         return None
+    named = _named_policy_ids(clause, list(by_policy.values()))
     if numbers:
         # 존재하지 않거나 비정상적인 번호가 있으면 여기서 고치지 않는다(인용 검증이 LLM 출력 오류로 처리한다).
         if any(number not in policy_of for number in numbers):
             return None
+        cited = {policy_of[number] for number in numbers}
+        if len(named) == 1 and named != cited:
+            # 본문 대상이 명확한데 다른 정책의 출처를 붙였으면 출처 정책의 판정을 빌리지 않는다.
+            check = by_policy[named.pop()]
+            fixes = [_status_correction(claim, check) for claim in claims]
+            text = " ".join(dict.fromkeys(fix or OPEN_CONFIRMED for fix in fixes))
+            return f"{check['policy_name']}: {text}"
+        if len(named) > 1 and named != cited:
+            # 이름이 겹치거나 여러 정책을 지칭하는데 인용 집합이 맞지 않으면 특정 정책을 고르지 않는다.
+            return RECEPTION_NOTICE["unknown"] if "open" in claims else ELIGIBILITY_NOTICE
+        if not named and len(by_policy) > 1 and len(numbers) == 1 and whole_sentence:
+            # 단독 단정문은 인용 하나만으로 여러 검색 정책 중 발화 대상을 확정할 수 없다.
+            # 다른 설명 절이나 정책별 문장이 있는 경우는 아래 기존 절별 처리를 유지한다.
+            return RECEPTION_NOTICE["unknown"] if "open" in claims else ELIGIBILITY_NOTICE
         grouped: dict[str, list[str]] = {}
         for number in numbers:
             grouped.setdefault(policy_of[number], []).append(number)
@@ -401,7 +417,14 @@ def run_ask_pipeline(
         if aligned:
             # 내용은 로그에 남기지 않는다.
             logger.warning("생성 본문의 접수·자격 안내를 Checker 판정에 맞춰 바꿨습니다.")
-            output = output.model_copy(update={"answer": fixed})
+            # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
+            remaining = set(CITATION.findall(fixed))
+            output = output.model_copy(update={
+                "answer": fixed,
+                "status": "info" if output.status == "answered" and not remaining else output.status,
+                "used_source_ids": [context["source_id"] for context in contexts
+                                    if str(context["source_id"]) in remaining],
+            })
     answer, citations = _citations(output, contexts)
     follow_ups = [
         item for item in output.follow_up_questions
