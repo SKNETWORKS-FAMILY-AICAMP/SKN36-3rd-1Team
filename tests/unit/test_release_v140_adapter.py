@@ -3,7 +3,7 @@
 
 - 가상 패키지: 누락·중복·해시 불일치·문서 내 메타데이터 불일치에서 멈추는지, 문서별 값을 합치지 않는지
 - 실제 릴리스(하위 프로세스, LIFEPOLICY_DATASET_DIR): 문서 261·해시 일치, 문서별 메타데이터, B2/B3 청크,
-  Qdrant payload 필수 필드, Neo4j 1,030노드/2,921관계 입력 검증, 원본 파일 불변
+  Qdrant payload 필수 필드, Neo4j 1,005노드/2,442관계 입력 검증, 원본 파일 불변
 - 명시적 v1.3.2 선택 시 호환 동작 회귀
 공식 정책 내용의 정확성은 검증하지 않는다 (저장된 원천과의 일치만 본다).
 """
@@ -217,7 +217,7 @@ class ApprovedReleaseTests(unittest.TestCase):
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 261, 599, 1030, 2921])
+        self.assertEqual(self.out["expected"], [246, 261, 599, 1005, 2442])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
@@ -257,7 +257,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_neo4j_graph_input(self):
         self.assertTrue(self.out["graph_ok"])
-        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1030, 2921))
+        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1005, 2442))
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):
