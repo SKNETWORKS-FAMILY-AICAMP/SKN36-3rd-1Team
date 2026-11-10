@@ -52,7 +52,7 @@ def _policy(start=None, end=None, ongoing=None, *, include_ongoing=False):
     "start,end,ongoing,include_ongoing,expected",
     [
         ("2024-02-26", "2025-02-25", None, False, "closed"),  # POL_009
-        ("2025-10-19", None, True, True, "open"),  # POL_002
+        ("2025-10-19", None, True, True, "open"),  # 시작일만 있는 상시 정책(가상 사례)
         (None, None, True, True, "open"),  # 시작일 없는 상시 정책
         ("", None, True, True, "open"),  # 빈 문자열도 시작일 미설정으로 취급
         ("2026-12-01", None, True, True, "before"),

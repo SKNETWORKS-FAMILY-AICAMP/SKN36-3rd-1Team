@@ -7,24 +7,35 @@ import json
 import math
 import os
 import re
+from functools import lru_cache
 from typing import Any
 
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
+from backend.eligibility.checker import _is_valid_age
+from database.region_search import ALIASES, SIDOS
 
 
+# D-06 모델·공급자 확정 전 임시 기본값. LLM_MODEL 환경변수로 변경 가능.
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT_SECONDS = 25.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1000
 
 CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 ALLOWED_FIELDS = {"age", "region", "income"}
-MAX_VALID_AGE = 120
 
+# 연령 검사는 Checker의 단일 구현을 사용한다(순환 import 없음).
+# 전국 시·도 공식명/약칭은 검색 모듈에서 가져온다.
+_SIDO_VARIANTS: dict[str, frozenset[str]] = {}
+for _short, _official in ALIASES.items():
+    if _official not in SIDOS:
+        continue
+    _names = {_official, _short}
+    if _official.endswith(("특별시", "광역시", "자치시")):
+        _names.add(f"{_short}시")
+    _SIDO_VARIANTS[_official] = frozenset(_names)
 
-def _is_valid_age(age: Any) -> bool:
-    """사용자 만 나이의 유효 범위(0~120). 데이터의 상한 없음 표현과 다름."""
-    return type(age) is int and 0 <= age <= MAX_VALID_AGE
+# 지역명 정규화는 긴 표현부터 처리해야 '서울시'가 '서울'로 잘리지 않는다.
 
 
 def _normalize_profile(profile: dict | None) -> dict | None:
@@ -119,23 +130,15 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
     # 알고 있는 시·도의 공식명·약칭을 모두 제거하여 시·도 재질문을
     # 세부 지역 질문으로 오인하지 않는다. 예: 서울시 ↔ 서울특별시.
     remaining = text
-    sido_name_sets = (
-        ("서울특별시", "서울시"),
-        ("부산광역시", "부산시"),
-        ("대구광역시", "대구시"),
-        ("인천광역시", "인천시"),
-        ("광주광역시", "광주시"),
-        ("대전광역시", "대전시"),
-        ("울산광역시", "울산시"),
-        ("세종특별자치시", "세종시"),
-    )
     known_sido_aliases: set[str] = set()
     if known_region:
         remaining = remaining.replace(known_region, "")
-        for names in sido_name_sets:
-            if known_region in names:
+        known_first_token = known_region.split()[0]
+        for names in _SIDO_VARIANTS.values():
+            if known_region in names or known_first_token in names:
                 known_sido_aliases.update(names)
-                for name in names:
+                # '서울시'보다 '서울'을 먼저 지우면 '시'가 남을 수 있다.
+                for name in sorted(names, key=len, reverse=True):
                     remaining = remaining.replace(name, "")
 
     # 예: 강남구에 / 수원시에 / 영광군 거주 / 역삼동 주민등록.
@@ -148,6 +151,8 @@ def _is_detail_region_request(text: str, known_region: str | None = None) -> boo
         suffix = remaining[match.end():]
 
         # 시·도 자체의 공식명과 약칭은 세부 지역으로 간주하지 않는다.
+        # 같은 이름이라도 다른 시·도에서는 실제 기초자치단체일 수 있다.
+        # 예: 경기도 광주시와 광주광역시의 약칭 '광주시'.
         if candidate in known_sido_aliases:
             continue
 
@@ -590,6 +595,15 @@ def _validate_model_response(
     }
 
 
+@lru_cache(maxsize=8)
+def _get_openai_client(openai_class: type, api_key: str, timeout: float) -> Any:
+    """같은 SDK·API 키·타임아웃 설정으로 만든 클라이언트를 재사용한다.
+
+    SDK 생성자를 캐시 키에 포함해 모의 SDK 테스트 간 객체가 섞이지 않게 한다.
+    """
+    return openai_class(api_key=api_key, timeout=timeout, max_retries=0)
+
+
 def _call_openai(
     messages: list[dict[str, str]],
 ) -> str:
@@ -634,11 +648,7 @@ def _call_openai(
         ) from error
 
     try:
-        client = OpenAI(
-            api_key=api_key,
-            timeout=timeout,
-            max_retries=0,
-        )
+        client = _get_openai_client(OpenAI, api_key, timeout)
 
         response = client.chat.completions.create(
             model=model,

@@ -359,12 +359,17 @@ def _walk(
 
     group_status = _combine(logic, states)
 
+    # 결과가 프론트 및 LLM에 그대로 전달되므로 내부 group_id는 노출하지 않는다.
+    group_reasons = {
+        "AND": "모든 조건을 충족해야 합니다(종합 결과).",
+        "OR": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+        "NOT": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+    }
     items.append(
         _result(
             "eligibility",
             group_status,
-            f"조건 그룹 {group.get('group_id') or 'ID 없음'} "
-            f"({logic})의 종합 평가 결과입니다.",
+            group_reasons[logic],
         )
     )
 
@@ -744,8 +749,6 @@ def check_eligibility(
                             "exclusion",
                             "marriage",
                             "children",
-                            "target",
-                            "education",
                         )
                     )
                 )
@@ -793,44 +796,70 @@ def check_eligibility(
     }
 
 
-def summarize_conditions_for_display(
-    conditions: list[dict],
-) -> list[dict]:
-    """동일한 소득 확인 안내만 화면용으로 합친다.
+def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
+    """화면에 중복되는 소득·가구 안내를 합친다.
 
-    원본 개별 조건·논리 조건·상태는 변경하지 않는다.
+    원본 conditions를 변경하지 않고, 상태가 다른 항목 및 논리 그룹 결과는 유지한다.
+    소득: field/label/reason이 같은 needs_check만 한 번 표시한다.
+    가구: 원문 검토 안내와 기존 그래프 조건이 함께 있을 때 한 줄로 합치되,
+          서로 다른 확인 사유도 생략하지 않는다.
+    이 함수는 정책 한 건의 conditions에 대해서만 사용해야 한다.
     """
-
     if not isinstance(conditions, list):
-        raise TypeError(
-            "conditions는 리스트여야 합니다."
+        raise TypeError("conditions는 리스트여야 합니다.")
+    if any(not isinstance(item, dict) for item in conditions):
+        raise TypeError("각 condition은 dict여야 합니다.")
+
+    def is_household_review(item: dict) -> bool:
+        return (
+            item.get("field") == "housing"
+            and item.get("status") == CHECK
+            and isinstance(item.get("reason"), str)
+            and item["reason"].startswith("가구 요건의 공식 원문 기준을 추가 확인해야 합니다.")
         )
 
+    # 가구 원문 검토 결과가 있을 때만, 같은 상태의 그래프 조건과 묶는다.
+    # 중복 제거로 '무주택' 등의 개별 확인 사항을 잃지 않도록 reason을 합친다.
+    housing_items = [
+        item for item in conditions
+        if item.get("field") == "housing" and item.get("status") == CHECK
+    ]
+    merge_housing = len(housing_items) > 1 and any(
+        is_household_review(item) for item in housing_items
+    )
+    housing_summary: dict | None = None
+    if merge_housing:
+        # 그래프에서 나온 기존 조건을 우선 사용하고, 그 뒤에 원문 검토 안내를 결합한다.
+        graph_items = [item for item in housing_items if not is_household_review(item)]
+        review_items = [item for item in housing_items if is_household_review(item)]
+        housing_summary = (graph_items or review_items)[0].copy()
+        reasons = list(dict.fromkeys(
+            str(item.get("reason") or "").strip()
+            for item in [*graph_items, *review_items]
+            if str(item.get("reason") or "").strip()
+        ))
+        housing_summary["reason"] = " / ".join(reasons)
+
     displayed: list[dict] = []
-    income_notices: set[
-        tuple[str, str, str]
-    ] = set()
+    income_notices: set[tuple[str, str, str]] = set()
+    housing_emitted = False
 
     for item in conditions:
-        if not isinstance(item, dict):
-            raise TypeError(
-                "각 condition은 dict여야 합니다."
-            )
-
-        if (
-            item.get("field") == "income"
-            and item.get("status") == CHECK
-        ):
+        if item.get("field") == "income" and item.get("status") == CHECK:
             key = (
                 str(item.get("field")),
                 str(item.get("label")),
                 str(item.get("reason")),
             )
-
             if key in income_notices:
                 continue
-
             income_notices.add(key)
+
+        if merge_housing and item.get("field") == "housing" and item.get("status") == CHECK:
+            if not housing_emitted:
+                displayed.append(housing_summary)
+                housing_emitted = True
+            continue
 
         displayed.append(item.copy())
 
