@@ -622,6 +622,84 @@ def _reception_status(policy: dict) -> str:
     return "unknown"
 
 
+
+# #42: 설명에 명시적인 연령이 있으나 조건 그래프에 AGE가 없는 경우만 안내한다.
+# '세대'와 '개월' 같은 비연령 표현은 매칭하지 않는다.
+_AGE_IN_DESCRIPTION = re.compile(
+    r"(?<!\d)(?:만\s*)?\d{1,3}\s*"
+    r"(?:(?:~|～|–|—|-)\s*\d{1,3}\s*)?세(?!대)"
+)
+
+
+def _age_tree_info(trees: list) -> tuple[bool, bool, bool]:
+    """(AGE 존재, 자녀 월령 조건 존재, 구조가 안전하게 판독 가능한지)."""
+    has_age = False
+    has_child_months = False
+
+    def visit(group: object, depth: int, ancestors: frozenset[int]) -> bool:
+        nonlocal has_age, has_child_months
+        if not isinstance(group, dict) or depth > 10 or id(group) in ancestors:
+            return False
+        if group.get("cycle") or group.get("not_loaded"):
+            return False
+        if str(group.get("logic") or "UNKNOWN").upper() not in {"AND", "OR", "NOT"}:
+            return False
+
+        conditions = group.get("conditions")
+        children = group.get("groups")
+        if not isinstance(conditions, list) or not isinstance(children, list):
+            return False
+
+        for condition in conditions:
+            if not isinstance(condition, dict):
+                return False
+            kind = str(condition.get("type") or "").upper()
+            if kind == "AGE":
+                has_age = True
+            if (kind == "SPECIAL_TARGET"
+                    and str(condition.get("unit") or "").strip() == "개월"):
+                has_child_months = True
+
+        path = ancestors | {id(group)}
+        return all(visit(child, depth + 1, path) for child in children)
+
+    valid = bool(trees) and all(visit(root, 0, frozenset()) for root in trees)
+    return has_age, has_child_months, valid
+
+
+def _should_add_missing_age_notice(
+    policy_node: dict, trees: object, affected: set[str],
+    review_items: list[dict], conditions: list[dict],
+) -> bool:
+    """나이 제한이 '없음'이 아니라 '추출 누락'인 정책만 보수적으로 안내한다.
+
+    UNKNOWN/손상 그룹 또는 전체 보류 사유는 이미 원문 확인을 안내하므로
+    중복 행을 추가하지 않는다. 일반 조건의 needs_check와는 구별한다.
+    """
+    if (
+        not isinstance(trees, list)
+        or "all" in affected
+        or review_items
+        or any(item.get("field") == "age" for item in conditions)
+    ):
+        return False
+
+    description = policy_node.get("eligibility")
+    if not isinstance(description, str) or not _AGE_IN_DESCRIPTION.search(description):
+        return False
+
+    has_age, has_child_months, valid = _age_tree_info(trees)
+    if not valid or has_age:
+        return False
+
+    # 자녀 월령을 신청자의 나이로 혼동하지 않는다(예: POL_GOV_050).
+    # 이 유형에 신청자 나이 조건까지 명시된다면 후속 데이터 정비가 우선이다.
+    if has_child_months:
+        return False
+
+    return True
+
+
 def check_eligibility(
     profile: dict,
     policy: dict,
@@ -788,6 +866,21 @@ def check_eligibility(
                     " 소득·가구 원문 확인이 남아 "
                     "종합 판정을 보류합니다."
                 )
+
+    # #42: 정책 설명에 연령 표현은 있지만 AGE 조건이 없을 때만
+    # 보수적인 안내 행을 추가한다. 실제 자격 판정이나 기존 그룹 상태는 변경하지 않는다.
+    if not missing and _should_add_missing_age_notice(
+        policy_node, trees, affected, review_items, conditions,
+    ):
+        conditions.append(
+            _result(
+                "age",
+                CHECK,
+                "이 정책의 나이 기준이 데이터에 정리되지 않아 "
+                "공식 원문에서 확인이 필요합니다.",
+                "나이 확인 필요",
+            )
+        )
 
     return {
         "policy_id": policy_id,
