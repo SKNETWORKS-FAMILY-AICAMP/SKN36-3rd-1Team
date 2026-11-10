@@ -1,0 +1,178 @@
+{
+  "package_filename": "rag-final-v140-pr45-review-worktree-20261110-r1.zip",
+  "package_sha256": "5b053525a13443b4afc0bc7650bf65c9c943429ebdf9ee96437ab248f260e5e8",
+  "restore_script_sha256": "5433a24e5fb679e714f42dfe652c10e7a97d9c1643bbf8cb82acad2183f30de1",
+  "source_base_commit": "3b9da1bfef528e85d3a5f29907c2a1b478b38444",
+  "source_basis": "uncommitted Issue #43 worktree; no new commit",
+  "python": "3.13.15",
+  "independent_extraction": true,
+  "internal_checksums_verified": 6,
+  "restore_safety_tests": {
+    "run": 24,
+    "passed": 24,
+    "source": "extracted source archive"
+  },
+  "qdrant_dimensions": 1024,
+  "apply": {
+    "status": "PASS",
+    "counts": [
+      246,
+      261,
+      599,
+      1138,
+      1004,
+      2431,
+      136
+    ],
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "metadata_points_updated": 0,
+    "metadata_field_updates": {},
+    "all_vectors_and_protected_payload_unchanged": true,
+    "vector_digest": "f5ec8c25f42f68726438879199860897f5e62baaf4549fcc02103747073a67df",
+    "graph_totals": {
+      "nodes": 1004,
+      "relationships": 2431
+    },
+    "full_graph_properties_verified": true,
+    "graph_verification_source": "load_graph.verification",
+    "cross_db": {
+      "status": "PASS",
+      "qdrant_points": 1138,
+      "qdrant_count": 1138,
+      "all_points_read": true,
+      "summary": {
+        "point_id": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "chunk_id_document": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "policy_exists": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_exists": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "supported_by": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_policy_id": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "content_hash": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        }
+      },
+      "failures": []
+    },
+    "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+    "embedding_calls": 0,
+    "verify_only": false
+  },
+  "verify_only": {
+    "status": "PASS",
+    "counts": [
+      246,
+      261,
+      599,
+      1138,
+      1004,
+      2431,
+      136
+    ],
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "metadata_points_updated": 0,
+    "metadata_field_updates": {},
+    "all_vectors_and_protected_payload_unchanged": true,
+    "vector_digest": "f5ec8c25f42f68726438879199860897f5e62baaf4549fcc02103747073a67df",
+    "graph_totals": {
+      "nodes": 1004,
+      "relationships": 2431
+    },
+    "full_graph_properties_verified": true,
+    "graph_verification_source": "verify_loaded_graph",
+    "cross_db": {
+      "status": "PASS",
+      "qdrant_points": 1138,
+      "qdrant_count": 1138,
+      "all_points_read": true,
+      "summary": {
+        "point_id": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "chunk_id_document": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "policy_exists": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_exists": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "supported_by": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_policy_id": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "content_hash": {
+          "PASS": 1138,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        }
+      },
+      "failures": []
+    },
+    "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+    "embedding_calls": 0,
+    "verify_only": true
+  },
+  "compose_project": "issue43-pr45-zip-r1-20261110",
+  "ports": {
+    "qdrant": 56339,
+    "neo4j_http": 57477,
+    "neo4j_bolt": 57690
+  },
+  "existing_package_preserved": true,
+  "scope": "Same PC, separate extraction and new empty DB volumes; no different-PC or new dependency installation validation"
+}
