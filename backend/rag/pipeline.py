@@ -51,6 +51,10 @@ PARTIAL_ELIGIBLE_NOTICE = "확인된 조건은 충족하지만, 전체 신청 �
 OPEN_CONFIRMED = "접수 중이에요."
 # 유보는 절 단위로 판단한다. "서류는 확인이 필요하지만, 지금 신청할 수 있어요"의 단정을 놓치지 않기 위해서다.
 CLAUSE_BREAK = re.compile(r"(,\s*|;\s*|\s+(?:하지만|그러나|다만|그런데)\s+)")
+# 문장 끝의 출처 번호·마침표. 여러 절 문장에서는 특정 절이 아니라 문장 전체의 출처로 본다.
+SENTENCE_TAIL = re.compile(r"\s*(?:\[\d+\]\s*)*[.!?。！？]*\s*$")
+# 절 첫 단어의 주제 조사(은/는). 주제가 둘 이상이면 여러 정책을 나눠 설명하는 문장으로 본다.
+TOPIC = re.compile(r"^\s*(\S+?)(?:은|는)\s")
 
 
 class AskError(RuntimeError):
@@ -152,12 +156,47 @@ def _status_correction(claim: str, check: dict) -> str | None:
     return PARTIAL_ELIGIBLE_NOTICE
 
 
+def _claims(clause: str) -> list[str]:
+    """절에 담긴 단정 종류(open/eligible). 유보 표현이 있으면 단정이 아니다."""
+    if HEDGED_CLAIM.search(clause):
+        return []
+    return [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM)) if pattern.search(clause)]
+
+
+def _unattributed_correction(
+    clause: str, claims: list[str], by_policy: dict[str, dict], several_topics: bool,
+) -> str | None:
+    """자기 출처 번호가 없는 단정 절. 고친 문구, 빼야 하면 "", 문장 출처를 따르면 None.
+
+    정책명으로 정책을 하나로 특정하면 그 정책 판정으로 고친다. 여러 정책을 나눠 설명하는 문장인데
+    정책을 특정할 수 없으면, 어느 정책 판정과라도 충돌하는 단정만 뺀다(다른 정책의 출처를 빌리지 않는다).
+    """
+    named = _named_policy_ids(clause, list(by_policy.values()))
+    if len(named) == 1:
+        check = by_policy[named.pop()]
+        fixes = [_status_correction(claim, check) for claim in claims]
+        if all(fix is None for fix in fixes):
+            return clause
+        text = " ".join(dict.fromkeys(fix or OPEN_CONFIRMED for fix in fixes))
+        return f"{check['policy_name']}: {text}"
+    if several_topics:
+        conflict = any(_status_correction(claim, check) is not None for check in by_policy.values() for claim in claims)
+        return "" if conflict else clause
+    return None
+
+
+def _inline(text: str, later: str) -> str:
+    """문장 중간 절에 넣을 문구: 뒤에 이미 붙은 출처 번호와 끝 마침표를 뺀다."""
+    text = CITATION.sub(lambda match: "" if match.group() in later else match.group(), text)
+    return re.sub(r"\s*[.。](?=(?:\s*\[\d+\])*\s*$)", "", text).strip()
+
+
 def _clause_correction(
     clause: str, numbers: list[str], policy_of: dict[str, str], by_policy: dict[str, dict], whole_sentence: bool,
 ) -> str | None:
     """단정 절 하나를 판정에 맞게 고친 문구. 충돌이 없거나 출처를 확정할 수 없으면 None."""
-    claims = [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM)) if pattern.search(clause)]
-    if not claims or HEDGED_CLAIM.search(clause):
+    claims = _claims(clause)
+    if not claims:
         return None
     if numbers:
         # 존재하지 않거나 비정상적인 번호가 있으면 여기서 고치지 않는다(인용 검증이 LLM 출력 오류로 처리한다).
@@ -206,13 +245,46 @@ def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[di
             continue
         clauses = CLAUSE_BREAK.split(sentence)
         sentence_numbers = list(dict.fromkeys(CITATION.findall(sentence)))
+        last = len(clauses) - 1
+        # 앞 절이 모두 자기 출처를 달았다면 끝 출처는 마지막 절 자신의 출처다.
+        shared = any(not CITATION.search(clauses[position]) for position in range(0, last, 2))
+        tail = SENTENCE_TAIL.search(clauses[last]).group()
+        topics = {match.group(1) for match in map(TOPIC.match, clauses[::2]) if match}
+        removed = []
         for position in range(0, len(clauses), 2):
-            numbers = list(dict.fromkeys(CITATION.findall(clauses[position]))) or sentence_numbers
-            fixed = _clause_correction(clauses[position], numbers, policy_of, by_policy, len(clauses) == 1)
+            clause = clauses[position]
+            later = "".join(clauses[position + 1:])
+            body = clause[: len(clause) - len(tail)] if position == last else clause
+            claims = _claims(clause)
+            # 여러 절 문장에서 자기 출처 번호가 없는 단정 절은 문장 끝 출처를 바로 빌리지 않는다.
+            if last and claims and not CITATION.search(body if shared else clause):
+                result = _unattributed_correction(body, claims, by_policy, len(topics) > 1)
+                if result == "":
+                    removed.append(position)
+                    changed = True
+                    continue
+                if result is not None:
+                    if result != body:
+                        clauses[position] = _inline(result, later) + (tail if position == last else "")
+                        changed = True
+                    continue
+            numbers = list(dict.fromkeys(CITATION.findall(clause))) or sentence_numbers
+            fixed = _clause_correction(clause, numbers, policy_of, by_policy, last == 0)
             if fixed is not None:
-                clauses[position] = fixed
+                clauses[position] = fixed if position == last else _inline(fixed, later)
                 changed = True
-        parts[index] = "".join(clauses)
+        keep = [position for position in range(0, len(clauses), 2) if position not in removed]
+        if not removed:
+            parts[index] = "".join(clauses)
+        elif not keep:
+            # 모든 절이 빠지면 출처를 잃지 않도록 확인 필요 안내로 대신한다.
+            kinds = dict.fromkeys(kind for position in removed for kind in _claims(clauses[position]))
+            notice = " ".join(RECEPTION_NOTICE["unknown"] if kind == "open" else ELIGIBILITY_NOTICE for kind in kinds)
+            parts[index] = _inline(notice, "") + tail
+        else:
+            rebuilt = "".join(clauses[position] + (clauses[position + 1] if position != keep[-1] else "")
+                              for position in keep)
+            parts[index] = rebuilt if last in keep else rebuilt.rstrip() + tail
     return "".join(parts), changed
 
 

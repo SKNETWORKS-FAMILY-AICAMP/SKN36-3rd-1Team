@@ -326,6 +326,40 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(_status_correction("eligible", {"conditions": [], "reception_status": "open"}),
                          "신청 자격은 공식 공고에서 추가 확인이 필요해요.")
 
+    def two_policy_case(self, text, names=("정책 가", "정책 나"), changed=True):
+        # A는 마감이라 Context 후순위([2]), B는 접수 중([1]).
+        policies = [policy("A", 1, policy_name=names[0]), policy("B", 2, policy_name=names[1])]
+        return self.conflict_case({"A": "closed", "B": "open"}, "eligible", text, policies, changed=changed)
+
+    def test_uncited_claim_about_other_policy_does_not_borrow_sentence_citation(self):
+        # 팀장 리뷰 사례: 문장 끝 [1]은 B 출처다. 어느 정책인지 확실하지 않은 A의 신청 가능 안내는 빼고 B 안내·출처는 남긴다.
+        response = self.two_policy_case("A는 지금 신청할 수 있어요, B는 제출 서류가 필요해요 [1].")
+        self.assertEqual(response.answer, "B는 제출 서류가 필요해요 [1].")
+        self.assertEqual([c.document_id for c in response.citations], ["DB"])
+        # 순서가 바뀌어도 같다.
+        response = self.two_policy_case("B는 제출 서류가 필요해요, A는 지금 신청할 수 있어요 [1].")
+        self.assertEqual(response.answer, "B는 제출 서류가 필요해요 [1].")
+        # 절마다 자기 출처를 달면 끝 출처는 마지막 절 자신의 출처다(정상 다정책 답변은 그대로).
+        kept = "A는 접수가 마감됐어요 [2], B는 지금 신청할 수 있어요 [1]."
+        self.assertEqual(self.two_policy_case(kept, changed=False).answer, kept)
+
+    def test_uncited_claim_with_identifiable_policy_name_uses_that_policy(self):
+        names = ("청년월세 특별지원", "청년 주거 상담")
+        response = self.two_policy_case(
+            "청년월세 특별지원은 지금 신청할 수 있어요, 청년 주거 상담은 제출 서류가 필요해요 [1].", names)
+        self.assertEqual(response.answer, "청년월세 특별지원: 접수가 마감됐어요, 청년 주거 상담은 제출 서류가 필요해요 [1].")
+        self.assertEqual([c.document_id for c in response.citations], ["DB"])
+
+    def test_single_policy_sentence_with_one_trailing_citation_is_kept_or_corrected_by_that_source(self):
+        # 한 정책만 설명하고 문장 끝에 출처를 한 번 붙인 정상 답변: 판정과 맞으면 그대로, 충돌하면 그 출처의 판정으로 교정.
+        kept = "B는 지금 신청할 수 있고, 제출 서류도 필요해요 [1]."
+        self.assertEqual(self.two_policy_case(kept, changed=False).answer, kept)
+        self.assertEqual(self.two_policy_case("지금 신청할 수 있어요, 제출 서류도 필요해요 [1].", changed=False).answer,
+                         "지금 신청할 수 있어요, 제출 서류도 필요해요 [1].")
+        corrected = self.two_policy_case("A는 지금 신청할 수 있고, 제출 서류도 필요해요 [2].")
+        self.assertEqual(corrected.answer, "접수가 마감됐어요, 제출 서류도 필요해요 [1].")
+        self.assertEqual([c.document_id for c in corrected.citations], ["DA"])
+
     def test_huge_or_unknown_citation_in_claim_sentence_is_invalid_llm_output(self):
         for text in (f"지금 신청할 수 있어요 [{'9' * 5000}].", "지금 신청할 수 있어요 [7]."):
             with self.subTest(length=len(text)):
