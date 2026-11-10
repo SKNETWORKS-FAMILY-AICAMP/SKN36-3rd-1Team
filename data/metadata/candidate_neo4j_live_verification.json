@@ -1,21 +1,21 @@
 {
-  "checked_at": "2026-11-06T22:08:09.921118+09:00",
-  "neo4j": {
-    "status": "PASS",
-    "two_loads_verified": true,
-    "all_properties_verified": true,
-    "transaction": "ROLLED_BACK",
-    "remaining_nodes": 0,
-    "schema_constraints_applied": false
-  },
+  "checked_at": "2026-11-09T01:31:41.024281+09:00",
+  "git_commit": "987057eea87124a6d88bcd73d81a63c4c3908ce2",
+  "issue": 31,
+  "dataset": "data/releases/v1.4.0-candidate",
+  "manifest_sha256": "16d6843f245ff1624686dddf815d0aeb6e6b76a87ecb674db1ea33701a46386e",
+  "generator": "venv/issue31_20261109/run.py",
+  "scope": "Local PR29 corrected data; old instances and collections retained. HTTP/LLM integration not tested.",
+  "previous_evidence": "data/metadata/verification_history/issue31_before_20261109.json",
+  "status": "PASS",
   "offline": {
     "status": "PASS",
     "counts": {
       "total_policies": 246,
       "total_documents": 261,
       "total_chunks": 599,
-      "total_graph_nodes": 1074,
-      "total_graph_edges": 3703
+      "total_graph_nodes": 1030,
+      "total_graph_edges": 2921
     },
     "nodes_by_label": {
       "Policy": 246,
@@ -25,8 +25,8 @@
       "Category": 5,
       "LifeStage": 6,
       "TargetGroup": 11,
-      "ConditionGroup": 352,
-      "EligibilityCondition": 52
+      "ConditionGroup": 306,
+      "EligibilityCondition": 54
     },
     "relations_by_type": {
       "ADMINISTERED_BY": 246,
@@ -35,11 +35,11 @@
       "TARGETS": 443,
       "APPLIES_TO_LIFESTAGE": 437,
       "SUPPORTED_BY": 261,
-      "REQUIRES_CONDITION": 735,
+      "REQUIRES_CONDITION": 367,
       "MODIFIES_CONDITION_OF": 1,
       "HAS_ROOT_CONDITION_GROUP": 246,
-      "CONTAINS_GROUP": 106,
-      "CONTAINS_CONDITION": 735
+      "CONTAINS_GROUP": 60,
+      "CONTAINS_CONDITION": 367
     },
     "nullable_properties": {
       "Policy.official_apply_url": 224,
@@ -50,5 +50,242 @@
     "manifest_files_checked": 20,
     "document_text_hashes_checked": 0
   },
-  "status": "PASS"
+  "neo4j": {
+    "status": "PASS",
+    "uri": "bolt://127.0.0.1:18687",
+    "container": "lifepolicy-neo4j-pr29",
+    "transaction": "BATCH_COMMITS_NEW_INSTANCE",
+    "successful_loads": 1,
+    "two_loads_verified": false,
+    "all_properties_verified": true,
+    "remaining_nodes": 1030,
+    "remaining_relationships": 2921,
+    "schema_constraints_applied": true,
+    "verification": {
+      "ok": true,
+      "totals": {
+        "nodes": 1030,
+        "relationships": 2921
+      },
+      "totals_ok": true,
+      "after_counts": {
+        "node:Policy": 246,
+        "node:Document": 261,
+        "node:Organization": 123,
+        "node:Region": 18,
+        "node:Category": 5,
+        "node:LifeStage": 6,
+        "node:TargetGroup": 11,
+        "node:ConditionGroup": 306,
+        "node:EligibilityCondition": 54,
+        "rel:ADMINISTERED_BY": 246,
+        "rel:AVAILABLE_IN": 247,
+        "rel:HAS_CATEGORY": 246,
+        "rel:APPLIES_TO_LIFESTAGE": 437,
+        "rel:TARGETS": 443,
+        "rel:SUPPORTED_BY": 261,
+        "rel:REQUIRES_CONDITION": 367,
+        "rel:HAS_ROOT_CONDITION_GROUP": 246,
+        "rel:MODIFIES_CONDITION_OF": 1,
+        "rel:CONTAINS_GROUP": 60,
+        "rel:CONTAINS_CONDITION": 367
+      },
+      "expected_counts": {
+        "node:Policy": 246,
+        "node:Document": 261,
+        "node:Organization": 123,
+        "node:Region": 18,
+        "node:Category": 5,
+        "node:LifeStage": 6,
+        "node:TargetGroup": 11,
+        "node:ConditionGroup": 306,
+        "node:EligibilityCondition": 54,
+        "rel:ADMINISTERED_BY": 246,
+        "rel:AVAILABLE_IN": 247,
+        "rel:HAS_CATEGORY": 246,
+        "rel:APPLIES_TO_LIFESTAGE": 437,
+        "rel:TARGETS": 443,
+        "rel:SUPPORTED_BY": 261,
+        "rel:REQUIRES_CONDITION": 367,
+        "rel:HAS_ROOT_CONDITION_GROUP": 246,
+        "rel:MODIFIES_CONDITION_OF": 1,
+        "rel:CONTAINS_GROUP": 60,
+        "rel:CONTAINS_CONDITION": 367
+      },
+      "count_mismatches": {},
+      "schema": {
+        "phase": "post",
+        "ok": true,
+        "problems": {},
+        "constraints": {
+          "expected": 9,
+          "matched": [
+            "constraint_agency_id",
+            "constraint_category_id",
+            "constraint_condition_group_id",
+            "constraint_document_id",
+            "constraint_eligibility_condition_id",
+            "constraint_policy_id",
+            "constraint_region_id",
+            "constraint_stage_id",
+            "constraint_target_group_id"
+          ],
+          "missing": []
+        },
+        "indexes": {
+          "expected": 4,
+          "matched": [
+            "index_condition_group_logic",
+            "index_eligibility_condition_type",
+            "index_policy_category",
+            "index_policy_verification"
+          ],
+          "missing": []
+        },
+        "constraint_owned_indexes": [
+          "constraint_agency_id",
+          "constraint_category_id",
+          "constraint_condition_group_id",
+          "constraint_document_id",
+          "constraint_eligibility_condition_id",
+          "constraint_policy_id",
+          "constraint_region_id",
+          "constraint_stage_id",
+          "constraint_target_group_id"
+        ],
+        "default_lookup_indexes": [
+          "index_343aff4e",
+          "index_f7700477"
+        ],
+        "actual_constraint_types": [
+          "UNIQUENESS"
+        ]
+      },
+      "nodes": {
+        "ok": true,
+        "problems": {},
+        "expected_by_label": {
+          "Policy": 246,
+          "Document": 261,
+          "Organization": 123,
+          "Region": 18,
+          "Category": 5,
+          "LifeStage": 6,
+          "TargetGroup": 11,
+          "ConditionGroup": 306,
+          "EligibilityCondition": 54
+        },
+        "actual_by_label": {
+          "Policy": 246,
+          "Document": 261,
+          "Organization": 123,
+          "Region": 18,
+          "Category": 5,
+          "LifeStage": 6,
+          "TargetGroup": 11,
+          "ConditionGroup": 306,
+          "EligibilityCondition": 54
+        },
+        "expected_total": 1030,
+        "actual_total": 1030
+      },
+      "relationships": {
+        "ok": true,
+        "problems": {},
+        "expected_by_type": {
+          "ADMINISTERED_BY": 246,
+          "AVAILABLE_IN": 247,
+          "HAS_CATEGORY": 246,
+          "APPLIES_TO_LIFESTAGE": 437,
+          "TARGETS": 443,
+          "SUPPORTED_BY": 261,
+          "REQUIRES_CONDITION": 367,
+          "HAS_ROOT_CONDITION_GROUP": 246,
+          "MODIFIES_CONDITION_OF": 1,
+          "CONTAINS_GROUP": 60,
+          "CONTAINS_CONDITION": 367
+        },
+        "actual_by_type": {
+          "ADMINISTERED_BY": 246,
+          "AVAILABLE_IN": 247,
+          "HAS_CATEGORY": 246,
+          "APPLIES_TO_LIFESTAGE": 437,
+          "TARGETS": 443,
+          "SUPPORTED_BY": 261,
+          "REQUIRES_CONDITION": 367,
+          "HAS_ROOT_CONDITION_GROUP": 246,
+          "MODIFIES_CONDITION_OF": 1,
+          "CONTAINS_GROUP": 60,
+          "CONTAINS_CONDITION": 367
+        },
+        "expected_total": 2921,
+        "actual_total": 2921
+      },
+      "node_properties": {
+        "ok": true,
+        "compared_nodes": 1030,
+        "counts": {
+          "missing_property": 0,
+          "extra_property": 0,
+          "type_mismatch": 0,
+          "value_mismatch": 0
+        },
+        "by_property": {},
+        "examples": {},
+        "unmatched": {
+          "missing_node": 0,
+          "extra_node": 0,
+          "duplicate_node_rows": 0
+        },
+        "null_properties_not_stored": {
+          "Policy.official_apply_url": 224,
+          "Document.effective_date": 9,
+          "Document.law_article": 9,
+          "Document.version": 8
+        },
+        "normalization": "null 값은 저장되지 않는 것으로 기대(속성 없음). 그 밖의 값은 정규화 없이 종류·값을 그대로 비교."
+      },
+      "relationship_properties": {
+        "ok": true,
+        "compared_relationships": 2921,
+        "counts": {
+          "missing_property": 0,
+          "extra_property": 0,
+          "type_mismatch": 0,
+          "value_mismatch": 0
+        },
+        "by_property": {},
+        "examples": {},
+        "unmatched": {
+          "missing_relationship": 0,
+          "extra_relationship": 0,
+          "duplicate_relationship_rows": 0
+        },
+        "null_properties_not_stored": {
+          "ADMINISTERED_BY.evidence_document_id": 9,
+          "AVAILABLE_IN.evidence_document_id": 9,
+          "HAS_CATEGORY.evidence_document_id": 9,
+          "APPLIES_TO_LIFESTAGE.evidence_document_id": 18,
+          "TARGETS.evidence_document_id": 19,
+          "SUPPORTED_BY.law_article": 9,
+          "HAS_ROOT_CONDITION_GROUP.evidence_document_id": 9
+        },
+        "input_fields_not_loaded": {},
+        "excluded_structural_fields": {
+          "source_id": "출발 노드 고유 ID → 관계의 출발 노드로 표현 (verify_relationship_endpoints에서 검증)",
+          "relation": "관계 타입 → type(r)로 표현 (verify_relationship_endpoints에서 검증)",
+          "target_id": "도착 노드 고유 ID → 관계의 도착 노드로 표현 (verify_relationship_endpoints에서 검증)"
+        }
+      }
+    },
+    "semantic_assertions": {
+      "age_011": "12~24",
+      "age_016": "19~120; 120 is sentinel, not legal upper age",
+      "age_023": "6~64",
+      "gov008_global_age_absent": true,
+      "gov025_homeless_retained": true,
+      "removed_household_or_groups": 46,
+      "region_links_corrected": true
+    }
+  }
 }
