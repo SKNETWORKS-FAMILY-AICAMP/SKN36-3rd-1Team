@@ -38,15 +38,12 @@ describe('mockAsk 예시 응답', () => {
     expect(income.reason).toContain('4,000만 원');
   });
 
-  it('앞 대화를 이어서 조건을 다시 확인한다', async () => {
+  it('질문에 나온 나이를 사용자 조건으로 안내하지 않는다', async () => {
     const r = await ask({
-      question: '26살, 서울, 소득은 4000만원이야',
-      profile: { age: 26, region: '서울', income: 4000 },
+      question: '만 34세까지 지원되나요?',
       history: [{ role: 'user', text: work.question }],
     });
-    expect(r.status).toBe('answered');
-    expect(r.answer).toContain('다시 확인');
-    expect(r.follow_up_questions.some((f) => f.field === 'income')).toBe(false);
+    expect(r.answer).not.toContain('알려 주신 조건');
   });
 
   it('대표 상황 카드(PRD 시나리오) 질문에도 같은 분야 예시로 답한다', async () => {
@@ -65,12 +62,14 @@ describe('mockAsk 예시 응답', () => {
     }
   });
 
-  it('되물은 소득에 단위만 적어 답해도 소득으로 읽는다', async () => {
+  it('전용 입력칸의 소득으로 원래 질문의 조건을 다시 확인한다', async () => {
     const r = await ask({
-      question: '4000만 원이요', awaiting_field: 'income',
+      question: work.question, awaiting_field: 'income',
+      profile: { ...empty, income: 4000 },
       history: [{ role: 'user', text: work.question }],
     });
-    expect(r.answer).toContain('연 4,000만 원');
+    expect(r.policy_checks[0].conditions.find((c) => c.field === 'income')?.reason).toContain('4,000만 원');
+    expect(r.follow_up_questions.some((f) => f.field === 'income')).toBe(false);
   });
 
   it('예시 답변의 추가 질문 버튼은 확정 답 없이 안내(info)만 한다', async () => {
