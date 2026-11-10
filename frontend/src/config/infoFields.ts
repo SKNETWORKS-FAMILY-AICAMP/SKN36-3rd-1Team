@@ -16,6 +16,6 @@ export const INFO_FIELDS: Record<string, InfoField> = {
 };
 
 /** 모르는 field가 와도 되물을 수 있게 기본값을 준다. */
-export function infoField(field: string | undefined): InfoField {
+export function infoField(field: string | null | undefined): InfoField {
   return (field && INFO_FIELDS[field]) || { label: '추가 정보', example: '예: 자유롭게 적어 주세요' };
 }

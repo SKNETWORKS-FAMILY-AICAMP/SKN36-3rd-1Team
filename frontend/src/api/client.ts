@@ -41,6 +41,34 @@ export function requestErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : `일시적인 문제가 생겼어요. ${RETRY}`;
 }
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+const isString = (value: unknown) => typeof value === 'string';
+const isNullableString = (value: unknown) => value === null || isString(value);
+
+export function isAskResponse(value: unknown): value is AskResponse {
+  if (!isObject(value)) return false;
+  return (value.status === 'answered' || value.status === 'no_evidence' || value.status === 'info')
+    && isString(value.answer) && typeof value.is_sample === 'boolean' && isNullableString(value.checked_at)
+    && Array.isArray(value.citations) && value.citations.every((item: unknown) =>
+      isObject(item) && isString(item.title) && isString(item.url)
+      && (item.document_id === undefined || isString(item.document_id))
+      && (item.page_number == null || Number.isInteger(item.page_number)))
+    && Array.isArray(value.policy_checks) && value.policy_checks.every((item: unknown) =>
+      isObject(item) && isString(item.policy_id) && isString(item.policy_name) && isString(item.agency)
+      && isString(item.source_url) && isNullableString(item.official_apply_url)
+      && (item.reception_status === 'before' || item.reception_status === 'open'
+        || item.reception_status === 'closed' || item.reception_status === 'unknown')
+      && Array.isArray(item.conditions) && item.conditions.every((condition: unknown) =>
+        isObject(condition) && isString(condition.field) && isString(condition.label) && isString(condition.reason)
+        && (condition.status === 'eligible' || condition.status === 'ineligible' || condition.status === 'needs_check')))
+    && Array.isArray(value.follow_up_questions) && value.follow_up_questions.every((item: unknown) =>
+      isObject(item) && isString(item.text) && (item.kind === 'question' ? item.field == null || isString(item.field)
+        : item.kind === 'ask_info' && (item.field === 'age' || item.field === 'region' || item.field === 'income')))
+    && (value.notice == null || (isObject(value.notice) && (value.notice.kind === 'info' || value.notice.kind === 'warn')
+      && isString(value.notice.title) && isString(value.notice.text)));
+}
+
 /**
  * 질문을 보내고 답변을 받는다.
  * 실패하면 화면에 그대로 보여 줄 문장(이유 + 다음 행동)을 담은 Error를 던지고, 화면은 오류 상태와 '다시 시도'를 보여 준다.
@@ -61,7 +89,12 @@ export async function askPolicy(request: AskRequest): Promise<AskResponse> {
       const body: unknown = await res.json().catch(() => null);
       throw new Error(serverErrorMessage(res.status, body));
     }
-    return (await res.json()) as AskResponse;
+    const body: unknown = await res.json().catch((error: unknown) => {
+      if (error instanceof SyntaxError) return null;
+      throw error;
+    });
+    if (!isAskResponse(body)) throw new Error(`답변 형식을 확인하지 못했어요. ${RETRY}`);
+    return body;
   } catch (err) {
     throw new Error(requestErrorMessage(err));
   } finally {

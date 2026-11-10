@@ -1,6 +1,6 @@
 /**
  * 질문 요청 설정값. 시간 제한·이력 길이처럼 백엔드 계약과 맞춰야 하는 값을 한 곳에 둔다 (CODING_STYLE §3).
- * 기준: docs/api/ask_contract.md v1.0 (#23 브랜치, dev 머지 전)
+ * 기준: docs/api/ask_contract.md 및 backend/api/schemas.py
  */
 import type { NodeKind } from './graph';
 
@@ -9,6 +9,9 @@ export const ASK_TIMEOUT_MS = 60_000;
 
 /** 함께 보내는 대화 이력 개수. 계약: 최근 10개까지 (백엔드도 최근 10개만 쓴다). */
 export const HISTORY_MAX_ITEMS = 10;
+
+/** 백엔드 AskRequest.question과 동일한 최대 길이. */
+export const QUESTION_MAX_LENGTH = 2_000;
 
 /** 생애주기 화면의 '이 정책 물어보기'가 상담 화면에 보내는 질문 */
 export const policyQuestion = (policyName: string) => `${policyName} 지원 대상이랑 신청 방법, 필요한 서류 알려줘`;

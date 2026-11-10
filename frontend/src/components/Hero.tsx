@@ -8,10 +8,12 @@ interface Props {
   age: string;
   ageError: string | null;
   region: string;
+  income: number | null;
+  onIncome: (value: number | null) => void;
   onAge: (v: string) => void;
   onRegion: (v: string) => void;
   categories: Category[];
-  onAsk: (text: string, origin: HTMLElement | null) => void;
+  onAsk: (text: string, origin: HTMLElement | null) => boolean;
   askBoxRef: RefObject<HTMLDivElement>;
   inputRef: RefObject<HTMLInputElement>;
   reduceMotion: boolean;
@@ -19,7 +21,7 @@ interface Props {
 
 const TITLE: [string, boolean, boolean][] = [['나에게', false, false], ['필요한', false, false], ['정부 지원 정책', true, false], ['을', false, true], ['물어보세요!', false, false]];
 
-export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
+export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
   const heroRef = useRef<HTMLElement>(null);
   useParallax(heroRef, reduceMotion);
   const examples = useMemo(() => categories.map((c) => '예: ' + c.question), [categories]);
@@ -63,6 +65,16 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
             <small>세</small>
           </label>
           <RegionPicker region={region} onRegion={onRegion} />
+          <label className={'cin' + (income != null ? ' filled' : '')}>
+            <span className="lbl">연 소득</span>
+            <input type="number" min={0} step="any" placeholder="입력" value={income ?? ''}
+              onChange={(event) => {
+                const value = event.currentTarget.valueAsNumber;
+                if (!Number.isFinite(value)) onIncome(null);
+                else if (value >= 0) onIncome(value);
+              }} />
+            <small>만 원</small>
+          </label>
         </div>
 
         {ageError && <p className="cond-error" id="age-error" role="alert">{ageError}</p>}
@@ -122,8 +134,7 @@ function AskForm({ examples, onAsk, inputRef, reduceMotion }: {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!text.trim()) return;
-    onAsk(text, e.currentTarget.querySelector('.go'));
-    setText('');
+    if (onAsk(text, e.currentTarget.querySelector('.go'))) setText('');
   };
   return (
     <form onSubmit={submit}>

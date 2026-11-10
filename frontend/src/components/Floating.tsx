@@ -4,14 +4,13 @@ import { iconUrl, type IconName } from './Icon';
 /** 큰 검색창이 화면 밖으로 나가면 아래에서 올라오는 이어서 질문하기 입력창 */
 export function BottomBar({ visible, condText, placeholder, inputRef, onAsk, onCondClick }: {
   visible: boolean; condText: string; placeholder: string; inputRef: RefObject<HTMLInputElement>;
-  onAsk: (text: string, origin: HTMLElement | null) => void; onCondClick: () => void;
+  onAsk: (text: string, origin: HTMLElement | null) => boolean; onCondClick: () => void;
 }) {
   const [text, setText] = useState('');
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!text.trim()) return;
-    onAsk(text, e.currentTarget.querySelector('.mini-go'));
-    setText('');
+    if (onAsk(text, e.currentTarget.querySelector('.mini-go'))) setText('');
   };
   const tab = visible ? 0 : -1;
   return (

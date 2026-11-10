@@ -4,11 +4,11 @@ import type { AskRequest, ChatTurnMessage, FollowUp, UserProfile } from './api/t
 import { CATEGORIES } from './config/categories';
 import { infoField } from './config/infoFields';
 import { PERSONAS, type Persona } from './config/personas';
-import { HISTORY_MAX_ITEMS } from './config/request';
-import { describeProfile, parseProfile } from './lib/parseProfile';
+import { HISTORY_MAX_ITEMS, QUESTION_MAX_LENGTH } from './config/request';
+import { describeProfile, REGIONS } from './lib/parseProfile';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
-import { checkAge } from './lib/validate';
+import { AGE_MAX, checkAge } from './lib/validate';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
@@ -21,7 +21,6 @@ import type { IconName } from './components/Icon';
 const PolicyMap = lazy(() => import('./components/PolicyMap'));
 const LifeTimeline = lazy(() => import('./components/LifeTimeline'));
 
-const josa = (w: string) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를'; };
 
 const THEME_KEY = 'lifepolicy-theme';
 function readTheme(): 'light' | 'dark' {
@@ -37,10 +36,9 @@ export default function App() {
   const [region, setRegion] = useState('');
   const [income, setIncome] = useState<number | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [awaiting, setAwaiting] = useState<string | null>(null);
+  const [awaiting, setAwaiting] = useState<{ field: string; question: string } | null>(null);
   const [toast, setToast] = useState<{ text: string; icon: IconName } | null>(null);
   const [miniOn, setMiniOn] = useState(false);
-  const [miniPlaceholder, setMiniPlaceholder] = useState('이어서 물어보세요');
 
   const askBoxRef = useRef<HTMLDivElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
@@ -126,36 +124,28 @@ export default function App() {
 
   const requests = useRef(new Map<number, AskRequest>());
 
-  /**
-   * 질문 보내기: 질문 속 나이·지역·소득을 먼저 '내 조건'에 반영한다.
-   * base: 이번 질문에 쓸 '내 조건'. 대표 상황 카드처럼 조건을 바꾸면서 바로 보낼 때 넘긴다(상태 반영을 기다리지 않게).
-   */
-  const ask = useCallback((raw: string, origin: HTMLElement | null, base: UserProfile = profile) => {
+  const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null) => {
     const question = raw.trim();
-    if (!question) return;
-    if (pending.current.has(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return; }
+    if (!question) return false;
+    if ([...question].length > QUESTION_MAX_LENGTH) {
+      showToast(`질문은 ${QUESTION_MAX_LENGTH.toLocaleString('ko-KR')}자까지 입력할 수 있어요.`);
+      return false;
+    }
+    if (pending.current.has(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return false; }
     burst(origin, reduceMotion);
-
-    const found = parseProfile(question, awaiting);
-    const next: UserProfile = {
-      age: found.age ?? base.age, region: found.region ?? base.region, income: found.income ?? base.income,
-    };
-    if (found.age != null) setAge(String(found.age));
-    if (found.region) setRegion(found.region);
-    if (found.income != null) setIncome(found.income);
 
     const id = nextId.current++;
     const tags: { icon: IconName; text: string }[] = [];
     if (next.age != null) tags.push({ icon: 'cake', text: `${next.age}세` });
     if (next.region) tags.push({ icon: 'pin', text: next.region });
 
-    const request: AskRequest = { question, profile: next, history: history(turnsRef.current), awaiting_field: awaiting };
+    const request: AskRequest = { question, profile: next, history: history(turnsRef.current), awaiting_field: field };
     requests.current.set(id, request);
     setTurns((list) => [...list, { id, kind: 'qa', question, tags, state: 'loading' }]);
     void run(id, request);
     setAwaiting(null);
-    setMiniPlaceholder('이어서 물어보세요');
-  }, [awaiting, profile, reduceMotion, run, showToast]);
+    return true;
+  }, [profile, reduceMotion, run, showToast]);
 
   const retry = useCallback((id: number) => {
     const request = requests.current.get(id);
@@ -164,16 +154,12 @@ export default function App() {
     void run(id, request);
   }, [run]);
 
-  /** 추가 질문 버튼: 정보 요청(ask_info)이면 AI가 먼저 되묻고, 일반 질문이면 바로 보낸다. */
-  const followUp = useCallback((f: FollowUp, origin: HTMLElement) => {
-    if (f.kind !== 'ask_info') { ask(f.text, origin); return; }
-    const { label, example } = infoField(f.field);
-    // 대답 속 값은 화면이 문장에서 읽어 profile에 넣고, 서버에는 어떤 항목의 대답인지만 알린다 (계약 §3.2)
-    setAwaiting(f.field ?? null);
-    setTurns((list) => [...list, { id: nextId.current++, kind: 'prompt', text: `좋아요! ${label}${josa(label)} 알려 주세요. 아래 입력창에 편하게 적어 주시면 그 조건으로 다시 확인해 드릴게요. (${example})` }]);
-    setMiniPlaceholder(example);
-    setTimeout(() => (miniOn ? miniInputRef : heroInputRef).current?.focus({ preventScroll: true }), 300);
-  }, [ask, miniOn]);
+  const followUp = (f: FollowUp, origin: HTMLElement, question: string) => {
+    if (f.kind === 'question') { ask(f.text, origin); return; }
+    if (f.field === 'age' || f.field === 'region' || f.field === 'income') {
+      setAwaiting({ field: f.field, question });
+    }
+  };
 
   /** 대표 상황 카드: PRD 시나리오의 조건을 '내 조건'에 넣고 대표 질문을 바로 보낸다 (소득은 비운다). */
   const startPersona = useCallback((p: Persona, origin: HTMLElement | null) => {
@@ -230,7 +216,7 @@ export default function App() {
           </Suspense>
         </ErrorBoundary>
       ) : (<>
-      <Hero age={age} ageError={ageError} region={region} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
+      <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
       <section className="board" id="board">
@@ -241,16 +227,53 @@ export default function App() {
           )}
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
-              <TurnView turn={t} onFollowUp={followUp} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
+              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
             </div>
           ))}
+          {awaiting && (
+            <form key={awaiting.field} className="conds-in" onSubmit={(event) => {
+              event.preventDefault();
+              const value = String(new FormData(event.currentTarget).get('condition') ?? '');
+              if (!value) return;
+              const { field, question } = awaiting;
+              const parsedAge = checkAge(value);
+              const numeric = Number(value);
+              const next = { ...profile };
+              if (field === 'age') {
+                if (!parsedAge.ok || parsedAge.value == null) return;
+                next.age = parsedAge.value;
+              } else if (field === 'region') {
+                next.region = value;
+              } else {
+                if (!Number.isFinite(numeric) || numeric < 0) return;
+                next.income = numeric;
+              }
+              if (!ask(question, null, next, field)) return;
+              if (field === 'age') setAge(value);
+              if (field === 'region') setRegion(value);
+              if (field === 'income') setIncome(numeric);
+            }}>
+              <label htmlFor="follow-up-condition">{infoField(awaiting.field).label}{awaiting.field === 'income' ? ' (만 원)' : ''}</label>
+              {awaiting.field === 'region' ? (
+                <select autoFocus required id="follow-up-condition" name="condition" defaultValue="">
+                  <option value="">선택</option>
+                  {REGIONS.map((value) => <option key={value}>{value}</option>)}
+                </select>
+              ) : (
+                <input autoFocus required id="follow-up-condition" name="condition" type="number" min={0}
+                  max={awaiting.field === 'age' ? AGE_MAX : undefined} step={awaiting.field === 'age' ? 1 : 'any'} />
+              )}
+              <button type="submit">다시 확인</button>
+              <button type="button" onClick={() => setAwaiting(null)}>취소</button>
+            </form>
+          )}
         </div>
       </section>
       </>)}
 
       <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요. 아이콘은 이 화면용으로 직접 그린 SVG예요.</div></footer>
 
-      <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder={miniPlaceholder} inputRef={miniInputRef} onAsk={ask}
+      <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder="이어서 물어보세요" inputRef={miniInputRef} onAsk={ask}
         onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), 400); }} />
       <JumpButtons reduceMotion={reduceMotion} watch={turns} />
       <Toast message={toast} />
