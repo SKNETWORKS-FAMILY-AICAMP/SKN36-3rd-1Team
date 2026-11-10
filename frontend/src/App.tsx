@@ -207,7 +207,7 @@ export default function App() {
       </div>
       <header className="gnb">
         <div className="wrap">
-          <div className="logo"><Logo /></div>
+          <a className="logo" href={askHref} aria-label="SSOK 홈"><Logo /></a>
           <nav className="tabs" aria-label="화면">
             {/* 좁은 화면에서는 로고가 가려지지 않게 '하기'·'정책'을 줄여 보여 준다 */}
             <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>상담<span className="long">하기</span></a>

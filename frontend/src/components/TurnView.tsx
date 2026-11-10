@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { Icon, type IconName } from './Icon';
+import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
 import { lifeHref, mapHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
@@ -68,7 +69,7 @@ export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode }:
 function BotHead({ sub, sample }: { sub: string; sample?: boolean }) {
   return (
     <div className="ahead">
-      <span className="bot"><Icon name="mascot" /></span>
+      <span className="bot"><MascotFace /></span>
       <div><b>SSOK</b><small>{sub}</small></div>
       {sample && <span className="badge b-warn">예시 응답</span>}
     </div>
@@ -195,17 +196,19 @@ function PolicyCard({ p, sample, onDemoApply }: { p: PolicyCheck; sample: boolea
       </div>
       {/* 예시 정책은 실제 데이터에 없어 생애단계를 찾지 않는다 */}
       {!sample && <StageChips policyId={p.policy_id} />}
-      <ul className="rows">
-        {p.conditions.map((c, i) => {
-          const [cls, label] = CONDITION_LABEL[c.status];
-          return (
-            // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
-            <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
-              <span className="k">{c.label}</span><span className="why">{c.reason}</span><span className={'badge ' + cls}>{label}</span>
-            </li>
-          );
-        })}
-      </ul>
+      {p.conditions.length > 0 && (
+        <ul className="rows">
+          {p.conditions.map((c, i) => {
+            const [cls, label] = CONDITION_LABEL[c.status];
+            return (
+              // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
+              <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
+                <span className="k">{c.label}</span><span className="why">{c.reason}</span><span className={'badge ' + cls}>{label}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
       <div className="pfoot">
         <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>
         {/* 예시 정책은 실제 데이터에 없어 관계 지도로 연결하지 않는다 */}

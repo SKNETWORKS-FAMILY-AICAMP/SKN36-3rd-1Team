@@ -4,7 +4,7 @@ import {
   buildGraphIndex, conditionTrees, countConditions, parseJsonl, policyNeighbors, searchPolicies,
 } from './graphModel';
 import {
-  INITIAL_VIEW, MAP_HEIGHT, MAP_WIDTH, layoutNeighbors, shortLabel, zoomAt, zoomCenter,
+  INITIAL_VIEW, MAP_HEIGHT, MAP_WIDTH, distinctLabels, layoutNeighbors, shortLabel, zoomAt, zoomCenter,
 } from './graphLayout';
 import { loadGraphDataset } from './loadGraph';
 
@@ -108,6 +108,16 @@ describe('graphLayout', () => {
     expect(zoomed.y + zoomed.scale * q.y).toBeCloseTo(point.y);
     expect(zoomAt(zoomed, 10, point, 0.5, 3).scale).toBe(3);
     expect(zoomCenter(INITIAL_VIEW, 0.1, 0.5, 3).scale).toBe(0.5);
+  });
+
+  it('잘라서 같아지는 이름은 공통 앞부분을 떼고 다른 부분을 보여 준다', () => {
+    // 실제 데이터에서 '고용노동부 국민취업지원기획팀'과 그 제도의 문서 둘이 모두 '고용노동부 국민취…'로 잘리던 경우 (sample_only 이름)
+    const labels = distinctLabels([
+      '가상노동부 가상취업지원제도 정부24 상세', '가상노동부 가상취업지원제도 온통청년 상세', '가상노동부 가상취업지원기획팀', '서울특별시',
+    ], 11);
+    expect(labels).toEqual(['…정부24 상세', '…온통청년 상세', '…가상취업지원기획팀', '서울특별시']);
+    // 완전히 같은 이름은 더 뗄 수 없으니 그대로 둔다
+    expect(distinctLabels(['같은 이름', '같은 이름'], 11)).toEqual(['같은 이름', '같은 이름']);
   });
 
   it('긴 이름은 줄여 쓴다', () => {

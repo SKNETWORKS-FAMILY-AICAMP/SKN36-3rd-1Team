@@ -12,7 +12,7 @@ import {
   type ConditionTree, type GraphNode,
 } from '../graph/graphModel';
 import {
-  CENTER_R, INITIAL_VIEW, LABEL_GAP, MAP_HEIGHT, MAP_WIDTH, NODE_R, layoutNeighbors, shortLabel, zoomAt, zoomCenter, type MapView, type PlacedNeighbor,
+  CENTER_R, INITIAL_VIEW, LABEL_GAP, MAP_HEIGHT, MAP_WIDTH, NODE_R, distinctLabels, layoutNeighbors, shortLabel, zoomAt, zoomCenter, type MapView, type PlacedNeighbor,
 } from '../graph/graphLayout';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
 import {
@@ -116,15 +116,15 @@ function MapShell({ data, children }: { data?: GraphDataset; children: ReactNode
           <h2>정책 <span>관계 지도</span></h2>
           <p>Graph DB(Neo4j)에 저장된 정책 연결 구조예요</p>
         </div>
-        {data && counted && (
-          <p className="map-meta">
-            <span className="badge b-muted">데이터 {data.version}{data.status ? ` · ${data.status}` : ''}</span>
-            <span>정책 {data.index.policies.length.toLocaleString('ko-KR')}개 · 노드 {counted.nodes.toLocaleString('ko-KR')}개 · 관계 {counted.edges.toLocaleString('ko-KR')}개</span>
-            {mismatch && <span className="badge b-warn">manifest 건수와 달라요</span>}
-          </p>
-        )}
+        {/* 데이터가 덜 받아졌거나 섞였을 때만 위에서 알린다. 평소 버전·건수는 맨 아래 작은 글씨 */}
+        {mismatch && <p className="map-meta"><span className="badge b-warn">데이터 건수가 manifest와 달라요</span></p>}
         {children}
         <p className="map-note">관계가 연결돼 있어도 자격이 확정된 건 아니에요. 최종 자격과 신청 가능 여부는 공식 원문에서 확인해 주세요.</p>
+        {data && counted && (
+          <p className="map-data" title={data.status ?? undefined}>
+            데이터 {data.version} · 정책 {data.index.policies.length.toLocaleString('ko-KR')}개 · 노드 {counted.nodes.toLocaleString('ko-KR')}개 · 관계 {counted.edges.toLocaleString('ko-KR')}개
+          </p>
+        )}
       </div>
     </section>
   );
@@ -204,6 +204,11 @@ function PolicyGraph({ data, policy, search, reduceMotion, onAsk }: {
   const kinds = [...new Set(['policy' as const, ...placed.map((n) => n.node.kind)])];
   // 지도 제목과 정책 카드가 같이 쓴다
   const meta = policyMeta(policy, POLICY_META_FIELDS);
+  // 둘레 원 이름: 잘라서 같아지는 이름(같은 기관의 문서 여러 개 등)은 공통 앞부분을 떼고 다른 부분을 보여 준다
+  const labels = useMemo(
+    () => distinctLabels(placed.map((n) => (n.node.kind === 'group' ? KIND_LABEL.group : n.node.label)), NODE_LABEL_MAX),
+    [placed],
+  );
 
   return (
     <div className="map-main">
@@ -227,7 +232,7 @@ function PolicyGraph({ data, policy, search, reduceMotion, onAsk }: {
                 <line x1={center.x} y1={center.y} x2={n.x} y2={n.y} pathLength={1} className={'gl' + (i === sel ? ' on' : '')} />
                 <EdgeLabel n={n} cx={center.x} cy={center.y} />
                 <MapNode x={n.x} y={n.y} r={NODE_R} kind={n.node.kind}
-                  label={n.node.kind === 'group' ? KIND_LABEL.group : n.node.label}
+                  label={labels[i]}
                   title={n.node.kind === 'group' ? nodeTitle(n.node) : `${RELATION_LABEL[n.edge.relation] ?? n.edge.relation}: ${n.node.label}`}
                   active={i === sel} onSelect={() => setSel(i)} />
               </g>
@@ -516,9 +521,15 @@ function Clamp({ text }: { text: string }) {
   );
 }
 
-function SourceLink({ policy }: { policy: GraphNode }) {
-  const source = safeHttpUrl(typeof policy.data.source_url === 'string' ? policy.data.source_url : null);
-  return source ? <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a> : null;
+function sourceUrl(node?: GraphNode) {
+  const url = node?.data.source_url;
+  return safeHttpUrl(typeof url === 'string' ? url : null);
+}
+
+function SourceLink({ policy, compact = false }: { policy: GraphNode; compact?: boolean }) {
+  const source = sourceUrl(policy);
+  return source ? <a className={compact ? 'pd-source' : 'btn btn-o'} href={source} target="_blank" rel="noopener noreferrer"
+    aria-label={compact ? `${policy.label} 공식 원문 (새 탭)` : undefined}>공식 원문 ↗</a> : null;
 }
 
 /** 자격 조건: 원천 데이터에 조건이 정리되지 않은 묶음(UNKNOWN, 비어 있음)만 있으면 트리 대신 한 줄 안내 */
@@ -544,7 +555,7 @@ function PopHead({ kind, title, sub }: { kind: NodeKind; title: string; sub?: st
 }
 
 /**
- * 둘레 원 팝업: 무엇인지 한 줄 → 이 원에 연결된 다른 정책이 어느 분야에 몰려 있는지(막대, 누르면 그 분야만)
+ * 둘레 원 팝업: 무엇인지 한 줄 → 분야별 관련 정책 수 (타일을 누르면 해당 분야만 표시)
  * → 정책 목록(이 정책과 같은 분야 먼저) → 맨 아래 근거 한 줄.
  * 같은 말을 되풀이하지 않도록 제목이 그대로 들어 있는 설명은 숨긴다. '받을 수 있는' 같은 자격 표현은 쓰지 않는다.
  */
@@ -552,22 +563,38 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
   const { node, edge } = n;
   const [showAll, setShowAll] = useState(false);
   const [filter, setFilter] = useState<string | null>(null);
+  const [preview, setPreview] = useState<GraphNode | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
+  const returnPoint = useRef<{ scrollTop: number; policyId: string } | null>(null);
+  useLayoutEffect(() => {
+    const dialog = contentRef.current?.closest('dialog');
+    if (!dialog || !returnPoint.current) return;
+    if (preview) {
+      dialog.scrollTop = 0;
+      backRef.current?.focus({ preventScroll: true });
+    } else {
+      const { scrollTop, policyId } = returnPoint.current;
+      contentRef.current?.querySelector<HTMLButtonElement>(`[data-preview-id="${CSS.escape(policyId)}"]`)?.focus({ preventScroll: true });
+      dialog.scrollTop = scrollTop;
+      returnPoint.current = null;
+    }
+  }, [preview]);
   const { index } = data;
   const relation = RELATION_LABEL[edge.relation] ?? edge.relation;
   // 머리에 종류('자격 조건')가 이미 있으니 조건 묶음은 논리만 제목으로 쓴다
   const title = node.kind === 'group' ? LOGIC_LABEL[node.label] ?? node.label : node.label;
   // 근거 문서 원이면 그 문서가 곧 근거라 문서 이름을 또 쓰지 않는다
   const evidence = edge.evidenceDocumentId && edge.evidenceDocumentId !== node.id ? index.nodes.get(edge.evidenceDocumentId) : undefined;
-  const urlOf = (doc?: GraphNode) => safeHttpUrl(typeof doc?.data.source_url === 'string' ? doc.data.source_url : null);
-  const evidenceUrl = urlOf(evidence);
-  const docUrl = node.kind === 'document' ? urlOf(node) : null;
+  const evidenceUrl = sourceUrl(evidence);
+  const docUrl = node.kind === 'document' ? sourceUrl(node) : null;
   const review = edge.reviewStatus ? REVIEW_STATUS[edge.reviewStatus] : undefined;
   const stage = node.kind === 'lifestage' ? LIFE_STAGES.find((s) => s.id === node.id) : undefined;
   const ageRange = typeof node.data.age_range === 'string' ? node.data.age_range : null;
   const rawDescription = typeof node.data.description === 'string' && node.kind !== 'group' ? node.data.description : null;
   const description = rawDescription && !rawDescription.includes(node.label) ? rawDescription : null;
   // 무엇인지 한 줄: 정책 → 이 원이면 'OO 정책의 지원 대상', 다른 정책이 이 정책을 가리키면 관계 이름만
-  const sub = n.direction === 'out' ? `${policy.label}의 ${relation}` : `이 정책과 연결: ${relation}`;
+  const context = <p className="pd-meta">현재 정책 · {policy.label} › {relation} · {title}</p>;
   const group = SHARED_GROUP_BY[node.kind] ?? SHARED_GROUP_DEFAULT;
   const mine = typeof policy.data[group.key] === 'string' ? policy.data[group.key] as string : null;
   // 팝업이 열렸을 때 한 번만 계산한다 (정책·조건 묶음은 다른 정책과 공유하는 노드가 아니라 건너뛴다)
@@ -576,16 +603,31 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
     const grouped = groupByField(list.map((p) => ({ policy: p })), group.key, ungroupedLabel(group.label));
     // 목록은 이 정책과 같은 분야(지역)부터. 같은 묶음 안에서는 이름순(policiesSharing 순서)을 그대로 둔다
     const same = grouped.find((g) => g.value === mine)?.items.map((i) => i.policy) ?? [];
-    return { shared: list, groups: grouped, ordered: [...same, ...list.filter((p) => !same.includes(p))] };
+    const sameIds = new Set(same.map((p) => p.id));
+    return { shared: list, groups: grouped, ordered: [...same, ...list.filter((p) => !sameIds.has(p.id))] };
   }, [index, node.id, node.kind, policy.id, group.key, group.label, mine]);
   const listed = filter ? groups.find((g) => g.value === filter)?.items.map((i) => i.policy) ?? [] : ordered;
   const shown = showAll ? listed : listed.slice(0, SHARED_POLICY_LIMIT);
-  const maxCount = groups[0]?.items.length ?? 1;
   const hiddenGroups = groups.length - SHARED_BAR_LIMIT;
 
+  if (preview) return (
+    <div className="map-info" ref={contentRef}>
+      {context}
+      <button ref={backRef} type="button" className="pd-more" onClick={() => setPreview(null)}>← 관련 정책 목록</button>
+      <PopHead kind="policy" title={preview.label} />
+      <PolicyFacts policy={preview} />
+      <div className="pd-actions">
+        <SourceLink policy={preview} />
+        <a className="btn btn-o" href={mapHref(preview.id)}>관계 지도에서 보기</a>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="map-info">
-      <PopHead kind={node.kind} title={title} sub={sub} />
+    <div className="map-info" ref={contentRef}>
+      {context}
+      <PopHead kind={node.kind} title={title} />
+      {node.kind === 'policy' && <PolicyFacts policy={node} />}
 
       {(description || ageRange) && (
         <section className="pd-block">
@@ -599,15 +641,17 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
       {shared.length > 0 && (
         <>
           <section className="pd-block">
-            <h4>{title}에 연결된 다른 정책 <span>{shared.length.toLocaleString('ko-KR')}개</span> · {group.label}별</h4>
-            <ul className="pd-bars">
+            <h4>관련 정책 <span className="pd-count">{shared.length.toLocaleString('ko-KR')}개</span> · {group.label}별</h4>
+            <ul className="pd-tiles">
               {groups.slice(0, SHARED_BAR_LIMIT).map((g) => (
                 <li key={g.value}>
-                  <button type="button" aria-pressed={filter === g.value} className={g.value === mine ? 'mine' : undefined}
+                  <button type="button" aria-pressed={filter === g.value}
                     onClick={() => { setFilter((f) => (f === g.value ? null : g.value)); setShowAll(false); }}>
-                    <span className="bar-name" title={g.value}><span>{g.value}</span>{g.value === mine && <small>이 정책</small>}</span>
-                    <span className="bar" aria-hidden="true"><i style={{ width: `${(g.items.length / maxCount) * 100}%` }} /></span>
-                    <span className="bar-n">{g.items.length}</span>
+                    <span className="pd-tile-label">{g.value}</span>
+                    <span className="pd-tile-summary">
+                      <strong>{g.items.length.toLocaleString('ko-KR')}<small>개</small></strong>
+                      {g.value === mine && <span className="pd-list-badge">현재 정책</span>}
+                    </span>
                   </button>
                 </li>
               ))}
@@ -617,11 +661,25 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
 
           <section className="pd-block">
             <h4>
-              {filter ? <>{filter} <span>{listed.length}개</span></> : mine ? `이 정책과 같은 ${group.label}부터` : '정책 목록'}
-              {filter && <button type="button" className="pd-clear" onClick={() => setFilter(null)}>전체 보기</button>}
+              {filter ?? '전체 정책'} <span className="pd-count">{listed.length.toLocaleString('ko-KR')}개</span>
+              {filter && <button type="button" className="pd-clear" onClick={() => { setFilter(null); setShowAll(false); }}>필터 해제</button>}
             </h4>
             <ul className="pd-plist">
-              {shown.map((p) => <li key={p.id}><a href={mapHref(p.id)} title={p.label}>{p.label}</a></li>)}
+              {shown.map((p) => {
+                const value = p.data[group.key];
+                return (
+                  <li key={p.id}>
+                    <button type="button" data-preview-id={p.id} onClick={(event) => {
+                      returnPoint.current = { scrollTop: event.currentTarget.closest('dialog')?.scrollTop ?? 0, policyId: p.id };
+                      setPreview(p);
+                    }}>
+                      <span>{p.label}</span>
+                      <small className="pd-list-badge">{typeof value === 'string' && value.trim() ? value : ungroupedLabel(group.label)}</small>
+                    </button>
+                    <SourceLink policy={p} compact />
+                  </li>
+                );
+              })}
             </ul>
             {listed.length > SHARED_POLICY_LIMIT && (
               <button type="button" className="pd-more" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
@@ -636,7 +694,8 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
         <div className="pd-actions">
           {docUrl && <a className="btn btn-o" href={docUrl} target="_blank" rel="noopener noreferrer">문서 원문 ↗</a>}
           {stage && <a className="btn btn-o" href={lifeHref(stage.name)}>생애주기에서 {stage.name} 보기</a>}
-          {node.kind === 'policy' && <a className="btn btn-o" href={mapHref(node.id)}>이 정책 지도 보기</a>}
+          {node.kind === 'policy' && <SourceLink policy={node} />}
+          {node.kind === 'policy' && <a className="btn btn-o" href={mapHref(node.id)}>관계 지도에서 보기</a>}
         </div>
       )}
 

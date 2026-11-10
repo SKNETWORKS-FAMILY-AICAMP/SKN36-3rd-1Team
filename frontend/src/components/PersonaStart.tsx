@@ -1,5 +1,6 @@
 import type { Persona } from '../config/personas';
 import { Icon } from './Icon';
+import { MascotFace } from './Logo';
 
 /**
  * 상담 결과가 비어 있을 때 보여 주는 첫 안내.
@@ -12,7 +13,7 @@ export function PersonaStart({ personas, onPersona }: {
 }) {
   return (
     <div className="empty start">
-      <Icon name="mascot" />
+      <MascotFace />
       <b>아직 질문이 없어요</b>
       <span>위 검색창에 물어보거나 분야 카드를 눌러 보세요. 이런 상황이라면 아래 카드로 바로 시작할 수 있어요.</span>
       <div className="persona-row" aria-label="대표 상황으로 시작하기">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { REGIONS } from '../lib/parseProfile';
 import { Icon, type IconName } from './Icon';
+import { MascotPeek } from './Logo';
 import type { Category } from '../config/categories';
 
 interface Props {
@@ -48,6 +49,8 @@ export function Hero({ age, ageError, region, onAge, onRegion, categories, onAsk
         <p className="sub">공식 원문을 근거로 조건과 신청 방법을 정리해 드려요</p>
 
         <div className="ask" ref={askBoxRef}>
+          {/* SSOK 캐릭터가 검색창 위 테두리에 두 손을 걸치고 빼꼼 내다본다 (장식) */}
+          <MascotPeek />
           <AskForm examples={examples} onAsk={onAsk} inputRef={inputRef} reduceMotion={reduceMotion} />
         </div>
 

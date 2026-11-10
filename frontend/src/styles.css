@@ -14,24 +14,24 @@
   --sk:#e7ece4; --sk-hi:#f4f7f0; --glow:rgba(71,103,90,.20);
   --map-line:#dce2d9; --map-label:#64736b; --map-node-edge:rgba(53,68,61,.3);
   /* SSOK 로고 */
-  --logo-text:#6b3a1c; --logo-o:#c2702a; --logo-star:#f4b623; --logo-lens:#fffaf2;
+  --logo-text:#354b40; --logo-o:#b78027; --logo-star:#d79a32; --logo-lens:#fffaf2;
   --logo-line:#6b3a1c; --logo-paper:#f9d48a; --logo-fold:#fff8ec; --logo-pocket:#f6a587; --logo-cheek:#f39a86;
   --char-bg:#f3ede3;
 }
 
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#262019; --bg-2:#2e271f; --card:#352c24; --ink:#e8ddd0; --ink-2:#c4b3a1; --ink-3:#958473; --line:#473b30;
-  --primary:#e2b98e; --primary-soft:#46382b; --on-primary:#262019;
-  --accent-light:#d4a373;
-  --hero-a:#33291f; --hero-b:#2b241c; --blob-a:rgba(227,195,160,.10); --blob-b:rgba(240,220,192,.08); --blob-c:rgba(216,226,203,.08);
-  --c1:#41342a; --c2:#3a332b; --c3:#433b28; --c4:#343a2d; --c5:#3d3129;
-  --ok:#a5d394; --ok-bg:#2f3a29; --warn:#f2c27a; --warn-bg:#443622; --bad:#f0a092; --bad-bg:#46302a; --muted-bg:#3b3128;
-  --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --sk:#3b3128; --sk-hi:#463a2f; --glow:rgba(226,185,142,.18);
+  --bg:#101010; --bg-2:#191919; --card:#202020; --ink:#f0f0f0; --ink-2:#c5c5c5; --ink-3:#a6a6a6; --line:#393939;
+  --primary:#b8d5c5; --primary-soft:#283730; --on-primary:#101010;
+  --accent-light:#a9c8b7;
+  --hero-a:#171717; --hero-b:#121212; --blob-a:rgba(255,255,255,.04); --blob-b:rgba(255,255,255,.025); --blob-c:rgba(255,255,255,.03);
+  --c1:#252525; --c2:#222222; --c3:#292929; --c4:#242424; --c5:#272727;
+  --ok:#a5d394; --ok-bg:#26322a; --warn:#f2c27a; --warn-bg:#352d23; --bad:#f0a092; --bad-bg:#372729; --muted-bg:#272727;
+  --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --sk:#292929; --sk-hi:#363636; --glow:rgba(184,213,197,.16);
   /* 어두운 배경에서 관계 지도의 선·글자·원 테두리가 묻히지 않게 밝게 */
-  --map-line:#6e5c4b; --map-label:#c4b3a1; --map-node-edge:rgba(232,221,208,.45);
+  --map-line:#555555; --map-label:var(--ink-2); --map-node-edge:rgba(240,240,240,.45);
   /* 로고: 어두운 배경에서 글자만 밝게, 캐릭터는 원래 색 그대로 */
-  --logo-text:#f1dcc3; --logo-o:#df9452;
+  --logo-text:#dcebe1; --logo-o:#dfad58;
   /* 손그림 캐릭터는 갈색 선이라 어두운 바탕에서 묻힌다 → 캐릭터 뒤만 밝은 크림색 */
   --char-bg:#eadccb;
 }
@@ -58,9 +58,13 @@ header.gnb{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);
 header.gnb .wrap{display:flex;align-items:center;gap:28px;height:68px}
 /* SSOK 로고 (components/Logo.tsx). 높이만 정하고 가로는 비율대로. 마우스를 올리면 캐릭터가 주머니에서 살짝 더 나온다 */
 .logo{display:flex;align-items:center;flex:none}
-.logo-svg{display:block;height:40px;width:auto;aspect-ratio:196/60;overflow:visible}
+.logo-svg{display:block;height:40px;width:auto}
 .logo-peek{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-.logo:hover .logo-peek{transform:translateY(-2.5px)}
+/* 첫 화면 검색창 위로 빼꼼: 공고문 아래 끝이 검색창 위 테두리에 닿고, 두 손은 테두리에 걸친다.
+   viewBox 아래 2칸(손 아래쪽)만큼 테두리 안으로 내려 둔다. 검색창에 마우스·입력 초점이 가면 살짝 더 올라온다 */
+.mascot-peek{position:absolute;z-index:2;overflow:visible;right:76px;bottom:calc(100% - 3px);height:54px;width:auto;aspect-ratio:48/37;pointer-events:none;transform-origin:50% 100%;animation:peekIn .6s 1s cubic-bezier(.34,1.56,.64,1) both}
+.ask:is(:hover,:focus-within) .mascot-peek .logo-peek{transform:translateY(-4px)}
+@keyframes peekIn{from{opacity:0;transform:translateY(8px) scale(.7)}}
 nav.menu{display:flex;gap:26px;font-weight:650;font-size:16px}
 nav.menu a{position:relative;text-decoration:none;padding:22px 0}
 nav.menu a::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:var(--primary);transform:scaleX(0);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
@@ -138,7 +142,7 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .board-h h2 span{color:var(--primary)}
 .board-h p{color:var(--ink-3);font-size:14px}
 .empty{display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed var(--line);border-radius:20px;padding:30px 20px;text-align:center;color:var(--ink-3);background:var(--bg-2)}
-.empty img{width:64px;height:64px;animation:float 4s ease-in-out infinite}
+.empty :is(img,.mascot-face){width:64px;height:64px;animation:float 4s ease-in-out infinite}
 .empty b{display:block;color:var(--ink-2);font-size:17px}
 
 .turn{margin-top:22px}
@@ -152,8 +156,8 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .acard{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;animation:rise .6s .15s cubic-bezier(.22,1,.36,1) both;transform:translateY(16px);opacity:0}
 .ahead{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .ahead .bot{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--primary-soft)}
-.ahead .bot img{width:28px;height:28px}
-.thinking .bot img{animation:bob .9s ease-in-out infinite}
+.ahead .bot :is(img,.mascot-face){width:28px;height:28px}
+.thinking .bot :is(img,.mascot-face){animation:bob .9s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(6deg)}}
 .ahead b{font-size:15px}
 .ahead small{display:block;font-size:12.5px;color:var(--ink-3)}
@@ -239,6 +243,7 @@ footer .wrap{padding:22px 24px}
   .deco.hide-sm{display:none}
   .ask form{padding-left:18px}
   .ask input{font-size:16px;height:42px}
+  .mascot-peek{height:42px;right:60px}
   .go{width:42px;height:42px}
   .cats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:26px}
   .cat{min-height:118px;padding:14px}
@@ -308,7 +313,7 @@ body.has-mini .jump{bottom:100px}
 /* 다크 모드: 반짝임·빛 번짐 줄이기 */
 
 :root[data-theme="dark"]{
-  --ring-a:#7d6450; --ring-b:#8e7660; --ring-c:#66705c;
+  --ring-a:#555555; --ring-b:#686868; --ring-c:#484848;
 }
 :root[data-theme="dark"] .ask{box-shadow:none}
 :root[data-theme="dark"] .ask::before{opacity:.08}
@@ -323,9 +328,7 @@ body.has-mini .jump{bottom:100px}
 :root[data-theme="dark"] .blob{opacity:.6}
 :root[data-theme="dark"] .btn-p{box-shadow:none}
 :root[data-theme="dark"] .burst{opacity:.6}
-/* 다크 모드: 내 질문 말풍선은 밝은 라떼색 + 진한 글씨로 */
-
-:root[data-theme="dark"] .qb{background:linear-gradient(135deg,#d6b08a,#e6caa8);color:#2b211a}
+:root[data-theme="dark"] .qb{background:var(--primary-soft);color:var(--ink)}
 
 /* React: 등장 애니메이션이 끝난 카드는 기울기 효과만 받는다 */
 .cat.entered{opacity:1;animation:none;transform:none;transition:box-shadow .25s,transform .35s cubic-bezier(.34,1.56,.64,1)}
@@ -358,6 +361,7 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .map-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;font-size:13.5px;color:var(--ink-3)}
 .map-msg{padding:40px 0;text-align:center;color:var(--ink-3)}
 .map-note{margin-top:14px;font-size:13px;color:var(--ink-3)}
+.map-data{margin-top:4px;font-size:12px;color:var(--ink-3);opacity:.8}
 .map-search{height:44px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);outline:0}
 .map-search:focus{border-color:var(--primary)}
 .map-list{list-style:none;margin:0;padding:0;overflow:auto;max-height:420px;border:2px solid var(--line);border-radius:16px;background:var(--card)}
@@ -609,22 +613,26 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .pd-status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
 .pd-status.ok{color:var(--ok)}
 .pd-status.ok::before{background:var(--ok)}
-.pd-plist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px}
-.pd-plist a{display:block;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pd-plist a:hover{color:var(--primary)}
+.pd-plist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pd-plist li+li{border-top:1px solid var(--line)}
+.pd-plist li{display:flex;align-items:center}
+.pd-plist button{flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center;gap:8px 16px;padding:9px 12px;font-size:14px;text-align:left}
+.pd-plist button:hover,.pd-plist button:focus-visible{background:var(--bg-2);color:var(--primary)}
+.pd-plist button>span{overflow-wrap:anywhere}
+.pd-source{flex:none;margin-inline:8px;padding:6px 4px;color:var(--primary);font-size:12px;text-decoration:none}
+.pd-source:hover,.pd-source:focus-visible{text-decoration:underline}
+.pd-list-badge,.pd-block h4 .pd-count{padding:2px 8px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:11px;white-space:nowrap}
 
-/* 분야(지역)별 막대: 누르면 그 묶음만 목록에 남는다. 이 정책의 분야는 진한 색 */
-.pd-bars{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
-.pd-bars button{width:100%;display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 32px;align-items:center;gap:12px;padding:5px 8px;margin:0 -8px;border-radius:10px;text-align:left;font-size:13.5px;color:var(--ink-2);transition:background .2s}
-.pd-bars button:hover{background:var(--bg-2)}
-.pd-bars button[aria-pressed="true"]{background:var(--primary-soft);color:var(--ink)}
-.bar-name{display:flex;align-items:center;gap:6px;min-width:0}
-.bar-name>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-name small{flex:none;font-size:11px;padding:1px 6px;border-radius:999px;background:var(--primary);color:var(--on-primary)}
-.bar{height:8px;border-radius:999px;background:var(--bg-2);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:inherit;background:var(--ring-a);transition:width .4s ease}
-.mine .bar i{background:var(--primary)}
-.bar-n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.pd-tiles{list-style:none;margin:4px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:8px}
+.pd-tiles button{width:100%;height:100%;min-height:80px;display:flex;flex-direction:column;justify-content:space-between;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2);box-shadow:0 2px 0 var(--line);text-align:left;color:var(--ink)}
+.pd-tiles li:nth-child(3n+2) button{background:var(--c1)}
+.pd-tiles li:nth-child(3n) button{background:var(--c3)}
+.pd-tiles button:hover,.pd-tiles button:focus-visible{border-color:var(--primary)}
+.pd-tiles button[aria-pressed="true"]{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.pd-tile-label{font-size:13px;overflow-wrap:anywhere}
+.pd-tile-summary{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.pd-tile-summary strong{font-size:24px;line-height:1;color:var(--primary)}
+.pd-tile-summary strong small{margin-left:2px;font-size:12px}
 .pd-block h4{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .pd-clear{margin-left:auto;font-size:12.5px;color:var(--primary)}
 .pd-foot{padding-top:14px;border-top:1px solid var(--line)}
@@ -632,7 +640,7 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .pd-foot a{color:var(--ink-2);text-decoration:none}
 .pd-foot a:hover{color:var(--primary)}
 /* 좁은 화면: 다른 정책은 한 줄, 막대는 이름을 넓게 */
-@media (max-width:600px){.pd-plist{grid-template-columns:minmax(0,1fr)}.pd-bars button{grid-template-columns:minmax(0,1fr) 72px 28px;gap:8px}}
+@media (max-width:600px){.pd-plist button{flex-direction:column;align-items:flex-start}}
 .pd-more{align-self:flex-start;padding:4px 0;font-size:13px;color:var(--primary)}
 .pd-more:hover{text-decoration:underline;text-underline-offset:3px}
 /* 팝업이 열릴 때 칸이 차례로 올라온다 (움직임 줄이기면 아래 전역 규칙으로 꺼진다) */

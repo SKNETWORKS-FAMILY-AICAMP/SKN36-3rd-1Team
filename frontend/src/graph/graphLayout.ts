@@ -63,6 +63,47 @@ export function zoomAt(view: MapView, factor: number, point: { x: number; y: num
 export const zoomCenter = (view: MapView, factor: number, min: number, max: number) =>
   zoomAt(view, factor, { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 }, min, max);
 
+/**
+ * 지도에 쓸 이름들. 잘랐을 때 서로 같아지는 이름끼리는 공통 앞부분(띄어쓰기 단위)을 떼어 다른 부분이 보이게 한다.
+ * 예: '고용노동부 국민취업지원제도 정부24 …', '고용노동부 국민취업지원제도 온통청년 …' → '…정부24 …', '…온통청년 …'
+ * 전체 이름은 원에 마우스를 올리거나 팝업에서 보여 준다.
+ */
+export function distinctLabels(labels: string[], max: number): string[] {
+  const text = [...labels];
+  // 앞을 뗀 이름은 '…'을 붙여 보여 주므로, 같은지 비교도 화면에 보일 모습으로 한다
+  const shown = (i: number) => shortLabel(text[i] === labels[i] ? text[i] : `…${text[i]}`, max);
+  // 한 번 떼고 나서도 또 같아질 수 있어(기관 → 제도명 → 문서 출처) 몇 번 반복한다
+  for (let round = 0; round < DISTINCT_ROUNDS; round += 1) {
+    const groups = new Map<string, number[]>();
+    text.forEach((_, i) => {
+      const key = shown(i);
+      const list = groups.get(key);
+      if (list) list.push(i); else groups.set(key, [i]);
+    });
+    let changed = false;
+    for (const idx of groups.values()) {
+      // 완전히 같은 이름끼리는 떼어도 구분되지 않으니 그대로 둔다
+      if (idx.length < 2 || new Set(idx.map((i) => text[i])).size === 1) continue;
+      const cut = commonWordPrefix(idx.map((i) => text[i]));
+      if (cut === 0 || idx.some((i) => text[i].length <= cut)) continue;
+      for (const i of idx) text[i] = text[i].slice(cut);
+      changed = true;
+    }
+    if (!changed) break;
+  }
+  return text.map((_, i) => shown(i));
+}
+const DISTINCT_ROUNDS = 3;
+
+/** 여러 이름의 공통 앞부분 길이 (마지막 띄어쓰기까지만 자른다. 단어 중간에서 자르지 않게) */
+function commonWordPrefix(texts: string[]): number {
+  const first = texts[0];
+  let n = 0;
+  while (n < first.length && texts.every((t) => t[n] === first[n])) n += 1;
+  const space = first.lastIndexOf(' ', n - 1);
+  return space >= 0 ? space + 1 : 0;
+}
+
 /** 지도에 쓸 짧은 이름 */
 export function shortLabel(label: string, max: number): string {
   const chars = [...label];
