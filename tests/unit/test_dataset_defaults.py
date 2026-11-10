@@ -42,7 +42,7 @@ print(json.dumps({'version':hd.dataset_version(),'release':hd.IS_RELEASE_PACKAGE
         self.assertTrue(result["release"])
         self.assertEqual(result["nodes"], 1004)
         self.assertEqual(result["flags"], "not_applicable")
-        self.assertEqual(set(result["configs"]), {"A_B2_V140", "B_B3_V140"})
+        self.assertEqual(set(result["configs"]), {"A_B2_V140", "B_B3_V140", "A_B2_4B_V140"})
 
     def test_blank_uses_approved_release(self):
         self.assertEqual(self.success("  ")["version"], "1.4.0-candidate")
