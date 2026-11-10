@@ -61,7 +61,9 @@ def apply_source_review(policies: list, corrections: dict) -> None:
                 if field in item:
                     policy[f"{attribute}_{suffix}"] = item[field]
     dates, notes = corrections["application_dates"], corrections["application_status_notes"]
+    ongoing = set(corrections["application_ongoing"])
     assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
+    assert ongoing <= known, f"상시 접수 교정 대상 정책 불일치: {sorted(ongoing - known)}"
     assert set(dates) & set(notes) <= set(corrections["application_notes_with_dates"]), "날짜와 확인 메모는 허용된 정책만 함께 쓴다"
     for policy in policies:
         item = dates.get(policy["policy_id"], {})
@@ -71,7 +73,7 @@ def apply_source_review(policies: list, corrections: dict) -> None:
             policy["application_end"] = item["end"]
         if policy["policy_id"] in notes:
             policy["application_status_note"] = notes[policy["policy_id"]]
-        if policy["policy_id"] in corrections["application_ongoing"]:
+        if policy["policy_id"] in ongoing:
             assert "end" not in item, f"종료일과 상시 접수를 함께 쓸 수 없음: {policy['policy_id']}"
             policy["application_is_ongoing"] = True
 
