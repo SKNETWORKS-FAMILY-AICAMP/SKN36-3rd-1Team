@@ -1,7 +1,7 @@
 # LifePolicy AI — 생애주기 맞춤형 정부 지원 정책 추천 챗봇
 
 > SKN 36기 부트캠프 3차 단위프로젝트 (교과목: LLM)
-> 상태: **데이터 수집·전처리 코드 및 DB 인계 파일 준비됨 — DB 적재·검색·조건 확인·RAG 통합은 미완료** (2026-11-05)
+> 상태: **최종 데이터(v1.4.0) Neo4j·Qdrant 적재 검증 완료 — RAG·API 통합(#23)과 화면 연동은 진행 중** (2026-11-10)
 
 사용자가 나이·지역·취업·혼인·가구·소득 상태를 입력하면, 공식 정책 원문을 근거로 관련 정부·지자체 지원 정책을 찾고
 **조건 충족 여부와 추가 확인 사항을 구분**하여 신청 절차·필요 서류·공식 링크·출처를 제시하는 한국어 RAG 질의응답 서비스입니다.
@@ -21,8 +21,8 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 - [x] 정책 정제 데이터 및 Graph·Vector DB 인계 파일 준비
 - [ ] 원본 파일 별도 전달·복원 및 로컬 존재 확인
 - [ ] 원본 배치 후 최종 인계 패키지 검증 통과
-- [ ] Neo4j 정책 관계 적재·조회
-- [ ] Qdrant 원문 청크 임베딩·검색
+- [x] Neo4j 정책 관계 적재·조회 (#45 최종 재적재 검증)
+- [x] Qdrant 원문 청크 임베딩·검색 (B2 청킹, qwen3-embedding 0.6B)
 - [ ] Graph + Vector 결합 조회
 - [ ] 사용자 입력 검증 + 연령·지역·신청기간 조건 확인
 - [ ] LLM 근거 기반 답변 + 출처 표시
@@ -159,8 +159,7 @@ python scripts/verify_candidate_sources.py
 전체 회귀 테스트와 원본 본문 검사는 Git 제외 원본 및 v1 정부24 대용량 파일 2개를 복원한 환경에서 실행합니다. 새 체크아웃의 후보 파일 사전 검증은 `load_candidate_neo4j.py`와 `verify_candidate_qdrant.py`로 별도 수행할 수 있습니다.
 실제 DB 검사와 신청 주소 교정 범위는 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요.
 
-2026-11-06 임시 Neo4j에서 노드 1,074개·관계 3,703개의 적재·재적재·속성 대조와 DDL 13개 적용 검사를 통과했습니다.
-임시 Qdrant에서도 599개 청크의 ID·payload 저장 검사를 통과했습니다. 검증 후 데이터와 컨테이너를 정리했으며, 임베딩·의미 검색·서비스 통합 완료를 뜻하지 않습니다.
+최종 데이터의 실제 적재 검증 결과는 아래 [최종 데이터와 사용 안내](#최종-데이터와-사용-안내)를 참고하세요.
 
 ### 후보 릴리스 재생성 및 DB 검사
 
@@ -176,6 +175,43 @@ python scripts/verify_candidate_qdrant.py --apply --url http://127.0.0.1:6333
 - Neo4j에 기존 노드가 있거나 Qdrant 검증 컬렉션이 이미 있으면 쓰기를 거절합니다. 기존 DB를 초기화하지 않습니다.
 - Qdrant 검사는 **벡터 없는 ID·payload 저장 검사**입니다. 임베딩 생성·유사도 검색은 별도 검증이 필요합니다. 모델·차원은 임의로 확정하지 않습니다.
 - 후보는 기존 정책의 신청 주소를 교정하며 `data/handoff/` 인계 원본은 보존합니다. 변경 전후 값은 후보의 `release_delta_manifest.json`에 기록합니다.
+
+## 최종 데이터와 사용 안내
+
+3차 최종 데이터는 `data/releases/v1.4.0-candidate/`입니다(2026-11-10, PR #45 기준).
+
+| 항목 | 값 |
+|---|---|
+| 정책 / 근거 문서 / 청크 | 246 / 261 / 599 |
+| Neo4j 노드 / 관계 | 1,004 / 2,431 (`REQUIRES_CONDITION` 136) |
+| Qdrant | B2 청킹 1,138 Points, `qwen3-embedding:0.6b`, 1,024차원, Cosine (`exp_b2_qwen3emb06b_v140_v1`) |
+| 검증 | 실제 적재 후 노드·관계 속성 대조, Neo4j–Qdrant 교차 검증 1,138/1,138, 빈 DB 복원 검증 통과 |
+
+v1.3.2(정책 237, 노드 1,034, 관계 3,615)보다 노드·관계가 적은 것은 공식 원문에 근거가 없는 조건을 교정으로 지웠기 때문입니다.
+
+### 어떤 파일을 보나요
+
+| 목적 | 위치 |
+|---|---|
+| 검색·적재에 쓰는 최종 데이터 | `data/releases/v1.4.0-candidate/` (`LIFEPOLICY_DATASET_DIR` 미설정 시 기본값) |
+| 필드 정의와 해석 규칙 | [docs/data/data_contract.md](docs/data/data_contract.md) |
+| 원문 대조 교정의 전후 값·근거 | `data/metadata/data_corrections_v1.4.0.json`, [docs/data/data_corrections_v1.4.0_review.md](docs/data/data_corrections_v1.4.0_review.md) |
+| 팀원용 DB 복원 | [docs/development/ISSUE43_RESTORE_GUIDE.md](docs/development/ISSUE43_RESTORE_GUIDE.md) (복원 ZIP은 Git 밖에서 별도 전달) |
+| RAG 인계 | [docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md](docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md) |
+| v1.3.2 기준선 | `data/handoff/` (고정본, 수정하지 않음) |
+
+### 데이터를 쓸 때 주의할 점
+
+- **자격 판정은 checker가 해석합니다.** 신청기간(`application_start`·`application_end`·`application_is_ongoing`)과 원문 확인 결과(`income_source_review`·`household_source_review`)는 checker가 읽고, RAG pipeline은 판정 결과만 사용합니다.
+- **모르는 조건은 "확인 필요"로 안내합니다.** 조건 그룹이 `UNKNOWN`인 정책은 자격을 확정하지 않습니다. 자격 설명에 신청자 연령 요건이 있지만 구조화된 나이 조건이 누락된 경우, 연령 요건을 추가로 확인하도록 안내합니다.
+- **신청 주소(`official_apply_url`)가 기록된 정책은 22건이며, 실제 접수 화면 연결 여부는 별도 확인이 필요합니다.** 정책 상세는 `source_url`로 안내합니다.
+- **정책 정보는 수집 시점 기준입니다.** 신청기간·금액·자격은 바뀔 수 있으므로 답변에 공식 원문 확인 안내를 함께 둡니다.
+
+### 데이터를 고칠 때
+
+1. `data/handoff/`와 릴리스 파일을 직접 고치지 않습니다. `data/metadata/data_corrections_v1.4.0.json`에 공식 원문 근거와 함께 교정 항목을 추가합니다.
+2. `python scripts/build_incremental_release_candidate.py`로 릴리스를 다시 만들고, `python -m unittest discover -s tests -p "test_candidate_release.py"`로 검사합니다.
+3. 노드·관계 수가 바뀌면 관련 테스트 기대값을 함께 고치고, DB 담당에게 재적재를 요청합니다. 청크 본문이 바뀌면 재임베딩이 필요하므로 먼저 알립니다.
 
 ## 데이터 원칙 (요약)
 
