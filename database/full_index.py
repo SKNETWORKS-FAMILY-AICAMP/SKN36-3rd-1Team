@@ -65,6 +65,8 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
                   "dataset": "1.4.0-candidate"},
     "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1220,
                   "dataset": "1.4.0-candidate"},
+    "A_B2_4B_V140": {"collection": "exp_b2_qwen3emb4b_v140_v1", "strategy": "B2", "expected_chunks": 1138,
+                     "dataset": "1.4.0-candidate", "model": "qwen3-embedding:4b", "dim": 2560},
 }
 # 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다
 # 구성에 dataset이 없으면 v1.3.2 인계 패키지 전용이다.

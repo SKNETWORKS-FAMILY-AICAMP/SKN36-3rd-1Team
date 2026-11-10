@@ -218,7 +218,7 @@ class ApprovedReleaseTests(unittest.TestCase):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
         self.assertEqual(self.out["expected"], [246, 261, 599, 1004, 2431])
-        self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140"])
+        self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
         self.assertEqual((self.out["documents"], self.out["unique_documents"]), (261, 261))
