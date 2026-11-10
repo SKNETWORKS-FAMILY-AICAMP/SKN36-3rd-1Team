@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-10T00:57:24.944730+09:00",
+  "created_at": "2026-11-10T02:59:07.929008+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "fa50a13ffd609324185299050895e8b9f43c2ec0c9e5b8359fd70aee130d8f90",
+    "source_sha256": "bd2c5f0980ac70710fe880a6e552cb1a3e165ae574b1eaf235bca8d792dc7367",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -4045,6 +4045,31 @@
       },
       {
         "source_id": "POL_GOV_053",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
+      },
+      {
+        "source_id": "POL_GOV_054",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
       },
@@ -7394,6 +7419,36 @@
         "target_id": "COND_INC_중위소득_200_초과"
       },
       {
+        "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_054_OR_INC"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
         "source_id": "GRP_POL_GOV_055_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
@@ -8302,6 +8357,7 @@
       "GRP_POL_GOV_051_OR_INC",
       "GRP_POL_GOV_052_OR_HH",
       "GRP_POL_GOV_053_OR_INC",
+      "GRP_POL_GOV_054_OR_INC",
       "GRP_POL_GOV_055_OR_HH",
       "GRP_POL_GOV_056_OR_HH",
       "GRP_POL_GOV_056_OR_INC",
