@@ -3,7 +3,7 @@ import {
 } from 'react';
 import {
   CENTER_LABEL_MAX, CHAT_MATCH_LIMIT, DRAG_CLICK_TOLERANCE, POLICY_LIST_META_FIELDS, POLICY_META_FIELDS, ungroupedLabel, KIND_LABEL, KIND_ORDER, LIFE_STAGES, LOGIC_LABEL, MAP_ENTER_STAGGER_S, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT,
-  RELATION_LABEL, REVIEW_STATUS, SHARED_BAR_LIMIT, SHARED_GROUP_BY, SHARED_GROUP_DEFAULT, SHARED_POLICY_LIMIT, SIMILAR_MIN_SHARED, SIMILAR_POLICY_LIMIT, SIMILAR_RELATIONS, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
+  RELATION_LABEL, REVIEW_STATUS, SHARED_TILE_LIMIT, SHARED_GROUP_BY, SHARED_GROUP_DEFAULT, SHARED_POLICY_LIMIT, SIMILAR_MIN_SHARED, SIMILAR_POLICY_LIMIT, SIMILAR_RELATIONS, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP,
   type NodeKind,
 } from '../config/graph';
 import { TOPIC_QUESTION, conditionQuestion, policyQuestion } from '../config/request';
@@ -239,7 +239,7 @@ function PolicyGraph({ data, policy, search, reduceMotion, onAsk }: {
             ))}
             {/* 가운데 정책: 뒤에서 옅은 빛 테두리가 천천히 퍼진다 (중심 표시) */}
             <circle className="pulse" cx={center.x} cy={center.y} r={CENTER_R} aria-hidden="true" />
-            <MapNode x={center.x} y={center.y} r={CENTER_R} kind="policy" label={policy.label} title={`${policy.label} (아래 정책 설명으로 이동)`}
+            <MapNode x={center.x} y={center.y} r={CENTER_R} kind="policy" label={shortLabel(policy.label, CENTER_LABEL_MAX)} title={`${policy.label} (아래 정책 설명으로 이동)`}
               active={false} onSelect={showCard} center />
           </g>
         </ZoomCanvas>
@@ -478,7 +478,7 @@ function MapNode({ x, y, r, kind, label, title, active, onSelect, center }: {
       <title>{title}</title>
       <g className="pop">
         <circle r={r} />
-        <text y={center ? 4 : r + LABEL_GAP} textAnchor="middle">{shortLabel(label, center ? CENTER_LABEL_MAX : NODE_LABEL_MAX)}</text>
+        <text y={center ? 4 : r + LABEL_GAP} textAnchor="middle">{label}</text>
       </g>
     </g>
   );
@@ -541,14 +541,13 @@ function Conditions({ trees }: { trees: ConditionTree[] }) {
 }
 
 /** 팝업·상세 머리: 지도와 같은 색 원 + 종류 + 이름 */
-function PopHead({ kind, title, sub }: { kind: NodeKind; title: string; sub?: string }) {
+function PopHead({ kind, title }: { kind: NodeKind; title: string }) {
   return (
     <div className="pd-head">
       <i className={`pd-dot k-${kind}`} aria-hidden="true" />
       <div>
         <span className="pd-kind">{KIND_LABEL[kind]}</span>
         <b>{title}</b>
-        {sub && <p className="pd-sub">{sub}</p>}
       </div>
     </div>
   );
@@ -608,7 +607,7 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
   }, [index, node.id, node.kind, policy.id, group.key, group.label, mine]);
   const listed = filter ? groups.find((g) => g.value === filter)?.items.map((i) => i.policy) ?? [] : ordered;
   const shown = showAll ? listed : listed.slice(0, SHARED_POLICY_LIMIT);
-  const hiddenGroups = groups.length - SHARED_BAR_LIMIT;
+  const hiddenGroups = groups.length - SHARED_TILE_LIMIT;
 
   if (preview) return (
     <div className="map-info" ref={contentRef}>
@@ -643,7 +642,7 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
           <section className="pd-block">
             <h4>관련 정책 <span className="pd-count">{shared.length.toLocaleString('ko-KR')}개</span> · {group.label}별</h4>
             <ul className="pd-tiles">
-              {groups.slice(0, SHARED_BAR_LIMIT).map((g) => (
+              {groups.slice(0, SHARED_TILE_LIMIT).map((g) => (
                 <li key={g.value}>
                   <button type="button" aria-pressed={filter === g.value}
                     onClick={() => { setFilter((f) => (f === g.value ? null : g.value)); setShowAll(false); }}>

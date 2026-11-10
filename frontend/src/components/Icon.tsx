@@ -31,8 +31,6 @@ const head = (cx: number, cy: number, r: number) =>
   `<path d="M${cx - r} ${cy}c0-${r * 0.75} ${r * 0.45}-${r} ${r}-${r}s${r} ${r * 0.25} ${r} ${r}c0 ${r * 0.6}-${r * 0.45} ${r * 0.85}-${r} ${r * 0.85}s-${r}-${r * 0.25}-${r}-${r * 0.85}z" fill="#fff4e8" ${S}/>`;
 
 const SVG = {
-  /** 마스코트 '모찌싹': 새싹이 난 찹쌀떡 */
-  mascot: `<path d="M32 17c-1-5 2-9 6-8-1 4-3 6-6 8z" fill="#bfeccb" ${S}/><path d="M32 17c0-4-3-7-6-6 0 3 2 5 6 6z" fill="#d8f5df" ${S}/><path d="M9 43c0-14 10-25 23-25s23 11 23 25c0 8-10 12-23 12S9 51 9 43z" fill="#fffdf9" ${S}/><path d="M12 44c-3 0-4 3-2 4M52 44c3 0 4 3 2 4" fill="none" ${S} stroke-width="1.5"/>${face(32, 39)}`,
   briefcase: `<path d="M25 23v-3a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v3" fill="none" ${S}/><path d="M8 34c0-7 4-11 11-11h26c7 0 11 4 11 11v8c0 8-4 12-11 12H19c-7 0-11-4-11-12z" fill="#f8dcc0" ${S}/>${face(32, 39)}`,
   house: `<path d="M9 33 32 13l23 20" fill="#ffc7d2" ${S}/><path d="M15 31v15c0 6 3 8 8 8h18c5 0 8-2 8-8V31L32 16z" fill="#fffaf0" ${S}/>${face(32, 40)}`,
   books: `<path d="M10 44c0-4 2-6 6-6h32c4 0 6 2 6 6v4c0 4-2 6-6 6H16c-4 0-6-2-6-6z" fill="#cfe7ff" ${S}/><path d="M14 31c0-4 2-6 6-6h24c4 0 6 2 6 6v1c0 4-2 6-6 6H20c-4 0-6-2-6-6z" fill="#fff0b8" ${S}/><path d="M19 18c0-3 2-5 5-5h16c3 0 5 2 5 5s-2 7-5 7H24c-3 0-5-4-5-7z" fill="#ffd3dd" ${S}/>${face(32, 45)}`,

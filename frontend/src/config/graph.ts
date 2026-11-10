@@ -54,14 +54,14 @@ export const REVIEW_STATUS: Record<string, { label: string; short: string; tone:
 export const SHARED_POLICY_LIMIT = 6;
 
 /**
- * 지도 팝업의 '다른 정책'을 무엇으로 묶어 막대로 보여 줄지. 정책 노드 필드(data_contract) 기준.
- * 분야 원은 모두 같은 분야라 지역으로 묶는다. 막대는 많은 순으로 SHARED_BAR_LIMIT개, 나머지는 개수만.
+ * 지도 팝업의 '관련 정책'을 무엇으로 묶어 타일로 보여 줄지. 정책 노드 필드(data_contract) 기준.
+ * 분야 원은 모두 같은 분야라 지역으로 묶는다. 타일은 많은 순으로 SHARED_TILE_LIMIT개, 나머지는 개수만.
  */
 export const SHARED_GROUP_DEFAULT = { key: 'category', label: '분야' } as const;
 export const SHARED_GROUP_BY: Partial<Record<NodeKind, { key: string; label: string }>> = {
   category: { key: 'region', label: '지역' },
 };
-export const SHARED_BAR_LIMIT = 6;
+export const SHARED_TILE_LIMIT = 6;
 
 /**
  * '연결 구조가 비슷한 정책': 이 관계로 이어진 기관·지역·분야·대상·생애단계가 몇 개 겹치는지로 고른다.

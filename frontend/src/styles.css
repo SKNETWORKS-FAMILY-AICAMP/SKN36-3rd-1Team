@@ -602,7 +602,6 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .pd-ask:hover{background:var(--primary-soft)}
 /* 팝업 내용: 상자·뱃지·점선 없이 여백과 작은 제목으로만 나눈다 */
 .map-dialog-body .map-info{gap:22px}
-.pd-sub{margin:4px 0 0;font-size:13.5px;color:var(--ink-2)}
 .pd-block{display:flex;flex-direction:column;gap:6px;width:100%;min-width:0}
 .pd-block h4{margin:0;font-size:12.5px;font-weight:400;color:var(--ink-3)}
 .pd-block h4 span{color:var(--primary)}
