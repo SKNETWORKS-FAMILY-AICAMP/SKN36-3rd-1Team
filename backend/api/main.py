@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from backend.api.schemas import AskRequest, AskResponse
 from backend.rag.pipeline import AskError, run_ask_pipeline
 from database import embedding
+# handoff_data는 hybrid_search import 중 데이터셋 경로를 고정하므로 먼저 환경을 읽는다.
+embedding.load_env_file()
 from database.hybrid_search import (
     HybridSearchBackendError,
     HybridSearchInputError,
@@ -50,14 +52,20 @@ def _check_eligibility(profile: dict, policy: dict) -> dict:
     return check_eligibility(profile, policy)
 
 
-def _generate_answer(question: str, contexts: list[dict], checks: list[dict], history: list[dict]) -> dict:
+def _generate_answer(
+    question: str, contexts: list[dict], checks: list[dict], history: list[dict], profile: dict | None = None,
+) -> dict:
+    """Pipeline이 정규화한 프로필(age/region/income)을 Generator에 키워드 인자로 넘긴다.
+
+    Generator가 profile 인자를 지원해야 한다(#35). 오류를 숨기는 재호출은 하지 않는다.
+    """
     try:
         from backend.llm.generator import generate_answer
     except ModuleNotFoundError as exc:
         if exc.name not in {"backend.llm", "backend.llm.generator"}:
             raise
         raise AskError("LLM_UNAVAILABLE") from exc
-    return generate_answer(question, contexts, checks, history)
+    return generate_answer(question, contexts, checks, history, profile=profile)
 
 
 def create_app(
@@ -65,6 +73,7 @@ def create_app(
     session_factory: Callable[[], HybridSearchSession] = _new_search_session,
     check_fn: Callable = _check_eligibility,
     generate_fn: Callable = _generate_answer,
+    display_fn: Callable[[list[dict]], list[dict]] | None = None,
 ) -> FastAPI:
     """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다."""
     search_lock = Lock()
@@ -127,7 +136,8 @@ def create_app(
     @application.post("/api/ask", response_model=AskResponse)
     def ask(request: AskRequest) -> AskResponse:
         try:
-            return run_ask_pipeline(request, search_fn=search, check_fn=check_fn, generate_fn=generate_fn)
+            return run_ask_pipeline(request, search_fn=search, check_fn=check_fn, generate_fn=generate_fn,
+                                    display_fn=display_fn)
         except AskError as exc:
             status, message = ERRORS[exc.code]
             if status >= 500:

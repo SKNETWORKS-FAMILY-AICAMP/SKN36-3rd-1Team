@@ -1,5 +1,6 @@
 """검색 결과에서 인용 가능한 공식 원문을 고른다."""
 
+from collections.abc import Collection
 import logging
 from urllib.parse import urlsplit
 
@@ -21,10 +22,17 @@ def valid_source_url(value: object) -> bool:
         return False
 
 
-def build_contexts(policies: list[dict], max_contexts: int = 5) -> list[dict]:
-    """상위 정책에 원문 하나씩 배정하고 나머지는 청크 순위로 채운다."""
+def build_contexts(
+    policies: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
+) -> list[dict]:
+    """상위 정책에 원문 하나씩 배정하고 나머지는 청크 순위로 채운다.
+
+    `deprioritized_policy_ids`(Checker가 신청 마감으로 판정한 정책)는 삭제하지 않는다.
+    다른 정책의 원문을 모두 배정한 뒤 남은 자리에만 넣고, 각 그룹 안의 순서는 기존 규칙을 따른다.
+    """
     if max_contexts <= 0:
         return []
+    later = set(deprioritized_policy_ids)
 
     candidates = []
     for policy in policies:
@@ -65,5 +73,7 @@ def build_contexts(policies: list[dict], max_contexts: int = 5) -> list[dict]:
         else:
             first.append((best_rank, rank, context))
             seen_policies.add(context["policy_id"])
-    selected = [item[2] for item in sorted(first, key=lambda item: item[:2])] + rest
+    ordered = [item[2] for item in sorted(first, key=lambda item: item[:2])] + rest
+    # 마감 여부만 기준으로 안정 정렬한다. 마감이 없으면 기존 결과와 같다.
+    selected = sorted(ordered, key=lambda context: context["policy_id"] in later)
     return [{"source_id": index, **context} for index, context in enumerate(selected[:max_contexts], 1)]

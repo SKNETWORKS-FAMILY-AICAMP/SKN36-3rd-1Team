@@ -1,12 +1,16 @@
 """실제 검색 반환 형태를 사용한 RAG 통합 테스트."""
 
 import unittest
+import os
+import subprocess
+import sys
 from unittest.mock import Mock
 
 from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, UserProfile
 from backend.rag.pipeline import AskError, run_ask_pipeline
+from backend.llm.generator import LLMOutputError, LLMTimeoutError, LLMUnavailableError
 
 
 def policy(pid="P", rank=1, **changes):
@@ -36,6 +40,52 @@ def answer(text="원문 [1]", ids=None, **changes):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_pipeline_import_does_not_load_generator_or_dataset_env(self):
+        env = os.environ.copy()
+        env.pop("LIFEPOLICY_DATASET_DIR", None)
+        code = (
+            "import os,sys; import backend.rag.pipeline; "
+            "assert 'backend.llm.generator' not in sys.modules; "
+            "assert 'LIFEPOLICY_DATASET_DIR' not in os.environ"
+        )
+        result = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_api_import_loads_dataset_env_before_search(self):
+        env = os.environ.copy()
+        env.pop("LIFEPOLICY_DATASET_DIR", None)
+        code = (
+            "import os,sys; from dotenv import dotenv_values; "
+            "expected=dotenv_values('.env').get('LIFEPOLICY_DATASET_DIR'); "
+            "import backend.api.main; "
+            "assert 'backend.llm.generator' not in sys.modules; "
+            "assert os.environ.get('LIFEPOLICY_DATASET_DIR') == (expected or None); "
+            "from database import handoff_data as h; "
+            "assert h.dataset_version()"
+        )
+        result = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_api_import_reads_env_file_before_dataset_selection_without_real_env(self):
+        # 실제 .env 없이도 검증한다: 임시 가상 .env에 데이터셋 경로만 적고, 검색 모듈 import 전에 읽히는지 확인.
+        env = os.environ.copy()
+        env.pop("LIFEPOLICY_DATASET_DIR", None)
+        code = (
+            "import os,sys,tempfile,pathlib; "
+            "from database import embedding as e; "
+            "dataset=(e.PROJECT_ROOT/'data'/'releases'/'v1.4.0-candidate').resolve(); "
+            "tmp=pathlib.Path(tempfile.mkdtemp())/'.env'; "
+            "tmp.write_text('LIFEPOLICY_DATASET_DIR='+str(dataset)+chr(10), encoding='utf-8'); "
+            "e.DEFAULT_ENV_PATH=tmp; "
+            "import backend.api.main; "
+            "assert 'backend.llm.generator' not in sys.modules; "
+            "assert os.environ['LIFEPOLICY_DATASET_DIR']==str(dataset); "
+            "from database import handoff_data as h; "
+            "assert h.HANDOFF_DIR==dataset, (h.HANDOFF_DIR, dataset)"
+        )
+        result = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def setUp(self):
         self.search = Mock(return_value={"policies": [policy()]})
         self.check = Mock(side_effect=checker)
@@ -46,13 +96,30 @@ class PipelineTests(unittest.TestCase):
                              **{"history": [], **changes})
         return run_ask_pipeline(request, search_fn=self.search, check_fn=self.check, generate_fn=self.generate)
 
-    def test_normalization_and_unverified_reception(self):
+    def test_normalization_and_checker_reception_kept(self):
         response = self.ask(awaiting_field="child_age", history=[{"role": "user", "text": str(i)} for i in range(12)])
         self.search.assert_called_once_with("질문", filters={"region": "서울특별시"}, k=10)
         self.assertEqual(self.check.call_args.args[0], {"age": 25, "region": "서울특별시", "income": 1.5})
         self.assertEqual(len(self.generate.call_args.args[3]), 10)
-        self.assertEqual(response.policy_checks[0].reception_status, "unknown")
+        # 신청 상태는 Checker 단일 책임이다. application_period 문구("상시신청")로 덮어쓰지 않는다.
+        self.assertEqual(response.policy_checks[0].reception_status, "open")
         self.assertEqual(response.citations[0].document_id, "DP")
+
+    def test_normalized_profile_reaches_generator(self):
+        cases = (
+            ({"age": 25, "region": "서울", "income": 1.5}, {"age": 25, "region": "서울특별시", "income": 1.5}),
+            ({"age": 25, "region": "서울", "income": 0}, {"age": 25, "region": "서울특별시", "income": 0}),
+            ({"age": None, "region": "", "income": None}, {"age": None, "region": None, "income": None}),
+            ({"age": 30, "region": "미확인시", "income": None}, {"age": 30, "region": None, "income": None}),
+        )
+        for supplied, expected in cases:
+            with self.subTest(supplied=supplied):
+                request = AskRequest(question="질문", profile=supplied, history=[])
+                run_ask_pipeline(request, search_fn=self.search, check_fn=self.check, generate_fn=self.generate)
+                self.assertEqual(self.generate.call_args.kwargs, {"profile": expected})
+                self.assertEqual(self.check.call_args.args[0], expected)
+                # Generator가 받은 profile을 바꿔도 Pipeline 내부 값에는 영향이 없어야 한다.
+                self.assertIsNot(self.generate.call_args.kwargs["profile"], self.check.call_args.args[0])
 
     def test_missing_evidence_skips_other_dependencies(self):
         for policies in ([], [policy(evidence=[])]):
@@ -90,7 +157,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(response.answer, "신청 [2], 조건 [1], 반복 [2]")
         self.assertEqual([item.document_id for item in response.citations], ["D1", "D3"])
         self.assertEqual([check.policy_id for check in response.policy_checks], list("12345"))
-        self.assertEqual(self.check.call_count, 5)
+        # 신청 상태 정렬을 위해 인용 가능한 후보는 모두 한 번씩 판정하고, 결과 카드는 채택된 정책만 남긴다.
+        self.assertEqual(sorted(call.args[1]["policy_id"] for call in self.check.call_args_list), list("123456"))
 
     def test_malformed_outputs_are_rejected(self):
         for raw in (answer("없는 근거 [9]"), answer("인용 누락"), {"answer": "불완전"},
@@ -112,14 +180,211 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(response.policy_checks[0].conditions[1].status, "needs_check")
         self.assertEqual(response.follow_up_questions[0].field, "region")
 
-    def test_spaced_vague_period_is_unknown(self):
-        # v1.4.0 실제 값은 "접수기관 별 상이"(띄어쓰기 포함)다.
-        for period in ("접수기관 별 상이", "접수기관별 상이", " 상시 "):
-            with self.subTest(period=period):
-                self.search.return_value = {"policies": [policy(graph={"policy": {"application_period": period}})]}
-                self.assertEqual(self.ask().policy_checks[0].reception_status, "unknown")
-        self.search.return_value = {"policies": [policy(graph={"policy": {"application_period": "20260101 ~ 20261231"}})]}
-        self.assertEqual(self.ask().policy_checks[0].reception_status, "open")
+    def test_does_not_ask_for_supplied_profile_value(self):
+        self.generate.return_value = answer(
+            "공식 조건 확인이 필요합니다 [1]",
+            follow_up_questions=[
+                {"kind": "ask_info", "text": "지역은?", "field": "region"},
+                {"kind": "question", "text": "공고 원문은?"},
+            ],
+        )
+        response = self.ask(region="서울")
+        self.assertEqual([item.kind for item in response.follow_up_questions], ["question"])
+
+    def with_reception(self, statuses):
+        """정책 ID별 신청 상태를 돌려주는 Checker 대역. 날짜 계산은 Checker 책임이므로 결과만 흉내 낸다."""
+        def check(profile, item):
+            return {**checker(profile, item), "reception_status": statuses.get(item["policy_id"], "unknown")}
+        self.check.side_effect = check
+
+    def test_reception_status_comes_from_checker(self):
+        # application_period 문구가 무엇이든 Checker의 판정을 그대로 쓴다(시작일만 있는 정책도 Checker가 판정).
+        for period in ("상시신청", "접수기관 별 상이", " 상시 ", "20260101 ~ 20261231", None):
+            for status in ("before", "open", "closed", "unknown"):
+                with self.subTest(period=period, status=status):
+                    graph = {"policy": {"application_period": period}, "eligibility": {}}
+                    self.search.return_value = {"policies": [policy(graph=graph)]}
+                    self.with_reception({"P": status})
+                    self.assertEqual(self.ask().policy_checks[0].reception_status, status)
+
+    # 팀장 결정(2026-11-10) 신청 기간 표. 날짜 판정은 Checker 책임이므로 Checker 대역이 기대 상태를 돌려주고,
+    # Pipeline이 그 상태를 그대로 유지·정렬하는지만 검증한다. 날짜 값은 가상(sample_only)이다.
+    RECEPTION_CASES = (
+        ("F", {"application_start": "2099-01-01", "application_is_ongoing": True}, "before"),
+        ("K", {"application_start": "2020-01-01", "application_end": "2020-12-31"}, "closed"),
+        ("G", {"application_start": "2020-01-01", "application_is_ongoing": True}, "open"),
+        ("H", {"application_is_ongoing": True}, "open"),
+        ("I", {"application_start": "2020-01-01"}, "unknown"),
+        ("J", {}, "unknown"),
+        ("L", {"application_start": "2020-01-01", "application_end": "2099-12-31"}, "open"),
+    )
+
+    def test_final_reception_contract_cases_are_kept_and_only_closed_moves(self):
+        policies = [policy(pid, rank, graph={"policy": fields, "eligibility": {}})
+                    for rank, (pid, fields, _) in enumerate(self.RECEPTION_CASES, 1)]
+        self.search.return_value = {"policies": policies}
+        expected = {pid: status for pid, _, status in self.RECEPTION_CASES}
+        self.with_reception(expected)
+        request = AskRequest(question="질문", profile={"age": 25, "region": "", "income": None}, history=[])
+        response = run_ask_pipeline(request, search_fn=self.search, check_fn=self.check, generate_fn=self.generate)
+        # 7개 후보 중 Context 5개: 검색 2위인 마감(K)만 뒤로 밀려 빠지고, 나머지는 검색 순서를 유지한다.
+        self.assertEqual([c["policy_id"] for c in self.generate.call_args.args[1]], list("FGHIJ"))
+        self.assertEqual([(c.policy_id, c.reception_status) for c in response.policy_checks],
+                         [(pid, expected[pid]) for pid in "FGHIJ"])
+        # Checker에는 graph.policy 필드가 바뀌지 않은 채 전달된다.
+        sent = {call.args[1]["policy_id"]: call.args[1]["graph"]["policy"] for call in self.check.call_args_list}
+        self.assertEqual(sent, {pid: fields for pid, fields, _ in self.RECEPTION_CASES})
+
+    def test_pipeline_does_not_interpret_dates_or_ongoing_flag(self):
+        # 필드가 가리키는 상태와 반대로 Checker가 판정해도 Pipeline은 Checker 결과만 따른다.
+        for fields, status in (
+            ({"application_is_ongoing": True}, "unknown"),
+            ({"application_start": "2020-01-01", "application_end": "2020-12-31"}, "open"),
+            ({"application_start": "2099-01-01"}, "closed"),
+            ({"application_period": "상시신청"}, "unknown"),
+        ):
+            with self.subTest(fields=fields, status=status):
+                self.search.return_value = {"policies": [policy(graph={"policy": fields, "eligibility": {}})]}
+                self.with_reception({"P": status})
+                self.assertEqual(self.ask().policy_checks[0].reception_status, status)
+
+    def test_missing_graph_reception_is_unknown_and_never_deprioritized(self):
+        self.search.return_value = {"policies": [policy("A", 1, graph=None, graph_status="MISSING_IN_GRAPH"),
+                                                 policy("B", 2)]}
+        self.with_reception({"A": "closed", "B": "open"})
+        response = self.ask()
+        self.assertEqual([(c.policy_id, c.reception_status) for c in response.policy_checks],
+                         [("A", "unknown"), ("B", "open")])
+
+    def test_closed_policies_move_after_others_before_context_selection(self):
+        # 검색 순서 A(closed) B(open) C(unknown) D(closed) E(before) → B C E A D
+        self.search.return_value = {"policies": [policy(pid, rank) for rank, pid in enumerate("ABCDE", 1)]}
+        self.with_reception({"A": "closed", "B": "open", "C": "unknown", "D": "closed", "E": "before"})
+        self.generate.return_value = answer("마감 정책 [4], 접수 정책 [1]", ids=[1, 4])
+        response = self.ask()
+        contexts = self.generate.call_args.args[1]
+        self.assertEqual([c["policy_id"] for c in contexts], list("BCEAD"))
+        self.assertEqual([c["source_id"] for c in contexts], [1, 2, 3, 4, 5])
+        self.assertEqual([c["policy_id"] for c in self.generate.call_args.args[2]], list("BCEAD"))
+        self.assertEqual([c.policy_id for c in response.policy_checks], list("BCEAD"))
+        # 본문 인용 번호는 새 Context 순서 기준으로 재번호되고, 출처 문서와 일치한다.
+        self.assertEqual(response.answer, "마감 정책 [2], 접수 정책 [1]")
+        self.assertEqual([c.document_id for c in response.citations], ["DB", "DA"])
+        self.assertEqual(self.check.call_count, 5)
+
+    def test_closed_policy_does_not_take_slots_when_others_have_enough_contexts(self):
+        def many(pid, rank, count):
+            return policy(pid, rank, evidence=[
+                {"rank": rank * 10 + i, "chunk_id": f"C{pid}{i}", "document_id": f"D{pid}",
+                 "text": f"원문 {pid}{i}", "source_url": "https://example.org/notice"} for i in range(count)])
+        self.search.return_value = {"policies": [many("A", 1, 2), many("B", 2, 3), many("C", 3, 3)]}
+        self.with_reception({"A": "closed", "B": "open", "C": "open"})
+        self.ask()
+        contexts = self.generate.call_args.args[1]
+        self.assertEqual([c["chunk_id"] for c in contexts], ["CB0", "CC0", "CB1", "CB2", "CC1"])
+        self.assertNotIn("A", [c["policy_id"] for c in self.generate.call_args.args[2]])
+        # 채택되지 않은 마감 정책도 판정은 한 번만 했다(정책 삭제 아님, 카드에서만 빠짐).
+        self.assertEqual(self.check.call_count, 3)
+
+    def test_all_closed_keeps_original_order(self):
+        self.search.return_value = {"policies": [policy(pid, rank) for rank, pid in enumerate("XYZ", 1)]}
+        self.with_reception({"X": "closed", "Y": "closed", "Z": "closed"})
+        response = self.ask()
+        self.assertEqual([c.policy_id for c in response.policy_checks], list("XYZ"))
+        self.assertTrue(all(c.reception_status == "closed" for c in response.policy_checks))
+
+    def test_invalid_checker_output_for_unselected_candidate_is_not_used_for_ordering(self):
+        self.search.return_value = {"policies": [policy(pid, rank) for rank, pid in enumerate("ABCDEF", 1)]}
+        statuses = {"A": "closed"}
+        def check(profile, item):
+            if item["policy_id"] == "B":
+                return {"policy_id": "B", "conditions": [], "reception_status": "closed"}  # 형식 오류
+            return {**checker(profile, item), "reception_status": statuses.get(item["policy_id"], "open")}
+        self.check.side_effect = check
+        # 형식 오류 정책(B)은 후순위로 숨기지 않으므로 채택되고, 그 결과 오류가 드러난다.
+        with self.assertRaisesRegex(AskError, "ELIGIBILITY_OUTPUT_INVALID"):
+            self.ask()
+
+    def test_checker_needs_check_reason_is_preserved(self):
+        reasons = {
+            "income": "소득 원문 확인 필요: 신청 유형과 연소득(일반형은 부부합산 5천만원 이하 등)을 공고에서 확인하세요.",
+            "housing": "가구 원문 확인 필요: 가구원 수를 공고 기준으로 확인하세요.",
+        }
+        self.check.side_effect = lambda profile, item: {
+            "policy_id": item["policy_id"], "reception_status": "unknown",
+            "conditions": [{"field": f, "label": f, "reason": r, "status": "needs_check"} for f, r in reasons.items()]}
+        for quality in ({}, {"hold_auto_eligibility": True, "affected_attributes": ["all"]},
+                        {"hold_auto_eligibility": True, "affected_attributes": ["income"]}):
+            with self.subTest(quality=quality):
+                self.search.return_value = {"policies": [policy(data_quality=quality)]}
+                response = self.ask()
+                self.assertEqual([c.reason for c in response.policy_checks[0].conditions], list(reasons.values()))
+                self.assertEqual([c["reason"] for c in self.generate.call_args.args[2][0]["conditions"]],
+                                 list(reasons.values()))
+
+    def test_downgraded_condition_keeps_checker_reason_and_adds_hold_reason(self):
+        cases = (
+            (policy(data_quality={"hold_auto_eligibility": True, "affected_attributes": ["all"]}), "데이터가 불확실"),
+            (policy(graph={"eligibility": {"unknown_logic_groups": ["G"]}}), "데이터가 불확실"),
+        )
+        for item, hold in cases:
+            with self.subTest(item=item):
+                self.search.return_value = {"policies": [item]}
+                conditions = self.ask().policy_checks[0].conditions
+                self.assertEqual([c.status for c in conditions], ["needs_check", "needs_check"])
+                self.assertTrue(conditions[0].reason.startswith("가상 조건 충족"))
+                self.assertIn(hold, conditions[0].reason)
+
+    def test_affected_attributes_scope(self):
+        # all·목록 밖 값(target, education 등)은 전체 보류, 목록 안 값은 그 필드만 보류.
+        cases = (
+            (["all"], ["needs_check", "needs_check"]),
+            (["target"], ["needs_check", "needs_check"]),
+            (["education"], ["needs_check", "needs_check"]),
+            (["region"], ["eligible", "needs_check"]),
+            (["age"], ["needs_check", "ineligible"]),
+        )
+        for affected, expected in cases:
+            with self.subTest(affected=affected):
+                quality = {"hold_auto_eligibility": True, "affected_attributes": affected}
+                self.search.return_value = {"policies": [policy(data_quality=quality)]}
+                self.assertEqual([c.status for c in self.ask().policy_checks[0].conditions], expected)
+
+    def test_display_fn_summarizes_response_only(self):
+        income = {"field": "income", "label": "소득", "reason": "중위소득 기준 확인 필요", "status": "needs_check"}
+        rows = [income, dict(income), dict(income), {**income, "reason": "가구 소득 기준 확인 필요"},
+                {"field": "eligibility", "label": "종합", "reason": "OR 그룹 보류", "status": "needs_check"}]
+        self.check.side_effect = lambda profile, item: {
+            "policy_id": item["policy_id"], "reception_status": "unknown", "conditions": [dict(r) for r in rows]}
+
+        def dedupe(conditions):
+            shown = []
+            for item in conditions:
+                if item not in shown:
+                    shown.append(item)
+            return shown
+
+        request = AskRequest(question="질문", profile={"age": 25, "region": "서울", "income": None}, history=[])
+        response = run_ask_pipeline(request, search_fn=self.search, check_fn=self.check,
+                                    generate_fn=self.generate, display_fn=dedupe)
+        self.assertEqual([c.reason for c in response.policy_checks[0].conditions],
+                         ["중위소득 기준 확인 필요", "가구 소득 기준 확인 필요", "OR 그룹 보류"])
+        # LLM에는 요약 전 원본 조건 5개를 그대로 전달한다.
+        self.assertEqual(len(self.generate.call_args.args[2][0]["conditions"]), 5)
+
+    def test_display_fn_cannot_change_status_or_invent_rows(self):
+        def bad_status(conditions):
+            return [{**conditions[0], "status": "eligible"}]
+
+        def drops_field(conditions):
+            return conditions[:1]
+
+        for display in (bad_status, drops_field, lambda conditions: []):
+            with self.subTest(display=display):
+                request = AskRequest(question="질문", profile={"age": 25, "region": "서울", "income": None}, history=[])
+                with self.assertRaisesRegex(AskError, "ELIGIBILITY_OUTPUT_INVALID"):
+                    run_ask_pipeline(request, search_fn=self.search, check_fn=self.check,
+                                     generate_fn=self.generate, display_fn=display)
 
     def test_hold_reason_matches_cause(self):
         request = AskRequest(question="질문", profile={"region": "", "age": None, "income": 10}, history=[])
@@ -134,6 +399,17 @@ class PipelineTests(unittest.TestCase):
 
     def test_llm_timeout_and_unavailable(self):
         for failure, code in ((TimeoutError, "LLM_TIMEOUT"), (ConnectionError, "LLM_UNAVAILABLE")):
+            with self.subTest(code=code):
+                self.generate.side_effect = failure
+                with self.assertRaisesRegex(AskError, code):
+                    self.ask()
+
+    def test_generator_defined_errors(self):
+        for failure, code in (
+            (LLMUnavailableError("private-value"), "LLM_UNAVAILABLE"),
+            (LLMTimeoutError("private-value"), "LLM_TIMEOUT"),
+            (LLMOutputError("private-value"), "LLM_OUTPUT_INVALID"),
+        ):
             with self.subTest(code=code):
                 self.generate.side_effect = failure
                 with self.assertRaisesRegex(AskError, code):

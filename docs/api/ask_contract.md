@@ -1,9 +1,10 @@
 # LifePolicy AI — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.0 · 2026-11-07  
+> **버전:** v1.1 초안 · 2026-11-10 (v1.0 · 2026-11-07)  
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.  
+> **v1.1 변경(팀장 결정 2026-11-10 반영, PR #23 리뷰에서 확인):** 신청 상태는 Checker가 `application_start`·`application_end`·`application_is_ongoing`으로 판정(§4.4) · 마감 정책 Context 후순위(§2, §6) · Generator `profile` 인자(§5.1) · 후속 질문 `question` 범위(§5.1, 소희 합의 2026-11-10) · Checker 사유 보존과 화면용 조건 요약(§4.3, §8.3) · UNKNOWN 그룹 전체 보류 유지 · 공통 파일 분담(§0).  
 > **저장 경로:** `docs/api/ask_contract.md`  
-> **기준 코드:** `dev` 커밋 `fe8637c`(PR #22), React `feature/15-react-demo-ui`의 `src/api/types.ts`, `client.ts`  
+> **기준 코드:** v1.0은 `dev` 커밋 `fe8637c`(PR #22), v1.1은 `dev` 커밋 `0686ecb`(PR #35 Checker·Generator, #37 데이터, #44 나이 조건 누락 안내), React `feature/15-react-demo-ui`의 `src/api/types.ts`, `client.ts`  
 > **주의:** 아래 예시 정책·ID·URL은 **가상 예시**이며 실제 정책의 자격·접수 상태를 의미하지 않는다.
 
 ## 0. 목적 및 역할 분담
@@ -17,7 +18,7 @@
 | 강민지 | `frontend/` | `AskRequest` 전송, `AskResponse` 렌더링, 후속 질문 처리, API 주소·타임아웃·오류 UI |
 | 주민혁 | `database/` | Qdrant/Neo4j 검색 코드, 데이터·임베딩/DB 환경, 검색 프로필 검증 |
 
-- `requirements.txt`, `.env.example` 변경은 지인이 취합한다. 소희는 **LLM 모델·SDK·API 키 환경변수의 이름**을 구현 중 공유한다. 실제 키/비밀번호는 절대 Git에 올리지 않는다.
+- 공통 파일 분담(v1.1): `requirements.txt`의 **LLM SDK**와 `.env.example`의 **`LLM_MODEL`·`LLM_TIMEOUT_SECONDS`·`LLM_MAX_OUTPUT_TOKENS` 이름**은 소희 PR(#35)이, `requirements.txt`의 **API 서버·테스트 의존성**은 지인 PR(#23)이 추가한다. `README.md`는 팀장이 최종 취합하며 각 PR 본문에 반영할 내용만 적는다. 실제 키/비밀번호는 절대 Git에 올리지 않는다.
 - 소희의 **함수 내부 알고리즘, 프롬프트, LLM 공급자**는 소희가 결정한다. 함수 **입력·출력·상태값**은 이 문서대로 맞춘다.
 - 공통 파일/프론트 타입 변경은 관련 담당자에게 알려 PR에서 확인한다.
 
@@ -25,14 +26,16 @@
 
 1. **검색:** `HybridSearchSession.search_policy_context(question, filters=..., k=10)` 사용. `k`는 정책 수가 아니라 **청크 Top-K**다.
 2. **조건 함수:** 동기 `def check_eligibility(profile: dict, policy: dict) -> dict`.
-3. **LLM 함수:** 동기 `def generate_answer(question: str, contexts: list[dict], policy_checks: list[dict], history: list[dict] | None = None) -> dict`.
+3. **LLM 함수:** 동기 `def generate_answer(question: str, contexts: list[dict], policy_checks: list[dict], history: list[dict] | None = None, profile: dict | None = None) -> dict`. Pipeline은 §3.2 정규화 프로필을 `profile=` 키워드로 넘긴다(§5.1).
 4. **조건 상태:** `eligible`, `ineligible`, `needs_check` / **접수 상태:** `before`, `open`, `closed`, `unknown`.
 5. **품질 보류:** 영향을 받는 조건은 `needs_check`. 정보 부족을 `ineligible`로, 그래프 경고를 `eligible`로 바꾸지 않는다.
 6. **답변 근거:** `evidence[].text`만 원문 근거다. 그래프 자동 추출 텍스트는 조건 판정 보조 데이터이며 공식 원문 인용 근거가 아니다.
 7. **인용:** Context Builder가 `source_id=1..N`을 부여하고, LLM은 해당 `[n]`만 사용한다. 없는 번호·인용 없는 근거 답변은 오류다.
 8. **API:** React의 기존 `AskRequest`, `AskResponse` 필드명을 유지한다. 정상 HTTP 200, 장애는 별도 오류 JSON.
-9. **신청기간:** `상시`, `상시신청`, `상시/공고참조` 등 **자동 추출 문구만** 있으면 기본 `unknown`. 정확한 일정과 신뢰 가능한 근거가 있을 때만 다른 상태를 허용한다.
-10. **개발:** Mock 기반 병렬 개발 → 소희 실제 함수 연결 → React 연동 → 통합 테스트. 추가 Agent·LangGraph 개발은 MVP 범위 밖이다.
+9. **신청기간:** 신청 상태는 **Checker 단일 책임**이며 `graph.policy.application_start`·`application_end`(ISO 날짜)와 `application_is_ongoing`(공식 원문으로 상시 접수 확인 시에만 `true`)으로 판정한다(§4.4). 자동 추출 문구(`상시신청` 등)만으로 `open`을 확정하지 않는다. Pipeline은 날짜·상시 여부를 해석하지 않고 Checker 결과를 그대로 쓴다.
+10. **마감 정책 정렬:** Checker가 `closed`로 판정한 정책만 Context 선택 전에 뒤로 보낸다. 다른 상태의 순서는 바꾸지 않고, 정책을 삭제하지 않는다(§2, §6).
+11. **UNKNOWN 조건 그룹:** MVP에서는 전체 `needs_check` 보류를 유지한다. 부분 해석은 MVP 이후 과제다.
+12. **개발:** Mock 기반 병렬 개발 → 소희 실제 함수 연결 → React 연동 → 통합 테스트. 추가 Agent·LangGraph 개발은 MVP 범위 밖이다.
 
 ## 2. 전체 처리 흐름
 
@@ -42,18 +45,18 @@ React AskRequest
       └─ run_ask_pipeline(request, search_session)
           1) 입력 검증 + 프로필 정규화
           2) Hybrid 검색(Qdrant + Neo4j): 청크 Top-10
-          3) 정책별 evidence → build_contexts(): source_id 부여
-          4) 선택된 context의 policy_id에 해당하는 정책만 선별
-          5) 각 정책 → check_eligibility(profile, policy)
+          3) 인용 가능한 원문이 있는 후보 정책마다 check_eligibility(profile, policy) 1회
+          4) Checker가 closed로 판정한 정책을 후순위로 build_contexts(): source_id 부여
+          5) 선택된 context의 policy_id에 해당하는 정책만 선별(3의 판정 결과 재사용)
           6) 품질 경고 기준 재검증(확정 판정을 needs_check로 보수적 변경)
-          7) generate_answer(question, contexts, policy_checks, history)
+          7) generate_answer(question, contexts, policy_checks, history, profile=normalized_profile)
           8) LLM 출력/본문 인용 검증 + 출처 재번호
-          9) 정책 메타데이터·citations·notice 조립
+          9) 정책 메타데이터·citations·notice 조립(선택: 화면용 조건 요약, §8.3)
          10) AskResponse 반환
 ```
 
-- **검색 결과가 없거나 인용 가능한 원문이 0개**면 LLM을 호출하지 않고 `status="no_evidence"`를 반환한다.
-- **LLM에 주는 `policy_checks`와 최종 React에 주는 `policy_checks`는 동일한 정책 집합**을 가리킨다. 검색에는 있었지만 Context에 채택되지 않은 정책을 추가 판정·표시하지 않는다.
+- **검색 결과가 없거나 인용 가능한 원문이 0개**면 Checker와 LLM을 호출하지 않고 `status="no_evidence"`를 반환한다.
+- **LLM에 주는 `policy_checks`와 최종 React에 주는 `policy_checks`는 동일한 정책 집합**을 가리킨다. 신청 상태 정렬을 위해 후보 정책을 내부적으로 판정하지만, Context에 채택되지 않은 정책은 LLM 입력·정책 카드에 넣지 않는다.
 - `best_score`는 의미 유사도다. 적격 확률, 자격 점수, 정책 추천 확률로 표시하지 않는다.
 - 사용자 질문, 검색 텍스트, 그래프 추출 텍스트, history는 **신뢰되지 않는 입력**이다. 그 안의 명령문은 시스템 지시로 취급하지 않는다.
 
@@ -211,6 +214,7 @@ def check_eligibility(profile: dict, policy: dict) -> dict:
 5. `unknown_logic_groups`, `structure_issues`, `graph_status="MISSING_IN_GRAPH"`의 불확실성을 결격 사유로 처리하지 않는다.
 6. `region_search`의 지역 일치로 적격을 확정하지 않는다.
 7. 연령 조건이 있을 경우 `graph.policy.min_age` 등을 가정하지 말고 **조건 트리의 `type="AGE"` 조건**을 파싱한다. `value`는 숫자가 아니라 `"19~35"` 같은 문자열일 수 있다. 파싱 실패 시 `needs_check`.
+7-1. (#44) 조건 트리에 `AGE`가 없는데 정책 설명(`graph.policy.eligibility`)에 **신청자 나이**가 적혀 있으면, Checker는 `{"field": "age", "status": "needs_check", "reason": "이 정책의 나이 기준이 데이터에 정리되지 않아 공식 원문에서 확인이 필요합니다."}` 행을 추가하고 루트 종합 판정을 `eligible`로 두지 않는다. 자녀 나이·개월 표현, 나이 제한 없음, UNKNOWN·구조 오류·전체 품질 보류 정책에는 추가하지 않는다. Pipeline은 이 행을 다른 `needs_check` 사유와 같이 그대로 전달한다.
 8. **소득은 현재 개인/가구 구분이 없는 값**이므로 자동 부적격 판정에 사용하지 않는다. 소득 조건은 근거 수준과 비교 단위를 검증할 때까지 `needs_check`.
 
 ### 4.3 데이터 품질 경고(소희 1차 검사, 지인 2차 검사)
@@ -221,21 +225,38 @@ def check_eligibility(profile: dict, policy: dict) -> dict:
 - `affected_attributes=["region"]`이면 지역 관련 확정 상태(`eligible` 또는 `ineligible`)를 **`needs_check`**로 변경하고, 영향 없는 연령 상태는 유지한다.
 - `affected_attributes`가 `"all"`을 포함하거나, 보류가 참인데 영향 범위를 신뢰할 수 없으면 **전체 조건 `needs_check`**.
 - `graph.eligibility.unknown_logic_groups`나 `structure_issues`의 범위를 판별할 수 없다면 전체 보류.
-- **파이프라인 방어:** 소희 결과에 확정 상태가 남으면 지인이 위 규칙으로 다시 검사하여 `needs_check`로 내리고, 사유에 데이터 불확실성을 덧붙인다. **보류 → 적격/부적격** 방향 자동 상향은 금지.
+- **파이프라인 방어:** 소희 결과에 확정 상태가 남으면 지인이 위 규칙으로 다시 검사하여 `needs_check`로 내리고, Checker의 기존 사유 뒤에 보류 사유를 덧붙인다(기존 사유를 지우지 않는다). **보류 → 적격/부적격** 방향 자동 상향은 금지.
+- **Checker 사유 보존(v1.1):** Checker가 이미 `needs_check`로 반환한 조건의 `reason`은 Pipeline이 바꾸지 않는다. 소득·가구 원문 확인 결과(`*_source_review`, `*_followup`, `*_source_note`, `*_check_point`)를 사용자 안내 문장으로 만드는 일은 **Checker가 `reason`에서** 한다. Pipeline은 같은 판단을 중복 구현하지 않는다.
+- **조건 항목의 추가 키:** 응답 계약(`ConditionResult`)은 `field`·`label`·`status`·`reason`만 정의한다. #35 Checker는 별도 `followup` 키를 출력하지 않고 안내를 `reason`에 담는다. 다른 키가 들어와도 **현재 API 응답에서는 제외**되며, 노출하려면 계약·Pydantic·React 타입을 함께 바꾸는 별도 합의가 필요하다(미확정).
+- `affected_attributes`의 유효 필드는 검색 계층(`database/hybrid_search.py`)이 내보내는 값 기준이다: `age`, `region`, `income`, `housing`, `employment`, `exclusion`, `marriage`, `children`, `all`. 이 밖의 값과 `all`은 영향 범위를 확정할 수 없으므로 전체 보류한다. 공통 상수가 생기면 Checker·Pipeline이 함께 사용한다.
 - 검증 자체가 불가능할 정도로 반환 JSON이 깨졌다면 임의로 전부 적격 처리하지 말고 출력 검증 오류로 취급한다.
 
-### 4.4 신청기간 `reception_status` (MVP 기본 정책 확정)
+### 4.4 신청기간 `reception_status` (v1.1, 팀장 최종 결정 2026-11-10)
 
-| 근거 | 반환 |
-|---|---|
-| 확인 가능한 신뢰 근거와 명시된 접수일이 있고 아직 시작 전 | `before` |
-| 확인 가능한 신뢰 근거와 명시된 접수일이 있고 현재 포함 | `open` |
-| 확인 가능한 신뢰 근거와 명시된 접수일이 있고 이미 종료 | `closed` |
-| `상시`, `상시신청`, `상시/공고참조`, `접수기관별 상이` 등의 **자동 추출 텍스트만 존재**하거나, 날짜/현재 운영 상태/근거가 불확실 | `unknown` |
+신청 상태 판정은 **Checker 단일 책임**이다. 판정 근거는 `graph.policy`의 다음 세 필드뿐이다.
 
-- `graph.policy.application_period`는 추출 텍스트이므로 **문구만으로 `open` 확정 금지**.
-- 날짜 비교가 필요하다면 한국 정책 서비스의 기준 날짜를 **Asia/Seoul**로 통일한다. 서버 시스템 시계가 곧 정책 원문 확인일은 아니다.
-- 분류 불가능하면 `unknown`; 접수 상태와 개인 자격 충족은 서로 독립이다.
+| 필드 | 형식 | 의미 |
+|---|---|---|
+| `application_start` | ISO 날짜(예: `2026-04-15`), 선택 | 공식 원문에서 확인한 신청 시작일 |
+| `application_end` | ISO 날짜, 선택 | 공식 원문에서 확인한 신청 종료일(당일 포함) |
+| `application_is_ongoing` | `true`만 사용, 선택 | **공식 원문에서 상시 접수가 명확히 확인된 경우에만** `true`. 확인되지 않으면 **키 자체를 생략**한다(`false`·`null`을 넣지 않는다). 종료일이 없는 정책에만 넣는다 |
+
+**판정 순서** (위에서부터 처음 맞는 규칙 적용, 기준일은 **Asia/Seoul**의 오늘)
+
+| 순서 | 조건 | 반환 |
+|---|---|---|
+| 1 | `application_start`가 있고 오늘보다 미래 | `before` (`application_is_ongoing`이 `true`여도 동일) |
+| 2 | `application_start`·`application_end`가 모두 있음 | 오늘이 시작일~종료일 사이면 `open`, 종료일 이후면 `closed` |
+| 3 | `application_end`가 없고 `application_is_ongoing is True` | `open` (시작일이 없어도 `open`) |
+| 4 | 그 외 | `unknown` |
+
+- **날짜 우선:** 시작일·종료일이 모두 있으면 2번 날짜 판정을 쓴다. 상시 표시는 종료일이 없을 때만 의미가 있다.
+- **보수적 처리(#35 Checker 구현 기준):** 날짜 값이 있는데 `YYYY-MM-DD` 형식이 아니거나 실재하지 않는 날짜, 시작일이 종료일보다 늦은 기간, **`application_is_ongoing=true`인데 종료일도 있는 모순 데이터**는 모두 `unknown`이다.
+- **상시 확인이 없으면 `unknown`:** 종료일이 없고 `application_is_ongoing` 키가 없으면(시작일이 과거여도) `unknown`이다. 종료일만 있고 시작일이 없는 경우도 위 순서상 `unknown`이다.
+- **문구로 추정 금지:** `graph.policy.application_period`·`application_status_note`는 참고 텍스트다. `상시신청`·`상시` 같은 문구만으로 `open`을 확정하거나 `application_is_ongoing`을 추정하지 않는다. `true` 입력 여부는 데이터 담당이 공식 원문을 확인해 결정한다(후보: `상시신청`·`상시` 문구 정책 / 제외: `상시/공고참조`, `상시 또는 공고 확인`). 예: POL_002는 후보였으나 공식 공지에 시작일(2026-10-19)만 있고 상시 접수가 확인되지 않아 `true`를 넣지 않았으며, 판정 순서 4번에 따라 `unknown`이다(v1.4.0 최종 데이터 기준).
+- 이전 v1.1 초안의 "시작일이 없으면 `unknown`", "상시 확인 필드 미정" 설명은 폐기한다.
+- Pipeline은 날짜를 판정하지 않는다. 그래프 문맥 자체가 없을 때만 `unknown`으로 두고, 그 밖에는 Checker 결과를 그대로 응답한다.
+- 접수 상태와 개인 자격 충족은 서로 독립이다. `closed`는 정렬 후순위 기준일 뿐 정책을 삭제하거나 자격을 바꾸지 않는다.
 
 ### 4.5 데이터 스냅샷 참고(계약 조건이 아님)
 
@@ -253,6 +274,7 @@ def generate_answer(
     contexts: list[dict],
     policy_checks: list[dict],
     history: list[dict] | None = None,
+    profile: dict | None = None,
 ) -> dict:
     """제공한 원문 근거·조건 판정을 사용해 답변과 후속 질문을 생성한다."""
     ...
@@ -264,6 +286,7 @@ def generate_answer(
 - `contexts`: §6의 Context Builder 결과(출처 번호 포함) **그대로**.
 - `policy_checks`: §4의 **재검증을 거친** 정책별 결과 목록. `contexts`에 나타난 정책만 포함.
 - `history`: `[ {"role": "user"|"assistant", "text": "..."} ]` 목록, 최대 최근 10턴. **이전 대화는 현재 정책의 사실 근거가 아니다.**
+- `profile`(v1.1): §3.2 정규화 프로필 `{"age": int|None, "region": 시·도 정식명|None, "income": float|None}`. Pipeline이 키워드 인자로 넘기며, 정규화 책임은 Pipeline에 있다. Generator는 이미 입력된 값을 다시 묻지 않는 데 사용하고, 정책 사실의 근거로 쓰지 않는다. `None`이면 사용자 정보를 모르는 것으로 처리한다(기존 4인자 호출과 호환).
 
 **반환 (필수 필드)**
 
@@ -285,8 +308,9 @@ def generate_answer(
 | `used_source_ids` | `list[int]` | 응답 생성 측 참고값. 최종 검증은 본문 인용 번호 기준 |
 | `follow_up_questions` | `list[dict]` | `kind`, `text`, `field`(ask_info일 때 필수). 0~3개 권장 |
 
-- `kind="question"`: 버튼의 `text`를 새 질문으로 보냄. `field` 생략 가능.
-- `kind="ask_info"`: `field`는 MVP에서 **`age`, `region`, `income` 중 하나**만 허용. 다른 필드는 `question`으로 안내한다.
+- `kind="question"`: 프론트는 버튼의 `text`를 **사용자의 새 질문으로 그대로 전송**한다. 따라서 **사용자가 AI에게 이어서 묻는 질문만** 허용한다(예: "신청 서류는 무엇이 필요한가요?"). AI가 사용자에게 묻거나 제안·부탁하는 문장(예: "어느 구에 거주하시나요?", "신청 서류도 알려드릴까요?")은 `question`에 넣지 않는다. `field` 생략 가능.
+- `kind="ask_info"`: `field`는 MVP에서 **`age`, `region`, `income` 중 하나**만 허용하며, 그 값이 아직 입력되지 않았을 때만 사용한다.
+- 그 밖의 정보 요청(시·군·구, 가구원 수, 자녀 개월 수 등)은 버튼이 아니라 **`answer` 본문에서** 안내한다(이유 문장은 원문 근거가 있을 때만). 허용되지 않은 `ask_info`를 `question`으로 바꾸거나, "알려주세요"를 물음표 질문으로 바꿔 버튼으로 내보내지 않는다.
 - `answered`인데 본문에 정상 출처 인용이 0개라면 **Pipeline이 잘못된 LLM 출력으로 처리**한다.
 - 확인되지 않은 자격·혜택·금액·신청 링크를 지어내지 않는다. `needs_check`를 임의로 `eligible`로 단정하지 않는다.
 - `contexts=[]`에서는 LLM을 호출하지 않는 것이 Pipeline 책임. LLM 구현 역시 외부에서 직접 호출되는 경우 근거 없는 정책 사실을 만들어서는 안 된다.
@@ -314,7 +338,9 @@ ESTIMATED_COST_LIMIT     = (시연 비용 한도)
 ```python
 # backend/rag/context_builder.py
 
-def build_contexts(policies: list[dict], max_contexts: int = 5) -> list[dict]:
+def build_contexts(
+    policies: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
+) -> list[dict]:
     """검색 청크에서 인용 가능한 원문을 추려 출처 ID를 생성한다."""
     ...
 ```
@@ -342,6 +368,7 @@ def build_contexts(policies: list[dict], max_contexts: int = 5) -> list[dict]:
 2. `source_id`는 이번 요청에서만 유효한 **1부터 연속된 정수**.
 3. `chunk_id` 중복을 제거하고, 빈 원문·빈 URL·유효하지 않은 `http(s)` URL은 인용 Context에서 제외한다. 제외 사실은 개인정보 없이 로그로 기록.
 4. 정책별 근거 균형을 고려한다: 먼저 검색 상위 정책마다 근거 1개씩 채택하고, 남는 슬롯을 전체 청크 검색 순위대로 채운다. 최종 `source_id`는 선별된 Context 순서대로 붙인다. `max_contexts=5`는 정책 수가 아니라 **최대 출처 5개**다.
+4-1. (v1.1) `deprioritized_policy_ids`(Checker가 `closed`로 판정한 정책)는 삭제하지 않고, 다른 정책의 근거(첫 근거와 추가 근거)를 모두 배정한 뒤 남은 슬롯에만 넣는다. 각 그룹 안의 순서는 4번 규칙을 그대로 따른다. 모든 후보가 마감이면 기존 순서와 같다.
 5. `title`: 같은 `document_id`의 Graph 문서 제목을 찾으면 사용, 없으면 `policy_name`으로 대체한다.
 6. `page_number`: `page_start`가 **양의 정수**일 때만 사용, 나머지는 `null`. v0.2 보고에 따르면 현재 스냅샷의 청크에는 페이지 정보가 없으나 **영구적으로 null이라고 가정하지 않는다**.
 7. `quality_warnings`는 데이터 품질 주의 메시지이지 인용 원문이 아니다. 답변에서 불확실성을 알릴 때만 참고한다.
@@ -436,7 +463,8 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 - `status`: `answered`, `no_evidence`, `info` 중 하나. `no_evidence`인 경우 `citations=[]`, `policy_checks=[]`.
 - `citations`: 원문 Context에서 만든 실제 출처만 포함. `answer`의 `[n]`과 **배열 인덱스+1** 일치.
-- `policy_checks`: **Context에 채택된 정책만** 표시. 소희 `conditions` 결과를 보수적 재검증한 후 메타데이터를 덧붙인다.
+- `policy_checks`: **Context에 채택된 정책만** 표시하며 순서는 Context 순서(마감 정책 후순위)를 따른다. 소희 `conditions` 결과를 보수적 재검증한 후 메타데이터를 덧붙인다.
+- 화면용 조건 요약(v1.1, 선택): Pipeline에 표시 함수(예: Checker의 `summarize_conditions_for_display`)가 연결되면 **응답의 `conditions`만** 정책별로 요약한다. 원본 행 중에서만 고를 수 있고 `field`·`status` 조합을 바꿀 수 없다(위반 시 `ELIGIBILITY_OUTPUT_INVALID`). LLM에는 요약 전 조건을 그대로 전달한다. 요약 전 원본 조건을 API로 별도 제공하는 필드는 없다(필요 시 별도 합의).
 - `policy_name`: 검색 결과의 `policy_name`.
 - `agency`: `graph.policy.agency` 또는 `graph.policy.organization` → `graph.organizations[]`의 실제 기관명 속성 → 없으면 `""`. **없는 기관명 생성 금지**.
 - `source_url`: 해당 정책의 인용 가능한 `evidence[].source_url` 우선 → 적합한 Graph 원문 URL → 없으면 `""`. 링크가 비어 있으면 프론트는 링크 버튼을 숨겨야 한다.
@@ -489,7 +517,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - [ ] 검색 Session 수명·동시성 보호·선택적 워밍업 구현
 - [ ] 품질 보류 재검증, 인용 검증/재번호, 출력 Pydantic 검증
 - [ ] `POST /api/ask`, `GET /health`, CORS, Swagger 구현
-- [ ] 소희가 선택한 LLM 패키지/환경변수 이름을 `requirements.txt`·`.env.example`에 반영
+- [ ] API 서버·테스트 의존성을 `requirements.txt`에 반영(LLM SDK·환경변수 이름은 소희 PR, v1.1)
 - [ ] Qdrant/Neo4j/Ollama 복원 및 검색 프로필 확인
 - [ ] 소희 PR 병합 뒤 실제 함수 연결·React 통합 테스트
 
@@ -535,9 +563,14 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | T13 | 지역 `""` vs `"서울"` | 필터 없음 vs `"서울특별시"` 검색 필터 |
 | T14 | DB 연결/인증 실패 | 503; 근거 없음으로 위장하지 않음 |
 | T15 | LLM 타임아웃 | 504; 가짜 답변 없음 |
-| T16 | 신청기간이 `상시/공고참조` 또는 `상시신청` 추출 텍스트뿐 | `unknown` |
+| T16 | 신청기간이 `상시/공고참조` 또는 `상시신청` 추출 텍스트뿐(`application_is_ongoing` 없음) | Checker가 `unknown`; Pipeline은 Checker 결과를 덮어쓰지 않음 |
+| T16-1 | 종료일 없음 + `application_is_ongoing=true` | 시작일 과거·없음 → `open`, 시작일 미래 → `before` |
 | T17 | `awaiting_field="child_age"` | 프로필에 없는 필드로 자동 자격 판정하지 않음 |
-| T18 | 선택된 Context 정책 2건, 검색 정책 5건 | 조건 검사·정책 카드는 Context의 2건에 한정 |
+| T18 | 선택된 Context 정책 2건, 검색 정책 5건 | LLM 입력·정책 카드는 Context의 2건에 한정(정렬용 내부 판정은 후보별 1회) |
+| T19 | 검색 1위 정책이 `closed` | Context·출처 번호·정책 카드에서 다른 정책 뒤로 이동, 삭제하지 않음 |
+| T20 | `open`/`before`/`unknown` 혼합 | 기존 검색 순서 유지 |
+| T21 | Checker가 `needs_check`와 구체적 사유 반환 | 사유가 LLM 입력·응답에 그대로 유지 |
+| T22 | 정규화 프로필 | Generator에 `profile=` 키워드로 전달(서울→서울특별시, 소득 0 유지, 미입력 None) |
 
 테스트는 **Mock/픽스처 단위 → 소희 실제 함수 → 실제 검색 데이터 → React 브라우저** 순서로 한다. 테스트가 통과하기 전에는 구현 완료라고 표시하지 않는다.
 
@@ -547,6 +580,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - 소희 구현 중 **입력/출력 필드, 상태값, 예외 처리**를 바꿔야 하면 변경 내용을 공유해 `ask_contract.md`와 Mock·Pydantic·React 타입·테스트를 같은 변경에 맞춘다.
 - **미정이지만 인터페이스를 막지 않는 값:** LLM 공급자·모델, 실제 API 키 환경변수 이름, 소희 내부 프롬프트, 시연 비용 한도, 성능에 따른 검색/LLM 타임아웃 세부값. 이는 구현 담당자가 선택하여 공유한다.
 - **이미 정한 MVP 기본 정책:** `상시신청` 단독은 `unknown`, `income`은 개인/가구 구분 없으면 자동 확정 금지, `ask_info.field`는 3가지, 정책 카드는 Context에 채택된 정책만, 본문 인용 기준 재번호, 60초 프론트 요청 제한은 실제 코드에 반영해야 할 목표.
+- **v1.1 미확정 항목:** 조건 항목 `followup` 키의 응답 노출(§4.3), 요약 전 원본 조건의 API 제공 여부(§8.3), 자녀 개월 수 입력 필드(MVP 이후 별도 이슈).
 - **팀 확인이 필요한 코드 변경:** 프론트 타임아웃, 추가 입력 UX, 공통 `requirements.txt`/`.env.example`, PR 병합. 현재 팀원이 이미 승인했다고 가정하지 않는다.
 
 ### 참조 코드

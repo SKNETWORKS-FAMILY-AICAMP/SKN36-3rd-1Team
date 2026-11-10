@@ -14,12 +14,15 @@ from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
 CITATION = re.compile(r"\[(\d+)\]")
+# database/hybrid_search.py가 data_quality.affected_attributes로 내보내는 필드 목록과 같다("all" 제외).
+# 목록 밖의 값과 "all"은 영향 범위를 확정할 수 없으므로 정책 전체를 보류한다.
+# TODO(#23 병합 후): 검색 담당이 공통 상수를 제공하면 그 상수로 교체한다.
 SCOPED_CONDITION_FIELDS = {"age", "region", "income", "housing", "employment", "exclusion", "marriage", "children"}
 QUALITY_REASON = "데이터가 불확실하여 공식 공고에서 조건을 확인해야 합니다."
 MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했습니다. 정보를 입력하거나 공식 공고에서 확인해 주세요."
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
-# 공백 차이를 없앤 뒤 비교한다. 실제 데이터에는 "접수기관 별 상이"처럼 띄어 쓴 값이 있다.
-VAGUE_PERIODS = {"상시", "상시신청", "상시/공고참조", "접수기관별상이"}
+# 신청 상태(before/open/closed/unknown)는 Checker 단일 책임이다. Pipeline은 날짜를 판정하지 않는다.
+CLOSED = "closed"
 
 
 class AskError(RuntimeError):
@@ -55,6 +58,7 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     conditions = [condition.model_dump() for condition in result.conditions]
     for condition in conditions:
         field = condition["field"].lower()
+        # Checker가 이미 보류한 조건의 사유(원문 확인 결과·공고 확인 항목 등)는 그대로 둔다.
         if condition["status"] == "needs_check":
             continue
         # 보류 원인별로 사유를 다르게 적는다. 입력 누락을 데이터 오류로 안내하지 않는다.
@@ -67,18 +71,16 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
             reason = INCOME_REASON
         else:
             continue
+        # 확정 상태만 보수적으로 낮추고, Checker의 비교 근거는 지우지 않고 보류 사유를 덧붙인다.
         condition["status"] = "needs_check"
-        condition["reason"] = reason
+        condition["reason"] = f"{condition['reason']} {reason}"
 
     agency = graph_policy.get("agency") or graph_policy.get("organization")
     if not agency:
         agency = next((org["name"] for org in graph.get("organizations", []) if org.get("name")), "")
     apply_url = graph_policy.get("official_apply_url")
-    reception = result.reception_status
-    period = graph_policy.get("application_period")
-    vague_period = isinstance(period, str) and "".join(period.split()) in VAGUE_PERIODS
-    if not graph or (vague_period and not quality.get("official_source_checked")):
-        reception = "unknown"
+    # 그래프 문맥이 없으면 신청 날짜 근거도 없으므로 unknown. 그 밖에는 Checker 결과를 그대로 쓴다.
+    reception = result.reception_status if graph else "unknown"
     return {
         "policy_id": result.policy_id, "policy_name": policy["policy_name"],
         "conditions": conditions, "reception_status": reception, "agency": agency,
@@ -108,14 +110,46 @@ def _citations(output: GeneratorOutput, contexts: list[dict]) -> tuple[str, list
     return answer, citations
 
 
+def _is_closed(policy: dict, raw: dict) -> bool:
+    """Checker가 유효한 형식으로 마감(closed)을 판정한 정책만 후순위 대상이다.
+
+    형식 오류는 여기서 숨기지 않는다. 해당 정책이 Context에 채택되면 _policy_check가 오류로 처리한다.
+    """
+    if not policy.get("graph"):
+        return False
+    try:
+        result = EligibilityOutput.model_validate(raw)
+    except ValidationError:
+        return False
+    return result.policy_id == policy["policy_id"] and result.reception_status == CLOSED
+
+
+def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) -> dict:
+    """화면용 조건 요약. 원본 행만 고를 수 있고 필드·상태 조합을 바꿀 수 없다."""
+    shown = display_fn([dict(condition) for condition in check["conditions"]])
+    original = check["conditions"]
+    if (
+        not isinstance(shown, list) or not shown
+        or any(item not in original for item in shown)
+        or {(c["field"], c["status"]) for c in shown} != {(c["field"], c["status"]) for c in original}
+    ):
+        raise AskError("ELIGIBILITY_OUTPUT_INVALID")
+    return {**check, "conditions": shown}
+
+
 def run_ask_pipeline(
     request: AskRequest,
     *,
     search_fn: Callable[..., dict],
     check_fn: Callable[[dict, dict], dict],
-    generate_fn: Callable[[str, list[dict], list[dict], list[dict]], dict],
+    generate_fn: Callable[..., dict],
+    display_fn: Callable[[list[dict]], list[dict]] | None = None,
 ) -> AskResponse:
-    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다."""
+    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
+
+    generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
+    display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
+    """
     profile = request.profile.model_dump()
     supplied_region = profile["region"].strip()
     canonical = ALIASES.get(supplied_region, supplied_region)
@@ -127,38 +161,59 @@ def run_ask_pipeline(
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
-    contexts = build_contexts(policies)
-    if not contexts:
+    # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
+    citable = {context["policy_id"] for context in build_contexts(policies, max_contexts=len(policies) * 100)}
+    if not citable:
         return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
+
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
+    raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
+    closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
+    contexts = build_contexts(policies, deprioritized_policy_ids=closed)
 
     first_context = {}
     for context in contexts:
         first_context.setdefault(context["policy_id"], context)
-    by_id = {policy["policy_id"]: policy for policy in policies}
     checks = [
-        _policy_check(by_id[pid], check_fn(profile, by_id[pid]), profile, context)
+        _policy_check(by_id[pid], raw_checks[pid], profile, context)
         for pid, context in first_context.items()
     ]
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:
-        raw = generate_fn(request.question, contexts, checks, history)
+        raw = generate_fn(request.question, contexts, checks, history, profile=dict(profile))
     except JSONDecodeError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
     except (TimeoutError, TimeoutException) as exc:
         raise AskError("LLM_TIMEOUT") from exc
     except (ConnectionError, NetworkError) as exc:
         raise AskError("LLM_UNAVAILABLE") from exc
+    except Exception as exc:
+        # 검색이 데이터셋을 선택하기 전에 generator의 load_dotenv()를 실행하지 않는다.
+        from backend.llm.generator import LLMOutputError, LLMUnavailableError
+
+        if isinstance(exc, LLMOutputError):
+            raise AskError("LLM_OUTPUT_INVALID") from exc
+        if isinstance(exc, LLMUnavailableError):
+            raise AskError("LLM_UNAVAILABLE") from exc
+        raise
     try:
         output = GeneratorOutput.model_validate(raw)
     except ValidationError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
     answer, citations = _citations(output, contexts)
+    follow_ups = [
+        item for item in output.follow_up_questions
+        if item.kind != "ask_info" or profile.get(item.field) is None
+    ]
     if output.status == "no_evidence":
         checks = []
     if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):
         notice = {"kind": "warn", "title": "추가 확인 필요",
                   "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."}
+    if display_fn is not None:
+        checks = [_display_check(check, display_fn) for check in checks]
     return AskResponse(
         status=output.status, answer=answer, citations=citations, policy_checks=checks,
-        follow_up_questions=output.follow_up_questions, notice=notice,
+        follow_up_questions=follow_ups, notice=notice,
     )

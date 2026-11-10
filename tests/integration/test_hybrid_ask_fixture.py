@@ -137,7 +137,7 @@ class HybridAskFixtureTests(unittest.TestCase):
             self.ask()
 
     def test_generator_json_decode_error_is_invalid_output(self):
-        self.generate.side_effect = lambda *_: loads("{")
+        self.generate.side_effect = lambda *_, **__: loads("{")
         with self.assertRaisesRegex(AskError, "LLM_OUTPUT_INVALID"):
             self.ask()
 
