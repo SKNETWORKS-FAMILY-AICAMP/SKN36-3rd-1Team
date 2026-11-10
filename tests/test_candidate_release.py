@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1005)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2442)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1004)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2431)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -216,6 +216,30 @@ class CandidateIntegrityTests(unittest.TestCase):
             else:
                 self.assertEqual(policies[item["policy_id"]]["income_source_review"], "needs_review", item["policy_id"])
 
+    def test_application_is_ongoing_only_when_source_confirms(self):
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        ongoing = [row for row in policies if "application_is_ongoing" in row]
+        # 건수는 교정 파일 기준으로 비교해, 교정 파일이 바뀌어도 이 테스트를 고치지 않게 한다.
+        expected = set(dc.load_corrections()["application_ongoing"])
+        self.assertEqual({row["policy_id"] for row in ongoing}, expected)
+        for row in ongoing:
+            self.assertIs(row["application_is_ongoing"], True, row["policy_id"])
+            self.assertIn(row["application_period"], ("상시신청", "상시"), row["policy_id"])
+            self.assertNotIn("application_end", row, row["policy_id"])
+        excluded = {"POL_002", "POL_GOV_003", "POL_003", "POL_004", "POL_006", "POL_007"}
+        self.assertFalse(excluded & {row["policy_id"] for row in ongoing})
+
+    def test_application_ongoing_rejects_unknown_policy_id(self):
+        corrections = {
+            "source_review": {"income": {}, "household": {}},
+            "application_dates": {},
+            "application_status_notes": {},
+            "application_notes_with_dates": [],
+            "application_ongoing": ["POL_001", "POL_TYPO"],
+        }
+        with self.assertRaisesRegex(AssertionError, "POL_TYPO"):
+            dc.apply_source_review([{"policy_id": "POL_001"}], corrections)
+
     def test_group_without_children_is_unknown(self):
         parents = {edge["source_id"] for edge in rows(PACKAGE / "neo4j/relationships.jsonl")
                    if edge["relation"] in ("CONTAINS_CONDITION", "CONTAINS_GROUP")}
@@ -235,7 +259,9 @@ class CandidateIntegrityTests(unittest.TestCase):
         self.assertEqual((policies["POL_001"]["application_start"], policies["POL_001"]["application_end"]), ("2026-04-15", "2026-04-17"))
         self.assertEqual((policies["POL_009"]["application_start"], policies["POL_009"]["application_end"]), ("2024-02-26", "2025-02-25"))
         self.assertIn("2026-03-30", policies["POL_009"]["application_status_note"])
+        self.assertEqual(policies["POL_002"]["application_start"], "2026-10-19")
         self.assertNotIn("application_end", policies["POL_002"])
+        self.assertIn("종료일은 미기재", policies["POL_002"]["application_status_note"])
         for policy_id in ("POL_GOV_006", "POL_GOV_020"):
             self.assertNotIn("application_start", policies[policy_id])
             self.assertNotIn("application_end", policies[policy_id])
