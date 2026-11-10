@@ -1,5 +1,6 @@
 """실제 검색 반환 형태를 사용한 RAG 통합 테스트."""
 
+from contextlib import nullcontext
 import unittest
 import os
 import subprocess
@@ -233,6 +234,70 @@ class PipelineTests(unittest.TestCase):
                                                  *[policy(pid, rank) for rank, pid in enumerate("BCDEF", 2)]]}
         self.ask_question("청년 정책 알려주세요")
         self.assertNotIn("A", [c["policy_id"] for c in self.generate.call_args.args[1]])
+
+    def conflict_case(self, reception, condition, text, policies=None, changed=True):
+        # 소득 확정 판정은 Pipeline이 항상 needs_check로 낮추므로, 확정 상태가 유지되는 나이 조건으로 만든다.
+        self.search.return_value = {"policies": policies or [policy()]}
+        self.check.side_effect = lambda profile, item: {
+            "policy_id": item["policy_id"], "reception_status": reception.get(item["policy_id"], "open")
+            if isinstance(reception, dict) else reception,
+            "conditions": [{"field": "age", "label": "나이", "reason": "가상 연령 판정", "status": condition}]}
+        self.generate.return_value = answer(text)
+        # 본문을 바꿀 때는 내용 없이 경고 로그만 남긴다.
+        with self.assertLogs("backend.rag.pipeline", level="WARNING") if changed else nullcontext():
+            return self.ask_question("신청할 수 있나요?")
+
+    def test_answer_conflicting_with_checker_is_replaced_even_with_valid_citation(self):
+        # 팀장 리뷰 사례: 유효한 [1]이 붙어 있어도 판정과 충돌하는 단정은 사용자에게 전달하지 않는다.
+        cases = (
+            ("closed", "eligible", "이 정책은 지금 신청할 수 있어요 [1].", "접수가 마감됐어요."),
+            ("open", "needs_check", "모든 신청 자격을 충족했어요 [1].", "신청 자격은 공식 공고에서 추가 확인이 필요해요."),
+            ("open", "ineligible", "신청 자격이 있어요 [1].", "맞지 않는 조건이 있어요"),
+            ("before", "eligible", "현재 접수 중이에요 [1].", "아직 접수가 시작되지 않았어요."),
+            ("unknown", "eligible", "지금 바로 신청 가능해요 [1].", "현재 접수 여부는 공식 공고에서 확인이 필요해요."),
+        )
+        for reception, condition, text, expected in cases:
+            with self.subTest(text=text):
+                response = self.conflict_case(reception, condition, text)
+                self.assertEqual(response.status, "answered")
+                self.assertIn(expected, response.answer)
+                self.assertNotIn(text.split(" [")[0], response.answer)
+                self.assertTrue(response.answer.endswith("[1]"))
+                self.assertEqual([c.document_id for c in response.citations], ["DP"])
+                self.assertEqual(response.notice.kind, "warn")
+
+    def test_consistent_or_hedged_answers_are_kept(self):
+        cases = (
+            ("open", "eligible", "이 정책은 지금 신청할 수 있어요 [1]."),
+            ("open", "eligible", "확인된 조건은 모두 충족해 신청 자격을 충족했어요 [1]."),
+            ("closed", "needs_check", "현재 접수 중인지 여부는 원문만으로 단정할 수 없습니다 [1]."),
+            ("closed", "needs_check", "지금 신청 가능 여부는 공고에서 추가 확인이 필요해요 [1]."),
+            ("closed", "needs_check", "연령 요건은 충족합니다 [1]."),
+        )
+        for reception, condition, text in cases:
+            with self.subTest(text=text):
+                self.search.return_value = {"policies": [policy()]}
+                self.check.side_effect = lambda profile, item, r=reception, c=condition: {
+                    "policy_id": item["policy_id"], "reception_status": r,
+                    "conditions": [{"field": "age", "label": "나이", "reason": "가상 연령 판정", "status": c}]}
+                self.generate.return_value = answer(text)
+                self.assertEqual(self.ask_question("신청할 수 있나요?").answer, text)
+
+    def test_only_sentence_citing_conflicting_policy_is_replaced(self):
+        policies = [policy("A", 1, policy_name="접수 중 정책"), policy("B", 2, policy_name="마감 정책")]
+        text = "A는 지금 신청할 수 있어요 [1]. B도 지금 신청할 수 있어요 [2]. 자세한 서류는 공고를 보세요 [1]."
+        response = self.conflict_case({"A": "open", "B": "closed"}, "eligible", text, policies)
+        self.assertEqual(response.answer,
+                         "A는 지금 신청할 수 있어요 [1]. 마감 정책: 접수가 마감됐어요. [2] 자세한 서류는 공고를 보세요 [1].")
+        self.assertEqual([c.document_id for c in response.citations], ["DA", "DB"])
+
+    def test_uncited_claim_is_replaced_only_when_every_policy_conflicts(self):
+        text = "관련 원문이 있습니다 [1]. 지금 신청할 수 있어요."
+        response = self.conflict_case("closed", "eligible", text)
+        self.assertEqual(response.answer, "관련 원문이 있습니다 [1]. 접수가 마감됐어요.")
+        policies = [policy("A", 1, policy_name="접수 중 정책"), policy("B", 2, policy_name="마감 정책")]
+        self.assertEqual(self.conflict_case({"A": "open", "B": "closed"}, "eligible", text, policies,
+                                            changed=False).answer, text)
 
     def test_reception_status_comes_from_checker(self):
         # application_period 문구가 무엇이든 Checker의 판정을 그대로 쓴다(시작일만 있는 정책도 Checker가 판정).

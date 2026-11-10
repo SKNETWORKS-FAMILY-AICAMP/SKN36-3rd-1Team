@@ -27,6 +27,25 @@ CLOSED = "closed"
 # 너무 짧은 이름은 일반 단어와 겹칠 수 있어 제외한다.
 NAME_NOISE = re.compile(r"[\W_]+")
 MIN_NAMED_POLICY_LENGTH = 4
+# 생성 본문의 접수·자격 단정이 Checker 판정과 충돌하면 확인된 상태 문구로 바꾼다(문장 단위).
+SENTENCE_BREAK = re.compile(r"((?<=[.!?。！？])\s+|\n+)")
+OPEN_CLAIM = re.compile(
+    r"(?:지금|현재|바로|오늘|당장)\s*\S{0,8}?\s*(?:신청|접수)\S{0,6}?\s*(?:수\s*)?(?:있|가능)"
+    r"|접수\s*(?:중|하고\s*있)|신청\s*(?:기간|접수)\s*(?:중|입니다)"
+)
+ELIGIBLE_CLAIM = re.compile(
+    r"자격(?:을|이|\s*요건을|\s*요건이)?\s*(?:모두\s*)?(?:충족|갖추|갖췄)"
+    r"|신청\s*대상(?:에|이)\s*(?:해당|맞)|(?:신청|지원)\s*자격이\s*(?:있|됩)"
+)
+# 부정·유보 표현이 있는 문장은 단정이 아니므로 바꾸지 않는다.
+HEDGED_CLAIM = re.compile(r"없|않|못|불가|어렵|여부|인지|단정|아직|추가|확인(?:이|해|할|되)|수도|일\s*수")
+RECEPTION_NOTICE = {
+    "closed": "접수가 마감됐어요.",
+    "before": "아직 접수가 시작되지 않았어요.",
+    "unknown": "현재 접수 여부는 공식 공고에서 확인이 필요해요.",
+}
+ELIGIBILITY_NOTICE = "신청 자격은 공식 공고에서 추가 확인이 필요해요."
+INELIGIBLE_NOTICE = "입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요."
 
 
 class AskError(RuntimeError):
@@ -112,6 +131,51 @@ def _citations(output: GeneratorOutput, contexts: list[dict]) -> tuple[str, list
         for number in used
     ]
     return answer, citations
+
+
+def _status_correction(claim: str, check: dict) -> str | None:
+    """단정(claim)이 Checker 판정과 충돌하면 확인된 상태 문구, 충돌하지 않으면 None."""
+    if claim == "open":
+        status = check["reception_status"]
+        return None if status == "open" else RECEPTION_NOTICE.get(status, RECEPTION_NOTICE["unknown"])
+    statuses = {condition["status"] for condition in check["conditions"]}
+    if statuses <= {"eligible"}:
+        return None
+    return INELIGIBLE_NOTICE if "ineligible" in statuses else ELIGIBILITY_NOTICE
+
+
+def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
+    """접수 상태·자격은 Checker 판정을 기준으로 안내한다.
+
+    인용 번호로 문장이 가리키는 정책을 찾고, 그 정책의 판정과 충돌하는 단정 문장만 확인된 상태 문구로 바꾼다.
+    원래 인용 번호는 그대로 붙여 출처 연결과 인용 검증을 유지한다. 인용이 없는 문장은 모든 판정 정책을 기준으로 한다.
+    """
+    policy_of = {context["source_id"]: context["policy_id"] for context in contexts}
+    by_policy = {check["policy_id"]: check for check in checks}
+    parts = SENTENCE_BREAK.split(answer)
+    changed = False
+    for index in range(0, len(parts), 2):
+        sentence = parts[index]
+        if not sentence.strip() or HEDGED_CLAIM.search(sentence):
+            continue
+        claims = [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM))
+                  if pattern.search(sentence)]
+        if not claims:
+            continue
+        numbers = CITATION.findall(sentence)
+        cited = list(dict.fromkeys(policy_of.get(int(n)) for n in numbers if int(n) in policy_of))
+        targets = [by_policy[pid] for pid in cited if pid in by_policy] or list(by_policy.values())
+        corrections = []
+        for claim in claims:
+            fixes = [(check, _status_correction(claim, check)) for check in targets]
+            if numbers or all(fix for _, fix in fixes):  # 인용 없는 문장은 근거 정책이 모두 충돌할 때만 바꾼다.
+                corrections += [f"{check['policy_name']}: {fix}" if len(targets) > 1 or numbers else fix
+                                for check, fix in fixes if fix]
+        if corrections:
+            markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers))
+            parts[index] = " ".join(dict.fromkeys(corrections)) + (f" {markers}" if markers else "")
+            changed = True
+    return "".join(parts), changed
 
 
 def _is_closed(policy: dict, raw: dict) -> bool:
@@ -221,6 +285,13 @@ def run_ask_pipeline(
         output = GeneratorOutput.model_validate(raw)
     except ValidationError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
+    aligned = False
+    if output.status != "no_evidence":
+        fixed, aligned = _align_answer_with_checks(output.answer, contexts, checks)
+        if aligned:
+            # 내용은 로그에 남기지 않는다.
+            logger.warning("생성 본문의 접수·자격 안내를 Checker 판정에 맞춰 바꿨습니다.")
+            output = output.model_copy(update={"answer": fixed})
     answer, citations = _citations(output, contexts)
     follow_ups = [
         item for item in output.follow_up_questions
@@ -231,6 +302,9 @@ def run_ask_pipeline(
     if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):
         notice = {"kind": "warn", "title": "추가 확인 필요",
                   "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."}
+    if notice is None and aligned:
+        notice = {"kind": "warn", "title": "추가 확인 필요",
+                  "text": "접수 상태와 신청 자격은 판정 결과를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."}
     if display_fn is not None:
         checks = [_display_check(check, display_fn) for check in checks]
     return AskResponse(
