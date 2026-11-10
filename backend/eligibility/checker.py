@@ -26,6 +26,12 @@ _LABELS = {
     "eligibility": "자격 요건",
 }
 
+_GROUP_REASONS = {
+    "AND": "모든 조건을 충족해야 합니다(종합 결과).",
+    "OR": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+    "NOT": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+}
+
 MAX_VALID_AGE = 120
 NO_UPPER_LIMIT_SENTINEL = 120
 
@@ -286,7 +292,10 @@ def _walk(
     group: dict,
     profile: dict,
     depth: int = 0,
+    *,
+    issues: set[str] | None = None,
 ) -> tuple[str, list[dict]]:
+    """조건 트리를 한 번만 순회하며 결과와 구조 오류를 수집한다."""
 
     if (
         depth > 10
@@ -294,6 +303,8 @@ def _walk(
         or group.get("cycle")
         or group.get("not_loaded")
     ):
+        if issues is not None:
+            issues.add("invalid_group")
         return CHECK, [
             _result(
                 "eligibility",
@@ -308,6 +319,8 @@ def _walk(
     ).upper()
 
     if logic not in {"AND", "OR", "NOT"}:
+        if issues is not None:
+            issues.add("unknown_logic")
         return CHECK, [
             _result(
                 "eligibility",
@@ -326,6 +339,8 @@ def _walk(
         not isinstance(conditions, list)
         or not isinstance(children, list)
     ):
+        if issues is not None:
+            issues.add("invalid_group")
         return CHECK, [
             _result(
                 "eligibility",
@@ -336,6 +351,8 @@ def _walk(
 
     for condition in conditions:
         if not isinstance(condition, dict):
+            if issues is not None:
+                issues.add("invalid_condition")
             item = _result(
                 "eligibility",
                 CHECK,
@@ -352,6 +369,7 @@ def _walk(
             child,
             profile,
             depth + 1,
+            issues=issues,
         )
 
         states.append(status)
@@ -360,16 +378,11 @@ def _walk(
     group_status = _combine(logic, states)
 
     # 결과가 프론트 및 LLM에 그대로 전달되므로 내부 group_id는 노출하지 않는다.
-    group_reasons = {
-        "AND": "모든 조건을 충족해야 합니다(종합 결과).",
-        "OR": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
-        "NOT": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
-    }
     items.append(
         _result(
             "eligibility",
             group_status,
-            group_reasons[logic],
+            _GROUP_REASONS[logic],
         )
     )
 
@@ -631,73 +644,27 @@ _AGE_IN_DESCRIPTION = re.compile(
 )
 
 
-def _age_tree_info(trees: list) -> tuple[bool, bool, bool]:
-    """(AGE 존재, 자녀 월령 조건 존재, 구조가 안전하게 판독 가능한지)."""
-    has_age = False
-    has_child_months = False
-
-    def visit(group: object, depth: int, ancestors: frozenset[int]) -> bool:
-        nonlocal has_age, has_child_months
-        if not isinstance(group, dict) or depth > 10 or id(group) in ancestors:
-            return False
-        if group.get("cycle") or group.get("not_loaded"):
-            return False
-        if str(group.get("logic") or "UNKNOWN").upper() not in {"AND", "OR", "NOT"}:
-            return False
-
-        conditions = group.get("conditions")
-        children = group.get("groups")
-        if not isinstance(conditions, list) or not isinstance(children, list):
-            return False
-
-        for condition in conditions:
-            if not isinstance(condition, dict):
-                return False
-            kind = str(condition.get("type") or "").upper()
-            if kind == "AGE":
-                has_age = True
-            if (kind == "SPECIAL_TARGET"
-                    and str(condition.get("unit") or "").strip() == "개월"):
-                has_child_months = True
-
-        path = ancestors | {id(group)}
-        return all(visit(child, depth + 1, path) for child in children)
-
-    valid = bool(trees) and all(visit(root, 0, frozenset()) for root in trees)
-    return has_age, has_child_months, valid
-
-
 def _should_add_missing_age_notice(
-    policy_node: dict, trees: object, affected: set[str],
-    review_items: list[dict], conditions: list[dict],
+    policy_node: dict,
+    affected: set[str],
+    conditions: list[dict],
+    walk_issues: set[str],
 ) -> bool:
-    """나이 제한이 '없음'이 아니라 '추출 누락'인 정책만 보수적으로 안내한다.
+    """실제 AGE 판정 누락만 안내한다. 기존 _walk 결과만 사용한다.
 
-    UNKNOWN/손상 그룹 또는 전체 보류 사유는 이미 원문 확인을 안내하므로
-    중복 행을 추가하지 않는다. 일반 조건의 needs_check와는 구별한다.
+    구조 오류·UNKNOWN·전체 품질 보류는 이미 포괄적인 확인 안내가 있다.
+    일반 소득·가구 원문 검토는 나이와 별개이므로 제외 조건이 아니다.
     """
-    if (
-        not isinstance(trees, list)
-        or "all" in affected
-        or review_items
-        or any(item.get("field") == "age" for item in conditions)
-    ):
+    if "all" in affected or walk_issues:
+        return False
+
+    # _walk가 만든 개별 필드 결과를 재사용하므로 트리를 재순회하지 않는다.
+    # 자녀 월령은 신청자의 AGE 조건을 의미하지 않는다.
+    if any(item.get("field") in {"age", "children"} for item in conditions):
         return False
 
     description = policy_node.get("eligibility")
-    if not isinstance(description, str) or not _AGE_IN_DESCRIPTION.search(description):
-        return False
-
-    has_age, has_child_months, valid = _age_tree_info(trees)
-    if not valid or has_age:
-        return False
-
-    # 자녀 월령을 신청자의 나이로 혼동하지 않는다(예: POL_GOV_050).
-    # 이 유형에 신청자 나이 조건까지 명시된다면 후속 데이터 정비가 우선이다.
-    if has_child_months:
-        return False
-
-    return True
+    return isinstance(description, str) and bool(_AGE_IN_DESCRIPTION.search(description))
 
 
 def check_eligibility(
@@ -756,12 +723,14 @@ def check_eligibility(
     )
 
     conditions: list[dict] = []
+    walk_issues: set[str] = set()
 
     if (
         missing
         or not isinstance(trees, list)
         or not trees
     ):
+        walk_issues.add("missing_tree")
         conditions = [
             _result(
                 "eligibility",
@@ -775,11 +744,12 @@ def check_eligibility(
         roots = []
 
         for tree in trees:
-            state, details = _walk(tree, profile)
+            state, details = _walk(tree, profile, issues=walk_issues)
             roots.append(state)
             conditions.extend(details)
 
         if len(roots) > 1:
+            walk_issues.add("multiple_roots")
             conditions.append(
                 _result(
                     "eligibility",
@@ -867,10 +837,10 @@ def check_eligibility(
                     "종합 판정을 보류합니다."
                 )
 
-    # #42: 정책 설명에 연령 표현은 있지만 AGE 조건이 없을 때만
-    # 보수적인 안내 행을 추가한다. 실제 자격 판정이나 기존 그룹 상태는 변경하지 않는다.
-    if not missing and _should_add_missing_age_notice(
-        policy_node, trees, affected, review_items, conditions,
+    # #42: _walk 판정 결과를 재사용하여 누락된 나이 안내만 보충한다.
+    # 소득·가구 검토 항목이 존재해도 독립된 나이 안내는 유지한다.
+    if _should_add_missing_age_notice(
+        policy_node, affected, conditions, walk_issues,
     ):
         conditions.append(
             _result(
@@ -878,7 +848,6 @@ def check_eligibility(
                 CHECK,
                 "이 정책의 나이 기준이 데이터에 정리되지 않아 "
                 "공식 원문에서 확인이 필요합니다.",
-                "나이 확인 필요",
             )
         )
 

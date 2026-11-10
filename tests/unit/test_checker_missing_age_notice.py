@@ -1,3 +1,4 @@
+
 """#42 나이 조건 미추출 안내 테스트. 모두 가상 그래프이며 DB/API 호출은 없다."""
 
 from copy import deepcopy
@@ -60,7 +61,7 @@ def test_issue42_target_age_notice(policy_id):
     assert source == snapshot
     assert len(age_rows(result)) == 1
     assert age_rows(result)[0] == {
-        "field": "age", "label": "나이 확인 필요",
+        "field": "age", "label": "나이",
         "status": "needs_check",
         "reason": "이 정책의 나이 기준이 데이터에 정리되지 않아 공식 원문에서 확인이 필요합니다.",
     }
@@ -151,10 +152,18 @@ def test_existing_age_quality_notice_not_duplicated():
     assert len(age_rows(result)) == 1
 
 
-def test_source_review_already_holds_overall_no_duplicate():
+@pytest.mark.parametrize("review_kind", ["income", "household"])
+def test_source_review_does_not_suppress_missing_age_notice(review_kind):
     source = policy()
-    source["graph"]["policy"]["income_source_review"] = "needs_review"
-    assert age_rows(check_eligibility({"age": 30}, source)) == []
+    source["graph"]["policy"][f"{review_kind}_source_review"] = "needs_review"
+    result = check_eligibility({"age": 30}, source)
+    assert len(age_rows(result)) == 1
+    assert age_rows(result)[0]["label"] == "나이"
+    assert any(
+        row["field"] == ("income" if review_kind == "income" else "housing")
+        and row["status"] == "needs_check"
+        for row in result["conditions"]
+    )
 
 
 def test_missing_tree_does_not_add_notice():
@@ -182,3 +191,57 @@ def test_eligible_group_state_unchanged_by_notice():
     result = check_eligibility({"age": 30, "child_age_months": 12}, source)
     assert age_rows(result) == []
     assert [row["status"] for row in result["conditions"]] == ["eligible", "eligible"]
+
+
+def test_structural_error_in_nested_condition_does_not_add_age_notice():
+    source = policy(conditions=[None])
+    assert age_rows(check_eligibility({"age": 30}, source)) == []
+
+
+def test_many_root_groups_are_not_treated_as_known_combination():
+    source = policy()
+    source["graph"]["eligibility"]["condition_tree"].append({
+        "group_id": "SECOND", "logic": "AND", "conditions": [], "groups": [],
+    })
+    assert age_rows(check_eligibility({"age": 30}, source)) == []
+
+
+def test_age_notice_uses_same_label_as_existing_age_conditions():
+    result = check_eligibility({"age": 30}, policy())
+    assert age_rows(result)[0]["label"] == "나이"
+    assert age_rows(result)[0]["status"] == "needs_check"
+
+
+def test_individual_income_quality_warning_does_not_hide_age_notice():
+    source = policy()
+    source["data_quality"] = {
+        "hold_auto_eligibility": True,
+        "affected_attributes": ["income"],
+    }
+    result = check_eligibility({"age": 30}, source)
+    assert len(age_rows(result)) == 1
+    assert any(item["field"] == "income" for item in result["conditions"])
+
+
+def test_tree_walk_is_called_once_per_group(monkeypatch):
+    import backend.eligibility.checker as checker
+
+    source = policy()
+    root = source["graph"]["eligibility"]["condition_tree"][0]
+    root["groups"].append({
+        "group_id": "NESTED", "logic": "OR",
+        "conditions": [{"type": "EDUCATION", "name": "학력"}],
+        "groups": [],
+    })
+
+    visits = []
+    original_walk = checker._walk
+
+    def counting_walk(group, *args, **kwargs):
+        visits.append(id(group))
+        return original_walk(group, *args, **kwargs)
+
+    monkeypatch.setattr(checker, "_walk", counting_walk)
+    result = checker.check_eligibility({"age": 30}, source)
+    assert len(age_rows(result)) == 1
+    assert len(visits) == len(set(visits)) == 2
