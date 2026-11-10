@@ -165,6 +165,18 @@ class AskApiTests(unittest.TestCase):
                                          "status": "needs_check"})
         self.assertEqual(len(self.generator.call_args.args[2][0]["conditions"]), 2)
 
+    def test_huge_citation_number_in_claim_sentence_is_public_502(self):
+        # 비정상적으로 긴 출처 번호가 단정 문장에 있어도 내부 예외(500) 없이 LLM 출력 오류(502)로 응답한다.
+        def closed_checker(profile, item):
+            return {**checker(profile, item), "reception_status": "closed"}
+
+        app = create_app(session_factory=self.factory, check_fn=closed_checker, generate_fn=self.generator)
+        self.generator.return_value = answer(f"지금 신청할 수 있어요 [{'9' * 5000}].")
+        with TestClient(app) as client:
+            response = client.post("/api/ask", json=REQUEST)
+        self.assertEqual((response.status_code, response.json()["detail"]["code"]), (502, "LLM_OUTPUT_INVALID"))
+        self.assertNotIn("9" * 50, response.text)
+
     def test_httpx_failures_map_to_public_errors(self):
         with self.client as client:
             for error, expected in (

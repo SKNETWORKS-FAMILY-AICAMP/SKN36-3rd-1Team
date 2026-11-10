@@ -10,7 +10,7 @@ from unittest.mock import Mock
 from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, UserProfile
-from backend.rag.pipeline import AskError, run_ask_pipeline
+from backend.rag.pipeline import AskError, _status_correction, run_ask_pipeline
 from backend.llm.generator import LLMOutputError, LLMTimeoutError, LLMUnavailableError
 
 
@@ -269,7 +269,6 @@ class PipelineTests(unittest.TestCase):
     def test_consistent_or_hedged_answers_are_kept(self):
         cases = (
             ("open", "eligible", "이 정책은 지금 신청할 수 있어요 [1]."),
-            ("open", "eligible", "확인된 조건은 모두 충족해 신청 자격을 충족했어요 [1]."),
             ("closed", "needs_check", "현재 접수 중인지 여부는 원문만으로 단정할 수 없습니다 [1]."),
             ("closed", "needs_check", "지금 신청 가능 여부는 공고에서 추가 확인이 필요해요 [1]."),
             ("closed", "needs_check", "연령 요건은 충족합니다 [1]."),
@@ -298,6 +297,43 @@ class PipelineTests(unittest.TestCase):
         policies = [policy("A", 1, policy_name="접수 중 정책"), policy("B", 2, policy_name="마감 정책")]
         self.assertEqual(self.conflict_case({"A": "open", "B": "closed"}, "eligible", text, policies,
                                             changed=False).answer, text)
+
+    def test_hedged_clause_does_not_hide_conflicting_claim_in_same_sentence(self):
+        # 서류에 대한 유보 안내는 남기고, 같은 문장의 '지금 신청할 수 있어요' 단정만 마감 안내로 바꾼다.
+        response = self.conflict_case("closed", "eligible", "신청 서류는 추가 확인이 필요하지만, 지금 신청할 수 있어요 [1].")
+        self.assertEqual(response.answer, "신청 서류는 추가 확인이 필요하지만, 접수가 마감됐어요. [1]")
+        self.assertEqual([c.document_id for c in response.citations], ["DP"])
+        # 유보 절만 있는 문장은 그대로 둔다.
+        kept = "신청 서류는 추가 확인이 필요하고, 신청 가능 여부도 공고에서 확인해 주세요 [1]."
+        self.assertEqual(self.conflict_case("closed", "eligible", kept, changed=False).answer, kept)
+
+    def test_multi_policy_claim_keeps_each_policy_status_and_its_own_source(self):
+        # A(마감)는 Context 후순위라 [2], B(접수 중)는 [1]. 각 정책 문장에는 그 정책의 출처 번호만 붙인다.
+        policies = [policy("A", 1, policy_name="정책 A"), policy("B", 2, policy_name="정책 B")]
+        response = self.conflict_case({"A": "closed", "B": "open"}, "eligible",
+                                      "A와 B 모두 지금 신청할 수 있어요 [2][1].", policies)
+        self.assertEqual(response.answer, "정책 A: 접수가 마감됐어요. [2] 정책 B: 접수 중이에요. [1]")
+        self.assertEqual([c.document_id for c in response.citations], ["DB", "DA"])
+        self.assertEqual({p.policy_id: p.reception_status for p in response.policy_checks}, {"A": "closed", "B": "open"})
+
+    def test_full_eligibility_claim_is_never_confirmed_from_individual_conditions(self):
+        # 확인된 개별 조건이 모두 eligible이어도 전체 신청 자격 보장 표현은 전달하지 않는다.
+        response = self.conflict_case("open", "eligible", "모든 신청 자격을 충족했어요 [1].")
+        self.assertEqual(response.answer,
+                         "가상 정책: 확인된 조건은 충족하지만, 전체 신청 자격은 공식 공고에서 확인이 필요해요. [1]")
+        self.assertEqual([c.status for c in response.policy_checks[0].conditions], ["eligible"])
+        # 조건 목록이 비어 있어도 전체 자격을 확정하지 않는다.
+        self.assertEqual(_status_correction("eligible", {"conditions": [], "reception_status": "open"}),
+                         "신청 자격은 공식 공고에서 추가 확인이 필요해요.")
+
+    def test_huge_or_unknown_citation_in_claim_sentence_is_invalid_llm_output(self):
+        for text in (f"지금 신청할 수 있어요 [{'9' * 5000}].", "지금 신청할 수 있어요 [7]."):
+            with self.subTest(length=len(text)):
+                self.search.return_value = {"policies": [policy()]}
+                self.with_reception({"P": "closed"})
+                self.generate.return_value = answer(text)
+                with self.assertRaisesRegex(AskError, "LLM_OUTPUT_INVALID"):
+                    self.ask_question("신청할 수 있나요?")
 
     def test_reception_status_comes_from_checker(self):
         # application_period 문구가 무엇이든 Checker의 판정을 그대로 쓴다(시작일만 있는 정책도 Checker가 판정).

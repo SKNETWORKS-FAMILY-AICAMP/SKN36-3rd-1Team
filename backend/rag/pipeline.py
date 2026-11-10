@@ -46,6 +46,11 @@ RECEPTION_NOTICE = {
 }
 ELIGIBILITY_NOTICE = "신청 자격은 공식 공고에서 추가 확인이 필요해요."
 INELIGIBLE_NOTICE = "입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요."
+# Checker의 eligible은 개별 조건 충족일 뿐 전체 신청 자격 보장이 아니다.
+PARTIAL_ELIGIBLE_NOTICE = "확인된 조건은 충족하지만, 전체 신청 자격은 공식 공고에서 확인이 필요해요."
+OPEN_CONFIRMED = "접수 중이에요."
+# 유보는 절 단위로 판단한다. "서류는 확인이 필요하지만, 지금 신청할 수 있어요"의 단정을 놓치지 않기 위해서다.
+CLAUSE_BREAK = re.compile(r"(,\s*|;\s*|\s+(?:하지만|그러나|다만|그런데)\s+)")
 
 
 class AskError(RuntimeError):
@@ -139,42 +144,75 @@ def _status_correction(claim: str, check: dict) -> str | None:
         status = check["reception_status"]
         return None if status == "open" else RECEPTION_NOTICE.get(status, RECEPTION_NOTICE["unknown"])
     statuses = {condition["status"] for condition in check["conditions"]}
-    if statuses <= {"eligible"}:
+    if "ineligible" in statuses:
+        return INELIGIBLE_NOTICE
+    if not statuses or statuses - {"eligible"}:
+        return ELIGIBILITY_NOTICE
+    # 확인된 조건이 모두 eligible이어도 전체 신청 자격은 확정하지 않는다.
+    return PARTIAL_ELIGIBLE_NOTICE
+
+
+def _clause_correction(
+    clause: str, numbers: list[str], policy_of: dict[str, str], by_policy: dict[str, dict], whole_sentence: bool,
+) -> str | None:
+    """단정 절 하나를 판정에 맞게 고친 문구. 충돌이 없거나 출처를 확정할 수 없으면 None."""
+    claims = [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM)) if pattern.search(clause)]
+    if not claims or HEDGED_CLAIM.search(clause):
         return None
-    return INELIGIBLE_NOTICE if "ineligible" in statuses else ELIGIBILITY_NOTICE
+    if numbers:
+        # 존재하지 않거나 비정상적인 번호가 있으면 여기서 고치지 않는다(인용 검증이 LLM 출력 오류로 처리한다).
+        if any(number not in policy_of for number in numbers):
+            return None
+        grouped: dict[str, list[str]] = {}
+        for number in numbers:
+            grouped.setdefault(policy_of[number], []).append(number)
+        if any(pid not in by_policy for pid in grouped):
+            return None
+        targets = [(by_policy[pid], "".join(f"[{n}]" for n in dict.fromkeys(nums))) for pid, nums in grouped.items()]
+    else:
+        targets = [(check, "") for check in by_policy.values()]
+    statements, conflict = [], False
+    for check, markers in targets:
+        texts = []
+        for claim in claims:
+            fix = _status_correction(claim, check)
+            conflict = conflict or fix is not None
+            texts.append(fix if fix is not None else OPEN_CONFIRMED)
+        statements.append((check, " ".join(dict.fromkeys(texts)), markers))
+    # 인용 없는 단정은 판정 정책이 모두 충돌할 때만 바꾼다(어느 정책 이야기인지 확정할 수 없으므로).
+    if not conflict or (not numbers and not all(text != OPEN_CONFIRMED for _, text, _ in statements)):
+        return None
+    if len(statements) == 1:
+        check, text, markers = statements[0]
+        named = f"{check['policy_name']}: {text}" if numbers and whole_sentence else text
+        return f"{named} {markers}".strip()
+    return " ".join(f"{check['policy_name']}: {text} {markers}".strip() for check, text, markers in statements)
 
 
 def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
     """접수 상태·자격은 Checker 판정을 기준으로 안내한다.
 
-    인용 번호로 문장이 가리키는 정책을 찾고, 그 정책의 판정과 충돌하는 단정 문장만 확인된 상태 문구로 바꾼다.
-    원래 인용 번호는 그대로 붙여 출처 연결과 인용 검증을 유지한다. 인용이 없는 문장은 모든 판정 정책을 기준으로 한다.
+    인용 번호로 절이 가리키는 정책을 찾고, 그 정책의 판정과 충돌하는 단정 절만 확인된 상태 문구로 바꾼다.
+    여러 정책을 함께 인용하면 정책마다 자기 출처 번호를 붙여 따로 안내한다. 유보 절은 그대로 둔다.
+    인용 번호는 문자열로만 다룬다(비정상적으로 긴 번호도 예외 없이 인용 검증으로 넘긴다).
     """
-    policy_of = {context["source_id"]: context["policy_id"] for context in contexts}
+    policy_of = {str(context["source_id"]): context["policy_id"] for context in contexts}
     by_policy = {check["policy_id"]: check for check in checks}
     parts = SENTENCE_BREAK.split(answer)
     changed = False
     for index in range(0, len(parts), 2):
         sentence = parts[index]
-        if not sentence.strip() or HEDGED_CLAIM.search(sentence):
+        if not sentence.strip():
             continue
-        claims = [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM))
-                  if pattern.search(sentence)]
-        if not claims:
-            continue
-        numbers = CITATION.findall(sentence)
-        cited = list(dict.fromkeys(policy_of.get(int(n)) for n in numbers if int(n) in policy_of))
-        targets = [by_policy[pid] for pid in cited if pid in by_policy] or list(by_policy.values())
-        corrections = []
-        for claim in claims:
-            fixes = [(check, _status_correction(claim, check)) for check in targets]
-            if numbers or all(fix for _, fix in fixes):  # 인용 없는 문장은 근거 정책이 모두 충돌할 때만 바꾼다.
-                corrections += [f"{check['policy_name']}: {fix}" if len(targets) > 1 or numbers else fix
-                                for check, fix in fixes if fix]
-        if corrections:
-            markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers))
-            parts[index] = " ".join(dict.fromkeys(corrections)) + (f" {markers}" if markers else "")
-            changed = True
+        clauses = CLAUSE_BREAK.split(sentence)
+        sentence_numbers = list(dict.fromkeys(CITATION.findall(sentence)))
+        for position in range(0, len(clauses), 2):
+            numbers = list(dict.fromkeys(CITATION.findall(clauses[position]))) or sentence_numbers
+            fixed = _clause_correction(clauses[position], numbers, policy_of, by_policy, len(clauses) == 1)
+            if fixed is not None:
+                clauses[position] = fixed
+                changed = True
+        parts[index] = "".join(clauses)
     return "".join(parts), changed
 
 
