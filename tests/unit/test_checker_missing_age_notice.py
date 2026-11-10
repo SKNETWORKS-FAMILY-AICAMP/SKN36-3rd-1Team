@@ -1,4 +1,3 @@
-
 """#42 나이 조건 미추출 안내 테스트. 모두 가상 그래프이며 DB/API 호출은 없다."""
 
 from copy import deepcopy
@@ -245,3 +244,250 @@ def test_tree_walk_is_called_once_per_group(monkeypatch):
     result = checker.check_eligibility({"age": 30}, source)
     assert len(age_rows(result)) == 1
     assert len(visits) == len(set(visits)) == 2
+
+
+@pytest.mark.parametrize(
+    "condition_status, expected_group_status",
+    [
+        ("eligible", "needs_check"),
+        ("ineligible", "ineligible"),
+    ],
+)
+def test_missing_age_notice_updates_only_eligible_group(
+    monkeypatch, condition_status, expected_group_status,
+):
+    """지역의 개별 판정은 유지하고, 미확인 나이는 적합 그룹만 보류한다."""
+    import backend.eligibility.checker as checker
+
+    source = policy(
+        description="지원 연령: 만 18~29세",
+        conditions=[{"type": "REGION", "name": "거주 지역"}],
+    )
+    snapshot = deepcopy(source)
+    original_condition = checker._condition
+
+    def fake_region_condition(condition, profile):
+        if condition.get("type") == "REGION":
+            return checker._result(
+                "region", condition_status, "지역 조건 판정 결과입니다."
+            )
+        return original_condition(condition, profile)
+
+    monkeypatch.setattr(checker, "_condition", fake_region_condition)
+    result = checker.check_eligibility({"age": 40, "region": "서울특별시"}, source)
+
+    assert source == snapshot
+    rows = result["conditions"]
+    assert [item["field"] for item in rows] == ["region", "eligibility", "age"]
+    assert rows[0]["status"] == condition_status
+    assert rows[1]["status"] == expected_group_status
+    assert rows[2]["status"] == "needs_check"
+    assert "데이터" in rows[2]["reason"] and "원문" in rows[2]["reason"]
+    if condition_status == "eligible":
+        assert "나이" in rows[1]["reason"]
+
+
+def test_without_age_notice_eligible_group_stays_eligible(monkeypatch):
+    """설명에서 나이 언급이 없으면 종합 판정을 보류하지 않는다."""
+    import backend.eligibility.checker as checker
+
+    source = policy(
+        description="지원 대상: 서울특별시 거주자",
+        conditions=[{"type": "REGION", "name": "거주 지역"}],
+    )
+    monkeypatch.setattr(
+        checker,
+        "_condition",
+        lambda condition, profile: checker._result(
+            "region", "eligible", "거주 지역이 확인되었습니다."
+        ),
+    )
+    result = checker.check_eligibility({"age": 40}, source)
+    assert [row["status"] for row in result["conditions"]] == [
+        "eligible", "eligible",
+    ]
+
+
+def test_income_review_and_missing_age_hold_is_not_duplicated(monkeypatch):
+    """소득 원문 확인과 나이 미추출이 동시에 있어도 종합 보류는 한 줄이다."""
+    import backend.eligibility.checker as checker
+
+    source = policy(conditions=[{"type": "REGION"}])
+    source["graph"]["policy"]["income_source_review"] = "needs_review"
+    monkeypatch.setattr(
+        checker,
+        "_condition",
+        lambda condition, profile: checker._result(
+            "region", "eligible", "거주 지역이 확인되었습니다."
+        ),
+    )
+    result = checker.check_eligibility({"age": 40}, source)
+    conditions = result["conditions"]
+    assert len([row for row in conditions if row["field"] == "age"]) == 1
+    assert len([row for row in conditions if row["field"] == "eligibility"]) == 1
+    group = next(row for row in conditions if row["field"] == "eligibility")
+    assert group["status"] == "needs_check"
+    assert "소득" in group["reason"]
+    assert "나이" in group["reason"]
+    assert next(row for row in conditions if row["field"] == "region")["status"] == "eligible"
+
+
+@pytest.mark.parametrize(
+    "root_logic,region_status,expected_root_status",
+    [
+        ("AND", "eligible", "needs_check"),
+        ("AND", "ineligible", "ineligible"),
+        ("OR", "eligible", "needs_check"),
+        ("OR", "ineligible", "needs_check"),
+    ],
+)
+def test_missing_age_holds_only_root_not_nested_group(
+    monkeypatch, root_logic, region_status, expected_root_status,
+):
+    """중첩 그룹 적합/개별 조건 판정은 유지하고 최상위 결과만 변경한다."""
+    import backend.eligibility.checker as checker
+
+    source = policy(
+        description="신청자 만 19~39세, 기타 조건은 별도 확인",
+        logic=root_logic,
+        conditions=[{"type": "REGION"}],
+    )
+    source["graph"]["eligibility"]["condition_tree"][0]["groups"] = [
+        {
+            "group_id": "CHILD_GROUP",
+            "logic": "OR",
+            "conditions": [{"type": "EDUCATION"}],
+            "groups": [],
+        }
+    ]
+    original_condition = checker._condition
+
+    def fake_condition(condition, profile):
+        if condition.get("type") == "REGION":
+            return checker._result("region", region_status, "지역 판정")
+        if condition.get("type") == "EDUCATION":
+            return checker._result("education", "eligible", "학력 판정")
+        return original_condition(condition, profile)
+
+    monkeypatch.setattr(checker, "_condition", fake_condition)
+    snapshot = deepcopy(source)
+    result = checker.check_eligibility({"age": 30}, source)
+
+    assert source == snapshot
+    assert [(row["field"], row["status"]) for row in result["conditions"]] == [
+        ("region", region_status),
+        ("education", "eligible"),
+        ("eligibility", "eligible"),  # 내부 OR 그룹은 절대 보류 처리하지 않음
+        ("eligibility", expected_root_status),
+        ("age", "needs_check"),
+    ]
+    assert "나이" not in result["conditions"][2]["reason"]
+    if expected_root_status == "needs_check":
+        assert "나이" in result["conditions"][3]["reason"]
+    else:
+        assert "나이" not in result["conditions"][3]["reason"]
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "지원 대상: 자녀 만 18세 미만",
+        "만 18세 미만 자녀가 있는 가구",
+        "아동 연령: 만 5세 이하",
+        "자녀: 만 18~29세",
+        "만 18세 이하의 자녀 지원",
+        "청년 가구의 자녀 만 18세 미만",
+    ],
+)
+def test_child_age_text_is_not_applicant_age_when_graph_has_no_child_condition(
+    description,
+):
+    """그래프에 자녀 조건마저 누락돼도 아동 연령을 신청자 연령으로 오인하지 않는다."""
+    result = check_eligibility({"age": 40}, policy(description=description))
+    assert age_rows(result) == []
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "신청자 만 19~39세, 자녀 24개월 미만",
+        "자녀 만 18세 미만, 신청자 만 19~39세",
+        "부양 자녀가 있는 신청자 만 19~39세",
+        "자녀 만 18세 미만; 신청자 연령: 만 19~39세",
+        "본인 연령 만 19~39세 / 자녀 만 18세 미만",
+    ],
+)
+def test_applicant_age_is_not_suppressed_by_existing_child_month_condition(
+    description,
+):
+    """자녀 월령과 신청자 나이가 함께 명시되면 신청자 AGE 누락을 알린다."""
+    source = policy(
+        description=description,
+        conditions=[{
+            "type": "SPECIAL_TARGET",
+            "operator": "LT",
+            "value": "24",
+            "unit": "개월",
+        }],
+    )
+    result = check_eligibility({"age": 30, "child_age_months": 12}, source)
+    assert len(age_rows(result)) == 1
+    assert age_rows(result)[0]["status"] == "needs_check"
+    assert [(row["field"], row["status"]) for row in result["conditions"]] == [
+        ("children", "eligible"),
+        ("eligibility", "needs_check"),
+        ("age", "needs_check"),
+    ]
+
+
+def test_ambiguous_age_with_only_child_month_condition_is_not_assumed_applicant_age():
+    """연령의 주어가 없고 자녀 조건만 있으면 신청자 나이라고 추측하지 않는다."""
+    source = policy(
+        description="만 18~29세",
+        conditions=[{
+            "type": "SPECIAL_TARGET",
+            "operator": "LT",
+            "value": "24",
+            "unit": "개월",
+        }],
+    )
+    result = check_eligibility({"age": 30, "child_age_months": 12}, source)
+    assert age_rows(result) == []
+    assert [row["status"] for row in result["conditions"]] == [
+        "eligible", "eligible",
+    ]
+
+
+def test_source_review_does_not_turn_nested_group_into_needs_check(monkeypatch):
+    """소득 원문 확인이 있는 경우에도 하위 그룹의 개별 종합 결과는 보존."""
+    import backend.eligibility.checker as checker
+
+    source = policy(
+        description="신청자 만 19~39세",
+        conditions=[{"type": "REGION"}],
+    )
+    source["graph"]["policy"]["income_source_review"] = "needs_review"
+    source["graph"]["eligibility"]["condition_tree"][0]["groups"] = [
+        {
+            "group_id": "INNER",
+            "logic": "AND",
+            "conditions": [{"type": "EDUCATION"}],
+            "groups": [],
+        }
+    ]
+    monkeypatch.setattr(
+        checker,
+        "_condition",
+        lambda condition, profile: checker._result(
+            "region" if condition.get("type") == "REGION" else "education",
+            "eligible",
+            "개별 조건은 충족됩니다.",
+        ),
+    )
+    result = checker.check_eligibility({"age": 30}, source)
+    inner = result["conditions"][2]
+    root = result["conditions"][3]
+    assert (inner["field"], inner["status"]) == ("eligibility", "eligible")
+    assert (root["field"], root["status"]) == ("eligibility", "needs_check")
+    assert "나이" in root["reason"] and "소득" in root["reason"]
+    assert "소득" not in inner["reason"] and "나이" not in inner["reason"]
