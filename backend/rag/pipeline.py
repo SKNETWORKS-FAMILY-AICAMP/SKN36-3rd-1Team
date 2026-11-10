@@ -9,7 +9,7 @@ from httpx import NetworkError, TimeoutException
 from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, AskResponse, EligibilityOutput, GeneratorOutput
-from backend.rag.context_builder import build_contexts, valid_source_url
+from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,10 @@ MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했�
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
 # 신청 상태(before/open/closed/unknown)는 Checker 단일 책임이다. Pipeline은 날짜를 판정하지 않는다.
 CLOSED = "closed"
+# 정책명 직접 언급 판별: 공백·문장부호를 지운 정책명 전체가 질문에 들어 있을 때만 인정한다.
+# 너무 짧은 이름은 일반 단어와 겹칠 수 있어 제외한다.
+NAME_NOISE = re.compile(r"[\W_]+")
+MIN_NAMED_POLICY_LENGTH = 4
 
 
 class AskError(RuntimeError):
@@ -124,6 +128,18 @@ def _is_closed(policy: dict, raw: dict) -> bool:
     return result.policy_id == policy["policy_id"] and result.reception_status == CLOSED
 
 
+def _named_policy_ids(question: str, policies: list[dict]) -> set[str]:
+    """질문에 정책명 전체가 들어 있는 정책 ID. 부분 이름·짧은 이름은 인정하지 않는다."""
+    asked = NAME_NOISE.sub("", question).lower()
+    named = set()
+    for policy in policies:
+        name = policy.get("policy_name")
+        key = NAME_NOISE.sub("", name).lower() if isinstance(name, str) else ""
+        if len(key) >= MIN_NAMED_POLICY_LENGTH and key in asked:
+            named.add(policy["policy_id"])
+    return named
+
+
 def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) -> dict:
     """화면용 조건 요약. 원본 행만 고를 수 있고 필드·상태 조합을 바꿀 수 없다."""
     shown = display_fn([dict(condition) for condition in check["conditions"]])
@@ -161,8 +177,10 @@ def run_ask_pipeline(
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
+    # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
+    ranked = rank_citable_contexts(policies)
+    citable = {context["policy_id"] for context in ranked}
     # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
-    citable = {context["policy_id"] for context in build_contexts(policies, max_contexts=len(policies) * 100)}
     if not citable:
         return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
 
@@ -170,7 +188,9 @@ def run_ask_pipeline(
     # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
     raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
     closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
-    contexts = build_contexts(policies, deprioritized_policy_ids=closed)
+    # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
+    named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
+    contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
 
     first_context = {}
     for context in contexts:

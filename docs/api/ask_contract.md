@@ -33,7 +33,7 @@
 7. **인용:** Context Builder가 `source_id=1..N`을 부여하고, LLM은 해당 `[n]`만 사용한다. 없는 번호·인용 없는 근거 답변은 오류다.
 8. **API:** React의 기존 `AskRequest`, `AskResponse` 필드명을 유지한다. 정상 HTTP 200, 장애는 별도 오류 JSON.
 9. **신청기간:** 신청 상태는 **Checker 단일 책임**이며 `graph.policy.application_start`·`application_end`(ISO 날짜)와 `application_is_ongoing`(공식 원문으로 상시 접수 확인 시에만 `true`)으로 판정한다(§4.4). 자동 추출 문구(`상시신청` 등)만으로 `open`을 확정하지 않는다. Pipeline은 날짜·상시 여부를 해석하지 않고 Checker 결과를 그대로 쓴다.
-10. **마감 정책 정렬:** Checker가 `closed`로 판정한 정책만 Context 선택 전에 뒤로 보낸다. 다른 상태의 순서는 바꾸지 않고, 정책을 삭제하지 않는다(§2, §6).
+10. **마감 정책 정렬:** Checker가 `closed`로 판정한 정책만 Context 선택 전에 뒤로 보낸다. 다른 상태의 순서는 바꾸지 않고, 정책을 삭제하지 않는다. 단, 질문에 정책명 전체가 들어 있는 마감 정책은 후순위에서 제외한다(§2, §6-4-2).
 11. **UNKNOWN 조건 그룹:** MVP에서는 전체 `needs_check` 보류를 유지한다. 부분 해석은 MVP 이후 과제다.
 12. **개발:** Mock 기반 병렬 개발 → 소희 실제 함수 연결 → React 연동 → 통합 테스트. 추가 Agent·LangGraph 개발은 MVP 범위 밖이다.
 
@@ -45,8 +45,8 @@ React AskRequest
       └─ run_ask_pipeline(request, search_session)
           1) 입력 검증 + 프로필 정규화
           2) Hybrid 검색(Qdrant + Neo4j): 청크 Top-10
-          3) 인용 가능한 원문이 있는 후보 정책마다 check_eligibility(profile, policy) 1회
-          4) Checker가 closed로 판정한 정책을 후순위로 build_contexts(): source_id 부여
+          3) rank_citable_contexts()로 인용 가능 후보를 한 번 만들고, 후보 정책마다 check_eligibility(profile, policy) 1회
+          4) closed 정책(질문에 정책명 전체가 있는 정책 제외)을 후순위로 select_contexts(): source_id 부여
           5) 선택된 context의 policy_id에 해당하는 정책만 선별(3의 판정 결과 재사용)
           6) 품질 경고 기준 재검증(확정 판정을 needs_check로 보수적 변경)
           7) generate_answer(question, contexts, policy_checks, history, profile=normalized_profile)
@@ -338,12 +338,21 @@ ESTIMATED_COST_LIMIT     = (시연 비용 한도)
 ```python
 # backend/rag/context_builder.py
 
+def rank_citable_contexts(policies: list[dict]) -> list[dict]:
+    """인용 가능한 원문 후보를 한 번 검증·중복 제거하고 정책 균형 순서로 정렬한다(source_id 없음)."""
+
+def select_contexts(
+    ranked: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
+) -> list[dict]:
+    """정렬된 후보에서 최종 근거를 고르고 source_id를 1부터 붙인다."""
+
 def build_contexts(
     policies: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
 ) -> list[dict]:
-    """검색 청크에서 인용 가능한 원문을 추려 출처 ID를 생성한다."""
-    ...
+    """rank_citable_contexts + select_contexts (호환용)."""
 ```
+
+Pipeline은 후보를 `rank_citable_contexts()`로 **한 번만** 만들고, 판정 대상 정책 선정(후보에 있는 정책 ID)과 최종 근거 선택(`select_contexts()`)에 같은 후보를 재사용한다.
 
 **출력**
 
@@ -369,6 +378,7 @@ def build_contexts(
 3. `chunk_id` 중복을 제거하고, 빈 원문·빈 URL·유효하지 않은 `http(s)` URL은 인용 Context에서 제외한다. 제외 사실은 개인정보 없이 로그로 기록.
 4. 정책별 근거 균형을 고려한다: 먼저 검색 상위 정책마다 근거 1개씩 채택하고, 남는 슬롯을 전체 청크 검색 순위대로 채운다. 최종 `source_id`는 선별된 Context 순서대로 붙인다. `max_contexts=5`는 정책 수가 아니라 **최대 출처 5개**다.
 4-1. (v1.1) `deprioritized_policy_ids`(Checker가 `closed`로 판정한 정책)는 삭제하지 않고, 다른 정책의 근거(첫 근거와 추가 근거)를 모두 배정한 뒤 남은 슬롯에만 넣는다. 각 그룹 안의 순서는 4번 규칙을 그대로 따른다. 모든 후보가 마감이면 기존 순서와 같다.
+4-2. (v1.1) **정책명 직접 질문 예외:** 질문에 정책명 전체가 들어 있으면(공백·문장부호를 제외하고 비교, 4자 미만의 짧은 이름은 제외) 그 정책은 마감이어도 후순위 대상에서 빼고 원래 검색 순서의 근거 자리를 유지한다. 신청 상태는 Checker 결과(`closed`) 그대로 응답한다. 부분 이름·약칭은 이름 지정으로 보지 않는다. 검색 결과에 해당 정책이 없으면 이 규칙으로 보완되지 않는다.
 5. `title`: 같은 `document_id`의 Graph 문서 제목을 찾으면 사용, 없으면 `policy_name`으로 대체한다.
 6. `page_number`: `page_start`가 **양의 정수**일 때만 사용, 나머지는 `null`. v0.2 보고에 따르면 현재 스냅샷의 청크에는 페이지 정보가 없으나 **영구적으로 null이라고 가정하지 않는다**.
 7. `quality_warnings`는 데이터 품질 주의 메시지이지 인용 원문이 아니다. 답변에서 불확실성을 알릴 때만 참고한다.

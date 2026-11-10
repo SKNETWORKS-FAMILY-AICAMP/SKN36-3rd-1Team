@@ -1,7 +1,8 @@
 from copy import deepcopy
+import random
 import unittest
 
-from backend.rag.context_builder import build_contexts
+from backend.rag.context_builder import build_contexts, rank_citable_contexts, select_contexts, valid_source_url
 
 
 def hit(rank, chunk_id, **changes):
@@ -70,3 +71,61 @@ class ContextBuilderTests(unittest.TestCase):
         # 목록에 없는 ID는 무시하고, 입력은 바꾸지 않는다.
         self.assertEqual(build_contexts(policies, 5, deprioritized_policy_ids={"Z"}), build_contexts(policies, 5))
         self.assertEqual(policies, original)
+
+    def test_reused_candidates_match_previous_single_pass_selection(self):
+        # 후보를 한 번 만들어 재사용해도, 리팩터링 전 한 번에 계산하던 결과와 같아야 한다.
+        rng = random.Random(23)
+        for _ in range(300):
+            policies = []
+            for index in range(rng.randint(0, 7)):
+                pid = f"P{index}"
+                hits = []
+                for _ in range(rng.randint(0, 4)):
+                    chunk = f"C{rng.randint(0, 9)}"  # 정책 간 청크 중복도 생긴다.
+                    changes = rng.choice([{}, {}, {"text": " "}, {"source_url": "https://"}, {"page_start": 3}])
+                    hits.append(hit(rng.randint(1, 30), chunk, **changes))
+                policies.append({"policy_id": pid, "policy_name": pid, "best_rank": rng.randint(1, 30),
+                                 "graph": None, "evidence": hits})
+            later = {p["policy_id"] for p in policies if rng.random() < 0.4}
+            size = rng.randint(0, 6)
+            expected = previous_build_contexts(policies, size, later)
+            with self.subTest(policies=policies, later=later, size=size):
+                self.assertEqual(build_contexts(policies, size, later), expected)
+                ranked = rank_citable_contexts(policies)
+                # 같은 후보에서 판정 대상 선정과 최종 선택을 반복해도 결과는 같다.
+                self.assertEqual({c["policy_id"] for c in ranked},
+                                 {c["policy_id"] for c in previous_build_contexts(policies, 10 ** 6, ())})
+                self.assertEqual(select_contexts(ranked, size, later), expected)
+                self.assertEqual(select_contexts(ranked, size, later), expected)
+
+
+def previous_build_contexts(policies, max_contexts, later):
+    """리팩터링 전 build_contexts 알고리즘(비교 기준). 검증·중복 제거·정렬·후순위를 한 번에 수행했다."""
+    if max_contexts <= 0:
+        return []
+    candidates = []
+    for policy in policies:
+        for item in policy.get("evidence", []):
+            content, url = item.get("text"), item.get("source_url")
+            if not isinstance(content, str) or not content.strip() or not valid_source_url(url):
+                continue
+            page = item.get("page_start")
+            context = {"policy_id": policy["policy_id"], "policy_name": policy["policy_name"],
+                       "document_id": item["document_id"], "chunk_id": item["chunk_id"],
+                       "title": policy["policy_name"], "url": url,
+                       "page_number": page if type(page) is int and page > 0 else None,
+                       "text": content.strip(), "quality_warnings": []}
+            candidates.append((item["rank"], policy.get("best_rank", item["rank"]), context))
+    seen_chunks, seen_policies, first, rest = set(), set(), [], []
+    for rank, best_rank, context in sorted(candidates, key=lambda entry: entry[0]):
+        if context["chunk_id"] in seen_chunks:
+            continue
+        seen_chunks.add(context["chunk_id"])
+        if context["policy_id"] in seen_policies:
+            rest.append(context)
+        else:
+            first.append((best_rank, rank, context))
+            seen_policies.add(context["policy_id"])
+    ordered = [entry[2] for entry in sorted(first, key=lambda entry: entry[:2])] + rest
+    selected = sorted(ordered, key=lambda context: context["policy_id"] in later)
+    return [{"source_id": index, **context} for index, context in enumerate(selected[:max_contexts], 1)]

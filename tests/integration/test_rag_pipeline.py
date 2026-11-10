@@ -197,6 +197,43 @@ class PipelineTests(unittest.TestCase):
             return {**checker(profile, item), "reception_status": statuses.get(item["policy_id"], "unknown")}
         self.check.side_effect = check
 
+    def named_policies(self):
+        # 검색 1위 A만 마감, 나머지 5개는 접수 중. 근거 자리는 5개라 이름 지정이 없으면 A가 밀려난다.
+        names = {"A": "서울특별시 청년수당", "B": "청년 월세 지원", "C": "청년 일자리 도약", "D": "청년 마음건강",
+                 "E": "청년 문화패스", "F": "청년 주거 상담"}
+        self.search.return_value = {"policies": [policy(pid, rank, policy_name=names[pid])
+                                                 for rank, pid in enumerate("ABCDEF", 1)]}
+        self.with_reception({"A": "closed", **{pid: "open" for pid in "BCDEF"}})
+
+    def ask_question(self, question):
+        request = AskRequest(question=question, profile={"age": 25, "region": "", "income": None}, history=[])
+        return run_ask_pipeline(request, search_fn=self.search, check_fn=self.check, generate_fn=self.generate)
+
+    def test_closed_policy_asked_by_name_keeps_an_evidence_slot(self):
+        self.named_policies()
+        for question in ("서울특별시 청년수당 신청 자격 알려주세요", "서울특별시청년수당은 지금 받을 수 있나요?"):
+            with self.subTest(question=question):
+                response = self.ask_question(question)
+                contexts = self.generate.call_args.args[1]
+                # 이름을 지정한 마감 정책은 후순위에서 빠져 원래 검색 순서(1위) 자리를 유지하고, 마감 상태는 그대로 응답한다.
+                self.assertEqual([c["policy_id"] for c in contexts], list("ABCDE"))
+                self.assertEqual([c["source_id"] for c in contexts], [1, 2, 3, 4, 5])
+                self.assertEqual((response.policy_checks[0].policy_id, response.policy_checks[0].reception_status),
+                                 ("A", "closed"))
+                self.assertEqual(response.citations[0].document_id, "DA")
+
+    def test_unnamed_partial_or_short_name_keeps_closed_policy_deprioritized(self):
+        self.named_policies()
+        for question in ("청년 지원 정책 알려주세요", "청년수당 신청 자격", "서울 청년수당"):
+            with self.subTest(question=question):
+                self.ask_question(question)
+                self.assertEqual([c["policy_id"] for c in self.generate.call_args.args[1]], list("BCDEF"))
+        # 너무 짧은 정책명(공백·문장부호 제외 4자 미만)은 이름 지정으로 보지 않는다.
+        self.search.return_value = {"policies": [policy("A", 1, policy_name="청년"),
+                                                 *[policy(pid, rank) for rank, pid in enumerate("BCDEF", 2)]]}
+        self.ask_question("청년 정책 알려주세요")
+        self.assertNotIn("A", [c["policy_id"] for c in self.generate.call_args.args[1]])
+
     def test_reception_status_comes_from_checker(self):
         # application_period 문구가 무엇이든 Checker의 판정을 그대로 쓴다(시작일만 있는 정책도 Checker가 판정).
         for period in ("상시신청", "접수기관 별 상이", " 상시 ", "20260101 ~ 20261231", None):
