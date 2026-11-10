@@ -1,15 +1,15 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-06T22:00:22.400693+09:00",
+  "created_at": "2026-11-10T02:59:08.002940+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
     "total_policies": 246,
     "total_documents": 261,
     "total_chunks": 599,
-    "total_graph_nodes": 1074,
-    "total_graph_edges": 3703,
+    "total_graph_nodes": 1004,
+    "total_graph_edges": 2431,
     "referential_integrity": "100% PASS (Broken References = 0)",
     "qdrant_point_id_standard": "RFC 4122 UUIDv5 (Deterministic)",
     "delta_from_baseline": {
@@ -30,13 +30,13 @@
       "record_count": 0
     },
     "CHANGELOG.md": {
-      "size_bytes": 5250,
-      "sha256": "08529a094530cd4ab63df65154acc86167ca0f4adcd508b5140746e680123202",
+      "size_bytes": 5940,
+      "sha256": "b7882c1bcb3fdb284cd29da4b7395a76243fa5adcd7c4152cd4079b538953487",
       "record_count": 0
     },
     "release_delta_manifest.json": {
-      "size_bytes": 72751,
-      "sha256": "e5719d1cb55e0ad102bb793a2d28f995c7b7194ac572893a66bcdd66f05e912f",
+      "size_bytes": 273767,
+      "sha256": "85c997963939b481d715bca984b8b0b9f09bff113a99f6fceb23feeece4a85b8",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -55,9 +55,9 @@
       "record_count": 5
     },
     "neo4j/nodes_condition_group.jsonl": {
-      "size_bytes": 86224,
-      "sha256": "8f37e4169e034d57ec615a230a02cf0dd4d8d2dacf38a07a423e8c650eb4028b",
-      "record_count": 352
+      "size_bytes": 66272,
+      "sha256": "da6499e615bc9ec5ca1eec1dc87f921e689cbbf7cccd31680c8eee42caa1b00e",
+      "record_count": 265
     },
     "neo4j/nodes_document.jsonl": {
       "size_bytes": 127586,
@@ -65,9 +65,9 @@
       "record_count": 261
     },
     "neo4j/nodes_eligibility_condition.jsonl": {
-      "size_bytes": 14937,
-      "sha256": "e7ac5ceda4c70d65bc2280ea411e5b3260522ec9f1a2a8e621448e35dffc1422",
-      "record_count": 52
+      "size_bytes": 22296,
+      "sha256": "6a95f2d1ea0d27391fa7117c08a78db81e1c23f70f73c95db0ca430965477edd",
+      "record_count": 69
     },
     "neo4j/nodes_lifestage.jsonl": {
       "size_bytes": 883,
@@ -80,8 +80,8 @@
       "record_count": 123
     },
     "neo4j/nodes_policy.jsonl": {
-      "size_bytes": 458304,
-      "sha256": "88b2050171bc308d16b91e8b2f063be60ea52a8248c1b1ce68fdfa018a643895",
+      "size_bytes": 496499,
+      "sha256": "0b098a2fcb5d70028307cf31d87deaae8ed8a05ccf5d95a1c095de6fa75a3664",
       "record_count": 246
     },
     "neo4j/nodes_region.jsonl": {
@@ -95,9 +95,9 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 956072,
-      "sha256": "be0c1e1beb350b8d1353d194d96c910d5ec91a9b9dcc96c51078fd8dd40a8b45",
-      "record_count": 3703
+      "size_bytes": 608904,
+      "sha256": "aba078e4040b3f221cf145743b653154d54cb1dccc622718a1dc7353f4d9caf7",
+      "record_count": 2431
     },
     "neo4j/schema_constraints.cypher": {
       "size_bytes": 1208,
@@ -120,8 +120,8 @@
       "record_count": 0
     },
     "qdrant/payload_chunks.jsonl": {
-      "size_bytes": 1333414,
-      "sha256": "f4c65b7e06ec49b3ef75d40c14ef8f4a275ea85ee1b2524a56dd59e0c386683d",
+      "size_bytes": 1333476,
+      "sha256": "acba957e7e3c0780f7590f6fdd0d83e7ef2ad98b3ac77979a78c8d38d57f7578",
       "record_count": 599
     }
   }

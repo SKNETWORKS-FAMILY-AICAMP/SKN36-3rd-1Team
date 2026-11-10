@@ -127,12 +127,29 @@ class TestCandidateGitInput(unittest.TestCase):
         self.assertEqual(self.graph, snapshot)
 
     def test_candidate_semantic_suspicions_remain(self):
-        old_groups = hd.read_jsonl(hd.NEO4J_HANDOFF_DIR / "nodes_condition_group.jsonl")
-        old_conditions = hd.read_jsonl(hd.NEO4J_HANDOFF_DIR / "nodes_eligibility_condition.jsonl")
+        # 고정 Git 후보와 비교할 대상도 동결 v1.3.2로 고정한다.
+        legacy = hd.LEGACY_HANDOFF_DIR / "neo4j"
+        old_groups = hd.read_jsonl(legacy / "nodes_condition_group.jsonl")
+        old_conditions = hd.read_jsonl(legacy / "nodes_eligibility_condition.jsonl")
         self.assertEqual(self.graph.nodes_by_label["EligibilityCondition"], old_conditions)
         ids = {g["group_id"] for g in old_groups}
         self.assertEqual([g for g in self.graph.nodes_by_label["ConditionGroup"] if g["group_id"] in ids], old_groups)
         self.assertEqual(next(g["logic"] for g in old_groups if g["group_id"] == "GRP_POL_GOV_011_OR_INC"), "OR")
+
+    def test_current_release_age_links_are_independent_of_historical_candidate(self):
+        graph = lg.read_graph_input(hd.DEFAULT_HANDOFF_DIR / "neo4j")
+        report = lg.validate_graph_input(graph)
+        self.assertTrue(report.ok, report.summary())
+        self.assertEqual(sum(report.node_counts.values()), 1004)
+        self.assertEqual(sum(report.relationship_counts.values()), 2431)
+        for policy_id, condition_id in (("POL_GOV_011", "COND_AGE_12_24"),
+                                        ("POL_GOV_016", "COND_AGE_19_120"),
+                                        ("POL_GOV_023", "COND_AGE_6_64")):
+            with self.subTest(policy_id=policy_id):
+                self.assertTrue(any(r["relation"] == "REQUIRES_CONDITION" and r["source_id"] == policy_id
+                                    and r["target_id"] == condition_id for r in graph.relationships))
+                self.assertTrue(any(r["relation"] == "CONTAINS_CONDITION" and r["source_id"] == f"GRP_{policy_id}_ROOT"
+                                    and r["target_id"] == condition_id for r in graph.relationships))
 
 
 class TestNullableAndRelationshipContract(unittest.TestCase):

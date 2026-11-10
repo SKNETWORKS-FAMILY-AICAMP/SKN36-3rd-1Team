@@ -1,0 +1,2475 @@
+{
+  "description": "v1.4.0 후보에만 적용하는 원문 대조 교정. data/handoff(v1.3.2)는 수정하지 않는다. 노드·관계 유형과 응답 구조 변경 없음.",
+  "checked_at": "2026-11-08",
+  "text_corrections": [
+    {
+      "policy_id": "POL_001",
+      "field": "eligibility",
+      "find": "소득 기준 70%(맞벌이 90%, 신생아가구 최대 20%p 가산), 총자산 3억 3,700만원(신생아 가구 3억 5,400만원) 이하, 자동차 4,563만원 이하.",
+      "replace": "소득 기준 전년도 도시근로자 월평균소득 70%(본인·배우자 모두 소득이 있으면 90%, 1인가구 20%p·2인가구 10%p 가산), 총자산 3억 4,500만원 이하, 자동차 4,542만원 이하('23.03.28 이후 출산 자녀 1인당 10%p 완화, 최대 2자녀: 총자산 4억 1,300만원, 자동차 5,451만원).",
+      "evidence": "DOC_LH_001 소득·자산 기준 표"
+    },
+    {
+      "policy_id": "POL_003",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_003 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_004",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_004 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_006",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_006 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_007",
+      "field": "eligibility",
+      "find": "3.37억원",
+      "replace": "3.45억원",
+      "evidence": "POL_007 근거 문서 대출대상 항목(순자산가액 3.45억원 이하)"
+    },
+    {
+      "policy_id": "POL_006",
+      "field": "benefit",
+      "find": "일반형 연 2.3%",
+      "replace": "일반형 연 1.8%",
+      "evidence": "POL_006 근거 문서 대출금리 항목"
+    },
+    {
+      "policy_id": "POL_010",
+      "field": "eligibility",
+      "find": "(18~34세 청년 5억원 이하)",
+      "replace": "(15~34세 청년 5억원 이하)",
+      "evidence": "POL_010 근거 문서 지원대상 항목"
+    },
+    {
+      "policy_id": "POL_010",
+      "field": "eligibility",
+      "find": "선발형 청년특례(18~34세)",
+      "replace": "선발형 청년특례(15~34세)",
+      "evidence": "POL_010 근거 문서 지원대상 항목"
+    },
+    {
+      "policy_id": "POL_005",
+      "field": "eligibility",
+      "find": "2년 이내인 경우 발급 가능",
+      "replace": "2년 미만인 경우 발급 가능",
+      "evidence": "고용24 안내(DOC_WORK24_001): 졸업까지 남은 수업연한이 2년 이상인 재학생은 지원 제외"
+    },
+    {
+      "policy_id": "POL_002",
+      "field": "application_period",
+      "find": "2025-10-19 ~ 상시",
+      "replace": "2026-10-19 ~ 종료일 미기재",
+      "evidence": "주택도시기금 공지 재조회(2026-11-10): 2026.10.19일부터 대출 신청 가능, 작성일 2026.10.16. 상시 문구와 종료일 없음"
+    }
+  ],
+  "region_corrections": [
+    {
+      "policy_id": "POL_GOV_028",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_GOV_030",
+      "before": "전라남도",
+      "after": "광주광역시",
+      "before_region_id": "REGION_JEONNAM",
+      "after_region_id": "REGION_GWANGJU",
+      "evidence": "전남광주통합특별시 동구: 원문 문의처 062 국번·광주 동구 시설"
+    },
+    {
+      "policy_id": "POL_YC_002",
+      "before": "전국",
+      "after": "전라남도",
+      "before_region_id": "REGION_NATIONWIDE",
+      "after_region_id": "REGION_JEONNAM",
+      "evidence": "운영기관 영광군, 지역코드 1개(12번대). 코드 매핑 실패로 전국 처리됐음"
+    }
+  ],
+  "household_condition_removals": [
+    {
+      "policy_id": "POL_GOV_002",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_005",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_011",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_022",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_025",
+      "remove_homeless_requirement": false,
+      "evidence": "원문에 무주택 요건이 있어 무주택 조건은 유지하고, API 전체 선택에서 생긴 가구유형 OR 그룹만 제거"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_031",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_032",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_033",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_035",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_036",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_040",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_041",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_042",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_044",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_045",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_047",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_049",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_052",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_055",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_059",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_060",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_062",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_063",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    },
+    {
+      "policy_id": "POL_GOV_064",
+      "remove_homeless_requirement": true,
+      "evidence": "정부24 API 가구 항목 8개가 모두 '적용대상'(사실상 제한 없음)인데 무주택 필수 + 나머지 7개 유형 OR로 생성됨. 지원대상·선정기준 원문에 해당 가구 요건 없음"
+    }
+  ],
+  "age_condition_removals": [
+    {
+      "policy_id": "POL_GOV_008",
+      "condition_id": "COND_AGE_60_120",
+      "evidence": "60세 이상은 고령가산금 대상만 해당. 한부모·장애 등 다른 가산금에는 적용되지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "condition_id": "COND_AGE_18_55",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_028",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_053",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "condition_id": "COND_AGE_18_44",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "condition_id": "COND_AGE_18_64",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_044",
+      "condition_id": "COND_AGE_18_64",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "condition_id": "COND_AGE_18_60",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_026",
+      "condition_id": "COND_AGE_65_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_043",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "condition_id": "COND_AGE_18_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_065",
+      "condition_id": "COND_AGE_19_120",
+      "evidence": "정부24 공식 페이지 재조회(2026-11-09) 지원대상·선정기준에 연령 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_001",
+      "condition_id": "COND_AGE_19_35",
+      "evidence": "공식 페이지 재조회(2026-11-09): 만 35세 이하는 우대형의 취업준비생·사회초년생에만 해당하고 일반형에는 나이 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "condition_id": "COND_AGE_15_39",
+      "evidence": "공식 페이지 재조회(2026-11-09): 만 15~39세는 청년내일저축에만 해당하고 희망저축계좌 I·II에는 나이 기준 없음"
+    }
+  ],
+  "new_condition_nodes": [
+    {
+      "condition_id": "COND_AGE_12_24",
+      "type": "AGE",
+      "name": "연령조건: 만 12세~24세",
+      "operator": "BETWEEN",
+      "value": "12~24",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 12세~24세)"
+    },
+    {
+      "condition_id": "COND_AGE_6_64",
+      "type": "AGE",
+      "name": "연령조건: 만 6세~64세",
+      "operator": "BETWEEN",
+      "value": "6~64",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 6세~64세)"
+    },
+    {
+      "condition_id": "COND_AGE_75_120",
+      "type": "AGE",
+      "name": "연령조건: 75세 이상",
+      "operator": "BETWEEN",
+      "value": "75~120",
+      "unit": "세",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (연령조건: 75세 이상)"
+    },
+    {
+      "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
+      "type": "EMPLOYMENT",
+      "name": "제외: 공무원, 사립학교 교직원",
+      "operator": "IN",
+      "value": "공무원, 사립학교 교직원",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 공무원, 사립학교 교직원)"
+    },
+    {
+      "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
+      "type": "EMPLOYMENT",
+      "name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "operator": "IN",
+      "value": "대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_SPECIAL_WORKER",
+      "type": "EMPLOYMENT",
+      "name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+      "operator": "IN",
+      "value": "월 소득 500만원 이상의 특수형태근로종사자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득 500만원 이상의 특수형태근로종사자)"
+    },
+    {
+      "condition_id": "COND_EXCL_CORP_REP",
+      "type": "EMPLOYMENT",
+      "name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "operator": "IN",
+      "value": "사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표)"
+    },
+    {
+      "condition_id": "COND_EXCL_SELF_EMPLOYED",
+      "type": "EMPLOYMENT",
+      "name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "operator": "IN",
+      "value": "사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자)"
+    },
+    {
+      "condition_id": "COND_EXCL_NONPROFIT_REP",
+      "type": "EMPLOYMENT",
+      "name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+      "operator": "IN",
+      "value": "월 소득이 300만원 이상인 비영리단체 대표",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득이 300만원 이상인 비영리단체 대표)"
+    },
+    {
+      "condition_id": "COND_EXCL_STUDENT",
+      "type": "EDUCATION",
+      "name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "operator": "IN",
+      "value": "졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생)"
+    },
+    {
+      "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "operator": "IN",
+      "value": "생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능))"
+    },
+    {
+      "condition_id": "COND_EXCL_OTHER_SUBSIDY",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "operator": "IN",
+      "value": "다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+      "operator": "IN",
+      "value": "지원·융자·수강제한 기간인 부정수급자",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 지원·융자·수강제한 기간인 부정수급자)"
+    },
+    {
+      "condition_id": "COND_EXCL_FRAUD_UNPAID",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+      "operator": "IN",
+      "value": "부정행위에 따른 지원금을 반환하지 않은 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 부정행위에 따른 지원금을 반환하지 않은 사람)"
+    },
+    {
+      "condition_id": "COND_EXCL_NO_NEED",
+      "type": "SPECIAL_TARGET",
+      "name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+      "operator": "IN",
+      "value": "기타 지원 필요성이 인정되지 않는 사람",
+      "unit": "해당 여부",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "description": "국민내일배움카드 참여 제외 조건 (제외: 기타 지원 필요성이 인정되지 않는 사람)"
+    },
+    {
+      "condition_id": "COND_AGE_0_65",
+      "type": "AGE",
+      "name": "연령조건: 만 65세 이하",
+      "operator": "BETWEEN",
+      "value": "0~65",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 65세 이하)"
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 24개월 미만",
+      "operator": "LT",
+      "value": "24",
+      "unit": "개월",
+      "evidence_location": "정부24 지원대상",
+      "description": "양육 자녀의 연령 조건. 신청자 나이가 아니다."
+    }
+  ],
+  "age_condition_replacements": [
+    {
+      "policy_id": "POL_GOV_011",
+      "before": "COND_AGE_13_18",
+      "after": "COND_AGE_12_24",
+      "evidence": "원문 선정기준 만 12세~만 24세, 그래프 13~18세",
+      "after_name": "연령조건: 만 12세~24세"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "before": "COND_AGE_18_65",
+      "after": "COND_AGE_19_120",
+      "evidence": "원문 만 19세 이상(상한 없음), 그래프 18~65세. 120은 기존 데이터의 상한 없음 표기",
+      "after_name": "연령조건: 만 19세~120세"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "before": "COND_AGE_0_120",
+      "after": "COND_AGE_6_64",
+      "evidence": "원문 만 6세 이상 65세 미만, 그래프 0~120세",
+      "after_name": "연령조건: 만 6세~64세"
+    },
+    {
+      "policy_id": "POL_GOV_002",
+      "before": "COND_AGE_18_65",
+      "after": "COND_AGE_0_65",
+      "after_name": "연령조건: 만 65세 이하",
+      "evidence": "공식 페이지 재조회(2026-11-09): 사업신청 연도기준 만 65세 이하, 하한 없음. 0은 하한 없음 표기"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "before": "COND_AGE_0_1",
+      "after": "COND_CHILD_AGE_UNDER_24M",
+      "after_name": "대상 자녀 연령: 24개월 미만",
+      "evidence": "정부24 지원대상 '24개월 미만 아이'. 같은 페이지의 '24개월 이하' 표기는 담당자 검토 결과 오기로 판단. 신청자 나이와 구분하려고 SPECIAL_TARGET으로 기록"
+    }
+  ],
+  "group_condition_additions": [
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_AGE_75_120",
+      "target_name": "연령조건: 75세 이상",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
+      "target_name": "제외: 공무원, 사립학교 교직원",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
+      "target_name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_SPECIAL_WORKER",
+      "target_name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_CORP_REP",
+      "target_name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_SELF_EMPLOYED",
+      "target_name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_NONPROFIT_REP",
+      "target_name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_STUDENT",
+      "target_name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
+      "target_name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_OTHER_SUBSIDY",
+      "target_name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
+      "target_name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_FRAUD_UNPAID",
+      "target_name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "condition_id": "COND_EXCL_NO_NEED",
+      "target_name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+      "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    }
+  ],
+  "category_corrections": [
+    {
+      "policy_id": "POL_STG_MOHW_001",
+      "before": "출산·육아",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_DGU_001",
+      "before": "출산·육아",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_NTS_001",
+      "before": "중소기업 취업",
+      "after": "청년 취업·교육·자산형성"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "before": "중소기업 취업",
+      "after": "청년 취업·교육·자산형성"
+    },
+    {
+      "policy_id": "POL_STG_MOIS_001",
+      "before": "세제 혜택",
+      "after": "출산·육아·가족"
+    },
+    {
+      "policy_id": "POL_STG_EX_001",
+      "before": "교통비·생활비",
+      "after": "교통·생활비·의료·돌봄"
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "before": "교통비·생활비",
+      "after": "교통·생활비·의료·돌봄"
+    },
+    {
+      "policy_id": "POL_STG_SEOUL_001",
+      "before": "지역 복지",
+      "after": "지역별 생활지원·복지"
+    }
+  ],
+  "target_group_code_names": {
+    "YOUTH": "청년",
+    "PREGNANT_BIRTH": "임산부·출산가구",
+    "CHILD_YOUTH": "영유아·아동·청소년",
+    "WORKER_BIZ": "소상공인·재직자",
+    "JOBSEEKER": "구직자·취업준비생",
+    "LOW_INCOME": "저소득·취약계층",
+    "SENIOR": "어르신·노년층",
+    "GENERAL": "일반국민"
+  },
+  "life_stage_corrections": [
+    {
+      "policy_id": "POL_001",
+      "before": [
+        "노년",
+        "영유아",
+        "중장년",
+        "청년"
+      ],
+      "after": [
+        "영유아",
+        "중장년",
+        "청년"
+      ],
+      "evidence": "LH 공고의 대상은 신생아가구·신혼부부·예비신혼부부·6세 이하 자녀 가구이며, 65세는 직계존속 부양 가점 항목에만 나온다"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "before": [
+        "unknown"
+      ],
+      "after": [
+        "청소년",
+        "청년",
+        "중장년"
+      ],
+      "evidence": "원문 선정기준 만 14세~64세",
+      "evidence_location": "지원조건 JA0110/JA0111"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "before": [
+        "아동",
+        "영유아",
+        "청소년"
+      ],
+      "after": [
+        "영유아"
+      ],
+      "evidence": "정부24 지원대상 24개월 미만 아이. 아동(6~12세)·청소년(13~18세) 구간에 해당하지 않음"
+    }
+  ],
+  "chunk_life_stage_alignment_policies": [
+    "POL_001",
+    "POL_GOV_017",
+    "POL_STG_MOHW_001",
+    "POL_STG_MOIS_001",
+    "POL_STG_EX_001",
+    "POL_STG_NTS_001",
+    "POL_GOV_050"
+  ],
+  "revised_at": "2026-11-09",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영",
+  "new_condition_groups": [
+    {
+      "group_id": "GRP_POL_005_OR_EXCL",
+      "policy_id": "POL_005",
+      "logic": "OR",
+      "is_root": false,
+      "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외"
+    }
+  ],
+  "group_group_additions": [
+    {
+      "source_id": "GRP_POL_005_NOT_EXCL",
+      "target_id": "GRP_POL_005_OR_EXCL",
+      "target_name": "참여제외 OR 그룹 (GRP_POL_005_OR_EXCL)",
+      "evidence_document_id": "DOC_WORK24_001",
+      "evidence_location": "DOC_WORK24_001 지원 제외 대상"
+    }
+  ],
+  "group_description_corrections": [
+    {
+      "group_id": "GRP_POL_005_NOT_EXCL",
+      "before_prefix": "고용24 국민내일배움카드 참여 제외 대상 그룹:",
+      "after": "고용24 국민내일배움카드 참여 제외 대상 그룹: 하위 OR 그룹의 제외 조건 중 하나라도 해당하면 참여 제외"
+    }
+  ],
+  "income_condition_corrections_note": "정부24 API 소득 항목 JA0201~JA0205가 45건 모두 Y로 전체 선택되어 있었다. remove는 '소득 제한 없음 확정'이 아니라 자동 판정하지 않는다는 뜻이다. mark_unknown은 임의로 구간을 정하지 않고 그룹 logic을 UNKNOWN으로 둔다.",
+  "income_condition_corrections": [
+    {
+      "policy_id": "POL_GOV_002",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_002_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_003",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_003_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_004",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_004_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_005",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_005_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_006",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_006_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_007",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_007_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 전월소득이 근로자가구 소득 9분위 미만이라는 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_008",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_008_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_009",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_009_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_010",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_010_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_011",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_011_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_012",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_012_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_013",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_013_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_014",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_014_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_015_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_016_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "재가장애인은 기초생활수급자·차상위계층, 거주시설 장애인은 소득제한 없음으로 대상별 기준이 다름"
+    },
+    {
+      "policy_id": "POL_GOV_017",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_017_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "기초생활수급자는 중증장애인·국가유공자·시설 거주자와 나란한 대상 중 하나이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_018",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_018_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_019",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_019_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_020",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_020_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_021",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_021_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_022",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_022_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "경제적 빈곤은 아동 보호조치 사유의 예시이며 위탁가정의 소득 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_023",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_023_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_024",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_024_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_027",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_027_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_028",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_028_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_029",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_029_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_032",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_032_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_034",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_034_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_038",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_038_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_039",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_039_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 경기도형 긴급복지 사업 기준 준용이라고만 적혀 있어 구체 수치를 확인할 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_041",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_041_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_042",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_042_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 국비사업 소득기준(중위소득 180%) 초과자로, 중위소득 101~200% 구간과 경계가 맞지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_043",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_043_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_047",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_047_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "evidence": "원문은 가구소득 1~8분위 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_048",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_048_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_050",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_050_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_051",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_051_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_053",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_053_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_054_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "정부24 안내에 소득 기준 미기재. 포항시 일반 장애인활동지원 안내는 소득수준과 무관하게 신청가능. 포항시 자체 지침은 미확인"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_057_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_058",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_058_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_059",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_059_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_061",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_061_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "소득연계형 국가장학금은 중복수혜 제한이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_064",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_064_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 기초생활보장수급자는 '지원제외: 기 감면 대상자'에 포함된 항목으로 소득 구간 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_065",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_065_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_",
+        "COND_INC_중위소득_200_초과"
+      ],
+      "after": [],
+      "evidence": "국민기초생활수급자는 여러 감면 대상 중 하나이며 소득 구간 기준은 없음"
+    },
+    {
+      "policy_id": "POL_GOV_001",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_001_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "evidence": "공식 페이지 재조회: 부부합산 연소득 등 금액 기준이라 중위소득 구간으로 옮길 수 없음"
+    },
+    {
+      "policy_id": "POL_GOV_035",
+      "action": "mark_unknown",
+      "group_id": "GRP_POL_GOV_035_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "after": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "evidence": "공식 페이지 재조회: 최저보험료 이하 차상위계층 기준이며 중위소득 51~75% 근거 없음"
+    },
+    {
+      "policy_id": "POL_GOV_037",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_037_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_056",
+      "action": "remove",
+      "group_id": "GRP_POL_GOV_056_OR_INC",
+      "before": [
+        "COND_INC_중위소득_0_50_",
+        "COND_INC_중위소득_51_75_",
+        "COND_INC_중위소득_76_100_",
+        "COND_INC_중위소득_101_200_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+    },
+    {
+      "policy_id": "POL_GOV_036",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_036_ROOT",
+      "before": [
+        "COND_INC_중위소득_0_50_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 수급자·차상위·한부모·중위소득 52% 이하 가구 등으로 0~50% 필수 조건과 맞지 않음"
+    },
+    {
+      "policy_id": "POL_GOV_045",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_045_ROOT",
+      "before": [
+        "COND_INC_중위소득_0_50_"
+      ],
+      "after": [],
+      "evidence": "공식 페이지 재조회: 저소득가정은 여러 대상 중 하나이며 소득 필수 조건이 아님"
+    }
+  ],
+  "source_review": {
+    "description": "정책별 소득·가구 원문 확인 결과. not_specified=공고에 별도 기준이 명시되지 않음(다시 묻지 않고 나머지 조건 확인, 제한 없음 확정은 아님), specified=원문 기준이 그래프 조건과 일치, needs_review=기준이 있으나 구조화되지 않았거나 불명확, not_reviewed=정책별 원문 대조를 하지 않음. followup: ask_user=사용자 정보를 더 받으면 판정 가능, check_notice=공고 확인 안내",
+    "income": {
+      "POL_GOV_002": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_003": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_004": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_005": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_006": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_008": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_009": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_010": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_011": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_012": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_013": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_014": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_015": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_017": {
+        "status": "not_specified",
+        "note": "기초생활수급자는 중증장애인·국가유공자·시설 거주자와 나란한 대상 중 하나이며 소득 구간 기준은 없음"
+      },
+      "POL_GOV_018": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_019": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_020": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_021": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_022": {
+        "status": "not_specified",
+        "note": "경제적 빈곤은 아동 보호조치 사유의 예시이며 위탁가정의 소득 기준은 없음"
+      },
+      "POL_GOV_023": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_024": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_027": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_028": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_029": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_032": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_034": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_038": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_041": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_043": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_048": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_050": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_051": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_053": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_057": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_058": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_059": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 소득·재산 기준 없음"
+      },
+      "POL_GOV_061": {
+        "status": "not_specified",
+        "note": "소득연계형 국가장학금은 중복수혜 제한이며 소득 구간 기준은 없음"
+      },
+      "POL_GOV_065": {
+        "status": "not_specified",
+        "note": "국민기초생활수급자는 여러 감면 대상 중 하나이며 소득 구간 기준은 없음"
+      },
+      "POL_GOV_037": {
+        "status": "not_specified",
+        "note": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+      },
+      "POL_GOV_056": {
+        "status": "not_specified",
+        "note": "공식 페이지 재조회: 지원대상·선정기준에 소득 기준 없음"
+      },
+      "POL_GOV_030": {
+        "status": "specified",
+        "note": "원문 중위소득 100% 이하가 그래프 소득 구간과 일치"
+      },
+      "POL_GOV_001": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "우대형·일반형에 연소득 금액 기준이 있어 중위소득 구간으로 옮길 수 없음",
+        "check_point": "신청 유형과 연소득(일반형은 부부합산 5천만원 이하 등)"
+      },
+      "POL_GOV_016": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "정부24는 거주시설 장애인 소득제한 없음, 재가장애인 기초생활수급자·차상위계층이고, 서울시복지재단 표는 구분 없이 수급자·차상위로 표기해 서로 다름",
+        "check_point": "거주시설 이용 여부와 재가장애인의 수급·차상위 여부"
+      },
+      "POL_GOV_036": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "수급자·차상위·한부모·중위소득 52% 이하 가구 등이 대상",
+        "check_point": "수급·차상위·한부모 해당 여부 또는 중위소득 52% 이하 여부"
+      },
+      "POL_GOV_040": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "기준중위소득 120% 이내(건강보험료 기준)로 그래프 구간보다 좁음",
+        "check_point": "건강보험료 기준 중위소득 120% 이내 여부"
+      },
+      "POL_GOV_064": {
+        "status": "not_specified",
+        "note": "지원제외 '기 감면 대상자'에 생계·의료급여 수급자가 포함되어 있으며 소득 구간 기준은 없음"
+      },
+      "POL_GOV_007": {
+        "status": "needs_review",
+        "followup": "check_notice",
+        "note": "통일부 운영 지침(2021-01-04 시행, 연혁본)에 전월 임금소득이 근로자가구 소득 9분위 이상이면 제외, 고용보험 가입 사업장 근로소득 기준. 원화 금액 미기재",
+        "check_point": "현행 지침과 적용되는 9분위 소득 금액"
+      },
+      "POL_GOV_035": {
+        "status": "needs_review",
+        "followup": "check_notice",
+        "note": "최저보험료 이하인 차상위계층 기준이며 중위소득 수치 없음",
+        "check_point": "차상위계층 여부와 보건복지부 장관이 정한 최저보험료 기준"
+      },
+      "POL_GOV_039": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "정부24는 경기도형 긴급복지 기준 준용. 경기도 안내: 기준 중위소득 100% 이하, 특례시 재산 372백만원 이하, 금융재산 18,494천원 이하(4인 기준). 외국인 주민 동일 적용은 미확인",
+        "check_point": "기준 중위소득 100% 이하 여부와 재산·금융재산"
+      },
+      "POL_GOV_042": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과",
+        "check_point": "기준중위소득 180% 초과 여부"
+      },
+      "POL_GOV_045": {
+        "status": "needs_review",
+        "followup": "check_notice",
+        "note": "저소득가정은 여러 대상 중 하나이며 저소득 기준 수치 없음",
+        "check_point": "저소득가정 기준과 다른 대상 요건"
+      },
+      "POL_GOV_047": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "천안시 2026년 하반기 공고에 대출 당시 가구소득 1~8분위",
+        "check_point": "학자금 대출 당시 가구소득 분위"
+      },
+      "POL_GOV_054": {
+        "status": "not_specified",
+        "note": "정부24 안내에 소득 기준 미기재. 포항시 일반 장애인활동지원 안내는 소득수준과 무관하게 신청가능. 포항시 자체 지침은 미확인"
+      }
+    },
+    "household": {
+      "POL_GOV_002": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_003": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_004": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_005": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_006": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_011": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_015": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_016": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_017": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_018": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_019": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_020": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_021": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음",
+        "check_point": "장애인가정 해당 여부"
+      },
+      "POL_GOV_022": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_023": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_027": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_029": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_031": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_032": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_033": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_034": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_035": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "노인·장애인·한부모·다자녀 세대가 대상이나 그래프에 가구 조건이 없음",
+        "check_point": "노인·장애인·한부모·다자녀 세대 해당 여부"
+      },
+      "POL_GOV_036": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "한부모 가구가 대상 예시로 있으나 필수 요건은 아님",
+        "check_point": "수급·차상위·한부모 등 대상 해당 여부"
+      },
+      "POL_GOV_040": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_041": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_042": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_044": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_045": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "독거 여성장애인이 대상 중 하나로 있으나 필수 요건은 아님",
+        "check_point": "독거 여부 등 대상 해당 여부"
+      },
+      "POL_GOV_046": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_047": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_048": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_049": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_050": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음",
+        "check_point": "장애인가정 해당 여부"
+      },
+      "POL_GOV_051": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_052": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_055": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_056": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "난임시술 후 비임신인 부부가 대상",
+        "check_point": "부부 여부와 시술비 지원 대상 여부"
+      },
+      "POL_GOV_057": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_058": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_059": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_060": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_061": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_062": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_063": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_064": {
+        "status": "not_specified",
+        "note": "원문 지원대상·선정기준에 가구 유형 요건 없음"
+      },
+      "POL_GOV_025": {
+        "status": "specified",
+        "note": "원문에 무주택 세대 구성원 요건이 있어 무주택 조건 유지"
+      },
+      "POL_GOV_054": {
+        "status": "needs_review",
+        "followup": "ask_user",
+        "note": "독거 및 취약가구 대상. 2025 장애인활동지원 사업안내의 취약가구는 수급자 외 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상인 경우이나 포항시 적용은 미확인",
+        "check_point": "독거 또는 취약가구 해당 여부"
+      }
+    }
+  },
+  "application_dates": {
+    "POL_001": {
+      "start": "2026-04-15",
+      "end": "2026-04-17",
+      "evidence": "수집된 신청기간: 2026-04-15 ~ 2026-04-17"
+    },
+    "POL_002": {
+      "start": "2026-10-19",
+      "evidence": "주택도시기금 공지 재조회(2026-11-10): 2026.10.19일부터 대출 신청 가능, 작성일 2026.10.16"
+    },
+    "POL_009": {
+      "start": "2024-02-26",
+      "end": "2025-02-25",
+      "evidence": "수집된 신청기간: 2024-02-26 ~ 2025-02-25. 자격 조건·근거 문서가 한시 특별지원 기준이므로 원래 사업 기간을 사용"
+    },
+    "POL_GOV_033": {
+      "start": "2025-10-24",
+      "end": "2025-11-07",
+      "evidence": "수집된 신청기간: 2025.10.24~2025.11.7. / ※ 2026년 일정 10월 초 게시 예정"
+    },
+    "POL_GOV_059": {
+      "start": "2026-06-24",
+      "end": "2026-06-26",
+      "evidence": "수집된 신청기간: 2026.06.24~2026.06.26"
+    },
+    "POL_GOV_061": {
+      "start": "2025-09-24",
+      "end": "2025-10-10",
+      "evidence": "수집된 신청기간: 2025.09.24~2025.10.10"
+    },
+    "POL_STG_SEOUL_001": {
+      "start": "2026-05-27",
+      "end": "2026-05-29",
+      "evidence": "수집된 신청기간: 20260527 ~ 20260529"
+    },
+    "POL_YC_002": {
+      "start": "2026-06-08",
+      "end": "2026-06-17",
+      "evidence": "수집된 신청기간: 20260608 ~ 20260617"
+    },
+    "POL_YC_003": {
+      "start": "2026-08-12",
+      "end": "2026-11-06",
+      "evidence": "수집된 신청기간: 20260812 ~ 20261106"
+    },
+    "POL_YC_004": {
+      "start": "2026-03-01",
+      "end": "2026-04-01",
+      "evidence": "수집된 신청기간: 20260301 ~ 20260401"
+    },
+    "POL_YC_005": {
+      "start": "2026-11-01",
+      "end": "2026-11-30",
+      "evidence": "수집된 신청기간: 20261101 ~ 20261130"
+    },
+    "POL_YC_006": {
+      "start": "2026-09-01",
+      "end": "2026-09-30",
+      "evidence": "수집된 신청기간: 20260901 ~ 20260930"
+    },
+    "POL_YC_007": {
+      "start": "2026-11-01",
+      "end": "2026-11-30",
+      "evidence": "수집된 신청기간: 20261101 ~ 20261130"
+    },
+    "POL_YC_009": {
+      "start": "2026-06-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260601 ~ 20261231"
+    },
+    "POL_YC_011": {
+      "start": "2026-03-23",
+      "end": "2026-04-24",
+      "evidence": "수집된 신청기간: 20260323 ~ 20260424"
+    },
+    "POL_YC_013": {
+      "start": "2026-03-01",
+      "end": "2026-04-30",
+      "evidence": "수집된 신청기간: 20260301 ~ 20260430"
+    },
+    "POL_YC_017": {
+      "start": "2026-03-02",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260302 ~ 20261231"
+    },
+    "POL_YC_019": {
+      "start": "2026-06-01",
+      "end": "2026-07-10",
+      "evidence": "수집된 신청기간: 20260601 ~ 20260710"
+    },
+    "POL_YC_020": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_021": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_022": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_023": {
+      "start": "2026-01-01",
+      "end": "2026-02-28",
+      "evidence": "수집된 신청기간: 20260101 ~ 20260228"
+    },
+    "POL_YC_024": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_025": {
+      "start": "2026-02-25",
+      "end": "2026-06-30",
+      "evidence": "수집된 신청기간: 20260225 ~ 20260630"
+    },
+    "POL_YC_027": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_028": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_032": {
+      "start": "2026-07-01",
+      "end": "2026-08-30",
+      "evidence": "수집된 신청기간: 20260701 ~ 20260830"
+    },
+    "POL_YC_036": {
+      "start": "2026-01-01",
+      "end": "2026-09-30",
+      "evidence": "수집된 신청기간: 20260101 ~ 20260930"
+    },
+    "POL_YC_041": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_045": {
+      "start": "2026-03-01",
+      "end": "2027-02-28",
+      "evidence": "수집된 신청기간: 20260301 ~ 20270228"
+    },
+    "POL_YC_049": {
+      "start": "2026-04-01",
+      "end": "2026-05-30",
+      "evidence": "수집된 신청기간: 20260401 ~ 20260530"
+    },
+    "POL_YC_050": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_052": {
+      "start": "2026-04-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260401 ~ 20261231"
+    },
+    "POL_YC_054": {
+      "start": "2026-03-01",
+      "end": "2026-03-31",
+      "evidence": "수집된 신청기간: 20260301 ~ 20260331"
+    },
+    "POL_YC_055": {
+      "start": "2026-01-01",
+      "end": "2026-02-28",
+      "evidence": "수집된 신청기간: 20260101 ~ 20260228"
+    },
+    "POL_YC_056": {
+      "start": "2026-03-04",
+      "end": "2026-03-31",
+      "evidence": "수집된 신청기간: 20260304 ~ 20260331"
+    },
+    "POL_YC_057": {
+      "start": "2026-02-10",
+      "end": "2026-02-24",
+      "evidence": "수집된 신청기간: 20260210 ~ 20260224"
+    },
+    "POL_YC_058": {
+      "start": "2026-05-13",
+      "end": "2026-05-21",
+      "evidence": "수집된 신청기간: 20260513 ~ 20260521"
+    },
+    "POL_YC_059": {
+      "start": "2026-04-30",
+      "end": "2026-08-14",
+      "evidence": "수집된 신청기간: 20260430 ~ 20260814"
+    },
+    "POL_YC_060": {
+      "start": "2026-02-25",
+      "end": "2026-03-11",
+      "evidence": "수집된 신청기간: 20260225 ~ 20260311"
+    },
+    "POL_YC_061": {
+      "start": "2026-03-23",
+      "end": "2026-04-06",
+      "evidence": "수집된 신청기간: 20260323 ~ 20260406"
+    },
+    "POL_YC_062": {
+      "start": "2026-02-26",
+      "end": "2026-03-04",
+      "evidence": "수집된 신청기간: 20260226 ~ 20260304"
+    },
+    "POL_YC_063": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    },
+    "POL_YC_064": {
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "evidence": "수집된 신청기간: 20260101 ~ 20261231"
+    }
+  },
+  "application_status_notes": {
+    "POL_GOV_006": "정부24 표시 신청기간이 2025.10.~12월 중으로 날짜가 특정되지 않음. 2026년 일정 미기재",
+    "POL_GOV_020": "2025.9.30. 이전 출생아 대상이며 출생일로부터 6개월 이내 신청. 후속 제도 미확인",
+    "POL_009": "후속 사업 청년월세 지원사업의 2026년 신규 신청기간은 2026-03-30~05-29 (복지로 확인 2026-11-09). 이 정책의 조건과 근거는 한시 특별지원 기준",
+    "POL_002": "공식 공지에 2026.10.19일부터 신청 가능으로 적혀 있고 종료일은 미기재. 상시 접수 여부는 확인되지 않음"
+  },
+  "empty_group_logic_corrections": [
+    {
+      "group_id": "GRP_POL_GOV_003_ROOT",
+      "policy_id": "POL_GOV_003",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_004_ROOT",
+      "policy_id": "POL_GOV_004",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_006_ROOT",
+      "policy_id": "POL_GOV_006",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_018_ROOT",
+      "policy_id": "POL_GOV_018",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_019_ROOT",
+      "policy_id": "POL_GOV_019",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_020_ROOT",
+      "policy_id": "POL_GOV_020",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_021_ROOT",
+      "policy_id": "POL_GOV_021",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_027_ROOT",
+      "policy_id": "POL_GOV_027",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_034_ROOT",
+      "policy_id": "POL_GOV_034",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_043_ROOT",
+      "policy_id": "POL_GOV_043",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_048_ROOT",
+      "policy_id": "POL_GOV_048",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_051_ROOT",
+      "policy_id": "POL_GOV_051",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_056_ROOT",
+      "policy_id": "POL_GOV_056",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_057_ROOT",
+      "policy_id": "POL_GOV_057",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_058_ROOT",
+      "policy_id": "POL_GOV_058",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_061_ROOT",
+      "policy_id": "POL_GOV_061",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    }
+  ],
+  "application_notes_with_dates": [
+    "POL_009",
+    "POL_002"
+  ],
+  "application_ongoing": {
+    "POL_005": "고용24 안내 원문: 신청기간 국민 누구나 상시신청 가능합니다",
+    "POL_010": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_007": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_015": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_018": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_021": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_022": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_023": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_025": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_026": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_027": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_028": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_029": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_030": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_034": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_035": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_036": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_037": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_038": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_039": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_040": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_042": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_044": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_045": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_048": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_050": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_051": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_052": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_053": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_056": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_058": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_060": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_062": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_063": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_GOV_065": "저장된 정부24 원문 신청기한: 상시신청",
+    "POL_STG_DGU_001": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청",
+    "POL_STG_EX_001": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청",
+    "POL_STG_MOLIT_001": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청",
+    "POL_STG_MOLIT_002": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청"
+  }
+}

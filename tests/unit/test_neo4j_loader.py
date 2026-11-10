@@ -192,10 +192,12 @@ class TestRealHandoffGraph(unittest.TestCase):
         self.assertEqual(sum(self.report.relationship_counts.values()), hd.EXPECTED_RELATIONSHIP_COUNT)
 
     def test_counts_by_label_and_relation(self):
-        self.assertEqual(self.report.node_counts, {
+        # 이 고정 집계는 v1.3.2 회귀용. 선택 데이터셋 집계는 위 테스트에서 별도로 확인한다.
+        report = lg.validate_graph_input(lg.read_graph_input(hd.LEGACY_HANDOFF_DIR / "neo4j"))
+        self.assertEqual(report.node_counts, {
             "Policy": 237, "Document": 246, "Organization": 116, "Region": 18, "Category": 5, "LifeStage": 6,
             "TargetGroup": 11, "ConditionGroup": 343, "EligibilityCondition": 52})
-        self.assertEqual(self.report.relationship_counts, {
+        self.assertEqual(report.relationship_counts, {
             "ADMINISTERED_BY": 237, "HAS_CATEGORY": 237, "AVAILABLE_IN": 238, "TARGETS": 424,
             "APPLIES_TO_LIFESTAGE": 419, "SUPPORTED_BY": 246, "REQUIRES_CONDITION": 735, "MODIFIES_CONDITION_OF": 1,
             "HAS_ROOT_CONDITION_GROUP": 237, "CONTAINS_GROUP": 106, "CONTAINS_CONDITION": 735})
@@ -263,7 +265,7 @@ def simulate_legacy_relationship_count(graph: lg.GraphInput) -> tuple[int, dict[
 class TestLegacyDefectReproduction(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.graph = lg.read_graph_input()
+        cls.graph = lg.read_graph_input(hd.LEGACY_HANDOFF_DIR / "neo4j")
 
     def test_legacy_unlabeled_or_match_inflates_relationships(self):
         total, per_type = simulate_legacy_relationship_count(self.graph)
@@ -279,8 +281,8 @@ class TestLegacyDefectReproduction(unittest.TestCase):
     def test_new_loader_matches_each_row_to_exactly_one_pair(self):
         runner = FakeGraphRunner()
         result = lg.load_graph(self.graph, runner)
-        self.assertEqual(len(runner.relationships), hd.EXPECTED_RELATIONSHIP_COUNT)
-        self.assertEqual(len(runner.nodes), hd.EXPECTED_NODE_COUNT)
+        self.assertEqual(len(runner.relationships), len(self.graph.relationships))
+        self.assertEqual(len(runner.nodes), sum(len(rows) for rows in self.graph.nodes_by_label.values()))
         self.assertEqual(result["count_mismatches"], {})
 
 
@@ -416,7 +418,8 @@ class TestLoadPlanAndFakeRunner(unittest.TestCase):
         self.assertEqual(sum(len(s.rows) for s in plan if s.kind == "node"), hd.EXPECTED_NODE_COUNT)
         self.assertEqual(sum(len(s.rows) for s in plan if s.kind == "relationship"), hd.EXPECTED_RELATIONSHIP_COUNT)
         relation_steps = [s for s in plan if s.name == "REQUIRES_CONDITION"]
-        self.assertEqual([len(s.rows) for s in relation_steps], [500, 235])
+        expected_batches = [500, 235] if hd.IS_LEGACY_DATASET else [136]
+        self.assertEqual([len(s.rows) for s in relation_steps], expected_batches)
         row = relation_steps[0].rows[0]
         self.assertEqual(set(row), {"source_id", "target_id", "properties"})
         self.assertLessEqual(set(row["properties"]), set(lg.RELATIONSHIP_PROPERTY_FIELDS))
