@@ -217,7 +217,7 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .rows .badge{animation:stamp .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:inherit}
 @keyframes stamp{0%{opacity:0;transform:scale(1.8) rotate(-8deg)}60%{opacity:1}100%{transform:none}}
 .b-ok{background:var(--ok-bg);color:var(--ok)}.b-warn{background:var(--warn-bg);color:var(--warn)}.b-bad{background:var(--bad-bg);color:var(--bad)}.b-muted{background:var(--muted-bg);color:var(--ink-2)}
-.pfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.pfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .pfoot .note{font-size:12.5px;color:var(--ink-3);margin-right:auto}
 .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 18px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none;white-space:nowrap;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
 .btn:hover{transform:translateY(-2px)}

@@ -17,11 +17,6 @@ export const NO_EVIDENCE_GUIDE = {
 
 /** backend/rag/pipeline.py가 needs_check 조건이 있을 때 붙이는 일반 보류 안내 */
 const HOLD_NOTICE_TEXT = '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.';
-export const UNJUDGED_NOTICE: Notice = {
-  kind: 'info',
-  title: '개인 자격 미판정',
-  text: '안내한 정책은 입력하신 조건과 비교할 자격 기준이 데이터에 정리되어 있지 않아 개인 자격을 판정하지 않았어요. 지원 기준은 공식 원문에서 확인해 주세요.',
-};
 
 export const INFO_GUIDE_TITLE = '추가 확인이 필요해요';
 export const INFO_CAVEAT = '공식 원문 근거가 부족해 확정 답변은 하지 않았어요.';
@@ -61,14 +56,13 @@ export function answerView(r: AskResponse): AnswerView {
     warning: notice?.kind === 'warn' ? notice : null,
     extraInfo: notice?.kind === 'info' ? notice : null,
   };
-  // 모든 정책의 보류 사유가 '비교할 조건 없음'뿐이면, 일반 보류 경고를 중립 안내로 바꾼다.
+  // 모든 정책의 보류 사유가 '비교할 조건 없음'뿐이면, 일반 보류 경고는 카드의 '자동 판정 안 함' 안내와 같은 내용이라 생략한다.
   // 다른 경고(지역 확인 등)나 구체적인 확인 사항이 있는 정책이 하나라도 있으면 경고를 그대로 둔다.
   if (
     notice?.kind === 'warn' && notice.text === HOLD_NOTICE_TEXT
     && r.policy_checks.length > 0 && r.policy_checks.every((policy) => isUnjudgedOnly(policy.conditions))
   ) {
     view.warning = null;
-    view.extraInfo = UNJUDGED_NOTICE;
   }
 
   if (r.status === 'answered') {

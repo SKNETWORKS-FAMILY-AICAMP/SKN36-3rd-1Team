@@ -6,7 +6,7 @@ import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
 import { lifeHref, mapHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
-import { LOADING_STAGES } from '../config/request';
+import { LOADING_STAGES, policyQuestion } from '../config/request';
 import type { GraphIndex } from '../graph/graphModel';
 import { policyLifeStages } from '../graph/lifeStages';
 
@@ -30,9 +30,11 @@ interface Props {
   onDemoApply: () => void;
   /** 예시 응답 모드(백엔드 주소 없음)인지. 응답이 오기 전 표시와 시연 안내에 쓴다. */
   sampleMode: boolean;
+  /** 정책 카드의 '이 정책 물어보기': 만든 질문을 상담 질문 흐름(App의 ask)으로 보낸다. */
+  onAskPolicy?: (question: string, origin: HTMLElement) => void;
 }
 
-export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode }: Props) {
+export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode, onAskPolicy }: Props) {
   if (turn.kind === 'prompt') {
     return (
       <div className="turn">
@@ -62,7 +64,7 @@ export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode }:
               <button type="button" className="chip stag" style={{ marginTop: 12, animationDelay: '.12s' }} onClick={() => onRetry(turn.id)}>다시 시도</button>
             </>
           )}
-          {turn.state === 'done' && r && <Answer r={r} onFollowUp={onFollowUp} onDemoApply={onDemoApply} />}
+          {turn.state === 'done' && r && <Answer r={r} onFollowUp={onFollowUp} onDemoApply={onDemoApply} onAskPolicy={onAskPolicy} />}
         </div>
       </div>
     </div>
@@ -131,7 +133,9 @@ function AnswerText({ text, sources }: { text: string; sources?: AskResponse['ci
   );
 }
 
-function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Props['onFollowUp']; onDemoApply: () => void }) {
+function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
+  r: AskResponse; onFollowUp: Props['onFollowUp']; onDemoApply: () => void; onAskPolicy?: Props['onAskPolicy'];
+}) {
   const policyGroup = useId();
   const [policyIndex, setPolicyIndex] = useState<GraphIndex | null>(null);
   const hasLivePolicies = !r.is_sample && r.policy_checks.length > 0;
@@ -229,7 +233,7 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
           {policyRows(r.policy_checks, r.is_sample ? null : policyIndex).map(({ policy, period }) => (
             <PolicyCard key={policy.policy_id} p={policy} period={period}
               stages={!r.is_sample && policyIndex ? policyLifeStages(policyIndex, policy.policy_id) : []}
-              group={policyGroup} sample={r.is_sample} onDemoApply={onDemoApply} />
+              group={policyGroup} sample={r.is_sample} onDemoApply={onDemoApply} onAskPolicy={onAskPolicy} />
           ))}
         </div>
       </Block>,
@@ -364,8 +368,9 @@ function conditionReasonForDisplay(reason: string) {
   return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
-function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
+function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
+  onAskPolicy?: Props['onAskPolicy'];
 }) {
   const unjudged = isUnjudgedOnly(p.conditions);
   const incomeNotices = new Set<string>();
@@ -418,8 +423,8 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
         // 비교할 조건이 없다는 사유만 있으면 '추가 확인 필요' 대신 미판정 상태와 기준을 볼 곳만 안내한다.
         // 원문을 인용했어도 답변이 신청 방법만 다룰 수 있어, 답변에 기준이 있다고 가정하지 않는다.
         <div className="policy-condition-summary">
-          <div><span className="badge b-muted">개인 자격 미판정</span></div>
-          <p className="policy-condition-note">신청 자격은 공식 원문에서 확인할 수 있어요.</p>
+          <div><span className="badge b-muted">자동 판정 안 함</span></div>
+          <p className="policy-condition-note">이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.</p>
         </div>
       ) : displayedConditions.length > 0 && (
         <>
@@ -454,8 +459,14 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
         </>
       )}
       <div className="pfoot">
-        <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>
-        {/* 예시 정책은 실제 데이터에 없어 관계 지도로 연결하지 않는다 */}
+        {/* 비교한 조건이 없는 카드에는 맞지 않는 안내라 숨긴다 */}
+        {!unjudged && <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>}
+        {/* 예시 정책은 실제 데이터에 없어 질문·관계 지도로 연결하지 않는다 */}
+        {!sample && onAskPolicy && (
+          <button type="button" className="btn btn-o" onClick={(event) => onAskPolicy(policyQuestion(p.policy_name), event.currentTarget)}>
+            이 정책 물어보기
+          </button>
+        )}
         {!sample && <a className="btn btn-o" href={mapHref(p.policy_id)}>관계 지도</a>}
         {sourceHref && <a className="btn btn-o" href={sourceHref} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>}
         {canApply && (sample

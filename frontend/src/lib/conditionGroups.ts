@@ -53,7 +53,7 @@ export function hasOnlyAndGroups(conditions: ConditionResult[]): boolean {
 const UNJUDGED_REASON_PREFIXES = ['UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '확인 가능한 자격 조건 구조가 없어'];
 
 /**
- * 비교할 조건이 없다는 사유만 있는 정책이면 true(개인 자격 미판정).
+ * 비교할 조건이 없다는 사유만 있는 정책이면 true(화면 표시: '자동 판정 안 함').
  * 나이·지역·소득 등 구체적인 행이 하나라도 있으면 false라서, 사용자가 확인·입력할 수 있는 항목은 그대로 보인다.
  */
 export function isUnjudgedOnly(conditions: ConditionResult[]): boolean {

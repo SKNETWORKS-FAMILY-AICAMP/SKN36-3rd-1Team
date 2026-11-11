@@ -227,7 +227,8 @@ export default function App() {
           )}
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
-              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample} />
+              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}
+                onAskPolicy={(question, origin) => { ask(question, origin); }} />
             </div>
           ))}
           {awaiting && (
