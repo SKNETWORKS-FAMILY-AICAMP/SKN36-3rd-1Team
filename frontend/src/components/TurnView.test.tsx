@@ -236,3 +236,77 @@ it('restores the region badge in sample mode without confirming overall eligibil
     vi.useRealTimers();
   }
 });
+
+// 실제 /api/ask 응답(11/11)의 국민취업지원제도 policy_check. 데이터에 비교할 조건이 없는 UNKNOWN 정책이다.
+const unjudgedPolicy: AskResponse['policy_checks'][number] = {
+  policy_id: 'POL_010', policy_name: '고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)', agency: '고용노동부 국민취업지원기획팀',
+  reception_status: 'open', source_url: 'https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007', official_apply_url: 'https://www.work24.go.kr',
+  conditions: [{ field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.' }],
+};
+const holdNotice = { kind: 'warn', title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.' } as const;
+
+function renderAnswer(response: AskResponse) {
+  const noop = () => {};
+  return renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+}
+
+it('labels policies with nothing to compare as not personally judged instead of repeating checks', () => {
+  const cited = { title: '정부24', url: unjudgedPolicy.source_url, document_id: 'D', page_number: null };
+  const html = renderAnswer({ status: 'answered', answer: '기준 설명 [1]', citations: [cited], follow_up_questions: [],
+    checked_at: null, is_sample: false, notice: holdNotice, policy_checks: [unjudgedPolicy] });
+  const card = html.split('관련 정책 1개')[1];
+  expect(card).toContain('자동 판정 안 함');
+  expect(card).toContain('이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.');
+  expect(card).not.toMatch(/위 답변|추가 확인 필요|데이터에 정리/);
+  // 카드와 같은 내용인 공통 보류 안내는 생략한다. 출처 번호와 원문 링크는 그대로다.
+  expect(html).not.toContain('자동 판정을 보류한 조건이 있습니다');
+  expect(html).not.toMatch(/notice (warn|info)/);
+  expect(html).toMatch(/<sup>.*<a href="https:\/\/www\.gov\.kr\/portal\/rcvfvrSvc\/dtlEx\/149200005007"/);
+  expect(card).toContain('원문 보기');
+});
+
+it('keeps the info-status guide, which is about the answer rather than the card', () => {
+  const html = renderAnswer({ status: 'info', answer: '안내 본문', citations: [], follow_up_questions: [], checked_at: null,
+    is_sample: false, notice: holdNotice, policy_checks: [unjudgedPolicy] });
+  expect(html).toContain('추가 확인이 필요해요');
+  expect(html).not.toContain('자동 판정을 보류한 조건이 있습니다');
+  expect(html).toContain('자동 판정 안 함');
+});
+
+it('keeps the hold warning and specific checks when another policy has items the user can resolve', () => {
+  const html = renderAnswer({ status: 'answered', answer: '본문', citations: [], checked_at: null, is_sample: false, notice: holdNotice,
+    follow_up_questions: [{ kind: 'ask_info', field: 'income', text: '연 소득을 알려 주세요.' }],
+    policy_checks: [unjudgedPolicy, fromChecker.POL_005_30 as AskResponse['policy_checks'][number]] });
+  expect(html).toContain('자동 판정을 보류한 조건이 있습니다');
+  expect(html).toContain('notice warn');
+  expect(html).toContain('연 소득을 알려 주세요.');
+  expect(html).toContain('외 10개 보기');
+  expect(html).toContain('자동 판정 안 함');
+});
+
+it('keeps other warnings such as an unrecognized region even for unjudged policies', () => {
+  const regionNotice = { kind: 'warn', title: '추가 확인 필요', text: '입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요.' } as const;
+  const html = renderAnswer({ status: 'answered', answer: '본문', citations: [], follow_up_questions: [], checked_at: null,
+    is_sample: false, notice: regionNotice, policy_checks: [unjudgedPolicy] });
+  expect(html).toContain('입력 지역을 확인하지 못했습니다');
+  expect(html).toContain('notice warn');
+});
+
+it('shows "이 정책 물어보기" first in the card footer only in live mode, and hides the condition footnote on unjudged cards', () => {
+  const noop = () => {};
+  const live = (sampleMode: boolean, policies: AskResponse['policy_checks']) => renderToStaticMarkup(
+    <TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response: {
+      status: 'answered', answer: '본문', citations: [], follow_up_questions: [], checked_at: null, is_sample: sampleMode, policy_checks: policies } }}
+      onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={sampleMode} onAskPolicy={noop} />,
+  );
+  const footer = (html: string) => html.slice(html.indexOf('class="pfoot"'));
+  const unjudgedCard = footer(live(false, [unjudgedPolicy]));
+  expect(unjudgedCard).toContain('이 정책 물어보기');
+  expect(unjudgedCard.indexOf('이 정책 물어보기')).toBeLessThan(unjudgedCard.indexOf('관계 지도'));
+  expect(unjudgedCard).not.toContain('조건 하나하나의 충족');
+  // 비교한 조건이 있는 카드는 기존 안내를 유지한다.
+  expect(footer(live(false, [fromChecker.POL_GOV_002_70 as AskResponse['policy_checks'][number]]))).toContain('조건 하나하나의 충족');
+  // 예시 모드에서는 가상 정책이라 질문 버튼을 숨긴다.
+  expect(live(true, [unjudgedPolicy])).not.toContain('이 정책 물어보기');
+});
