@@ -1,7 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
 import { TurnView } from './TurnView';
+import { mockAsk } from '../mock/mockAsk';
+import fromChecker from './__fixtures__/policyChecksFromChecker.json';
 
 it('shows one prompt per missing field before the answer and keeps suggested questions below', () => {
   const age = { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' } as const;
@@ -139,6 +141,85 @@ it('shows identical income notices once per policy without dropping distinct con
   expect(overview).toContain('정책별로 확인할 조건');
   expect(overview.match(/sample_only_income/g)).toHaveLength(1);
   expect(cards.match(/sample_only_income/g)).toHaveLength(2);
-  expect(html.match(/sample_only_other/g)).toHaveLength(1);
+  // 상단 요약은 같은 항목의 서로 다른 사유를 모두 한 줄에 보여 주고, 카드 상세도 그대로 유지한다.
+  expect(overview.match(/sample_only_other/g)).toHaveLength(1);
+  expect(cards.match(/sample_only_other/g)).toHaveLength(1);
   expect(conditions).toHaveLength(4);
+});
+
+// Release v1.4.0-candidate의 실제 조건 트리를 실제 Checker·Pipeline(run_ask_pipeline)에 통과시킨 policy_checks.
+// 검색 결과와 LLM 답변만 대역이다. 국민내일배움카드(POL_005)의 만 75세 이상은 '제외(NOT) → OR' 그룹 아래에 있다.
+
+function renderPolicy(key: keyof typeof fromChecker, followUps: AskResponse['follow_up_questions'] = []) {
+  const response: AskResponse = {
+    status: 'answered', answer: '가상 본문', citations: [], follow_up_questions: followUps,
+    checked_at: null, is_sample: false, policy_checks: [fromChecker[key] as AskResponse['policy_checks'][number]],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+  const [overview, card] = html.split('관련 정책 1개');
+  return { overview, card };
+}
+
+it.each(['POL_005_30', 'POL_005_80'] as const)('does not read exclusion-group age results as eligibility (%s)', (key) => {
+  const { overview, card } = renderPolicy(key);
+  expect(card).not.toMatch(/조건상 적합|조건 불일치/);
+  expect(card).toContain('개별 비교');
+  expect(card).toContain('조건이 어떻게 결합되는지 확인되지 않았어요.');
+  expect(card).not.toMatch(/하나만 충족|제외 조건이 함께/);
+  expect(overview).not.toMatch(/일치하지 않아요|조건상 적합|만 75세/);
+  expect(overview + card).not.toContain('(종합 결과)');
+  // '기타 자격 조건' 12개 중 2개만 바로 보이고 나머지는 접는다.
+  expect(overview).toContain('외 10개 보기');
+});
+
+it('hides verdict badges when an OR group may contain the compared condition', () => {
+  const { overview, card } = renderPolicy('POL_GOV_030_30');
+  expect(card).not.toMatch(/조건상 적합|조건 불일치/);
+  expect(card).toContain('만 9~24세 기준에 입력한 만 30세가 포함되지 않습니다.');
+  expect(overview.match(/개인\/가구 소득 및 중위소득 비교 기준을 확인해야 합니다\./g)).toHaveLength(1);
+});
+
+it('keeps verdict badges for policies whose groups are all AND', () => {
+  const { card } = renderPolicy('POL_GOV_002_70');
+  expect(card).toContain('조건 불일치');
+  expect(card).not.toContain('개별 비교');
+  expect(card).not.toContain('(종합 결과)');
+});
+
+it('does not repeat a missing-age request that the input button already asks for', () => {
+  const age = { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' } as const;
+  const policy = (id: string): AskResponse['policy_checks'][number] => ({
+    policy_id: id, policy_name: `가상 정책 ${id}`, agency: '', reception_status: 'unknown', source_url: 'https://example.org',
+    official_apply_url: null, conditions: [{ field: 'age', label: '나이', status: 'needs_check', reason: '사용자의 만 나이가 입력되지 않았습니다.' }],
+  });
+  const response: AskResponse = {
+    status: 'answered', answer: '가상 본문', citations: [], follow_up_questions: [age], checked_at: null, is_sample: false,
+    policy_checks: [policy('A'), policy('B')],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+  const [overview] = html.split('관련 정책 2개');
+  expect(overview.match(/만 나이를 알려 주세요\./g)).toHaveLength(1);
+  expect(overview).not.toContain('정책별로 확인할 조건');
+});
+
+it('restores the region badge in sample mode without confirming overall eligibility', async () => {
+  vi.useFakeTimers();
+  try {
+    const pending = mockAsk({ question: '구직 중인 청년인데 받을 수 있는 취업 지원이 있나요?', profile: { age: null, region: '서울', income: null }, history: [] });
+    await vi.advanceTimersByTimeAsync(1500);
+    const response = await pending;
+    const noop = () => {};
+    const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+      onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode />);
+    const card = html.split('관련 정책 1개')[1];
+    expect(card).toMatch(/조건상 적합<\/span><span>지역/);
+    expect(card).toMatch(/추가 확인 필요<\/span><span>나이 · 소득/);
+    expect(card).not.toMatch(/개별 비교|결합되는지 확인되지|\(종합 결과\)/);
+  } finally {
+    vi.useRealTimers();
+  }
 });

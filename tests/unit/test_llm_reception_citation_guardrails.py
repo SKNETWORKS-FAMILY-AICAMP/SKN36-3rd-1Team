@@ -75,6 +75,8 @@ def test_prompts_define_both_reception_and_eligibility():
         assert state in SYSTEM_PROMPT
     assert "접수가 마감된 상태" in SYSTEM_PROMPT
     assert "접수가 아직 시작되지" in SYSTEM_PROMPT
-    assert "접수 상태를 확인할 수 없" in SYSTEM_PROMPT
+    # 접수 미확인(unknown)은 자격 보류(needs_check)와 다른 문장으로 안내한다(#58 문구).
+    assert "현재 접수 여부는 공식 공고에서 확인해 주세요" in SYSTEM_PROMPT
+    assert "신청 자격은 추가 확인이 필요해요" in SYSTEM_PROMPT
     assert "서로 다른 정보" in SYSTEM_PROMPT
     assert "모든 정책에 신청 가능" in SYSTEM_PROMPT

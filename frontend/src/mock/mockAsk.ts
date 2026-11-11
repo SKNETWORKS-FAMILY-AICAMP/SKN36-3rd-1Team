@@ -9,6 +9,7 @@
 import type { AskRequest, AskResponse, ConditionResult, FollowUp, PolicyCheck, UserProfile } from '../api/types';
 import { CATEGORIES } from '../config/categories';
 import { PERSONAS } from '../config/personas';
+import { andGroupResult } from '../lib/conditionGroups';
 
 const SAMPLE_CHECKED_AT = '2026-11-06'; // 시연용 예시 날짜
 
@@ -65,6 +66,9 @@ function samplePolicy(p: UserProfile): PolicyCheck {
     { field: 'income', label: '소득', status: 'needs_check',
       reason: p.income != null ? `입력 연 ${p.income.toLocaleString('ko-KR')}만 원 · 원문 기준이 복잡해 자동으로 판정하지 않아요` : '원문 기준이 복잡해 자동으로 판정하지 않아요' },
   ];
+  // 예시 정책 A는 나이·지역·소득을 모두 충족해야 하는 AND 조건으로 가정한다(가상 기준).
+  // 실제 Checker처럼 루트 그룹의 종합 결과 행을 마지막에 붙인다. 화면은 이 행으로 AND 구조를 확인하고 표시에서는 뺀다.
+  conditions.push(andGroupResult(conditions));
   return {
     policy_id: 'POL_SAMPLE_A', policy_name: '예시 정책 A · 청년 구직 지원', agency: '시연용 가상 데이터 · 실제 정책 아님',
     reception_status: 'open', conditions, source_url: SRC.youth.url,
