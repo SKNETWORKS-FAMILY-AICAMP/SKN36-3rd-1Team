@@ -20,8 +20,19 @@ describe('mockAsk 예시 응답', () => {
   it('조건이 없으면 나이·지역·소득 모두 추가 확인 필요', async () => {
     const r = await ask({ question: work.question });
     expect(r.is_sample).toBe(true);
-    expect(r.policy_checks[0].conditions.map((c) => c.status)).toEqual(['needs_check', 'needs_check', 'needs_check']);
+    // 마지막 행은 실제 Checker처럼 붙인 AND 종합 결과다.
+    expect(r.policy_checks[0].conditions.map((c) => c.status)).toEqual(['needs_check', 'needs_check', 'needs_check', 'needs_check']);
     expect(r.checked_at).not.toBeNull();
+  });
+
+  it('AND 종합 결과: 불일치가 있으면 불일치, 없으면 확인 필요 (소득은 항상 확인 필요)', async () => {
+    const root = async (profile: UserProfile) => {
+      const { conditions } = (await ask({ question: work.question, profile })).policy_checks[0];
+      return conditions[conditions.length - 1];
+    };
+    expect(await root({ ...empty, region: '서울' })).toMatchObject({ field: 'eligibility', status: 'needs_check', reason: '모든 조건을 충족해야 합니다(종합 결과).' });
+    expect((await root({ age: 40, region: '서울', income: null })).status).toBe('ineligible');
+    expect((await root({ age: 26, region: '서울', income: 4000 })).status).toBe('needs_check');
   });
 
   it('나이 경계값: 19·34세는 적합, 18·35세는 불일치', async () => {

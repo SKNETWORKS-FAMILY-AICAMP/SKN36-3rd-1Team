@@ -1,0 +1,282 @@
+{
+ "POL_005_30": {
+  "policy_id": "POL_005",
+  "conditions": [
+   {
+    "field": "age",
+    "label": "나이",
+    "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.",
+    "status": "ineligible"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "education",
+    "label": "기타 자격 조건",
+    "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+    "status": "needs_check"
+   }
+  ],
+  "reception_status": "open",
+  "policy_name": "고용24 국민내일배움카드",
+  "agency": "고용노동부 / 한국고용정보원",
+  "source_url": "https://example.org/POL_005",
+  "official_apply_url": null
+ },
+ "POL_005_80": {
+  "policy_id": "POL_005",
+  "conditions": [
+   {
+    "field": "age",
+    "label": "나이",
+    "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.",
+    "status": "eligible"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "employment",
+    "label": "기타 자격 조건",
+    "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "education",
+    "label": "기타 자격 조건",
+    "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "target",
+    "label": "기타 자격 조건",
+    "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+    "status": "eligible"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+    "status": "ineligible"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+    "status": "ineligible"
+   }
+  ],
+  "reception_status": "open",
+  "policy_name": "고용24 국민내일배움카드",
+  "agency": "고용노동부 / 한국고용정보원",
+  "source_url": "https://example.org/POL_005",
+  "official_apply_url": null
+ },
+ "POL_GOV_030_30": {
+  "policy_id": "POL_GOV_030",
+  "conditions": [
+   {
+    "field": "age",
+    "label": "나이",
+    "reason": "만 9~24세 기준에 입력한 만 30세가 포함되지 않습니다.",
+    "status": "ineligible"
+   },
+   {
+    "field": "income",
+    "label": "소득",
+    "reason": "개인/가구 소득 및 중위소득 비교 기준을 확인해야 합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "income",
+    "label": "소득",
+    "reason": "개인/가구 소득 및 중위소득 비교 기준을 확인해야 합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "income",
+    "label": "소득",
+    "reason": "개인/가구 소득 및 중위소득 비교 기준을 확인해야 합니다.",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+    "status": "needs_check"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+    "status": "ineligible"
+   }
+  ],
+  "reception_status": "open",
+  "policy_name": "위기청소년 특별지원",
+  "agency": "전남광주통합특별시 동구",
+  "source_url": "https://example.org/POL_GOV_030",
+  "official_apply_url": null
+ },
+ "POL_GOV_002_70": {
+  "policy_id": "POL_GOV_002",
+  "conditions": [
+   {
+    "field": "age",
+    "label": "나이",
+    "reason": "만 0~65세 기준에 입력한 만 70세가 포함되지 않습니다.",
+    "status": "ineligible"
+   },
+   {
+    "field": "eligibility",
+    "label": "자격 요건",
+    "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+    "status": "ineligible"
+   }
+  ],
+  "reception_status": "unknown",
+  "policy_name": "귀어 창업 및 주택구입 지원(융자)",
+  "agency": "해양수산부",
+  "source_url": "https://example.org/POL_GOV_002",
+  "official_apply_url": null
+ }
+}

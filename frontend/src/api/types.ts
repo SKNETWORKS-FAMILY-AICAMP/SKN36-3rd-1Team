@@ -83,7 +83,7 @@ export interface Notice {
 
 /**
  * answered: 출처 검증을 통과한 답변 / no_evidence: 근거 없음(서버가 LLM 없이 정한 문장) / info: 근거가 부족해 안내만
- * 화면은 answered의 answer만 답변 본문으로 보여 준다 (lib/answerView.ts).
+ * 화면은 answered의 answer를 답변 본문으로, info의 answer는 안내 상자 아래 근거 설명으로 보여 준다 (lib/answerView.ts, TurnView).
  */
 export type AnswerStatus = 'answered' | 'no_evidence' | 'info';
 

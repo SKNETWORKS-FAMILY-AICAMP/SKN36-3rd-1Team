@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
-import type { AskResponse, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
+import type { AskResponse, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
+import { hasOnlyAndGroups, isGroupRow, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
@@ -143,17 +144,26 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     return () => { active = false; };
   }, [hasLivePolicies]);
   const view = answerView(r);
-  const ageRequest = r.follow_up_questions.find((item) => item.kind === 'ask_info' && item.field === 'age');
-  const remainingFollowUps = r.follow_up_questions.filter((item) => (
-    item.kind !== 'ask_info' || item.field !== 'age'
-  ));
+  const infoRequests = new Map<string, FollowUp>();
+  const questions: FollowUp[] = [];
+  for (const item of r.follow_up_questions) {
+    if (item.kind === 'question') {
+      questions.push(item);
+    } else if (item.field && !infoRequests.has(item.field)) {
+      infoRequests.set(item.field, item);
+    }
+  }
   const blocks: ReactElement[] = [];
-  if (ageRequest) {
+  if (infoRequests.size > 0) {
     blocks.push(
-      <Block key="age" title="만 나이 확인" icon="bulb">
-        <button type="button" className="chip" onClick={(event) => onFollowUp(ageRequest, event.currentTarget)}>
-          {ageRequest.text}
-        </button>
+      <Block key="info-requests" title="추가로 확인할 정보" icon="bulb">
+        <div className="chips">
+          {[...infoRequests].map(([field, item]) => (
+            <button key={field} type="button" className="chip" onClick={(event) => onFollowUp(item, event.currentTarget)}>
+              {item.text}
+            </button>
+          ))}
+        </div>
       </Block>,
     );
   }
@@ -166,10 +176,7 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     );
     if (r.answer.trim()) {
       blocks.push(
-        <details key="info-answer" className="policy-reasons">
-          <summary>확인한 근거 설명 보기</summary>
-          <AnswerText text={r.answer} sources={r.citations} />
-        </details>,
+        <AnswerText key="info-answer" text={r.answer} sources={r.citations} />,
       );
     }
   } else if (view.guide) {
@@ -180,6 +187,40 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     );
   } else if (view.warning) {
     blocks.push(<NoticeBox key="w" kind="warn" icon="search" title={view.warning.title} text={view.warning.text} />);
+  }
+  // 확인할 항목만 모은다. 개별 적합·불일치는 그룹 맥락 없이 정책 자격으로 읽힐 수 있어 여기에 올리지 않는다.
+  const policyReasons = r.policy_checks
+    .map((policy) => ({ policy, items: checkItems(policy.conditions, infoRequests), excluded: matchesExclusion(policy.conditions) }))
+    .filter(({ items, excluded }) => items.length > 0 || excluded);
+  if (policyReasons.length > 0) {
+    blocks.push(
+      <Block key="policy-reasons" title="정책별로 확인할 조건" icon="check">
+        <ul className="check-items">
+          {policyReasons.map(({ policy, items, excluded }) => (
+            <li key={policy.policy_id}>
+              <b>{policy.policy_name}</b>
+              {excluded && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
+              <ul>
+                {items.map(({ label, details }) => (
+                  <li key={label}>
+                    <span className="k">{label}</span>
+                    <span className="why">
+                      {details.slice(0, VISIBLE_DETAILS).map((detail) => <span key={detail} className="detail">{detail}</span>)}
+                      {details.length > VISIBLE_DETAILS && (
+                        <details>
+                          <summary>외 {details.length - VISIBLE_DETAILS}개 보기</summary>
+                          <ul>{details.slice(VISIBLE_DETAILS).map((detail) => <li key={detail}>{detail}</li>)}</ul>
+                        </details>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </Block>,
+    );
   }
   if (r.policy_checks.length > 0) {
     blocks.push(
@@ -229,11 +270,11 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
       </Block>,
     );
   }
-  if (remainingFollowUps.length > 0) {
+  if (questions.length > 0) {
     blocks.push(
       <Block key="f" title="이것도 알려 주시면 더 정확해요" icon="bulb">
         <div className="chips">
-          {remainingFollowUps.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
+          {questions.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
         </div>
       </Block>,
     );
@@ -283,9 +324,36 @@ function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
   });
 }
 
+const OFFICIAL_ELIGIBILITY_NOTICE = '신청 자격은 공식 공고에서 확인해 주세요.';
+/** 제외(NOT) 그룹에 입력 정보가 해당할 때(lib/conditionGroups `matchesExclusion`). 어떤 조건인지는 원문에서 확인하게 한다. */
+const EXCLUSION_NOTICE = '입력하신 정보가 이 정책의 지원 제외 대상 조건에 해당해요. 공식 원문의 제외 대상을 확인해 주세요.';
+/** Checker가 입력이 없어 보류할 때 쓰는 사유. 위쪽 입력 버튼과 같은 요청이라 요약에서 반복하지 않는다. */
+const MISSING_INPUT_REASON: Record<string, string> = { age: '사용자의 만 나이가 입력되지 않았습니다.' };
+/** 상단 요약에서 항목 하나에 바로 보여 줄 사유 수. 나머지는 '외 N개 보기'로 접는다. */
+const VISIBLE_DETAILS = 2;
+
+/** 정책 하나의 추가 확인 사유를 항목(label)별로 모은다. 일반 공고 안내·입력 요청·중복 사유는 뺀다. */
+function checkItems(conditions: ConditionResult[], infoRequests: Map<string, FollowUp>) {
+  const byLabel = new Map<string, Set<string>>();
+  for (const condition of conditions) {
+    if (condition.status !== 'needs_check' || isGroupRow(condition)) continue;
+    if (infoRequests.has(condition.field) && condition.reason === MISSING_INPUT_REASON[condition.field]) continue;
+    const detail = conditionReasonForDisplay(condition.reason);
+    if (detail === OFFICIAL_ELIGIBILITY_NOTICE) continue;
+    const details = byLabel.get(condition.label) ?? new Set<string>();
+    details.add(detail);
+    byLabel.set(condition.label, details);
+  }
+  return Array.from(byLabel, ([label, details]) => ({ label, details: [...details] }));
+}
+
+/** 그룹 구조가 AND로만 확인된 정책만 개별 적합·불일치를 배지로 보여 준다(lib/conditionGroups). */
+function conditionBadge(status: ConditionStatus, showVerdict: boolean): [string, string] {
+  return showVerdict || status === 'needs_check' ? CONDITION_LABEL[status] : ['b-muted', '개별 비교'];
+}
+
 function conditionReasonForDisplay(reason: string) {
-  const reviewMessage = '신청 자격은 공식 공고에서 확인해 주세요.';
-  if (reason === '사용자의 만 나이가 입력되지 않았습니다.') return '만 나이를 알려 주세요.';
+  if (reason === MISSING_INPUT_REASON.age) return '만 나이를 알려 주세요.';
   const detail = reason
     .replace('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '')
     .replace('조건 그룹의 내부 구조가 올바르지 않습니다.', '')
@@ -293,26 +361,32 @@ function conditionReasonForDisplay(reason: string) {
     .replace('데이터 품질 경고로 자동 판정을 보류합니다.', '')
     .trim();
 
-  return detail === reason ? reason : [detail, reviewMessage].filter(Boolean).join(' ');
+  return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
 function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
 }) {
   const incomeNotices = new Set<string>();
-  const displayedConditions = p.conditions.filter(({ field, status, label, reason }) => {
+  // 그룹 종합 결과 행(…해야 합니다(종합 결과))은 계산 과정이라 화면에서 뺀다.
+  const displayedConditions = p.conditions.filter((condition) => {
+    const { field, status, label, reason } = condition;
+    if (isGroupRow(condition)) return false;
     if (field !== 'income' || status !== 'needs_check') return true;
     const key = JSON.stringify([label, reason]);
     if (incomeNotices.has(key)) return false;
     incomeNotices.add(key);
     return true;
   });
+  const showVerdict = hasOnlyAndGroups(p.conditions);
+  const hidesVerdict = !showVerdict && displayedConditions.some(({ status }) => status !== 'needs_check');
   const [rcls, rlabel] = RECEPTION_LABEL[p.reception_status];
-  const labelsByStatus = new Map<ConditionStatus, Set<string>>();
+  const labelsByBadge = new Map<string, { cls: string; labels: Set<string> }>();
   for (const { status, label } of displayedConditions) {
-    const labels = labelsByStatus.get(status) ?? new Set<string>();
-    labels.add(label);
-    labelsByStatus.set(status, labels);
+    const [cls, badge] = conditionBadge(status, showVerdict);
+    const entry = labelsByBadge.get(badge) ?? { cls, labels: new Set<string>() };
+    entry.labels.add(label);
+    labelsByBadge.set(badge, entry);
   }
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
@@ -342,21 +416,24 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
       {displayedConditions.length > 0 && (
         <>
           <div className="policy-condition-summary">
-            {Array.from(labelsByStatus, ([status, labels]) => {
-              const [cls, label] = CONDITION_LABEL[status];
-              return (
-                <div key={status}>
-                  <span className={`badge ${cls}`}>{label}</span>
-                  <span>{Array.from(labels).join(' · ')}</span>
-                </div>
-              );
-            })}
+            {Array.from(labelsByBadge, ([badge, { cls, labels }]) => (
+              <div key={badge}>
+                <span className={`badge ${cls}`}>{badge}</span>
+                <span>{Array.from(labels).join(' · ')}</span>
+              </div>
+            ))}
+            {matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
+            {hidesVerdict && (
+              <p className="policy-condition-note">
+                조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.
+              </p>
+            )}
           </div>
           <details className="policy-reasons">
             <summary>판정 사유 자세히 보기</summary>
             <ul className="rows">
               {displayedConditions.map((c, i) => {
-            const [cls, label] = CONDITION_LABEL[c.status];
+            const [cls, label] = conditionBadge(c.status, showVerdict);
             return (
               // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
               <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>
