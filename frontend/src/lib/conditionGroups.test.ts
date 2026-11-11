@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import type { ConditionResult } from '../api/types';
-import { andGroupResult, hasOnlyAndGroups, isGroupRow } from './conditionGroups';
+import { andGroupResult, hasOnlyAndGroups, isGroupRow, matchesExclusion } from './conditionGroups';
 
 const row = (reason: string, field = 'eligibility'): ConditionResult => ({ field, label: '자격 요건', status: 'needs_check', reason });
 const AND = row('모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.');
@@ -30,4 +30,11 @@ it('builds an AND summary row with the checker AND rule and recognizes it as AND
   expect(andGroupResult([at('eligible'), at('eligible')]).status).toBe('eligible');
   expect(andGroupResult([]).status).toBe('needs_check');
   expect(hasOnlyAndGroups([at('eligible'), andGroupResult([at('eligible')])])).toBe(true);
+});
+
+it('reports an exclusion match only when a NOT group row is ineligible', () => {
+  expect(matchesExclusion([age, { ...NOT, status: 'ineligible' }, AND])).toBe(true);
+  expect(matchesExclusion([age, NOT, AND])).toBe(false);
+  expect(matchesExclusion([age, { ...NOT, status: 'eligible' }])).toBe(false);
+  expect(matchesExclusion([age, { ...AND, status: 'ineligible' }, { ...OR, status: 'ineligible' }])).toBe(false);
 });

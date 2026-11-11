@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
-import { hasOnlyAndGroups, isGroupRow } from '../lib/conditionGroups';
+import { hasOnlyAndGroups, isGroupRow, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
@@ -190,15 +190,16 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
   }
   // 확인할 항목만 모은다. 개별 적합·불일치는 그룹 맥락 없이 정책 자격으로 읽힐 수 있어 여기에 올리지 않는다.
   const policyReasons = r.policy_checks
-    .map((policy) => ({ policy, items: checkItems(policy.conditions, infoRequests) }))
-    .filter(({ items }) => items.length > 0);
+    .map((policy) => ({ policy, items: checkItems(policy.conditions, infoRequests), excluded: matchesExclusion(policy.conditions) }))
+    .filter(({ items, excluded }) => items.length > 0 || excluded);
   if (policyReasons.length > 0) {
     blocks.push(
       <Block key="policy-reasons" title="정책별로 확인할 조건" icon="check">
         <ul className="check-items">
-          {policyReasons.map(({ policy, items }) => (
+          {policyReasons.map(({ policy, items, excluded }) => (
             <li key={policy.policy_id}>
               <b>{policy.policy_name}</b>
+              {excluded && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
               <ul>
                 {items.map(({ label, details }) => (
                   <li key={label}>
@@ -324,6 +325,8 @@ function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
 }
 
 const OFFICIAL_ELIGIBILITY_NOTICE = '신청 자격은 공식 공고에서 확인해 주세요.';
+/** 제외(NOT) 그룹에 입력 정보가 해당할 때(lib/conditionGroups `matchesExclusion`). 어떤 조건인지는 원문에서 확인하게 한다. */
+const EXCLUSION_NOTICE = '입력하신 정보가 이 정책의 지원 제외 대상 조건에 해당해요. 공식 원문의 제외 대상을 확인해 주세요.';
 /** Checker가 입력이 없어 보류할 때 쓰는 사유. 위쪽 입력 버튼과 같은 요청이라 요약에서 반복하지 않는다. */
 const MISSING_INPUT_REASON: Record<string, string> = { age: '사용자의 만 나이가 입력되지 않았습니다.' };
 /** 상단 요약에서 항목 하나에 바로 보여 줄 사유 수. 나머지는 '외 N개 보기'로 접는다. */
@@ -419,6 +422,7 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
                 <span>{Array.from(labels).join(' · ')}</span>
               </div>
             ))}
+            {matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
             {hidesVerdict && (
               <p className="policy-condition-note">
                 조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.

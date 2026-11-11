@@ -48,3 +48,11 @@ export function hasOnlyAndGroups(conditions: ConditionResult[]): boolean {
   const groups = conditions.filter((condition) => condition.field === 'eligibility').map(groupLogic);
   return groups.length > 0 && groups.every((logic) => logic === 'AND');
 }
+
+/**
+ * 제외(NOT) 그룹의 종합 결과가 불일치면, 그 안의 제외 대상 조건에 입력 정보가 실제로 해당한 것이다.
+ * (Checker는 안쪽 결과가 '적합'일 때만 NOT을 '불일치'로 계산한다.) 어떤 조건이 해당했는지는 평평한 목록으로 알 수 없다.
+ */
+export function matchesExclusion(conditions: ConditionResult[]): boolean {
+  return conditions.some((condition) => groupLogic(condition) === 'NOT' && condition.status === 'ineligible');
+}

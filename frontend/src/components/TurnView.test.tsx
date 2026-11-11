@@ -174,6 +174,19 @@ it.each(['POL_005_30', 'POL_005_80'] as const)('does not read exclusion-group ag
   expect(overview).toContain('외 10개 보기');
 });
 
+it('warns only when the input actually falls into an exclusion (NOT) group', () => {
+  const notice = '지원 제외 대상 조건에 해당해요';
+  // 80세: 만 75세 이상 제외 그룹에 해당(Checker NOT 행 ineligible) → 상단 요약과 카드 모두 경고
+  const over80 = renderPolicy('POL_005_80');
+  expect(over80.overview).toContain(notice);
+  expect(over80.card).toContain(notice);
+  // 30세: 제외 그룹 결과가 확인 필요 → 경고 없음. 단순 AND·OR 정책에도 경고 없음
+  for (const key of ['POL_005_30', 'POL_GOV_030_30', 'POL_GOV_002_70'] as const) {
+    const { overview, card } = renderPolicy(key);
+    expect(overview + card).not.toContain(notice);
+  }
+});
+
 it('hides verdict badges when an OR group may contain the compared condition', () => {
   const { overview, card } = renderPolicy('POL_GOV_030_30');
   expect(card).not.toMatch(/조건상 적합|조건 불일치/);
