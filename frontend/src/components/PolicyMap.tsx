@@ -45,7 +45,7 @@ export default function PolicyMap({ policyId, recent, reduceMotion, onAsk }: {
     let alive = true;
     loadGraphDataset()
       .then((data) => { if (alive) setState({ kind: 'ready', data }); })
-      .catch((err: unknown) => { if (alive) setState({ kind: 'error', message: err instanceof Error ? err.message : '그래프 데이터를 읽지 못했어요.' }); });
+      .catch(() => { if (alive) setState({ kind: 'error', message: '정책 관계 지도를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.' }); });
     return () => { alive = false; };
   }, []);
 
@@ -114,15 +114,15 @@ function MapShell({ data, children }: { data?: GraphDataset; children: ReactNode
       <div className="wrap">
         <div className="board-h">
           <h2>정책 <span>관계 지도</span></h2>
-          <p>Graph DB(Neo4j)에 저장된 정책 연결 구조예요</p>
+          <p>정책의 지원 대상, 담당 기관, 관련 문서를 살펴보세요</p>
         </div>
         {/* 데이터가 덜 받아졌거나 섞였을 때만 위에서 알린다. 평소 버전·건수는 맨 아래 작은 글씨 */}
-        {mismatch && <p className="map-meta"><span className="badge b-warn">데이터 건수가 manifest와 달라요</span></p>}
+        {mismatch && <p className="map-meta"><span className="badge b-warn">일부 정책 정보가 빠져 있을 수 있어요</span></p>}
         {children}
         <p className="map-note">관계가 연결돼 있어도 자격이 확정된 건 아니에요. 최종 자격과 신청 가능 여부는 공식 원문에서 확인해 주세요.</p>
         {data && counted && (
-          <p className="map-data" title={data.status ?? undefined}>
-            데이터 {data.version} · 정책 {data.index.policies.length.toLocaleString('ko-KR')}개 · 노드 {counted.nodes.toLocaleString('ko-KR')}개 · 관계 {counted.edges.toLocaleString('ko-KR')}개
+          <p className="map-data">
+            정책 {data.index.policies.length.toLocaleString('ko-KR')}개
           </p>
         )}
       </div>
@@ -233,7 +233,7 @@ function PolicyGraph({ data, policy, search, reduceMotion, onAsk }: {
                 <EdgeLabel n={n} cx={center.x} cy={center.y} />
                 <MapNode x={n.x} y={n.y} r={NODE_R} kind={n.node.kind}
                   label={labels[i]}
-                  title={n.node.kind === 'group' ? nodeTitle(n.node) : `${RELATION_LABEL[n.edge.relation] ?? n.edge.relation}: ${n.node.label}`}
+                  title={n.node.kind === 'group' ? nodeTitle(n.node) : `${RELATION_LABEL[n.edge.relation] ?? '관련 정보'}: ${n.node.label}`}
                   active={i === sel} onSelect={() => setSel(i)} />
               </g>
             ))}
@@ -465,7 +465,7 @@ function ZoomCanvas({ resetKey, label, children }: { resetKey: string; label: st
 
 /** 조건 묶음 노드는 이름 대신 논리(모두 충족 등)를 보여 준다 */
 function nodeTitle(node: GraphNode): string {
-  return node.kind === 'group' ? `${KIND_LABEL.group} · ${LOGIC_LABEL[node.label] ?? node.label}` : node.label;
+  return node.kind === 'group' ? `${KIND_LABEL.group} · ${LOGIC_LABEL[node.label] ?? '공식 공고 확인 필요'}` : node.label;
 }
 
 function MapNode({ x, y, r, kind, label, title, active, onSelect, center }: {
@@ -485,7 +485,7 @@ function MapNode({ x, y, r, kind, label, title, active, onSelect, center }: {
 }
 
 function EdgeLabel({ n, cx, cy }: { n: PlacedNeighbor; cx: number; cy: number }) {
-  const label = RELATION_LABEL[n.edge.relation] ?? n.edge.relation;
+  const label = RELATION_LABEL[n.edge.relation] ?? '관련 정보';
   return <text className="ge" x={(cx + n.x) / 2} y={(cy + n.y) / 2} textAnchor="middle">{label}</text>;
 }
 
@@ -580,9 +580,9 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
     }
   }, [preview]);
   const { index } = data;
-  const relation = RELATION_LABEL[edge.relation] ?? edge.relation;
+  const relation = RELATION_LABEL[edge.relation] ?? '관련 정보';
   // 머리에 종류('자격 조건')가 이미 있으니 조건 묶음은 논리만 제목으로 쓴다
-  const title = node.kind === 'group' ? LOGIC_LABEL[node.label] ?? node.label : node.label;
+  const title = node.kind === 'group' ? LOGIC_LABEL[node.label] ?? '공식 공고 확인 필요' : node.label;
   // 근거 문서 원이면 그 문서가 곧 근거라 문서 이름을 또 쓰지 않는다
   const evidence = edge.evidenceDocumentId && edge.evidenceDocumentId !== node.id ? index.nodes.get(edge.evidenceDocumentId) : undefined;
   const evidenceUrl = sourceUrl(evidence);
@@ -706,8 +706,8 @@ function NodeDetail({ n, data, policy, children }: { n: PlacedNeighbor; data: Gr
             : <span>{evidence.label}</span>)}
           {edge.evidenceLocation && <span>원문 ‘{edge.evidenceLocation}’ 항목</span>}
           {edge.reviewStatus && (
-            <span className={`pd-status ${review?.tone ?? 'muted'}`} title={review?.label ?? edge.reviewStatus}>
-              {review?.short ?? edge.reviewStatus}
+            <span className={`pd-status ${review?.tone ?? 'muted'}`} title={review?.label ?? '원문 확인 필요'}>
+              {review?.short ?? '원문 확인 필요'}
             </span>
           )}
         </p>
@@ -767,7 +767,7 @@ function SimilarPolicies({ similar }: { similar: SimilarPolicy[] }) {
 function TreeView({ tree }: { tree: ConditionTree }) {
   return (
     <div className={`ctree l-${tree.logic.toLowerCase()}`}>
-      <span className="badge b-muted">{LOGIC_LABEL[tree.logic] ?? tree.logic}</span>
+      <span className="badge b-muted">{LOGIC_LABEL[tree.logic] ?? '공식 공고 확인 필요'}</span>
       {(tree.conditions.length > 0 || tree.groups.length > 0) && (
         <ul>
           {tree.conditions.map((c) => <li key={c.id}>{c.label}</li>)}

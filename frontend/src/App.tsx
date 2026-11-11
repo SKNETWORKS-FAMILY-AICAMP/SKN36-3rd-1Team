@@ -189,7 +189,7 @@ export default function App() {
   return (
     <>
       <div className="util">
-        <div className="wrap"><span className="dot" /><span className="ut">학습용 시연 화면이에요{usingSample && <> · 백엔드 연동 전이라 <b>예시 응답</b>이 표시돼요</>}</span></div>
+        <div className="wrap"><span className="dot" /><span className="ut">학습용 시연 화면이에요{usingSample && <> · <b>예시 응답</b>이 표시돼요</>}</span></div>
       </div>
       <header className="gnb">
         <div className="wrap">
@@ -271,7 +271,7 @@ export default function App() {
       </section>
       </>)}
 
-      <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요. 아이콘은 이 화면용으로 직접 그린 SVG예요.</div></footer>
+      <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
 
       <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder="이어서 물어보세요" inputRef={miniInputRef} onAsk={ask}
         onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), 400); }} />

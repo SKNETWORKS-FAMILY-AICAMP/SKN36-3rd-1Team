@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { LIFE_STAGES } from '../config/graph';
 import { policyQuestion } from '../config/request';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
+import { searchPolicies } from '../graph/graphModel';
 import {
   formatAgeRange, groupByCategory, lifeStageSummary, stageForAge, type AgeRange, type LifeStage, type StagePolicy,
 } from '../graph/lifeStages';
@@ -31,7 +32,7 @@ export default function LifeTimeline({ stageName, myAge, onAsk, recent }: {
     let alive = true;
     loadGraphDataset()
       .then((data) => { if (alive) setState({ kind: 'ready', data }); })
-      .catch((err: unknown) => { if (alive) setState({ kind: 'error', message: err instanceof Error ? err.message : '정책 데이터를 읽지 못했어요.' }); });
+      .catch(() => { if (alive) setState({ kind: 'error', message: '생애주기별 정책을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.' }); });
     return () => { alive = false; };
   }, []);
 
@@ -59,6 +60,7 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
   onAsk: (question: string) => void; recent: RecentPolicies | null;
 }) {
   const { stages, unclassified } = summary;
+  const [query, setQuery] = useState('');
   const myStage = stageForAge(stages, myAge);
   const recentIds = useMemo(() => new Set(recent?.policies.map((p) => p.id) ?? []), [recent]);
   // 상담 정책이 들어 있는 단계: 렌더마다 단계별 정책을 다시 훑지 않게 한 번만 계산한다
@@ -73,6 +75,12 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
     ?? stages.find((s) => s.id === myStage)
     ?? [...stages].sort((a, b) => b.policies.length - a.policies.length)[0];
   const withAge = selected.policies.filter((p) => limitedAges(p.ages).length > 0).length;
+  const searching = query.trim().length > 0;
+  const matches = useMemo(() => {
+    if (!searching) return null;
+    const ids = new Set(searchPolicies(data.index, query, data.index.policies.length).map((policy) => policy.id));
+    return selected.policies.filter(({ policy }) => ids.has(policy.id));
+  }, [data.index, query, searching, selected]);
 
   // 좁은 화면에서는 타임라인이 옆으로 넘어가므로, 고른 단계가 보이게 가로로만 옮긴다 (페이지는 움직이지 않게)
   const lineRef = useRef<HTMLOListElement>(null);
@@ -106,10 +114,15 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
       </ol>
 
       {/* 단계를 바꾸면 펼친 분야를 닫는다 (key로 새로 그림) */}
-      <StagePanel key={selected.id} stage={selected} withAge={withAge} onAsk={onAsk} recentIds={recentIds} />
+      <div role="search" className="life-panel">
+        <label htmlFor="life-policy-search">정책 검색 · {selected.name}</label>
+        <input id="life-policy-search" className="map-search" type="search" value={query}
+          placeholder="정책명, 기관, 지역" onChange={(event) => setQuery(event.target.value)} />
+      </div>
+      <StagePanel key={selected.id} stage={selected} withAge={withAge} onAsk={onAsk} recentIds={recentIds} matches={matches} />
 
       <p className="life-foot">
-        데이터 {data.version}{data.status ? ` · ${data.status}` : ''} · 정책 {data.index.policies.length.toLocaleString('ko-KR')}개 중 생애단계가 연결된 정책만 보여 드려요 (미분류 {unclassified}개)
+        전체 정책 {data.index.policies.length.toLocaleString('ko-KR')}개 중 생애단계가 연결된 정책만 보여 드려요 (미분류 {unclassified}개)
       </p>
     </>
   );
@@ -118,8 +131,9 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
 /**
  * 고른 생애단계의 정책: 처음에는 분야 칩만 보여 주고, 누른 분야 하나만 펼친다 (한 번에 정보가 쏟아지지 않게).
  */
-function StagePanel({ stage, withAge, onAsk, recentIds }: {
+function StagePanel({ stage, withAge, onAsk, recentIds, matches }: {
   stage: LifeStage; withAge: number; onAsk: (question: string) => void; recentIds: Set<string>;
+  matches: StagePolicy[] | null;
 }) {
   const groups = useMemo(() => groupByCategory(stage.policies), [stage]);
   const isRecent = (g: { items: StagePolicy[] }) => g.items.some((i) => recentIds.has(i.policy.id));
@@ -128,6 +142,7 @@ function StagePanel({ stage, withAge, onAsk, recentIds }: {
   // 펼친 정책 하나 (분야를 바꾸면 닫는다)
   const [openPolicy, setOpenPolicy] = useState<string | null>(null);
   const opened = groups.find((g) => g.category === open);
+  const visiblePolicies = matches ?? opened?.items;
 
   return (
     <div className="life-panel">
@@ -137,7 +152,11 @@ function StagePanel({ stage, withAge, onAsk, recentIds }: {
       </div>
       <p className="life-caution">ⓘ 생애단계는 데이터 분류예요. 나이 배지가 있는 정책만 원문 나이 기준이 확인됐어요.</p>
 
-      {groups.length === 0
+      {matches !== null
+        ? <p role="status" className="map-dim">{matches.length
+            ? `${stage.name} 검색 결과 ${matches.length}개`
+            : `${stage.name}에서 검색어와 일치하는 정책이 없어요.`}</p>
+        : groups.length === 0
         ? <p className="map-dim">이 단계에 연결된 정책이 없어요.</p>
         : (
           <div className="life-cats" role="group" aria-label="분야">
@@ -153,12 +172,12 @@ function StagePanel({ stage, withAge, onAsk, recentIds }: {
           </div>
         )}
 
-      {opened
-        ? <ul className="life-list" aria-label={`${opened.category} 정책`}>{opened.items.map((item) => (
+      {visiblePolicies?.length
+        ? <ul className="life-list" aria-label={matches ? '검색 결과 정책' : `${opened?.category} 정책`}>{visiblePolicies.map((item) => (
             <PolicyRow key={item.policy.id} item={item} fromChat={recentIds.has(item.policy.id)} open={openPolicy === item.policy.id}
               onToggle={() => setOpenPolicy(openPolicy === item.policy.id ? null : item.policy.id)} onAsk={onAsk} />
           ))}</ul>
-        : groups.length > 0 && <p className="life-pick">분야를 누르면 정책 목록이 펼쳐져요</p>}
+        : matches === null && groups.length > 0 && <p className="life-pick">분야를 누르면 정책 목록이 펼쳐져요</p>}
     </div>
   );
 }

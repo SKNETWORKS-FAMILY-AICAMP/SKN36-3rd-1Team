@@ -3,6 +3,42 @@ import { expect, it } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
 import { TurnView } from './TurnView';
 
+it('keeps reception and eligibility separate for each policy', () => {
+  const response: AskResponse = {
+    status: 'answered', answer: '1) **현재 접수 중 [1]**인 정책과 **접수 여부**를 확인할 정책이 있어요.\n2) 짝 없는 **표시와 일반 *표시 [1]',
+    citations: [{ title: '공식 공고', url: 'https://example.org/notice', document_id: 'D1', page_number: null }],
+    follow_up_questions: [], checked_at: null, is_sample: false,
+    policy_checks: [
+      { policy_id: 'A', policy_name: '정책 A', agency: '기관', reception_status: 'open',
+        source_url: 'https://example.org/notice', official_apply_url: null,
+        conditions: [{ field: 'age', label: '나이', status: 'needs_check', reason: '사용자의 만 나이가 입력되지 않았습니다.' }] },
+      { policy_id: 'B', policy_name: '정책 B', agency: '기관', reception_status: 'unknown',
+        source_url: 'https://example.org/other', official_apply_url: null,
+        conditions: [{ field: 'eligibility', label: '자격', status: 'needs_check', reason: '조건 그룹의 내부 구조가 올바르지 않습니다.' }] },
+    ],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+  expect(html).toContain('접수 중</span>');
+  expect(html).toContain('모집 상태 미확인</span>');
+  expect(html).toContain('만 나이를 알려 주세요.');
+  expect(html).toContain('신청 자격은 공식 공고에서 확인해 주세요.');
+  expect(html).toContain('href="https://example.org/notice"');
+  expect(html).toMatch(/<strong>.*현재 접수 중.*<a .*?>1<\/a>.*<\/strong>/);
+  expect(html).toContain('<strong><span>접수 여부</span></strong>');
+  expect(html).toContain('2) 짝 없는 **표시와 일반 *표시');
+  expect(html).not.toMatch(/needs_check|reception_status|내부 구조|조건상 적합/);
+});
+
+it('shows retry in demo mode without instructions for triggering an error', () => {
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'error' }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode />);
+  expect(html).toContain('다시 시도');
+  expect(html).not.toContain('질문에 “오류”를 넣으면');
+});
+
 it.each([
   ['closed', false], ['before', false], ['open', true],
 ] as const)('shows the application link according to reception status %s', (status, canApply) => {
@@ -45,7 +81,9 @@ it('groups identical source links without renumbering inline citations', () => {
     />,
   );
   expect(html.match(/class="src"/g)).toHaveLength(2);
-  expect(html).toContain('>1, 3</span>');
+  expect(html).not.toContain('class="n"');
+  expect(html).toContain('출처 3 원문 보기');
+  expect(html).toContain('example.org · p.2 · example.org · p.4');
   expect(html.match(/href="https:\/\/example\.org\/notice"/g)).toHaveLength(3);
 });
 

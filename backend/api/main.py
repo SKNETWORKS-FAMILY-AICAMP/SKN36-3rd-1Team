@@ -3,6 +3,7 @@
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 import logging
+import os
 from threading import Lock
 
 from fastapi import FastAPI, HTTPException, Request
@@ -15,6 +16,8 @@ from backend.rag.pipeline import AskError, run_ask_pipeline
 from database import embedding
 # handoff_data는 hybrid_search import 중 데이터셋 경로를 고정하므로 먼저 환경을 읽는다.
 embedding.load_env_file()
+if os.environ.get("LIFEPOLICY_DATASET_DIR") == "":
+    os.environ.pop("LIFEPOLICY_DATASET_DIR")
 from database.hybrid_search import (
     HybridSearchBackendError,
     HybridSearchInputError,

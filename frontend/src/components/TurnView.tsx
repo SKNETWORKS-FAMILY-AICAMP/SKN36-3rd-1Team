@@ -57,7 +57,7 @@ export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode }:
           {turn.state === 'error' && (
             <>
               <NoticeBox kind="bad" icon="warning" title="답변을 불러오지 못했어요"
-                text={`${turn.error ?? ''}${sampleMode ? ' (시연: 질문에 “오류”를 넣으면 이 화면이 나와요)' : ''}`} />
+                text={turn.error ?? '잠시 후 다시 시도해 주세요.'} />
               <button type="button" className="chip stag" style={{ marginTop: 12, animationDelay: '.12s' }} onClick={() => onRetry(turn.id)}>다시 시도</button>
             </>
           )}
@@ -99,7 +99,9 @@ function AnswerText({ text, sources }: { text: string; sources?: AskResponse['ci
     <div className="answer">
       {text.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).map((paragraph, index) => (
         <p key={index}>
-          {paragraph.split(/((?:\[\d+\])+)/).map((part, i) => {
+          {paragraph.split(/((?<!\*)\*\*(?!\*)[^*\r\n]+\*\*(?!\*))/).map((segment, index) => {
+            const bold = index % 2 === 1;
+            const content = (bold ? segment.slice(2, -2) : segment).split(/((?:\[\d+\])+)/).map((part, i) => {
             const citations = /^\[\d+\]/.test(part) ? part.match(/\d+/g) : null;
             if (!citations) return <span key={i}>{part}</span>;
             return (
@@ -119,6 +121,8 @@ function AnswerText({ text, sources }: { text: string; sources?: AskResponse['ci
                 })}
               </sup>
             );
+            });
+            return bold ? <strong key={index}>{content}</strong> : <span key={index}>{content}</span>;
           })}
         </p>
       ))}
@@ -139,7 +143,20 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     return () => { active = false; };
   }, [hasLivePolicies]);
   const view = answerView(r);
+  const ageRequest = r.follow_up_questions.find((item) => item.kind === 'ask_info' && item.field === 'age');
+  const remainingFollowUps = r.follow_up_questions.filter((item) => (
+    item.kind !== 'ask_info' || item.field !== 'age'
+  ));
   const blocks: ReactElement[] = [];
+  if (ageRequest) {
+    blocks.push(
+      <Block key="age" title="만 나이 확인" icon="bulb">
+        <button type="button" className="chip" onClick={(event) => onFollowUp(ageRequest, event.currentTarget)}>
+          {ageRequest.text}
+        </button>
+      </Block>,
+    );
+  }
   if (view.answerText) blocks.push(<AnswerText key="a" text={view.answerText} sources={r.citations} />);
   if (r.status === 'info' && view.guide) {
     blocks.push(
@@ -184,7 +201,6 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     const sources = new Map<string | number, {
       href: ReturnType<typeof safeHttpUrl>;
       title: string;
-      numbers: number[];
       details: Set<string>;
     }>();
     r.citations.forEach((citation, index) => {
@@ -193,17 +209,16 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
       const detail = sourceDetail(href, citation.page_number);
       const source = sources.get(key);
       if (source) {
-        source.numbers.push(index + 1);
         source.details.add(detail);
       } else {
-        sources.set(key, { href, title: citation.title, numbers: [index + 1], details: new Set([detail]) });
+        sources.set(key, { href, title: citation.title, details: new Set([detail]) });
       }
     });
     blocks.push(
       <Block key="src" title="근거 출처" icon="books">
         <div className="srcs">
-          {[...sources].map(([key, { href, title, numbers, details }]) => {
-            const inner = <><span className="n">{numbers.join(', ')}</span><span><b>{title}</b><span>{[...details].join(' · ')}</span></span>{href && <span className="arr">↗</span>}</>;
+          {[...sources].map(([key, { href, title, details }]) => {
+            const inner = <><span><b>{title}</b><span>{[...details].join(' · ')}</span></span>{href && <span className="arr">↗</span>}</>;
             // 안전하지 않은 주소는 링크로 만들지 않고 제목만 보여 준다
             return href
               ? <a key={key} className="src" href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
@@ -214,11 +229,11 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
       </Block>,
     );
   }
-  if (r.follow_up_questions.length > 0) {
+  if (remainingFollowUps.length > 0) {
     blocks.push(
       <Block key="f" title="이것도 알려 주시면 더 정확해요" icon="bulb">
         <div className="chips">
-          {r.follow_up_questions.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
+          {remainingFollowUps.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
         </div>
       </Block>,
     );
@@ -270,8 +285,10 @@ function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
 
 function conditionReasonForDisplay(reason: string) {
   const reviewMessage = '신청 자격은 공식 공고에서 확인해 주세요.';
+  if (reason === '사용자의 만 나이가 입력되지 않았습니다.') return '만 나이를 알려 주세요.';
   const detail = reason
     .replace('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '')
+    .replace('조건 그룹의 내부 구조가 올바르지 않습니다.', '')
     .replace('데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다.', '')
     .replace('데이터 품질 경고로 자동 판정을 보류합니다.', '')
     .trim();
