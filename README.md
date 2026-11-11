@@ -1,4 +1,6 @@
-# LifePolicy AI — 생애주기 맞춤형 정부 지원 정책 추천 챗봇
+# SSOK · 생애주기 맞춤 정책 AI
+
+생애주기 맞춤형 정부 지원 정책 추천 및 질의응답 서비스입니다.
 
 > SKN 36기 부트캠프 3차 단위프로젝트 (교과목: LLM)
 > 상태: **최종 데이터(v1.4.0) Neo4j·Qdrant 적재 검증 완료 — RAG·API 통합(#23)과 화면 연동은 진행 중** (2026-11-10)
@@ -41,7 +43,7 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 | Embedding | Ollama · Qwen3 Embedding 0.6B | 기본 검색 프로필에 적용 |
 | Frontend | React | 3차 최소 시연·4차 정식 웹 UI |
 | 데이터 처리 | Python, Pandas, XML/HTML/PDF 파서 | 파서 라이브러리 미확정 |
-| 테스트 | pytest | 제안 |
+| 테스트 | pytest, unittest | 단위·통합 테스트에 사용 |
 | 개발 환경 | Python venv, Docker Compose | 제안 |
 
 ## 폴더 구조
@@ -50,25 +52,28 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 3차/
 ├── backend/            # FastAPI 서버
 │   ├── api/            #   라우터·요청/응답 스키마
-│   ├── core/           #   설정·로깅·공통 유틸
-│   ├── models/         #   Pydantic 도메인 모델 (정책·문서·청크 등)
-│   ├── services/       #   정책 조회·답변 조합 비즈니스 로직
+│   ├── core/           #   예약 경로
+│   ├── models/         #   예약 경로
+│   ├── services/       #   예약 경로
 │   ├── rag/            #   검색 결과 결합·LLM 호출
-│   ├── graph/          #   Neo4j 연동
+│   ├── graph/          #   예약 경로
+│   ├── llm/            #   근거 기반 답변 생성
 │   └── eligibility/    #   사용자 입력 검증, 연령·지역·신청기간 조건 확인
-├── frontend/           # 3차 React 최소 시연 화면과 4차 웹 UI
+├── frontend/           # 3차 React 시연 화면
 ├── data/
 │   ├── raw/            # 원본 (youth_policy/, lh/, other/) — Git 기본 제외
 │   ├── processed/      # 정제 결과 (policies/documents/relationships.jsonl)
 │   ├── metadata/       # 출처·API 등록부
 │   ├── samples/        # 형식 설명용 가상 예시 (실데이터 아님)
-│   └── schemas/        # JSON Schema 등 데이터 계약 정의
-├── collectors/         # 수집기 (api/, html/, pdf/) 및 preprocessing/
-├── database/           # neo4j/ (Cypher·제약조건), qdrant/ (컬렉션 설정), migrations/
-├── ai/                 # embeddings/, prompts/, workflows/ (확장용), evaluation/
+│   ├── releases/       # 버전별 데이터 릴리스와 매니페스트
+│   ├── handoff/        # v1.3.2 고정 인계본
+│   └── schemas/        # 예약 경로
+├── collectors/         # 수집기 (api/, html/) 및 preprocessing/, pdf/ (예약)
+├── database/           # neo4j/ (Cypher·제약조건), qdrant/ (컬렉션 설정), migrations/ (예약)
+├── ai/                 # prompts/, embeddings/·workflows/·evaluation/ (예약)
 ├── tests/              # unit/, integration/, evaluation/
 ├── scripts/            # 적재·재실행 유틸리티
-├── docs/               # product/, development/, architecture/, data/, api/, reports/
+├── docs/               # product/, development/, data/, api/, reports/, architecture/ (예약)
 ├── .env.example
 ├── docker-compose.yml  # 개발용 Neo4j + Qdrant
 └── AGENTS.md
@@ -81,9 +86,9 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 | 역할 | 담당 | 주요 작업 위치 | 산출물 |
 |---|---|---|---|
 | 데이터 / API / README | 장반석 | `data/`, `collectors/`, `docs/data/` | 01 수집 데이터 및 전처리 문서 |
-| 임베딩 / DB | 주민혁 | `database/`, `ai/embeddings/`, `backend/graph/`, `docs/architecture/` | 02 시스템 아키텍처 |
-| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | 검색 관련 코드, `backend/eligibility/`, `ai/evaluation/`, `tests/evaluation/` | 05 테스트 계획 및 결과 보고서 |
-| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `ai/prompts/`, `ai/workflows/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
+| 임베딩 / DB | 주민혁 | `database/` (Neo4j·Qdrant·임베딩) | 02 시스템 아키텍처 |
+| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | `database/hybrid_search.py`, `backend/eligibility/`, `tests/evaluation/`, `docs/development/experiments/` | 05 테스트 계획 및 결과 보고서 |
+| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `backend/api/`, `backend/llm/`, `ai/prompts/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
 | PM · React 시연 UI · 발표 | 강민지 | 프로젝트 일정·진행 관리, 팀 협업 및 GitHub 작업 흐름 관리, `frontend/` | 03 개발 소프트웨어 실행·시연 정리 (화면 연동·검증, 전원 실행법 취합), 발표 |
 | 공통 변경 | 전원 (PR 리뷰 필수) | `README.md`, `.env.example`, `AGENTS.md`, `docs/api/` (공통 API 계약) | — |
 
@@ -99,7 +104,7 @@ RAG/API와 Checker·Generator의 파일별 담당은 [API 계약 §0](docs/api/a
    python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
    ```
 
-   백엔드 실행 후 [상태 확인](http://127.0.0.1:8000/health)에서 API 기동과 `ready` 값을 확인합니다. 실제 검색·답변 생성·출처 표시는 5단계의 상담 요청으로 확인합니다.
+   백엔드 실행 후 [상태 확인](http://127.0.0.1:8000/health)에서 API 기동을 확인합니다. 정책 결과가 있는 검색에 처음 성공하기 전에는 `ready: false`일 수 있습니다. 실제 검색·답변 생성·출처 표시는 5단계의 상담 요청으로 확인합니다.
 
 4. 새 터미널에서 [프론트 README](frontend/README.md)의 설치 절차를 따릅니다. `frontend/.env.local`에서 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`로 설정하고, `frontend` 폴더에서 실행합니다.
 

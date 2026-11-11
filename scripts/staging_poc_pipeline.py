@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-LifePolicy AI — STEP C: 공식 근거 문서 수집 PoC 및 안전한 증분 확장 파이프라인
+SSOK — STEP C: 공식 근거 문서 수집 PoC 및 안전한 증분 확장 파이프라인
 경로: scripts/staging_poc_pipeline.py
 
 원칙:

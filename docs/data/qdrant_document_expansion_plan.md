@@ -1,4 +1,4 @@
-# LifePolicy AI — Qdrant 문서 확장 및 벡터 페이로드 아키텍처 설계서
+# SSOK — Qdrant 문서 확장 및 벡터 페이로드 아키텍처 설계서
 
 - **문서 버전**: v1.0.0 (STEP B 공식 산출물)
 - **작성일자**: 2026-11-06
@@ -6,7 +6,7 @@
 - **대상 파일**:
   - `data/handoff/qdrant/collection_config.json`
   - `data/handoff/qdrant/payload_chunks.jsonl`
-- **책임자**: LifePolicy AI 검색 엔진 / Vector DB 파트
+- **책임자**: SSOK 검색 엔진 / Vector DB 파트
 
 ---
 

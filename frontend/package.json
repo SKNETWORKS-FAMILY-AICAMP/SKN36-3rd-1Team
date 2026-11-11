@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "LifePolicy AI 3차 React 시연 화면 (질문·조건 입력 → 답변·공식 출처 표시)",
+  "description": "SSOK 3차 React 시연 화면 (질문·조건 입력 → 답변·공식 출처 표시)",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

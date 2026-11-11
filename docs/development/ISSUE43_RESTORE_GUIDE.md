@@ -27,9 +27,9 @@ Get-Content .\SHA256SUMS | ForEach-Object {
         throw 'Checksum mismatch'
     }
 }
-if (Test-Path .\LifePolicyAI) { throw 'Use a new source directory' }
-Expand-Archive .\source-a44bf08-issue43.zip .\LifePolicyAI
-$repo = (Resolve-Path .\LifePolicyAI).Path
+if (Test-Path .\SSOK) { throw 'Use a new source directory' }
+Expand-Archive .\source-a44bf08-issue43.zip .\SSOK
+$repo = (Resolve-Path .\SSOK).Path
 $bundle = (Get-Location).Path
 ```
 

@@ -1,5 +1,5 @@
 """
-LifePolicy AI — STEP 3 최종 인계 패키지 자동 품질 검증 스크립트 (verify_handoff_package.py)
+SSOK — STEP 3 최종 인계 패키지 자동 품질 검증 스크립트 (verify_handoff_package.py)
 data/handoff/ 내의 모든 노드, 관계, 청크, 메타데이터, 보안, 참조 무결성을 전수 검사한다.
 - P0-1: Broken Target & Source 0건 검증
 - P0-2: ConditionGroup 계층형 DAG 논리 검증

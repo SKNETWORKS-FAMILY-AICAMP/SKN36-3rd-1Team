@@ -1,5 +1,5 @@
 
-"""LifePolicy AI - GPT-5.4 mini 답변 품질 수동 검증.
+"""SSOK - GPT-5.4 mini 답변 품질 수동 검증.
 
 테스트:
 A. 한국어 답변 및 출처 인용

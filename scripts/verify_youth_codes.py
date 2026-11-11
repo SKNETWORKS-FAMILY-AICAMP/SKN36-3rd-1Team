@@ -1,5 +1,5 @@
 """
-LifePolicy AI — 온통청년 공식 코드정의서(API코드정보.xlsx)와 정규화 데이터 전수 비교 검증 스크립트 (v2)
+SSOK — 온통청년 공식 코드정의서(API코드정보.xlsx)와 정규화 데이터 전수 비교 검증 스크립트 (v2)
 raw_attributes 필드 전수 조사
 """
 import openpyxl

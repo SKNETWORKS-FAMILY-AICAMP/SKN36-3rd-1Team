@@ -43,9 +43,9 @@ Get-Content .\SHA256SUMS | ForEach-Object {
     $hash, $file = $_ -split '  ', 2
     if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLower() -ne $hash) { throw "체크섬 불일치: $file" }
 }
-if (Test-Path .\LifePolicyAI) { throw '새 코드 폴더를 사용하세요' }
-Expand-Archive .\source-987057e.zip .\LifePolicyAI
-$repo = (Resolve-Path .\LifePolicyAI).Path
+if (Test-Path .\SSOK) { throw '새 코드 폴더를 사용하세요' }
+Expand-Archive .\source-987057e.zip .\SSOK
+$repo = (Resolve-Path .\SSOK).Path
 py -3.12 -m venv "$repo\.venv"
 $python = "$repo\.venv\Scripts\python.exe"
 & $python -m pip install -r "$repo\requirements.txt"

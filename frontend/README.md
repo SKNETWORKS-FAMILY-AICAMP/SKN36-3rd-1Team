@@ -1,4 +1,4 @@
-# LifePolicy AI — 3차 React 시연 화면
+# SSOK — 3차 React 시연 화면
 
 질문과 선택 조건(나이·지역·연 소득)을 입력하면 답변·조건 확인·공식 출처·추가 질문을 한 화면에 보여 주는 3차 발표용 화면입니다. (이슈 #15)
 
@@ -13,6 +13,16 @@
 | 정책 관계 지도 | `#/map`, `#/map?policy=POL_001` | Graph DB(Neo4j)에 저장된 정책 연결 구조: 정책을 가운데 두고 기관·지역·분야·대상·생애단계·근거 문서·자격 조건 묶음(AND/OR)을 보여 줌 |
 
 > 백엔드 연동 전에는 **예시 응답(시연용 가상 데이터)** 으로 동작합니다. 화면 맨 위 띠와 답변 카드에 '예시 응답'이 표시됩니다. '예시 정책 A'와 조건 판정 기준은 실제 정책이 아닙니다.
+
+## 처음 볼 파일
+
+| 경로 | 역할 |
+| --- | --- |
+| [`src/App.tsx`](src/App.tsx) | 화면 전환, 질문 전송, 사용자 조건 관리 |
+| [`src/api/client.ts`](src/api/client.ts) | 실제 질문 API 호출과 오류 처리 |
+| [`src/components/TurnView.tsx`](src/components/TurnView.tsx) | 상담 답변·조건·출처 표시 |
+| [`src/components/LifeTimeline.tsx`](src/components/LifeTimeline.tsx) | 생애주기별 정책 탐색 |
+| [`src/components/PolicyMap.tsx`](src/components/PolicyMap.tsx) | 정책 관계 지도 |
 
 ## 실행
 

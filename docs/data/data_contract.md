@@ -1,4 +1,4 @@
-# LifePolicy AI — 최종 통합 데이터 계약서 (data_contract.md)
+# SSOK — 최종 통합 데이터 계약서 (data_contract.md)
 
 > **기준일시:** 2026-11-05 (KST)  
 > **버전:** `v1.3.0-final-contract`  

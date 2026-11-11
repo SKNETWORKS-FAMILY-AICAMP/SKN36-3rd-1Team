@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-LifePolicy AI — 후보 정책 전수 평가 및 증분 선별 v2 스크립트
+SSOK — 후보 정책 전수 평가 및 증분 선별 v2 스크립트
 경로: scripts/evaluate_candidates_v2.py
 
 원칙:

@@ -1,9 +1,9 @@
-# LifePolicy AI — 팀 공통 코딩 스타일
+# SSOK — 팀 공통 코딩 스타일
 
 > 버전: 1.0 (팀 검토용)  
 > 적용 프로젝트: 생애주기 맞춤형 정부·지자체 정책 추천 및 근거 기반 질의응답 서비스  
 > 참고 원본: `CODING_STYLE.md` (LabBridge 팀 공통 스타일; 핵심 원칙 계승)  
-> 기획 기준: `LifePolicy_AI_PRD_v1.0.md`, [Notion WBS](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
+> 기획 기준: [PRD](../product/PRD.md), [Notion WBS](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 > 적용: 데이터 수집·전처리, Graph/Vector DB, Python/FastAPI, RAG/LLM, 웹 UI, 테스트·문서  
 > 상태: **초안** — 팀 합의가 필요한 항목은 아래 '결정 대기'에 명시
 
@@ -318,7 +318,7 @@ AI 코딩 도구에는 다음 순서를 요구한다.
 ### Codex용 짧은 지시문
 
 ```text
-이 저장소의 AGENTS.md(있다면), LifePolicy AI PRD, CODING_STYLE.md, 공통 데이터/API 계약을 먼저 확인하세요.
+이 저장소의 AGENTS.md(있다면), SSOK PRD, CODING_STYLE.md, 공통 데이터/API 계약을 먼저 확인하세요.
 코드는 입력→검증→처리→결과 흐름으로 읽히게 작성하고 과도한 추상화를 피하세요.
 Neo4j/Qdrant 간 policy_id·document_id를 유지하고 정책 원문의 출처·기준일·페이지를 보존하세요.
 RAG 응답은 검색한 근거를 벗어나 정책 조건을 지어내지 않으며, 정보 부족과 근거 없음을 구분하세요.
@@ -362,7 +362,7 @@ API 키·개인정보를 노출하지 말고 변경 후 테스트 결과, 변경
 
 | 버전 | 내용 |
 |---|---|
-| 1.0 | LabBridge 공통 스타일을 LifePolicy AI용으로 개편. 정책 출처·전처리·Neo4j/Qdrant·RAG 검증·역할 경계·MVP 일정 반영 |
+| 1.0 | LabBridge 공통 스타일을 SSOK용으로 개편. 정책 출처·전처리·Neo4j/Qdrant·RAG 검증·역할 경계·MVP 일정 반영 |
 | 1.1 | 3차·4차 범위 조정 반영: UI는 4차로 이관, 강민지 역할을 사용자 조건 확인·산출물 03·발표로 변경, 조건 확인 테스트 기준 추가 (2026-11-05) |
 | 1.2 | 웹 UI React 사용 확정 반영 (4차 개발, 3차는 터미널·노트북 시연) (2026-11-05) |
 | 1.3 | 3차 React 최소 시연 및 조건 확인 담당 변경 반영 (2026-11-06) |

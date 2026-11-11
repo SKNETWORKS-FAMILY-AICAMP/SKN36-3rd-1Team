@@ -1,4 +1,4 @@
-# LifePolicy AI — 대상자 속성별 정책 분포 보고서 (target_attributes_distribution_report.md)
+# SSOK — 대상자 속성별 정책 분포 보고서 (target_attributes_distribution_report.md)
 
 > **기준일시:** 2026-11-05 (KST)  
 > **분석 대상:** `data/processed/policies.jsonl` 전수 (237건)  

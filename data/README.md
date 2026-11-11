@@ -1,4 +1,4 @@
-# LifePolicy AI — 데이터 파트 총괄 가이드 (`data/README.md`)
+# SSOK — 데이터 파트 총괄 가이드 (`data/README.md`)
 
 > **문서 버전:** `v1.3.2-verified`  
 > **기준일시:** 2026-11-05 (KST)  
@@ -12,7 +12,7 @@
 
 ## 1. 개요 및 핵심 정량 지표
 
-본 문서는 **LifePolicy AI**(생애주기 맞춤형 청년·국민 지원정책 RAG 질의응답 서비스)의 데이터 수집, 정제, 품질 검증, 그리고 Graph DB(Neo4j) 및 Vector DB(Qdrant) 인계 패키지의 전체 아키텍처를 안내하는 총괄 가이드입니다.
+본 문서는 **SSOK**(생애주기 맞춤형 청년·국민 지원정책 RAG 질의응답 서비스)의 데이터 수집, 정제, 품질 검증, 그리고 Graph DB(Neo4j) 및 Vector DB(Qdrant) 인계 패키지의 전체 아키텍처를 안내하는 총괄 가이드입니다.
 
 2026-11-04 초기 작성 당시의 "미수집·승인 대기·미생성" 상태에서 벗어나, 공식 공공 API 3종 및 공공기관 공고문을 전수 수집·정제하고, 다중 출처 중복 병합 및 계층적 복합 조건 DAG 모델링을 적용하여 **최종 검증 데이터셋(`v1.3.2-verified`)** 구축을 완료하였습니다.
 
@@ -286,7 +286,7 @@ flowchart TD
 
 ```
 =================================================================
-      LifePolicy AI 3차 데이터 정합성 및 품질 전수 검증        
+      SSOK 3차 데이터 정합성 및 품질 전수 검증
 =================================================================
 [Check 1/10] JSONL Parsing & Schema Loading Check       : PASSED (100%)
 [Check 2/10] Required Fields Completeness Check         : PASSED (0 missing)
@@ -334,4 +334,4 @@ flowchart TD
 - [미해결 이슈 보고서 (`data/reports/unresolved_issues.md`)](reports/unresolved_issues.md) — 팀 간 협의 및 운영 조율 사항
 - [공식 산출물 01: 데이터 수집 및 전처리 검증 보고서](../docs/DATA_COLLECTION_REPORT.md) — 단위 프로젝트 마일스톤 공식 제출 보고서 (원형 15개 파일 및 10대 정책 검증)
 - [3차 기술 상세 보고서: 데이터 수집 및 정제 최종 보고서](../docs/data/data_collection_report.md) — 3대 공공 API 전수 수집(15,264건), 237개 정책/246개 문서, 청킹 비교 및 세부 파이프라인 기술 명세서
-- [팀 공유 데이터 완료 보고서 (`docs/reports/LifePolicy_AI_팀공유_데이터완료보고서_20261105.md`)](../docs/reports/LifePolicy_AI_팀공유_데이터완료보고서_20261105.md) — 팀 공유용 종합 요약
+- [팀 공유 데이터 완료 보고서 (`docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md`)](../docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md) — 팀 공유용 종합 요약

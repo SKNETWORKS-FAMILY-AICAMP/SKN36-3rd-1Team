@@ -1,5 +1,5 @@
 """
-LifePolicy AI - 데이터 정제·정규화 및 중복 병합 모듈 (collectors/preprocessing/normalize.py)
+SSOK - 데이터 정제·정규화 및 중복 병합 모듈 (collectors/preprocessing/normalize.py)
 
 역할:
 1. HTML/PDF 원문에서 UI/메뉴/자동로그아웃/뷰어 노이즈를 제거하고 순수 정책 본문만 추출

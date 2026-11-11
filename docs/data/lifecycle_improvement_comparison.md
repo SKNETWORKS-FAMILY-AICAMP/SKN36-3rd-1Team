@@ -1,4 +1,4 @@
-# LifePolicy AI — 생애주기 분류 개선 전후 비교서 (lifecycle_improvement_comparison.md)
+# SSOK — 생애주기 분류 개선 전후 비교서 (lifecycle_improvement_comparison.md)
 
 > **기준일시:** 2026-11-05 (KST)  
 > **비교 대상:** 2차/STEP 1 단일 분류 체계 vs STEP 2 다차원 정규화 체계

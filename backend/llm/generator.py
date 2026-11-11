@@ -1,5 +1,5 @@
 
-"""LifePolicy AI LLM 답변 생성: ask_contract.md v1.0 호환, 동기 인터페이스."""
+"""SSOK LLM 답변 생성: ask_contract.md v1.0 호환, 동기 인터페이스."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-LifePolicy AI — 오프라인 GraphRAG 검색 성능 평가 시뮬레이션
+SSOK — 오프라인 GraphRAG 검색 성능 평가 시뮬레이션
 경로: scripts/evaluate_graphrag_retrieval.py
 
 목적:
