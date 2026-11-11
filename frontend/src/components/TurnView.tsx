@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
-import { hasOnlyAndGroups, isGroupRow, matchesExclusion } from '../lib/conditionGroups';
+import { hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
@@ -367,6 +367,7 @@ function conditionReasonForDisplay(reason: string) {
 function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
 }) {
+  const unjudged = isUnjudgedOnly(p.conditions);
   const incomeNotices = new Set<string>();
   // 그룹 종합 결과 행(…해야 합니다(종합 결과))은 계산 과정이라 화면에서 뺀다.
   const displayedConditions = p.conditions.filter((condition) => {
@@ -413,7 +414,14 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {
           <span className="why">{period || '공식 원문에서 확인해 주세요.'}</span>
         </li>
       </ul>
-      {displayedConditions.length > 0 && (
+      {unjudged ? (
+        // 비교할 조건이 없다는 사유만 있으면 '추가 확인 필요' 대신 미판정 상태와 기준을 볼 곳만 안내한다.
+        // 원문을 인용했어도 답변이 신청 방법만 다룰 수 있어, 답변에 기준이 있다고 가정하지 않는다.
+        <div className="policy-condition-summary">
+          <div><span className="badge b-muted">개인 자격 미판정</span></div>
+          <p className="policy-condition-note">신청 자격은 공식 원문에서 확인할 수 있어요.</p>
+        </div>
+      ) : displayedConditions.length > 0 && (
         <>
           <div className="policy-condition-summary">
             {Array.from(labelsByBadge, ([badge, { cls, labels }]) => (

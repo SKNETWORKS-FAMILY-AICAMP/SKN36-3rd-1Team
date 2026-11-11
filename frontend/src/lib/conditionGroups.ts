@@ -49,6 +49,21 @@ export function hasOnlyAndGroups(conditions: ConditionResult[]): boolean {
   return groups.length > 0 && groups.every((logic) => logic === 'AND');
 }
 
+/** Checker가 비교할 조건이 없을 때 쓰는 사유(UNKNOWN 그룹, 조건 구조 없음). 뒤에 데이터 품질 보류 문구가 붙을 수 있다. */
+const UNJUDGED_REASON_PREFIXES = ['UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '확인 가능한 자격 조건 구조가 없어'];
+
+/**
+ * 비교할 조건이 없다는 사유만 있는 정책이면 true(개인 자격 미판정).
+ * 나이·지역·소득 등 구체적인 행이 하나라도 있으면 false라서, 사용자가 확인·입력할 수 있는 항목은 그대로 보인다.
+ */
+export function isUnjudgedOnly(conditions: ConditionResult[]): boolean {
+  const rows = conditions.filter((condition) => !isGroupRow(condition));
+  return rows.length > 0 && rows.every((condition) => (
+    condition.field === 'eligibility' && condition.status === 'needs_check'
+    && UNJUDGED_REASON_PREFIXES.some((prefix) => condition.reason.startsWith(prefix))
+  ));
+}
+
 /**
  * 제외(NOT) 그룹의 종합 결과가 불일치면, 그 안의 제외 대상 조건에 입력 정보가 실제로 해당한 것이다.
  * (Checker는 안쪽 결과가 '적합'일 때만 NOT을 '불일치'로 계산한다.) 어떤 조건이 해당했는지는 평평한 목록으로 알 수 없다.
