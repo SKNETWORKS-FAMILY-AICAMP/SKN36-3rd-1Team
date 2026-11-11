@@ -143,17 +143,26 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     return () => { active = false; };
   }, [hasLivePolicies]);
   const view = answerView(r);
-  const ageRequest = r.follow_up_questions.find((item) => item.kind === 'ask_info' && item.field === 'age');
-  const remainingFollowUps = r.follow_up_questions.filter((item) => (
-    item.kind !== 'ask_info' || item.field !== 'age'
-  ));
+  const infoRequests = new Map<string, FollowUp>();
+  const questions: FollowUp[] = [];
+  for (const item of r.follow_up_questions) {
+    if (item.kind === 'question') {
+      questions.push(item);
+    } else if (item.field && !infoRequests.has(item.field)) {
+      infoRequests.set(item.field, item);
+    }
+  }
   const blocks: ReactElement[] = [];
-  if (ageRequest) {
+  if (infoRequests.size > 0) {
     blocks.push(
-      <Block key="age" title="만 나이 확인" icon="bulb">
-        <button type="button" className="chip" onClick={(event) => onFollowUp(ageRequest, event.currentTarget)}>
-          {ageRequest.text}
-        </button>
+      <Block key="info-requests" title="추가로 확인할 정보" icon="bulb">
+        <div className="chips">
+          {[...infoRequests].map(([field, item]) => (
+            <button key={field} type="button" className="chip" onClick={(event) => onFollowUp(item, event.currentTarget)}>
+              {item.text}
+            </button>
+          ))}
+        </div>
       </Block>,
     );
   }
@@ -166,10 +175,7 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     );
     if (r.answer.trim()) {
       blocks.push(
-        <details key="info-answer" className="policy-reasons">
-          <summary>확인한 근거 설명 보기</summary>
-          <AnswerText text={r.answer} sources={r.citations} />
-        </details>,
+        <AnswerText key="info-answer" text={r.answer} sources={r.citations} />,
       );
     }
   } else if (view.guide) {
@@ -180,6 +186,34 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
     );
   } else if (view.warning) {
     blocks.push(<NoticeBox key="w" kind="warn" icon="search" title={view.warning.title} text={view.warning.text} />);
+  }
+  const policyReasons = r.policy_checks.flatMap((policy) => {
+    const reasons = policy.conditions
+      .filter((condition) => condition.status !== 'eligible')
+      .map((condition) => ({ condition, detail: conditionReasonForDisplay(condition.reason) }))
+      .filter(({ detail }) => detail !== OFFICIAL_ELIGIBILITY_NOTICE);
+    const selected = reasons.find(({ condition }) => condition.status === 'ineligible' && condition.field !== 'eligibility')
+      ?? reasons.find(({ condition }) => condition.field !== 'eligibility')
+      ?? reasons[0];
+    return selected ? [{ policy, reason: selected.condition, detail: selected.detail }] : [];
+  });
+  if (policyReasons.length > 0) {
+    blocks.push(
+      <Block key="policy-reasons" title="정책별로 확인할 조건" icon="check">
+        <ul>
+          {policyReasons.map(({ policy, reason, detail }) => (
+            <li key={policy.policy_id}>
+              <b>{policy.policy_name}</b>
+              <div>
+                {reason.field !== 'eligibility' && <>{reason.label} · </>}
+                {reason.status === 'ineligible' && reason.field !== 'eligibility' && '이 조건과 일치하지 않아요. '}
+                {detail}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Block>,
+    );
   }
   if (r.policy_checks.length > 0) {
     blocks.push(
@@ -229,11 +263,11 @@ function Answer({ r, onFollowUp, onDemoApply }: { r: AskResponse; onFollowUp: Pr
       </Block>,
     );
   }
-  if (remainingFollowUps.length > 0) {
+  if (questions.length > 0) {
     blocks.push(
       <Block key="f" title="이것도 알려 주시면 더 정확해요" icon="bulb">
         <div className="chips">
-          {remainingFollowUps.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
+          {questions.map((f, i) => <button key={`${i}-${f.text}`} type="button" className="chip" onClick={(e) => onFollowUp(f, e.currentTarget)}>{f.text}</button>)}
         </div>
       </Block>,
     );
@@ -283,8 +317,9 @@ function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
   });
 }
 
+const OFFICIAL_ELIGIBILITY_NOTICE = '신청 자격은 공식 공고에서 확인해 주세요.';
+
 function conditionReasonForDisplay(reason: string) {
-  const reviewMessage = '신청 자격은 공식 공고에서 확인해 주세요.';
   if (reason === '사용자의 만 나이가 입력되지 않았습니다.') return '만 나이를 알려 주세요.';
   const detail = reason
     .replace('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '')
@@ -293,7 +328,7 @@ function conditionReasonForDisplay(reason: string) {
     .replace('데이터 품질 경고로 자동 판정을 보류합니다.', '')
     .trim();
 
-  return detail === reason ? reason : [detail, reviewMessage].filter(Boolean).join(' ');
+  return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
 function PolicyCard({ p, group, period, stages, sample, onDemoApply }: {

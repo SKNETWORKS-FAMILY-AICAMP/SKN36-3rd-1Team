@@ -3,6 +3,30 @@ import { expect, it } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
 import { TurnView } from './TurnView';
 
+it('shows one prompt per missing field before the answer and keeps suggested questions below', () => {
+  const age = { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' } as const;
+  const response: AskResponse = {
+    status: 'answered', answer: '가상 본문', citations: [], policy_checks: [], checked_at: null, is_sample: false,
+    follow_up_questions: [
+      age, { ...age },
+      { kind: 'ask_info', field: 'region', text: '거주 지역을 알려 주세요.' },
+      { kind: 'ask_info', field: 'income', text: '연 소득을 알려 주세요.' },
+      { kind: 'question', text: '신청 방법은 무엇인가요?' },
+    ],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(
+    <TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+      onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />,
+  );
+  expect(html.match(/만 나이를 알려 주세요\./g)).toHaveLength(1);
+  for (const prompt of [age.text, '거주 지역을 알려 주세요.', '연 소득을 알려 주세요.']) {
+    expect(html).toContain(prompt);
+    expect(html.indexOf(prompt)).toBeLessThan(html.indexOf(response.answer));
+  }
+  expect(html.indexOf('신청 방법은 무엇인가요?')).toBeGreaterThan(html.indexOf(response.answer));
+});
+
 it('keeps reception and eligibility separate for each policy', () => {
   const response: AskResponse = {
     status: 'answered', answer: '1) **현재 접수 중 [1]**인 정책과 **접수 여부**를 확인할 정책이 있어요.\n2) 짝 없는 **표시와 일반 *표시 [1]',
@@ -111,7 +135,10 @@ it('shows identical income notices once per policy without dropping distinct con
       onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode
     />,
   );
-  expect(html.match(/sample_only_income/g)).toHaveLength(2);
+  const [overview, cards] = html.split('관련 정책 1개');
+  expect(overview).toContain('정책별로 확인할 조건');
+  expect(overview.match(/sample_only_income/g)).toHaveLength(1);
+  expect(cards.match(/sample_only_income/g)).toHaveLength(2);
   expect(html.match(/sample_only_other/g)).toHaveLength(1);
   expect(conditions).toHaveLength(4);
 });
