@@ -1,4 +1,4 @@
-﻿"""LifePolicy AI: 실제 검색 근거를 고정한 LLM 3종 비교."""
+﻿"""SSOK: 실제 검색 근거를 고정한 LLM 3종 비교."""
 
 import argparse
 import hashlib

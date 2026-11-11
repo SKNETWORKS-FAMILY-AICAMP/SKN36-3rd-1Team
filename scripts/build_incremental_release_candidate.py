@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-LifePolicy AI — 후보 릴리스 v1.4.0-candidate 빌드 및 안정화 스크립트 (Fix v2)
+SSOK — 후보 릴리스 v1.4.0-candidate 빌드 및 안정화 스크립트 (Fix v2)
 경로: scripts/build_incremental_release_candidate.py
 
 개정 사항 (2026-11-06):

@@ -1,5 +1,5 @@
 """
-LifePolicy AI — STEP 3 최종 인계 패키지 빌드 스크립트 (build_handoff_package.py)
+SSOK — STEP 3 최종 인계 패키지 빌드 스크립트 (build_handoff_package.py)
 Neo4j 노드/관계 JSONL, Qdrant 페이로드, DDL, 검증 쿼리, 인계 문서 및 매니페스트 전수 생성
 - P0-1: 100% 참조 무결성 (Broken References = 0)
 - P0-2: ConditionGroup 계층형 DAG (AND/OR/NOT/UNKNOWN)

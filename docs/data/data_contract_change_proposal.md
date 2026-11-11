@@ -1,10 +1,10 @@
-# LifePolicy AI — 데이터 계약 변경 제안서 (Data Contract Change Proposal)
+# SSOK — 데이터 계약 변경 제안서 (Data Contract Change Proposal)
 
 - **제안 문서 번호**: DCP-20261106-01
 - **현재 계약 버전**: `v1.3.2-verified` (2026-11-05 기준)
 - **제안 계약 버전**: `v1.4.0-draft`
 - **작성일자**: 2026-11-06
-- **제안 주체**: LifePolicy AI 데이터 수집·정제 파트
+- **제안 주체**: SSOK 데이터 수집·정제 파트
 - **수신 주체**: Neo4j Graph DB 엔지니어 (주민혁 님), Qdrant Vector DB 검색 파트
 
 ---

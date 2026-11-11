@@ -1,5 +1,5 @@
 
-"""LifePolicy AI 자격 조건 판정기 (ask_contract v1.0).
+"""SSOK 자격 조건 판정기 (ask_contract v1.0).
 
 입력은 Hybrid 검색 결과의 정책 객체 한 건이다.
 DB/LLM 호출이나 입력 변형을 하지 않는다.

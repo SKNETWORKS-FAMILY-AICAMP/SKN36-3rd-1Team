@@ -1,21 +1,21 @@
-# LifePolicy AI — 정책 선별 알고리즘 v2 및 증분 파이프라인 시험 보고서
+# SSOK — 정책 선별 알고리즘 v2 및 증분 파이프라인 시험 보고서
 
 - **문서 버전**: v1.0.0 (STEP C 산출물)
 - **작성일자**: 2026-11-06
 - **기준 데이터셋**: `v1.3.2-verified` (운영 DB 및 인계 데이터 불변)
 - **대상 스크립트**:
-  - [`scripts/evaluate_candidates_v2.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/evaluate_candidates_v2.py)
-  - [`scripts/staging_poc_pipeline.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/staging_poc_pipeline.py)
-- **책임 파트**: LifePolicy AI 데이터 아키텍처 / 수집 파이프라인팀
+  - [`scripts/evaluate_candidates_v2.py`](../../scripts/evaluate_candidates_v2.py)
+  - [`scripts/staging_poc_pipeline.py`](../../scripts/staging_poc_pipeline.py)
+- **책임 파트**: SSOK 데이터 아키텍처 / 수집 파이프라인팀
 
 ---
 
 ## 1. 개요 및 파이프라인 개선 목적
 
-기존 선별 파이프라인([`scripts/build_clean_dataset.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/build_clean_dataset.py))에서 확인된 **65건 조기 중단(Hard Break) 및 ASCII 사전순/역순 편향 정렬 문제**를 근본적으로 해결하기 위해, STEP A에서 설계한 **선별 알고리즘 v2(Evaluate-First Architecture)**를 신규 스크립트로 분리 구현하고 실제 원천 데이터셋을 대상으로 동작 시험을 완료하였습니다.
+기존 선별 파이프라인([`scripts/build_clean_dataset.py`](../../scripts/build_clean_dataset.py))에서 확인된 **65건 조기 중단(Hard Break) 및 ASCII 사전순/역순 편향 정렬 문제**를 근본적으로 해결하기 위해, STEP A에서 설계한 **선별 알고리즘 v2(Evaluate-First Architecture)**를 신규 스크립트로 분리 구현하고 실제 원천 데이터셋을 대상으로 동작 시험을 완료하였습니다.
 
 ### 1.1 핵심 구현 및 시험 원칙
-1. **기존 프로덕션 코드 보존**: 기존 `build_clean_dataset.py`를 파괴하지 않고, 별도 실험 스크립트([`scripts/evaluate_candidates_v2.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/evaluate_candidates_v2.py))로 구현하여 위험을 원천 차단함.
+1. **기존 프로덕션 코드 보존**: 기존 `build_clean_dataset.py`를 파괴하지 않고, 별도 실험 스크립트([`scripts/evaluate_candidates_v2.py`](../../scripts/evaluate_candidates_v2.py))로 구현하여 위험을 원천 차단함.
 2. **다차원 상태 필드의 엄격 분리**: 데이터 검증 여부, 관리자 승인 상태, 신청 접수 상태, 정책 폐지/시행 상태를 단일 문자열로 혼합하지 않고 4개 독립 필드로 분리.
 3. **충돌 방지 신규 ID 발급 체계**: 기존 237개 `policy_id` 및 `official_id` 전수 교차 검사를 통과한 비중복 레코드에 한해서만 결정론적 신규 ID 발급.
 
@@ -58,7 +58,7 @@
 ## 3. 선별 알고리즘 v2 시험 실행 결과
 
 ### 3.1 시험 실행 환경 및 명령어
-[`scripts/evaluate_candidates_v2.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy AI/scripts/evaluate_candidates_v2.py)에 CLI 옵션을 적용하여 정부24 원천 데이터 30건을 대상으로 전수 평가 시험을 수행하였습니다.
+[`scripts/evaluate_candidates_v2.py`](../../scripts/evaluate_candidates_v2.py)에 CLI 옵션을 적용하여 정부24 원천 데이터 30건을 대상으로 전수 평가 시험을 수행하였습니다.
 
 ```bash
 # 실행 명령어 (Windows PowerShell)

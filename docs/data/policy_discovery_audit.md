@@ -1,10 +1,10 @@
-# LifePolicy AI — 정책 누락 원인 분석 및 숨은 정책 발굴 조사 보고서
+# SSOK — 정책 누락 원인 분석 및 숨은 정책 발굴 조사 보고서
 
 > ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
 
 > **문서 버전:** `v1.0.0-audit`  
 > **기준일시:** 2026-11-06 (KST)  
-> **작성자:** LifePolicy AI 데이터 / 아키텍처 담당  
+> **작성자:** SSOK 데이터 / 아키텍처 담당
 > **기반 데이터셋:** `v1.3.2-verified` (통합 정책 237건, 문서 246건, 청크 557건, 관계 3,615건)  
 > **조사 범위:** 원천 수집 15,278건(온통청년 3,861건, 정부24 10,942건, 복지로 461건/99건, 공고문 14건) vs 최종 237건  
 > **상태:** **원천 데이터 전수 정밀 감사 완료 (데이터·인계 파일 0건 수정, 무손실 분석)**
@@ -32,7 +32,7 @@
 
 ## 2. 정책 누락 원인 분석 (Root Cause Analysis)
 
-최종 237건을 추출하는 전처리 스크립트([`scripts/build_clean_dataset.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/build_clean_dataset.py))의 3.1절~3.3절 코드를 전수 정밀 추적하여 정책 누락의 구조적 원인을 규명하였습니다.
+최종 237건을 추출하는 전처리 스크립트([`scripts/build_clean_dataset.py`](../../scripts/build_clean_dataset.py))의 3.1절~3.3절 코드를 전수 정밀 추적하여 정책 누락의 구조적 원인을 규명하였습니다.
 
 ```mermaid
 flowchart TD

@@ -1,4 +1,4 @@
-# LifePolicy AI — 기관별 코드 및 지원조건 통합 매핑표 (cross_agency_condition_mapping.md)
+# SSOK — 기관별 코드 및 지원조건 통합 매핑표 (cross_agency_condition_mapping.md)
 
 > **기준일시:** 2026-11-05 (KST)  
 > **대상 기관:** 한국사회보장정보원(복지로), 행정안전부(정부24), 고용정보원(온통청년)  

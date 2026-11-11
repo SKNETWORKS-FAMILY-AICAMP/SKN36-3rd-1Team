@@ -1,4 +1,4 @@
-# LifePolicy AI — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
+# SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
 > **버전:** v1.1 초안 · 2026-11-10 (v1.0 · 2026-11-07)  
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.  
@@ -415,10 +415,10 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | 질문 API | `POST /api/ask` |
 | 상태 확인 | `GET /health` |
 | Swagger | `GET /docs` |
-| 백엔드 실행 | `python -m uvicorn backend.api.main:app --reload --host 127.0.0.1 --port 8000` |
+| 백엔드 실행 | `python -m uvicorn backend.api.main:app --reload --host 127.0.0.1 --port 8000 --env-file .env` |
 | 프론트 설정 | `frontend/.env.local`의 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask` (**전체 URL**) |
 | CORS | 최소 `http://127.0.0.1:5173` 허용; 추가 개발 주소는 명시적으로 추가 |
-| 프론트 요청 타임아웃 | **60,000ms를 통합 목표값으로 설정**. 현재 `client.ts`는 30,000ms이므로 **민지의 실제 코드 수정 필요** |
+| 프론트 요청 타임아웃 | **60,000ms 적용**. `frontend/src/config/request.ts`의 `ASK_TIMEOUT_MS`를 클라이언트가 사용한다. |
 
 `127.0.0.1`과 `localhost`는 브라우저에서 다른 origin일 수 있다. 시연/로컬 개발 주소를 맞춘다. **프론트 타임아웃을 60초로 바꿨다고 서버 요청 전체에 60초 중단 제한이 자동 적용되는 것은 아니므로**, 모델/DB별 타임아웃·응답 시간 측정이 필요하다.
 
@@ -543,7 +543,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - [ ] §4 `check_eligibility()` 구현(동기 함수, 필수 JSON 필드·enum 준수)
 - [ ] `AGE` 문자열 값, `AND/OR/NOT/UNKNOWN`, `MISSING_IN_GRAPH` 처리 단위 테스트
 - [ ] `hold_auto_eligibility`, `affected_attributes` 및 접수기간 `unknown` 테스트
-- [ ] §5 `generate_answer()` 구현(동기 함수, 출처 번호·후속 질문 규격 준수)
+- [x] §5 `generate_answer()` 구현(동기 함수, 출처 번호·후속 질문 규격 준수)
 - [ ] 모델명·SDK·API 키 **변수명**·타임아웃·최대 토큰·비용 한도 공유
 - [ ] `feature/eligibility-llm`에서 PR. 개발 중 시그니처 변경이 필요하면 지인에게 먼저 공유
 
@@ -551,7 +551,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 - [ ] 기존 `AskRequest`/`AskResponse` 필드 유지 확인
 - [ ] `frontend/.env.local`의 전체 API URL 설정
-- [ ] 요청 제한 **60,000ms로 변경** 또는 통합 시연 전 실제 측정값 기반 조정
+- [x] 프론트 요청 제한 **60,000ms 적용**
 - [ ] `no_evidence/info/answered`, `needs_check`, `unknown`, 빈 URL/`null` 및 `notice` 표시
 - [ ] `ask_info.field`를 `age/region/income` 프로필에 반영하는 흐름 확인
 - [ ] API 4xx/5xx 화면 표시와 실제 `is_sample=false` 확인
@@ -595,7 +595,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 - **인터페이스는 본 v1.0을 초기 구현 기준으로 사용한다.** 소희·민지는 승인 응답을 기다리느라 개발을 멈출 필요 없이 본 규격으로 작업한다.
 - 소희 구현 중 **입력/출력 필드, 상태값, 예외 처리**를 바꿔야 하면 변경 내용을 공유해 `ask_contract.md`와 Mock·Pydantic·React 타입·테스트를 같은 변경에 맞춘다.
-- **미정이지만 인터페이스를 막지 않는 값:** LLM 공급자·모델, 실제 API 키 환경변수 이름, 소희 내부 프롬프트, 시연 비용 한도, 성능에 따른 검색/LLM 타임아웃 세부값. 이는 구현 담당자가 선택하여 공유한다.
+- **미정이지만 인터페이스를 막지 않는 값:** 시연 비용 한도, 성능에 따른 검색/LLM 타임아웃 세부값. 3차 시연은 OpenAI API와 `gpt-5.4-mini`를 사용한다. Generator는 `OPENAI_API_KEY`를 읽으며 코드 기본값은 `gpt-5.4-mini`이다. 별도 비교 환경에서는 `LLM_MODEL`로 모델을 지정할 수 있다.
 - **이미 정한 MVP 기본 정책:** `상시신청` 단독은 `unknown`, `income`은 개인/가구 구분 없으면 자동 확정 금지, `ask_info.field`는 3가지, 정책 카드는 Context에 채택된 정책만, 본문 인용 기준 재번호, 60초 프론트 요청 제한은 실제 코드에 반영해야 할 목표.
 - **v1.1 미확정 항목:** 조건 항목 `followup` 키의 응답 노출(§4.3), 요약 전 원본 조건의 API 제공 여부(§8.3), 자녀 개월 수 입력 필드(MVP 이후 별도 이슈).
 - **팀 확인이 필요한 코드 변경:** 프론트 타임아웃, 추가 입력 UX, 공통 `requirements.txt`/`.env.example`, PR 병합. 현재 팀원이 이미 승인했다고 가정하지 않는다.

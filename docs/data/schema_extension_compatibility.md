@@ -1,4 +1,4 @@
-# LifePolicy AI — 스키마 우선 재사용 및 공식 문서 확장 적합성 분석 보고서
+# SSOK — 스키마 우선 재사용 및 공식 문서 확장 적합성 분석 보고서
 
 - **문서 버전**: v1.0.0 (STEP B 공식 산출물)
 - **작성일자**: 2026-11-06
@@ -8,7 +8,7 @@
   - `data/handoff/neo4j/cypher_ddl.cypher`
   - `data/handoff/neo4j/nodes_*.jsonl` 및 `relationships.jsonl`
   - `data/handoff/qdrant/collection_config.json` 및 `payload_chunks.jsonl`
-- **책임자**: LifePolicy AI 데이터 아키텍처 / 수집·정제 파트
+- **책임자**: SSOK 데이터 아키텍처 / 수집·정제 파트
 
 ---
 

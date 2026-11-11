@@ -1,10 +1,10 @@
-# LifePolicy AI — 발굴 정책 30건 정밀 재검증 및 선별 코드 감사 보고서 (STEP A)
+# SSOK — 발굴 정책 30건 정밀 재검증 및 선별 코드 감사 보고서 (STEP A)
 
 > ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
 
 > **문서 버전:** `v1.0.0-step-a`  
 > **기준일시:** 2026-11-06 (KST)  
-> **작성자:** LifePolicy AI 데이터 / 아키텍처 감사팀  
+> **작성자:** SSOK 데이터 / 아키텍처 감사팀
 > **기반 데이터셋:** `v1.3.2-verified` (통합 정책 237건 불변 유지)  
 > **참고 문서:** `docs/data/policy_discovery_audit.md`, `data/README.md`, `data/handoff/data_contract.md`  
 > **상태:** **원천 데이터 전수 1:1 대조 및 선별 코드 감사 완료 (정책 데이터 및 인계 파일 0건 수정)**
@@ -13,7 +13,7 @@
 
 ## 1. 개요 및 검증 원칙
 
-본 문서는 `v1.3.2-verified` 데이터셋의 237개 정책을 불변으로 유지한 상태에서, 선행 보고서(`policy_discovery_audit.md`)에서 발굴된 **실생활 혜택 후보 정책 30건의 진위와 유효성을 독립적으로 재검증**하고, 기존 선별 코드([`scripts/build_clean_dataset.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/build_clean_dataset.py))의 누락 원인을 코드 라인 단위로 교차 검증한 공식 감사 결과입니다.
+본 문서는 `v1.3.2-verified` 데이터셋의 237개 정책을 불변으로 유지한 상태에서, 선행 보고서(`policy_discovery_audit.md`)에서 발굴된 **실생활 혜택 후보 정책 30건의 진위와 유효성을 독립적으로 재검증**하고, 기존 선별 코드([`scripts/build_clean_dataset.py`](../../scripts/build_clean_dataset.py))의 누락 원인을 코드 라인 단위로 교차 검증한 공식 감사 결과입니다.
 
 ### 독립 재검증 원칙
 1. **디스크 상 물리적 실재성 100% 검증:** 가상 또는 임의의 정책을 배제하고, `data/raw/` 및 `data/processed/*_policies.jsonl`에 실재하는 원천 레코드만 검증.

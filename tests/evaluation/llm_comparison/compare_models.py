@@ -1,4 +1,4 @@
-"""LifePolicy AI: 동일한 가상 근거로 세 Generator 모델의 응답을 비교한다.
+"""SSOK: 동일한 가상 근거로 세 Generator 모델의 응답을 비교한다.
 
 사용 위치: tests/evaluation/llm_comparison/compare_models.py
 실행하지 않으면 API를 호출하지 않는다. --execute가 있어야 호출한다.

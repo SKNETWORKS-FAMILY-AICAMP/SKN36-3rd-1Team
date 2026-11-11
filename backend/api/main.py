@@ -94,7 +94,7 @@ def create_app(
                 session.close()
             application.state.search_ready = False
 
-    application = FastAPI(title="LifePolicy AI", lifespan=lifespan)
+    application = FastAPI(title="SSOK", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware, allow_origins=["http://127.0.0.1:5173"],
         allow_methods=["POST", "GET"], allow_headers=["Content-Type"],

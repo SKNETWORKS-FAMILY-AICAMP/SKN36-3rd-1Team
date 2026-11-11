@@ -1,4 +1,4 @@
-# LifePolicy AI — 3차 데이터 수집 및 정제 최종 보고서 (data_collection_report.md)
+# SSOK — 3차 데이터 수집 및 정제 최종 보고서 (data_collection_report.md)
 
 > **작성자:** 데이터 수집/검증 담당 (장반석)  
 > **기준일시:** 2026-11-04 (KST)  

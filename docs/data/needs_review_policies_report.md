@@ -1,4 +1,4 @@
-# LifePolicy AI — 검토 필요 정책 목록 및 관리 지침서 (needs_review_policies_report.md)
+# SSOK — 검토 필요 정책 목록 및 관리 지침서 (needs_review_policies_report.md)
 
 > **기준일시:** 2026-11-05 (KST)  
 > **분석 대상:** 온통청년 원천 정책 3,861건 및 통합 기준 데이터셋 237건  

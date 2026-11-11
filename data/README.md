@@ -1,18 +1,18 @@
-# LifePolicy AI — 데이터 파트 총괄 가이드 (`data/README.md`)
+# SSOK — 데이터 파트 총괄 가이드 (`data/README.md`)
 
 > **문서 버전:** `v1.3.2-verified`  
 > **기준일시:** 2026-11-05 (KST)  
 > **담당자:** 데이터 / API / 전처리 담당 (장반석)  
 > **인계 대상:** DB 엔지니어(주민혁 님), RAG/검색·조건 확인 담당(나지인 님, 박소희 님), React 시연 UI/발표 담당(강민지 님)  
 > **상태:** **STEP 1~3 수집·정제·정합성 검증 완료 및 DB 인계 패키지 배포 완료 (파일·참조 무결성 100% PASS, Broken References = 0)**  
-> **후속 후보:** `data/releases/v1.4.0-candidate/` (정책 246 · 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703, 신규 문서 14건 모두 공식 원문 대조 완료 — DB 미적재, 신규 정책 조건은 UNKNOWN). 대조 결과: [official_source_crosscheck_report.md](../docs/data/official_source_crosscheck_report.md)  
+> **3차 최종 사용 데이터셋:** `data/releases/v1.4.0-candidate/` (정책 246 · 문서 261 · 인계 청크 599 · Neo4j 노드 1,004 · 관계 2,431). v1.3.2 대비 문서 15건이 추가됐습니다. 서비스 Qdrant에는 B2 청킹 후 1,138개 포인트를 적재해 검증했습니다. [최종 DB 복원 가이드](../docs/development/ISSUE43_RESTORE_GUIDE.md)
 > **체크섬 기준:** `data/handoff/`, `data/releases/`는 `.gitattributes`로 줄바꿈 변환을 끄고 저장소 바이트(LF) 기준으로 SHA-256을 기록한다. Windows·Mac·Linux 어디서 내려받아도 `verify_handoff_package.py` 결과가 같다.
 
 ---
 
 ## 1. 개요 및 핵심 정량 지표
 
-본 문서는 **LifePolicy AI**(생애주기 맞춤형 청년·국민 지원정책 RAG 질의응답 서비스)의 데이터 수집, 정제, 품질 검증, 그리고 Graph DB(Neo4j) 및 Vector DB(Qdrant) 인계 패키지의 전체 아키텍처를 안내하는 총괄 가이드입니다.
+본 문서는 **SSOK**(생애주기 맞춤형 청년·국민 지원정책 RAG 질의응답 서비스)의 데이터 수집, 정제, 품질 검증, 그리고 Graph DB(Neo4j) 및 Vector DB(Qdrant) 인계 패키지의 전체 아키텍처를 안내하는 총괄 가이드입니다.
 
 2026-11-04 초기 작성 당시의 "미수집·승인 대기·미생성" 상태에서 벗어나, 공식 공공 API 3종 및 공공기관 공고문을 전수 수집·정제하고, 다중 출처 중복 병합 및 계층적 복합 조건 DAG 모델링을 적용하여 **최종 검증 데이터셋(`v1.3.2-verified`)** 구축을 완료하였습니다.
 
@@ -286,7 +286,7 @@ flowchart TD
 
 ```
 =================================================================
-      LifePolicy AI 3차 데이터 정합성 및 품질 전수 검증        
+      SSOK 3차 데이터 정합성 및 품질 전수 검증
 =================================================================
 [Check 1/10] JSONL Parsing & Schema Loading Check       : PASSED (100%)
 [Check 2/10] Required Fields Completeness Check         : PASSED (0 missing)
@@ -334,4 +334,4 @@ flowchart TD
 - [미해결 이슈 보고서 (`data/reports/unresolved_issues.md`)](reports/unresolved_issues.md) — 팀 간 협의 및 운영 조율 사항
 - [공식 산출물 01: 데이터 수집 및 전처리 검증 보고서](../docs/DATA_COLLECTION_REPORT.md) — 단위 프로젝트 마일스톤 공식 제출 보고서 (원형 15개 파일 및 10대 정책 검증)
 - [3차 기술 상세 보고서: 데이터 수집 및 정제 최종 보고서](../docs/data/data_collection_report.md) — 3대 공공 API 전수 수집(15,264건), 237개 정책/246개 문서, 청킹 비교 및 세부 파이프라인 기술 명세서
-- [팀 공유 데이터 완료 보고서 (`docs/reports/LifePolicy_AI_팀공유_데이터완료보고서_20261105.md`)](../docs/reports/LifePolicy_AI_팀공유_데이터완료보고서_20261105.md) — 팀 공유용 종합 요약
+- [팀 공유 데이터 완료 보고서 (`docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md`)](../docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md) — 팀 공유용 종합 요약

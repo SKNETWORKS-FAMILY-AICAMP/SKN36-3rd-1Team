@@ -1,4 +1,6 @@
-# LifePolicy AI — 생애주기 맞춤형 정부 지원 정책 추천 챗봇
+# SSOK · 생애주기 맞춤 정책 AI
+
+생애주기 맞춤형 정부 지원 정책 추천 및 질의응답 서비스입니다.
 
 > SKN 36기 부트캠프 3차 단위프로젝트 (교과목: LLM)
 > 상태: **최종 데이터(v1.4.0) Neo4j·Qdrant 적재 검증 완료 — RAG·API 통합(#23)과 화면 연동은 진행 중** (2026-11-10)
@@ -23,25 +25,25 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 - [ ] 원본 배치 후 최종 인계 패키지 검증 통과
 - [x] Neo4j 정책 관계 적재·조회 (#45 최종 재적재 검증)
 - [x] Qdrant 원문 청크 임베딩·검색 (B2 청킹, qwen3-embedding 0.6B)
-- [ ] Graph + Vector 결합 조회
-- [ ] 사용자 입력 검증 + 연령·지역·신청기간 조건 확인
-- [ ] LLM 근거 기반 답변 + 출처 표시
-- [ ] 평가 질문 10개 및 결과 기록
+- [x] Graph + Vector 결합 조회
+- [x] 사용자 입력 검증 + 연령·지역·신청기간 조건 확인
+- [x] LLM 근거 기반 답변 + 출처 표시
+- [x] 평가 질문·검색 실험 결과 기록 (55문항 실행·52문항 채점, Gold 최종 합본은 별도)
 
-> 3차 발표는 **React 화면 한 장**으로 질문과 선택 조건을 입력하고 답변·공식 출처를 보여줍니다. 터미널·노트북은 시연 백업이며 정식 웹 UI 개발은 4차 범위입니다.
+> 3차 발표는 **React 세 화면(상담하기·생애주기·정책 관계 지도)**으로 질문과 선택 조건을 입력하고 답변·공식 출처를 보여줍니다. 터미널·노트북은 시연 백업이며 정식 웹 UI 개발은 4차 범위입니다.
 
 ## 기술 스택
 
 | 영역 | 기술 | 상태 |
 |---|---|---|
-| Backend | Python, FastAPI | 제안 |
-| LLM·RAG | LangChain, LangGraph | 제안 (LLM 모델 미확정, PRD D-06) |
-| Graph DB | Neo4j | 제안 (PRD D-02) |
-| Vector DB | Qdrant | 제안 (PRD D-02) |
-| Embedding | 한국어 지원 모델 | 미확정 (PRD D-04) |
+| Backend | Python, FastAPI | 구현 완료 |
+| LLM·RAG | Python RAG Pipeline, OpenAI API | 3차 시연 모델 `gpt-5.4-mini` 채택 ([PR #56 비교 결과](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56)) |
+| Graph DB | Neo4j | 최종 DB 적재·검증 완료 |
+| Vector DB | Qdrant | 최종 DB 적재·검증 완료 |
+| Embedding | Ollama · Qwen3 Embedding 0.6B | 기본 검색 프로필에 적용 |
 | Frontend | React | 3차 최소 시연·4차 정식 웹 UI |
 | 데이터 처리 | Python, Pandas, XML/HTML/PDF 파서 | 파서 라이브러리 미확정 |
-| 테스트 | pytest | 제안 |
+| 테스트 | pytest, unittest | 단위·통합 테스트에 사용 |
 | 개발 환경 | Python venv, Docker Compose | 제안 |
 
 ## 폴더 구조
@@ -50,25 +52,28 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 3차/
 ├── backend/            # FastAPI 서버
 │   ├── api/            #   라우터·요청/응답 스키마
-│   ├── core/           #   설정·로깅·공통 유틸
-│   ├── models/         #   Pydantic 도메인 모델 (정책·문서·청크 등)
-│   ├── services/       #   정책 조회·답변 조합 비즈니스 로직
+│   ├── core/           #   예약 경로
+│   ├── models/         #   예약 경로
+│   ├── services/       #   예약 경로
 │   ├── rag/            #   검색 결과 결합·LLM 호출
-│   ├── graph/          #   Neo4j 연동
+│   ├── graph/          #   예약 경로
+│   ├── llm/            #   근거 기반 답변 생성
 │   └── eligibility/    #   사용자 입력 검증, 연령·지역·신청기간 조건 확인
-├── frontend/           # 3차 React 최소 시연 화면과 4차 웹 UI
+├── frontend/           # 3차 React 시연 화면
 ├── data/
 │   ├── raw/            # 원본 (youth_policy/, lh/, other/) — Git 기본 제외
 │   ├── processed/      # 정제 결과 (policies/documents/relationships.jsonl)
 │   ├── metadata/       # 출처·API 등록부
 │   ├── samples/        # 형식 설명용 가상 예시 (실데이터 아님)
-│   └── schemas/        # JSON Schema 등 데이터 계약 정의
-├── collectors/         # 수집기 (api/, html/, pdf/) 및 preprocessing/
-├── database/           # neo4j/ (Cypher·제약조건), qdrant/ (컬렉션 설정), migrations/
-├── ai/                 # embeddings/, prompts/, workflows/ (LangGraph), evaluation/
+│   ├── releases/       # 버전별 데이터 릴리스와 매니페스트
+│   ├── handoff/        # v1.3.2 고정 인계본
+│   └── schemas/        # 예약 경로
+├── collectors/         # 수집기 (api/, html/) 및 preprocessing/, pdf/ (예약)
+├── database/           # neo4j/ (Cypher·제약조건), qdrant/ (컬렉션 설정), migrations/ (예약)
+├── ai/                 # prompts/, embeddings/·workflows/·evaluation/ (예약)
 ├── tests/              # unit/, integration/, evaluation/
 ├── scripts/            # 적재·재실행 유틸리티
-├── docs/               # product/, development/, architecture/, data/, api/, reports/
+├── docs/               # product/, development/, data/, api/, reports/, architecture/ (예약)
 ├── .env.example
 ├── docker-compose.yml  # 개발용 Neo4j + Qdrant
 └── AGENTS.md
@@ -81,17 +86,39 @@ PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
 | 역할 | 담당 | 주요 작업 위치 | 산출물 |
 |---|---|---|---|
 | 데이터 / API / README | 장반석 | `data/`, `collectors/`, `docs/data/` | 01 수집 데이터 및 전처리 문서 |
-| 임베딩 / DB | 주민혁 | `database/`, `ai/embeddings/`, `backend/graph/`, `docs/architecture/` | 02 시스템 아키텍처 |
-| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | 검색 관련 코드, `backend/eligibility/`, `ai/evaluation/`, `tests/evaluation/` | 05 테스트 계획 및 결과 보고서 |
-| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `ai/prompts/`, `ai/workflows/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
-| React 시연 UI / 발표 | 강민지 | `frontend/` | 03 개발 소프트웨어 실행·시연 정리 (화면 연동·검증, 전원 실행법 취합), 발표 |
+| 임베딩 / DB | 주민혁 | `database/` (Neo4j·Qdrant·임베딩) | 02 시스템 아키텍처 |
+| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | `database/hybrid_search.py`, `backend/eligibility/`, `tests/evaluation/`, `docs/development/experiments/` | 05 테스트 계획 및 결과 보고서 |
+| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `backend/api/`, `backend/llm/`, `ai/prompts/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
+| PM · React 시연 UI · 발표 | 강민지 | 프로젝트 일정·진행 관리, 팀 협업 및 GitHub 작업 흐름 관리, `frontend/` | 03 개발 소프트웨어 실행·시연 정리 (화면 연동·검증, 전원 실행법 취합), 발표 |
 | 공통 변경 | 전원 (PR 리뷰 필수) | `README.md`, `.env.example`, `AGENTS.md`, `docs/api/` (공통 API 계약) | — |
 
-검색·평가와 LLM·RAG의 세부 코드 소유권은 아직 합의 전입니다 (PRD D-08).
+RAG/API와 Checker·Generator의 파일별 담당은 [API 계약 §0](docs/api/ask_contract.md)을 기준으로 합니다.
+
+## 로컬에서 전체 실행하기
+
+1. [DB 복원 가이드의 가상환경 준비 절차](docs/development/ISSUE43_RESTORE_GUIDE.md)에 따라 Python 가상환경을 준비하고 `requirements.txt`의 의존성을 설치합니다.
+2. 같은 가이드에 따라 복원 ZIP으로 Qdrant·Neo4j 데이터를 복원하고 Ollama를 준비합니다. 저장소 루트의 `.env`에 복원 환경과 일치하는 DB 접속 정보, Ollama 주소, 답변 생성 API 설정을 입력합니다.
+3. 가상환경을 활성화한 상태로 저장소 루트에서 백엔드를 실행합니다.
+
+   ```powershell
+   python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
+   ```
+
+   백엔드 실행 후 [상태 확인](http://127.0.0.1:8000/health)에서 API 기동을 확인합니다. 정책 결과가 있는 검색에 처음 성공하기 전에는 `ready: false`일 수 있습니다. 실제 검색·답변 생성·출처 표시는 5단계의 상담 요청으로 확인합니다.
+
+4. 새 터미널에서 [프론트 README](frontend/README.md)의 설치 절차를 따릅니다. `frontend/.env.local`에서 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`로 설정하고, `frontend` 폴더에서 실행합니다.
+
+   ```powershell
+   npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+   ```
+
+5. [프론트 화면](http://127.0.0.1:5173/)에서 “직업 훈련이나 교육비 지원은 어디서 찾아요?”를 보냅니다. 화면에 답변과 출처가 표시되고 백엔드 로그에 `POST /api/ask … 200 OK`가 찍히는지 확인합니다.
+
+백엔드 없이 예시 모드로 시연할 때는 프론트 README에 따라 VITE_ASK_API_URL을 비우고 npm run dev를 실행합니다.
 
 ## 개발 환경 설정
 
-> 데이터 수집·전처리용 의존성은 `requirements.txt`에 정의되어 있습니다. DB·임베딩·RAG 의존성은 각 담당자가 기술 확정 후 추가합니다.
+> 데이터 수집·전처리용 의존성은 `requirements.txt`에 정의되어 있습니다. DB·임베딩·RAG 실행 의존성도 같은 파일에서 설치합니다.
 
 ### 1. Python 가상환경
 
@@ -124,7 +151,7 @@ python -m unittest discover -s tests/unit -p 'test_*.py'
 
 | 변수 | 용도 |
 |---|---|
-| `OPENAI_API_KEY` | LLM API 키 (모델 확정 전) |
+| `OPENAI_API_KEY` | OpenAI 답변 생성 API 키 |
 | `YOUTH_POLICY_API_KEY` | 온통청년 Open API 인증키 (승인 필요) |
 | `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j 접속 정보 (로컬 사용자명은 `neo4j`) |
 | `QDRANT_URL` / `QDRANT_API_KEY` | Qdrant 접속 정보 |

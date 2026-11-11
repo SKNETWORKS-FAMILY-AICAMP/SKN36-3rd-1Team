@@ -1,4 +1,4 @@
-# LifePolicy AI — GraphRAG 검색 성능 평가 시뮬레이션 및 최종 검색 아키텍처 보고서
+# SSOK — GraphRAG 검색 성능 평가 시뮬레이션 및 최종 검색 아키텍처 보고서
 
 > ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
 
@@ -7,9 +7,9 @@
 - **평가 대상 데이터셋**: `v1.4.0-candidate` (정책 246건, 문서 268건, 청크 593건, 그래프 노드 1,082개, 관계 3,710건)
 - **실서버 접속 상태**: **`NOT_TESTED (Pending DB Deployment by Minhyeok Ju)`**
 - **평가 모드**: **오프라인 벤치마크 및 BM25 시뮬레이션 (Offline Simulation / Dry-run Estimation)**
-- **벤치마크 데이터**: [`data/staging/evaluation/retrieval_benchmark_30.json`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/staging/evaluation/retrieval_benchmark_30.json)
-- **시뮬레이션 스크립트**: [`scripts/evaluate_graphrag_retrieval.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/evaluate_graphrag_retrieval.py)
-- **책임 파트**: LifePolicy AI 데이터 아키텍처팀 / 검색 엔지니어링팀
+- **벤치마크 데이터**: [`data/staging/evaluation/retrieval_benchmark_30.json`](../../data/staging/evaluation/retrieval_benchmark_30.json)
+- **시뮬레이션 스크립트**: [`scripts/evaluate_graphrag_retrieval.py`](../../scripts/evaluate_graphrag_retrieval.py)
+- **책임 파트**: SSOK 데이터 아키텍처팀 / 검색 엔지니어링팀
 
 ---
 
@@ -24,7 +24,7 @@
 
 ## 2. 30개 평가 벤치마크 질의 및 정답 근거 설계
 
-사용자의 실생활 복지 질문 패턴을 8대 유형으로 체계화하여 30개의 평가 질의와 정답 그라운드 트루스를 설계하였습니다. ([`retrieval_benchmark_30.json`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/data/staging/evaluation/retrieval_benchmark_30.json))
+사용자의 실생활 복지 질문 패턴을 8대 유형으로 체계화하여 30개의 평가 질의와 정답 그라운드 트루스를 설계하였습니다. ([`retrieval_benchmark_30.json`](../../data/staging/evaluation/retrieval_benchmark_30.json))
 
 ```mermaid
 pie title 30개 평가 벤치마크 질의 유형별 분포
@@ -77,7 +77,7 @@ pie title 30개 평가 벤치마크 질의 유형별 분포
 
 ## 3. 검색 방식 비교 및 오프라인 시뮬레이션 결과
 
-안정화된 데이터셋(`v1.4.0-candidate`, 노드 1,082개, 관계 3,710개, 청크 593개)을 바탕으로 [`scripts/evaluate_graphrag_retrieval.py`](file:///c:/Users/Peter/Desktop/모꼬지/SKN%2036기%20부트캠프/단위프로젝트/3차/LifePolicy%20AI/scripts/evaluate_graphrag_retrieval.py)를 재실행하여 산출한 시뮬레이션 지표입니다.
+안정화된 데이터셋(`v1.4.0-candidate`, 노드 1,082개, 관계 3,710개, 청크 593개)을 바탕으로 [`scripts/evaluate_graphrag_retrieval.py`](../../scripts/evaluate_graphrag_retrieval.py)를 재실행하여 산출한 시뮬레이션 지표입니다.
 
 ### 3.1 3대 검색 방식 오프라인 시뮬레이션 집계표
 

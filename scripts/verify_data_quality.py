@@ -1,5 +1,5 @@
 """
-LifePolicy AI - 데이터 정합성 및 품질 전수 검증 스크립트 (scripts/verify_data_quality.py)
+SSOK - 데이터 정합성 및 품질 전수 검증 스크립트 (scripts/verify_data_quality.py)
 작업 지시서 9장 10대 검사 기준 + 의미적 정합성(Semantic Consistency) 자동화:
   1. JSONL 파싱 검사
   2. 필수 필드 누락 검사 (Policy, Document, Chunk, Relationship)

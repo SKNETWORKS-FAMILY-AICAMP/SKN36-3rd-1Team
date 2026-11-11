@@ -1,5 +1,5 @@
 """
-LifePolicy AI - 3차 데이터 오류 수정 및 3종 공식 API 통합 정제 데이터셋 생성 스크립트 (scripts/build_clean_dataset.py)
+SSOK - 3차 데이터 오류 수정 및 3종 공식 API 통합 정제 데이터셋 생성 스크립트 (scripts/build_clean_dataset.py)
 
 수행 내역:
 1. [P0] 기존 2차 데이터 품질 오류 전수 수정 및 원문 대조:
