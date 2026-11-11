@@ -14,11 +14,11 @@ describe('오류 문구', () => {
       .toBe('질문이나 내 조건을 다시 확인해 주세요. 질문을 고쳐서 다시 보내 주세요.');
   });
 
-  it('모르는 code이거나 형식이 다르면 오류 번호만 알린다', () => {
-    const unknown = '일시적인 문제가 생겼어요. (오류 500) 잠시 후 다시 시도해 주세요.';
+  it('모르는 code이거나 형식이 다르면 일반 오류 안내를 보여 준다', () => {
+    const unknown = '일시적인 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
     expect(serverErrorMessage(500, { detail: { code: 'INTERNAL_ERROR', message: 'Traceback ...' } })).toBe(unknown);
     expect(serverErrorMessage(500, null)).toBe(unknown);
-    expect(serverErrorMessage(502, { detail: '문자열' })).toBe('일시적인 문제가 생겼어요. (오류 502) 잠시 후 다시 시도해 주세요.');
+    expect(serverErrorMessage(502, { detail: '문자열' })).toBe('일시적인 문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
   });
 
   it('시간 초과는 60초 넘게 오지 않았다고 알려 준다', () => {

@@ -244,6 +244,29 @@ def _clause_correction(
     return " ".join(f"{check['policy_name']}: {text} {markers}".strip() for check, text, markers in statements)
 
 
+_INTERNAL_STATUS = re.compile(
+    r"(?<![a-z0-9_/.-])(?:needs_check|reception_status)(?![a-z0-9_/-])"
+    r"|(?:접수\s*(?:상태|여부))[^.!?\n]{0,60}?(?<![a-z0-9_./-])"
+    r"(?:open|unknown|closed|before)(?![a-z0-9_/-])"
+    r"|\(\s*(?:open|unknown|closed|before)\s*\)"
+    r"|\*\*\s*(?:open|unknown|closed|before)\s*\*\*",
+    re.IGNORECASE,
+)
+
+_REDUNDANT_STATUS_TAG = re.compile(
+    r"(마감)\s*\(\s*closed\s*\)|(보류)\s*\(\s*needs_check\s*\)",
+    re.IGNORECASE,
+)
+
+
+def _remove_redundant_status_tags(text: str) -> str:
+    return _REDUNDANT_STATUS_TAG.sub(lambda match: match[1] or match[2], text)
+
+
+def _has_internal_status(text: str) -> bool:
+    return _INTERNAL_STATUS.search(text) is not None
+
+
 def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
     """접수 상태·자격은 Checker 판정을 기준으로 안내한다.
 
@@ -411,6 +434,7 @@ def run_ask_pipeline(
         output = GeneratorOutput.model_validate(raw)
     except ValidationError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
+    output = output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
     aligned = False
     if output.status != "no_evidence":
         fixed, aligned = _align_answer_with_checks(output.answer, contexts, checks)
@@ -425,11 +449,14 @@ def run_ask_pipeline(
                 "used_source_ids": [context["source_id"] for context in contexts
                                     if str(context["source_id"]) in remaining],
             })
-    answer, citations = _citations(output, contexts)
     follow_ups = [
         item for item in output.follow_up_questions
         if item.kind != "ask_info" or profile.get(item.field) is None
     ]
+    # 상태가 섞인 자유 문장을 추측으로 고치면 정책과 출처의 연결이 바뀔 수 있다.
+    if any(_has_internal_status(text) for text in (output.answer, *(item.text for item in follow_ups))):
+        raise AskError("LLM_OUTPUT_INVALID")
+    answer, citations = _citations(output, contexts)
     if output.status == "no_evidence":
         checks = []
     if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):

@@ -26,10 +26,11 @@ const CODE_MESSAGES: Record<string, string> = {
   INVALID_SEARCH_INPUT: `질문이나 내 조건을 다시 확인해 주세요. ${FIX_INPUT}`,
 };
 
-/** 서버 오류 응답({"detail": {"code", "message"}})의 code로 화면 문구를 고른다. 모르는 code면 오류 번호만 알린다. */
-export function serverErrorMessage(status: number, body: unknown): string {
+/** 서버 오류 응답의 code로 화면 문구를 고른다. */
+export function serverErrorMessage(_status: number, body: unknown): string {
   const code = (body as { detail?: { code?: unknown } } | null)?.detail?.code;
-  return (typeof code === 'string' && CODE_MESSAGES[code]) || `일시적인 문제가 생겼어요. (오류 ${status}) ${RETRY}`;
+  return (typeof code === 'string' && Object.prototype.hasOwnProperty.call(CODE_MESSAGES, code) && CODE_MESSAGES[code])
+    || `일시적인 문제가 생겼어요. ${RETRY}`;
 }
 
 /** 요청 단계에서 난 오류(시간 초과·연결 실패)를 화면 문구로 바꾼다. */
@@ -93,7 +94,7 @@ export async function askPolicy(request: AskRequest): Promise<AskResponse> {
       if (error instanceof SyntaxError) return null;
       throw error;
     });
-    if (!isAskResponse(body)) throw new Error(`답변 형식을 확인하지 못했어요. ${RETRY}`);
+    if (!isAskResponse(body)) throw new Error(`답변을 불러오지 못했어요. ${RETRY}`);
     return body;
   } catch (err) {
     throw new Error(requestErrorMessage(err));

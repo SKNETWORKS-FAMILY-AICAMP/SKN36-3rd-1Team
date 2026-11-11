@@ -161,6 +161,31 @@ class PipelineTests(unittest.TestCase):
         # 신청 상태 정렬을 위해 인용 가능한 후보는 모두 한 번씩 판정하고, 결과 카드는 채택된 정책만 남긴다.
         self.assertEqual(sorted(call.args[1]["policy_id"] for call in self.check.call_args_list), list("123456"))
 
+    def test_generated_status_codes_are_rejected_without_regeneration(self):
+        for raw in (
+            answer("접수 상태도 각각 unknown 또는 open으로만 확인됩니다. [1]"),
+            answer("자격은 needs_check로 보류됐어요. [1]"),
+            answer("자격은보류needs_check로 표시됩니다. [1]"),
+            answer("현재 **closed**예요. [1]"),
+            answer("reception_status를 확인하세요. [1]"),
+            answer(follow_up_questions=[{"kind": "question", "text": "접수 상태가 open인가요?"}]),
+        ):
+            with self.subTest(raw=raw):
+                self.generate.reset_mock()
+                self.generate.return_value = raw
+                with self.assertRaisesRegex(AskError, "LLM_OUTPUT_INVALID"):
+                    self.ask()
+                self.generate.assert_called_once()
+
+    def test_redundant_status_tags_preserve_answer_and_citation(self):
+        self.generate.return_value = answer(
+            "공고에 필요한 서류는 등본입니다. [1] 접수는 마감(closed), 자격 확인은 보류(needs_check) 상태입니다. [1]"
+        )
+        response = self.ask()
+        self.assertIn("공고에 필요한 서류는 등본입니다. [1]", response.answer)
+        self.assertIn("접수는 마감, 자격 확인은 보류 상태입니다. [1]", response.answer)
+        self.assertEqual(len(response.citations), 1)
+
     def test_malformed_outputs_are_rejected(self):
         for raw in (answer("없는 근거 [9]"), answer("인용 누락"), {"answer": "불완전"},
                     answer(follow_up_questions=[{"kind": "ask_info", "text": "정보", "field": "child_age"}])):
