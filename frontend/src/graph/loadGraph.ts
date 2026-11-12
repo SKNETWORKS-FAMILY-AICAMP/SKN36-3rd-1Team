@@ -38,7 +38,7 @@ export function loadGraphDataset(): Promise<GraphDataset> {
 async function readGraphDataset(): Promise<GraphDataset> {
   const entries = Object.entries(GRAPH_FILES);
   if (entries.length === 0) {
-    throw new Error('그래프 데이터 폴더(data/releases/v1.4.0-candidate/neo4j)를 찾지 못했어요. 최신 dev를 받았는지 확인해 주세요.');
+    throw new Error('그래프 데이터 폴더(data/releases/v1.4.0-candidate/neo4j)를 찾지 못했어요. 최신 main을 받았는지 확인해 주세요.');
   }
   const files: Record<string, string> = {};
   await Promise.all(entries.map(async ([path, load]) => { files[fileName(path)] = await load(); }));
