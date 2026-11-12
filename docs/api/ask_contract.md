@@ -528,7 +528,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 **지인**
 
-- [ ] `dev` 최신 상태 확인 후 `feature/rag-api-integration` 브랜치 생성
+- [ ] `main` 최신 상태 확인 후 `feature/rag-api-integration` 브랜치 생성
 - [ ] 본 문서를 `docs/api/ask_contract.md`로 추가하고 PR 리뷰
 - [ ] `build_contexts()` 및 Mock 기반 `run_ask_pipeline()` 구현
 - [ ] 검색 Session 수명·동시성 보호·선택적 워밍업 구현
@@ -558,7 +558,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 **민혁**
 
-- [ ] `dev`와 DB 인계 데이터셋/컬렉션/임베딩 모델 일치 여부 확인
+- [ ] `main`과 DB 인계 데이터셋/컬렉션/임베딩 모델 일치 여부 확인
 - [ ] 검색 데이터 복원 절차와 지역 필터 동작 확인
 
 ## 11. 최소 통합 테스트 (T01~T18)
@@ -602,9 +602,9 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 ### 참조 코드
 
-- [Hybrid 검색 구현 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/database/hybrid_search.py)
-- [지역 검색/약칭 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/database/region_search.py)
-- [React 요청·응답 타입 (기능 브랜치)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/feature/15-react-demo-ui/frontend/src/api/types.ts)
-- [React API 클라이언트 (기능 브랜치)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/feature/15-react-demo-ui/frontend/src/api/client.ts)
+- [Hybrid 검색 구현 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/database/hybrid_search.py)
+- [지역 검색/약칭 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/database/region_search.py)
+- [React 요청·응답 타입 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/frontend/src/api/types.ts)
+- [React API 클라이언트 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/frontend/src/api/client.ts)
 
 > **MVP 성공 기준:** 근거 없는 적격/부적격 판정 없음 · 실제 원문 출처만 표시 · React와 API 스키마 일치 · 검색/LLM 오류 분리 · 시연 전 통합 테스트 완료.
