@@ -1393,31 +1393,31 @@ B3는 HTML 제목 경계·고아 소제목 처리를 개선했지만 이번 평�
 | 중요 조건 누락 | 질문의 답을 바꾸는 핵심 조건·예외를 모두 설명 | 해당 조건·예외를 하나라도 누락. 일반적인 정책 조건 전부를 요구하는 기준은 아님 |
 | 핵심 주장 인용 적합 | 핵심 답변에 붙인 번호의 원문이 해당 주장을 실제 뒷받침함 | 번호는 유효해도 핵심 결론을 지지하지 못하거나 핵심 제외 규정을 설명하지 못함 |
 
-<b>문항별 결과 — AI 보조 예비 채점, 팀 최종 확정 전</b>
+<b>문항별 결과 — AI 보조 재검수</b>
 
 | 문항 | 모델 | 핵심 사실 일치 | 중요 조건 누락 | 핵심 주장 인용 적합 | 판단 이유·원본 답변 |
 | --- | --- | --- | --- | --- | --- |
 | RQ027 | nano | 1 | 없음 | 1 | 금액·중위소득 기준이 \[1\]과 일치 · [원본 1행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L1) |
 | RQ027 | mini | 1 | 없음 | 1 | 동일 금액·기준 설명 · [원본 2행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L2) |
 | RQ027 | 5.4 | 1 | 없음 | 1 | 본문은 일치. 후속 ask\_info의 income 용도는 별도 검토 대상 · [원본 3행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L3) |
-| RQ031 | nano | 1 | 없음 | 1 | 60일 이상은 설명했으나 연도 해석을 불필요하게 보류: REVIEW · [원본 4행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L4) |
-| RQ031 | mini | 1 | 없음 | 1 | 60일 이상 설명. 60일 이하 제재 문구와 경계 상충은 원문 확인 필요 · [원본 5행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L5) |
-| RQ031 | 5.4 | 1 | 없음 | 1 | 60일 이상 설명. 동일 경계 상충은 원문 확인 필요 · [원본 6행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L6) |
+| RQ031 | nano | 1 | 있음 | 1 | 60일 이상·이하 기준을 인용했으나 정확히 60일의 적용 기준 안내 누락 · [원본 4행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L4) |
+| RQ031 | mini | 1 | 있음 | 1 | 두 기준을 인용했으나 정확히 60일의 적용 기준 안내 누락 · [원본 5행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L5) |
+| RQ031 | 5.4 | 1 | 있음 | 1 | 두 기준을 인용했으나 정확히 60일의 적용 기준 안내 누락 · [원본 6행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L6) |
 | RQ036 | nano | 1 | 없음 | 1 | 일반 4억·15\~34세 청년 5억 구분 · [원본 7행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L7) |
 | RQ036 | mini | 1 | 없음 | 1 | 일반 기준·청년 예외 모두 포함 · [원본 8행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L8) |
 | RQ036 | 5.4 | 1 | 없음 | 1 | \[1\]\[3\]의 일반 기준·예외와 일치 · [원본 9행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L9) |
 | RQ040 | nano | 1 | 없음 | 1 | 공무원 제외와 불가 결론을 \[5\]로 설명 · [원본 10행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L10) |
 | RQ040 | mini | 0 | 없음 | 1 | 첫 긍정 표현과 발급 불가 결론 충돌. 근거는 제외 규정을 지지 · [원본 11행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L11) |
 | RQ040 | 5.4 | 1 | 없음 | 1 | 공무원 제외·불가 결론 일치 · [원본 12행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L12) |
-| RQ042 | nano | 1 | 없음 | 1 | 직계존속 임차 제외를 \[2\]\[4\]로 설명. 가능성·동거 해석은 REVIEW · [원본 13행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L13) |
+| RQ042 | nano | 0 | 없음 | 1 | 직계존속 임차 제외를 \[2\]\[4\]로 설명. 질문에 없는 동거 상황을 전제로 설명 · [원본 13행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L13) |
 | RQ042 | mini | 0 | 있음 | 0 | 질문에 없는 동거를 가정하고 핵심 직계존속 임차 제외 규정을 누락 · [원본 14행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L14) |
 | RQ042 | 5.4 | 1 | 없음 | 1 | 직계존속 임차 제외를 설명하고 부모 소유 여부 불확실성을 구분 · [원본 15행](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl#L15) |
 
 | 모델 | 핵심 사실 일치 건수 / 5 | 중요 조건 누락 건수 / 5 | 핵심 주장 인용 적합 건수 / 5 | 형식 검사 건수 / 5 |
 | --- | --- | --- | --- | --- |
-| GPT-5.4-nano | 5/5 | 0/5 | 5/5 | 5/5 |
-| GPT-5.4-mini | 3/5 | 1/5 | 4/5 | 5/5 |
-| GPT-5.4 | 5/5 | 0/5 | 5/5 | 5/5 |
+| GPT-5.4-nano | 4/5 | 1/5 | 5/5 | 5/5 |
+| GPT-5.4-mini | 3/5 | 2/5 | 4/5 | 5/5 |
+| GPT-5.4 | 5/5 | 1/5 | 5/5 | 5/5 |
 
 <b>해석:</b> 형식 검사 15/15와 답변 내용 채점은 다른 지표입니다. 위 건수는 5문항의 핵심 답변에 한정한 AI 보조 검토이며, 전체 답변의 모든 주장에 대한 정확도나 팀의 최종 성능 점수가 아닙니다. nano의 RQ031·RQ042는 사실을 언급했더라도 과도한 판단 보류가 있어 REVIEW로 남깁니다. RQ031의 60일 경계 표현은 입력 원문 간에도 상충 가능성이 있어 세 모델 공통으로 추가 확인 대상입니다.
 
@@ -1428,7 +1428,7 @@ B3는 HTML 제목 경계·고아 소제목 처리를 개선했지만 이번 평�
 | 검색 A/B 1 | E3 품질 52문항, E4 CPU 반복 모델별 165표본 | 위 검색 결과표의 <code>summary.json</code>·<code>per_question_ranks.csv</code>·<code>repeat_3rounds.json</code>; 조건은 <mention url="https://app.notion.com/p/414130c4176a80538199eb72e4afabb6" /> §1·§7 | 기존 실행 보고 / 원본은 산출물 05 §7 첨부 ZIP |
 | B2/B3 | E6 0.6B 고정·52문항·메모리 정확 검색 | 위 청킹 결과표와 산출물 05 §6-2 | 기존 실행 보고 / 원본은 산출물 05 §7 첨부 ZIP |
 | RAG/API 연결·출처 차단 | 실제 Qdrant·Neo4j·Checker + 고정 Generator, 시나리오 8개 | <code>docs/development/experiments/ab1_qdrant_local_20261110/rag_api_final_db_e2e.json</code> 및 <code>logs/pytest_rag_api_scope.log</code> | 기존 실행 보고 / 원본은 산출물 05 §7 첨부 ZIP / 생성 품질 점수에 포함하지 않음 |
-| 생성 모델 비교 | 실제 정책 5문항 × 3모델 = 15건 | [고정 입력](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/real_gold_batch01/inputs.json) · [원본 응답·시간·usage](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl) · [평가 코드](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/compare_real_gold.py) | 원본 확인·동일 기준 예비 재채점 완료 / 팀 확정 전 |
+| 생성 모델 비교 | 실제 정책 5문항 × 3모델 = 15건 | [고정 입력](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/real_gold_batch01/inputs.json) · [원본 응답·시간·usage](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl) · [평가 코드](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/compare_real_gold.py) | 원본과 당시 입력 근거를 대조해 AI 보조 재검수 완료 |
 | 실제 상담 화면의 답변·공식 출처 표시 | React→실제 API, 코드·DB 버전과 질문 기록 필요 | 산출물 05 §4 화면 검수 캡처(RQ027·RQ031·RQ036)와 산출물 03 시연 캡처 | 수동 검수 기록 / 제출 코드 E2E 2건은 산출물 03 §5 |
 | RQ040·RQ042 오류 수정 | mini 답변 충돌·핵심 제외 규정 누락 | 위 15건 채점표의 오류 원본 | 발견 확인 / 수정 후 재시험 증빙 미확인 |
 
