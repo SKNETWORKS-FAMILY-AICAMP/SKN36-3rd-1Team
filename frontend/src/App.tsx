@@ -5,7 +5,7 @@ import { CATEGORIES } from './config/categories';
 import { infoField } from './config/infoFields';
 import { PERSONAS, type Persona } from './config/personas';
 import { HISTORY_MAX_ITEMS, QUESTION_MAX_LENGTH } from './config/request';
-import { describeProfile, REGIONS } from './lib/parseProfile';
+import { describeProfile, readProfileReply, REGIONS } from './lib/parseProfile';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge } from './lib/validate';
@@ -125,8 +125,27 @@ export default function App() {
   const requests = useRef(new Map<number, AskRequest>());
 
   const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null) => {
-    const question = raw.trim();
+    let question = raw.trim();
     if (!question) return false;
+
+    // "난 26살이야"처럼 조건만 알려 주는 답은 새 질문으로 검색하지 않는다 (#64).
+    // 내 조건에 넣고, 바로 앞 질문을 바뀐 조건으로 다시 보낸다 (조건 입력칸으로 답한 것과 같은 동작).
+    const reply = field == null ? readProfileReply(question) : null;
+    if (reply) {
+      if (reply.age != null) setAge(String(reply.age));
+      if (reply.region) setRegion(reply.region);
+      if (reply.income != null) setIncome(reply.income);
+      const previous = [...turnsRef.current].reverse().find((t) => t.kind === 'qa');
+      if (!previous || previous.kind !== 'qa') {
+        showToast(`내 조건에 넣었어요: ${describeProfile(reply)}. 궁금한 정책을 물어봐 주세요`);
+        return true;
+      }
+      showToast(`${describeProfile(reply)} 조건으로 앞 질문을 다시 확인할게요`);
+      question = previous.question;
+      next = { ...next, ...reply };
+      const keys = Object.keys(reply);
+      field = keys.length === 1 ? keys[0] : null;
+    }
     if ([...question].length > QUESTION_MAX_LENGTH) {
       showToast(`질문은 ${QUESTION_MAX_LENGTH.toLocaleString('ko-KR')}자까지 입력할 수 있어요.`);
       return false;
