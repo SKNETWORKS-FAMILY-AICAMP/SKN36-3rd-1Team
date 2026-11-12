@@ -1,0 +1,55 @@
+{
+  "record": "SSOK failure handling check (Qdrant / Neo4j / LLM)",
+  "date": "2026-11-12",
+  "code": "d63e3b3 (main). Test backend started from this repository's .venv with the same backend code",
+  "method": "기존 DB·.env·Docker는 변경하지 않음. 테스트용 백엔드를 127.0.0.1:8011에 따로 띄우고 환경변수 하나만 바꿔 장애를 재현함. 각 케이스마다 같은 질문을 1회 보내고 테스트 백엔드를 종료함. 복구 확인은 정상 설정으로 실행 중인 127.0.0.1:8000 백엔드에 같은 질문을 보냄",
+  "request": {
+    "question": "직업 훈련이나 교육비 지원은 어디서 찾아요?",
+    "profile": {"age": 25, "region": "서울특별시", "income": null},
+    "history": []
+  },
+  "cases": [
+    {
+      "id": "FAIL-QDRANT",
+      "override": "QDRANT_URL=http://127.0.0.1:6399 (사용하지 않는 포트)",
+      "expected": "HTTP 503",
+      "http": 503,
+      "elapsed_ms": 3250,
+      "health_after": {"status": "ok", "ready": false},
+      "server_log": "POST /api/ask HTTP/1.1 503 Service Unavailable",
+      "result": "PASS"
+    },
+    {
+      "id": "FAIL-NEO4J",
+      "override": "NEO4J_URI=bolt://127.0.0.1:7699 (사용하지 않는 포트)",
+      "expected": "HTTP 503",
+      "http": 503,
+      "elapsed_ms": 3450,
+      "health_after": {"status": "ok", "ready": false},
+      "server_log": "POST /api/ask HTTP/1.1 503 Service Unavailable",
+      "result": "PASS"
+    },
+    {
+      "id": "FAIL-LLM",
+      "override": "OPENAI_API_KEY=유효하지 않은 테스트 값",
+      "expected": "HTTP 502",
+      "http": 502,
+      "elapsed_ms": 3242,
+      "health_after": {"status": "ok", "ready": true},
+      "server_log": "POST /api/ask HTTP/1.1 502 Bad Gateway",
+      "note": "검색은 성공해 ready=true가 되었고, 답변 생성 단계에서만 실패함",
+      "result": "PASS"
+    },
+    {
+      "id": "RECOVERY",
+      "override": "없음 (정상 설정 백엔드 127.0.0.1:8000)",
+      "expected": "HTTP 200, 공식 출처 포함 답변",
+      "http": 200,
+      "status": "answered",
+      "citations": 5,
+      "elapsed_ms": 4212,
+      "result": "PASS"
+    }
+  ],
+  "not_covered": "컨테이너 장애 후 자동 복구, LLM 타임아웃(504)은 이번 범위에 포함하지 않음. 오류 응답 본문의 detail.code는 이번 기록에서 수집하지 않음"
+}
