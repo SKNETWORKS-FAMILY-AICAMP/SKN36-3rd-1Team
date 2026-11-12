@@ -1,0 +1,1832 @@
+{
+  "summary": {
+    "status": "PRELIMINARY_UNREVIEWED_GOLD",
+    "question_count": 26,
+    "condition_question_count": 8,
+    "same_ranking_count": 26,
+    "methods": {
+      "vector": {
+        "gold_span_hit_26": 24,
+        "condition_gold_span_hit_8": 6,
+        "latency": {
+          "mean_ms": 67.26,
+          "p95_ms": 71.29
+        }
+      },
+      "hybrid": {
+        "gold_span_hit_26": 24,
+        "condition_gold_span_hit_8": 6,
+        "latency": {
+          "mean_ms": 111.64,
+          "p95_ms": 286.07
+        }
+      }
+    }
+  },
+  "records": [
+    {
+      "question_id": "RQ027",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.8193615999771282,
+        "score": {
+          "question_id": "RQ027",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ027-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_047_C004",
+          "CHK_B2_DOC_GOV_033_C002",
+          "CHK_B2_DOC_BOK_047_C005"
+        ]
+      },
+      "hybrid": {
+        "seconds": 1.3132257999968715,
+        "score": {
+          "question_id": "RQ027",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ027-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_047_C004",
+          "CHK_B2_DOC_GOV_033_C002",
+          "CHK_B2_DOC_BOK_047_C005"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_BOK_047",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_BOK_047_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ028",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.04050359997199848,
+        "score": {
+          "question_id": "RQ028",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ028-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_047_C004",
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_LH_001_C006",
+          "CHK_B2_DOC_LH_001_C005"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.07478900003479794,
+        "score": {
+          "question_id": "RQ028",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ028-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_047_C004",
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_LH_001_C006",
+          "CHK_B2_DOC_LH_001_C005"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_BOK_047",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_BOK_047_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ029",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.042866499978117645,
+        "score": {
+          "question_id": "RQ029",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ029-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_BOK_047_C005",
+          "CHK_B2_DOC_BOK_047_C001",
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_020_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.03753749997122213,
+        "score": {
+          "question_id": "RQ029",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ029-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_BOK_047_C002",
+          "CHK_B2_DOC_BOK_047_C005",
+          "CHK_B2_DOC_BOK_047_C001",
+          "CHK_B2_DOC_BOK_047_C003",
+          "CHK_B2_DOC_BOK_020_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_BOK_047",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_BOK_047_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ030",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.0404969000373967,
+        "score": {
+          "question_id": "RQ030",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ030-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C005",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009",
+          "CHK_B2_DOC_GOV_006_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.09410200000274926,
+        "score": {
+          "question_id": "RQ030",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ030-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C005",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009",
+          "CHK_B2_DOC_GOV_006_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_GOV_006",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_GOV_006_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ031",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.04814879997866228,
+        "score": {
+          "question_id": "RQ031",
+          "outcome": "doc_only",
+          "first_hit_rank": null,
+          "reciprocal_rank": 0.0,
+          "first_gold_document_rank": 1,
+          "required_found": 0,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ031-E1",
+              "rank": null,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C008",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009",
+          "CHK_B2_DOC_GOV_006_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04501389997312799,
+        "score": {
+          "question_id": "RQ031",
+          "outcome": "doc_only",
+          "first_hit_rank": null,
+          "reciprocal_rank": 0.0,
+          "first_gold_document_rank": 1,
+          "required_found": 0,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ031-E1",
+              "rank": null,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C008",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009",
+          "CHK_B2_DOC_GOV_006_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_GOV_006",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_GOV_006_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ032",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.027903700014576316,
+        "score": {
+          "question_id": "RQ032",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ032-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C007",
+          "CHK_B2_DOC_GOV_006_C001",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.06679329997859895,
+        "score": {
+          "question_id": "RQ032",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ032-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_006_C007",
+          "CHK_B2_DOC_GOV_006_C001",
+          "CHK_B2_DOC_GOV_006_C006",
+          "CHK_B2_DOC_GOV_006_C003",
+          "CHK_B2_DOC_GOV_006_C009"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_GOV_006",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_GOV_006_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ033",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.041989599994849414,
+        "score": {
+          "question_id": "RQ033",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ033-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_048_C002",
+          "CHK_B2_DOC_GOV_048_C001",
+          "CHK_B2_DOC_GOV_048_C003",
+          "CHK_B2_DOC_GOV_058_C003",
+          "CHK_B2_DOC_GOV_028_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.058771700016222894,
+        "score": {
+          "question_id": "RQ033",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ033-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_048_C002",
+          "CHK_B2_DOC_GOV_048_C001",
+          "CHK_B2_DOC_GOV_048_C003",
+          "CHK_B2_DOC_GOV_058_C003",
+          "CHK_B2_DOC_GOV_028_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_GOV_048",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_GOV_048_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ034",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.025224899989552796,
+        "score": {
+          "question_id": "RQ034",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ034-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_048_C002",
+          "CHK_B2_DOC_GOV_048_C001",
+          "CHK_B2_DOC_GOV_048_C003",
+          "CHK_B2_DOC_GOV_047_C004",
+          "CHK_B2_DOC_GOV_047_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.06372040003770962,
+        "score": {
+          "question_id": "RQ034",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ034-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_GOV_048_C002",
+          "CHK_B2_DOC_GOV_048_C001",
+          "CHK_B2_DOC_GOV_048_C003",
+          "CHK_B2_DOC_GOV_047_C004",
+          "CHK_B2_DOC_GOV_047_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_GOV_048",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_GOV_048_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ035",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.025659600039944053,
+        "score": {
+          "question_id": "RQ035",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 2,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ035-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_002_C002",
+          "CHK_B2_DOC_MOEL_001_C003",
+          "CHK_B2_DOC_MOEL_001_C005",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_002_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04096369998296723,
+        "score": {
+          "question_id": "RQ035",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 2,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ035-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_002_C002",
+          "CHK_B2_DOC_MOEL_001_C003",
+          "CHK_B2_DOC_MOEL_001_C005",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_002_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_010",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_010_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ036",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.06502559996442869,
+        "score": {
+          "question_id": "RQ036",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ036-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_001_C002",
+          "CHK_B2_DOC_MOEL_002_C002",
+          "CHK_B2_DOC_MOEL_002_C003",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_001_C003"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.05415549996541813,
+        "score": {
+          "question_id": "RQ036",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ036-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_001_C002",
+          "CHK_B2_DOC_MOEL_002_C002",
+          "CHK_B2_DOC_MOEL_002_C003",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_001_C003"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_010",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_010_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ037",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.04518590000225231,
+        "score": {
+          "question_id": "RQ037",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ037-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_001_C004",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_001_C005",
+          "CHK_B2_DOC_MOEL_001_C001",
+          "CHK_B2_DOC_MOEL_002_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04753450001589954,
+        "score": {
+          "question_id": "RQ037",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ037-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOEL_001_C004",
+          "CHK_B2_DOC_MOEL_002_C004",
+          "CHK_B2_DOC_MOEL_001_C005",
+          "CHK_B2_DOC_MOEL_001_C001",
+          "CHK_B2_DOC_MOEL_002_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_010",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_010_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ038",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.043928799976129085,
+        "score": {
+          "question_id": "RQ038",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ038-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C008",
+          "CHK_B2_DOC_WORK24_001_C002",
+          "CHK_B2_DOC_WORK24_001_C009",
+          "CHK_B2_DOC_WORK24_001_C007"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.08557090000249445,
+        "score": {
+          "question_id": "RQ038",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ038-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C008",
+          "CHK_B2_DOC_WORK24_001_C002",
+          "CHK_B2_DOC_WORK24_001_C009",
+          "CHK_B2_DOC_WORK24_001_C007"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_005",
+            "graph_status": "FOUND",
+            "condition_ids": [
+              "COND_AGE_75_120",
+              "COND_EXCL_CORP_REP",
+              "COND_EXCL_FRAUD_RESTRICTED",
+              "COND_EXCL_FRAUD_UNPAID",
+              "COND_EXCL_LARGE_FIRM_WORKER",
+              "COND_EXCL_LIVELIHOOD_BENEFIT",
+              "COND_EXCL_NONPROFIT_REP",
+              "COND_EXCL_NO_NEED",
+              "COND_EXCL_OTHER_SUBSIDY",
+              "COND_EXCL_PUBLIC_EMPLOYEE",
+              "COND_EXCL_SELF_EMPLOYED",
+              "COND_EXCL_SPECIAL_WORKER",
+              "COND_EXCL_STUDENT"
+            ],
+            "unknown_groups": [],
+            "tree_matches_requires": false
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ039",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.057936099998187274,
+        "score": {
+          "question_id": "RQ039",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ039-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C010",
+          "CHK_B2_DOC_WORK24_001_C004",
+          "CHK_B2_DOC_WORK24_001_C008",
+          "CHK_B2_DOC_WORK24_001_C007"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.05898259999230504,
+        "score": {
+          "question_id": "RQ039",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ039-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C010",
+          "CHK_B2_DOC_WORK24_001_C004",
+          "CHK_B2_DOC_WORK24_001_C008",
+          "CHK_B2_DOC_WORK24_001_C007"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_005",
+            "graph_status": "FOUND",
+            "condition_ids": [
+              "COND_AGE_75_120",
+              "COND_EXCL_CORP_REP",
+              "COND_EXCL_FRAUD_RESTRICTED",
+              "COND_EXCL_FRAUD_UNPAID",
+              "COND_EXCL_LARGE_FIRM_WORKER",
+              "COND_EXCL_LIVELIHOOD_BENEFIT",
+              "COND_EXCL_NONPROFIT_REP",
+              "COND_EXCL_NO_NEED",
+              "COND_EXCL_OTHER_SUBSIDY",
+              "COND_EXCL_PUBLIC_EMPLOYEE",
+              "COND_EXCL_SELF_EMPLOYED",
+              "COND_EXCL_SPECIAL_WORKER",
+              "COND_EXCL_STUDENT"
+            ],
+            "unknown_groups": [],
+            "tree_matches_requires": false
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ040",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.040143099962733686,
+        "score": {
+          "question_id": "RQ040",
+          "outcome": "hit",
+          "first_hit_rank": 5,
+          "reciprocal_rank": 0.2,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ040-E1",
+              "rank": 5,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C007",
+          "CHK_B2_DOC_WORK24_001_C005",
+          "CHK_B2_DOC_WORK24_001_C004",
+          "CHK_B2_DOC_WORK24_001_C003"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.05011409998405725,
+        "score": {
+          "question_id": "RQ040",
+          "outcome": "hit",
+          "first_hit_rank": 5,
+          "reciprocal_rank": 0.2,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ040-E1",
+              "rank": 5,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_WORK24_001_C001",
+          "CHK_B2_DOC_WORK24_001_C007",
+          "CHK_B2_DOC_WORK24_001_C005",
+          "CHK_B2_DOC_WORK24_001_C004",
+          "CHK_B2_DOC_WORK24_001_C003"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_005",
+            "graph_status": "FOUND",
+            "condition_ids": [
+              "COND_AGE_75_120",
+              "COND_EXCL_CORP_REP",
+              "COND_EXCL_FRAUD_RESTRICTED",
+              "COND_EXCL_FRAUD_UNPAID",
+              "COND_EXCL_LARGE_FIRM_WORKER",
+              "COND_EXCL_LIVELIHOOD_BENEFIT",
+              "COND_EXCL_NONPROFIT_REP",
+              "COND_EXCL_NO_NEED",
+              "COND_EXCL_OTHER_SUBSIDY",
+              "COND_EXCL_PUBLIC_EMPLOYEE",
+              "COND_EXCL_SELF_EMPLOYED",
+              "COND_EXCL_SPECIAL_WORKER",
+              "COND_EXCL_STUDENT"
+            ],
+            "unknown_groups": [],
+            "tree_matches_requires": false
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ041",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.029803299985360354,
+        "score": {
+          "question_id": "RQ041",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ041-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C001",
+          "CHK_B2_DOC_MOLIT_002_C006",
+          "CHK_B2_DOC_MOLIT_001_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.2860745000070892,
+        "score": {
+          "question_id": "RQ041",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ041-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C001",
+          "CHK_B2_DOC_MOLIT_002_C006",
+          "CHK_B2_DOC_MOLIT_001_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_009",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_009_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ042",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.03976329998113215,
+        "score": {
+          "question_id": "RQ042",
+          "outcome": "doc_only",
+          "first_hit_rank": null,
+          "reciprocal_rank": 0.0,
+          "first_gold_document_rank": 1,
+          "required_found": 0,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ042-E1",
+              "rank": null,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C002",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_002_C004",
+          "CHK_B2_DOC_MOLIT_002_C003"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.059246999968308955,
+        "score": {
+          "question_id": "RQ042",
+          "outcome": "doc_only",
+          "first_hit_rank": null,
+          "reciprocal_rank": 0.0,
+          "first_gold_document_rank": 1,
+          "required_found": 0,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ042-E1",
+              "rank": null,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C002",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_002_C004",
+          "CHK_B2_DOC_MOLIT_002_C003"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_009",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_009_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ043",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.03539839998120442,
+        "score": {
+          "question_id": "RQ043",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ043-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C004",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C005",
+          "CHK_B2_DOC_MOLIT_001_C002",
+          "CHK_B2_DOC_MOLIT_001_C006"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04242690000683069,
+        "score": {
+          "question_id": "RQ043",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ043-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_MOLIT_001_C004",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C005",
+          "CHK_B2_DOC_MOLIT_001_C002",
+          "CHK_B2_DOC_MOLIT_001_C006"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_009",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_009_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ044",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.02443019999191165,
+        "score": {
+          "question_id": "RQ044",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ044-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_035_C001",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C001",
+          "CHK_B2_DOC_MOLIT_002_C006"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04310859995894134,
+        "score": {
+          "question_id": "RQ044",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ044-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_035_C001",
+          "CHK_B2_DOC_MOLIT_001_C001",
+          "CHK_B2_DOC_MOLIT_001_C006",
+          "CHK_B2_DOC_MOLIT_002_C001",
+          "CHK_B2_DOC_MOLIT_002_C006"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_035",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_035_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ045",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.026514399971347302,
+        "score": {
+          "question_id": "RQ045",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ045-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_054_C001",
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_YC_050_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04245870001614094,
+        "score": {
+          "question_id": "RQ045",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ045-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_054_C001",
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_YC_050_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_054",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_054_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ046",
+      "condition_question": true,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.025615999998990446,
+        "score": {
+          "question_id": "RQ046",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ046-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C001",
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_MOLIT_001_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.047512899967841804,
+        "score": {
+          "question_id": "RQ046",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ046-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C001",
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_MOLIT_001_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_054",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_054_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ047",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.026755400002002716,
+        "score": {
+          "question_id": "RQ047",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ047-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_050_C004",
+          "CHK_B2_DOC_YC_054_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04106320004211739,
+        "score": {
+          "question_id": "RQ047",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ047-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_054_C004",
+          "CHK_B2_DOC_YC_054_C003",
+          "CHK_B2_DOC_YC_054_C002",
+          "CHK_B2_DOC_YC_050_C004",
+          "CHK_B2_DOC_YC_054_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_054",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_054_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ048",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.025182000012136996,
+        "score": {
+          "question_id": "RQ048",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ048-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_001_C002",
+          "CHK_B2_DOC_YC_001_C001",
+          "CHK_B2_DOC_YC_055_C001",
+          "CHK_B2_DOC_YC_001_C003",
+          "CHK_B2_DOC_YC_055_C002"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04679760005092248,
+        "score": {
+          "question_id": "RQ048",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ048-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_001_C002",
+          "CHK_B2_DOC_YC_001_C001",
+          "CHK_B2_DOC_YC_055_C001",
+          "CHK_B2_DOC_YC_001_C003",
+          "CHK_B2_DOC_YC_055_C002"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_001",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_001_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ049",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.02852679998613894,
+        "score": {
+          "question_id": "RQ049",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ049-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_055_C004",
+          "CHK_B2_DOC_YC_001_C004",
+          "CHK_B2_DOC_YC_001_C003",
+          "CHK_B2_DOC_YC_001_C002",
+          "CHK_B2_DOC_YC_055_C001"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.05001000000629574,
+        "score": {
+          "question_id": "RQ049",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ049-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_055_C004",
+          "CHK_B2_DOC_YC_001_C004",
+          "CHK_B2_DOC_YC_001_C003",
+          "CHK_B2_DOC_YC_001_C002",
+          "CHK_B2_DOC_YC_055_C001"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_055",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_055_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ050",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.026227800000924617,
+        "score": {
+          "question_id": "RQ050",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 2,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ050-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_033_C001",
+          "CHK_B2_DOC_YC_029_C001",
+          "CHK_B2_DOC_BOK_037_C001",
+          "CHK_B2_DOC_BOK_037_C002",
+          "CHK_B2_DOC_BOK_037_C003"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.06472659995779395,
+        "score": {
+          "question_id": "RQ050",
+          "outcome": "hit",
+          "first_hit_rank": 2,
+          "reciprocal_rank": 0.5,
+          "first_gold_document_rank": 2,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ050-E1",
+              "rank": 2,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_033_C001",
+          "CHK_B2_DOC_YC_029_C001",
+          "CHK_B2_DOC_BOK_037_C001",
+          "CHK_B2_DOC_BOK_037_C002",
+          "CHK_B2_DOC_BOK_037_C003"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_029",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_029_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ051",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.07129420002456754,
+        "score": {
+          "question_id": "RQ051",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ051-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_003_C001",
+          "CHK_B2_DOC_YC_002_C002",
+          "CHK_B2_DOC_GOV_003_C003",
+          "CHK_B2_DOC_BOK_057_C003",
+          "CHK_B2_DOC_YC_002_C003"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.04643739998573437,
+        "score": {
+          "question_id": "RQ051",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ051-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_003_C001",
+          "CHK_B2_DOC_YC_002_C002",
+          "CHK_B2_DOC_GOV_003_C003",
+          "CHK_B2_DOC_BOK_057_C003",
+          "CHK_B2_DOC_YC_002_C003"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_003",
+            "graph_status": "FOUND",
+            "condition_ids": [
+              "COND_JOB_미취업자"
+            ],
+            "unknown_groups": [],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    },
+    {
+      "question_id": "RQ052",
+      "condition_question": false,
+      "same_ranking": true,
+      "vector": {
+        "seconds": 0.024976200016681105,
+        "score": {
+          "question_id": "RQ052",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ052-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_033_C001",
+          "CHK_B2_DOC_YC_055_C002",
+          "CHK_B2_DOC_NHUF_008_C004",
+          "CHK_B2_DOC_GOV_001_C002",
+          "CHK_B2_DOC_YC_055_C004"
+        ]
+      },
+      "hybrid": {
+        "seconds": 0.041375999979209155,
+        "score": {
+          "question_id": "RQ052",
+          "outcome": "hit",
+          "first_hit_rank": 1,
+          "reciprocal_rank": 1.0,
+          "first_gold_document_rank": 1,
+          "required_found": 1,
+          "required_total": 1,
+          "evidence": [
+            {
+              "evidence_id": "RQ052-E1",
+              "rank": 1,
+              "split_only": false
+            }
+          ]
+        },
+        "chunk_ids": [
+          "CHK_B2_DOC_YC_033_C001",
+          "CHK_B2_DOC_YC_055_C002",
+          "CHK_B2_DOC_NHUF_008_C004",
+          "CHK_B2_DOC_GOV_001_C002",
+          "CHK_B2_DOC_YC_055_C004"
+        ],
+        "target_graph": [
+          {
+            "policy_id": "POL_YC_033",
+            "graph_status": "FOUND",
+            "condition_ids": [],
+            "unknown_groups": [
+              "GRP_POL_YC_033_ROOT"
+            ],
+            "tree_matches_requires": true
+          }
+        ]
+      }
+    }
+  ]
+}
