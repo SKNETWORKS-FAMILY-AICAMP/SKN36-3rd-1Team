@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="SSOK 로고와 공고문 캐릭터">
+  <rect width="1000" height="300" rx="36" fill="#f8f8f3"/>
+  <circle cx="752" cy="150" r="110" fill="#eeefe8"/>
+  <g transform="translate(135 66) scale(2.5)" fill="none" stroke="#354b40" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path id="s" d="M21 20.5C18 18 15 17.5 11.5 17.5C5.5 17.5 2 20.5 2 24C2 28 6 29 11.5 30C17 31 21 32.5 21 36.3C21 40 17 42.5 11.5 42.5C7 42.5 3.5 41.5 1 39"/>
+    <use href="#s" x="32"/>
+    <circle cx="79" cy="30" r="13" fill="#fffaf2" stroke="#b78027" stroke-width="8"/>
+    <path d="m89 40 4 4" stroke="#b78027" stroke-width="6"/>
+    <path d="M79 24Q80 29 85 30Q80 31 79 36Q78 31 73 30Q78 29 79 24" fill="#d79a32" stroke="none"/>
+    <path d="M106 17.5v25m17-25-14.5 13M112.5 28 124 42.5"/>
+  </g>
+  <text x="132" y="218" font-family="sans-serif" font-size="25" fill="#53645b">생애주기 맞춤 정책 AI</text>
+  <g transform="translate(665 63) scale(3.35)" stroke="#6b3a1c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 36V10Q9 4 15 4H33L43 14V36Z" fill="#f9d48a"/>
+    <path d="M33 4V11Q33 14 36 14H43" fill="#fff8ec"/>
+    <circle cx="16.5" cy="24" r="2.6" fill="#f39a86" stroke="none"/>
+    <circle cx="35.5" cy="24" r="2.6" fill="#f39a86" stroke="none"/>
+    <path d="M20.5 17.5v3m11-3v3M23 23q3 3.2 6 0" fill="none"/>
+    <path d="M4 34H48V40Q48 52 36 54H16Q4 52 4 40Z" fill="#f6a587"/>
+    <ellipse cx="14.5" cy="33.5" rx="5.4" ry="3.6" fill="#f9d48a"/>
+    <ellipse cx="37.5" cy="33.5" rx="5.4" ry="3.6" fill="#f9d48a"/>
+  </g>
+  <path d="M857 71q2 12 14 14-12 2-14 14-2-12-14-14 12-2 14-14" fill="#d79a32"/>
+</svg>

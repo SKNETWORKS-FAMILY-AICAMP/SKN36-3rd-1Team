@@ -1,248 +1,155 @@
-# SSOK · 생애주기 맞춤 정책 AI
+<p align="center">
+  <img src="docs/assets/ssok-banner.svg" width="900" alt="SSOK · 생애주기 맞춤 정책 AI, 주머니에서 빼꼼 나오는 공고문 캐릭터">
+</p>
 
-생애주기 맞춤형 정부 지원 정책 추천 및 질의응답 서비스입니다.
+<h1 align="center">SSOK · 생애주기 맞춤 정책 AI</h1>
 
-> SKN 36기 부트캠프 3차 단위프로젝트 (교과목: LLM)
-> 상태: **최종 데이터(v1.4.0) Neo4j·Qdrant 적재 검증 완료 — RAG·API 통합(#23)과 화면 연동은 진행 중** (2026-11-10)
+<p align="center"><strong>모르면 못 받는 지원금, SSOK이 ‘모르면’을 줄입니다.</strong></p>
 
-사용자가 나이·지역·취업·혼인·가구·소득 상태를 입력하면, 공식 정책 원문을 근거로 관련 정부·지자체 지원 정책을 찾고
-**조건 충족 여부와 추가 확인 사항을 구분**하여 신청 절차·필요 서류·공식 링크·출처를 제시하는 한국어 RAG 질의응답 서비스입니다.
+<p align="center">
+  <a href="#시연-화면">시연 화면</a> ·
+  <a href="#기술-스택">기술 스택</a> ·
+  <a href="#아키텍처">아키텍처</a> ·
+  <a href="#실행-방법">실행 방법</a>
+</p>
 
-- 기획 문서: [docs/product/PRD.md](docs/product/PRD.md)
-- 코딩 규칙: [docs/development/CODING_STYLE.md](docs/development/CODING_STYLE.md)
-- AI 코딩 도구 규칙: [AGENTS.md](AGENTS.md)
-- 일정·역할: Notion WBS (PRD 상단 링크)
+**내 상황에 맞는 정부 지원 정책을 찾고, 신청 전에 확인할 조건과 공식 공고를 함께 보여주는 한국어 RAG 서비스입니다.**
 
-> 학습용 MVP이며 행정기관의 최종 자격 심사나 법적·금융적 조언을 대체하지 않습니다.
+SK네트웍스 Family AI 캠프 36기 · 3차 단위 프로젝트(LLM) · 1팀
 
-## 진행 현황
+정부·지자체 지원 정책은 여러 기관에 흩어져 있고, 같은 분야라도 나이·거주지·신청기간에 따라 자격이 달라집니다. SSOK은 자연어 질문과 사용자가 제공한 조건을 바탕으로 관련 정책을 찾고, 확인된 조건과 추가로 확인해야 할 사항을 구분해 보여줍니다. 3차 프로젝트에서는 **청년 취업준비생**을 주요 사용자로 삼았습니다.
 
-PRD §3.1 필수 MVP 기준입니다. 완료된 항목만 체크합니다.
+## 시연 화면
 
-- [x] 초기 폴더 구조 및 공통 설정 파일
-- [x] 정책 정제 데이터 및 Graph·Vector DB 인계 파일 준비
-- [ ] 원본 파일 별도 전달·복원 및 로컬 존재 확인
-- [ ] 원본 배치 후 최종 인계 패키지 검증 통과
-- [x] Neo4j 정책 관계 적재·조회 (#45 최종 재적재 검증)
-- [x] Qdrant 원문 청크 임베딩·검색 (B2 청킹, qwen3-embedding 0.6B)
-- [x] Graph + Vector 결합 조회
-- [x] 사용자 입력 검증 + 연령·지역·신청기간 조건 확인
-- [x] LLM 근거 기반 답변 + 출처 표시
-- [x] 평가 질문·검색 실험 결과 기록 (55문항 실행·52문항 채점, Gold 최종 합본은 별도)
+| 화면 | 시연에서 볼 수 있는 내용 |
+|---|---|
+| 상담하기 | “직업 훈련이나 교육비 지원은 어디서 찾아요?”라고 질문하고 답변, 조건 확인 결과, 공식 출처를 확인합니다. |
+| 생애주기 | 생애단계와 분야를 선택해 정책을 탐색하고, 관심 정책의 요약을 읽거나 상담에서 질문합니다. |
+| 정책 관계 지도 | 정책을 중심으로 기관·지역·분야·대상·생애단계·근거 문서·자격 조건이 어떻게 연결되는지 살펴봅니다. |
 
-> 3차 발표는 **React 세 화면(상담하기·생애주기·정책 관계 지도)**으로 질문과 선택 조건을 입력하고 답변·공식 출처를 보여줍니다. 터미널·노트북은 시연 백업이며 정식 웹 UI 개발은 4차 범위입니다.
+**대표 시연** · 상담하기에서 질문을 보낸 뒤 답변의 출처를 열고, 같은 정책을 생애주기 또는 관계 지도에서 이어서 살펴봅니다. [화면별 기능 및 시연 방법](frontend/README.md)
+
+## 핵심 기능
+
+- **정책 검색 및 추천** · 사용자 질문과 관련된 정책과 공식 원문을 찾습니다. 상담 화면에서는 나이·지역·연 소득을 선택 입력할 수 있습니다.
+- **조건 확인과 추가 질문** · 연령·지역·신청기간 등 확인 가능한 조건을 검사합니다. 입력이 더 필요하면 추가 질문을 표시하고, 공고 자체의 기준이 불명확하면 공식 원문 확인을 안내합니다.
+- **근거 기반 답변** · 검색된 근거를 바탕으로 신청 절차와 필요 서류를 안내하고 공식 출처를 표시합니다. 근거가 부족하면 별도 안내를 표시합니다.
 
 ## 기술 스택
 
-| 영역 | 기술 | 상태 |
-|---|---|---|
-| Backend | Python, FastAPI | 구현 완료 |
-| LLM·RAG | Python RAG Pipeline, OpenAI API | 3차 시연 모델 `gpt-5.4-mini` 채택 ([PR #56 비교 결과](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56)) |
-| Graph DB | Neo4j | 최종 DB 적재·검증 완료 |
-| Vector DB | Qdrant | 최종 DB 적재·검증 완료 |
-| Embedding | Ollama · Qwen3 Embedding 0.6B | 기본 검색 프로필에 적용 |
-| Frontend | React | 3차 최소 시연·4차 정식 웹 UI |
-| 데이터 처리 | Python, Pandas, XML/HTML/PDF 파서 | 파서 라이브러리 미확정 |
-| 테스트 | pytest, unittest | 단위·통합 테스트에 사용 |
-| 개발 환경 | Python venv, Docker Compose | 제안 |
+| 영역 | 사용 기술 |
+|---|---|
+| **Frontend** | ![React](https://img.shields.io/badge/React-708477?style=flat-square&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-708477?style=flat-square&logo=vite&logoColor=white) |
+| **Backend** | ![Python](https://img.shields.io/badge/Python-53645b?style=flat-square&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-53645b?style=flat-square&logo=fastapi&logoColor=white) |
+| **AI** | ![OpenAI · GPT-5.4 mini](https://img.shields.io/badge/OpenAI%20%C2%B7%20GPT--5.4%20mini-a46b21?style=flat-square) ![Ollama](https://img.shields.io/badge/Ollama-a46b21?style=flat-square&logo=ollama&logoColor=white) ![Qwen3 Embedding 0.6B](https://img.shields.io/badge/Qwen3%20Embedding%200.6B-a46b21?style=flat-square) |
+| **Database** | ![Neo4j](https://img.shields.io/badge/Neo4j-708477?style=flat-square&logo=neo4j&logoColor=white) ![Qdrant](https://img.shields.io/badge/Qdrant-708477?style=flat-square) |
+| **Dev & Test** | ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-805746?style=flat-square&logo=docker&logoColor=white) ![pytest](https://img.shields.io/badge/pytest-805746?style=flat-square&logo=pytest&logoColor=white) ![unittest](https://img.shields.io/badge/unittest-805746?style=flat-square) ![Vitest](https://img.shields.io/badge/Vitest-805746?style=flat-square&logo=vitest&logoColor=white) |
 
-## 폴더 구조
+## 아키텍처
 
-```text
-3차/
-├── backend/            # FastAPI 서버
-│   ├── api/            #   라우터·요청/응답 스키마
-│   ├── core/           #   예약 경로
-│   ├── models/         #   예약 경로
-│   ├── services/       #   예약 경로
-│   ├── rag/            #   검색 결과 결합·LLM 호출
-│   ├── graph/          #   예약 경로
-│   ├── llm/            #   근거 기반 답변 생성
-│   └── eligibility/    #   사용자 입력 검증, 연령·지역·신청기간 조건 확인
-├── frontend/           # 3차 React 시연 화면
-├── data/
-│   ├── raw/            # 원본 (youth_policy/, lh/, other/) — Git 기본 제외
-│   ├── processed/      # 정제 결과 (policies/documents/relationships.jsonl)
-│   ├── metadata/       # 출처·API 등록부
-│   ├── samples/        # 형식 설명용 가상 예시 (실데이터 아님)
-│   ├── releases/       # 버전별 데이터 릴리스와 매니페스트
-│   ├── handoff/        # v1.3.2 고정 인계본
-│   └── schemas/        # 예약 경로
-├── collectors/         # 수집기 (api/, html/) 및 preprocessing/, pdf/ (예약)
-├── database/           # neo4j/ (Cypher·제약조건), qdrant/ (컬렉션 설정), migrations/ (예약)
-├── ai/                 # prompts/, embeddings/·workflows/·evaluation/ (예약)
-├── tests/              # unit/, integration/, evaluation/
-├── scripts/            # 적재·재실행 유틸리티
-├── docs/               # product/, development/, data/, api/, reports/, architecture/ (예약)
-├── .env.example
-├── docker-compose.yml  # 개발용 Neo4j + Qdrant
-└── AGENTS.md
+```mermaid
+flowchart TD
+    UI["React 시연 화면"] --> API["FastAPI 상담 API"]
+    API --> SEARCH["Graph + Vector 결합 검색"]
+    SEARCH <--> N["Neo4j 정책 관계"]
+    SEARCH <--> Q["Qdrant 공식 원문 검색"]
+    SEARCH --> CHECK["자격 조건 확인"]
+    CHECK --> LLM["LLM 답변 생성"]
+    LLM --> RESULT["답변·조건 결과·출처 표시"]
+    classDef app fill:#eeefe8,stroke:#708477,color:#35443d
+    classDef data fill:#fff4dc,stroke:#b78027,color:#49351d
+    class UI,API,SEARCH,CHECK,LLM,RESULT app
+    class N,Q data
 ```
 
-## 팀별 담당 영역
+Neo4j는 정책에 연결된 대상·생애단계·자격 조건을 조회하고, Qdrant는 질문과 의미상 관련된 공식 원문 청크를 검색합니다. 검색 결과를 결합한 뒤 조건 확인 모듈이 사용자 입력과 정책 조건을 비교합니다. 답변 생성에는 검색 근거와 조건 확인 결과를 사용합니다.
 
-역할은 Notion WBS 기준이며, 폴더 경계는 협업을 위한 **기본 제안**입니다.
+[상담 API 계약](docs/api/ask_contract.md) · [시연 모델 비교 PR #56](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56)
 
-| 역할 | 담당 | 주요 작업 위치 | 산출물 |
-|---|---|---|---|
-| 데이터 / API / README | 장반석 | `data/`, `collectors/`, `docs/data/` | 01 수집 데이터 및 전처리 문서 |
-| 임베딩 / DB | 주민혁 | `database/` (Neo4j·Qdrant·임베딩) | 02 시스템 아키텍처 |
-| 검색 / 조건 확인 / 평가 | 나지인, 박소희 | `database/hybrid_search.py`, `backend/eligibility/`, `tests/evaluation/`, `docs/development/experiments/` | 05 테스트 계획 및 결과 보고서 |
-| LLM / RAG | 나지인, 박소희 | `backend/rag/`, `backend/api/`, `backend/llm/`, `ai/prompts/` (조건 결과 기반 답변·추가 질문) | 04 RAG-LLM 및 DB 연동 코드 |
-| PM · React 시연 UI · 발표 | 강민지 | 프로젝트 일정·진행 관리, 팀 협업 및 GitHub 작업 흐름 관리, `frontend/` | 03 개발 소프트웨어 실행·시연 정리 (화면 연동·검증, 전원 실행법 취합), 발표 |
-| 공통 변경 | 전원 (PR 리뷰 필수) | `README.md`, `.env.example`, `AGENTS.md`, `docs/api/` (공통 API 계약) | — |
+## 데이터와 평가 결과
 
-RAG/API와 Checker·Generator의 파일별 담당은 [API 계약 §0](docs/api/ask_contract.md)을 기준으로 합니다.
+온통청년, LH 청약플러스, 복지로, 정부24 등 공식 정책 자료를 바탕으로 데이터셋을 구성했습니다. 정책 원문의 출처 URL, 수집 시점, 콘텐츠 해시를 보존합니다.
 
-## 로컬에서 전체 실행하기
+| 항목 | 결과 |
+|---|---|
+| 정책·근거 문서·원본 청크 | 246개 · 261개 · 599개 |
+| Neo4j | 노드 1,004개 · 관계 2,431개 |
+| Qdrant | B2 청킹 기준 1,138 points · 1,024차원 · Cosine |
+| DB 검증 | Neo4j–Qdrant 교차 검증 1,138/1,138 · 빈 DB 복원 검증 통과 |
+| 검색 평가 | 55문항 실행 · 52문항 채점 |
 
-1. [DB 복원 가이드의 가상환경 준비 절차](docs/development/ISSUE43_RESTORE_GUIDE.md)에 따라 Python 가상환경을 준비하고 `requirements.txt`의 의존성을 설치합니다.
-2. 같은 가이드에 따라 복원 ZIP으로 Qdrant·Neo4j 데이터를 복원하고 Ollama를 준비합니다. 저장소 루트의 `.env`에 복원 환경과 일치하는 DB 접속 정보, Ollama 주소, 답변 생성 API 설정을 입력합니다.
+연령·지역 조건을 확인할 수 있어도 소득 기준이 공고에서 불명확하면, 확인된 조건을 보여주고 소득은 공식 공고에서 확인하도록 안내합니다. 근거가 불충분한 항목까지 자격을 확정하는 일을 줄이기 위한 설계입니다.
+
+3차 기준 데이터는 `data/releases/v1.4.0-candidate/`에 있습니다. [최종 DB 적재 검증 PR #45](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/45) · [데이터 계약](docs/data/data_contract.md) · [공식 원문 대조·교정 기록](docs/data/data_corrections_v1.4.0_review.md)
+
+## 실행 방법
+
+### 빠른 시연 · 예시 모드
+
+Node.js 18 이상이 필요합니다. 저장소 루트에서 아래 명령을 실행하고 Vite가 출력하는 로컬 주소를 엽니다. `frontend/.env.local`이 있다면 `VITE_ASK_API_URL`을 비워 둡니다. 상담 답변은 화면에 **예시 응답**으로 표시됩니다.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 전체 로컬 실행 · 실제 검색과 답변
+
+**별도로 전달되는 최종 DB 복원 ZIP**, Python, Docker, Ollama의 `qwen3-embedding:0.6b`, OpenAI API 키가 필요합니다. 복원 가이드의 검증 환경은 Windows / Python 3.13.15입니다.
+
+1. [DB 복원 가이드](docs/development/ISSUE43_RESTORE_GUIDE.md)에 따라 Python 가상환경을 준비하고 `requirements.txt`의 의존성을 설치합니다. 복원 ZIP으로 Neo4j·Qdrant를 복원하고 Ollama 임베딩 모델을 준비합니다.
+2. 저장소 루트의 `.env.example`을 `.env`로 복사합니다. 복원 환경과 일치하는 Neo4j·Qdrant 접속 정보, Ollama 주소, OpenAI API 설정을 입력합니다. 실제 키가 들어간 `.env`와 `.env.local`은 커밋에서 제외합니다.
 3. 가상환경을 활성화한 상태로 저장소 루트에서 백엔드를 실행합니다.
 
-   ```powershell
+   ```bash
    python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
    ```
 
-   백엔드 실행 후 [상태 확인](http://127.0.0.1:8000/health)에서 API 기동을 확인합니다. 정책 결과가 있는 검색에 처음 성공하기 전에는 `ready: false`일 수 있습니다. 실제 검색·답변 생성·출처 표시는 5단계의 상담 요청으로 확인합니다.
+4. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
 
-4. 새 터미널에서 [프론트 README](frontend/README.md)의 설치 절차를 따릅니다. `frontend/.env.local`에서 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`로 설정하고, `frontend` 폴더에서 실행합니다.
-
-   ```powershell
+   ```bash
+   cd frontend
+   npm install
    npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
    ```
 
-5. [프론트 화면](http://127.0.0.1:5173/)에서 “직업 훈련이나 교육비 지원은 어디서 찾아요?”를 보냅니다. 화면에 답변과 출처가 표시되고 백엔드 로그에 `POST /api/ask … 200 OK`가 찍히는지 확인합니다.
+5. [상담 화면](http://127.0.0.1:5173/)에서 “직업 훈련이나 교육비 지원은 어디서 찾아요?”를 보내고, 화면의 답변·공식 출처와 백엔드의 `POST /api/ask … 200 OK` 로그를 확인합니다. [API 상태](http://127.0.0.1:8000/health)의 `ready`는 정책 결과가 있는 검색에 처음 성공하기 전까지 `false`일 수 있습니다.
 
-백엔드 없이 예시 모드로 시연할 때는 프론트 README에 따라 VITE_ASK_API_URL을 비우고 npm run dev를 실행합니다.
+### 주요 코드와 개발 문서
 
-## 개발 환경 설정
-
-> 데이터 수집·전처리용 의존성은 `requirements.txt`에 정의되어 있습니다. DB·임베딩·RAG 실행 의존성도 같은 파일에서 설치합니다.
-
-### 1. Python 가상환경
-
-```bash
-python -m venv .venv
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-# macOS / Linux / Git Bash
-source .venv/bin/activate
-```
-
-### 2. 환경변수
-
-```bash
-cp .env.example .env
-```
-
-`.env`에 실제 값을 입력합니다. `.env`는 `.gitignore`로 제외되며 절대 커밋하지 않습니다.
-
-`requirements.txt`의 `python-dotenv`는 `.env` 로딩에 필요합니다. 검색·로더·색인은 `LIFEPOLICY_DATASET_DIR` 미설정 시 승인된 `data/releases/v1.4.0-candidate/`를 사용합니다. 명시한 경로가 우선이며, v1.3.2 호환 검사는 `data/handoff`를 지정합니다. 잘못된 경로·manifest는 오류로 중단합니다.
-
-데이터셋 선택은 DB 접속 주소를 바꾸지 않습니다. `NEO4J_URI`·`QDRANT_URL`은 해당 데이터셋이 적재된 본인의 환경으로 설정합니다.
-
-기존 v1.3.2 기반 단위 테스트는 입력을 명시해 실행합니다(신규 기본값 검사는 별도 프로세스에서 환경변수를 제거해 검증).
-
-```powershell
-$env:LIFEPOLICY_DATASET_DIR='data/handoff'
-python -m unittest discover -s tests/unit -p 'test_*.py'
-```
-
-| 변수 | 용도 |
+| 위치 | 내용 |
 |---|---|
-| `OPENAI_API_KEY` | OpenAI 답변 생성 API 키 |
-| `YOUTH_POLICY_API_KEY` | 온통청년 Open API 인증키 (승인 필요) |
-| `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j 접속 정보 (로컬 사용자명은 `neo4j`) |
-| `QDRANT_URL` / `QDRANT_API_KEY` | Qdrant 접속 정보 |
+| [frontend/](frontend/) | 상담하기, 생애주기, 정책 관계 지도 |
+| [backend/](backend/) | FastAPI, RAG, 조건 확인, 답변 생성 |
+| [database/](database/) | Neo4j·Qdrant 연동 및 결합 검색 |
+| [data/](data/) · [collectors/](collectors/) | 데이터 릴리스, 수집 및 전처리 |
+| [tests/](tests/) · [scripts/](scripts/) | 테스트, 데이터 검증 및 적재 도구 |
+| [docs/](docs/) | 기획, API, 데이터, 개발 문서 |
 
-### 3. 로컬 DB 실행 (개발용)
+후보 데이터 재생성은 `scripts/build_incremental_release_candidate.py`를 사용합니다. 변경 근거와 재적재 시 확인할 사항은 [데이터 교정 기록](docs/data/data_corrections_v1.4.0_review.md)과 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요. 전체 회귀 테스트와 원본 본문 검사는 Git에서 제외된 원본 자료를 복원한 환경에서 실행합니다.
 
-```bash
-docker compose up -d
-```
+## 팀원과 산출물
 
-- Neo4j Browser: http://localhost:7474
-- Qdrant Dashboard: http://localhost:6333/dashboard
-
-`NEO4J_PASSWORD`, `QDRANT_API_KEY`가 `.env`에 없으면 기동되지 않도록 구성했습니다. 데이터는 Docker named volume에 저장되며 `docker compose down -v`로 삭제됩니다.
-
-### 4. 테스트
-
-```bash
-pytest
-```
-
-후보 데이터 검증에는 추가 설치 없이 Python 기본 테스트 도구를 사용할 수 있습니다.
-
-```bash
-python -m unittest discover -s tests -p "test_candidate_release.py" -v
-python scripts/load_candidate_neo4j.py
-python scripts/verify_candidate_qdrant.py
-python scripts/verify_candidate_sources.py
-```
-
-위 명령은 파일·계약·참조·해시를 검사하며 실제 DB에는 쓰지 않습니다.
-전체 회귀 테스트와 원본 본문 검사는 Git 제외 원본 및 v1 정부24 대용량 파일 2개를 복원한 환경에서 실행합니다. 새 체크아웃의 후보 파일 사전 검증은 `load_candidate_neo4j.py`와 `verify_candidate_qdrant.py`로 별도 수행할 수 있습니다.
-실제 DB 검사와 신청 주소 교정 범위는 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요.
-
-최종 데이터의 실제 적재 검증 결과는 아래 [최종 데이터와 사용 안내](#최종-데이터와-사용-안내)를 참고하세요.
-
-### 후보 릴리스 재생성 및 DB 검사
-
-```bash
-python scripts/build_incremental_release_candidate.py
-# Neo4j: 비어 있는 검증 DB에서 적재·재적재·속성을 대조한 뒤 롤백
-python scripts/load_candidate_neo4j.py --apply --http-url http://127.0.0.1:7474
-# Qdrant: 새 임시 컬렉션에서 ID·payload를 대조한 뒤 컬렉션 정리
-python scripts/verify_candidate_qdrant.py --apply --url http://127.0.0.1:6333
-```
-
-- DB 검사 전 `.env`에 `NEO4J_USER`, `NEO4J_PASSWORD`, `QDRANT_API_KEY`를 설정합니다. 접속 값은 로그에 출력하지 않습니다.
-- Neo4j에 기존 노드가 있거나 Qdrant 검증 컬렉션이 이미 있으면 쓰기를 거절합니다. 기존 DB를 초기화하지 않습니다.
-- Qdrant 검사는 **벡터 없는 ID·payload 저장 검사**입니다. 임베딩 생성·유사도 검색은 별도 검증이 필요합니다. 모델·차원은 임의로 확정하지 않습니다.
-- 후보는 기존 정책의 신청 주소를 교정하며 `data/handoff/` 인계 원본은 보존합니다. 변경 전후 값은 후보의 `release_delta_manifest.json`에 기록합니다.
-
-## 최종 데이터와 사용 안내
-
-3차 최종 데이터는 `data/releases/v1.4.0-candidate/`입니다(2026-11-10, PR #45 기준).
-
-| 항목 | 값 |
+| 팀원 | 주요 담당 |
 |---|---|
-| 정책 / 근거 문서 / 청크 | 246 / 261 / 599 |
-| Neo4j 노드 / 관계 | 1,004 / 2,431 (`REQUIRES_CONDITION` 136) |
-| Qdrant | B2 청킹 1,138 Points, `qwen3-embedding:0.6b`, 1,024차원, Cosine (`exp_b2_qwen3emb06b_v140_v1`) |
-| 검증 | 실제 적재 후 노드·관계 속성 대조, Neo4j–Qdrant 교차 검증 1,138/1,138, 빈 DB 복원 검증 통과 |
+| 장반석 | 정책 데이터 수집·전처리, 데이터 API, README |
+| 주민혁 | 임베딩, Neo4j·Qdrant 적재 및 검증 |
+| 나지인 · 박소희 | 검색, 조건 확인, 평가, LLM·RAG·API 연동 |
+| 강민지 | React 시연 UI, 화면 연동·검증, 일정·협업 관리, 발표 |
 
-v1.3.2(정책 237, 노드 1,034, 관계 3,615)보다 노드·관계가 적은 것은 공식 원문에 근거가 없는 조건을 교정으로 지웠기 때문입니다.
+[프로젝트 기획서](docs/product/PRD.md) · [Notion 일정·역할표](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 
-### 어떤 파일을 보나요
-
-| 목적 | 위치 |
+| 산출물 | 관련 자료 |
 |---|---|
-| 검색·적재에 쓰는 최종 데이터 | `data/releases/v1.4.0-candidate/` (`LIFEPOLICY_DATASET_DIR` 미설정 시 기본값) |
-| 필드 정의와 해석 규칙 | [docs/data/data_contract.md](docs/data/data_contract.md) |
-| 원문 대조 교정의 전후 값·근거 | `data/metadata/data_corrections_v1.4.0.json`, [docs/data/data_corrections_v1.4.0_review.md](docs/data/data_corrections_v1.4.0_review.md) |
-| 팀원용 DB 복원 | [docs/development/ISSUE43_RESTORE_GUIDE.md](docs/development/ISSUE43_RESTORE_GUIDE.md) (복원 ZIP은 Git 밖에서 별도 전달) |
-| RAG 인계 | [docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md](docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md) |
-| v1.3.2 기준선 | `data/handoff/` (고정본, 수정하지 않음) |
+| 01 · 수집 데이터 및 전처리 | [데이터 스키마](docs/data/data_schema.md) · [전처리 규칙](docs/data/preprocessing_rules.md) |
+| 02 · 시스템 아키텍처 | [위 아키텍처](#아키텍처) · [DB 복원 가이드](docs/development/ISSUE43_RESTORE_GUIDE.md) |
+| 03 · 개발 소프트웨어 실행·시연 | [위 실행 방법](#실행-방법) · [프론트엔드 시연 가이드](frontend/README.md) |
+| 04 · RAG·LLM 및 DB 연동 | [Notion 산출물 04](https://app.notion.com/p/04-RAG-LLM-DB-40c896a6387281f1bc63f2b0b45e304d) · [RAG 데이터 인계](docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md) |
+| 05 · 테스트 계획 및 결과 | [평가 코드와 자료](tests/evaluation/) · [시연 모델 비교 PR #56](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56) |
 
-### 데이터를 쓸 때 주의할 점
+## 한계와 후속 계획
 
-- **자격 판정은 checker가 해석합니다.** 신청기간(`application_start`·`application_end`·`application_is_ongoing`)과 원문 확인 결과(`income_source_review`·`household_source_review`)는 checker가 읽고, RAG pipeline은 판정 결과만 사용합니다.
-- **모르는 조건은 "확인 필요"로 안내합니다.** 조건 그룹이 `UNKNOWN`인 정책은 자격을 확정하지 않습니다. 자격 설명에 신청자 연령 요건이 있지만 구조화된 나이 조건이 누락된 경우, 연령 요건을 추가로 확인하도록 안내합니다.
-- **신청 주소(`official_apply_url`)가 기록된 정책은 22건이며, 실제 접수 화면 연결 여부는 별도 확인이 필요합니다.** 정책 상세는 `source_url`로 안내합니다.
-- **정책 정보는 수집 시점 기준입니다.** 신청기간·금액·자격은 바뀔 수 있으므로 답변에 공식 원문 확인 안내를 함께 둡니다.
-
-### 데이터를 고칠 때
-
-1. `data/handoff/`와 릴리스 파일을 직접 고치지 않습니다. `data/metadata/data_corrections_v1.4.0.json`에 공식 원문 근거와 함께 교정 항목을 추가합니다.
-2. `python scripts/build_incremental_release_candidate.py`로 릴리스를 다시 만들고, `python -m unittest discover -s tests -p "test_candidate_release.py"`로 검사합니다.
-3. 노드·관계 수가 바뀌면 관련 테스트 기대값을 함께 고치고, DB 담당에게 재적재를 요청합니다. 청크 본문이 바뀌면 재임베딩이 필요하므로 먼저 알립니다.
-
-## 데이터 원칙 (요약)
-
-- 공식 출처의 원문만 실데이터로 사용합니다. 가상 정책을 실데이터처럼 만들지 않습니다.
-- `raw/`와 `processed/`를 분리하고 `source_url`, `retrieved_at`, `content_hash`를 보존합니다.
-- `data/samples/`의 파일은 **형식 설명용 가상 예시**입니다.
-- 세부 규칙: [docs/data/data_schema.md](docs/data/data_schema.md), [docs/data/preprocessing_rules.md](docs/data/preprocessing_rules.md)
+- 정책 정보는 수집 시점 기준입니다. 신청기간·금액·자격의 최신 내용과 실제 접수 여부는 공식 공고에서 확인해야 합니다.
+- 공고의 조건이 불명확하거나 구조화된 조건이 부족한 경우 추가 확인을 안내합니다. 최종 신청 자격은 담당 기관의 심사로 결정됩니다.
+- 3차 React 화면은 발표용 MVP입니다. 정식 웹 UI는 4차 범위이며, 혼인·가구 조건이 중요한 신혼부부와 육아 가구의 맞춤 안내는 관련 조건을 정비한 뒤 확장할 계획입니다.
