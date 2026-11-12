@@ -6,6 +6,7 @@ import { infoField } from './config/infoFields';
 import { PERSONAS, type Persona } from './config/personas';
 import { HISTORY_MAX_ITEMS, QUESTION_MAX_LENGTH } from './config/request';
 import { describeProfile, readProfileReply, REGIONS } from './lib/parseProfile';
+import { planProfileReply } from './lib/profileReply';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge } from './lib/validate';
@@ -124,27 +125,32 @@ export default function App() {
 
   const requests = useRef(new Map<number, AskRequest>());
 
+  /** 조건 값을 화면의 '내 조건' 입력값에 반영한다. 조건 답과 조건 입력칸이 함께 쓴다. */
+  const applyProfileState = useCallback((values: Partial<UserProfile>) => {
+    if (values.age != null) setAge(String(values.age));
+    if (values.region) setRegion(values.region);
+    if (values.income != null) setIncome(values.income);
+  }, []);
+
   const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null) => {
     let question = raw.trim();
     if (!question) return false;
 
     // "난 26살이야"처럼 조건만 알려 주는 답은 새 질문으로 검색하지 않는다 (#64).
     // 내 조건에 넣고, 바로 앞 질문을 바뀐 조건으로 다시 보낸다 (조건 입력칸으로 답한 것과 같은 동작).
+    // 앞 질문의 답변을 기다리는 중이면 내 조건도 바꾸지 않는다.
     const reply = field == null ? readProfileReply(question) : null;
     if (reply) {
-      if (reply.age != null) setAge(String(reply.age));
-      if (reply.region) setRegion(reply.region);
-      if (reply.income != null) setIncome(reply.income);
       const previous = [...turnsRef.current].reverse().find((t) => t.kind === 'qa');
-      if (!previous || previous.kind !== 'qa') {
+      const plan = planProfileReply(reply, previous?.kind === 'qa' ? previous.question : null, next, (q) => pending.current.has(q));
+      if (plan.kind === 'busy') { showToast('같은 질문의 답변을 기다리고 있어요'); return false; }
+      applyProfileState(reply);
+      if (plan.kind === 'store') {
         showToast(`내 조건에 넣었어요: ${describeProfile(reply)}. 궁금한 정책을 물어봐 주세요`);
         return true;
       }
       showToast(`${describeProfile(reply)} 조건으로 앞 질문을 다시 확인할게요`);
-      question = previous.question;
-      next = { ...next, ...reply };
-      const keys = Object.keys(reply);
-      field = keys.length === 1 ? keys[0] : null;
+      ({ question, profile: next, field } = plan);
     }
     if ([...question].length > QUESTION_MAX_LENGTH) {
       showToast(`질문은 ${QUESTION_MAX_LENGTH.toLocaleString('ko-KR')}자까지 입력할 수 있어요.`);
@@ -164,7 +170,7 @@ export default function App() {
     void run(id, request);
     setAwaiting(null);
     return true;
-  }, [profile, reduceMotion, run, showToast]);
+  }, [profile, reduceMotion, run, showToast, applyProfileState]);
 
   const retry = useCallback((id: number) => {
     const request = requests.current.get(id);
@@ -269,9 +275,7 @@ export default function App() {
                 next.income = numeric;
               }
               if (!ask(question, null, next, field)) return;
-              if (field === 'age') setAge(String(numeric));
-              if (field === 'region') setRegion(value);
-              if (field === 'income') setIncome(numeric);
+              applyProfileState(field === 'age' ? { age: next.age } : field === 'region' ? { region: next.region } : { income: next.income });
             }}>
               <label htmlFor="follow-up-condition">{infoField(awaiting.field).label}{awaiting.field === 'income' ? ' (만 원)' : ''}</label>
               {awaiting.field === 'region' ? (
