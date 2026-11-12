@@ -1429,7 +1429,7 @@ B3는 HTML 제목 경계·고아 소제목 처리를 개선했지만 이번 평�
 | B2/B3 | E6 0.6B 고정·52문항·메모리 정확 검색 | 위 청킹 결과표와 산출물 05 §6-2 | 기존 실행 보고 / 원본은 산출물 05 §7 첨부 ZIP |
 | RAG/API 연결·출처 차단 | 실제 Qdrant·Neo4j·Checker + 고정 Generator, 시나리오 8개 | <code>docs/development/experiments/ab1_qdrant_local_20261110/rag_api_final_db_e2e.json</code> 및 <code>logs/pytest_rag_api_scope.log</code> | 기존 실행 보고 / 원본은 산출물 05 §7 첨부 ZIP / 생성 품질 점수에 포함하지 않음 |
 | 생성 모델 비교 | 실제 정책 5문항 × 3모델 = 15건 | [고정 입력](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/real_gold_batch01/inputs.json) · [원본 응답·시간·usage](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/results/20261111_015351/comparison.jsonl) · [평가 코드](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/05948151cc411dd1237d8bd1ed10082c68958d14/tests/evaluation/llm_comparison/compare_real_gold.py) | 원본 확인·동일 기준 예비 재채점 완료 / 팀 확정 전 |
-| 실제 상담 화면의 답변·공식 출처 표시 | React→실제 API, 코드·DB 버전과 질문 기록 필요 | 산출물 05 §4 화면 검수 캡처(RQ027·RQ031·RQ036)와 산출물 03 시연 캡처 | 수동 검수 기록 / React E2E 재시험 미실행 |
+| 실제 상담 화면의 답변·공식 출처 표시 | React→실제 API, 코드·DB 버전과 질문 기록 필요 | 산출물 05 §4 화면 검수 캡처(RQ027·RQ031·RQ036)와 산출물 03 시연 캡처 | 수동 검수 기록 / 제출 코드 E2E 2건은 산출물 03 §5 |
 | RQ040·RQ042 오류 수정 | mini 답변 충돌·핵심 제외 규정 누락 | 위 15건 채점표의 오류 원본 | 발견 확인 / 수정 후 재시험 증빙 미확인 |
 
 <b>남은 항목:</b> 답변 오류 수정과 재시험은 결과를 확인한 뒤 상태를 바꿉니다.
@@ -1964,7 +1964,7 @@ A/B 2 결과는 아직 최종 확정되지 않은 Gold 후보를 기준으로 �
 
 Checker는 구조화 조건을 보수적으로 판정하도록 구현했으며, Generator는 공식 원문에 기반한 답변과 출처·JSON 형식 검증 기능을 구현하였다.
 
-실제 OpenAI 모델 비교를 통해 GPT-5.4-mini를 MVP 기본 모델로 선정하였다. 다만 RQ040·RQ042의 답변 오류, Gold 최종 검토, 실제 React–API E2E 검증은 후속 점검 항목으로 남아 있다.
+실제 OpenAI 모델 비교를 통해 GPT-5.4-mini를 MVP 기본 모델로 선정하였다. 다만 RQ040·RQ042의 답변 오류, Gold 최종 검토, 질문 세트 기준 React–API E2E 검증은 후속 점검 항목으로 남아 있다(제출 코드 수동 E2E 2건은 산출물 03 §5).
 </callout>
 </toggle>
 
