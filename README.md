@@ -147,13 +147,15 @@ npm run dev
 
 [프로젝트 기획서](docs/product/PRD.md) · [Notion 일정·역할표](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 
-| 산출물                           | 관련 자료                                                                                                                                                            |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 01 · 수집 데이터 및 전처리      | [데이터 스키마](docs/data/data_schema.md) · [전처리 규칙](docs/data/preprocessing_rules.md)                                                                           |
-| 02 · 시스템 아키텍처            | [위 아키텍처](#아키텍처) · [DB 복원 가이드](docs/development/ISSUE43_RESTORE_GUIDE.md)                                                                                |
-| 03 · 개발 소프트웨어 실행·시연 | [위 실행 방법](#실행-방법) · [프론트엔드 시연 가이드](frontend/README.md)                                                                                             |
-| 04 · RAG·LLM 및 DB 연동        | [Notion 산출물 04](https://app.notion.com/p/04-RAG-LLM-DB-40c896a6387281f1bc63f2b0b45e304d) · [RAG 데이터 인계](docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md) |
-| 05 · 테스트 계획 및 결과        | [평가 코드와 자료](tests/evaluation/) · [시연 모델 비교 PR #56](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56)                                  |
+| 산출물 | 최종 제출본 |
+| --- | --- |
+| 01 | [수집 데이터 및 전처리](docs/reports/ssok-deliverables/01%20%C2%B7%20%EC%88%98%EC%A7%91%20%EB%8D%B0%EC%9D%B4%ED%84%B0%20%EB%B0%8F%20%EC%A0%84%EC%B2%98%EB%A6%AC.md) |
+| 02 | [시스템 아키텍처](docs/reports/ssok-deliverables/02%20%C2%B7%20%EC%8B%9C%EC%8A%A4%ED%85%9C%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98.md) |
+| 03 | [개발된 소프트웨어](docs/reports/ssok-deliverables/03%20%C2%B7%20%EA%B0%9C%EB%B0%9C%EB%90%9C%20%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4.md) |
+| 04 | [RAG·LLM·DB 연동 코드](docs/reports/ssok-deliverables/04%20%C2%B7%20RAG%C2%B7LLM%C2%B7DB%20%EC%97%B0%EB%8F%99%20%EC%BD%94%EB%93%9C.md) |
+| 05 | [테스트 계획 및 결과 보고서](docs/reports/ssok-deliverables/05%20%C2%B7%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EA%B3%84%ED%9A%8D%20%EB%B0%8F%20%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C.md) |
+
+[SSOK 발표 자료 PDF](docs/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
 
 ## 한계와 후속 계획
 
