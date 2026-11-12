@@ -10,7 +10,8 @@
   <a href="#시연-화면">시연 화면</a> ·
   <a href="#기술-스택">기술 스택</a> ·
   <a href="#아키텍처">아키텍처</a> ·
-  <a href="#실행-방법">실행 방법</a>
+  <a href="#실행-방법">실행 방법</a> ·
+  <a href="#팀원과-산출물">최종 산출물</a>
 </p>
 
 **내 상황에 맞는 정부 지원 정책을 찾고, 신청 전에 확인할 조건과 공식 공고를 함께 보여주는 한국어 RAG 서비스입니다.**
@@ -22,6 +23,14 @@ SSOK은 자연어 질문과 사용자가 제공한 조건을 바탕으로 관련
 3차 프로젝트에서는 **청년 취업준비생**을 주요 사용자로 삼았습니다.
 
 ## 시연 화면
+
+**홈 화면**
+
+![SSOK 홈 화면의 질문 입력창, 내 조건과 정책 분야](docs/reports/ssok-deliverables/assets/3-6-ssok-demo-4.png)
+
+**실제 상담 결과**
+
+![직업 훈련과 교육비 지원 질문에 대한 답변 및 공식 출처 번호](docs/reports/ssok-deliverables/assets/3-10-ssok-demo-5.png)
 
 | 화면           | 시연에서 볼 수 있는 내용                                                                                  |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
@@ -35,7 +44,7 @@ SSOK은 자연어 질문과 사용자가 제공한 조건을 바탕으로 관련
 ## 핵심 기능
 
 - **정책 검색 및 추천** · 사용자 질문과 관련된 정책과 공식 원문을 찾습니다. 상담 화면에서는 나이·지역·연 소득을 선택 입력할 수 있습니다.
-- **조건 확인과 추가 질문** · 연령·지역·신청기간 등 확인 가능한 조건을 검사합니다. 입력이 더 필요하면 추가 질문을 표시하고, 공고 자체의 기준이 불명확하면 공식 원문 확인을 안내합니다.
+- **조건 확인과 추가 질문** · 자동 비교가 가능한 자격 조건을 확인하고, 추가 입력이 필요한 경우 입력 항목을 안내합니다. 접수 상태는 자격 확인 결과와 구분해 표시합니다.
 - **근거 기반 답변** · 검색된 근거를 바탕으로 신청 절차와 필요 서류를 안내하고 공식 출처를 표시합니다. 근거가 부족하면 별도 안내를 표시합니다.
 
 ## 기술 스택
@@ -57,11 +66,13 @@ flowchart TD
     SEARCH <--> N["Neo4j 정책 관계"]
     SEARCH <--> Q["Qdrant 공식 원문 검색"]
     SEARCH --> CHECK["자격 조건 확인"]
-    CHECK --> LLM["LLM 답변 생성"]
-    LLM --> RESULT["답변·조건 결과·출처 표시"]
+    CHECK --> EVIDENCE["답변에 사용할 최종 근거 선택"]
+    EVIDENCE --> LLM["LLM 답변 생성"]
+    LLM --> VALIDATE["응답 및 인용 검증"]
+    VALIDATE --> RESULT["답변·조건 결과·출처 표시"]
     classDef app fill:#eeefe8,stroke:#708477,color:#35443d
     classDef data fill:#fff4dc,stroke:#b78027,color:#49351d
-    class UI,API,SEARCH,CHECK,LLM,RESULT app
+    class UI,API,SEARCH,CHECK,EVIDENCE,LLM,VALIDATE,RESULT app
     class N,Q data
 ```
 
@@ -77,14 +88,13 @@ Neo4j는 정책에 연결된 대상·생애단계·자격 조건을 조회하고
 
 | 항목                       | 결과                                                        |
 | -------------------------- | ----------------------------------------------------------- |
-| 정책·근거 문서·원본 청크 | 246개 · 261개 · 599개                                     |
+| 정책·근거 문서·릴리스 청크 | 246개 · 261개 · 599개                                     |
 | Neo4j                      | 노드 1,004개 · 관계 2,431개                                |
-| Qdrant                     | B2 청킹 기준 1,138 points · 1,024차원 · Cosine            |
+| Qdrant                     | B2 청킹 기준 1,138포인트 · 1,024차원 · Cosine            |
 | DB 검증                    | Neo4j–Qdrant 교차 검증 1,138/1,138 · 빈 DB 복원 검증 통과 |
-| 검색 평가                  | 55문항 실행 · 52문항 채점                                  |
+| 검색 평가                  | 55문항 실행 · 52문항 채점 · 최종 Gold 확정 전                                  |
 
-연령·지역 조건을 확인할 수 있어도 소득 기준이 공고에서 불명확하면, 확인된 조건을 보여주고 소득은 공식 공고에서 확인하도록 안내합니다. 
-근거가 불충분한 항목까지 자격을 확정하는 일을 줄이기 위한 설계입니다.
+자동 비교에 필요한 조건이 구조화되지 않았거나 공식 근거가 부족하면 해당 조건의 확인을 보류합니다. 거주 지역은 입력할 수 있으며, 지역 범위와 거주 요건은 공식 원문에서 확인하도록 안내합니다.
 
 3차 기준 데이터는 `data/releases/v1.4.0-candidate/`에 있습니다. [최종 DB 적재 검증 PR #45](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/45) · [데이터 계약](docs/data/data_contract.md) · [공식 원문 대조·교정 기록](docs/data/data_corrections_v1.4.0_review.md)
 
@@ -114,7 +124,7 @@ npm run dev
    ```bash
    python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
    ```
-4. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
+4. 백엔드의 CORS 허용 주소는 `http://127.0.0.1:5173`입니다. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
 
    ```bash
    cd frontend
@@ -147,13 +157,15 @@ npm run dev
 
 [프로젝트 기획서](docs/product/PRD.md) · [Notion 일정·역할표](https://app.notion.com/p/1c9896a6387283e0924f81be54a9b726)
 
-| 산출물                           | 관련 자료                                                                                                                                                            |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 01 · 수집 데이터 및 전처리      | [데이터 스키마](docs/data/data_schema.md) · [전처리 규칙](docs/data/preprocessing_rules.md)                                                                           |
-| 02 · 시스템 아키텍처            | [위 아키텍처](#아키텍처) · [DB 복원 가이드](docs/development/ISSUE43_RESTORE_GUIDE.md)                                                                                |
-| 03 · 개발 소프트웨어 실행·시연 | [위 실행 방법](#실행-방법) · [프론트엔드 시연 가이드](frontend/README.md)                                                                                             |
-| 04 · RAG·LLM 및 DB 연동        | [Notion 산출물 04](https://app.notion.com/p/04-RAG-LLM-DB-40c896a6387281f1bc63f2b0b45e304d) · [RAG 데이터 인계](docs/development/ISSUE5_V140_RAG_HANDOFF_20261107.md) |
-| 05 · 테스트 계획 및 결과        | [평가 코드와 자료](tests/evaluation/) · [시연 모델 비교 PR #56](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/56)                                  |
+| 산출물 | 최종 제출본 |
+| --- | --- |
+| 01 | [수집 데이터 및 전처리](docs/reports/ssok-deliverables/01%20%C2%B7%20%EC%88%98%EC%A7%91%20%EB%8D%B0%EC%9D%B4%ED%84%B0%20%EB%B0%8F%20%EC%A0%84%EC%B2%98%EB%A6%AC.md) |
+| 02 | [시스템 아키텍처](docs/reports/ssok-deliverables/02%20%C2%B7%20%EC%8B%9C%EC%8A%A4%ED%85%9C%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98.md) |
+| 03 | [개발된 소프트웨어](docs/reports/ssok-deliverables/03%20%C2%B7%20%EA%B0%9C%EB%B0%9C%EB%90%9C%20%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4.md) |
+| 04 | [RAG·LLM·DB 연동 코드](docs/reports/ssok-deliverables/04%20%C2%B7%20RAG%C2%B7LLM%C2%B7DB%20%EC%97%B0%EB%8F%99%20%EC%BD%94%EB%93%9C.md) |
+| 05 | [테스트 계획 및 결과 보고서](docs/reports/ssok-deliverables/05%20%C2%B7%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EA%B3%84%ED%9A%8D%20%EB%B0%8F%20%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C.md) |
+
+[SSOK 발표 자료 PDF](docs/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
 
 ## 한계와 후속 계획
 
