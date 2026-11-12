@@ -24,7 +24,7 @@ import re
 import time
 from collections import Counter
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 import requests
 
@@ -547,16 +547,23 @@ def search_policy_evidence(query: str, filters: dict[str, Any] | None = None, k:
 
 
 def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
-                     settings: dict[str, Any]) -> dict[str, Any]:
+                     settings: dict[str, Any], *, vector_size: int | None = None,
+                     region_catalog=None, refresh_vector_size: Callable[[], int] | None = None) -> dict[str, Any]:
     """검증을 마친 입력·설정으로 실제 임베딩·검색을 한다. client는 호출한 쪽이 관리한다."""
     collection, query_template = settings["collection"], settings["query_template"]
     # (1) 컬렉션 벡터 크기와 설정 차원을 검색 전에 비교한다 (프로필, 또는 차원을 표시한 embedder)
     #     사용자 지정 방식에서 embedder를 주지 않으면 기본값으로 단정하지 않고 (2)의 실제 벡터 차원 검사로 막는다
-    vector_size = _collection_vector_size(client, collection)
-    region_plan = (rs.plan_region_search(filters, hd.load_payload_chunks())
-                   if hd.dataset_version() == "1.4.0-candidate" else None)
+    if vector_size is None:
+        vector_size = _collection_vector_size(client, collection)
+    region_plan = None
+    if region_catalog is not None or hd.dataset_version() == "1.4.0-candidate":
+        region_plan = (rs.plan_region_search(filters, hd.load_payload_chunks()) if region_catalog is None
+                       else rs.plan_region_search(filters, region_catalog=region_catalog))
     applied_filters = region_plan["applied_filters"] if region_plan is not None else filters
     declared_dim = settings["embedding_dim"] if (settings["mode"] == "profile" or settings["embedder"] is not None) else None
+    if declared_dim is not None and declared_dim != vector_size and refresh_vector_size is not None:
+        vector_size = refresh_vector_size()
+        refresh_vector_size = None
     if declared_dim is not None and declared_dim != vector_size:
         raise SearchProfileError(f"{collection} 벡터 크기 {vector_size} ≠ 임베딩 차원 {settings['embedding_dim']} "
                                  f"({settings['embedding_model']})")
@@ -581,6 +588,8 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
         raise HybridSearchBackendError("ollama", f"질의 임베딩 실패: {_safe_message(error)}", kind) from error
     embed_seconds = time.perf_counter() - started
     # (2) 실제 질의 벡터 차원도 검색 전에 확인한다 (표시를 속인 embedder도 여기서 막힌다)
+    if len(query_vector) != vector_size and refresh_vector_size is not None:
+        vector_size = refresh_vector_size()
     if len(query_vector) != vector_size:
         raise SearchProfileError(f"질의 벡터 차원 {len(query_vector)} ≠ {collection} 벡터 크기 {vector_size}")
 
@@ -1079,6 +1088,8 @@ class HybridSearchSession:
         self._neo4j_settings = (neo4j_connection_timeout, neo4j_acquisition_timeout, neo4j_query_timeout)
         self.closed = False
         self.close_errors: list[str] = []
+        self._vector_size_cache = None
+        self._region_catalog_cache = None
 
     # --- 연결 (처음 쓸 때 만든다) ---
     def _check_open(self) -> None:
@@ -1132,7 +1143,32 @@ class HybridSearchSession:
     # --- 검색 (모듈 함수와 같은 입력·출력) ---
     def search_policy_evidence(self, query: str, filters: dict[str, Any] | None = None, k: int = DEFAULT_K) -> dict[str, Any]:
         query, filters, k = validate_query(query), validate_filters(filters), validate_k(k)
-        return _search_evidence(self.client, query, filters, k, self.settings)
+        client = self.client
+        collection = self.settings["collection"]
+        now = time.monotonic()
+        cached = self._vector_size_cache
+        def refresh_vector_size() -> int:
+            size = _collection_vector_size(client, collection)
+            self._vector_size_cache = (collection, time.monotonic() + 30, size)
+            return size
+
+        cache_hit = cached is not None and cached[0] == collection and now < cached[1]
+        vector_size = cached[2] if cache_hit else refresh_vector_size()
+        catalog = None
+        version = hd.dataset_version()
+        if version == "1.4.0-candidate":
+            path = hd.PAYLOAD_CHUNKS_PATH
+            key = (version, path, hd.file_signature(path))
+            if self._region_catalog_cache is None or self._region_catalog_cache[0] != key:
+                self._region_catalog_cache = (key, rs.build_region_catalog(hd.load_payload_chunks()))
+            catalog = self._region_catalog_cache[1]
+        try:
+            return _search_evidence(client, query, filters, k, self.settings,
+                                    vector_size=vector_size, region_catalog=catalog,
+                                    refresh_vector_size=refresh_vector_size if cache_hit else None)
+        except (SearchProfileError, HybridSearchBackendError):
+            self._vector_size_cache = None
+            raise
 
     def get_policy_graph_context(self, policy_ids: list[str]) -> dict[str, Any]:
         ids = validate_policy_ids(policy_ids)

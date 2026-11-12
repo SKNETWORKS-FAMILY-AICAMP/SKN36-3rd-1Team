@@ -113,5 +113,5 @@ pip install -r requirements.txt
 python scripts/download_raw.py
 
 # 3. 전처리 데이터셋 생성 (policies, documents, chunks, graph_edges, source_registry)
-python scripts/build_processed_dataset.py
+python scripts/build_processed_dataset.py --raw-dir data/raw
 ```

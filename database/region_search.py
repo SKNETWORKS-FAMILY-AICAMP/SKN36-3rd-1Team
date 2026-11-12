@@ -47,22 +47,30 @@ def _overlaps(left, right):
     return detail[:size] == other_detail[:size]
 
 
-def plan_region_search(filters, payload_rows):
-    """관측된 payload 값만 MatchAny 후보로 만든다. 모호한 값은 별도 검토 경로로 반환."""
-    requested = (filters or {}).get("region")
-    requested = list(requested) if isinstance(requested, (list, tuple)) else ([] if requested is None else [requested])
-    queries = [_describe(value, query=True) for value in requested]
+def build_region_catalog(payload_rows):
     catalog = {}
     unconfirmed_ids = set()
     for row in payload_rows:
         raw = row.get("region")
-        kind, _ = _describe(raw)
         if isinstance(raw, str) and raw.strip():
-            catalog[raw] = _describe(raw)
+            if raw not in catalog:
+                catalog[raw] = _describe(raw)
+            kind, _ = catalog[raw]
+        else:
+            kind = "unconfirmed"
         if kind == "unconfirmed" and row.get("policy_id"):
             unconfirmed_ids.add(row["policy_id"])
+    return sorted(catalog.items()), sorted(unconfirmed_ids)
+
+
+def plan_region_search(filters, payload_rows=(), *, region_catalog=None):
+    """관측된 payload 값만 MatchAny 후보로 만든다. 모호한 값은 별도 검토 경로로 반환."""
+    requested = (filters or {}).get("region")
+    requested = list(requested) if isinstance(requested, (list, tuple)) else ([] if requested is None else [requested])
+    queries = [_describe(value, query=True) for value in requested]
+    catalog, unconfirmed_ids = build_region_catalog(payload_rows) if region_catalog is None else region_catalog
     selected = []
-    for raw, (kind, components) in sorted(catalog.items()):
+    for raw, (kind, components) in catalog:
         if (raw in requested or
             (kind == "national" and any(qkind == "national" or qcomponents for qkind, qcomponents in queries)) or
             any(_overlaps(a, b) for a in components for _, qcomponents in queries for b in qcomponents)):
@@ -74,8 +82,8 @@ def plan_region_search(filters, payload_rows):
     return {
         "requested_values": requested, "filter_values": selected if requested else None,
         "applied_filters": applied or None,
-        "unconfirmed_region_values": sorted(raw for raw, (kind, _) in catalog.items() if kind == "unconfirmed"),
-        "unconfirmed_policy_ids": sorted(unconfirmed_ids),
+        "unconfirmed_region_values": [raw for raw, (kind, _) in catalog if kind == "unconfirmed"],
+        "unconfirmed_policy_ids": list(unconfirmed_ids),
         "unconfirmed_review_route": "지역 필터를 생략하고 policy_id 필터로 별도 검색하여 원문 확인",
         "is_eligibility_decision": False, "note": REVIEW_NOTE,
     }
