@@ -5,6 +5,7 @@ Default is read-only. Existing local execute.py modes/markers are never used or 
 from __future__ import annotations
 
 import argparse
+import shutil
 from contextlib import contextmanager
 import ctypes
 from datetime import datetime, timezone
@@ -38,8 +39,10 @@ def require_target(url, collection=COLLECTION):
         raise ValueError("Only the pinned Issue41 A/B endpoint and 4B collection are allowed")
 
 
-def verify_container():
-    docker = "C:/Users/Playdata/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe"
+def verify_container(docker_executable=None):
+    docker = shutil.which(docker_executable or "docker")
+    if docker is None:
+        raise ValueError("Docker 실행 파일을 PATH에 추가하거나 --docker로 경로를 지정하세요.")
     info = json.loads(subprocess.check_output([docker, "inspect", "issue41-ab-run01"], text=True))[0]
     if (not info["State"]["Running"]
             or info["Config"]["Labels"].get("purpose") != "issue41-ab-execution"
@@ -226,9 +229,10 @@ def main():
     parser.add_argument("--url", required=True)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--context", action="store_true", help="Read-only model/collection digest sidecar")
+    parser.add_argument("--docker", help="Docker 실행 파일 경로")
     args = parser.parse_args()
     require_target(args.url)
-    verify_container()
+    verify_container(args.docker)
     if hd.dataset_version() != "1.4.0-candidate" or any(not r["matched"] for r in hd.verify_manifest_checksums()):
         raise ValueError("Release dataset/checksum mismatch")
     docs = hd.load_documents(verify_hash=True)

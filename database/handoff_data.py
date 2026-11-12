@@ -16,6 +16,7 @@ import hashlib
 import json
 import os
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -89,9 +90,19 @@ if not IS_LEGACY_DATASET:
     EXPECTED_RELATIONSHIP_COUNT = _summary["total_graph_edges"]
 
 
+@lru_cache(maxsize=8)
+def _read_dataset_version(path: Path, signature: tuple[int, ...]) -> str:
+    return json.loads(path.read_text(encoding="utf-8"))["manifest_version"]
+
+
+def file_signature(path: Path) -> tuple[int, ...]:
+    stat = path.stat()
+    return stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+
 def dataset_version() -> str:
     """현재 인계 패키지의 manifest_version (v1.3.2는 "1.3.2")."""
-    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["manifest_version"]
+    return _read_dataset_version(MANIFEST_PATH, file_signature(MANIFEST_PATH))
 
 # ---------------------------------------------------------------------------
 # 2. Neo4j 노드·관계 명세

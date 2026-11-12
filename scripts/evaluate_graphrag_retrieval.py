@@ -19,7 +19,7 @@ import statistics
 from pathlib import Path
 from collections import Counter
 
-BASE_DIR = Path(r"c:\Users\Peter\Desktop\모꼬지\SKN 36기 부트캠프\단위프로젝트\3차\LifePolicy AI")
+BASE_DIR = Path(__file__).resolve().parents[1]
 CANDIDATE_DIR = BASE_DIR / "data" / "releases" / "v1.4.0-candidate"
 BENCHMARK_PATH = BASE_DIR / "data" / "staging" / "evaluation" / "retrieval_benchmark_30.json"
 OUTPUT_REPORT_PATH = BASE_DIR / "data" / "staging" / "evaluation" / "benchmark_results_30.json"
@@ -143,14 +143,14 @@ def run_evaluation():
         # Method C: Neo4j + Qdrant 결합 검색 (Hybrid GraphRAG)
         # -------------------------------------------------------------
         # 1단계: Graph 구조화 필터로 후보군 제한 (상위 30% 정책 선별)
-        candidate_pids_pool = set(x[0] for x in scored_p[:30])
+        candidate_scores = dict(reversed(scored_p[:30]))
         # 2단계: 선별된 정책에 속한 청크들 중에서 Vector 시맨틱 랭킹 적용
         hybrid_scored_chunks = []
         for idx, c in enumerate(chunks):
-            if c["policy_id"] in candidate_pids_pool:
+            if c["policy_id"] in candidate_scores:
                 base_sim = compute_bm25_sim(q_tokens, corpus_tokens[idx], idf_dict, avgdl)
                 # Graph 가중치 결합: 해당 정책의 Graph 점수 보너스
-                g_score = next((x[1] for x in scored_p if x[0] == c["policy_id"]), 0.0)
+                g_score = candidate_scores[c["policy_id"]]
                 final_score = base_sim * 1.5 + g_score * 0.5
                 hybrid_scored_chunks.append((c, final_score))
                 

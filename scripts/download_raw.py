@@ -9,7 +9,7 @@ import urllib3
 
 urllib3.disable_warnings()
 
-BASE_DIR = Path(r"c:\Users\Peter\Desktop\모꼬지\SKN 36기 부트캠프\단위프로젝트\3차")
+BASE_DIR = Path(__file__).resolve().parents[1]
 RAW_DIR = BASE_DIR / "data" / "raw"
 METADATA_DIR = BASE_DIR / "data" / "metadata"
 

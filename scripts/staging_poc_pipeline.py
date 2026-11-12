@@ -18,7 +18,7 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
-BASE_DIR = Path(r"c:\Users\Peter\Desktop\모꼬지\SKN 36기 부트캠프\단위프로젝트\3차\LifePolicy AI")
+BASE_DIR = Path(__file__).resolve().parents[1]
 HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 STAGING_DIR = BASE_DIR / "data" / "staging"
 STAGING_RAW_DIR = STAGING_DIR / "raw"

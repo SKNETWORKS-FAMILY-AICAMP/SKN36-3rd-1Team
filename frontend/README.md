@@ -48,7 +48,7 @@ npm run dev
 
 `.env.example`을 `.env.local`로 복사하고 `VITE_ASK_API_URL`에 질문 API 주소를 넣으면 예시 응답 대신 백엔드를 호출합니다. `.env.local`은 커밋하지 않습니다.
 
-기본 FastAPI CORS 설정은 `http://127.0.0.1:5173`을 허용합니다. 실제 API에 연결할 때는 `npm run dev -- --port 5173 --strictPort`로 실행합니다. 신청 상태는 API 응답에서, 화면의 신청 기간은 로컬 그래프에서 가져오므로 백엔드 DB와 프론트 그래프에 동일한 데이터 릴리스를 사용합니다.
+기본 FastAPI CORS 설정은 `http://127.0.0.1:5173`을 허용합니다. 실제 API에 연결할 때는 `npm run dev -- --host 127.0.0.1 --port 5173 --strictPort`로 실행합니다. 신청 상태는 API 응답에서, 화면의 신청 기간은 로컬 그래프에서 가져오므로 백엔드 DB와 프론트 그래프에 동일한 데이터 릴리스를 사용합니다.
 
 - 요청·응답 형식: [`src/api/types.ts`](src/api/types.ts) — `docs/api/ask_contract.md`와 백엔드 `backend/api/schemas.py`를 따릅니다. 추가 질문 중 정보 요청(`ask_info`)은 나이·지역·소득 세 가지뿐입니다.
 - 호출: [`src/api/client.ts`](src/api/client.ts) — `POST`로 `AskRequest`(질문, 내 조건, 최근 10개 대화 이력)를 보내고 `AskResponse`를 받습니다. 60초가 지나면 중단하고 오류 화면을 보여 줍니다. 서버 오류 응답(`{"detail": {"code", "message"}}`)은 `code`만 보고 화면이 정한 문구를 보여 줍니다. 서버 `message`는 계약에서 문장이 정해지지 않은 외부 데이터라 그대로 쓰지 않습니다.

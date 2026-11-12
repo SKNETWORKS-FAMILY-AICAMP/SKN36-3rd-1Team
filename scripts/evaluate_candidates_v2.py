@@ -19,7 +19,7 @@ import json
 import argparse
 from pathlib import Path
 
-BASE_DIR = Path(r"c:\Users\Peter\Desktop\모꼬지\SKN 36기 부트캠프\단위프로젝트\3차\LifePolicy AI")
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 def load_existing_policy_ids(base_dir: Path) -> tuple[set, set]:
     existing_policy_ids = set()
