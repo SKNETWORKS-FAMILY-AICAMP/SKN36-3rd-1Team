@@ -652,7 +652,7 @@ def run_pipeline():
         return False
 
     if not NEO4J_PASSWORD:
-        print("\\n>> [ERROR] NEO4J_PASSWORD 환경 변수가 없습니다. .env 또는 환경 변수에 설정한 뒤 실행하십시오. <<")
+        print("\\n>> [ERROR] NEO4J_PASSWORD 환경 변수가 없습니다. 실행 전에 현재 셸의 환경 변수로 설정하십시오. <<")
         return False
 
     try:

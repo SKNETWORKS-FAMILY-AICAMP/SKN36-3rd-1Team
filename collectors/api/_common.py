@@ -16,6 +16,7 @@ from typing import Any
 from urllib.parse import quote, quote_plus
 
 import requests
+from urllib3.exceptions import ReadTimeoutError
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 RAW_ROOT = BASE_DIR / "data" / "raw"
@@ -107,7 +108,9 @@ def http_get(url: str, params: dict[str, Any], *, logger: logging.Logger, timeou
             r = requests.get(url, params=params, timeout=(min(CONNECT_TIMEOUT_SECONDS, timeout), timeout),
                              headers={"User-Agent": user_agent}, allow_redirects=allow_redirects)
         except requests.ConnectionError as e:          # ConnectTimeout도 여기에 포함된다
-            retriable, last_error = True, f"{type(e).__name__}: {e}"
+            # requests는 응답 본문 읽기 시간 초과를 ConnectionError로 감싼다.
+            retriable = not any(isinstance(cause, ReadTimeoutError) for cause in e.args)
+            last_error = f"{type(e).__name__}: {e}"
         except requests.Timeout as e:
             retriable, last_error = False, f"{type(e).__name__}: {e}"
         else:

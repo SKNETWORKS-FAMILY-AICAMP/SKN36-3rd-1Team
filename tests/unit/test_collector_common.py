@@ -13,6 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import requests  # noqa: E402
+from urllib3.exceptions import ReadTimeoutError  # noqa: E402
 
 from collectors.api import _common  # noqa: E402
 from collectors.api import gov24_collector, youthcenter_collector  # noqa: E402
@@ -57,9 +58,36 @@ class TestHttpGetRetry(unittest.TestCase):
         def read_timeout(*_args, **_kwargs):
             raise requests.ReadTimeout("slow server (sample_only)")
 
-        calls, result = self.call(read_timeout)
+        def wrapped_read_timeout(*_args, **_kwargs):
+            raise requests.ConnectionError(ReadTimeoutError(None, "/api", "slow body (sample_only)"))
+
+        for timeout in (read_timeout, wrapped_read_timeout):
+            with self.subTest(timeout=timeout.__name__):
+                calls, result = self.call(timeout)
+                self.assertEqual(len(calls), 1)
+                self.assertEqual(self.sleeps, [])
+                self.assertEqual(calls[0]["timeout"], (_common.CONNECT_TIMEOUT_SECONDS, 30))
+                self.assertIsInstance(result, RuntimeError)
+
+    def test_retryable_failures_keep_backoff(self):
+        failures = [requests.ConnectTimeout(), *(response(code) for code in (500, 502, 503, 504))]
+
+        def fail(*_args, **_kwargs):
+            if isinstance(failure, Exception):
+                raise failure
+            return failure
+
+        for failure in failures:
+            with self.subTest(failure=failure):
+                calls, result = self.call(fail)
+                self.assertEqual(len(calls), 3)
+                self.assertEqual(self.sleeps, [0.5, 1.0])
+                self.assertIsInstance(result, RuntimeError)
+
+    def test_501_is_not_retried(self):
+        calls, result = self.call(lambda *a, **k: response(501))
         self.assertEqual(len(calls), 1)
-        self.assertEqual(calls[0]["timeout"], (_common.CONNECT_TIMEOUT_SECONDS, 30))
+        self.assertEqual(self.sleeps, [])
         self.assertIsInstance(result, RuntimeError)
 
     def test_5xx_is_retried_and_success_returns(self):

@@ -13,6 +13,8 @@
 
 팀원 로컬 실행은 아래 최종 DB 복원 가이드를 따릅니다.
 
+`build_handoff_package.py`가 생성한 `load_neo4j.py`를 실행하기 전에 현재 셸에 `NEO4J_PASSWORD` 환경 변수를 설정하세요. 이 적재 스크립트는 `.env`를 자동으로 읽지 않습니다.
+
 ## 관련 문서
 
 - [상세 가이드](../docs/development/ISSUE43_RESTORE_GUIDE.md)

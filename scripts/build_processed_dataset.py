@@ -7,8 +7,6 @@ from pathlib import Path
 from pypdf import PdfReader
 from bs4 import BeautifulSoup
 
-# 같은 HTML을 문서 단계와 청크 단계에서 모두 쓰므로, 한 번 실행하는 동안 파싱 결과를 재사용한다.
-@lru_cache(maxsize=None)
 def read_file_text(path: Path) -> str:
     with open(path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f.read(), "html.parser")
@@ -17,6 +15,9 @@ def read_file_text(path: Path) -> str:
 
 
 def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> None:
+    # 문서와 청크가 공유하는 HTML 파싱 결과는 이 빌드에서만 재사용한다.
+    read_html = lru_cache(maxsize=None)(read_file_text)
+
     NOW = "2026-11-04T16:25:00+09:00"
 
     def get_hash(s: str) -> str:
@@ -340,7 +341,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": "2026-04-08",
             "effective_at": "2026-04-08",
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "lh" / "lh_notice_2015122300019712_seoul_newlywed.html"))[:1000]),
+            "content_hash": get_hash((text := read_html(raw_dir / "lh" / "lh_notice_2015122300019712_seoul_newlywed.html"))[:1000]),
             "text": text,
             "review_status": "verified"
         },
@@ -354,7 +355,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": "2026-10-16",
             "effective_at": "2026-10-19",
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_notice_1316_newlywed_income.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_notice_1316_newlywed_income.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -382,7 +383,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": "2026-10-19",
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_newlywed_jeonse_guide.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_newlywed_jeonse_guide.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -396,7 +397,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_newlywed_jeonse_process.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_newlywed_jeonse_process.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -410,7 +411,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_youth_jeonse_guide.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_youth_jeonse_guide.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -424,7 +425,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_youth_jeonse_process.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_youth_jeonse_process.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -438,7 +439,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "work24" / "work24_tomorrow_learning_card.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "work24" / "work24_tomorrow_learning_card.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -452,7 +453,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_monthly_rent_guide.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_monthly_rent_guide.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -466,7 +467,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "nhuf" / "nhuf_youth_rent_deposit_guide.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "nhuf" / "nhuf_youth_rent_deposit_guide.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -480,7 +481,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "youthcenter" / "youthcenter_openapi_guide.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "youthcenter" / "youthcenter_openapi_guide.html"))),
             "text": text,
             "review_status": "verified"
         },
@@ -494,7 +495,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
             "published_at": None,
             "effective_at": None,
             "retrieved_at": NOW,
-            "content_hash": get_hash((text := read_file_text(raw_dir / "youthcenter" / "youthcenter_openapi_doc.html"))),
+            "content_hash": get_hash((text := read_html(raw_dir / "youthcenter" / "youthcenter_openapi_doc.html"))),
             "text": text,
             "review_status": "verified"
         }
@@ -594,7 +595,7 @@ def build_dataset(raw_dir: Path, processed_dir: Path, metadata_dir: Path) -> Non
         ("DOC_YC_001", "POL_008", "youthcenter/youthcenter_openapi_guide.html", "온통청년 오픈API 이용안내", "https://www.youthcenter.go.kr/cmnFooter/openapiIntro/oaiGuide"),
         ("DOC_YC_002", "POL_008", "youthcenter/youthcenter_openapi_doc.html", "온통청년 오픈API 규격명세", "https://www.youthcenter.go.kr/cmnFooter/openapiIntro/oaiDoc"),
     ]:
-        t = read_file_text(raw_dir / raw_f)
+        t = read_html(raw_dir / raw_f)
         # split into 800-char chunks
         for i in range(0, len(t), 800):
             c_text = t[i:i+800].strip()
