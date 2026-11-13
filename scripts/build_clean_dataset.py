@@ -35,7 +35,11 @@ from collectors.preprocessing.normalize import (
     parse_bokjiro_detail_xml,
 )
 from collectors.api.gov24_collector import structure_ja_conditions
-from collectors.api.youthcenter_collector import load_code_definitions, normalize_youthcenter_item
+from collectors.api.youthcenter_collector import (
+    CURATED_YOUTHCENTER_PLCY_NOS,
+    load_code_definitions,
+    normalize_youthcenter_item,
+)
 from collectors.preprocessing.application_urls import application_url_or_none
 
 DATA_DIR = BASE_DIR / "data"
@@ -516,7 +520,8 @@ def main() -> None:
                 json.dumps(gov24_all[sid], ensure_ascii=False, indent=2), encoding="utf-8"
             )
 
-    for pno in ["20260710005400113256", "20261004005400113874", "20250123005400110393", "20241231005400100180"]:
+    # 정책번호마다 별도 파일로 저장하므로 순서는 결과에 영향이 없다.
+    for pno in sorted(CURATED_YOUTHCENTER_PLCY_NOS):
         if pno in yc_all:
             (yc_items_dir / f"{pno}.json").write_text(
                 json.dumps(yc_all[pno], ensure_ascii=False, indent=2), encoding="utf-8"
@@ -1227,7 +1232,7 @@ def main() -> None:
 
     excluded_bokjiro_ids = {"WLF00004661", "WLF00006229", "WLF00003222", "WLF00001063", "WLF00003245"}
     excluded_gov24_ids = {"161300000099", "149200005007", "149200000026"}
-    excluded_yc_ids = {"20260710005400113256", "20261004005400113874", "20250123005400110393", "20241231005400100180"}
+    excluded_yc_ids = CURATED_YOUTHCENTER_PLCY_NOS
 
     # 직접 원문 XML/JSON과 대조 검수 완료한 대표 API 정책 집합 (verified 부여 대상)
     verified_bokjiro_ids = {

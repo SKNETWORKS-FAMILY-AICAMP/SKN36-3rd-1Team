@@ -47,7 +47,7 @@ import requests
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import first_application_url
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -111,7 +111,8 @@ def make_api_request(url: str, params: Dict[str, Any], logger: logging.Logger, t
             timeout=timeout,
         )
     except Exception as e:
-        raise BokjiroApiError(f"네트워크 통신 오류: {e}")
+        # requests 예외 문장에는 serviceKey가 들어간 URL이 포함되므로 키를 가린다.
+        raise BokjiroApiError(f"네트워크 통신 오류: {mask_secrets(e, params.get('serviceKey'))}")
 
     try:
         root = ET.fromstring(r.content)
@@ -398,7 +399,7 @@ def run_collection(
                 break
             except Exception as e:
                 logger.error("Unexpected error at list page %d: %s", page, e)
-                summary["errors"].append(f"List page {page} unexpected: {e}")
+                summary["errors"].append(mask_secrets(f"List page {page} unexpected: {e}", key, raw_key))
                 break
 
         summary["list_pages_fetched"] += 1
@@ -450,7 +451,7 @@ def run_collection(
                     break
             except Exception as e:
                 summary["detail_failed"] += 1
-                summary["errors"].append(f"Detail {serv_id} unexpected: {str(e)[:150]}")
+                summary["errors"].append(mask_secrets(f"Detail {serv_id} unexpected: {e}", key, raw_key)[:200])
 
     # -------------------------------------------------------------------------
     # 3. 원본 XML 파싱 -> 정제 JSONL (bokjiro_welfare_services.jsonl) 생성

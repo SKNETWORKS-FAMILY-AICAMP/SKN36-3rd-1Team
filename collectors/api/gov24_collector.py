@@ -36,12 +36,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
-import requests
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -116,14 +114,12 @@ def get_gov24_urls() -> Tuple[str, str, str]:
 
 
 def fetch_api_json(url: str, params: Dict[str, Any], logger: logging.Logger, timeout: int = 45) -> Dict[str, Any]:
-    """공공데이터포털 odcloud.kr REST GET 호출 및 JSON 파싱."""
-    try:
-        r = requests.get(url, params=params, headers={"User-Agent": "LifePolicyAI-Gov24Collector/3.0"}, timeout=timeout)
-    except Exception as e:
-        raise RuntimeError(f"Network error while calling {url}: {e}")
+    """공공데이터포털 odcloud.kr REST GET 호출 및 JSON 파싱.
 
-    if r.status_code != 200:
-        raise RuntimeError(f"HTTP {r.status_code} error from {url}: {r.text[:200]}")
+    네트워크 오류·429·5xx 재시도와 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
+    """
+    r = http_get(url, params, logger=logger, timeout=timeout,
+                 user_agent="LifePolicyAI-Gov24Collector/3.0", allow_redirects=True)
 
     try:
         data = r.json()
@@ -491,7 +487,7 @@ def run_collection(per_page: int = 1000, max_pages: Optional[int] = None, use_ca
                     cache_file.write_text(json.dumps(j, ensure_ascii=False, indent=1), encoding="utf-8")
                     time.sleep(0.3)
                 except Exception as e:
-                    summary["errors"].append(f"{ep_name} page {page}: {e}")
+                    summary["errors"].append(mask_secrets(f"{ep_name} page {page}: {e}", key, raw_key))
                     logger.error("%s page %d failed: %s", ep_name, page, e)
                     break
 

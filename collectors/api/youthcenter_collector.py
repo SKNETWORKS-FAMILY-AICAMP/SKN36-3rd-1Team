@@ -35,12 +35,10 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-import requests
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, load_env_value, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -50,6 +48,13 @@ OUT_PROCESSED_JSONL = PROCESSED_ROOT / "youthcenter_policies.jsonl"
 OUT_CODE_JSON = METADATA_ROOT / "youthcenter_code_definitions.json"
 
 DEFAULT_API_URL = "https://www.youthcenter.go.kr/go/ythip/getPlcy"
+
+# 대표 정책(POL_004·005·009·010)과 같은 건으로 병합·연계한 온통청년 정책번호.
+# 근거: data/metadata/id_mapping.csv (중복 병합·근거 문서 연계 기록). 수집기는 이 4건에 verified를 주고
+# 원본 JSON을 항상 보존하며, scripts/build_clean_dataset.py는 일반 목록에서 제외해 중복 적재를 막는다.
+CURATED_YOUTHCENTER_PLCY_NOS = frozenset({
+    "20260710005400113256", "20261004005400113874", "20250123005400110393", "20241231005400100180",
+})
 
 ZIP_CODE_TO_REGION = {
     "11": "서울특별시",
@@ -332,7 +337,7 @@ def normalize_youthcenter_item(
         "text": full_text,
         "content": full_text,
         "content_hash": hashlib.sha256(full_text.encode("utf-8")).hexdigest(),
-        "verification_status": "verified" if pno in {"20260710005400113256", "20261004005400113874", "20250123005400110393", "20241231005400100180"} else "extracted",
+        "verification_status": "verified" if pno in CURATED_YOUTHCENTER_PLCY_NOS else "extracted",
         "retrieved_at": now_kst(),
         "collected_at": now_kst(),
         "raw_attributes": item,
@@ -365,10 +370,9 @@ def fetch_youthcenter_api(
             raise ValueError("pageType=2(상세조회)는 plcyNo가 필수입니다.")
         params["plcyNo"] = plcy_no
 
-    headers = {"User-Agent": "LifePolicyAI-YouthCenterCollector/2.0"}
-    r = requests.get(DEFAULT_API_URL, params=params, headers=headers, timeout=45)
-    if r.status_code != 200:
-        raise RuntimeError(f"HTTP {r.status_code} error from YouthCenter API: {r.text[:200]}")
+    # 재시도(네트워크 오류·429·5xx)와 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
+    r = http_get(DEFAULT_API_URL, params, logger=logger or get_logger("youthcenter", [api_key]), timeout=45,
+                 user_agent="LifePolicyAI-YouthCenterCollector/2.0", allow_redirects=True)
     return r.json()
 
 
@@ -429,7 +433,7 @@ def run_collection(
                 cache_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
                 time.sleep(0.3)
             except Exception as e:
-                summary["errors"].append(f"Page {page} error: {e}")
+                summary["errors"].append(mask_secrets(f"Page {page} error: {e}", key))
                 logger.error("Page %d fetch failed: %s", page, e)
                 break
 
@@ -468,7 +472,7 @@ def run_collection(
                     det_ok += 1
                 time.sleep(0.2)
             except Exception as e:
-                summary["errors"].append(f"Detail fetch {pno}: {e}")
+                summary["errors"].append(mask_secrets(f"Detail fetch {pno}: {e}", key))
         summary["detail_fetch_success_count"] = det_ok
 
     # 3. 코드정의서 적용 정규화 & 통계 산출
@@ -538,7 +542,7 @@ def run_collection(
         refined_records.append(norm_rec)
 
         # 상위 500개 및 주요 정책 개별 원본 JSON 파일 보존
-        if len(refined_records) <= 500 or pno in {"20260710005400113256", "20261004005400113874", "20250123005400110393", "20241231005400100180"}:
+        if len(refined_records) <= 500 or pno in CURATED_YOUTHCENTER_PLCY_NOS:
             (raw_items_dir / f"{pno}.json").write_text(json.dumps(it, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 4. JSONL 파일 저장

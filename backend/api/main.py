@@ -26,6 +26,24 @@ from database.hybrid_search import (
 )
 
 logger = logging.getLogger(__name__)
+# 계약(ask_contract §8.1)의 기본 개발 주소. 다른 개발 주소는 환경 변수에 쉼표로 추가한다.
+DEFAULT_CORS_ORIGINS = ("http://127.0.0.1:5173",)
+CORS_ORIGINS_ENV = "ASK_CORS_EXTRA_ORIGINS"
+# 같은 PC(루프백)의 개발 서버는 포트와 무관하게 허용한다. 5173이 차 있으면 Vite가 5174 등으로 옮겨 뜨기 때문이다.
+# 외부 주소는 허용하지 않는다(필요하면 ASK_CORS_EXTRA_ORIGINS에 명시).
+LOCAL_DEV_ORIGIN_REGEX = r"^http://(127\.0\.0\.1|localhost)(:\d{1,5})?$"
+
+
+def cors_origins() -> list[str]:
+    """기본 주소 + ASK_CORS_EXTRA_ORIGINS(쉼표 구분). '*' 같은 전체 허용은 받지 않는다."""
+    extra = [value.strip().rstrip("/") for value in os.environ.get(CORS_ORIGINS_ENV, "").split(",")]
+    origins = list(DEFAULT_CORS_ORIGINS)
+    for origin in extra:
+        if origin and origin != "*" and origin not in origins:
+            origins.append(origin)
+    return origins
+
+
 ERRORS = {
     "SEARCH_BACKEND_UNAVAILABLE": (503, "정책 검색 서비스를 잠시 이용할 수 없습니다."),
     "SEARCH_TIMEOUT": (504, "정책 검색 시간이 초과되었습니다."),
@@ -99,7 +117,7 @@ def create_app(
 
     application = FastAPI(title="SSOK", lifespan=lifespan)
     application.add_middleware(
-        CORSMiddleware, allow_origins=["http://127.0.0.1:5173"],
+        CORSMiddleware, allow_origins=cors_origins(), allow_origin_regex=LOCAL_DEV_ORIGIN_REGEX,
         allow_methods=["POST", "GET"], allow_headers=["Content-Type"],
     )
 

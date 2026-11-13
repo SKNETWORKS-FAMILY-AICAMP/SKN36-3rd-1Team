@@ -1,4 +1,4 @@
-# LifePolicy AI - Data Pipeline Requirements
+# SSOK - Data Pipeline Requirements
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 pypdf>=4.0.0

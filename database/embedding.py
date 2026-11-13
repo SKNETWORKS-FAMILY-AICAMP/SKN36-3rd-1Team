@@ -337,6 +337,7 @@ def make_ollama_embedder(
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
     http_post: Callable[..., Any] = requests.post,
     metrics_sink: list[dict[str, Any]] | None = None,
+    reuse_connection: bool = False,
 ) -> Embedder:
     """
     Ollama 임베딩 함수를 만들어 돌려준다. 반환된 함수는 문자열 목록을 batch_size개씩 나눠 요청한다.
@@ -345,22 +346,38 @@ def make_ollama_embedder(
         vectors = embed(["문장1", "문장2"])          # 반환값은 기존과 같은 "벡터 목록"
         summarize_ollama_metrics(metrics)             # Ollama가 잰 시간·토큰 수 요약
     이 함수 자체는 서버에 접속하지 않는다. 반환된 함수를 호출할 때 접속한다.
+    reuse_connection=True이고 http_post가 기본값(requests.post)이면 requests.Session 하나로 연결을 재사용한다
+    (반복 질의용: HybridSearchSession). 다 쓰면 embed.close()로 닫는다. Ollama 주소는 지금처럼 호출할 때 정한다.
     """
     if batch_size < 1:
         raise ValueError("batch_size는 1 이상이어야 합니다.")
+    session = requests.Session() if reuse_connection and http_post is requests.post else None
+    post = http_post
+    if session is not None:
+        def post(url, **kwargs):
+            try:
+                return session.post(url, **kwargs)
+            except requests.ConnectTimeout:
+                raise                          # 접속 자체가 안 되면 다시 보내도 같은 대기만 반복한다
+            except requests.ConnectionError:
+                # 재사용하던 연결이 끊긴 경우(예: Ollama 재시작). 연결을 버리고 새 연결로 한 번만 다시 보낸다.
+                # 임베딩 요청은 같은 입력이면 같은 결과라 다시 보내도 안전하다.
+                session.close()
+                return session.post(url, **kwargs)
 
     def embed(texts: list[str]) -> list[list[float]]:
         vectors: list[list[float]] = []
         for start in range(0, len(texts), batch_size):
             vectors.extend(ollama_embed_batch(
                 texts[start:start + batch_size], model=model, base_url=base_url,
-                expected_dim=expected_dim, timeout=timeout, http_post=http_post, metrics_sink=metrics_sink,
+                expected_dim=expected_dim, timeout=timeout, http_post=post, metrics_sink=metrics_sink,
             ))
         return vectors
 
     # 이 함수가 어떤 모델·차원의 벡터를 만드는지 표시 (Hybrid 검색 프로필이 embedder를 검증할 때 쓴다)
     embed.embedding_model = model
     embed.embedding_dim = expected_dim
+    embed.close = session.close if session is not None else (lambda: None)
     return embed
 
 

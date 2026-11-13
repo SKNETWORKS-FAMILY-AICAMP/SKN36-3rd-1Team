@@ -594,7 +594,8 @@ except ImportError:
 
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+# 비밀번호는 기본값을 두지 않는다. .env 또는 환경 변수에 없으면 접속하지 않고 멈춘다.
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 DATA_DIR = Path(__file__).resolve().parent
 
@@ -648,6 +649,10 @@ def run_pipeline():
     if not NEO4J_AVAILABLE:
         print("\\n>> [NOT_TESTED] neo4j 파이썬 드라이버 라이브러리 미설치 ('pip install neo4j' 필요) <<")
         print("   안내: DB 엔지니어(주민혁 님) 인프라 환경에서 패키지 설치 및 서버 기동 후 실행하십시오.")
+        return False
+
+    if not NEO4J_PASSWORD:
+        print("\\n>> [ERROR] NEO4J_PASSWORD 환경 변수가 없습니다. .env 또는 환경 변수에 설정한 뒤 실행하십시오. <<")
         return False
 
     try:

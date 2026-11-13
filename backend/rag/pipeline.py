@@ -10,17 +10,19 @@ from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, AskResponse, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
+from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
 CITATION = re.compile(r"\[(\d+)\]")
-# database/hybrid_search.py가 data_quality.affected_attributes로 내보내는 필드 목록과 같다("all" 제외).
+# 검색 계층(data_quality.affected_attributes)·Checker와 같은 공통 상수("all" 제외).
 # 목록 밖의 값과 "all"은 영향 범위를 확정할 수 없으므로 정책 전체를 보류한다.
-# TODO(#23 병합 후): 검색 담당이 공통 상수를 제공하면 그 상수로 교체한다.
-SCOPED_CONDITION_FIELDS = {"age", "region", "income", "housing", "employment", "exclusion", "marriage", "children"}
+SCOPED_CONDITION_FIELDS = SCOPED_ELIGIBILITY_FIELDS
 QUALITY_REASON = "데이터가 불확실하여 공식 공고에서 조건을 확인해야 합니다."
 MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했습니다. 정보를 입력하거나 공식 공고에서 확인해 주세요."
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
+# 화면(frontend/src/lib/answerView.ts)이 이 문장으로 일반 보류 안내를 알아본다. 바꾸면 화면도 함께 바꾼다.
+HOLD_NOTICE_TEXT = "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
 # 신청 상태(before/open/closed/unknown)는 Checker 단일 책임이다. Pipeline은 날짜를 판정하지 않는다.
 CLOSED = "closed"
 # 정책명 직접 언급 판별: 공백·문장부호를 지운 정책명 전체가 질문에 들어 있을 때만 인정한다.
@@ -460,8 +462,7 @@ def run_ask_pipeline(
     if output.status == "no_evidence":
         checks = []
     if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):
-        notice = {"kind": "warn", "title": "추가 확인 필요",
-                  "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."}
+        notice = {"kind": "warn", "title": "추가 확인 필요", "text": HOLD_NOTICE_TEXT}
     if notice is None and aligned:
         notice = {"kind": "warn", "title": "추가 확인 필요",
                   "text": "접수 상태와 신청 자격은 판정 결과를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."}

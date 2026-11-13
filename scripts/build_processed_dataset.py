@@ -2,10 +2,13 @@ import argparse
 import json
 import csv
 import hashlib
+from functools import lru_cache
 from pathlib import Path
 from pypdf import PdfReader
 from bs4 import BeautifulSoup
 
+# 같은 HTML을 문서 단계와 청크 단계에서 모두 쓰므로, 한 번 실행하는 동안 파싱 결과를 재사용한다.
+@lru_cache(maxsize=None)
 def read_file_text(path: Path) -> str:
     with open(path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f.read(), "html.parser")
