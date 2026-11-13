@@ -196,7 +196,7 @@ npm run dev
 | 04 | [RAG·LLM·DB 연동 코드](docs/reports/ssok-deliverables/04%20%C2%B7%20RAG%C2%B7LLM%C2%B7DB%20%EC%97%B0%EB%8F%99%20%EC%BD%94%EB%93%9C.md) |
 | 05 | [테스트 계획 및 결과 보고서](docs/reports/ssok-deliverables/05%20%C2%B7%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EA%B3%84%ED%9A%8D%20%EB%B0%8F%20%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C.md) |
 
-[SSOK 발표 자료 PDF](docs/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
+[SSOK 발표 자료 PDF](docs/reports/ssok-deliverables/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
 
 ## 한계와 후속 계획
 
