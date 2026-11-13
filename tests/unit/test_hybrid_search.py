@@ -1085,7 +1085,9 @@ class TestSessionProfileEmbedderReuse(unittest.TestCase):
             def post(self, url, json, timeout):   # noqa: A002 - requests.post와 같은 인자 이름
                 attempts.append(url)
                 if len(attempts) == 1:
-                    raise requests.ConnectionError("connection reset (sample_only)")   # Ollama 재시작 직후
+                    raise requests.ConnectionError(
+                        em.ProtocolError("connection aborted", ConnectionResetError())
+                    )
                 return mock.Mock(status_code=200, json=lambda: {"embeddings": [[0.0] * DIM]})
 
             def close(self):
@@ -1113,6 +1115,14 @@ class TestSessionProfileEmbedderReuse(unittest.TestCase):
             with self.assertRaises(em.EmbeddingError):
                 embed(["가상 1"])
         self.assertEqual(len(attempts), 1)
+
+    def test_connection_refusal_is_not_retried(self):
+        with mock.patch.object(em.requests, "Session") as session:
+            session.return_value.post.side_effect = em.requests.ConnectionError(ConnectionRefusedError())
+            embed = em.make_ollama_embedder(base_url="http://ollama.invalid", reuse_connection=True)
+            with self.assertRaises(em.EmbeddingError):
+                embed(["가상 질문"])
+            session.return_value.post.assert_called_once()
 
 
 if __name__ == "__main__":

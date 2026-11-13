@@ -15,10 +15,12 @@
 import math
 import os
 import re
+from http.client import RemoteDisconnected
 from pathlib import Path
 from typing import Any, Callable
 
 import requests
+from urllib3.exceptions import ProtocolError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ENV_PATH = PROJECT_ROOT / ".env"
@@ -359,7 +361,13 @@ def make_ollama_embedder(
                 return session.post(url, **kwargs)
             except requests.ConnectTimeout:
                 raise                          # 접속 자체가 안 되면 다시 보내도 같은 대기만 반복한다
-            except requests.ConnectionError:
+            except requests.ConnectionError as error:
+                reason = error.args[0] if error.args else None
+                if not isinstance(reason, ProtocolError) or not any(
+                    isinstance(cause, (ConnectionResetError, BrokenPipeError, RemoteDisconnected))
+                    for cause in reason.args
+                ):
+                    raise
                 # 재사용하던 연결이 끊긴 경우(예: Ollama 재시작). 연결을 버리고 새 연결로 한 번만 다시 보낸다.
                 # 임베딩 요청은 같은 입력이면 같은 결과라 다시 보내도 안전하다.
                 session.close()

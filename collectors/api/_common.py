@@ -2,7 +2,7 @@
 
 - 인증키는 .env 또는 환경변수에서만 읽는다. 코드·로그·저장 파일에 키를 남기지 않는다.
 - HTTP 오류(상태코드)와 API 내부 오류(resultCode 등)를 구분해 예외로 올린다.
-- 재시도: 접속 실패·5xx·429에 한해 짧은 백오프(최대 3회 시도, 대기 0.5초 → 1초).
+- 재시도: 접속 실패 또는 HTTP 429·500·502·503·504에 한해 최대 3회 시도한다.
 """
 from __future__ import annotations
 
@@ -96,7 +96,8 @@ def http_get(url: str, params: dict[str, Any], *, logger: logging.Logger, timeou
              allow_redirects: bool = False) -> requests.Response:
     """GET with retry/backoff. 오류 문장에서 인증키를 가린다.
 
-    재시도: 접속 실패(접속 시간 초과 포함)·429·5xx만, 최대 max_retries번, 대기 0.5초 → 1초 (기본 합계 1.5초).
+    접속 실패(접속 시간 초과 포함) 또는 RETRY_STATUS_CODES만 재시도한다.
+    기본 최대 3회 시도, 대기 0.5초 → 1초.
     응답 대기 시간 초과(ReadTimeout)는 서버가 느린 것이라 다시 보내면 대기만 길어지므로 재시도하지 않는다.
     """
     secrets = _param_secrets(params)

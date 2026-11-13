@@ -116,7 +116,7 @@ def get_gov24_urls() -> Tuple[str, str, str]:
 def fetch_api_json(url: str, params: Dict[str, Any], logger: logging.Logger, timeout: int = 45) -> Dict[str, Any]:
     """공공데이터포털 odcloud.kr REST GET 호출 및 JSON 파싱.
 
-    네트워크 오류·429·5xx 재시도와 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
+    재시도 정책과 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
     """
     r = http_get(url, params, logger=logger, timeout=timeout,
                  user_agent="LifePolicyAI-Gov24Collector/3.0", allow_redirects=True)

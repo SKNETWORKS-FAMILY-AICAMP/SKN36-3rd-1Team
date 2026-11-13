@@ -24,7 +24,7 @@ const LifeTimeline = lazy(() => import('./components/LifeTimeline'));
 
 
 /** 중복 요청 판단용 질문 키: 앞뒤 공백을 빼고 연속 공백을 하나로 줄인다 */
-const pendingKey = (question: string) => question.trim().replace(/\s+/g, ' ');
+const pendingKey = (question: string) => question.trim().replace(/\r\n?/g, '\n').replace(/[^\S\n]+/g, ' ');
 
 const THEME_KEY = 'lifepolicy-theme';
 function readTheme(): 'light' | 'dark' {
@@ -182,7 +182,7 @@ export default function App() {
     if (!request || isPending(request.question)) return;
     setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'loading', error: undefined } : t)));
     void run(id, request);
-  }, [run]);
+  }, [isPending, run]);
 
   const followUp = (f: FollowUp, origin: HTMLElement, question: string, turnId: number) => {
     if (f.kind === 'question') { ask(f.text, origin); return; }

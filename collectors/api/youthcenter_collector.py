@@ -370,7 +370,7 @@ def fetch_youthcenter_api(
             raise ValueError("pageType=2(상세조회)는 plcyNo가 필수입니다.")
         params["plcyNo"] = plcy_no
 
-    # 재시도(네트워크 오류·429·5xx)와 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
+    # 재시도 정책과 오류 문장의 인증키 가리기는 _common.http_get이 맡는다.
     r = http_get(DEFAULT_API_URL, params, logger=logger or get_logger("youthcenter", [api_key]), timeout=45,
                  user_agent="LifePolicyAI-YouthCenterCollector/2.0", allow_redirects=True)
     return r.json()
