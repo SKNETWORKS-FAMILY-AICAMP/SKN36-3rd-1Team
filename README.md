@@ -142,7 +142,7 @@ npm run dev
    ```bash
    python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
    ```
-4. 백엔드의 CORS 허용 주소는 `http://127.0.0.1:5173`입니다. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
+4. 백엔드는 `http://127.0.0.1`과 `http://localhost`의 개발 포트를 자동으로 허용합니다. 그 외 프론트 주소는 백엔드의 `ASK_CORS_EXTRA_ORIGINS`에 쉼표로 구분해 추가하세요. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
 
    ```bash
    cd frontend

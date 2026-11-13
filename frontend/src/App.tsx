@@ -23,6 +23,9 @@ const PolicyMap = lazy(() => import('./components/PolicyMap'));
 const LifeTimeline = lazy(() => import('./components/LifeTimeline'));
 
 
+/** 중복 요청 판단용 질문 키: 앞뒤 공백을 빼고 연속 공백을 하나로 줄인다 */
+const pendingKey = (question: string) => question.trim().replace(/\r\n?/g, '\n').replace(/[^\S\n]+/g, ' ');
+
 const THEME_KEY = 'lifepolicy-theme';
 function readTheme(): 'light' | 'dark' {
   try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
@@ -108,10 +111,12 @@ export default function App() {
   }).slice(-HISTORY_MAX_ITEMS);
 
   // 답변을 기다리는 질문. 같은 질문이 연달아 눌려 요청이 두 번 나가지 않게 한다 (LLM 호출 비용)
+  // 띄어쓰기만 다른 질문도 같은 질문으로 본다 (예: '청년  월세' / '청년 월세').
   const pending = useRef(new Set<string>());
+  const isPending = useCallback((question: string) => pending.current.has(pendingKey(question)), []);
 
   const run = useCallback(async (id: number, request: AskRequest) => {
-    pending.current.add(request.question);
+    pending.current.add(pendingKey(request.question));
     try {
       const response = await askPolicy(request);
       setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'done', response } : t)));
@@ -119,7 +124,7 @@ export default function App() {
       const message = err instanceof Error ? err.message : '일시적인 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
       setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'error', error: message } : t)));
     } finally {
-      pending.current.delete(request.question);
+      pending.current.delete(pendingKey(request.question));
     }
   }, []);
 
@@ -142,7 +147,7 @@ export default function App() {
     const reply = field == null ? readProfileReply(question) : null;
     if (reply) {
       const previous = [...turnsRef.current].reverse().find((t) => t.kind === 'qa');
-      const plan = planProfileReply(reply, previous?.kind === 'qa' ? previous.question : null, next, (q) => pending.current.has(q));
+      const plan = planProfileReply(reply, previous?.kind === 'qa' ? previous.question : null, next, isPending);
       if (plan.kind === 'busy') { showToast('같은 질문의 답변을 기다리고 있어요'); return false; }
       applyProfileState(reply);
       if (plan.kind === 'store') {
@@ -156,7 +161,7 @@ export default function App() {
       showToast(`질문은 ${QUESTION_MAX_LENGTH.toLocaleString('ko-KR')}자까지 입력할 수 있어요.`);
       return false;
     }
-    if (pending.current.has(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return false; }
+    if (isPending(question)) { showToast('같은 질문의 답변을 기다리고 있어요'); return false; }
     burst(origin, reduceMotion);
 
     const id = nextId.current++;
@@ -174,10 +179,10 @@ export default function App() {
 
   const retry = useCallback((id: number) => {
     const request = requests.current.get(id);
-    if (!request || pending.current.has(request.question)) return;
+    if (!request || isPending(request.question)) return;
     setTurns((list) => list.map((t) => (t.id === id && t.kind === 'qa' ? { ...t, state: 'loading', error: undefined } : t)));
     void run(id, request);
-  }, [run]);
+  }, [isPending, run]);
 
   const followUp = (f: FollowUp, origin: HTMLElement, question: string, turnId: number) => {
     if (f.kind === 'question') { ask(f.text, origin); return; }
