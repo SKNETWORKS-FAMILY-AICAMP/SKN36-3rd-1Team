@@ -204,7 +204,8 @@ class PipelineTests(unittest.TestCase):
 
     def test_contacts_fall_back_to_unselected_citable_candidate(self):
         # 채택된 청크엔 문의처가 없고, 같은 정책의 더 낮은 순위라 채택되지 못한(그러나 인용 가능한)
-        # 청크에 문의처가 있으면 그걸로 보완한다.
+        # 청크에 문의처가 있으면 그걸로 보완한다. 단, 그 청크는 답변의 citations에 들어가지 않으므로
+        # chunk_id/document_id/source_url은 비워서 화면이 인용되지 않은 출처를 링크하지 않게 한다.
         no_contact_text = "...[지원대상]\n만 19세 이상"
         contact_text = "[문의처]\n기관C (02-333-3333\n\n[출처 URL] https://example.org/t2"
         target = policy("T", 1, evidence=[
@@ -219,8 +220,8 @@ class PipelineTests(unittest.TestCase):
         response = self.ask()
         target_check = next(c for c in response.policy_checks if c.policy_id == "T")
         self.assertEqual(
-            [(c.agency, c.phone, c.chunk_id) for c in target_check.contacts],
-            [("기관C", "02-333-3333", "T2")],
+            [(c.agency, c.phone, c.chunk_id, c.document_id, c.source_url) for c in target_check.contacts],
+            [("기관C", "02-333-3333", None, None, None)],
         )
 
     def test_regenerated_doc_gov_048_chunks_reach_api_response_intact(self):
@@ -971,6 +972,18 @@ class ContactParsingTests(unittest.TestCase):
         contacts = parse_contacts("가족복지과/0327607917")
         self.assertEqual([(c.agency, c.phone) for c in contacts], [("가족복지과", "0327607917")])
 
+    def test_agency_name_ending_in_digit_still_splits_phone(self):
+        # 기관명이 숫자로 끝나면(예: "학교폭력117") 구분자 "(" 바로 앞이 숫자라서
+        # "전화번호 뒤 부가 설명" 걸러내기 규칙에 걸려 통째로 기관명 취급되던 버그.
+        contacts = parse_contacts("학교폭력117(1588-7179")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("학교폭력117", "1588-7179")])
+
+    def test_digit_suffix_annotation_after_phone_still_has_no_separator(self):
+        # 위 수정이 원래 걸러내려던 경우(전화번호 뒤 설명)를 다시 구분자로 착각하지 않는지 확인.
+        contacts = parse_contacts("043-913-2352(시스템")
+        self.assertEqual(len(contacts), 1)
+        self.assertIsNone(contacts[0].phone)
+
     def test_contacts_from_text_extracts_block_before_next_tag(self):
         text = (
             "...지원 근거\n\n[문의처]\n보건복지상담센터 (129\n\n"
@@ -981,6 +994,13 @@ class ContactParsingTests(unittest.TestCase):
 
     def test_contacts_from_text_without_block_is_empty(self):
         self.assertEqual(contacts_from_text("원문에 문의처 항목이 없는 경우"), [])
+
+    def test_contacts_from_text_ignores_mid_line_tag(self):
+        # [문의처]가 줄 시작이 아니면(예: 설명 문장 중간) 실제 구조화 태그가 아니다.
+        # scripts/build_clean_dataset.py의 iter_document_chunks도 줄 시작만 보호 대상으로 보므로
+        # 둘의 "블록" 정의를 맞춘다.
+        text = "자세한 사항은 [문의처] 참고 바랍니다.\n\n[출처 URL] https://example.org"
+        self.assertEqual(contacts_from_text(text), [])
 
 
 class RequestSchemaTests(unittest.TestCase):

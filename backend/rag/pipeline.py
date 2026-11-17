@@ -68,10 +68,15 @@ class AskError(RuntimeError):
 
 
 # [문의처] 블록은 다음 [...] 태그(보통 [출처 URL]) 전까지다. 블록이 없으면 None.
-_CONTACT_BLOCK = re.compile(r"\[문의처\]\s*(.*?)(?=\n\n\[|\Z)", re.DOTALL)
+# 줄 시작에서만 인정한다 — scripts/build_clean_dataset.py의 iter_document_chunks가 청크를 보호하는
+# 범위와 정의를 맞춰야, 그 쪼개기가 지켜주지 않는 "줄 중간의 [문의처]"를 여기서도 블록으로 보지 않는다.
+_CONTACT_BLOCK = re.compile(r"^\[문의처\]\s*(.*?)(?=\n\n\[|\Z)", re.DOTALL | re.MULTILINE)
 # 기관명 뒤에서 전화번호를 분리하는 구분자. 출처마다 다르다: 정부24는 "/", 복지로는 "(" (닫는 괄호 없음).
 # 숫자에 바로 붙은 "("(예: "043-913-2352(시스템)")은 전화번호 뒤의 부가 설명이지 구분자가 아니므로 제외한다.
 _CONTACT_SEPARATOR = re.compile(r"(?<!\d)[/(]")
+# 기관명이 숫자로 끝나는 경우(예: "학교폭력117(1588-7179)")의 구분자 — 위 구분자가 모두 숫자 뒤에
+# 붙어 있어서 제외됐을 때만 대신 쓴다. 뒤에 유효한 전화번호가 없으면 결국 같은 결과(분리 실패)로 떨어진다.
+_ANY_CONTACT_SEPARATOR = re.compile(r"[/(]")
 # 구분자 뒤 텍스트에서 실제 전화번호만 뽑는다("국번없이 132", "각 기관 120 센터"처럼 설명이 섞여도 숫자만 가져온다).
 _PHONE_IN_TAIL = re.compile(r"\d[\d\-]{1,}\d|\d{2,4}")
 # 쉼표로 분리된 조각이 새 기관이 아니라 앞 전화번호의 내선/부가 번호인 경우
@@ -85,7 +90,11 @@ def _split_agency_phone(fragment: str) -> tuple[str, str | None]:
     """"기관명(/|() 전화번호" 한 건을 기관명과 전화번호로 나눈다. 중첩 괄호가 있으면 마지막 구분자를 쓴다."""
     separators = list(_CONTACT_SEPARATOR.finditer(fragment))
     if not separators:
-        return fragment, None
+        # 전부 숫자 뒤의 "("라서 제외됐을 수 있다(기관명이 숫자로 끝나는 경우). 뒤에 유효한 전화번호가
+        # 있으면 실제 구분자로 본다 — 없으면 아래와 동일하게 분리 실패로 떨어진다.
+        separators = list(_ANY_CONTACT_SEPARATOR.finditer(fragment))
+        if not separators:
+            return fragment, None
     split_at = separators[-1].start()
     agency = fragment[:split_at].strip()
     tail = fragment[split_at + 1:].strip()
@@ -506,7 +515,14 @@ def run_ask_pipeline(
     checks = []
     for pid, selected in contexts_by_policy.items():
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
-        contacts = _collect_contacts(selected) or _collect_contacts(candidates_by_policy.get(pid, ()))
+        contacts = _collect_contacts(selected)
+        if not contacts:
+            # 미채택 후보 청크에서만 찾았다 — 그 청크는 답변의 citations에 들어가지 않으므로,
+            # 화면이 "문의처 원문"으로 인용되지 않은 출처를 링크하지 않도록 출처 정보는 비운다.
+            contacts = [
+                contact.model_copy(update={"document_id": None, "chunk_id": None, "source_url": None})
+                for contact in _collect_contacts(candidates_by_policy.get(pid, ()))
+            ]
         check["contacts"] = contacts or None
         checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
