@@ -36,7 +36,8 @@ def select_documents(documents: list[dict[str, Any]], document_ids: list[str] | 
 
 def prepare_a_chunks(documents: list[dict[str, Any]], payload_chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
-    A안(기존 인계 청크 557건) 중 선택 문서의 청크를 B안과 같은 모양으로 맞춘다. 원본 dict는 바꾸지 않는다.
+    A안(릴리스 청크) 중 선택 문서의 청크를 B안과 같은 모양으로 맞춘다. 원본 dict는 바꾸지 않는다.
+    받은 payload_chunks를 그대로 쓴다. 검토된 노이즈 27건 제외(Issue #81)는 prepare_chunks가 원본 전체에 먼저 적용한다.
     - chunking_version = "A"
     - char_start/char_end: 원문에서 위치를 찾아 채운다(locate_chunks_in_document). 못 찾으면 None.
     - page_start/page_end: 페이지가 확인된 문서만 숫자(get_verified_page_number), 나머지는 None.
@@ -65,8 +66,10 @@ def prepare_chunks(
     if strategy not in STRATEGIES:
         raise ValueError(f"알 수 없는 청킹 전략: {strategy} {STRATEGIES}")
     if strategy == "A":
-        return prepare_a_chunks(documents, payload_chunks if payload_chunks is not None
-                                else handoff_data.load_payload_chunks())
+        # Issue #81 A안: 검토된 노이즈 27건은 적재하지 않는다. 원본 전체로 검토 목록을 확인한 뒤 뺀다.
+        source = payload_chunks if payload_chunks is not None else handoff_data.load_payload_chunks()
+        selected, _excluded = handoff_data.select_chunks_for_embedding(source)
+        return prepare_a_chunks(documents, selected)
     chunks, _reports = chunking.chunk_documents(documents, strategy=strategy)
     return chunks
 
