@@ -122,19 +122,88 @@ checker의 conditions[].status와 reception_status를 사용하고 UNKNOWN·기�
 추가 메타데이터 수정 0건, 임베딩 재생성 0회였고 실제 DB 스모크 18개와 안전 테스트 8개도 통과했다.
 실제 다른 PC/OS의 설치와 OpenAI LLM·HTTP/UI E2E는 미검증이다.
 
+## 문제 해결 (연결·인증 오류)
 
-## PR45 review package r1 ? latest distribution (2026-11-10)
+아래는 이 가이드의 `compose.yaml`(프로젝트명 `lifepolicy-final-team-local`, 포트 56336/57687/57474)로
+복원한 뒤 실제 백엔드를 띄울 때 생길 수 있는 연결 오류와 확인 순서다. **`56336`·`57687`은 이 가이드의
+기본값이며 잘못된 포트가 아니다.** 저장소 루트의 `docker-compose.yml`(개발용, 기본 포트 6333/7687)을
+같은 PC에서 함께 쓰고 있다면, 지금 `.env`가 어느 쪽 컨테이너를 가리키는지부터 구분한다.
 
-Supersedes the earlier distribution for new restores; historical results below/above remain historical.
+### `SEARCH_BACKEND_UNAVAILABLE` + `WinError 10061`(연결 거부)
 
-- ZIP: `rag-final-v140-pr45-review-worktree-20261110-r1.zip` (local artifact: `.cache/rag-final-v140-pr45-review-worktree-20261110-r1.zip`)
+`.env`의 `QDRANT_URL`/`NEO4J_URI` 포트가 실제로 떠 있는 컨테이너 포트와 다를 때 난다. 비밀값을 출력하지
+않고 실제 포트 매핑만 확인한다.
+
+```powershell
+docker compose -p lifepolicy-final-team-local -f .\compose.yaml ps
+# 또는 docker ps --filter "name=qdrant" / --filter "name=neo4j"
+```
+
+`PORTS` 열의 `127.0.0.1:<포트>->6333/tcp`(Qdrant), `->7687/tcp`(Neo4j Bolt)가 `.env`의
+`QDRANT_URL`·`NEO4J_URI` 포트와 같은지 맞춰 본다. `FINAL_QDRANT_PORT`/`FINAL_NEO4J_BOLT_PORT`로
+포트를 바꿔 띄웠다면 `.env`도 그 값으로 맞춘다.
+
+### Qdrant `401 Unauthorized` (`Invalid API key or JWT`)
+
+포트는 맞는데 인증이 실패하면 `.env`의 `QDRANT_API_KEY`와 컨테이너를 띄울 때 쓴
+`QDRANT__SERVICE__API_KEY`가 다른 경우다(새 셸에서 `$env:QDRANT_API_KEY`를 다시 입력하지 않고
+이전 값을 쓴 경우가 흔하다). `docker compose config`는 값 자체를 그대로 출력하므로 쓰지 않는다
+(이 가이드 상단의 "값 전체를 출력하지 않는다" 원칙). 대신 **일치 여부만** 확인한다.
+
+```powershell
+$a = $env:QDRANT_API_KEY
+$b = Read-Host '컨테이너를 띄울 때 쓴 QDRANT_API_KEY' -AsSecureString
+$b = [Net.NetworkCredential]::new('', $b).Password
+"키 일치: $($a -ceq $b)"
+```
+
+`False`면 컨테이너를 그 프로젝트명으로 다시 띄우지 말고(새 볼륨이 또 생긴다), 같은 `$env:QDRANT_API_KEY`
+값을 현재 셸에 다시 입력한 뒤 백엔드를 재시작한다. 로컬이라도 `QDRANT_API_KEY`를
+비우면 `resolve_connection_settings()`(`database/qdrant/store.py`)가 서버에 접속하기도 전에
+`[qdrant:config] QDRANT_API_KEY 값이 비어 있습니다`로 거부한다 — 코드가 API 키를 필수로 보기 때문이며,
+이 동작은 바꾸지 않는다.
+
+### 연결은 되는데 `collections: []`(컬렉션 없음) 또는 Neo4j 노드 0개
+
+포트·인증이 맞아도 그 볼륨에 실제로 복원이 안 돼 있으면 비어 있다. **먼저 `--apply` 복원을 다시
+실행했는지 확인한다**(§ 복원·정합화·전체 무결성 검사). 이미 복원한 다른 프로젝트/볼륨이 PC에 남아 있다면
+아래로 확인할 수 있지만, **원본 볼륨은 삭제·덮어쓰지 않고** 복구용 새 볼륨에 복사해서 쓴다.
+
+```powershell
+docker volume ls --filter "label=com.docker.compose.project"
+docker run --rm -v <확인할 볼륨>:/data busybox du -sh /data
+```
+
+Neo4j는 연결 후 아래로 실제 적재량을 확인한다(연결 성공과 데이터 적재는 별개다).
+
+```cypher
+MATCH (n) RETURN count(n) AS nodes;
+MATCH ()-[r]->() RETURN count(r) AS relationships;
+```
+
+기준값(§ 기준과 준비물): Qdrant 1,138 Point, Neo4j 1,004노드·2,431관계. 이 수치와 크게 다르면 다른
+프로젝트의 볼륨을 잘못 연결했을 가능성이 높다. 두 DB를 모두 연결한 뒤에는 `resolve-report.json` 또는
+`verify-report.json`의 cross-DB 검사 결과로 두 DB가 같은 복원본인지 최종 확인한다(§ 복원·정합화·전체
+무결성 검사). 숫자만 맞고 실제 PASS가 아니면 서로 다른 복원본을 섞어 쓰고 있는 것이다.
+
+### `LLM_UNAVAILABLE`(502)
+
+Qdrant·Neo4j 연결을 모두 통과한 뒤에 나면 LLM 쪽이다. `LLM_MODEL`이 비어 있는 건 정상이다
+(`backend/llm/generator.py`의 `DEFAULT_MODEL`로 대체된다). 대신 다음을 확인한다.
+
+- `OPENAI_API_KEY`가 **입력돼 있는지**뿐 아니라 **아직 유효한지**(발급 후 폐기·만료되지 않았는지)를
+  OpenAI 콘솔이나 별도 호출로 확인한다. 키 값 자체는 로그·문서에 남기지 않는다.
+- 위 두 DB 문제처럼 연결 자체가 아니라 인증 단계에서 막히는지, 오류 메시지의 코드(`LLM_UNAVAILABLE`
+  vs `LLM_TIMEOUT` vs `LLM_OUTPUT_INVALID`)로 구분한다(`backend/api/main.py`의 `ERRORS`).
+
+## PR45 review package r1 — 최신 배포본 (2026-11-10)
+
+새로 복원할 때는 이 배포본을 쓴다. 이전 배포본(§ 위)은 과거 기록으로만 남긴다.
+
+- ZIP: `rag-final-v140-pr45-review-worktree-20261110-r1.zip` (로컬 아티팩트: `.cache/rag-final-v140-pr45-review-worktree-20261110-r1.zip`)
 - ZIP SHA-256: `5b053525a13443b4afc0bc7650bf65c9c943429ebdf9ee96437ab248f260e5e8`
-- Restore script SHA-256: `5433a24e5fb679e714f42dfe652c10e7a97d9c1643bbf8cb82acad2183f30de1`
-- Source: uncommitted Issue #43 worktree based on `3b9da1bfef528e85d3a5f29907c2a1b478b38444`; this is not a new commit SHA.
-- Extract `source-pr45-review-worktree.zip` from the bundle. Use this extracted source and its `scripts/restore_final_v140.py`, not the earlier source archive or another checkout.
-- Independent ZIP extraction: six internal checksums matched; extracted restore safety tests 24/24 passed on Python 3.13.15. Both `--apply` and `--verify-only` passed against new empty DB volumes.
-- Actual counts: Neo4j 1,004 nodes / 2,431 relationships / 136 REQUIRES_CONDITION; Qdrant 1,138 points / 1,024 dimensions / Cosine. Cross-DB PASS, 1,138/1,138; full graph properties verified; vector/protected payload unchanged; embedding calls zero.
-- Vector digest: `f5ec8c25f42f68726438879199860897f5e62baaf4549fcc02103747073a67df`. Metadata updates zero because the snapshot is already aligned.
-- Evidence: [PR45_PACKAGE_VALIDATION_20261110.json](PR45_PACKAGE_VALIDATION_20261110.json). This distribution-side evidence was recorded after packaging; it does not change the sealed ZIP or its checksums.
-- Review items 1?5 are included in both script copies. The old ZIP and `.sha256` remain unchanged. The earlier statement that the review ZIP had not yet been rebuilt is historical and superseded by this entry.
-- No secrets, `.env`, models, 4B vectors, local caches or test DB volumes are included. `.env.example` contains configuration names only. Dependencies must already be installed; another PC/OS and fresh dependency installation remain unverified.
+- 복원 스크립트 SHA-256: `5433a24e5fb679e714f42dfe652c10e7a97d9c1643bbf8cb82acad2183f30de1`
+- 출처: 커밋 `3b9da1bfef528e85d3a5f29907c2a1b478b38444` 기준 Issue #43 작업 트리(uncommitted)이며, 이 자체가 새 커밋 SHA는 아니다.
+- 번들에서 `source-pr45-review-worktree.zip`을 풀어 그 소스와 `scripts/restore_final_v140.py`를 쓴다. 이전 소스 아카이브나 다른 체크아웃을 쓰지 않는다.
+
+검증 수치(건수, cross-DB PASS, 벡터 다이제스트 등)는 [PR45_PACKAGE_VALIDATION_20261110.json](PR45_PACKAGE_VALIDATION_20261110.json)에 이미 기록돼 있으니 여기서 반복하지 않는다. `.env`·비밀값·모델·4B 벡터는 이 배포본에 포함되지 않는다.
