@@ -418,6 +418,19 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
           <span className="k">신청 기간</span>
           <span className="why">{period || '공식 원문에서 확인해 주세요.'}</span>
         </li>
+        {/* phone은 항상 깨끗한 전화번호 형식이 아닐 수 있다(예: "각 기관 120 센터"). 원문 그대로 보여 준다. */}
+        {p.contacts?.map((c, i) => {
+          const href = safeHttpUrl(c.source_url);
+          return (
+          <li key={`${c.agency}-${i}`}>
+            <span className="k">문의처</span>
+            <span className="why">
+              {c.agency}{c.phone ? ` · ${c.phone}` : ''}
+              {href && <> · <a href={href} target="_blank" rel="noreferrer">문의처 원문</a></>}
+            </span>
+          </li>
+          );
+        })}
       </ul>
       {unjudged ? (
         // 비교할 조건이 없다는 사유만 있으면 '추가 확인 필요' 대신 미판정 상태와 기준을 볼 곳만 안내한다.

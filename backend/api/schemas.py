@@ -41,11 +41,43 @@ class EligibilityOutput(BaseModel):
     reception_status: ReceptionStatus
 
 
+class Contact(BaseModel):
+    """정책 원문의 [문의처] 항목 하나(#77 계약, PolicyCheck.contacts 필드용)."""
+
+    agency: NonBlank
+    phone: str | None = None
+    document_id: str | None = None
+    chunk_id: str | None = None
+    source_url: str | None = None
+
+
+class ExclusionReason(BaseModel):
+    """NOT 제외 조건 하나(#77 계약 — 자리만 예약, #78이 채운다). ConditionResult와 같은 field/label 체계를 쓴다."""
+
+    field: NonBlank
+    label: NonBlank
+    reason: NonBlank
+
+
+class OfficialRequirement(BaseModel):
+    """정책이 요구하는 공식 기준 하나(#77 계약 — 자리만 예약, #76-A가 채운다). value는 원문 그대로이며 임의 환산 금지."""
+
+    label: NonBlank
+    value: NonBlank
+    document_id: str | None = None
+    chunk_id: str | None = None
+
+
 class PolicyCheck(EligibilityOutput):
     policy_name: str
     agency: str
     source_url: str
     official_apply_url: str | None
+    contacts: list[Contact] | None = None
+    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. 아래 둘은 자리만 예약한 것으로,
+    # Pipeline이 항상 None을 돌려준다 — 값을 채우는 구현은 각각 #78·#76-A에서 한다.
+    exclusion_reasons: list[ExclusionReason] | None = None
+    official_requirements: list[OfficialRequirement] | None = None
 
 
 class Citation(BaseModel):

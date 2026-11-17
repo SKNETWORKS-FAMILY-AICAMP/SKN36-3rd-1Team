@@ -1,7 +1,10 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.1 초안 · 2026-11-10 (v1.0 · 2026-11-07)  
+> **버전:** v1.4 · 2026-11-17 (v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)  
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.  
+> **v1.4 변경(2026-11-17 — #77 완료 기준 마무리, 강민지):** `exclusion_reasons`·`official_requirements` 선택 필드를 §8.3에 기록(자리만 예약, 둘 다 항상 `null`) — #77에서 세 기능(제외 정보·공식 요건·문의처)을 하나의 계약으로 같이 설계하기로 한 것 중 남아 있던 두 자리를 채웠다. 값을 채우는 구현은 각각 [#78](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/78)·[#76-A](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/76)가 한다. `backend/api/schemas.py`의 `ExclusionReason`·`OfficialRequirement`, `frontend/src/api/types.ts`의 같은 이름 타입이 이 정의를 따른다.  
+> **v1.3 변경(2026-11-17 — #77 추가 보완, 강민지):** `Contact`에 `document_id`·`chunk_id`·`source_url` 추가(§8.3) — 같은 정책의 **채택 청크 전체**(없으면 검색된 인용 가능한 미채택 후보)에서 문의처를 모으되, 어느 청크·출처에서 나왔는지 문의처 항목마다 추적할 수 있게 했다. 기관명·번호가 같은 항목은 첫 등장만 남기고, 같은 기관의 다른 번호는 유지한다.  
+> **v1.2 변경(2026-11-17 — #77·#76 contacts 작업 중 강민지가 코드와 문서를 함께 수정):** `policy_checks[].contacts` 선택 필드 추가(§8.3) — `backend/rag/pipeline.py`의 `contacts_from_text`가 정책 원문의 `[문의처]` 블록을 파싱한 결과. `frontend/src/api/types.ts`의 `PolicyCheck.contacts`, `TurnView.tsx`의 문의처 표시(#76)에서 사용.  
 > **v1.1 변경(팀장 결정 2026-11-10 반영, PR #23 리뷰에서 확인):** 신청 상태는 Checker가 `application_start`·`application_end`·`application_is_ongoing`으로 판정(§4.4) · 마감 정책 Context 후순위(§2, §6) · Generator `profile` 인자(§5.1) · 후속 질문 `question` 범위(§5.1, 소희 합의 2026-11-10) · Checker 사유 보존과 화면용 조건 요약(§4.3, §8.3) · UNKNOWN 그룹 전체 보류 유지 · 공통 파일 분담(§0).  
 > **저장 경로:** `docs/api/ask_contract.md`  
 > **기준 코드:** v1.0은 `dev` 커밋 `fe8637c`(PR #22), v1.1은 `dev` 커밋 `0686ecb`(PR #35 Checker·Generator, #37 데이터, #44 나이 조건 누락 안내), React `feature/15-react-demo-ui`의 `src/api/types.ts`, `client.ts`  
@@ -464,7 +467,13 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
         {"field": "region", "label": "거주 지역", "reason": "세부 지역 검증이 필요합니다.", "status": "needs_check"}
       ],
       "source_url": "https://example.org/notice",
-      "official_apply_url": null
+      "official_apply_url": null,
+      "contacts": [
+        {"agency": "가상 상담센터", "phone": "02-000-0000",
+         "document_id": "DOC_EXAMPLE", "chunk_id": "DOC_EXAMPLE_C01", "source_url": "https://example.org/notice"}
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
     }
   ],
   "follow_up_questions": [
@@ -486,6 +495,9 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `agency`: `graph.policy.agency` 또는 `graph.policy.organization` → `graph.organizations[]`의 실제 기관명 속성 → 없으면 `""`. **없는 기관명 생성 금지**.
 - `source_url`: 해당 정책의 인용 가능한 `evidence[].source_url` 우선 → 적합한 Graph 원문 URL → 없으면 `""`. 링크가 비어 있으면 프론트는 링크 버튼을 숨겨야 한다.
 - `official_apply_url`: 실제 `graph.policy.official_apply_url`에 **유효한 신청 URL**이 있을 때만. 공고 URL을 임의로 복사하지 않는다. 없으면 `null`.
+- `contacts`(선택, v1.2 추가·v1.3 필드 보완): 해당 정책의 **채택 청크 전체**(`contexts`에 선택된 이 정책의 모든 청크)에서 `[문의처]` 블록을 모으고, 그중 유효한 문의처가 하나도 없을 때만 같은 정책의 **인용 가능하지만 채택되지 않은 후보**로 보완한다. `{agency, phone, document_id, chunk_id, source_url}` 목록이며, 원문에 없으면 `null`(빈 배열 아님). 기관명·전화번호가 모두 같은 항목은 첫 등장 순서로 한 번만 남기고, 같은 기관이라도 전화번호가 다르면 둘 다 유지한다. `document_id`·`chunk_id`·`source_url`은 그 문의처가 실제로 나온 청크를 가리키며, `source_url`이 유효한 http(s) 주소가 아니면 `null`이다. `phone`은 원문 숫자·구분자 그대로이며, 번호 뒤에 설명이 더 있으면(예: "각 기관 120 센터") 맥락을 잃지 않도록 구절 전체를 담을 수 있다 — 항상 전화번호 단독 형식은 아니다. 프론트에서 그대로 노출할 때 이 점을 감안한다.
+- `exclusion_reasons`(선택, v1.4 자리 예약 — #78이 채운다): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고, `reason`은 "75세 이상이라 제외 대상입니다" 같은 구체적 문구다. #78 구현 전까지는 항상 `null`이며, Pipeline이 이 필드를 채우는 로직은 아직 없다.
+- `official_requirements`(선택, v1.4 자리 예약 — #76-A가 채운다): 정책이 요구하는 공식 자격 기준(값·단위·연도)과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다(#76 참고). `document_id`·`chunk_id`는 그 기준이 실제로 나온 근거를 가리킨다. #76-A 구현 전까지는 항상 `null`이며, Pipeline이 이 필드를 채우는 로직은 아직 없다.
 - `checked_at`: **공식 원문 재확인 시간**을 검증 가능할 때만 ISO 8601 문자열. 데이터 수집시각/오늘 날짜를 임의로 넣지 않는다. MVP 기본은 `null`.
 - `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`).
 - `is_sample`: 실제 검색·실제 LLM 응답은 `false`; **프론트 Mock 등 가상 응답만 `true`**.

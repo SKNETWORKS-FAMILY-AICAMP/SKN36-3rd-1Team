@@ -8,7 +8,7 @@ import re
 from httpx import NetworkError, TimeoutException
 from pydantic import ValidationError
 
-from backend.api.schemas import AskRequest, AskResponse, EligibilityOutput, GeneratorOutput
+from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from database.region_search import ALIASES, SIDOS
@@ -65,6 +65,92 @@ class AskError(RuntimeError):
     def __init__(self, code: str):
         super().__init__(code)
         self.code = code
+
+
+# [문의처] 블록은 다음 [...] 태그(보통 [출처 URL]) 전까지다. 블록이 없으면 None.
+_CONTACT_BLOCK = re.compile(r"\[문의처\]\s*(.*?)(?=\n\n\[|\Z)", re.DOTALL)
+# 기관명 뒤에서 전화번호를 분리하는 구분자. 출처마다 다르다: 정부24는 "/", 복지로는 "(" (닫는 괄호 없음).
+# 숫자에 바로 붙은 "("(예: "043-913-2352(시스템)")은 전화번호 뒤의 부가 설명이지 구분자가 아니므로 제외한다.
+_CONTACT_SEPARATOR = re.compile(r"(?<!\d)[/(]")
+# 구분자 뒤 텍스트에서 실제 전화번호만 뽑는다("국번없이 132", "각 기관 120 센터"처럼 설명이 섞여도 숫자만 가져온다).
+_PHONE_IN_TAIL = re.compile(r"\d[\d\-]{1,}\d|\d{2,4}")
+# 쉼표로 분리된 조각이 새 기관이 아니라 앞 전화번호의 내선/부가 번호인 경우
+# (예: "...(시스템), 2258(사업"의 "2258(사업"). 숫자로 시작해 바로 "("가 붙는 짧은 조각만 해당하되,
+# 그 조각 자체로 유효한 기관·전화번호 쌍을 만들 수 있으면(예: "120(위기상담센터) (1588-9191") 내선이 아니라
+# 새 기관이므로 오탐을 막기 위해 제외한다.
+_EXTENSION_CONTINUATION_PREFIX = re.compile(r"^\d{2,6}\(")
+
+
+def _split_agency_phone(fragment: str) -> tuple[str, str | None]:
+    """"기관명(/|() 전화번호" 한 건을 기관명과 전화번호로 나눈다. 중첩 괄호가 있으면 마지막 구분자를 쓴다."""
+    separators = list(_CONTACT_SEPARATOR.finditer(fragment))
+    if not separators:
+        return fragment, None
+    split_at = separators[-1].start()
+    agency = fragment[:split_at].strip()
+    tail = fragment[split_at + 1:].strip()
+    phone_match = _PHONE_IN_TAIL.search(tail) if tail else None
+    if not agency or phone_match is None:
+        return fragment.rstrip(")").strip(), None
+    trailing = tail[phone_match.end():].strip()
+    if trailing:
+        # 숫자 뒤에도 설명이 남아 있으면(예: "각 기관 120 센터", "1566-3232(단축번호 1번")
+        # 숫자만 뽑으면 맥락을 잃으므로 구절 전체를 보존한다.
+        return agency, tail
+    return agency, phone_match.group(0)
+
+
+def _is_extension_continuation(fragment: str) -> bool:
+    """내선/부가 번호 조각인지 판단한다. 자체적으로 유효한 기관·전화번호 쌍이 나오면 새 기관으로 본다."""
+    if not _EXTENSION_CONTINUATION_PREFIX.match(fragment):
+        return False
+    _, phone = _split_agency_phone(fragment)
+    return phone is None
+
+
+def parse_contacts(block: str | None) -> list[Contact]:
+    """[문의처] 블록 본문을 기관·전화번호 목록으로 나눈다.
+
+    원문은 출처마다 구분자가 다르고(/ 또는 열기만 하는 괄호), 여러 기관을 잇는 구분자도 다르다
+    (쉼표 또는 "||", 최대 17건까지 확인됨). 전화번호 없는 기관도 있다. 어느 쪽도 임의로 지어내지
+    않고 원문 글자 그대로의 기관명·전화번호만 담는다.
+    """
+    if not block or not block.strip():
+        return []
+    contacts: list[Contact] = []
+    delimiter = "||" if "||" in block else ","
+    for fragment in block.split(delimiter):
+        fragment = fragment.strip().rstrip(")").strip()
+        if not fragment:
+            continue
+        if contacts and _is_extension_continuation(fragment):
+            previous = contacts[-1]
+            previous.phone = f"{previous.phone}, {fragment}" if previous.phone else fragment
+            continue
+        agency, phone = _split_agency_phone(fragment)
+        if agency:
+            contacts.append(Contact(agency=agency, phone=phone))
+    return contacts
+
+
+def contacts_from_text(text: str) -> list[Contact]:
+    """근거 원문 전체에서 [문의처] 블록을 찾아 파싱한다. 블록이 없으면 빈 리스트."""
+    match = _CONTACT_BLOCK.search(text or "")
+    return parse_contacts(match.group(1)) if match else []
+
+
+def _collect_contacts(contexts) -> list[Contact]:
+    contacts = {}
+    for context in contexts:
+        for contact in contacts_from_text(context["text"]):
+            key = (contact.agency, contact.phone)
+            if key not in contacts:
+                contacts[key] = contact.model_copy(update={
+                    "document_id": context["document_id"],
+                    "chunk_id": context["chunk_id"],
+                    "source_url": context["url"] if valid_source_url(context["url"]) else None,
+                })
+    return list(contacts.values())
 
 
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
@@ -408,13 +494,21 @@ def run_ask_pipeline(
     named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
     contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
 
-    first_context = {}
+    contexts_by_policy = {}
     for context in contexts:
-        first_context.setdefault(context["policy_id"], context)
-    checks = [
-        _policy_check(by_id[pid], raw_checks[pid], profile, context)
-        for pid, context in first_context.items()
-    ]
+        contexts_by_policy.setdefault(context["policy_id"], []).append(context)
+    selected_ids = {context["chunk_id"] for context in contexts}
+    candidates_by_policy = {}
+    for context in ranked:
+        pid = context["policy_id"]
+        if pid in contexts_by_policy and context["chunk_id"] not in selected_ids:
+            candidates_by_policy.setdefault(pid, []).append(context)
+    checks = []
+    for pid, selected in contexts_by_policy.items():
+        check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
+        contacts = _collect_contacts(selected) or _collect_contacts(candidates_by_policy.get(pid, ()))
+        check["contacts"] = contacts or None
+        checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:
         raw = generate_fn(request.question, contexts, checks, history, profile=dict(profile))
