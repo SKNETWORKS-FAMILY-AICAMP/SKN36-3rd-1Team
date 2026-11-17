@@ -44,6 +44,30 @@ export interface ConditionResult {
   status: ConditionStatus;
 }
 
+/** 정책 원문의 [문의처] 항목 하나. phone은 항상 깨끗한 전화번호 형식이 아닐 수 있다(예: "각 기관 120 센터"). */
+export interface Contact {
+  agency: string;
+  phone: string | null;
+  document_id?: string | null;
+  chunk_id?: string | null;
+  source_url?: string | null;
+}
+
+/** NOT 제외 조건 중 사용자가 실제로 걸린 사유 하나. #77 계약에서 자리만 예약, 값은 #78이 채운다(아직 항상 null). */
+export interface ExclusionReason {
+  field: string;
+  label: string;
+  reason: string;
+}
+
+/** 정책이 요구하는 공식 자격 기준 하나(값·단위·연도, "내 조건 판정"과는 분리). #77 계약에서 자리만 예약, 값은 #76-A가 채운다(아직 항상 null). */
+export interface OfficialRequirement {
+  label: string;
+  value: string;
+  document_id?: string | null;
+  chunk_id?: string | null;
+}
+
 export interface PolicyCheck {
   policy_id: string;
   policy_name: string;
@@ -53,6 +77,12 @@ export interface PolicyCheck {
   source_url: string;
   /** 신청 주소가 확인된 경우에만 값이 있다(null이면 '신청하기'를 숨긴다). */
   official_apply_url: string | null;
+  /** 원문에 [문의처]가 없으면 null(빈 배열이 아니다). */
+  contacts?: Contact[] | null;
+  /** #78 구현 전까지는 항상 null(#77 계약 자리 예약). */
+  exclusion_reasons?: ExclusionReason[] | null;
+  /** #76-A 구현 전까지는 항상 null(#77 계약 자리 예약). */
+  official_requirements?: OfficialRequirement[] | null;
 }
 
 export interface Citation {

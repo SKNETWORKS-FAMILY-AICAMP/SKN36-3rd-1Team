@@ -10,7 +10,7 @@ from unittest.mock import Mock
 from pydantic import ValidationError
 
 from backend.api.schemas import AskRequest, UserProfile
-from backend.rag.pipeline import AskError, _status_correction, run_ask_pipeline
+from backend.rag.pipeline import AskError, _status_correction, contacts_from_text, parse_contacts, run_ask_pipeline
 from backend.llm.generator import LLMOutputError, LLMTimeoutError, LLMUnavailableError
 
 
@@ -149,6 +149,177 @@ class PipelineTests(unittest.TestCase):
                 self.assertEqual([c.status for c in response.policy_checks[0].conditions], expected)
                 self.assertEqual(response.notice.kind, "warn")
                 self.assertEqual([c["status"] for c in self.generate.call_args.args[2][0]["conditions"]], expected)
+
+    def test_contacts_reach_response_through_full_pipeline(self):
+        # 실제 Qdrant/Neo4j/LLM 서비스 없이도, 검색·조건판정·생성 함수를 대역하고 실제
+        # contacts_from_text·_policy_check를 그대로 거쳐 AskResponse.policy_checks[].contacts가
+        # 채워지는지 확인한다(POL_BOK_004 DOC_BOK_004_C02 원문 그대로, 가상 조건판정 결과와 조합).
+        real_contact_text = (
+            "...[지원대상]\n만 19~34세\n\n"
+            "[문의처]\n보건복지상담센터 (129, 자산형성지원 콜센터 (1522-3690\n\n"
+            "[출처 URL] https://www.bokjiro.go.kr/example"
+        )
+        self.search.return_value = {"policies": [policy(
+            evidence=[{"rank": 1, "chunk_id": "DOC_BOK_004_C02", "document_id": "DOC_BOK_004",
+                       "text": real_contact_text, "source_url": "https://www.bokjiro.go.kr/example"}],
+        )]}
+        response = self.ask()
+        self.assertEqual(
+            [(c.agency, c.phone) for c in response.policy_checks[0].contacts],
+            [("보건복지상담센터", "129"), ("자산형성지원 콜센터", "1522-3690")],
+        )
+
+    def test_contacts_absent_when_no_block_in_context_text(self):
+        # [문의처] 블록이 없는 원문이면 contacts는 None이지 빈 리스트가 아니다.
+        response = self.ask()
+        self.assertIsNone(response.policy_checks[0].contacts)
+
+    def test_contacts_carry_document_chunk_and_source_url(self):
+        # 각 문의처는 그 문의처가 실제로 나온 청크의 document_id·chunk_id·source_url에 연결된다.
+        text = "[문의처]\n기관A (02-111-1111\n\n[출처 URL] https://example.org/a"
+        self.search.return_value = {"policies": [policy(
+            evidence=[{"rank": 1, "chunk_id": "CHUNK_A", "document_id": "DOC_A",
+                       "text": text, "source_url": "https://example.org/a"}],
+        )]}
+        response = self.ask()
+        contact = response.policy_checks[0].contacts[0]
+        self.assertEqual((contact.document_id, contact.chunk_id, contact.source_url),
+                          ("DOC_A", "CHUNK_A", "https://example.org/a"))
+
+    def test_contacts_aggregated_from_all_selected_chunks_of_same_policy(self):
+        # 정책 하나가 채택 청크를 여러 개 가지면(첫 청크엔 문의처 없음), 그 전부에서 문의처를 모은다.
+        no_contact_text = "...[지원대상]\n만 19세 이상"
+        contact_text = "[문의처]\n기관B (02-222-2222\n\n[출처 URL] https://example.org/c2"
+        self.search.return_value = {"policies": [policy(evidence=[
+            {"rank": 1, "chunk_id": "C1", "document_id": "D1", "text": no_contact_text,
+             "source_url": "https://example.org/c1"},
+            {"rank": 2, "chunk_id": "C2", "document_id": "D1", "text": contact_text,
+             "source_url": "https://example.org/c2"},
+        ])]}
+        response = self.ask()
+        self.assertEqual(
+            [(c.agency, c.phone, c.chunk_id) for c in response.policy_checks[0].contacts],
+            [("기관B", "02-222-2222", "C2")],
+        )
+
+    def test_contacts_fall_back_to_unselected_citable_candidate(self):
+        # 채택된 청크엔 문의처가 없고, 같은 정책의 더 낮은 순위라 채택되지 못한(그러나 인용 가능한)
+        # 청크에 문의처가 있으면 그걸로 보완한다. 단, 그 청크는 답변의 citations에 들어가지 않으므로
+        # chunk_id/document_id/source_url은 비워서 화면이 인용되지 않은 출처를 링크하지 않게 한다.
+        no_contact_text = "...[지원대상]\n만 19세 이상"
+        contact_text = "[문의처]\n기관C (02-333-3333\n\n[출처 URL] https://example.org/t2"
+        target = policy("T", 1, evidence=[
+            {"rank": 1, "chunk_id": "T1", "document_id": "DT", "text": no_contact_text,
+             "source_url": "https://example.org/t1"},
+            {"rank": 10, "chunk_id": "T2", "document_id": "DT", "text": contact_text,
+             "source_url": "https://example.org/t2"},
+        ])
+        # 정책당 1청크씩인 다른 정책 4개로 상위 5자리를 채워 T2를 최종 채택(top-5)에서 밀어낸다.
+        fillers = [policy(str(i), i + 1) for i in range(1, 5)]
+        self.search.return_value = {"policies": [target, *fillers]}
+        response = self.ask()
+        target_check = next(c for c in response.policy_checks if c.policy_id == "T")
+        self.assertEqual(
+            [(c.agency, c.phone, c.chunk_id, c.document_id, c.source_url) for c in target_check.contacts],
+            [("기관C", "02-333-3333", None, None, None)],
+        )
+
+    def test_regenerated_doc_gov_048_chunks_reach_api_response_intact(self):
+        # 재생성 전: 750자 고정창이 [문의처] 32건 목록 중간을 잘라 마지막 번호가 끊겼었다(#77).
+        # 실제 raw JSON을 scripts/build_clean_dataset.py의 iter_document_chunks로 다시 쪼갠 결과를
+        # Qdrant 없이 검색 픽스처로 주입해서, /api/ask 응답까지 32건이 안 잘리고 도착하는지 확인한다.
+        import json
+        from pathlib import Path
+
+        from collectors.preprocessing.normalize import format_gov24_item_text
+        from scripts.build_clean_dataset import iter_document_chunks
+
+        raw_path = (Path(__file__).resolve().parents[2]
+                    / "data" / "raw" / "gov24" / "items" / "449000000108.json")
+        with open(raw_path, encoding="utf-8") as f:
+            item = json.load(f)
+        pieces = [p for p in iter_document_chunks(format_gov24_item_text(item), 750, 80) if len(p) >= 50]
+        self.assertEqual(len(pieces), 3)  # 재생성 전에는 1개(C01)뿐이었다
+        evidence = [
+            {"rank": i + 1, "chunk_id": f"DOC_GOV_048_C{i + 1:02d}", "document_id": "DOC_GOV_048",
+             "text": piece, "source_url": "https://example.org/gov048"}
+            for i, piece in enumerate(pieces)
+        ]
+        self.search.return_value = {"policies": [policy("POL_GOV_048", evidence=evidence)]}
+        response = self.ask()
+        contacts = response.policy_checks[0].contacts
+        self.assertEqual(len(contacts), 32)
+        self.assertEqual(contacts[0].phone, "041-521-5374")
+        self.assertEqual(contacts[-1].phone, "041-521-6703")  # 재생성 전에는 이 번호까지 못 왔다
+
+    def test_contacts_not_mixed_between_different_policies(self):
+        # 서로 다른 정책의 문의처가 섞이지 않고 각자의 정책에만 붙는다.
+        text_a = "[문의처]\n기관A (02-111-1111\n\n[출처 URL] https://example.org/a"
+        text_b = "[문의처]\n기관B (02-222-2222\n\n[출처 URL] https://example.org/b"
+        self.search.return_value = {"policies": [
+            policy("A", 1, evidence=[{"rank": 1, "chunk_id": "CA", "document_id": "DA",
+                                       "text": text_a, "source_url": "https://example.org/a"}]),
+            policy("B", 2, evidence=[{"rank": 2, "chunk_id": "CB", "document_id": "DB",
+                                       "text": text_b, "source_url": "https://example.org/b"}]),
+        ]}
+        response = self.ask()
+        by_pid = {c.policy_id: c for c in response.policy_checks}
+        self.assertEqual([(c.agency, c.phone) for c in by_pid["A"].contacts], [("기관A", "02-111-1111")])
+        self.assertEqual([(c.agency, c.phone) for c in by_pid["B"].contacts], [("기관B", "02-222-2222")])
+
+    def test_contacts_dedup_same_agency_and_phone_but_keeps_different_phone(self):
+        # 기관명·번호가 같은 항목은 첫 등장만 남기고, 같은 기관의 다른 번호는 둘 다 남긴다.
+        chunk1 = "[문의처]\n기관D (02-444-4444\n\n[출처 URL] https://example.org/d1"
+        chunk2 = "[문의처]\n기관D (02-444-4444, 기관D (02-555-5555\n\n[출처 URL] https://example.org/d2"
+        self.search.return_value = {"policies": [policy(evidence=[
+            {"rank": 1, "chunk_id": "D1", "document_id": "D", "text": chunk1,
+             "source_url": "https://example.org/d1"},
+            {"rank": 2, "chunk_id": "D2", "document_id": "D", "text": chunk2,
+             "source_url": "https://example.org/d2"},
+        ])]}
+        response = self.ask()
+        self.assertEqual(
+            [(c.agency, c.phone, c.chunk_id) for c in response.policy_checks[0].contacts],
+            [("기관D", "02-444-4444", "D1"), ("기관D", "02-555-5555", "D2")],
+        )
+
+    def test_policy_check_validates_without_contacts_field_for_old_responses(self):
+        # contacts·exclusion_reasons·official_requirements가 아예 없는 이전 응답 모양도
+        # 그대로 검증된다(하위 호환, #77 계약에서 세 필드 모두 선택 필드로 합의했다).
+        from backend.api.schemas import PolicyCheck
+
+        old_shape = {
+            "policy_id": "P", "policy_name": "가상 정책", "agency": "기관", "source_url": "https://example.org",
+            "official_apply_url": None, "reception_status": "unknown",
+            "conditions": [{"field": "age", "label": "나이", "reason": "확인 필요", "status": "needs_check"}],
+        }
+        check = PolicyCheck.model_validate(old_shape)
+        self.assertIsNone(check.contacts)
+        self.assertIsNone(check.exclusion_reasons)
+        self.assertIsNone(check.official_requirements)
+
+    def test_exclusion_reasons_and_official_requirements_accept_explicit_values(self):
+        # #78·#76-A가 실제로 값을 채우게 될 모양도 스키마가 그대로 받아들이는지 확인한다
+        # (자리만 예약했을 뿐 타입 자체는 이미 쓸 수 있어야 한다).
+        from backend.api.schemas import PolicyCheck
+
+        shape = {
+            "policy_id": "P", "policy_name": "가상 정책", "agency": "기관", "source_url": "https://example.org",
+            "official_apply_url": None, "reception_status": "unknown",
+            "conditions": [{"field": "age", "label": "나이", "reason": "확인 필요", "status": "needs_check"}],
+            "exclusion_reasons": [{"field": "age", "label": "나이", "reason": "75세 이상이라 제외 대상입니다."}],
+            "official_requirements": [{"label": "가구원 수별 소득인정액", "value": "1인 가구 기준 2,392,013원",
+                                        "document_id": "DOC_X", "chunk_id": "DOC_X_C01"}],
+        }
+        check = PolicyCheck.model_validate(shape)
+        self.assertEqual(check.exclusion_reasons[0].reason, "75세 이상이라 제외 대상입니다.")
+        self.assertEqual(check.official_requirements[0].value, "1인 가구 기준 2,392,013원")
+
+    def test_pipeline_never_fills_exclusion_reasons_or_official_requirements_yet(self):
+        # #78·#76-A 구현 전까지는 Pipeline이 이 두 필드를 채우는 로직이 없어야 한다(#77 범위 밖).
+        response = self.ask()
+        self.assertIsNone(response.policy_checks[0].exclusion_reasons)
+        self.assertIsNone(response.policy_checks[0].official_requirements)
 
     def test_citations_use_body_and_only_selected_policies_are_checked(self):
         self.search.return_value = {"policies": [policy(str(i), i) for i in range(1, 7)]}
@@ -679,6 +850,157 @@ class PipelineTests(unittest.TestCase):
                 self.generate.side_effect = failure
                 with self.assertRaisesRegex(AskError, code):
                     self.ask()
+
+
+class ContactParsingTests(unittest.TestCase):
+    """data/releases/v1.4.0-candidate/qdrant/payload_chunks.jsonl의 실제 [문의처] 원문 샘플 기준."""
+
+    def test_slash_separator(self):
+        # DOC_MOLIT_002_C05
+        contacts = parse_contacts("국토교통부/044-201-3640")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("국토교통부", "044-201-3640")])
+
+    def test_unclosed_paren_separator(self):
+        # DOC_MOLIT_001_C04
+        contacts = parse_contacts("국토교통부 (1599-0001")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("국토교통부", "1599-0001")])
+
+    def test_agency_only_no_phone(self):
+        # DOC_MOEL_001_C02
+        contacts = parse_contacts("고용노동부")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("고용노동부", None)])
+
+    def test_multiple_contacts_comma_separated(self):
+        # DOC_BOK_004_C02
+        contacts = parse_contacts("보건복지상담센터 (129, 자산형성지원 콜센터 (1522-3690")
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("보건복지상담센터", "129"), ("자산형성지원 콜센터", "1522-3690")],
+        )
+
+    def test_mixed_with_and_without_phone(self):
+        # DOC_BOK_010_C03 (6건, 그중 하나는 전화번호 없음)
+        raw = (
+            "현대카드 (1577-6000, 거주지 관할 읍면동 주민센터, 사회보장정보원 (1566-3232, "
+            "BC카드 (1899-4651, KB국민카드 (1599-7900, 롯데카드 (1899-"
+        )
+        contacts = parse_contacts(raw)
+        self.assertEqual(len(contacts), 6)
+        self.assertEqual((contacts[0].agency, contacts[0].phone), ("현대카드", "1577-6000"))
+        self.assertEqual((contacts[1].agency, contacts[1].phone), ("거주지 관할 읍면동 주민센터", None))
+        self.assertEqual((contacts[2].agency, contacts[2].phone), ("사회보장정보원", "1566-3232"))
+
+    def test_nested_parentheses_uses_last_separator_for_phone(self):
+        # DOC_BOK_013_C03 — "(0079에듀콜)"은 기관 별칭이지 전화번호가 아니다.
+        contacts = parse_contacts("한국교육학술정보원 (0079에듀콜) (1544-0079, 교육부 (02-6222-6060")
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("한국교육학술정보원 (0079에듀콜)", "1544-0079"), ("교육부", "02-6222-6060")],
+        )
+
+    def test_descriptive_text_before_phone_digits(self):
+        # DOC_BOK_017_C02 — "국번없이 132"처럼 설명이 섞여도 숫자만 전화번호로 뽑는다.
+        contacts = parse_contacts("대한법률구조공단 (국번없이 132, 한국가정법률상담소 (1644-7077")
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("대한법률구조공단", "132"), ("한국가정법률상담소", "1644-7077")],
+        )
+
+    def test_empty_block_returns_empty_list(self):
+        self.assertEqual(parse_contacts(None), [])
+        self.assertEqual(parse_contacts("   "), [])
+
+    def test_double_pipe_separator_many_contacts(self):
+        # DOC_GOV_002_C01 — 정부24 계열은 "/"로 기관·번호를 나누고 "||"로 여러 기관을 잇는다.
+        contacts = parse_contacts(
+            "해당지방자치단체 수산 총괄 부서/1899-9597||귀어귀촌 종합센터/1899-9597"
+        )
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("해당지방자치단체 수산 총괄 부서", "1899-9597"), ("귀어귀촌 종합센터", "1899-9597")],
+        )
+
+    def test_double_pipe_with_parenthetical_agency_name(self):
+        # DOC_GOV_048_C01 — "/" 구분자와 기관명 안의 "(주민복지팀)" 설명이 섞여도 마지막 구분자로 나눈다.
+        contacts = parse_contacts(
+            "여성가족과/041-521-5374||목천읍 (주민복지팀)/041-521-4662"
+        )
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("여성가족과", "041-521-5374"), ("목천읍 (주민복지팀)", "041-521-4662")],
+        )
+
+    def test_ambiguous_number_keeps_surrounding_context(self):
+        # DOC_BOK_023_C02 — "각 기관 120 센터"는 숫자만 뽑으면 "각 기관"·"센터"라는 맥락을 잃는다.
+        contacts = parse_contacts("각 지방자치단체 (각 기관 120 센터, 여성긴급전화 (1366")
+        self.assertEqual(
+            [(c.agency, c.phone) for c in contacts],
+            [("각 지방자치단체", "각 기관 120 센터"), ("여성긴급전화", "1366")],
+        )
+
+    def test_shortcut_instruction_after_phone_kept_as_context(self):
+        # DOC_BOK_031_C03 — "1566-3232(단축번호 1번"처럼 번호 뒤 안내도 맥락이라 통째로 살린다.
+        contacts = parse_contacts("아이사랑 헬프데스크 (1566-3232(단축번호 1번")
+        self.assertEqual(contacts[0].agency, "아이사랑 헬프데스크")
+        self.assertEqual(contacts[0].phone, "1566-3232(단축번호 1번")
+
+    def test_extension_continuation_merges_into_previous_phone(self):
+        # DOC_BOK_050_C02 — 쉼표로 이어진 "2258(사업"은 새 기관이 아니라 앞 번호의 내선 설명이다.
+        contacts = parse_contacts(
+            "예방접종도우미 누리집 (043-913-2352(시스템), 2258(사업"
+        )
+        self.assertEqual(len(contacts), 1)
+        self.assertEqual(contacts[0].agency, "예방접종도우미 누리집")
+        self.assertIn("043-913-2352", contacts[0].phone)
+        self.assertIn("2258(사업", contacts[0].phone)
+
+    def test_agency_with_no_separator_and_no_phone(self):
+        # DOC_BOK_082_C01 — 구분자도 전화번호도 없이 문의 안내 문구만 있는 경우.
+        contacts = parse_contacts("각 시군구 담당과로 문의")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("각 시군구 담당과로 문의", None)])
+
+    def test_digit_prefixed_agency_is_not_merged_as_extension(self):
+        # 전체 데이터에는 실제로 없지만(가상 예시, sample_only), 숫자로 시작하는 기관명이
+        # 그 자체로 유효한 전화번호를 가지면 내선번호로 잘못 합쳐지지 않는지 확인하는 오탐 방지 테스트.
+        contacts = parse_contacts("보건복지상담센터 (129, 120(위기상담센터) (1588-9191")
+        self.assertEqual(len(contacts), 2)
+        self.assertEqual(contacts[1].agency, "120(위기상담센터)")
+        self.assertEqual(contacts[1].phone, "1588-9191")
+
+    def test_plain_digit_phone_without_dashes(self):
+        # DOC_GOV_027_C02 — 하이픈 없이 번호가 이어진 경우도 그대로 보존한다.
+        contacts = parse_contacts("가족복지과/0327607917")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("가족복지과", "0327607917")])
+
+    def test_agency_name_ending_in_digit_still_splits_phone(self):
+        # 기관명이 숫자로 끝나면(예: "학교폭력117") 구분자 "(" 바로 앞이 숫자라서
+        # "전화번호 뒤 부가 설명" 걸러내기 규칙에 걸려 통째로 기관명 취급되던 버그.
+        contacts = parse_contacts("학교폭력117(1588-7179")
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("학교폭력117", "1588-7179")])
+
+    def test_digit_suffix_annotation_after_phone_still_has_no_separator(self):
+        # 위 수정이 원래 걸러내려던 경우(전화번호 뒤 설명)를 다시 구분자로 착각하지 않는지 확인.
+        contacts = parse_contacts("043-913-2352(시스템")
+        self.assertEqual(len(contacts), 1)
+        self.assertIsNone(contacts[0].phone)
+
+    def test_contacts_from_text_extracts_block_before_next_tag(self):
+        text = (
+            "...지원 근거\n\n[문의처]\n보건복지상담센터 (129\n\n"
+            "[출처 URL] https://www.bokjiro.go.kr/example"
+        )
+        contacts = contacts_from_text(text)
+        self.assertEqual([(c.agency, c.phone) for c in contacts], [("보건복지상담센터", "129")])
+
+    def test_contacts_from_text_without_block_is_empty(self):
+        self.assertEqual(contacts_from_text("원문에 문의처 항목이 없는 경우"), [])
+
+    def test_contacts_from_text_ignores_mid_line_tag(self):
+        # [문의처]가 줄 시작이 아니면(예: 설명 문장 중간) 실제 구조화 태그가 아니다.
+        # scripts/build_clean_dataset.py의 iter_document_chunks도 줄 시작만 보호 대상으로 보므로
+        # 둘의 "블록" 정의를 맞춘다.
+        text = "자세한 사항은 [문의처] 참고 바랍니다.\n\n[출처 URL] https://example.org"
+        self.assertEqual(contacts_from_text(text), [])
 
 
 class RequestSchemaTests(unittest.TestCase):

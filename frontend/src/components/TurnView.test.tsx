@@ -57,6 +57,54 @@ it('keeps reception and eligibility separate for each policy', () => {
   expect(html).not.toMatch(/needs_check|reception_status|내부 구조|조건상 적합/);
 });
 
+it('shows each policy its own contacts and hides the section when there are none', () => {
+  const response: AskResponse = {
+    status: 'answered', answer: '본문', citations: [], follow_up_questions: [], checked_at: null, is_sample: false,
+    policy_checks: [
+      { policy_id: 'A', policy_name: '정책 A', agency: '기관 A', reception_status: 'open',
+        source_url: 'https://example.org/a', official_apply_url: null,
+        conditions: [{ field: 'age', label: '나이', status: 'eligible', reason: '충족' }],
+        contacts: [{ agency: '가상 상담센터', phone: '02-000-0000' }, { agency: '가상 콜센터', phone: null }] },
+      { policy_id: 'B', policy_name: '정책 B', agency: '기관 B', reception_status: 'open',
+        source_url: 'https://example.org/b', official_apply_url: null,
+        conditions: [{ field: 'age', label: '나이', status: 'eligible', reason: '충족' }],
+        contacts: null },
+    ],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+  const [cardA, cardB] = html.split('정책 B');
+  expect(cardA).toContain('가상 상담센터 · 02-000-0000');
+  expect(cardA).toContain('가상 콜센터');
+  // 전화번호가 없는 기관은 번호 없이 기관명만 보여준다(가짜 구분자 없이).
+  expect(cardA).not.toContain('가상 콜센터 ·');
+  expect(cardB).not.toContain('가상 상담센터');
+  expect(cardB).not.toContain('가상 콜센터');
+  expect(cardB).not.toContain('문의처');
+});
+
+it('links each contact to its own source_url when present and safe', () => {
+  const response: AskResponse = {
+    status: 'answered', answer: '본문', citations: [], follow_up_questions: [], checked_at: null, is_sample: false,
+    policy_checks: [
+      { policy_id: 'A', policy_name: '정책 A', agency: '기관 A', reception_status: 'open',
+        source_url: 'https://example.org/a', official_apply_url: null,
+        conditions: [{ field: 'age', label: '나이', status: 'eligible', reason: '충족' }],
+        contacts: [
+          { agency: '가상 상담센터', phone: '02-000-0000', document_id: 'D1', chunk_id: 'C1', source_url: 'https://example.org/contact' },
+          { agency: '가상 콜센터', phone: null, document_id: null, chunk_id: null, source_url: null },
+        ] },
+    ],
+  };
+  const noop = () => {};
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
+  expect(html).toContain('href="https://example.org/contact"');
+  // source_url이 없는 문의처는 링크 없이 기관명·번호만 보여준다.
+  expect(html).not.toContain('가상 콜센터 </span><a');
+});
+
 it('shows retry in demo mode without instructions for triggering an error', () => {
   const noop = () => {};
   const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'error' }}

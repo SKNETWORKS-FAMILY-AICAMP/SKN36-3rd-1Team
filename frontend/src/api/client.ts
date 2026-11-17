@@ -62,7 +62,9 @@ export function isAskResponse(value: unknown): value is AskResponse {
         || item.reception_status === 'closed' || item.reception_status === 'unknown')
       && Array.isArray(item.conditions) && item.conditions.every((condition: unknown) =>
         isObject(condition) && isString(condition.field) && isString(condition.label) && isString(condition.reason)
-        && (condition.status === 'eligible' || condition.status === 'ineligible' || condition.status === 'needs_check')))
+        && (condition.status === 'eligible' || condition.status === 'ineligible' || condition.status === 'needs_check'))
+      && (item.contacts == null || (Array.isArray(item.contacts) && item.contacts.every((contact: unknown) =>
+        isObject(contact) && isString(contact.agency) && isNullableString(contact.phone)))))
     && Array.isArray(value.follow_up_questions) && value.follow_up_questions.every((item: unknown) =>
       isObject(item) && isString(item.text) && (item.kind === 'question' ? item.field == null || isString(item.field)
         : item.kind === 'ask_info' && (item.field === 'age' || item.field === 'region' || item.field === 'income')))

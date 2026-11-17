@@ -94,6 +94,42 @@ REGION_CODE_MAP = {
 }
 
 
+def iter_document_chunks(text: str, size: int, overlap: int):
+    """750자 고정창 청킹과 같은 자리를 자르되, [문의처] 블록 중간은 피해서 자른다(#77).
+
+    원문의 [문의처]...다음 빈 줄+[ 전까지를 통째로 보존해야 기관·전화번호가 잘리지 않는다.
+    창 끝이 그 블록 안에 걸치면, 오버랩을 뺀 자리가 블록 시작보다 뒤면 블록 시작에서 끊고,
+    아니면(블록이 막 시작한 직후라 뒤로 물릴 자리가 없으면) 블록 끝까지 창을 늘린다 — 단, 그렇게
+    늘렸을 때 청크가 지나치게 커지면(_MAX_CHUNK_SIZE 초과) 보존을 포기하고 창 그대로 자른다.
+    """
+    contacts = [
+        (match.start(), match.end())
+        for match in re.finditer(r"(?ms)^\[문의처\]\s*.*?(?=\n\n\[|\Z)", text)
+    ]
+    max_chunk_size = size + overlap * 2
+    start = 0
+    while start < len(text):
+        end = min(start + size, len(text))
+        for left, right in contacts:
+            if left < end < right:
+                if left - start > overlap:
+                    end = left
+                elif right - start <= max_chunk_size:
+                    end = right
+                break
+        yield text[start:end].strip()
+        if end == len(text):
+            break
+        next_start = max(start + 1, end - overlap)
+        for left, right in contacts:
+            # 지금 끝낸 블록(right == end) 안으로 오버랩이 들어가는 건 정상적인 겹침이다.
+            # 아직 끝나지 않은(앞으로 올) 블록 중간에서 시작하는 것만 막는다.
+            if left < next_start < right and right != end:
+                next_start = right
+                break
+        start = next_start
+
+
 def infer_region_from_text(org_name: str, title: str = "") -> List[str]:
     combined = f"{org_name} {title}"
     found: List[str] = []
@@ -1594,6 +1630,8 @@ def main() -> None:
             )
 
     # 4.2 HTML 및 API 문서 의미 단위 청킹 (600~900자 기준, 80자 오버랩)
+    # [문의처] 블록(기관·전화번호 목록)은 750자 창을 넘어도 중간에서 자르지 않는다(#77).
+    # 자르면 번호가 잘려서 PolicyCheck.contacts가 반쪽짜리 번호를 돌려주게 된다.
     pdf_doc_ids = {"DOC_LH_001", "DOC_LH_002", "DOC_NHUF_002"}
     for doc in documents:
         if doc["document_id"] in pdf_doc_ids:
@@ -1604,9 +1642,7 @@ def main() -> None:
         step = 750
         overlap = 80
         c_num = 0
-        start = 0
-        while start < len(full_txt):
-            piece = full_txt[start : start + step].strip()
+        for piece in iter_document_chunks(full_txt, step, overlap):
             if len(piece) >= 50:
                 c_num += 1
                 append_chunk(
@@ -1616,9 +1652,6 @@ def main() -> None:
                     section_title=f"{doc['title']} (섹션 {c_num})",
                     chunk_text=piece,
                 )
-            if start + step >= len(full_txt):
-                break
-            start += step - overlap
 
     # =========================================================================
     # [Step 5] Neo4j 적재용 Graph 관계 생성 (relationships.jsonl / graph_edges.jsonl)

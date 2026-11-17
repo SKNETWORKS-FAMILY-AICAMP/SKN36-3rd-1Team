@@ -73,6 +73,11 @@ function samplePolicy(p: UserProfile): PolicyCheck {
     policy_id: 'POL_SAMPLE_A', policy_name: '예시 정책 A · 청년 구직 지원', agency: '시연용 가상 데이터 · 실제 정책 아님',
     reception_status: 'open', conditions, source_url: SRC.youth.url,
     official_apply_url: '#sample-apply', // 시연용. 화면에서 실제로 이동하지 않는다
+    // 시연용 가상 문의처. 실제 기관·번호가 아니며, phone이 항상 깨끗한 형식은 아님을 보여 준다(#76).
+    contacts: [
+      { agency: '시연용 가상 상담센터', phone: '000-0000-0000' },
+      { agency: '시연용 가상 콜센터', phone: null },
+    ],
   };
 }
 
