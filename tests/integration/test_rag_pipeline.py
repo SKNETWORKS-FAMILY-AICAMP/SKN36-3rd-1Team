@@ -169,6 +169,8 @@ class PipelineTests(unittest.TestCase):
             answer("현재 **closed**예요. [1]"),
             answer("reception_status를 확인하세요. [1]"),
             answer(follow_up_questions=[{"kind": "question", "text": "접수 상태가 open인가요?"}]),
+            # "접수 상태" 같은 문맥 단어가 앞에 없어도 코드값이 그대로 노출되면 잡아야 한다.
+            answer("모집 상태는 open으로 표시돼요. [1]"),
         ):
             with self.subTest(raw=raw):
                 self.generate.reset_mock()
@@ -176,6 +178,12 @@ class PipelineTests(unittest.TestCase):
                 with self.assertRaisesRegex(AskError, "LLM_OUTPUT_INVALID"):
                     self.ask()
                 self.generate.assert_called_once()
+
+    def test_english_proper_nouns_are_not_mistaken_for_status_leaks(self):
+        # "Open Innovation"처럼 대문자로 시작하는 영문 고유명사는 내부 코드값(소문자) 유출이 아니다.
+        self.generate.return_value = answer("접수 상태는 Open Innovation 공고에서 확인해 주세요. [1]")
+        response = self.ask()
+        self.assertIn("Open Innovation", response.answer)
 
     def test_redundant_status_tags_preserve_answer_and_citation(self):
         self.generate.return_value = answer(

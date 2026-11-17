@@ -245,13 +245,14 @@ def _clause_correction(
 
 
 _INTERNAL_STATUS = re.compile(
-    r"(?<![a-z0-9_/.-])(?:needs_check|reception_status)(?![a-z0-9_/-])"
-    r"|(?:접수\s*(?:상태|여부))[^.!?\n]{0,60}?(?<![a-z0-9_./-])"
-    r"(?:open|unknown|closed|before)(?![a-z0-9_/-])"
+    r"(?<![A-Za-z0-9_/.-])(?:needs_check|reception_status)(?![A-Za-z0-9_/-])"
+    r"|(?<![A-Za-z0-9_/.-])(?:open|unknown|closed|before)(?![A-Za-z0-9_/-])"
     r"|\(\s*(?:open|unknown|closed|before)\s*\)"
-    r"|\*\*\s*(?:open|unknown|closed|before)\s*\*\*",
-    re.IGNORECASE,
+    r"|\*\*\s*(?:open|unknown|closed|before)\s*\*\*"
 )
+# 대소문자를 구분한다(re.IGNORECASE 미사용): 내부 코드값은 항상 소문자로 저장되므로
+# (OPEN_CONFIRMED 등), "Open Innovation"처럼 영문 고유명사가 대문자로 시작하는 경우는
+# 걸러지지 않는다. "접수 상태" 같은 문맥 단어 없이도 소문자 토큰 자체를 바로 잡아낸다.
 
 _REDUNDANT_STATUS_TAG = re.compile(
     r"(마감)\s*\(\s*closed\s*\)|(보류)\s*\(\s*needs_check\s*\)",
