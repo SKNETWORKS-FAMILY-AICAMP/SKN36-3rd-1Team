@@ -18,6 +18,8 @@ import warnings
 from pathlib import Path
 from unittest import mock
 
+import requests
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -941,6 +943,186 @@ class TestDataQualityWarnings(unittest.TestCase):
         self.assertIn("unknown", combined["notes"])
         self.assertIn("score", combined["notes"])
         json.dumps(combined, ensure_ascii=False)      # 직렬화 가능
+
+
+class CountingClient:
+    """메모리 Qdrant client를 감싸 get_collection 호출 수를 센다 (sample_only)."""
+
+    def __init__(self, inner):
+        self.inner, self.get_collection_calls = inner, 0
+
+    def get_collection(self, name):
+        self.get_collection_calls += 1
+        return self.inner.get_collection(name)
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+
+@unittest.skipUnless(HAS_QDRANT, "qdrant-client가 필요합니다.")
+class TestSessionVectorSizeCache(unittest.TestCase):
+    """HybridSearchSession의 컬렉션 벡터 크기 캐시(30초)와 재조회 규칙 (PR #71)."""
+
+    def setUp(self):
+        self.memory = make_memory_client()
+        self.client = CountingClient(self.memory)
+        self.embed_calls = 0
+        self.clock = [1000.0]
+
+        def embedder(texts):
+            self.embed_calls += 1
+            return fake_embedder(texts)
+
+        self.session = hs.HybridSearchSession(client=self.client, runner=FakeHybridRunner(), embedder=embedder,
+                                              collection=COLLECTION)
+        fake_time = mock.Mock(monotonic=lambda: self.clock[0], perf_counter=hs.time.perf_counter)
+        patcher = mock.patch.object(hs, "time", fake_time)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def search(self):
+        return self.session.search_policy_evidence("금리 질문", k=2)
+
+    def test_second_search_reuses_cached_size(self):
+        self.search()
+        self.search()
+        self.assertEqual(self.client.get_collection_calls, 1)
+        self.assertEqual(self.embed_calls, 2)
+
+    def test_stale_size_within_ttl_refreshes_once_without_reembedding(self):
+        self.search()
+        # 30초 안에 컬렉션 크기가 바뀐 것처럼 캐시 값만 다르게 둔다(실제 크기는 DIM).
+        self.session._vector_size_cache = (COLLECTION, self.clock[0] + 30, DIM * 2)
+        result = self.search()
+        self.assertEqual(self.client.get_collection_calls, 2)
+        self.assertEqual(self.embed_calls, 2)              # 질문은 검색마다 한 번만 임베딩
+        self.assertEqual(result["search_profile"]["collection_vector_size"], DIM)
+        self.assertEqual(self.session._vector_size_cache[2], DIM)
+
+    def test_size_is_read_again_after_ttl(self):
+        self.search()
+        self.clock[0] += 29
+        self.search()
+        self.assertEqual(self.client.get_collection_calls, 1)
+        self.clock[0] += 2                                # 마지막 조회 후 31초
+        self.search()
+        self.assertEqual(self.client.get_collection_calls, 2)
+
+    def test_backend_error_clears_cache(self):
+        self.search()
+        failing = em.EmbeddingError("Ollama 연결 실패 (sample_only)")
+        self.session.settings["embedder"] = mock.Mock(side_effect=failing)
+        with self.assertRaises(hs.HybridSearchBackendError):
+            self.search()
+        self.assertIsNone(self.session._vector_size_cache)
+
+    def test_profile_error_clears_cache(self):
+        self.search()
+        self.session.settings["embedder"] = lambda texts: [[0.1] * (DIM + 1) for _ in texts]
+        with self.assertRaises(hs.SearchProfileError):
+            self.search()
+        self.assertIsNone(self.session._vector_size_cache)
+
+    def test_deleted_collection_within_ttl_is_not_found_and_clears_cache(self):
+        self.search()
+        self.memory.delete_collection(COLLECTION)
+        with self.assertRaises(hs.HybridSearchBackendError) as raised:
+            self.search()
+        self.assertEqual(raised.exception.kind, "not_found")
+        self.assertIsNone(self.session._vector_size_cache)
+
+
+class TestSessionProfileEmbedderReuse(unittest.TestCase):
+    """프로필 방식 세션은 Ollama embedder(HTTP 연결)를 한 번 만들어 질문마다 재사용하고 close()에서 닫는다."""
+
+    def test_embedder_created_once_and_closed(self):
+        profile = hs.resolve_search_profile(hs.default_profile())
+        dim = profile["embedding_dim"]
+        client = mock.Mock()
+        client.get_collection.return_value = mock.Mock(config=mock.Mock(params=mock.Mock(vectors=mock.Mock(size=dim))))
+        client.query_points.return_value = mock.Mock(points=[])
+        embedder = mock.Mock(side_effect=lambda texts: [[0.1] * dim for _ in texts])
+        with mock.patch.object(hs.em, "make_ollama_embedder", return_value=embedder) as factory:
+            session = hs.HybridSearchSession(client=client, runner=FakeHybridRunner())
+            self.assertEqual(factory.call_count, 0)                 # 만들 때는 접속·생성하지 않는다
+            session.search_policy_evidence("가상 질문 (sample_only)", k=1)
+            session.search_policy_evidence("다른 가상 질문 (sample_only)", k=1)
+            session.close()
+        self.assertEqual(factory.call_count, 1)
+        self.assertTrue(factory.call_args.kwargs["reuse_connection"])
+        self.assertEqual(embedder.call_count, 2)
+        embedder.close.assert_called_once()
+
+    def test_reuse_connection_uses_one_requests_session(self):
+        sessions = []
+
+        class FakeSession:
+            def __init__(self):
+                self.posts, self.closed = 0, False
+                sessions.append(self)
+
+            def post(self, url, json, timeout):   # noqa: A002 - requests.post와 같은 인자 이름
+                self.posts += 1
+                return mock.Mock(status_code=200, json=lambda: {"embeddings": [[0.0] * DIM] * len(json["input"])})
+
+            def close(self):
+                self.closed = True
+
+        with mock.patch.object(hs.em.requests, "Session", FakeSession):
+            embed = em.make_ollama_embedder(base_url="http://ollama.invalid", expected_dim=DIM, batch_size=1,
+                                            reuse_connection=True)
+            embed(["가상 1"])
+            embed(["가상 2"])
+            embed.close()
+        self.assertEqual(len(sessions), 1)
+        self.assertEqual(sessions[0].posts, 2)
+        self.assertTrue(sessions[0].closed)
+
+    def test_dropped_reused_connection_is_retried_once(self):
+        attempts = []
+
+        class FlakySession:
+            def post(self, url, json, timeout):   # noqa: A002 - requests.post와 같은 인자 이름
+                attempts.append(url)
+                if len(attempts) == 1:
+                    raise requests.ConnectionError(
+                        em.ProtocolError("connection aborted", ConnectionResetError())
+                    )
+                return mock.Mock(status_code=200, json=lambda: {"embeddings": [[0.0] * DIM]})
+
+            def close(self):
+                attempts.append("close")
+
+        with mock.patch.object(hs.em.requests, "Session", FlakySession):
+            embed = em.make_ollama_embedder(base_url="http://ollama.invalid", expected_dim=DIM, batch_size=1,
+                                            reuse_connection=True)
+            self.assertEqual(len(embed(["가상 1"])), 1)
+        self.assertEqual(attempts, ["http://ollama.invalid/api/embed", "close", "http://ollama.invalid/api/embed"])
+
+    def test_ollama_down_is_not_retried(self):
+        attempts = []
+
+        class DownSession:
+            def post(self, url, json, timeout):   # noqa: A002
+                attempts.append(url)
+                raise requests.ConnectTimeout("no route (sample_only)")
+
+            def close(self):
+                pass
+
+        with mock.patch.object(hs.em.requests, "Session", DownSession):
+            embed = em.make_ollama_embedder(base_url="http://ollama.invalid", expected_dim=DIM, reuse_connection=True)
+            with self.assertRaises(em.EmbeddingError):
+                embed(["가상 1"])
+        self.assertEqual(len(attempts), 1)
+
+    def test_connection_refusal_is_not_retried(self):
+        with mock.patch.object(em.requests, "Session") as session:
+            session.return_value.post.side_effect = em.requests.ConnectionError(ConnectionRefusedError())
+            embed = em.make_ollama_embedder(base_url="http://ollama.invalid", reuse_connection=True)
+            with self.assertRaises(em.EmbeddingError):
+                embed(["가상 질문"])
+            session.return_value.post.assert_called_once()
 
 
 if __name__ == "__main__":

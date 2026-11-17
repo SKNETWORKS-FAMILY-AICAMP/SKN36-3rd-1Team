@@ -13,6 +13,8 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
+from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
+
 KST = timezone(timedelta(hours=9))
 
 OK, NO, CHECK = "eligible", "ineligible", "needs_check"
@@ -419,17 +421,8 @@ def _affected_fields(
         "household": "housing",
     }
 
-    supported = {
-        "all",
-        "age",
-        "region",
-        "income",
-        "housing",
-        "employment",
-        "exclusion",
-        "marriage",
-        "children",
-    }
+    # 검색 계층·Pipeline과 같은 공통 상수. 판단(별칭 변환·전체 보류)은 이 함수가 그대로 맡는다.
+    supported = SCOPED_ELIGIBILITY_FIELDS | {ALL_ELIGIBILITY_FIELDS}
 
     normalized = set()
 

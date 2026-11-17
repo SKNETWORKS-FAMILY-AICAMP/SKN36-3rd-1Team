@@ -47,6 +47,21 @@ class AskApiTests(unittest.TestCase):
             self.assertEqual(self.session.search_policy_context.call_count, 2)
         self.session.close.assert_called_once()
 
+    def test_cors_extra_origins_from_environment(self):
+        from backend.api import main
+
+        with patch.dict("os.environ", {main.CORS_ORIGINS_ENV: " https://demo.example/ , * ,"}):
+            self.assertEqual(main.cors_origins(), ["http://127.0.0.1:5173", "https://demo.example"])
+            client = TestClient(create_app(session_factory=self.factory, check_fn=checker, generate_fn=self.generator))
+        with client:
+            results = {origin: client.post("/api/ask", json=REQUEST, headers={"Origin": origin}).headers
+                       for origin in ("https://demo.example", "http://127.0.0.1:5174", "http://localhost:5173",
+                                      "http://evil.example", "http://127.0.0.1.evil.example:5173")}
+        for origin in ("https://demo.example", "http://127.0.0.1:5174", "http://localhost:5173"):
+            self.assertEqual(results[origin].get("access-control-allow-origin"), origin)
+        for origin in ("http://evil.example", "http://127.0.0.1.evil.example:5173"):
+            self.assertNotIn("access-control-allow-origin", results[origin])
+
     def test_invalid_inputs_are_rejected_without_echoing_values(self):
         with self.client as client:
             profiles = [{"age": True}, {"age": 25.0}, {"age": "25"}, {"income": "10"}, {"income": True}]

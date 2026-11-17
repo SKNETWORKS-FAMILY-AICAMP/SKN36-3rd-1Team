@@ -417,7 +417,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | Swagger | `GET /docs` |
 | 백엔드 실행 | `python -m uvicorn backend.api.main:app --reload --host 127.0.0.1 --port 8000 --env-file .env` |
 | 프론트 설정 | `frontend/.env.local`의 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask` (**전체 URL**) |
-| CORS | 최소 `http://127.0.0.1:5173` 허용; 추가 개발 주소는 명시적으로 추가 |
+| CORS | `http://127.0.0.1`과 `http://localhost`는 개발 포트와 관계없이 허용합니다. 그 외 출처는 `ASK_CORS_EXTRA_ORIGINS`에 쉼표로 구분해 명시합니다. 와일드카드(`*`)는 무시합니다. |
 | 프론트 요청 타임아웃 | **60,000ms 적용**. `frontend/src/config/request.ts`의 `ASK_TIMEOUT_MS`를 클라이언트가 사용한다. |
 
 `127.0.0.1`과 `localhost`는 브라우저에서 다른 origin일 수 있다. 시연/로컬 개발 주소를 맞춘다. **프론트 타임아웃을 60초로 바꿨다고 서버 요청 전체에 60초 중단 제한이 자동 적용되는 것은 아니므로**, 모델/DB별 타임아웃·응답 시간 측정이 필요하다.

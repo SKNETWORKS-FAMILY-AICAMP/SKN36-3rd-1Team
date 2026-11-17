@@ -27,6 +27,9 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LEGACY_HANDOFF_DIR = PROJECT_ROOT / "data" / "handoff"
 DEFAULT_HANDOFF_DIR = PROJECT_ROOT / "data" / "releases" / "v1.4.0-candidate"
+# 기본 릴리스의 manifest_version. 프론트 frontend/src/graph/loadGraph.ts·vite.config.ts의 경로와 같아야 한다
+# (tests/unit/test_shared_constants.py가 확인).
+RELEASE_V140_VERSION = "1.4.0-candidate"
 # 명시한 경로가 우선이며, 미설정·빈 값은 승인 v1.4.0을 사용한다.
 # 상대 경로는 프로젝트 루트 기준. v1.3.2는 data/handoff를 명시한다.
 DATASET_DIR_ENV = "LIFEPOLICY_DATASET_DIR"

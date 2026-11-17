@@ -24,6 +24,7 @@ import re
 import time
 from collections import Counter
 from contextlib import contextmanager
+from types import SimpleNamespace
 from typing import Any, Callable, Iterator
 
 import requests
@@ -55,7 +56,7 @@ SEARCH_PROFILES: dict[str, dict[str, str]] = {
     "b3_06b_v140": {"index_config": "B_B3_V140", "query_template_name": "none"},
 }
 DEFAULT_PROFILE = "b2_06b_baseline"
-DATASET_DEFAULT_PROFILES = {"1.4.0-candidate": "b2_06b_v140"}
+DATASET_DEFAULT_PROFILES = {hd.RELEASE_V140_VERSION: "b2_06b_v140"}
 _UNSET = object()     # query_template을 "넘기지 않음"과 "None(지시문 없음)"을 구분하기 위한 표시
 DEFAULT_K = 5
 MAX_K = 200                                     # 진단용 전체 순위(107개)까지 허용하되 무제한은 막는다
@@ -495,18 +496,25 @@ def resolve_search_settings(*, profile: str | None = None, collection: str | Non
     return {"mode": "profile", **resolved, "embedder": embedder}
 
 
+def _qdrant_collection_error(error: BaseException, collection: str) -> HybridSearchBackendError | None:
+    """Qdrant 예외 분류. 컬렉션이 없으면 서버·메모리 모드 모두 kind="not_found"로 맞춘다. 코드 버그는 None."""
+    # 메모리 모드(QdrantClient(":memory:"))는 없는 컬렉션을 ValueError로 알린다.
+    if isinstance(error, ValueError) and str(error) == f"Collection {collection} not found":
+        return HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found")
+    converted = _qdrant_error(error)
+    if converted is not None and converted.kind == "not_found":
+        return HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found")
+    return converted
+
+
 def _collection_vector_size(client, collection: str) -> int:
     """컬렉션 벡터 크기(읽기 전용). Qdrant 장애는 HybridSearchBackendError로 바꾼다."""
     try:
         return int(client.get_collection(collection).config.params.vectors.size)
     except Exception as error:
-        if isinstance(error, ValueError) and str(error) == f"Collection {collection} not found":
-            raise HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found") from error
-        converted = _qdrant_error(error)
+        converted = _qdrant_collection_error(error, collection)
         if converted is None:
             raise
-        if converted.kind == "not_found":
-            raise HybridSearchBackendError("qdrant", f"컬렉션이 없습니다: {collection} (색인 적재 필요)", "not_found") from error
         raise converted from error
 
 
@@ -548,7 +556,8 @@ def search_policy_evidence(query: str, filters: dict[str, Any] | None = None, k:
 
 def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
                      settings: dict[str, Any], *, vector_size: int | None = None,
-                     region_catalog=None, refresh_vector_size: Callable[[], int] | None = None) -> dict[str, Any]:
+                     region_catalog=None, refresh_vector_size: Callable[[], int] | None = None,
+                     profile_embedder: Callable[[], em.Embedder] | None = None) -> dict[str, Any]:
     """검증을 마친 입력·설정으로 실제 임베딩·검색을 한다. client는 호출한 쪽이 관리한다."""
     collection, query_template = settings["collection"], settings["query_template"]
     # (1) 컬렉션 벡터 크기와 설정 차원을 검색 전에 비교한다 (프로필, 또는 차원을 표시한 embedder)
@@ -556,7 +565,7 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
     if vector_size is None:
         vector_size = _collection_vector_size(client, collection)
     region_plan = None
-    if region_catalog is not None or hd.dataset_version() == "1.4.0-candidate":
+    if region_catalog is not None or hd.dataset_version() == hd.RELEASE_V140_VERSION:
         region_plan = (rs.plan_region_search(filters, hd.load_payload_chunks()) if region_catalog is None
                        else rs.plan_region_search(filters, region_catalog=region_catalog))
     applied_filters = region_plan["applied_filters"] if region_plan is not None else filters
@@ -569,7 +578,9 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
                                  f"({settings['embedding_model']})")
     embedder = settings["embedder"]
     if embedder is None:
-        if settings["mode"] == "profile":
+        if settings["mode"] == "profile" and profile_embedder is not None:
+            embedder = profile_embedder()      # HybridSearchSession: 같은 Ollama 연결을 질문마다 재사용
+        elif settings["mode"] == "profile":
             embedder = em.make_ollama_embedder(model=settings["embedding_model"], expected_dim=settings["embedding_dim"],
                                                batch_size=1, timeout=QUERY_EMBED_TIMEOUT_SECONDS)
         else:
@@ -597,7 +608,8 @@ def _search_evidence(client, query: str, filters: dict[str, Any] | None, k: int,
     try:
         hits = store.search_chunks(client, collection, query_vector, k=k, filters=applied_filters)
     except Exception as error:
-        converted = _qdrant_error(error)
+        # 컬렉션 크기 캐시가 살아 있는 동안 컬렉션이 지워져도 get_collection과 같은 not_found로 알린다.
+        converted = _qdrant_collection_error(error, collection)
         if converted is None:
             raise                       # 코드 버그·컬렉션 보호 오류는 원래 예외 그대로
         raise converted from error
@@ -1090,6 +1102,15 @@ class HybridSearchSession:
         self.close_errors: list[str] = []
         self._vector_size_cache = None
         self._region_catalog_cache = None
+        self._profile_embedder = None          # 프로필 방식 기본 Ollama embedder (처음 임베딩할 때 만든다)
+
+    def _get_profile_embedder(self) -> em.Embedder:
+        """프로필 모델·차원의 Ollama embedder를 한 번 만들어 HTTP 연결을 재사용한다. close()에서 닫는다."""
+        if self._profile_embedder is None:
+            self._profile_embedder = em.make_ollama_embedder(
+                model=self.settings["embedding_model"], expected_dim=self.settings["embedding_dim"],
+                batch_size=1, timeout=QUERY_EMBED_TIMEOUT_SECONDS, reuse_connection=True)
+        return self._profile_embedder
 
     # --- 연결 (처음 쓸 때 만든다) ---
     def _check_open(self) -> None:
@@ -1123,6 +1144,11 @@ class HybridSearchSession:
         if self.closed:
             return
         self.closed = True
+        if self._profile_embedder is not None:
+            error = _close_quietly(SimpleNamespace(close=getattr(self._profile_embedder, "close", lambda: None)))
+            if error is not None:
+                self.close_errors.append(f"ollama: {_safe_message(error)}")
+            self._profile_embedder = None
         if self._owns_client:
             error = _close_quietly(self._client)
             if error is not None:
@@ -1156,7 +1182,7 @@ class HybridSearchSession:
         vector_size = cached[2] if cache_hit else refresh_vector_size()
         catalog = None
         version = hd.dataset_version()
-        if version == "1.4.0-candidate":
+        if version == hd.RELEASE_V140_VERSION:
             path = hd.PAYLOAD_CHUNKS_PATH
             key = (version, path, hd.file_signature(path))
             if self._region_catalog_cache is None or self._region_catalog_cache[0] != key:
@@ -1165,7 +1191,8 @@ class HybridSearchSession:
         try:
             return _search_evidence(client, query, filters, k, self.settings,
                                     vector_size=vector_size, region_catalog=catalog,
-                                    refresh_vector_size=refresh_vector_size if cache_hit else None)
+                                    refresh_vector_size=refresh_vector_size if cache_hit else None,
+                                    profile_embedder=self._get_profile_embedder)
         except (SearchProfileError, HybridSearchBackendError):
             self._vector_size_cache = None
             raise

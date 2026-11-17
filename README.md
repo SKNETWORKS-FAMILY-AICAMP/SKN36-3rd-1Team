@@ -142,7 +142,7 @@ npm run dev
    ```bash
    python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --env-file .env
    ```
-4. 백엔드의 CORS 허용 주소는 `http://127.0.0.1:5173`입니다. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
+4. 백엔드는 `http://127.0.0.1`과 `http://localhost`의 개발 포트를 자동으로 허용합니다. 그 외 프론트 주소는 백엔드의 `ASK_CORS_EXTRA_ORIGINS`에 쉼표로 구분해 추가하세요. `frontend/.env.local`에 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask`를 설정합니다. 새 터미널을 저장소 루트에서 열어 프론트엔드를 실행합니다.
 
    ```bash
    cd frontend
@@ -196,7 +196,7 @@ npm run dev
 | 04 | [RAG·LLM·DB 연동 코드](docs/reports/ssok-deliverables/04%20%C2%B7%20RAG%C2%B7LLM%C2%B7DB%20%EC%97%B0%EB%8F%99%20%EC%BD%94%EB%93%9C.md) |
 | 05 | [테스트 계획 및 결과 보고서](docs/reports/ssok-deliverables/05%20%C2%B7%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EA%B3%84%ED%9A%8D%20%EB%B0%8F%20%EA%B2%B0%EA%B3%BC%20%EB%B3%B4%EA%B3%A0%EC%84%9C.md) |
 
-[SSOK 발표 자료 PDF](docs/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
+[SSOK 발표 자료 PDF](docs/reports/ssok-deliverables/SSOK%20%EB%B0%9C%ED%91%9C.pdf)
 
 ## 한계와 후속 계획
 
