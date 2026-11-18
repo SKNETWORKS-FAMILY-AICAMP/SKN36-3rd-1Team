@@ -1,0 +1,24 @@
+# Issue #91 r2 전용 Qdrant (pr29 B2 snapshot 복원 → 부분 갱신). NEW project/volume only.
+# - 프로젝트 이름이 볼륨·네트워크 이름 앞에 붙는다: issue91-r2-qdrant-20261119_qdrant_storage / _default
+#   기존 볼륨(external)·컨테이너(container_name)·네트워크를 참조하지 않는다.
+# - API 키는 현재 PowerShell 세션의 환경 변수 QDRANT_API_KEY로만 주입한다. 없으면 기동하지 않는다.
+#   scripts/update_b2_from_snapshot.py도 같은 환경 변수만 읽는다(.env 미사용).
+# - 이미지: Qdrant v1.12.4 (pr29 snapshot을 만든 버전). digest는 ISSUE41_EMBEDDING_AB_EVAL.md에 1.12.4로 기록된 값이며
+#   r1 복원(issue43_restore.compose.yaml)과 같다. 태그는 사람이 읽기 위한 표시이고 실제로는 digest가 쓰인다.
+# - 삭제·정리에 `down -v`를 쓰지 않는다. 실패한 볼륨은 보존하고 새 프로젝트 이름으로 다시 시작한다.
+name: issue91-r2-qdrant-20261119
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4@sha256:241edb9d7778327516ef218f8c74e1bd61b5ea42cd4f193cb8d0896199705636
+    ports:
+      - "127.0.0.1:56446:6333"
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?Set QDRANT_API_KEY in this PowerShell session}
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    mem_limit: 1g
+    cpus: 2
+    restart: "no"
+volumes:
+  qdrant_storage:

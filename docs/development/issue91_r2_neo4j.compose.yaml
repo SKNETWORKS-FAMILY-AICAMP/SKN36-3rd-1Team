@@ -1,0 +1,30 @@
+# Issue #91 r2 전용 Neo4j (최신 v1.4.0-candidate 그래프 전체 적재 → #91 Qdrant 56446과 교차 검증). NEW project/volumes only.
+# - #91 Qdrant(issue91_r2_qdrant.compose.yaml)와 별도 프로젝트다. 이 파일로 Qdrant 컨테이너·볼륨을 다시 만들지 않는다.
+# - 볼륨·네트워크 이름 앞에 프로젝트 이름이 붙는다: issue91-r2-neo4j-20261119_neo4j_data / _neo4j_logs / _default
+#   기존 볼륨(external)·컨테이너(container_name)·바인드 마운트를 쓰지 않는다.
+# - 비밀번호는 현재 PowerShell 세션의 ISSUE91_NEO4J_PASSWORD로만 주입한다(공유 DB용 NEO4J_PASSWORD와 분리). 없으면 기동하지 않는다.
+#   scripts/load_neo4j_r2_isolated.py도 같은 환경 변수만 읽는다(.env·NEO4J_URI 미사용).
+# - 이미지: Neo4j Community 5.26.32 (이미지 NEO4J_TARBALL=neo4j-community-5.26.32-unix.tar.gz). r1 복원
+#   (issue43_restore.compose.yaml)·pr29 번들과 같은 digest. 태그는 로컬 태그 표시이며 실제로는 digest가 쓰인다.
+# - Bolt만 127.0.0.1:56487에 연다. HTTP(Browser)는 열지 않는다. 메모리 설정은 r1 복원 구성과 같다.
+# - 정리에 `down -v`를 쓰지 않는다. 실패한 볼륨은 보존하고 새 프로젝트 이름으로 다시 시작한다.
+name: issue91-r2-neo4j-20261119
+services:
+  neo4j:
+    image: neo4j:5.26-community@sha256:42ef3ebfd671ebd01fdebb6dcbe80cf7b45eef2aa3d346ef4132f7ef31e67d2f
+    ports:
+      - "127.0.0.1:56487:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${ISSUE91_NEO4J_PASSWORD:?Set ISSUE91_NEO4J_PASSWORD in this PowerShell session}
+      NEO4J_server_memory_heap_initial__size: 128m
+      NEO4J_server_memory_heap_max__size: 256m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    mem_limit: 1280m
+    cpus: 2
+    restart: "no"
+volumes:
+  neo4j_data:
+  neo4j_logs:
