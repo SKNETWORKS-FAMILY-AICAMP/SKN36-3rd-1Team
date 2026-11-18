@@ -10,6 +10,7 @@
 """
 
 import time
+from collections import defaultdict
 from typing import Any
 
 from database import chunking
@@ -41,10 +42,17 @@ def prepare_a_chunks(documents: list[dict[str, Any]], payload_chunks: list[dict[
     - chunking_version = "A"
     - char_start/char_end: 원문에서 위치를 찾아 채운다(locate_chunks_in_document). 못 찾으면 None.
     - page_start/page_end: 페이지가 확인된 문서만 숫자(get_verified_page_number), 나머지는 None.
+    청크는 payload_chunks를 한 번만 훑어 document_id별로 묶고(입력 순서 유지), 문서는 documents 순서대로 처리한다.
     """
+    if not documents:   # 문서가 없으면 청크를 읽지 않는다 (기존 동작과 같음)
+        return []
+    chunks_by_document: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for chunk in payload_chunks:
+        chunks_by_document[chunk["document_id"]].append(chunk)
+
     prepared = []
     for document in documents:
-        own = [chunk for chunk in payload_chunks if chunk["document_id"] == document["document_id"]]
+        own = chunks_by_document.get(document["document_id"], [])
         positions = chunking.locate_chunks_in_document(document["text"], [chunk["text"] for chunk in own])
         for chunk, position in zip(own, positions):
             page = handoff_data.get_verified_page_number(chunk)
