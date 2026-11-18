@@ -1,6 +1,6 @@
 # SSOK — 공식 근거 문서 수집 PoC 및 품질 검증 보고서
 
-> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
+> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](../official_source_crosscheck_report.md)를 따릅니다.
 
 - **문서 버전**: v1.0.0 (STEP C 산출물)
 - **작성일자**: 2026-11-06
@@ -89,7 +89,7 @@ pie title 확보 공식 근거 문서 22건 유형별 분포
 
 ## 4. C-3. PoC 데이터 생성 및 청킹 품질 정량 비교
 
-[`scripts/staging_poc_pipeline.py`](../../scripts/staging_poc_pipeline.py) 파이프라인을 실행하여 산출된 실제 지표(`data/staging/poc_metrics.json`)의 정량 결과입니다.
+[`scripts/staging_poc_pipeline.py`](../../../scripts/staging_poc_pipeline.py) 파이프라인을 실행하여 산출된 실제 지표(`data/staging/poc_metrics.json`)의 정량 결과입니다.
 
 ### 4.1 핵심 정량 지표 요약
 

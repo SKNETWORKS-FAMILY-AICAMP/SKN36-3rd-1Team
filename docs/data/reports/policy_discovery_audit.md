@@ -1,6 +1,6 @@
 # SSOK — 정책 누락 원인 분석 및 숨은 정책 발굴 조사 보고서
 
-> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
+> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](../official_source_crosscheck_report.md)를 따릅니다.
 
 > **문서 버전:** `v1.0.0-audit`  
 > **기준일시:** 2026-11-06 (KST)  
@@ -32,7 +32,7 @@
 
 ## 2. 정책 누락 원인 분석 (Root Cause Analysis)
 
-최종 237건을 추출하는 전처리 스크립트([`scripts/build_clean_dataset.py`](../../scripts/build_clean_dataset.py))의 3.1절~3.3절 코드를 전수 정밀 추적하여 정책 누락의 구조적 원인을 규명하였습니다.
+최종 237건을 추출하는 전처리 스크립트([`scripts/build_clean_dataset.py`](../../../scripts/build_clean_dataset.py))의 3.1절~3.3절 코드를 전수 정밀 추적하여 정책 누락의 구조적 원인을 규명하였습니다.
 
 ```mermaid
 flowchart TD
@@ -151,7 +151,7 @@ flowchart LR
         NTS["국세청 홈택스<br/>(조세특례 가이드)"]
     end
 
-    subgraph Pipeline [LifePolicy 수집·정제 엔진]
+    subgraph Pipeline [SSOK 수집·정제 엔진]
         Collector["신규 수집 파이프라인"]
         Norm["정규화 및 스키마 매핑"]
     end

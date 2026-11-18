@@ -2,15 +2,15 @@
 
 > **2026-11-06 신청 주소 추가 교정:** 현재 후보에서는 기존 정책 219건의 `official_apply_url`만 교정했습니다. 인계 원본 보존과 후보 레코드 무변경은 다른 의미입니다. 최신 변경 목록·검증 상태는 [PR #16 신청 주소 검증 보고서](pr16_application_url_review.md)를 따릅니다. 아래의 과거 검증 결과는 실제 DB 적재 완료를 뜻하지 않습니다.
 
-> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
+> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](../official_source_crosscheck_report.md)를 따릅니다.
 
 - **문서 버전**: v1.1.0 (참조 무결성 교정 및 안정화 감사본)
 - **작성일자**: 2026-11-06
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (manifest SHA-256: `9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85`, 100% 무변경 보존; 2026-11-06 OS 간 줄바꿈 기준(LF) 통일 및 data_contract.md 개정(official_apply_url Nullable)으로 manifest 해시 재계산, 데이터 내용 변경 없음)
-- **후보 패키지 위치**: [`data/releases/v1.4.0-candidate/`](../../data/releases/v1.4.0-candidate)
-- **정밀 증분 명세서**: [`release_delta_manifest.json`](../../data/releases/v1.4.0-candidate/release_delta_manifest.json)
+- **후보 패키지 위치**: [`data/releases/v1.4.0-candidate/`](../../../data/releases/v1.4.0-candidate)
+- **정밀 증분 명세서**: [`release_delta_manifest.json`](../../../data/releases/v1.4.0-candidate/release_delta_manifest.json)
 - **책임 파트**: SSOK 데이터 아키텍처팀
 
 ---
@@ -104,7 +104,7 @@
 
 ## 4. 정밀 타겟 롤백 프로토콜 (Exact Item List Based)
 
-단순 접두어나 와일드카드 삭제 방식을 전면 배제하고, [`release_delta_manifest.json`](../../data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 증분 ID 목록만을 타겟팅하여 삭제**하는 안전한 롤백 절차를 수립하였습니다.
+단순 접두어나 와일드카드 삭제 방식을 전면 배제하고, [`release_delta_manifest.json`](../../../data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 증분 ID 목록만을 타겟팅하여 삭제**하는 안전한 롤백 절차를 수립하였습니다.
 
 - **타겟 정책 (9건)**: `POL_STG_MOLIT_002`, `POL_STG_MOHW_001`, `POL_STG_DGU_001`, `POL_STG_NTS_001`, `POL_STG_MOIS_001`, `POL_STG_EX_001`, `POL_STG_MOLIT_001`, `POL_STG_SEOUL_001`, `POL_STG_ICN_001`
 - **타겟 문서 (22건)**: `DOC_STG_001_NOTICE` ~ `DOC_STG_ICN_001_NOT` 22건

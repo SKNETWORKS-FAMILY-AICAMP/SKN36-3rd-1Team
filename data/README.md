@@ -333,5 +333,5 @@ flowchart TD
 - [생애주기 분포 분석 보고서 (`data/reports/lifecycle_distribution_report.md`)](reports/lifecycle_distribution_report.md) — 6대 생애주기 매핑 통계
 - [미해결 이슈 보고서 (`data/reports/unresolved_issues.md`)](reports/unresolved_issues.md) — 팀 간 협의 및 운영 조율 사항
 - [공식 산출물 01: 데이터 수집 및 전처리 검증 보고서](../docs/DATA_COLLECTION_REPORT.md) — 단위 프로젝트 마일스톤 공식 제출 보고서 (원형 15개 파일 및 10대 정책 검증)
-- [3차 기술 상세 보고서: 데이터 수집 및 정제 최종 보고서](../docs/data/data_collection_report.md) — 3대 공공 API 전수 수집(15,264건), 237개 정책/246개 문서, 청킹 비교 및 세부 파이프라인 기술 명세서
+- [3차 기술 상세 보고서: 데이터 수집 및 정제 최종 보고서](../docs/data/reports/data_collection_report.md) — 3대 공공 API 전수 수집(15,264건), 237개 정책/246개 문서, 청킹 비교 및 세부 파이프라인 기술 명세서
 - [팀 공유 데이터 완료 보고서 (`docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md`)](../docs/reports/SSOK_팀공유_데이터완료보고서_20261105.md) — 팀 공유용 종합 요약

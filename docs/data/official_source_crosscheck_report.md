@@ -1,6 +1,6 @@
 # v1.4.0 후보 신규 문서 — 공식 원문 대조 보고서
 
-> **신청 주소 후속 교정:** 이 문서의 원문 대조 결과는 유지합니다. 이후 후보의 기존 정책 219건에서 신청 주소만 교정했으며, 현재 후보를 "기존 레코드 변경 0건"으로 설명하면 안 됩니다. [후속 변경·검증 보고서](pr16_application_url_review.md)를 함께 참고하세요.
+> **신청 주소 후속 교정:** 이 문서의 원문 대조 결과는 유지합니다. 이후 후보의 기존 정책 219건에서 신청 주소만 교정했으며, 현재 후보를 "기존 레코드 변경 0건"으로 설명하면 안 됩니다. [후속 변경·검증 보고서](reports/pr16_application_url_review.md)를 함께 참고하세요.
 
 > **대조일:** 2026-11-06 (KST)
 > **담당:** 데이터 (장반석)
@@ -105,7 +105,7 @@
 1. ~~LH FAQ HWP 재추출~~ — 완료 (olefile 설치 승인, 2026-11-06)
 2. **FAQ 원문 수집:** 공식 FAQ 페이지를 수동으로 확인하고, 원문이 있으면 추가한다. 대상은 K-패스(korea-pass.kr), 서울청년수당(youth.seoul.go.kr), 한국도로공사, 국세청, 주택도시보증공사이다.
 3. **조건 구조화:** 신규 정책 9건의 자격 조건을 원문 기준으로 구조화한다(현재 `UNKNOWN`).
-4. **평가 재실행:** 이전 검색 평가(`docs/data/graphrag_retrieval_evaluation.md`, `data/staging/evaluation/`)는 대조 전 요약 문서로 측정한 결과라 다시 실행해야 한다.
+4. **평가 재실행:** 이전 검색 평가(`docs/data/poc/graphrag_retrieval_evaluation.md`, `data/staging/evaluation/`)는 대조 전 요약 문서로 측정한 결과라 다시 실행해야 한다.
 5. **온통청년 원본 경로 정리:** `data/processed/youthcenter_policies.jsonl` 3,861건 중 3,358건의 `local_raw_path`(`data/raw/youthcenter/items/{plcyNo}.json`)가 실제로 없는 파일을 가리킨다.
    - 원문은 `data/raw/youthcenter/api/page_*.json`(API 응답 페이지)에 들어 있다.
    - 이번 후보의 `DOC_STG_SEOUL_001_YC`는 실제 페이지 파일로 고쳤다.

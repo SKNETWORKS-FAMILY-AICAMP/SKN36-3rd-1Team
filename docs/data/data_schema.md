@@ -70,4 +70,4 @@
   - `SUPPORTED_BY` (Policy -> Document)
   - `MODIFIES_CONDITION_OF` (Policy -> Policy)
 
-> **상세 명세:** 세부 엔티티 ER 다이어그램 및 Neo4j/Qdrant 상세 설계 요구사항은 [DB 스키마 설계 요구사항 명세서](db_schema_change_proposal.md)를 참조하십시오.
+> **상세 명세:** 세부 엔티티 ER 다이어그램 및 Neo4j/Qdrant 상세 설계 요구사항은 [DB 스키마 설계 요구사항 명세서](history/db_schema_change_proposal.md)를 참조하십시오.

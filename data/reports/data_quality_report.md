@@ -1,4 +1,4 @@
-# LifePolicy AI — 3차 데이터 품질 및 정합성 검증 보고서 (data_quality_report.md)
+# SSOK — 3차 데이터 품질 및 정합성 검증 보고서 (data_quality_report.md)
 
 > **기준일시:** 2026-11-04 (KST)  
 > **검증 대상:** `data/processed/` 디렉터리 내 JSONL 5종 전수 검증  
