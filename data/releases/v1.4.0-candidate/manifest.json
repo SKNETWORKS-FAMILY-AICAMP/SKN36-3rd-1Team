@@ -1,14 +1,14 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-18T10:31:25.212932+09:00",
+  "created_at": "2026-11-18T10:42:55.149103+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
     "total_policies": 246,
     "total_documents": 261,
     "total_chunks": 599,
-    "total_graph_nodes": 1121,
+    "total_graph_nodes": 1122,
     "total_graph_edges": 2664,
     "referential_integrity": "100% PASS (Broken References = 0)",
     "qdrant_point_id_standard": "RFC 4122 UUIDv5 (Deterministic)",
@@ -31,12 +31,12 @@
     },
     "CHANGELOG.md": {
       "size_bytes": 5940,
-      "sha256": "442f17f071272205001f241520380a0f7a1717ece9ee87870521afdd3515404c",
+      "sha256": "399feb5467dc05e99a8401be41907cbb790c4bb935a48b586a28c38dfc60f0a4",
       "record_count": 0
     },
     "release_delta_manifest.json": {
-      "size_bytes": 317318,
-      "sha256": "247d13afcf530ce1bf536639231e129fc18e3b6078e3f11aff6d9f5254845a0d",
+      "size_bytes": 317321,
+      "sha256": "fa28164803a6c101d3d05381f55a43a1d781662f9e113fec19d658791c99d511",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -65,9 +65,9 @@
       "record_count": 261
     },
     "neo4j/nodes_eligibility_condition.jsonl": {
-      "size_bytes": 32949,
-      "sha256": "be29c82ec9a37049bad250ec3e29d4449cd2f5d93af867f547e8fd2bc158a6de",
-      "record_count": 101
+      "size_bytes": 33444,
+      "sha256": "7cb33a5d9b0e12166e8f48f1b827aa077a76a5dc21e0b6ae302299947ad07994",
+      "record_count": 102
     },
     "neo4j/nodes_lifestage.jsonl": {
       "size_bytes": 883,
@@ -95,8 +95,8 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 675404,
-      "sha256": "a45dc8092178ce98b161b68bea999ddb53ddacd3fb3da5cb72b4c0ba225acb29",
+      "size_bytes": 675764,
+      "sha256": "2d8fb6d0afa7b934286e7095d6534bc39135ff9a0c1226e2192d68e4f5914b7f",
       "record_count": 2664
     },
     "neo4j/schema_constraints.cypher": {

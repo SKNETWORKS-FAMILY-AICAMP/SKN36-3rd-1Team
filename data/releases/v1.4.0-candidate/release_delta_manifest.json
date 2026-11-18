@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T10:31:25.147866+09:00",
+  "created_at": "2026-11-18T10:42:55.072646+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "8c284664e7f03701a4e36d601610eb141cf9b52b08e9017d3c27f1fb51ae7ade",
+    "source_sha256": "2215edc4db91a243984d0fbefd81e067131fd09c85cb18364438a1278ea01c01",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8733,17 +8733,17 @@
       {
         "source_id": "GRP_POL_BOK_013_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_36_71M"
+        "target_id": "COND_CHILD_AGE_36_97M"
       },
       {
         "source_id": "GRP_POL_BOK_015_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_156M"
+        "target_id": "COND_CHILD_AGE_0_155M"
       },
       {
         "source_id": "GRP_POL_BOK_031_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_156M"
+        "target_id": "COND_CHILD_AGE_0_155M"
       },
       {
         "source_id": "GRP_POL_BOK_033_OR_TARGET",
@@ -8763,7 +8763,7 @@
       {
         "source_id": "GRP_POL_BOK_054_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_72M"
+        "target_id": "COND_CHILD_AGE_0_97M"
       },
       {
         "source_id": "GRP_POL_BOK_055_ROOT",
@@ -9618,17 +9618,17 @@
       {
         "source_id": "POL_BOK_013",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_36_71M"
+        "target_id": "COND_CHILD_AGE_36_97M"
       },
       {
         "source_id": "POL_BOK_015",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_156M"
+        "target_id": "COND_CHILD_AGE_0_155M"
       },
       {
         "source_id": "POL_BOK_031",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_156M"
+        "target_id": "COND_CHILD_AGE_0_155M"
       },
       {
         "source_id": "POL_BOK_033",
@@ -9648,7 +9648,7 @@
       {
         "source_id": "POL_BOK_054",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_72M"
+        "target_id": "COND_CHILD_AGE_0_97M"
       },
       {
         "source_id": "POL_BOK_055",
@@ -9788,11 +9788,12 @@
       "COND_SP_활동지원_X1_360점",
       "COND_HH_취약가구",
       "COND_CHILD_AGE_UNDER_156M",
-      "COND_CHILD_AGE_36_71M",
+      "COND_CHILD_AGE_36_97M",
+      "COND_CHILD_AGE_0_155M",
       "COND_CHILD_AGE_UNDER_37M",
       "COND_CHILD_AGE_UNDER_108M",
       "COND_CHILD_AGE_UNDER_216M",
-      "COND_CHILD_AGE_UNDER_72M",
+      "COND_CHILD_AGE_0_97M",
       "COND_CHILD_AGE_24_85M",
       "COND_CHILD_AGE_UNDER_144M",
       "COND_CHILD_AGE_UNDER_228M",

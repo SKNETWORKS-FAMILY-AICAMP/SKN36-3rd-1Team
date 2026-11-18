@@ -813,11 +813,21 @@
       "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
     },
     {
-      "condition_id": "COND_CHILD_AGE_36_71M",
+      "condition_id": "COND_CHILD_AGE_36_97M",
       "type": "SPECIAL_TARGET",
-      "name": "대상 자녀 연령: 36~71개월",
+      "name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "operator": "BETWEEN",
-      "value": "36~71",
+      "value": "36~97",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_0_155M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 0~155개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "0~155",
       "unit": "개월",
       "evidence_location": "원문 대조 교정",
       "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
@@ -853,11 +863,11 @@
       "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
     },
     {
-      "condition_id": "COND_CHILD_AGE_UNDER_72M",
+      "condition_id": "COND_CHILD_AGE_0_97M",
       "type": "SPECIAL_TARGET",
-      "name": "대상 자녀 연령: 72개월 미만(만 6세 미만)",
-      "operator": "LT",
-      "value": "72",
+      "name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "0~97",
       "unit": "개월",
       "evidence_location": "원문 대조 교정",
       "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
@@ -865,7 +875,7 @@
     {
       "condition_id": "COND_CHILD_AGE_24_85M",
       "type": "SPECIAL_TARGET",
-      "name": "대상 자녀 연령: 24~85개월",
+      "name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "operator": "BETWEEN",
       "value": "24~85",
       "unit": "개월",
@@ -1617,27 +1627,27 @@
     },
     {
       "group_id": "GRP_POL_BOK_013_ROOT",
-      "condition_id": "COND_CHILD_AGE_36_71M",
-      "target_name": "대상 자녀 연령: 36~71개월",
+      "condition_id": "COND_CHILD_AGE_36_97M",
+      "target_name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_013",
       "evidence_location": "원문 대조 교정 (DOC_BOK_013_C01)",
-      "evidence": "대상 유아 연령: 만 3~5세: 3~5세 유아"
+      "evidence": "대상 유아 연령: 3~5세반(출생연도 기준): 3~5세 유아"
     },
     {
       "group_id": "GRP_POL_BOK_015_ROOT",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_155M",
+      "target_name": "대상 자녀 연령: 0~155개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_015",
       "evidence_location": "원문 대조 교정 (DOC_BOK_015_C01)",
-      "evidence": "대상 장애아동 연령: 미취학 12세 이하: 미취학 12세 이하의 장애아동"
+      "evidence": "대상 장애아동 연령: 미취학 12세 이하(보육 연령 기준): 미취학 12세 이하의 장애아동"
     },
     {
       "group_id": "GRP_POL_BOK_031_ROOT",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_155M",
+      "target_name": "대상 자녀 연령: 0~155개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_031",
       "evidence_location": "원문 대조 교정 (DOC_BOK_031_C01)",
-      "evidence": "대상 아동 연령: 12세 이하: 12세 이하 초등학교 취학아동"
+      "evidence": "대상 아동 연령: 12세 이하 취학아동(보육 연령 기준): 12세 이하 초등학교 취학아동"
     },
     {
       "group_id": "GRP_POL_BOK_033_OR_TARGET",
@@ -1665,16 +1675,16 @@
     },
     {
       "group_id": "GRP_POL_BOK_054_ROOT",
-      "condition_id": "COND_CHILD_AGE_UNDER_72M",
-      "target_name": "대상 자녀 연령: 72개월 미만(만 6세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_97M",
+      "target_name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_054",
       "evidence_location": "원문 대조 교정 (DOC_BOK_054_C01)",
-      "evidence": "대상 아동 연령: 0~5세: 0~5세 아동의 보육료"
+      "evidence": "대상 아동 연령: 0~5세반(출생연도 기준): 0~5세 아동의 보육료"
     },
     {
       "group_id": "GRP_POL_BOK_055_ROOT",
       "condition_id": "COND_CHILD_AGE_24_85M",
-      "target_name": "대상 자녀 연령: 24~85개월",
+      "target_name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_055",
       "evidence_location": "원문 대조 교정 (DOC_BOK_055_C02)",
       "evidence": "대상 아동 연령: 24개월 이상 86개월 미만: 24개월 이상 86개월 미만 아동"
@@ -5803,22 +5813,22 @@
     },
     {
       "policy_id": "POL_BOK_013",
-      "condition_id": "COND_CHILD_AGE_36_71M",
-      "target_name": "대상 자녀 연령: 36~71개월",
+      "condition_id": "COND_CHILD_AGE_36_97M",
+      "target_name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_013",
       "evidence_location": "원문 대조 교정 (DOC_BOK_013_C01)"
     },
     {
       "policy_id": "POL_BOK_015",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_155M",
+      "target_name": "대상 자녀 연령: 0~155개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_015",
       "evidence_location": "원문 대조 교정 (DOC_BOK_015_C01)"
     },
     {
       "policy_id": "POL_BOK_031",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_155M",
+      "target_name": "대상 자녀 연령: 0~155개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_031",
       "evidence_location": "원문 대조 교정 (DOC_BOK_031_C01)"
     },
@@ -5845,15 +5855,15 @@
     },
     {
       "policy_id": "POL_BOK_054",
-      "condition_id": "COND_CHILD_AGE_UNDER_72M",
-      "target_name": "대상 자녀 연령: 72개월 미만(만 6세 미만)",
+      "condition_id": "COND_CHILD_AGE_0_97M",
+      "target_name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_054",
       "evidence_location": "원문 대조 교정 (DOC_BOK_054_C01)"
     },
     {
       "policy_id": "POL_BOK_055",
       "condition_id": "COND_CHILD_AGE_24_85M",
-      "target_name": "대상 자녀 연령: 24~85개월",
+      "target_name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_055",
       "evidence_location": "원문 대조 교정 (DOC_BOK_055_C02)"
     },
@@ -6045,7 +6055,7 @@
     }
   },
   "beneficiary_age_notes": {
-    "description": "#79 수혜자 나이 구분. 자녀 대상은 자녀 월령(SPECIAL_TARGET, 개월), 본인·보호자 겸용은 대상자 나이(SPECIAL_TARGET, 세)로 넣었다. 신청자 나이(AGE)로 넣지 않는다. 교정 코드는 이 키를 읽지 않는다(기록용).",
+    "description": "#79 수혜자 나이 구분. 자녀 대상은 자녀 월령(SPECIAL_TARGET, 개월), 본인·보호자 겸용은 대상자 나이(SPECIAL_TARGET, 세)로 넣었다. 신청자 나이(AGE)로 넣지 않는다. 보육료·유아학비처럼 출생연도 연령반으로 정하는 정책은 범위(BETWEEN)로 두어 자동 비교하지 않는다. 교정 코드는 이 키를 읽지 않는다(기록용).",
     "not_added": {
       "POL_BOK_006": "원문의 '9세 미만'은 장애 미등록 영유아도 신청할 수 있다는 예외 규정이라 대상 나이 조건이 아님",
       "POL_001": "신생아 가구(2년 이내 출산)·한부모(6세 이하 자녀) 등 유형별로 자녀 나이가 달라 유형 구조가 먼저 필요함",
