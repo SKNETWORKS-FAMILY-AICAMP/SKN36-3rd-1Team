@@ -69,10 +69,11 @@ class TestAgeBoundaries(unittest.TestCase):
         self.assertEqual(self.walk("POL_BOK_004", 41), checker.NO)
         self.assertEqual(self.walk("POL_BOK_004", None), checker.CHECK)
 
-    def test_pol_stg_icn_001_uses_gov24_source_range(self):
-        # 데이터에 있는 정부24 원문 '대상연령: 18세 ~ 39세'에 연결한다(인천 청년포털 19세 표기와 다름).
-        self.assertEqual(self.walk("POL_STG_ICN_001", 17), checker.NO)
-        self.assertEqual(self.walk("POL_STG_ICN_001", 18), checker.CHECK)
+    def test_pol_stg_icn_001_uses_guide_range(self):
+        # 인천 서구 사업안내서 '서구에 거주하고 있는 청년(…19~39세)'. 정부24 지원조건 코드(18세)와 다르다.
+        self.assertEqual(self.walk("POL_STG_ICN_001", 18), checker.NO)
+        self.assertEqual(self.walk("POL_STG_ICN_001", 19), checker.CHECK)
+        self.assertEqual(self.walk("POL_STG_ICN_001", 39), checker.CHECK)
         self.assertEqual(self.walk("POL_STG_ICN_001", 40), checker.NO)
 
     def test_age_alone_never_yields_eligible(self):
