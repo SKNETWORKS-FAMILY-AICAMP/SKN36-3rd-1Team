@@ -2,8 +2,8 @@
 
 > **알림:** 본 문서는 초기 DB 스키마 변경 제안서였으며, 데이터팀의 통합 확정 권한에 따라 정식 확정된 최종 DB 스키마 설계 문서는 아래 링크로 이관되었습니다.
 
-👉 **공식 기준 문서:** [최종 통합 DB 스키마 설계 명세서 (db_schema.md)](db_schema.md)  
-👉 **공식 데이터 계약서:** [최종 통합 데이터 계약서 (data_contract.md)](data_contract.md)
+👉 **공식 기준 문서:** [최종 통합 DB 스키마 설계 명세서 (../db_schema.md)](../db_schema.md)  
+👉 **공식 데이터 계약서:** [최종 통합 데이터 계약서 (../data_contract.md)](../data_contract.md)
 
 ---
 

@@ -114,7 +114,7 @@ Neo4j는 정책에 연결된 대상·생애단계·자격 조건을 조회하고
 
 자동 비교에 필요한 조건이 구조화되지 않았거나 공식 근거가 부족하면 해당 조건의 확인을 보류합니다. 거주 지역은 입력할 수 있으며, 지역 범위와 거주 요건은 공식 원문에서 확인하도록 안내합니다.
 
-3차 기준 데이터는 `data/releases/v1.4.0-candidate/`에 있습니다. [최종 DB 적재 검증 PR #45](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/45) · [데이터 계약](docs/data/data_contract.md) · [공식 원문 대조·교정 기록](docs/data/data_corrections_v1.4.0_review.md)
+3차 기준 데이터는 `data/releases/v1.4.0-candidate/`에 있습니다. [최종 DB 적재 검증 PR #45](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/45) · [데이터 계약](docs/data/data_contract.md) · [공식 원문 대조·교정 기록](docs/data/reports/data_corrections_v1.4.0_review.md)
 
 ## 실행 방법
 
@@ -164,7 +164,7 @@ npm run dev
 | [tests/](tests/) · [scripts/](scripts/)     | 테스트, 데이터 검증 및 적재 도구   |
 | [docs/](docs/)                              | 기획, API, 데이터, 개발 문서       |
 
-후보 데이터 재생성은 `scripts/build_incremental_release_candidate.py`를 사용합니다. 변경 근거와 재적재 시 확인할 사항은 [데이터 교정 기록](docs/data/data_corrections_v1.4.0_review.md)과 [후보 검증 보고서](docs/data/pr16_application_url_review.md)를 참고하세요. 전체 회귀 테스트와 원본 본문 검사는 Git에서 제외된 원본 자료를 복원한 환경에서 실행합니다.
+후보 데이터 재생성은 `scripts/build_incremental_release_candidate.py`를 사용합니다. 변경 근거와 재적재 시 확인할 사항은 [데이터 교정 기록](docs/data/reports/data_corrections_v1.4.0_review.md)과 [후보 검증 보고서](docs/data/reports/pr16_application_url_review.md)를 참고하세요. 전체 회귀 테스트와 원본 본문 검사는 Git에서 제외된 원본 자료를 복원한 환경에서 실행합니다.
 
 ## 3차 프로젝트 일정
 

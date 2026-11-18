@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | [`product/`](product/) | 서비스 범위·요구사항 | [목차](product/README.md) |
 | [`api/`](api/) | 질문 API·데이터 계약 | [목차](api/README.md) |
+| [`architecture/`](architecture/) | 시스템 구조·데이터 흐름 | [목차](architecture/README.md) |
 | [`data/`](data/) | 데이터 수집·전처리·스키마 세부 근거 | [목차](data/README.md) |
 | [`development/`](development/) | 팀 공통 코딩 규칙, 이슈·PR별 작업 기록 | [목차](development/README.md) |
 | [`reports/`](reports/) | 최종 산출물 1~5 + 중간 보고서 | [목차](reports/README.md) |

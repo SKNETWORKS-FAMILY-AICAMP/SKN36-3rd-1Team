@@ -128,5 +128,5 @@
 
 - Neo4j는 후보 패키지로 다시 적재해야 한다.
 - Qdrant는 지역 교정 9개 청크의 `region`과 표기 교정 89개 청크의 `category`·`life_stages` payload만 맞으면 된다. 전체 재색인 시에도 같은 결과가 된다.
-- `data/metadata/candidate_*_verification.json`과 `docs/data/pr16_application_url_review.md`의 1,074/3,703은 교정 전 검증 기록이다. 재적재 후 다시 검증해야 한다.
+- `data/metadata/candidate_*_verification.json`과 `docs/data/reports/pr16_application_url_review.md`의 1,074/3,703은 교정 전 검증 기록이다. 재적재 후 다시 검증해야 한다.
 - 정적 품질 목록(`neo4j_semantic_flags_v1_3_2.json`)은 v1.4.0에서 `not_applicable`이므로 연령 등 정적 경고는 v1.4.0 검색 결과에 붙지 않는다.

@@ -4,7 +4,7 @@
 > **기준일시:** 2026-11-06 (KST)  
 > **작성자:** SSOK 데이터 / 아키텍처 감사팀
 > **기반 데이터셋:** `v1.3.2-verified` (237건) 및 원천 수집 데이터셋 (15,278건)  
-> **참고 문서:** `docs/data/policy_candidate_validation.md`, `data/handoff/data_contract.md`  
+> **참고 문서:** `docs/data/reports/policy_candidate_validation.md`, `data/handoff/data_contract.md`  
 > **상태:** **선별 알고리즘 v2 아키텍처 및 평가 지표 설계 완료 (실제 코드 변경 없는 독립 설계안)**
 
 ---

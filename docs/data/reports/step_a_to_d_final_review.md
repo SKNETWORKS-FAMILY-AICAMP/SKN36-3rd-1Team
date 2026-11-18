@@ -1,6 +1,6 @@
 # SSOK — STEP A~D 종합 품질 검증 및 최종 안정화 보고서
 
-> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](official_source_crosscheck_report.md)를 따릅니다.
+> ⚠️ **2026-11-06 공식 원문 대조로 내용이 바뀌었습니다.** 이 문서의 신규 문서 22건·청크 36건, 후보 규모(문서 268 · 청크 593 · 노드 1,082 · 관계 3,710), `verified_extracted`·`reference_restructured` 판정은 대조 **전** 값입니다. 요약 문서 상당수가 공식 원문과 달라 제외·교체했고, 현재 후보는 문서 261 · 청크 599 · 노드 1,074 · 관계 3,703입니다. 최신 판정은 [official_source_crosscheck_report.md](../official_source_crosscheck_report.md)를 따릅니다.
 
 - **문서 버전**: v1.0.0 (STEP A~D 종합 감사 보고서)
 - **작성일자**: 2026-11-06
@@ -129,20 +129,20 @@ flowchart TD
 
 ## 5. 검색 성능 평가의 재현성 및 사실 표기 교정 (Area 5)
 
-[`docs/data/graphrag_retrieval_evaluation.md`](graphrag_retrieval_evaluation.md) 보고서의 표현을 실제 실행 환경에 부합하도록 전면 교정하였습니다.
+[`docs/data/poc/graphrag_retrieval_evaluation.md`](../poc/graphrag_retrieval_evaluation.md) 보고서의 표현을 실제 실행 환경에 부합하도록 전면 교정하였습니다.
 
 1. **실제 DB 미접속 및 시뮬레이션 명시**:
    - 라이브 Neo4j 서버 접속 및 Qdrant API 임베딩 적재는 **`NOT_TESTED (Pending DB Deployment)`** 상태임을 명확히 기록함.
    - 30개 평가 질의에 대한 Hit@K / Recall@K 수치는 **오프라인 BM25 어휘 유사도 기반 시뮬레이션 추정치(`simulation / estimated`)**임을 명시하고, "실측치"라는 표현을 전면 삭제함.
    - 응답 지연 시간(18.5ms, 24.2ms) 및 토큰 비용은 이론적 모델 기반의 추정치(Estimated)로 정정함.
 2. **평가 질문셋 및 코드 자산화**:
-   - 30개 평가 질문 세트([`data/staging/evaluation/retrieval_benchmark_30.json`](../../data/staging/evaluation/retrieval_benchmark_30.json))와 평가 스크립트([`scripts/evaluate_graphrag_retrieval.py`](../../scripts/evaluate_graphrag_retrieval.py))는 추후 DB 담당자가 실서버를 구동했을 때 즉시 실행할 수 있는 공식 테스트베드로 확립함.
+   - 30개 평가 질문 세트([`data/staging/evaluation/retrieval_benchmark_30.json`](../../../data/staging/evaluation/retrieval_benchmark_30.json))와 평가 스크립트([`scripts/evaluate_graphrag_retrieval.py`](../../../scripts/evaluate_graphrag_retrieval.py))는 추후 DB 담당자가 실서버를 구동했을 때 즉시 실행할 수 있는 공식 테스트베드로 확립함.
 
 ---
 
 ## 6. 정밀 롤백 프로토콜 수립 (Area 6)
 
-단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식의 파괴적 위험을 제거하고, [`data/releases/v1.4.0-candidate/release_delta_manifest.json`](../../data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 명세 기반 타겟 롤백** 체계를 구축하였습니다.
+단순 접두어(`STARTS WITH 'POL_STG_'`)나 `doc_type != 'notice'` 삭제 방식의 파괴적 위험을 제거하고, [`data/releases/v1.4.0-candidate/release_delta_manifest.json`](../../../data/releases/v1.4.0-candidate/release_delta_manifest.json)에 기록된 **정확한 명세 기반 타겟 롤백** 체계를 구축하였습니다.
 
 ```cypher
 // 정밀 타겟 롤백 Cypher (정확한 9개 정책, 22개 문서, 9개 조건그룹만 타겟팅)
