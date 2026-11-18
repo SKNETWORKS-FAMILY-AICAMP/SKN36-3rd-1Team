@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-10T02:59:07.929008+09:00",
+  "created_at": "2026-11-18T10:23:56.011105+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "bd2c5f0980ac70710fe880a6e552cb1a3e165ae574b1eaf235bca8d792dc7367",
+    "source_sha256": "cbfb063fbc1d97dd606d15538f4291eeec8c2d9037a69f2dd60aa8cd8c488048",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -2324,6 +2324,31 @@
         "target_id": "COND_HH_확대가족"
       },
       {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
         "source_id": "POL_GOV_017",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_HH_1인가구"
@@ -2946,6 +2971,11 @@
       {
         "source_id": "POL_GOV_028",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_다자녀가구"
+      },
+      {
+        "source_id": "POL_GOV_028",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -3367,6 +3397,11 @@
         "source_id": "POL_GOV_038",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_GOV_039",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_다문화가족"
       },
       {
         "source_id": "POL_GOV_040",
@@ -4051,6 +4086,16 @@
       {
         "source_id": "POL_GOV_054",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_0_120"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_1인가구"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -4646,6 +4691,11 @@
       {
         "source_id": "POL_GOV_065",
         "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_한부모가정_조손가정"
+      },
+      {
+        "source_id": "POL_GOV_065",
+        "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_0_50_"
       },
       {
@@ -4667,6 +4717,31 @@
         "source_id": "POL_GOV_065",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "POL_YC_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
+      },
+      {
+        "source_id": "POL_YC_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_한부모가정"
+      },
+      {
+        "source_id": "POL_YC_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_장애인"
+      },
+      {
+        "source_id": "POL_YC_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_기타"
+      },
+      {
+        "source_id": "POL_YC_021",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
       },
       {
         "source_id": "GRP_POL_GOV_001_ROOT",
@@ -5417,6 +5492,36 @@
         "source_id": "GRP_POL_GOV_016_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_016_OR_INC"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_0_50_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_51_75_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_76_100_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_101_200_"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_INC_중위소득_200_초과"
       },
       {
         "source_id": "GRP_POL_GOV_016_ROOT",
@@ -6199,6 +6304,11 @@
         "target_id": "COND_INC_중위소득_200_초과"
       },
       {
+        "source_id": "GRP_POL_GOV_028_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_다자녀가구"
+      },
+      {
         "source_id": "GRP_POL_GOV_029_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_HH_무주택세대"
@@ -6657,6 +6767,11 @@
         "source_id": "GRP_POL_GOV_038_OR_INC",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "GRP_POL_GOV_039_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_다문화가족"
       },
       {
         "source_id": "GRP_POL_GOV_040_ROOT",
@@ -7420,6 +7535,11 @@
       },
       {
         "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_0_120"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_054_OR_INC"
       },
@@ -7447,6 +7567,11 @@
         "source_id": "GRP_POL_GOV_054_OR_INC",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_1인가구"
       },
       {
         "source_id": "GRP_POL_GOV_055_ROOT",
@@ -8127,6 +8252,41 @@
         "source_id": "GRP_POL_GOV_065_OR_INC",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_INC_중위소득_200_초과"
+      },
+      {
+        "source_id": "GRP_POL_GOV_065_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_한부모가정_조손가정"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_002_OR_SP"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_OR_SP",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_OR_SP",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_한부모가정"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_OR_SP",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_장애인"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_OR_SP",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_기타"
+      },
+      {
+        "source_id": "GRP_POL_YC_021_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
       }
     ],
     "replacement_relationships": [
@@ -8246,9 +8406,889 @@
         "target_id": "COND_EXCL_NO_NEED"
       },
       {
+        "source_id": "GRP_POL_YC_024_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_7_120"
+      },
+      {
+        "source_id": "GRP_POL_YC_047_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_053_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_025_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_20"
+      },
+      {
+        "source_id": "GRP_POL_BOK_002_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "GRP_POL_BOK_004_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "GRP_POL_BOK_018_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_0_64"
+      },
+      {
+        "source_id": "GRP_POL_BOK_027_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_0_24"
+      },
+      {
+        "source_id": "GRP_POL_BOK_034_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_65_120"
+      },
+      {
+        "source_id": "GRP_POL_BOK_053_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "GRP_POL_BOK_063_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "GRP_POL_BOK_075_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "GRP_POL_BOK_079_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_20_49"
+      },
+      {
+        "source_id": "GRP_POL_BOK_095_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_007_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "GRP_POL_009_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "GRP_POL_STG_ICN_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "GRP_POL_010_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_15_69"
+      },
+      {
+        "source_id": "GRP_POL_YC_002_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_29"
+      },
+      {
+        "source_id": "GRP_POL_YC_013_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_014_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_016_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "GRP_POL_YC_019_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_020_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_021_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_023_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "GRP_POL_YC_030_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_031_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_032_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_034_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_035_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "GRP_POL_YC_036_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_038_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_039_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_040_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_041_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_042_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_048_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_049_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "GRP_POL_YC_050_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "GRP_POL_YC_051_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_24"
+      },
+      {
+        "source_id": "GRP_POL_YC_052_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "GRP_POL_YC_054_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "GRP_POL_YC_055_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_056_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_057_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_058_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_061_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_062_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_063_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_064_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_YC_065_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_TYPE_FACILITY",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_장애인거주시설_이용인"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_TYPE_HOME",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_재가장애인"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_HOME_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_HOME_OR_INC",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_차상위계층"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_DIS",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_사지마비_와상"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_DIS",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_24시간_호흡기"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_SP_활동지원_X1_360점"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_HH",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_1인가구"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_OR_HH",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_HH_취약가구"
+      },
+      {
         "source_id": "GRP_POL_005_NOT_EXCL",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_005_OR_EXCL"
+      },
+      {
+        "source_id": "GRP_POL_YC_024_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_024_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_047_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_047_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_053_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_053_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_025_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_025_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_002_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_002_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_004_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_004_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_018_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_018_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_027_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_027_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_034_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_034_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_053_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_053_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_063_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_063_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_075_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_075_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_079_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_079_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_095_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_095_REST"
+      },
+      {
+        "source_id": "GRP_POL_007_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_007_REST"
+      },
+      {
+        "source_id": "GRP_POL_009_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_009_REST"
+      },
+      {
+        "source_id": "GRP_POL_STG_ICN_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_STG_ICN_001_REST"
+      },
+      {
+        "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_STG_MOLIT_001_REST"
+      },
+      {
+        "source_id": "GRP_POL_010_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_010_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_013_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_013_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_016_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_016_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_019_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_019_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_020_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_020_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_023_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_023_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_030_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_030_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_031_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_031_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_032_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_032_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_034_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_034_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_035_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_035_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_036_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_036_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_038_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_038_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_039_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_039_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_040_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_040_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_041_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_041_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_042_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_042_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_050_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_050_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_051_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_051_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_052_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_052_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_054_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_054_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_055_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_055_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_056_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_056_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_058_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_058_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_061_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_061_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_062_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_062_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_065_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_065_REST"
+      },
+      {
+        "source_id": "GRP_POL_YC_021_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_YC_021_REST"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_016_OR_TYPE"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_TYPE",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_016_TYPE_FACILITY"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_OR_TYPE",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_016_TYPE_HOME"
+      },
+      {
+        "source_id": "GRP_POL_GOV_016_TYPE_HOME",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_016_HOME_OR_INC"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_054_OR_DIS"
+      },
+      {
+        "source_id": "GRP_POL_GOV_054_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_GOV_054_OR_HH"
+      },
+      {
+        "source_id": "POL_YC_024",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_7_120"
+      },
+      {
+        "source_id": "POL_YC_047",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_053",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_025",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_20"
+      },
+      {
+        "source_id": "POL_BOK_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "POL_BOK_004",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "POL_BOK_018",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_0_64"
+      },
+      {
+        "source_id": "POL_BOK_027",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_0_24"
+      },
+      {
+        "source_id": "POL_BOK_034",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_65_120"
+      },
+      {
+        "source_id": "POL_BOK_053",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_BOK_063",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_BOK_075",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "POL_BOK_079",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_20_49"
+      },
+      {
+        "source_id": "POL_BOK_095",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_007",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "POL_009",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "POL_STG_ICN_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_STG_MOLIT_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_120"
+      },
+      {
+        "source_id": "POL_010",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_15_69"
+      },
+      {
+        "source_id": "POL_YC_002",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_29"
+      },
+      {
+        "source_id": "POL_YC_013",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_014",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_120"
+      },
+      {
+        "source_id": "POL_YC_019",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_020",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_021",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_023",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "POL_YC_030",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_031",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "POL_YC_032",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_034",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_035",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_34"
+      },
+      {
+        "source_id": "POL_YC_036",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_038",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_15_39"
+      },
+      {
+        "source_id": "POL_YC_039",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_040",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_041",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_042",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_048",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_049",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "POL_YC_050",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "POL_YC_051",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_24"
+      },
+      {
+        "source_id": "POL_YC_052",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "POL_YC_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_45"
+      },
+      {
+        "source_id": "POL_YC_055",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_056",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_057",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_18_39"
+      },
+      {
+        "source_id": "POL_YC_058",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_061",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_062",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_063",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_064",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_YC_065",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_AGE_19_39"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_장애인거주시설_이용인"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_재가장애인"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_기초생활수급자"
+      },
+      {
+        "source_id": "POL_GOV_016",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_차상위계층"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_사지마비_와상"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_24시간_호흡기"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_SP_활동지원_X1_360점"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_1인가구"
+      },
+      {
+        "source_id": "POL_GOV_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_HH_취약가구"
       },
       {
         "source_id": "POL_GOV_017",
@@ -8284,7 +9324,24 @@
       "COND_EXCL_FRAUD_UNPAID",
       "COND_EXCL_NO_NEED",
       "COND_AGE_0_65",
-      "COND_CHILD_AGE_UNDER_24M"
+      "COND_CHILD_AGE_UNDER_24M",
+      "COND_AGE_7_120",
+      "COND_AGE_18_20",
+      "COND_AGE_0_64",
+      "COND_AGE_0_24",
+      "COND_AGE_20_49",
+      "COND_AGE_19_34",
+      "COND_AGE_15_69",
+      "COND_AGE_18_29",
+      "COND_AGE_18_45",
+      "COND_AGE_19_24",
+      "COND_SP_장애인거주시설_이용인",
+      "COND_SP_재가장애인",
+      "COND_SP_차상위계층",
+      "COND_SP_사지마비_와상",
+      "COND_SP_24시간_호흡기",
+      "COND_SP_활동지원_X1_360점",
+      "COND_HH_취약가구"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",
@@ -8308,6 +9365,7 @@
       "GRP_POL_GOV_015_OR_HH",
       "GRP_POL_GOV_015_OR_INC",
       "GRP_POL_GOV_016_OR_HH",
+      "GRP_POL_GOV_016_OR_INC",
       "GRP_POL_GOV_017_OR_HH",
       "GRP_POL_GOV_017_OR_INC",
       "GRP_POL_GOV_018_OR_HH",
@@ -8374,7 +9432,8 @@
       "GRP_POL_GOV_063_OR_HH",
       "GRP_POL_GOV_064_OR_HH",
       "GRP_POL_GOV_064_OR_INC",
-      "GRP_POL_GOV_065_OR_INC"
+      "GRP_POL_GOV_065_OR_INC",
+      "GRP_POL_YC_002_OR_SP"
     ],
     "region_corrected_chunks": 9
   },
