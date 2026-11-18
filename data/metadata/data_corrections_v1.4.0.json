@@ -1259,7 +1259,8 @@
       "target_name": "연령조건: 만 19세~39세",
       "evidence_document_id": "DOC_STG_ICN_001_GOV24",
       "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
-      "evidence": "서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」"
+      "evidence": "서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」",
+      "review_status": "needs_review"
     },
     {
       "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -1950,7 +1951,7 @@
     "POL_GOV_050"
   ],
   "revised_at": "2026-11-18",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영; #79 원문으로 확인한 신청자 나이 조건 추가(나이 외 조건은 하위 UNKNOWN 그룹으로 남김), 우대·순위 조건을 필수에서 제거(special_condition_removals), 정책-조건 직접 관계 추가 키(requires_condition_additions); #80 소득·가구 원문 대조 결과 반영, POL_GOV_016·054 유형별 조건 구조, POL_GOV_016 소득 그룹 mark_unknown→remove; #79 수혜자 나이 27건(자녀 월령 19, 대상자 나이 8)을 신청자 나이와 구분해 추가, POL_001 가구 유형 안내 조건 추가; PR #89 리뷰 반영: POL_BOK_004 상한 40세(신청 월 만 40세 포함), POL_STG_ICN_001은 정부24 원문 18~39세로 연결; PR #89 2차 리뷰 반영: POL_GOV_016 유형 조건에 서울시 관할 시설·서울시 주민등록 제한을 이름에 명시; POL_STG_ICN_001 나이를 인천 서구 사업안내서 기준 19~39세로 정정",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영; #79 원문으로 확인한 신청자 나이 조건 추가(나이 외 조건은 하위 UNKNOWN 그룹으로 남김), 우대·순위 조건을 필수에서 제거(special_condition_removals), 정책-조건 직접 관계 추가 키(requires_condition_additions); #80 소득·가구 원문 대조 결과 반영, POL_GOV_016·054 유형별 조건 구조, POL_GOV_016 소득 그룹 mark_unknown→remove; #79 수혜자 나이 27건(자녀 월령 19, 대상자 나이 8)을 신청자 나이와 구분해 추가, POL_001 가구 유형 안내 조건 추가; PR #89 리뷰 반영: POL_BOK_004 상한 40세(신청 월 만 40세 포함), POL_STG_ICN_001은 정부24 원문 18~39세로 연결; PR #89 2차 리뷰 반영: POL_GOV_016 유형 조건에 서울시 관할 시설·서울시 주민등록 제한을 이름에 명시; POL_STG_ICN_001 나이를 인천 서구 사업안내서 기준 19~39세로 정정; POL_STG_ICN_001 나이 조건 관계를 검수 대기(needs_review)로 표시",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -5522,7 +5523,8 @@
       "condition_id": "COND_AGE_19_39",
       "target_name": "연령조건: 만 19세~39세",
       "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세"
+      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
+      "review_status": "needs_review"
     },
     {
       "policy_id": "POL_STG_MOLIT_001",
@@ -6111,6 +6113,9 @@
     },
     "source_discrepancies": {
       "POL_STG_ICN_001": "사업안내서(인천 청년포털 첨부)는 19~39세, 정부24 지원조건 코드는 18~39세(상세 화면은 '청년'만 표기). 사업안내서를 기준으로 19~39세를 쓴다(반석 확인 2026-11-18). 사업안내서는 '서구 소재 중소기업'으로 적고 청년포털은 '전국 중소기업'으로 적어 근무지 조건도 다르다(이번 교정 범위 밖). 사업안내서 사본: 4차_준비/age_conditions/evidence/POL_STG_ICN_001_incheon_welfare_sharing_guide.pdf"
+    },
+    "pending_followups": {
+      "POL_STG_ICN_001": "나이 19~39세의 실제 근거(인천 서구 「복지공유제 사업안내서」)가 후보 문서에 없다. 다음 재적재 때 사업안내서를 Document로 추가하고 evidence_document_id를 그 문서로 바꾼 뒤 review_status를 해제한다. 그 전까지 조건 관계는 review_status=needs_review(검수 대기)다."
     }
   },
   "beneficiary_age_notes": {

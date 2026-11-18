@@ -189,9 +189,11 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
     assert seen_regions == set(region_by_policy), "지역 교정 대상 관계 누락"
     # 원문 근거로 새로 잇는 관계. 제외 조건은 NOT 그룹 안에만 둔다
     # (REQUIRES_CONDITION으로 이으면 "공무원이어야 한다"는 반대 뜻이 되기 때문이다)
+    # review_status는 기본 extracted. 근거 문서가 아직 후보에 없는 조건은 교정 항목에 needs_review를 적어
+    # 검색 계층이 자동 판정을 보류하게 한다(QUALITY_NEEDS_REVIEW).
     new_rows = [{"source_id": item["group_id"], "relation": "CONTAINS_CONDITION", "target_id": item["condition_id"],
                  "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
-                 "evidence_location": item["evidence_location"], "review_status": "extracted"}
+                 "evidence_location": item["evidence_location"], "review_status": item.get("review_status", "extracted")}
                 for item in corrections["group_condition_additions"]]
     new_rows += [{"source_id": item["source_id"], "relation": "CONTAINS_GROUP", "target_id": item["target_id"],
                   "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
@@ -205,7 +207,8 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
             f"이미 있는 REQUIRES 관계를 다시 추가함: {item['policy_id']} {item['condition_id']}"
         new_rows.append({"source_id": item["policy_id"], "relation": "REQUIRES_CONDITION", "target_id": item["condition_id"],
                          "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
-                         "evidence_location": item["evidence_location"], "review_status": "extracted"})
+                         "evidence_location": item["evidence_location"],
+                         "review_status": item.get("review_status", "extracted")})
     for item in corrections["life_stage_corrections"]:
         for stage in [value for value in item["after"] if value not in item["before"]]:
             new_rows.append({"source_id": item["policy_id"], "relation": "APPLIES_TO_LIFESTAGE",
