@@ -735,22 +735,22 @@
     {
       "condition_id": "COND_SP_장애인거주시설_이용인",
       "type": "SPECIAL_TARGET",
-      "name": "특화조건: 장애인거주시설 이용인",
+      "name": "특화조건: 서울시 관할 장애인거주시설 이용인",
       "operator": "IN",
-      "value": "장애인거주시설 이용인",
+      "value": "서울시 관할 장애인거주시설 이용인",
       "unit": "특성",
       "evidence_location": "원문 대조 교정",
-      "description": "정책 지원 자격 조건 (특화조건: 장애인거주시설 이용인). 프로필 미지원 → needs_check"
+      "description": "정책 지원 자격 조건 (특화조건: 서울특별시 관할 운영시설에 거주하는 장애인, 소득제한 없음). 프로필 미지원 → needs_check"
     },
     {
       "condition_id": "COND_SP_재가장애인",
       "type": "SPECIAL_TARGET",
-      "name": "특화조건: 재가장애인",
+      "name": "특화조건: 서울시 주민등록 재가 장애인",
       "operator": "IN",
-      "value": "재가장애인",
+      "value": "서울시 주민등록 재가 장애인",
       "unit": "특성",
       "evidence_location": "원문 대조 교정",
-      "description": "정책 지원 자격 조건 (특화조건: 재가장애인, 시설에 거주하지 않는 장애인). 프로필 미지원 → needs_check"
+      "description": "정책 지원 자격 조건 (특화조건: 서울특별시에 주민등록이 등재된 재가 장애인). 프로필 미지원 → needs_check"
     },
     {
       "condition_id": "COND_SP_차상위계층",
@@ -1552,7 +1552,7 @@
     {
       "group_id": "GRP_POL_GOV_016_TYPE_FACILITY",
       "condition_id": "COND_SP_장애인거주시설_이용인",
-      "target_name": "특화조건: 장애인거주시설 이용인",
+      "target_name": "특화조건: 서울시 관할 장애인거주시설 이용인",
       "evidence_document_id": "DOC_GOV_016",
       "evidence_location": "원문 대조 교정",
       "evidence": "거주시설 장애인: 서울특별시 관할 운영시설에 거주하는 장애인 (소득제한 없음)"
@@ -1560,7 +1560,7 @@
     {
       "group_id": "GRP_POL_GOV_016_TYPE_HOME",
       "condition_id": "COND_SP_재가장애인",
-      "target_name": "특화조건: 재가장애인",
+      "target_name": "특화조건: 서울시 주민등록 재가 장애인",
       "evidence_document_id": "DOC_GOV_016",
       "evidence_location": "원문 대조 교정",
       "evidence": "재가 장애인: 서울특별시에 주민등록이 등재된 기초생활수급자 또는 차상위계층 장애인"
@@ -1950,7 +1950,7 @@
     "POL_GOV_050"
   ],
   "revised_at": "2026-11-18",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영; #79 원문으로 확인한 신청자 나이 조건 추가(나이 외 조건은 하위 UNKNOWN 그룹으로 남김), 우대·순위 조건을 필수에서 제거(special_condition_removals), 정책-조건 직접 관계 추가 키(requires_condition_additions); #80 소득·가구 원문 대조 결과 반영, POL_GOV_016·054 유형별 조건 구조, POL_GOV_016 소득 그룹 mark_unknown→remove; #79 수혜자 나이 27건(자녀 월령 19, 대상자 나이 8)을 신청자 나이와 구분해 추가, POL_001 가구 유형 안내 조건 추가; PR #89 리뷰 반영: POL_BOK_004 상한 40세(신청 월 만 40세 포함), POL_STG_ICN_001은 정부24 원문 18~39세로 연결",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영; #79 원문으로 확인한 신청자 나이 조건 추가(나이 외 조건은 하위 UNKNOWN 그룹으로 남김), 우대·순위 조건을 필수에서 제거(special_condition_removals), 정책-조건 직접 관계 추가 키(requires_condition_additions); #80 소득·가구 원문 대조 결과 반영, POL_GOV_016·054 유형별 조건 구조, POL_GOV_016 소득 그룹 mark_unknown→remove; #79 수혜자 나이 27건(자녀 월령 19, 대상자 나이 8)을 신청자 나이와 구분해 추가, POL_001 가구 유형 안내 조건 추가; PR #89 리뷰 반영: POL_BOK_004 상한 40세(신청 월 만 40세 포함), POL_STG_ICN_001은 정부24 원문 18~39세로 연결; PR #89 2차 리뷰 반영: POL_GOV_016 유형 조건에 서울시 관할 시설·서울시 주민등록 제한을 이름에 명시",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -5779,14 +5779,14 @@
     {
       "policy_id": "POL_GOV_016",
       "condition_id": "COND_SP_장애인거주시설_이용인",
-      "target_name": "특화조건: 장애인거주시설 이용인",
+      "target_name": "특화조건: 서울시 관할 장애인거주시설 이용인",
       "evidence_document_id": "DOC_GOV_016",
       "evidence_location": "원문 대조 교정"
     },
     {
       "policy_id": "POL_GOV_016",
       "condition_id": "COND_SP_재가장애인",
-      "target_name": "특화조건: 재가장애인",
+      "target_name": "특화조건: 서울시 주민등록 재가 장애인",
       "evidence_document_id": "DOC_GOV_016",
       "evidence_location": "원문 대조 교정"
     },

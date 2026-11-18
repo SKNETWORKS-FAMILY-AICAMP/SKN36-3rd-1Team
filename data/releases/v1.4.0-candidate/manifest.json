@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-18T14:54:34.752809+09:00",
+  "created_at": "2026-11-18T16:09:06.929495+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
@@ -31,12 +31,12 @@
     },
     "CHANGELOG.md": {
       "size_bytes": 5940,
-      "sha256": "82d0e0e6afd2e1c2397bd56ad6e586a73baf28fe125d802689f640b962eac89e",
+      "sha256": "a2167454d8847f387522d6d9ea18b75ccdeb26ba6ce18f994e7fe2f0ddbc0f93",
       "record_count": 0
     },
     "release_delta_manifest.json": {
       "size_bytes": 320582,
-      "sha256": "8bbd594fd0b91f798daa89c97f58a6ce30e63e42aea3f1bb120359df5515a4bf",
+      "sha256": "aad745b9582eedd0d56401d6ab1ffa07b3dccd2163c1c409c201495e04ea0cfb",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -65,8 +65,8 @@
       "record_count": 261
     },
     "neo4j/nodes_eligibility_condition.jsonl": {
-      "size_bytes": 34618,
-      "sha256": "89419a3dad93a92661cbdcd80d5a3488c4aaeb059c188295e4029ceed2b9ae93",
+      "size_bytes": 34756,
+      "sha256": "cb24b1b1a0f186652492fa6a504f646da6b2275b683870b94194baab97834b45",
       "record_count": 104
     },
     "neo4j/nodes_lifestage.jsonl": {
@@ -95,8 +95,8 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 677314,
-      "sha256": "cd11e9512c7e526f591193160dfae27691c505cf609ed6afddcb3afc0faeb402",
+      "size_bytes": 677396,
+      "sha256": "7fd704de51457df888e033ad2fde8d71a4d9e0c96a22a915c67092a74d6b809a",
       "record_count": 2667
     },
     "neo4j/schema_constraints.cypher": {
