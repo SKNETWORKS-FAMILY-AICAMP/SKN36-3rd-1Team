@@ -35,7 +35,7 @@ flowchart TD
     ENGINE -->|"2. 정책 식별자 기반 그래프 문맥 조회"| NEO4J
     NEO4J -->|"조건 그룹(ConditionGroup) & 공식 출처(Document)"| ENGINE
     ENGINE -->|"3. 검색 문맥 및 프로필 전달"| CHECKER
-    CHECKER -->|"자격 적합도(eligible/ineligible) & 접수 상태"| LLM
+    CHECKER -->|"자격 판정(eligible / ineligible / needs_check) & 접수 상태"| LLM
     ENGINE -->|"인용 가능 컨텍스트 전달"| LLM
     LLM -->|"출처 URL 및 인용문 포함 응답"| API
     API -->|"JSON 응답 (Policy Cards + Reasons)"| UI
@@ -47,12 +47,12 @@ flowchart TD
 
 | 계층 (Layer) | 주요 기술 | 핵심 책임 |
 |---|---|---|
-| **Frontend** | React 18, TypeScript, TailwindCSS, Vite | • 사용자 생애주기 프로필(연령, 소득, 지역, 가구원, 특성) 입력 폼<br/>• 질문 입력 및 추천 정책 카드 실시간 렌더링<br/>• 공식 출처 URL 및 추가 확인 필요 사항(`needs_review`) 배지 표시 |
+| **Frontend** | React 18, TypeScript, Vite | • 사용자 생애주기 프로필(연령, 소득, 지역, 가구원, 특성) 입력 폼<br/>• 질문 입력 및 추천 정책 카드 실시간 렌더링<br/>• 공식 출처 URL 및 추가 확인 필요 사항(`needs_review`) 배지 표시 |
 | **API Gateway** | FastAPI, Pydantic v2, Uvicorn | • `POST /api/ask` 계약([ask_contract.md](../api/ask_contract.md)) 검증<br/>• 헬스체크(`/health`) 및 글로벌 예외 핸들링 |
-| **Search & Pipeline** | Python 3.11, NetworkX | • **1. Vector Search**: 질문 임베딩 기반 Qdrant 밀집 벡터 Top-K 시맨틱 검색<br/>• **2. Graph Evidence Linking**: 검색된 정책의 Neo4j 노드·조건그룹·공식근거 연결<br/>• **3. Checker Evaluation**: 사용자 프로필 기반 규칙 엔진(Checker) 자격 및 접수 상태 판정 |
-| **Graph Store** | Neo4j 5.x Community (Bolt) | • `Policy`, `TargetGroup`, `Condition`, `Document` 노드 및 관계 모델링<br/>• 파라미터화된 Cypher 쿼리로 SQL Injection 차단 |
-| **Vector Store** | Qdrant 1.x (gRPC/REST) | • Qwen3 Embedding 4B 모델(2560 차원)로 인덱싱된 정책 요약 및 청크 벡터<br/>• `policy_id`, `lifecycle`, `source_url` 메타데이터 페이로드 필터링 |
-| **RAG / LLM** | OpenAI API (GPT-4o-mini / GPT-4o) | • 프롬프트 인젝션 방어 및 시스템 가드레일 적용<br/>• 검색된 공식 문서 조항 내 팩트 기반 근거 문장 생성 |
+| **Search & Pipeline** | Python (`database/hybrid_search.py`, `backend/rag/`, `backend/eligibility/`) | • **1. Vector Search**: 질문 임베딩 기반 Qdrant 밀집 벡터 Top-K 시맨틱 검색<br/>• **2. Graph Evidence Linking**: 검색된 정책의 Neo4j 노드·조건그룹·공식근거 연결<br/>• **3. Checker Evaluation**: 사용자 프로필 기반 규칙 엔진(Checker) 자격 및 접수 상태 판정 |
+| **Graph Store** | Neo4j 5.26 Community (Bolt) | • `Policy`, `Document`, `ConditionGroup`, `EligibilityCondition`, `Organization`, `Region`, `Category`, `LifeStage`, `TargetGroup` 노드 및 관계 모델링<br/>• 파라미터화된 Cypher 쿼리로 SQL Injection 차단 |
+| **Vector Store** | Qdrant 1.12 (REST) | • 서비스 기본: `qwen3-embedding:0.6b`(1024차원)로 색인한 B2 청크(컬렉션 `exp_b2_qwen3emb06b_v140_v1`). 4B는 비교 실험용([run03 분석](../development/ISSUE41_AB_RUN03_ANALYSIS.md))<br/>• payload: `policy_id`, `document_id`, `chunk_id`, `policy_name`, `category`, `region`, `life_stages`, `target_groups`, `source_url` 등 |
+| **RAG / LLM** | OpenAI API (코드 기본값 `gpt-5.4-mini`, `LLM_MODEL`로 변경. 운영 모델은 #82에서 결정) | • 프롬프트 인젝션 방어 및 시스템 가드레일 적용<br/>• 검색된 공식 문서 조항 내 팩트 기반 근거 문장 생성 |
 
 ---
 

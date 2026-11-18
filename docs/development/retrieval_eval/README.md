@@ -54,15 +54,15 @@
 
 ```bash
 # 루트 디렉터리(LifePolicy AI)에서 실행 (필수 --output 옵션 지정)
-python database/retrieval_v140_eval.py --output docs/development/retrieval_eval/eval_result.json
+python database/retrieval_v140_eval.py --output data/staging/evaluation/retrieval_v140_eval.json
 
 # 모듈 형태로 실행할 경우 (권장)
-python -m database.retrieval_v140_eval --output docs/development/retrieval_eval/eval_result.json
+python -m database.retrieval_v140_eval --output data/staging/evaluation/retrieval_v140_eval.json
 ```
 
 ### 주요 평가 지표
 - **Recall@5 (Full Containment)**: 필수 근거 구간 전체(`gold.required`)가 Top-5 검색 청크 내에 완전히 포함된 질문 비율
 - **MRR (Mean Reciprocal Rank)**: 마지막 필수 근거가 확보되는 순위의 역수 평균
-- **Hit@1 (Top-1 Accuracy)**: 검색 결과 1위에 정답 정책이 포함될 확률
-- **Hit@3 / Hit@5**: 상위 3개 또는 5개 추천 카드 내에 정답 정책이 포함될 확률
-- **Constraint Pass Rate**: 연령/소득/지역 하드 필터링 제약 조건 통과율
+- **first_hit_rank / outcomes**: 질문별 첫 근거 순위와 결과 분류(완전 성공, 문서만 맞음 등)
+
+> freeze 파일의 채점 지표는 위 네 가지(`recall_at_5`, `mrr`, `first_hit_rank`, `outcomes`, 근거 일치 방식 `full_containment`)뿐이다. freeze의 `data_version`은 `v1.3.2-verified`이므로 v1.4.0 데이터로 평가할 때는 데이터 버전이 다르다는 점을 결과에 함께 적는다.

@@ -10,32 +10,36 @@
 
 행정안전부의 정부24(Gov24) 공공서비스 등록정보는 중앙부처 및 지자체의 대민 지원 혜택을 포괄하는 핵심 공공 데이터셋입니다.
 
-- **데이터 출처**: 공공데이터포털(data.go.kr) "행정안전부_공공서비스 목록 및 상세 등록정보"
-- **연계 방식**: 공공데이터포털 Open API 및 파일 다운로드 배치 수집
-- **수집 주기**: 마일스톤 정기 갱신 및 증분 파이프라인 적용
+- **데이터 출처**: 공공데이터포털 행정안전부 공공서비스 Open API ([Swagger 명세](https://infuser.odcloud.kr/api/stages/44436/api-docs?1684891964110))
+- **사용 API**: `serviceList`(목록), `serviceDetail`(상세), `supportConditions`(지원조건 JA 코드). 수집기: `collectors/api/gov24_collector.py`
+- **원본 보관**: `data/raw/gov24/` (원본 필드명은 한글 키 그대로 저장)
 
 ---
 
 ## 2. 관련 핵심 규격 문서
 
-- [gov24_field_mapping.md](../../data/gov24_field_mapping.md): **[핵심 매핑표]** 행안부 API 원본 필드(`svcId`, `svcNm`, `trgterInfo`, `slctnCritCn`, `alwAmt`, `reqstMthdCn` 등)와 당사 표준 데이터 계약(`policy_id`, `policy_name`, `target_group`, `condition`, `benefit_amount`, `apply_method` 등) 간의 1:1 변환 규격.
+- [gov24_field_mapping.md](../../data/gov24_field_mapping.md): **[핵심 매핑표]** 행안부 API 원본 필드(`서비스ID`, `서비스명`, `지원대상`, `선정기준`, `지원내용`, `신청방법` 등 한글 키)와 정규화 필드(`official_id`, `policy_name`, `target_audience`, `selection_criteria`, `benefit`, `application_method` 등)의 변환표. 지원조건 JA 코드 매핑도 이 문서에 있다.
 - [cross_agency_condition_mapping.md](../../data/cross_agency_condition_mapping.md): 행안부 지원조건 코드를 복지부 및 온통청년 표준 자격 체계와 상호 호환되도록 통합 매핑한 규격서.
 
 ---
 
 ## 3. 주요 연계 필드 요약
 
-[gov24_field_mapping.md](../../data/gov24_field_mapping.md) 및 당사 표준 데이터 계약에 따른 행안부 공공서비스 원본 필드 매핑 규칙입니다.
+[gov24_field_mapping.md](../../data/gov24_field_mapping.md) 1절에서 자주 쓰는 필드만 옮겼다. 전체 목록과 지원조건(JA 코드) 매핑은 원문 표를 본다.
 
-| 행안부 원본 필드 | 표준 계약 필드 | 매핑 및 처리 규칙 |
+| 행안부 원본 필드 | 정규화 필드 | 설명 |
 |---|---|---|
-| `서비스ID` (`svcId`) | `official_id` / `service_id` | 원천 기관 공공서비스 고유 식별자 (PK). 원본 대조 및 갱신 추적용으로 보존 |
-| (시스템 부여) | `policy_id` | 당사 프로젝트 전역 정책 기본 키 (PK). `POL_GOV_…` 형식 부여 (예: `POL_GOV_001`) |
-| `서비스명` (`svcNm`) | `policy_name` / `service_name` | 정책 명칭 정규화 (특수문자 및 불필요한 기관 태그 정제) |
-| `지원대상` (`trgterInfo`) | `target_summary` / `target_audience` | 지원대상 요약 텍스트 정제 |
-| `선정기준` (`slctnCritCn`) | `conditions` / `selection_criteria` | 선정기준 원문에서 연령, 소득, 가구 조건 정규식 추출 및 구조화 |
-| `신청방법` (`reqstMthdCn`) | `apply_method` / `application_method` | `온라인만`, `오프라인만`, `둘 다`, `직권(신청 없음)`으로 표준화 |
-| `소관기관명` (`refrncNm`) | `supervising_agency` / `agency` | 소관 부처 또는 지자체명 매핑 |
-| `서비스목적요약` (`svcPruposeCn`) | `description` / `summary` | 서비스 목적 및 혜택 상세 설명 |
-| `온라인신청사이트URL` | `official_apply_url` | 전용 온라인 신청 주소 (포털 첫 화면인 경우 비움 처리) |
-| `상세조회URL` | `source_url` | 정부24 공식 상세 안내 웹페이지 URL |
+| `서비스ID` | `official_id` / `service_id` | 공공서비스 고유 식별자. 원본 대조와 갱신 추적에 쓴다 |
+| (프로젝트 부여) | `policy_id` | 프로젝트 정책 ID. 정부24에서 고른 정책은 `POL_GOV_001` 형식(`scripts/build_clean_dataset.py`), 4차 추가 정책은 `POL_STG_…` 형식 |
+| `서비스명` | `policy_name` / `service_name` | 정책 및 공공서비스 명칭 |
+| `소관기관명` | `agency` / `organization` | 소관 부처 또는 지자체명 (`부서명`은 `organization`에 결합) |
+| `지원대상` | `target_audience` / `eligibility` | 지원 대상 텍스트 |
+| `선정기준` | `selection_criteria` | 자격 요건 및 선정 기준 텍스트 |
+| `지원내용` | `benefit` | 지원 금액, 혜택, 기간 |
+| `신청기한` | `application_period` | 신청 기간 또는 상시 여부 |
+| `신청방법` | `application_method` | 온라인/방문 등 신청 절차 (원문 그대로 저장) |
+| `서비스목적요약` / `서비스목적` | `purpose` / `summary` | 사업 목적 및 개요 |
+| `온라인신청사이트URL` | `official_apply_url` | 신청 주소만 저장, 없거나 안내 주소이면 null |
+| `상세조회URL` | `source_url` | 정부24 공식 상세 안내 웹페이지 |
+
+- 나이·소득·가구 등 자격 조건은 본문 문장이 아니라 `supportConditions`의 JA 코드에서 만든다. 지원조건 API에 없는 항목은 '조건 없음'이 아니라 '미확인'이다.
