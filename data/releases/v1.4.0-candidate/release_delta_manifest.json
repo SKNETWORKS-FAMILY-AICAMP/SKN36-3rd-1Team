@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T10:23:56.011105+09:00",
+  "created_at": "2026-11-18T10:31:25.147866+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "cbfb063fbc1d97dd606d15538f4291eeec8c2d9037a69f2dd60aa8cd8c488048",
+    "source_sha256": "8c284664e7f03701a4e36d601610eb141cf9b52b08e9017d3c27f1fb51ae7ade",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8716,6 +8716,141 @@
         "target_id": "COND_HH_취약가구"
       },
       {
+        "source_id": "GRP_POL_BOK_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_005_OR_TARGET",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_009_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_013_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_36_71M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_015_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_031_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_033_OR_TARGET",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_37M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_036_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_108M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_045_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_054_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_72M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_055_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_24_85M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_061_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_067_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_144M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_068_OR_TARGET",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_069_OR_TARGET",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_071_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_072_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "GRP_POL_STG_EX_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_228M"
+      },
+      {
+        "source_id": "GRP_POL_STG_MOIS_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "GRP_POL_BOK_008_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_9_24"
+      },
+      {
+        "source_id": "GRP_POL_BOK_010_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_9_24"
+      },
+      {
+        "source_id": "GRP_POL_BOK_035_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_18_PLUS"
+      },
+      {
+        "source_id": "GRP_POL_BOK_038_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_17"
+      },
+      {
+        "source_id": "GRP_POL_BOK_046_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_UNDER_18"
+      },
+      {
+        "source_id": "GRP_POL_BOK_059_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_UNDER_18"
+      },
+      {
+        "source_id": "GRP_POL_BOK_060_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_64"
+      },
+      {
+        "source_id": "GRP_POL_BOK_073_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_PLUS"
+      },
+      {
         "source_id": "GRP_POL_005_NOT_EXCL",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_005_OR_EXCL"
@@ -8979,6 +9114,181 @@
         "source_id": "GRP_POL_GOV_054_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_GOV_054_OR_HH"
+      },
+      {
+        "source_id": "GRP_POL_BOK_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_001_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_005_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_005_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_005_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_005_OR_TARGET"
+      },
+      {
+        "source_id": "GRP_POL_BOK_005_OR_TARGET",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_005_ALT"
+      },
+      {
+        "source_id": "GRP_POL_BOK_009_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_009_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_013_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_013_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_015_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_015_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_031_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_031_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_033_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_033_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_033_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_033_OR_TARGET"
+      },
+      {
+        "source_id": "GRP_POL_BOK_033_OR_TARGET",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_033_ALT"
+      },
+      {
+        "source_id": "GRP_POL_BOK_036_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_036_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_045_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_045_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_054_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_054_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_055_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_055_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_061_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_061_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_067_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_067_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_068_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_068_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_068_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_068_OR_TARGET"
+      },
+      {
+        "source_id": "GRP_POL_BOK_068_OR_TARGET",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_068_ALT"
+      },
+      {
+        "source_id": "GRP_POL_BOK_069_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_069_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_069_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_069_OR_TARGET"
+      },
+      {
+        "source_id": "GRP_POL_BOK_069_OR_TARGET",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_069_ALT"
+      },
+      {
+        "source_id": "GRP_POL_BOK_071_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_071_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_072_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_072_REST"
+      },
+      {
+        "source_id": "GRP_POL_STG_EX_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_STG_EX_001_REST"
+      },
+      {
+        "source_id": "GRP_POL_STG_MOIS_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_STG_MOIS_001_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_008_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_008_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_010_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_010_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_035_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_035_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_038_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_038_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_046_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_046_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_059_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_059_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_060_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_060_REST"
+      },
+      {
+        "source_id": "GRP_POL_BOK_073_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_BOK_073_REST"
       },
       {
         "source_id": "POL_YC_024",
@@ -9291,6 +9601,141 @@
         "target_id": "COND_HH_취약가구"
       },
       {
+        "source_id": "POL_BOK_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "POL_BOK_005",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "POL_BOK_009",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "POL_BOK_013",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_36_71M"
+      },
+      {
+        "source_id": "POL_BOK_015",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "POL_BOK_031",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "POL_BOK_033",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_37M"
+      },
+      {
+        "source_id": "POL_BOK_036",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_108M"
+      },
+      {
+        "source_id": "POL_BOK_045",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "POL_BOK_054",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_72M"
+      },
+      {
+        "source_id": "POL_BOK_055",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_24_85M"
+      },
+      {
+        "source_id": "POL_BOK_061",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "POL_BOK_067",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_144M"
+      },
+      {
+        "source_id": "POL_BOK_068",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "POL_BOK_069",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
+      },
+      {
+        "source_id": "POL_BOK_071",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "POL_BOK_072",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_24M"
+      },
+      {
+        "source_id": "POL_STG_EX_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_228M"
+      },
+      {
+        "source_id": "POL_STG_MOIS_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "POL_BOK_008",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_9_24"
+      },
+      {
+        "source_id": "POL_BOK_010",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_9_24"
+      },
+      {
+        "source_id": "POL_BOK_035",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_18_PLUS"
+      },
+      {
+        "source_id": "POL_BOK_038",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_17"
+      },
+      {
+        "source_id": "POL_BOK_046",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_UNDER_18"
+      },
+      {
+        "source_id": "POL_BOK_059",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_UNDER_18"
+      },
+      {
+        "source_id": "POL_BOK_060",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_64"
+      },
+      {
+        "source_id": "POL_BOK_073",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TARGET_AGE_6_PLUS"
+      },
+      {
         "source_id": "POL_GOV_017",
         "relation": "APPLIES_TO_LIFESTAGE",
         "target_id": "LIFESTAGE_청소년"
@@ -9341,7 +9786,22 @@
       "COND_SP_사지마비_와상",
       "COND_SP_24시간_호흡기",
       "COND_SP_활동지원_X1_360점",
-      "COND_HH_취약가구"
+      "COND_HH_취약가구",
+      "COND_CHILD_AGE_UNDER_156M",
+      "COND_CHILD_AGE_36_71M",
+      "COND_CHILD_AGE_UNDER_37M",
+      "COND_CHILD_AGE_UNDER_108M",
+      "COND_CHILD_AGE_UNDER_216M",
+      "COND_CHILD_AGE_UNDER_72M",
+      "COND_CHILD_AGE_24_85M",
+      "COND_CHILD_AGE_UNDER_144M",
+      "COND_CHILD_AGE_UNDER_228M",
+      "COND_TARGET_AGE_9_24",
+      "COND_TARGET_AGE_18_PLUS",
+      "COND_TARGET_AGE_6_17",
+      "COND_TARGET_AGE_UNDER_18",
+      "COND_TARGET_AGE_6_64",
+      "COND_TARGET_AGE_6_PLUS"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",
