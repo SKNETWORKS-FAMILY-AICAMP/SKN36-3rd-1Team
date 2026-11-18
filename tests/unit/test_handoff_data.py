@@ -218,8 +218,12 @@ class TestNoiseChunkSelection(unittest.TestCase):
         self.assertEqual(len(candidates), 27)
 
     def test_select_with_exclusion(self):
+        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 599 → 572).
+        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 572}
+        version = hd.dataset_version()
+        self.assertIn(version, expected_selected, f"기대 건수가 정해지지 않은 데이터셋: {version}")
         selected, excluded = hd.select_chunks_for_embedding(self.chunks, exclude_noise=True)
-        self.assertEqual(len(selected), 530)
+        self.assertEqual(len(selected), expected_selected[version])
         self.assertEqual(len(excluded), 27)
         self.assertEqual(len(selected) + len(excluded), len(self.chunks))
 

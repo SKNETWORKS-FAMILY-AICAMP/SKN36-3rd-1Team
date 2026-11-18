@@ -8,7 +8,10 @@
 
 중요한 원칙
 - 인계 파일(data/handoff/)은 절대 수정하지 않는다. 읽기만 한다.
-- 비정상 청크는 "삭제"가 아니라 "적재 시 선택적으로 제외"한다. 원본 557건은 그대로 남는다.
+- 검토된 노이즈 청크 27건(REVIEWED_NOISE_CHUNKS)은 원본에서 삭제하지 않는다. 원본 파일은 그대로 두고,
+  A 전략으로 적재할 때 select_chunks_for_embedding()이 기본으로 제외한다 (Issue #81).
+  v1.3.2는 557 → 530건, v1.4.0-candidate는 599 → 572건이 적재 대상이다.
+  exclude_noise=False를 명시해 호출하면 기존처럼 원본 전체를 그대로 돌려준다.
 - 페이지 번호는 원문 페이지 단위로 청킹된 PDF 문서에서만 사용한다. 확인되지 않은 페이지는 None.
 """
 
@@ -16,6 +19,7 @@ import hashlib
 import json
 import os
 import re
+from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -164,7 +168,11 @@ SHORT_CHUNK_THRESHOLD = 120
 # - "120자 미만이면 무조건 제외" 같은 규칙은 데이터가 바뀌면 정상 청크까지 지울 수 있다.
 # - 그래서 사람이 확인한 목록만 제외하고, 테스트에서 "규칙 후보 == 검토 목록"을 확인한다.
 #   데이터가 바뀌어 둘이 달라지면 테스트가 FAIL이 되고, 그때 다시 검토한다.
-# TODO(주민혁): 제외 방침은 데이터 담당(장반석)과 최종 합의 필요. 합의 전까지 제외는 선택 옵션.
+#
+# Issue #81 A안 (데이터 담당 장반석과 합의):
+# - 릴리스 청크 원본(load_payload_chunks)은 그대로 둔다: v1.4.0 599건, v1.3.2 557건.
+# - 적재할 때만 이 목록의 27건을 기본으로 뺀다(select_chunks_for_embedding): v1.4.0 572건, v1.3.2 530건.
+# - 서비스 B2 청크(1,138개, chunking.py)와는 다른 데이터다. B2와 Neo4j, 운영 Qdrant는 바꾸지 않는다.
 REASON_URL_TAIL = "출처 URL 꼬리만 남음"
 REASON_URL_TAIL_AND_TIMESTAMP = "출처 URL 꼬리 + 최종수정일시만 남음"
 REASON_BOARD_NAVIGATION = "게시판 이전글/다음글 메뉴만 남음"
@@ -198,6 +206,44 @@ REVIEWED_NOISE_CHUNKS: dict[str, str] = {
     "DOC_YC_049_C02": REASON_URL_TAIL_AND_TIMESTAMP,
     "DOC_NHUF_001_C02": REASON_BOARD_NAVIGATION,
 }
+
+# 검토 당시 본문의 SHA-256 (UTF-8). 2026-11-17 v1.3.2·v1.4.0 payload_chunks.jsonl에서 계산했고 두 버전이 같다.
+# 본문이 바뀌면 과거 검토 결과를 믿지 않고 멈춘다 (바뀐 청크를 검토 없이 빼지 않기 위해).
+REVIEWED_NOISE_TEXT_SHA256: dict[str, str] = {
+    "DOC_BOK_015_C03": "24c1641006e4ec1c984be39e3ae1205f4f86ccc3b3007983b6b7e07d97ca565b",
+    "DOC_BOK_022_C02": "41df5015062f0af8d5d96a32b60517f45efd953c233ac3d0bae110d31059d43c",
+    "DOC_BOK_036_C02": "2b7fa4ccbfdd5be68ac4a58fd7e3508690aba1c41a3c8a5c297b065bbdd2ddb8",
+    "DOC_BOK_041_C03": "6427b734446d6240042ede10c7b4826562314f0caa9caabde86c6b60d66a9ce0",
+    "DOC_BOK_042_C04": "3518458e2dd083c597edd2df57928447d9410373e59a3e72463c814c5564aff8",
+    "DOC_BOK_043_C03": "f4cf7104ffe47a6482792d71cb70d845ba17020184fc5e9cd98f2dd3605f6db3",
+    "DOC_BOK_062_C02": "30162fb86dbb9644fe5ec6b77f6b39f35fa53948d2cee263f1f0379ef46d5bfb",
+    "DOC_BOK_075_C02": "6864d9f2d2861761ba0d820bee96dc16f2ca5102e5657ee32b263013f7ee9ade",
+    "DOC_BOK_079_C02": "69c10157823109e1b934df50b729a45f8def8856c0f8bb6331eedfb3503c22aa",
+    "DOC_BOK_082_C02": "37dfd360789c03387efe4f179b3158002d5dd2652362317fd1896e1f5cfb8999",
+    "DOC_GOV_011_C02": "5cb436396c61ec8ff4469db8528be65f1c97ce7866029d5486ed2599ae0422e3",
+    "DOC_GOV_017_C02": "6454d2674b55631b60290332f80fa6a39252a3a84a2c53c25f46e3bd8bbd2116",
+    "DOC_GOV_030_C03": "8ee4f6ba47e8273052ed12fff0d07cbe144acda03d9d5d212efd9f50e3c238d8",
+    "DOC_GOV_035_C02": "17ac7bef3735fcad005050a4818b02190311c88a4661023e3b2543cafca71379",
+    "DOC_GOV_049_C02": "1a47bac93cbbc404128b9edb2f0e5d555f0d51f3884838e9ce2e85b8d4876394",
+    "DOC_MOLIT_001_C05": "fbbfae8f8c0fc9724646bf15864db9bdc8d7422c60a460f1bb119b730eb06b13",
+    "DOC_YC_002_C03": "d52331bb19ac43a5be300a9a6ed463bf12219770431ff6b4d7ad2b50164058d1",
+    "DOC_YC_005_C02": "d8ecdc7316bd38be58b861d3111843e9d09e8da90d752a0ff749d59ebd81292c",
+    "DOC_YC_011_C02": "8aa3603247719c44b9766849527c65d5e413af40ffcdb51d4bda6a86bc767733",
+    "DOC_YC_013_C02": "24e8107da5da43b6e50817d375a21b684a31ed5ab3639e023c54a882773cb4f0",
+    "DOC_YC_014_C02": "c52af3f68388f98f2b805529009c63e7c85bcfc38f694edf35a7704e4277488a",
+    "DOC_YC_015_C02": "ed2e73e2be933d64153914bcb78b319c50b08230aa3e46f03595f8eb99e0de2c",
+    "DOC_YC_016_C02": "fd8ab9ac349d75db7df66814b05c12840416df0fe4b80678490451f393a98c64",
+    "DOC_YC_021_C02": "82ffe592f3109528cdc9be7bc4a1581e7bea20a0a15b7bc95489cf52fa17c3c8",
+    "DOC_YC_033_C02": "35fe7e74e9b24413a73873cde8e40437dd3c1ff525aef606c0afdd15d3e1011c",
+    "DOC_YC_049_C02": "40eb74aa5db30b0d8f5d47a14c69034e9e35a68dd2a83e96986b345e929ea134",
+    "DOC_NHUF_001_C02": "9f36f347e109a019135c82a0a38bc77328f2b59e8e1ff9aaa8a0cba80f1bcdbc",
+}
+# 위 목록·해시를 실제로 확인한 데이터셋(manifest_version). 다른 데이터셋에는 과거 검토 결과를 자동 적용하지 않는다.
+REVIEWED_NOISE_DATASET_VERSIONS = frozenset({"1.3.2", RELEASE_V140_VERSION})
+
+
+class ReviewedNoiseError(ValueError):
+    """검토 목록을 이 청크 목록에 그대로 적용할 수 없음 (데이터셋·본문·구성이 검토 당시와 다름)."""
 
 # ---------------------------------------------------------------------------
 # 4. 페이지 번호 규칙
@@ -234,7 +280,8 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def load_payload_chunks() -> list[dict[str, Any]]:
-    """Qdrant에 적재할 청크 557건을 읽는다. (원본 그대로, 수정하지 않음)"""
+    """릴리스 청크 원본 전체를 읽는다 (v1.4.0 599건, v1.3.2 557건). 원본 그대로이며 노이즈도 빼지 않는다.
+    적재 대상만 필요하면 select_chunks_for_embedding으로 검토된 27건을 뺀다 (Issue #81)."""
     return read_jsonl(PAYLOAD_CHUNKS_PATH)
 
 
@@ -312,20 +359,39 @@ def find_short_chunk_candidates(
 
 
 def select_chunks_for_embedding(
-    chunks: list[dict[str, Any]], exclude_noise: bool = False
+    chunks: list[dict[str, Any]], exclude_noise: bool = True, version: str | None = None
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """
-    임베딩·적재할 청크와 제외할 청크를 나눈다.
+    릴리스 청크 중 임베딩·적재할 청크와 제외할 청크를 나눈다. (Issue #81 A안)
 
-    입력: 원본 청크 리스트 (557건)
-    출력: (적재할 청크, 제외된 청크) — 두 리스트의 합은 항상 원본 건수와 같다.
-    exclude_noise=False(기본값) 이면 아무것도 제외하지 않는다.
-    기본값을 False로 둔 이유: 27건 제외는 데이터 담당과 아직 합의 전이므로,
-    호출하는 쪽이 exclude_noise=True 를 명시했을 때만 제외한다.
+    입력: 릴리스 청크 원본 전체 (load_payload_chunks 결과: v1.4.0 599건, v1.3.2 557건)
+    출력: (적재할 청크, 제외된 청크) — 순서는 원본 순서 그대로이고, 두 리스트의 합은 원본 건수와 같다.
+    exclude_noise=True(기본값): 사람이 검토한 REVIEWED_NOISE_CHUNKS 27건만 뺀다 (v1.4.0 → 572, v1.3.2 → 530).
+      짧다는 이유만으로 빼지 않는다. 검토 목록에 없는 짧은 청크는 그대로 적재 대상에 남는다.
+    exclude_noise=False: 아무것도 빼지 않고 원본 전체를 돌려준다.
+    version: 청크가 나온 데이터셋의 manifest_version (생략하면 현재 데이터셋의 dataset_version()).
+
+    검토 결과를 그대로 적용할 수 없으면 ReviewedNoiseError로 멈춘다 (조용히 일부만 빼지 않는다):
+      - 검토하지 않은 데이터셋, 입력 chunk_id 중복, 검토 대상의 누락, 검토 대상 본문 변경(SHA-256 불일치)
     원본 dict는 바꾸지 않는다.
     """
     if not exclude_noise:
         return list(chunks), []
+
+    if version is None:
+        version = dataset_version()
+    if version not in REVIEWED_NOISE_DATASET_VERSIONS:
+        raise ReviewedNoiseError(f"노이즈 검토 목록을 확인하지 않은 데이터셋입니다: {version} "
+                                 f"(확인한 데이터셋: {sorted(REVIEWED_NOISE_DATASET_VERSIONS)}). "
+                                 "검토 목록을 갱신하거나 exclude_noise=False로 원본 전체를 고르세요.")
+    counts = Counter(chunk["chunk_id"] for chunk in chunks)
+    duplicated = sorted(chunk_id for chunk_id, count in counts.items() if count > 1)
+    if duplicated:
+        raise ReviewedNoiseError(f"chunk_id가 중복된 청크 목록입니다: {duplicated[:5]}")
+    missing = sorted(set(REVIEWED_NOISE_CHUNKS) - set(counts))
+    if missing:
+        raise ReviewedNoiseError(f"검토 대상 청크가 입력에 없습니다 {len(missing)}건: {missing[:5]} "
+                                 "(릴리스 청크 원본 전체를 넘겨야 합니다)")
 
     selected, excluded = [], []
     for chunk in chunks:
@@ -333,6 +399,11 @@ def select_chunks_for_embedding(
             excluded.append(chunk)
         else:
             selected.append(chunk)
+    changed = sorted(chunk["chunk_id"] for chunk in excluded
+                     if _sha256(chunk["text"].encode("utf-8")) != REVIEWED_NOISE_TEXT_SHA256[chunk["chunk_id"]])
+    if changed:
+        raise ReviewedNoiseError(f"검토 이후 본문이 바뀐 청크가 있어 제외하지 않습니다: {changed[:5]} "
+                                 "(다시 검토해 목록과 해시를 갱신하세요)")
     return selected, excluded
 
 

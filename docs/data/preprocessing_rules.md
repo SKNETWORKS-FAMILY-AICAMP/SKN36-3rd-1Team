@@ -53,6 +53,11 @@
    - PDF 문서는 1페이지 내외 기준 분할.
    - 긴 HTML/API 문서는 600~900자 단위 분할, 80자 오버랩 적용.
    - 각 청크에 `chunk_id`, `document_id`, `policy_id`, `policy_name`, `category`, `region`, `target_group` 메타데이터 부여.
+   - **적재 대상 (Issue #81 A안, 데이터 담당 합의):** 사람이 검토한 노이즈 청크 27건(출처 URL 꼬리·최종수정일시·게시판 메뉴만 남은 청크)만 적재할 때 뺀다. 목록과 검토 당시 본문 SHA-256은 `database/handoff_data.py`의 `REVIEWED_NOISE_CHUNKS`·`REVIEWED_NOISE_TEXT_SHA256`에 있다.
+     - 릴리스 원본 `payload_chunks.jsonl`은 그대로 보존한다 (v1.4.0 599건, v1.3.2 557건). 적재 대상은 v1.4.0 572건, v1.3.2 530건이다.
+     - 짧다는 이유만으로 빼지 않는다 (120자 미만은 검토 후보일 뿐). 검토하지 않은 데이터셋이거나 검토 대상의 본문이 바뀌면 제외하지 않고 오류로 멈춘다.
+     - 서비스 검색 컬렉션의 B2 청크 1,138개는 문서 본문을 다시 청킹한 별개 데이터라 이 제외와 무관하며 바꾸지 않았다. Neo4j와 운영 Qdrant도 바꾸지 않았다. 실제 Qdrant에 이 27건의 Point가 있는지는 확인하지 않았다.
+     - 신규 데이터의 청킹 규칙 개선(섹션 경계, API 외 출처의 메타 필드 처리 등)은 별도 후속 Issue에서 다룬다.
 2. **그래프 엣지 생성 규칙 (`relationships.jsonl` / `graph_edges.jsonl`):**
    - `ADMINISTERED_BY`: 정책 -> 소관기관
    - `HAS_CATEGORY`: 정책 -> 5대 분야 카테고리
