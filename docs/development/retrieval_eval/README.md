@@ -50,19 +50,20 @@
 
 ## 3. 벤치마크 재현 및 평가 실행 방법
 
-백엔드 및 DB 헬스체크 통과 후, 아래 명령어를 실행하여 현재 검색 파이프라인의 벤치마크 스코어를 실측하고 기준선(`retrieval_eval_v0.freeze.json`) 대비 회귀가 없는지 검증합니다. **`--output` 인자는 결과 저장을 위한 필수 옵션입니다.**
+Qdrant·임베딩 서버가 준비된 뒤 프로젝트 루트에서 **모듈 형태로** 실행합니다. 파일 경로로 직접 실행하면(`python database/…py`) `database` 모듈을 찾지 못해 멈춥니다. 목적에 따라 실행기가 다르고 점수의 의미도 다릅니다.
 
-```bash
-# 루트 디렉터리(LifePolicy AI)에서 실행 (필수 --output 옵션 지정)
-python database/retrieval_v140_eval.py --output data/staging/evaluation/retrieval_v140_eval.json
+| 목적 | 명령 | 점수의 의미 |
+|---|---|---|
+| v1.3.2 동결 평가 | `python -m database.retrieval_run --record` | freeze의 해시·manifest가 현재 데이터와 같을 때만 실행됩니다. 동결 기준의 Recall@K·MRR@5 |
+| v1.4.0 진단 (기본 `legacy` 모드) | `python -m database.retrieval_v140_eval --output <결과 폴더>` | 승인 v1.4.0의 B2/B3를 vector·hybrid로 비교하는 진단. 정답이 검수 전 후보라 공식 지표(`formal_recall`, `formal_mrr`)는 비어 있습니다 |
+| 0.6B·4B 예비 비교 | `python -m database.retrieval_v140_eval --mode model-ab --environment <환경 JSON> --output <결과 폴더>` | B2 청크에서 두 임베딩 모델의 예비 Recall@5·MRR@5. 사람 검수 전 결과입니다 |
 
-# 모듈 형태로 실행할 경우 (권장)
-python -m database.retrieval_v140_eval --output data/staging/evaluation/retrieval_v140_eval.json
-```
+- `retrieval_v140_eval`의 `--output`은 필수입니다. 결과는 문서 폴더가 아닌 곳(예: `data/staging/evaluation/retrieval_v140_<날짜>`)에 둡니다.
 
 ### 주요 평가 지표
 - **Recall@5 (Full Containment)**: 필수 근거 구간 전체(`gold.required`)가 Top-5 검색 청크 내에 완전히 포함된 질문 비율
-- **MRR (Mean Reciprocal Rank)**: 마지막 필수 근거가 확보되는 순위의 역수 평균
-- **first_hit_rank / outcomes**: 질문별 첫 근거 순위와 결과 분류(완전 성공, 문서만 맞음 등)
+- **MRR (Mean Reciprocal Rank)**: `first_hit_rank`의 역수 평균(5위 안에 없으면 0)
+- **first_hit_rank**: 필수 근거를 **모두** 찾은 순위. 근거가 여러 개면 가장 늦게 찾은 근거의 순위입니다(`database/retrieval_eval.py` `score_question`)
+- **outcomes**: 질문별 결과 분류(`hit`, `split_only`, `partial`, `doc_only`, `miss`, `not_scored`)
 
 > freeze 파일의 채점 지표는 위 네 가지(`recall_at_5`, `mrr`, `first_hit_rank`, `outcomes`, 근거 일치 방식 `full_containment`)뿐이다. freeze의 `data_version`은 `v1.3.2-verified`이므로 v1.4.0 데이터로 평가할 때는 데이터 버전이 다르다는 점을 결과에 함께 적는다.

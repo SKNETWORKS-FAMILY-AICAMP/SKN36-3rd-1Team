@@ -61,7 +61,8 @@ flowchart TD
 1. **Hybrid Pipeline & Deterministic Checker (벡터 검색 → 그래프 연결 → Checker 판정)**:
    - 질문에 가장 부합하는 정책 후보군을 Qdrant 벡터 검색으로 발굴하고, Neo4j Graph DB를 통해 해당 정책의 정형 자격 조건(ConditionGroup) 및 공식 근거(Document)를 연결합니다.
    - 복지 지원 자격(나이, 소득, 거주지)과 신청 상태는 모호한 자연어 생성이 아닌 결정론적 규칙 기반 Checker를 통해 엄격히 판정하며, 판정 결과와 공식 출처만을 LLM 생성기에 전달하여 답변을 생성합니다.
-2. **Zero Hallucination Grounding (허위 출처 방지)**:
-   - LLM은 사전에 정의된 검색 근거 문서(`Document`)에 명시된 사실만 서술해야 하며, 답변에 첨부되는 `source_url`과 `official_quote`는 수집 원문과 100% 바이트 단위로 일치해야 합니다 ([수집 규정](../data/DATA_COLLECTION_AND_REVIEW_RULES.md)).
+2. **Grounded Citation (근거 기반 인용)**:
+   - **응답 단계**: LLM은 넘겨받은 검색 근거만 인용합니다. 응답의 인용(`citations`)은 `title`, `url`, `document_id`, `page_number`이고, 실행 중에는 답변의 인용 번호가 실제로 넘겨준 근거를 가리키는지 확인합니다(`backend/rag/pipeline.py`). 응답 단계에서 인용문을 원문과 글자 단위로 대조하지는 않습니다.
+   - **수집 단계**: 데이터에 넣는 근거 문장은 저장 원문과 대조합니다. 공백·줄바꿈만 다른 경우는 정규화 일치로 따로 표시합니다([수집 규정](../data/DATA_COLLECTION_AND_REVIEW_RULES.md) 8.2절).
 3. **Dual-Store Isolation (저장소 독립성 및 복원력)**:
    - Neo4j와 Qdrant는 `policy_id`와 `document_id`를 공통 키로 공유하며, 어느 한쪽 저장소가 재적재되더라도 일관성을 유지할 수 있도록 독립 복원 파이프라인([ISSUE43_RESTORE_GUIDE.md](../development/ISSUE43_RESTORE_GUIDE.md))을 지원합니다.
