@@ -30,12 +30,12 @@
   - `summary.json`: 검색 정확도(Top-1, Top-3, Top-5), MRR, 지연시간 요약 지표
   - `runs/195a83c17d7b408483ce164d9290275d.json`: 세부 평가 질의별 검색 랭킹 및 스코어 로그
 
-### 3) [issue41_ab_run03/](issue41_ab_run03/) — Qwen3 Embedding 4B 대규모 평가 (최종 선정 런)
+### 3) [issue41_ab_run03/](issue41_ab_run03/) — Qwen3 Embedding 0.6B / 4B 비교 평가 (예비 A/B 런)
 - **관련 이슈**: Issue #41
-- **대상 모델**: `Qwen/Qwen3-Embedding-4B` (고성능 대규모 임베딩 모델, 최종 채택)
+- **대상 모델**: `Qwen/Qwen3-Embedding-4B` (서비스 기본 모델은 0.6B 유지, 4B는 품질 우선 환경의 추가 검증 후보로 관리)
 - **산출물**:
   - `identity.json`: 4B 모델 실행 환경 메타데이터
-  - `summary.json`: 0.6B 대비 정량 평가 결과 (Top-1 정확도 대폭 향상 입증)
+  - `summary.json`: 0.6B 대비 정량 평가 결과 (기본 모델 0.6B 유지 하에 4B의 Top-1/Top-5 정확도 향상 지표 실측)
   - `runs/ba8d0cd22aea434090e26ae5c046dde4.json`: 세부 벤치마크 평가 질의별 스코어 로그
 
 ---

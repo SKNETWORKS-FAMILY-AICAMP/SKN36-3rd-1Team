@@ -1,11 +1,12 @@
 # 정책 데이터 수집 및 리뷰 표준 규정 (Data Collection & Review Standard Rules)
 
-> **버전**: v1.2 (개정본)  
-> **개정일자**: 2026-11-17  
+> **버전**: v1.3 (개정본: 기존 검증 자산 재사용 표준 추가)  
+> **개정일자**: 2026-11-18  
 > **버전 이력**:  
 > - v1.0 (2026-11-17 제정): 최초 정책 데이터 수집 및 리뷰 표준 제정 (4대 기본 철학, 원문 바이트 대조, 주소 장부 추적성, 6대 자체점검)  
 > - v1.1 (2026-11-17 개정): 이슈 #18 1차 독립 검수 반영 (5대 철학 확장, 조건 위계·논리 분리, 신청 URL 역할과 접수 상태 분리, FAQ 동적 한계 명시, 장부 사후 위조 방지)  
 > - v1.2 (2026-11-17 개정): 이슈 #18 2차 독립 검수 반영 (독립 검증 엔진과 보고서 분리, 기계 판독형 JSON 검증 스키마, 변조 방지 테스트[Tamper Test] 의무화)  
+> - v1.3 (2026-11-18 개정): 3차 검증 코드 재사용 범위 정의, 4차 이슈 #18 신규 검증 경계, JSON 결과 통합 계약, 안전한 실행 및 기준서 동기화 원칙  
 > **적용 대상**: 모든 정책 데이터 수집자(개발자, 크롤러, AI 에이전트) 및 품질 검증 리뷰어(검토자)  
 > **관련 문서**: [PRD](../product/PRD.md), [CODING_STYLE.md](../development/CODING_STYLE.md), [AGENTS.md](../../AGENTS.md)  
 
@@ -326,3 +327,67 @@
 - 이 절은 새로운 표준을 정의할 뿐 **이슈 #18의 기존 `PASS` 선언을 소급 승인하지 않는다.** 검증 엔진과 테스트가 실제로 실행되고 결과가 제출되어야 한다.
 
 <!-- JSON_VERIFICATION_STANDARD_END -->
+
+---
+
+<!-- EXISTING_VALIDATION_REUSE_START v1.3 -->
+
+## 9. 기존 검증 자산 재사용과 이슈 #18 신규 검증 경계 (v1.3 추가)
+
+> **목적:** 3차 LifePolicy AI의 클로드 검증·릴리스 자산을 정본 계약으로 재사용하고, 4차 이슈 #18의 원문·정책 동일성·자격조건 의미·신청 페이지 검증만 보완한다. 기능이 비슷하다는 이유로 검증의 *수행 범위*까지 동일하다고 간주하지 않는다. 이 장은 1~8장을 대체하지 않는다.
+
+### 9.1 역할과 기준선(SSOT)
+
+1. **정책 식별 및 데이터 계약 기준:** `LifePolicy AI/data/handoff/data_contract.md`와 후보 릴리스의 실제 정책 레코드를 읽고, 정책의 `policy_id`를 임의로 변경하거나 새 체계로 재발급하지 않는다. `data/metadata/id_mapping.csv` 및 `data/metadata/data_corrections_v1.4.0.json`의 기존 매핑·교정 이력을 우선 확인한다.
+2. **후보 릴리스 기준:** `data/releases/v1.4.0-candidate/manifest.json`에 기록된 파일·버전·SHA256을 기준으로 후보 데이터를 특정한다. 과거의 검증 로그가 다른 manifest 해시를 가리키면 현 후보 통과 근거로 재사용하지 않는다.
+3. **조건 그룹 계약:** 기존 `ConditionGroup`, `EligibilityCondition` 및 `HAS_ROOT_CONDITION_GROUP`, `CONTAINS_GROUP`, `CONTAINS_CONDITION`의 모델과 `data/handoff/data_contract.md` 규격을 준수한다. 조사용 표 C의 그룹을 별도의 영구 정책 ID 또는 신규 DB 스키마로 확정하지 않는다.
+4. **신청 URL 근거:** `data/metadata/application_url_evidence_v1.4.0.json`은 기존 공식 출처·추출 근거 목록이다. 실제 접수 화면을 *현재 열어 확인했다는 증거*로 해석하지 않는다.
+5. 3차 정본과 4차 조사 파일이 충돌하면 우선 **차이 보고서**를 작성하고, 양쪽 정책명·기관·지역·공식 ID·수집 원문을 비교한다. 단순히 최신 파일에 적혀 있다는 이유로 원본 정책명을 바꾸지 않는다.
+
+### 9.2 기존 스크립트 담당 범위와 재사용 원칙
+
+| 기존 스크립트 (`LifePolicy AI/scripts/`) | 확인 가능한 담당 범위 | 이 스크립트만으로 승인할 수 없는 사항 |
+|---|---|---|
+| `verify_data_quality.py` | `data/processed/`의 JSONL 파싱, 필수 필드, 중복·참조, 제한된 출처/키워드 검사 등 | 이슈 #18 표 C/E 전수 원문 일치, 신청 URL 실제 화면, 모든 정책 자격 의미 |
+| `verify_handoff_package.py` | `data/handoff/`의 ID 유일성, 노드·관계 참조, 청크 형식, 원본 존재, manifest 해시 등 | AND/OR/NOT 자격 판단의 실제 참·거짓 평가, 모든 출처의 현행성 |
+| `load_candidate_neo4j.py`의 `validate_package` | 후보 manifest 해시·레코드 수, 노드 타입·관계 끝점, 문서·청크 연결 등 **오프라인 패키지 검사** | 실제 Neo4j 적재 완료, 정책 조건 의미 일치, 웹 URL의 현재 유효성 |
+| `verify_candidate_sources.py` | 후보 문서의 저장 본문 해시·청크 포함 여부와 원본 경로 존재 여부 | 원문 최신성 및 정책 판정의 정확성 (코드 자체가 범위를 명시함) |
+| `review_candidate_application_urls.py` | 기존 저장 근거의 정책 `official_id`·`source_url` 정합성, 증거 파일 해시 대조, 신청 주소 수정 후보 검토 | 실시간 신청 화면 검증 (`live_application_page_verified: false`를 결과에 명시) |
+| `data_corrections.py` | 사전에 기록된 조건·관계·가구 교정사항의 데이터 변환 | 새 공식 근거 없이 이슈 #18 판정을 승인하거나 현재 릴리스를 자동 갱신 |
+| `build_incremental_release_candidate.py` | 후보 릴리스 생성 및 데이터 변환 파이프라인 | 이슈 #18 검수 단계에서 재실행·배포·DB 반영하는 행위 |
+
+- **검사 재사용의 의미:** 원본 코드를 복제하거나 전면 재작성하는 대신, 해당 검사의 입력·출력 계약을 확인하여 가능한 범위에서 *읽기 전용*으로 실행하거나 결과를 참조한다. 경로·버전·입력 해시가 달라지는 경우 결과를 새로운 데이터에 자동 승계하지 않는다.
+- 기존 스크립트를 실행하기 전 **파일 쓰기, 외부 호출, DB 접근, 명령행 플래그와 의존성**을 정적으로 조사한다. 예를 들어 `verify_data_quality.py`를 직접 실행하면 `data/processed/verification_result.json`을 기록하고, `load_candidate_neo4j.py`는 `--apply`/`--commit` 옵션에 따라 DB에 접근할 수 있으므로 무심코 실행해서는 안 된다.
+- 3차 저장소는 이슈 #18 작업 중 기본적으로 읽기 전용이다. 예외는 사용자가 명시적으로 승인한 두 규칙서의 문서 동기화 작업뿐이며, 이때도 코드·데이터·DB·릴리스 변경은 금지한다.
+
+### 9.3 신규 검증에 필요한 최소 기능 (이슈 #18 전용)
+
+1. **정책 동일성:** 대상 JSON의 `policy_id` ↔ 기존 후보의 `policy_id` ↔ 보고서의 정책명·기관·지역·공식 ID ↔ 저장 원문을 교차 검증한다. 표기가 다른 경우 동의어/약칭인지, 다른 지원사업인지 증거를 제시한다. `policy_identity`를 고정 `VERIFIED`로 설정할 수 없다.
+2. **인용문·출처 정합성:** 보고서 표 C·E의 *실제 행*을 파싱하고 근거 문장, 원본 저장 파일, 수집 당시 manifest의 URL을 대조한다. `NOT_FOUND`, `SOURCE_MISSING`, `URL_MISMATCH`를 숨기지 않는다. 원문 문자열 일치가 정책 의미 충족을 자동으로 보장하지 않는다.
+3. **자격 조건 의미 검증:** 기본/우대/소급/연계/제외 구분, 적용 대상(신청자/자녀/가구), 수치·단위, 정책 유형별 AND/OR/NOT의 결합을 테스트한다. 특히 차량 소유 OR 장기 리스·렌트, 대상 유형별 소득 한도, 미취업 OR 단기근로 예외는 경계값·반례를 포함해야 한다. 기존 그래프의 `ConditionGroup` 구조와 일치하도록 **매핑 제안**만 작성한다.
+4. **신청 URL 검증:** 주소의 역할(정책 안내/실제 신청/기관 첫 화면/접속 불가)과 현재 접수 상태를 구분한다. 과거 모집 공고, 지역 불일치, 리다이렉트, 공식 URL 접근 제한을 구분한다. `official_apply_url`을 실제 DB에 적용하지 않는다.
+5. **검증 불가와 차단:** 공식 자료·브라우저 접근·현행 기준이 확인되지 않은 경우 `PENDING`으로 남기며 핵심 자격조건의 단정적 추천 판정을 금지한다. 정책 연결 오류처럼 확인된 오류는 `FAIL`로 구분한다.
+
+### 9.4 검증 결과 통합 계약
+
+- 8장의 JSON 표준(`schema_version`, `run_id`, `verified_at`, `verifier`, `inputs`, `coverage`, `results`, `summary`, `overall_status`)을 **공통 출력 계약**으로 사용하고 새 상태 체계를 임의로 만들지 않는다.
+- 결과 각 행에 `validation_layer` (`STRUCTURE`, `PACKAGE`, `SOURCE_QUOTE`, `POLICY_IDENTITY`, `CONDITION_SEMANTIC`, `APPLICATION_URL` 등) 및 `validator_source`(기존 스크립트명 또는 이슈 #18 검증기)를 함께 기록할 수 있다. 각 층의 PASS는 해당 범위의 성공일 뿐 전체 데이터 활용 승인과 다르다.
+- 기존 검사 결과를 통합할 때는 `source_manifest_sha256`, `input_sha256`, `execution_type`(`ACTUAL_RUN`, `HISTORICAL_REPORT`, `CODE_REVIEW_ONLY`)을 구분한다. 실행하지 않은 코드를 실행 완료로 보고하거나 과거 성공을 현재 후보 성공으로 기록하지 않는다.
+- 집계는 JSON의 행별 상태에서 계산하고 기존 검사 결과와 중복 집계하지 않는다. 검증 코드가 예상 행 수나 전체 PASS를 하드코딩할 수 없다.
+- `policy_identity=MISMATCH`, 원문 미발견, 조건 논리의 확인된 오류 등은 전체 `FAIL`로 반영한다. 미검증 항목은 `PENDING`으로 남긴다. 정상 사례와 변조 사례를 모두 검증하는 8.5의 통합 테스트를 수행한다.
+
+### 9.5 작업 순서와 품질 게이트
+
+1. **Inventory:** 현 3차·4차 기준서, 기존 검증 스크립트 및 버전·경로·부작용을 기록한다. 기능 비교표를 만들고 재사용/추가/보류를 결정한다.
+2. **Baseline:** 정책 ID·명칭·지역과 공식 출처의 충돌 목록을 먼저 작성한다. `POL_YC_009`는 조사 제외 결정을 유지하며 정책 신원만 보존한다.
+3. **Minimum extension:** 기존 구조·파일 해시·참조 검사는 재사용하고, 9.3의 공백만 이슈 #18 검증기에 보완한다. 조사 원본과 후보 릴리스는 변경하지 않는다.
+4. **Test:** 실제 표 C/D/E의 전체 행 범위, JSON 규격, 정상·변조 테스트를 수행한다. 오류가 하나라도 있으면 허위 `PASS`를 출력하지 않는다.
+5. **Handoff:** 정책 ID별 `검증됨/확인 불가/오류`, 기존 검사와 신규 검사 경계, 남은 수동 확인 항목을 문서화한다. 이슈 종료·DB 반영·릴리스 갱신은 **독립 검수 후 별도 승인**을 받는다.
+
+### 9.6 기준서 동기화와 변경 범위
+
+- 정본 후보 파일은 이슈 #18 `revisions/DATA_COLLECTION_AND_REVIEW_RULES_v1.3.md`로 작성하고, **기존 1~8장 누락·변형 없이** 이 9장을 추가한다. 적용하기 전 두 로컬 정본의 차이를 확인하고, 사용자가 지정한 `LifePolicy AI/docs/data/DATA_COLLECTION_AND_REVIEW_RULES.md` 및 실제 `4차_준비` 정본에 동기화한다.
+- 기준서 외에는 기존 `LifePolicy AI` 저장소의 코드·데이터·DB·릴리스 파일을 수정하거나 생성하지 않는다. 4차의 검수 산출물도 `issue18_gemini/revisions/` 또는 `issue18_gemini/verification/`에 격리한다.
+- 병합 시 기존 각 문서의 고유 조항이 있으면 무조건 덮어쓰지 않는다. 충돌 내용을 보고하고 해당 조항의 채택 여부를 확정한 다음 SHA256·장별 비교·JSON 예제 파싱 결과를 기록한다.
+
+<!-- EXISTING_VALIDATION_REUSE_END -->
