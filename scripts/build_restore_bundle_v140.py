@@ -371,6 +371,19 @@ def plan(source_sha: str | None, out_dir: Path = DEFAULT_OUT_DIR, snapshot: Path
     return output
 
 
+def cli_success(result: dict[str, Any]) -> dict[str, Any]:
+    """
+    CLI 전체 상태(status=PASS)와 작업 결과 상태(result_status, 예: BUILT)를 분리한다.
+    작업 결과의 다른 필드는 그대로 둔다. 예외 없이 끝난 작업에만 쓰며, 실패는 main의 except가 FAILED로 표시한다.
+    (이전에는 {"status": "PASS", **result}에서 result["status"]="BUILT"가 PASS를 덮어써 성공해도 exit 1이었다)
+    """
+    output = {"status": "PASS"}
+    if "status" in result:
+        output["result_status"] = result["status"]
+    output.update({key: value for key, value in result.items() if key != "status"})
+    return output
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="r2 복원 번들 (기본 읽기 전용 계획)")
     mode = parser.add_mutually_exclusive_group()
@@ -403,7 +416,7 @@ def main(argv: list[str] | None = None) -> int:
                                   confirm_write=True)
         else:
             result = plan(args.source_commit, args.out_dir, args.snapshot, args.snapshot_record)
-        result = {"status": "PASS", **result}
+        result = cli_success(result)
     except (BundleError, qdrant_r2.UpdateError, seed.SeedPlanError, ValueError) as error:
         result = {"status": "FAILED", "error_type": type(error).__name__, "reason": str(error)[:800],
                   "action": "원본 자산은 바꾸지 않았다. 원인을 확인한 뒤 새 출력 경로로 다시 실행한다."}

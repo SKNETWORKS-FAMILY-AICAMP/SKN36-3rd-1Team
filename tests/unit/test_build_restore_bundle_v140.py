@@ -343,5 +343,62 @@ class CreateSnapshotTests(unittest.TestCase):
         self.assertEqual(self.client.snapshots, [])
 
 
+class CliExitCodeTests(unittest.TestCase):
+    """main()의 종료 코드: 성공 0, 실패 non-zero. 작업 결과 상태(BUILT)는 result_status로 따로 남는다."""
+
+    SHA = "f" * 40
+
+    def run_main(self, argv):
+        import contextlib
+        import io
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            code = bundle.main(argv)
+        return code, json.loads(buffer.getvalue())
+
+    def build_args(self):
+        return ["--build", "--confirm-write", "--source-commit", self.SHA, "--snapshot", "s", "--snapshot-record", "r"]
+
+    def test_successful_build_exits_zero_and_keeps_built_status(self):
+        report = {"status": "BUILT", "bundle": "sample_only.zip", "bundle_sha256": "a" * 64, "members": ["x"]}
+        with patch.object(bundle, "build_bundle", return_value=report):
+            code, output = self.run_main(self.build_args())
+        self.assertEqual(code, 0)
+        self.assertEqual((output["status"], output["result_status"]), ("PASS", "BUILT"))
+        self.assertEqual((output["bundle"], output["bundle_sha256"], output["members"]),
+                         ("sample_only.zip", "a" * 64, ["x"]))
+
+    def test_failed_build_exits_non_zero(self):
+        with patch.object(bundle, "build_bundle", side_effect=bundle.BundleError("sample_only failure")):
+            code, output = self.run_main(self.build_args())
+        self.assertEqual((code, output["status"]), (1, "FAILED"))
+        self.assertNotIn("result_status", output)
+
+    def test_create_snapshot_success_and_failure_exit_codes(self):
+        args = ["--create-snapshot", "--confirm-write", "--qdrant-url", "http://127.0.0.1:56446",
+                "--expect-fingerprint", "0" * 64]
+        client = SimpleNamespace(close=lambda: None)
+        with patch.object(qdrant_r2, "build_reference", return_value={}), \
+                patch.object(qdrant_r2, "make_isolated_client", return_value=client), \
+                patch.object(bundle, "create_snapshot", return_value={"snapshot_sha256": "b" * 64, "points": 1139}):
+            code, output = self.run_main(args)
+        self.assertEqual((code, output["status"], output["points"]), (0, "PASS", 1139))
+        self.assertNotIn("result_status", output)
+        with patch.object(qdrant_r2, "build_reference", return_value={}), \
+                patch.object(qdrant_r2, "make_isolated_client", return_value=client), \
+                patch.object(bundle, "create_snapshot", side_effect=bundle.BundleError("sample_only")):
+            code, output = self.run_main(args)
+        self.assertEqual((code, output["status"]), (1, "FAILED"))
+
+    def test_plan_failure_exits_non_zero(self):
+        code, output = self.run_main(["--source-commit", "HEAD"])
+        self.assertEqual((code, output["status"]), (1, "FAILED"))
+
+    def test_cli_success_never_hides_a_failure(self):
+        self.assertEqual(bundle.cli_success({"mode": "plan"}), {"status": "PASS", "mode": "plan"})
+        self.assertEqual(bundle.cli_success({"status": "BUILT", "a": 1}),
+                         {"status": "PASS", "result_status": "BUILT", "a": 1})
+
+
 if __name__ == "__main__":
     unittest.main()
