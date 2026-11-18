@@ -58,6 +58,15 @@ Qdrant·임베딩 서버가 준비된 뒤 프로젝트 루트에서 **모듈 형
 | v1.4.0 진단 (기본 `legacy` 모드) | `python -m database.retrieval_v140_eval --output <결과 폴더>` | 승인 v1.4.0의 B2/B3를 vector·hybrid로 비교하는 진단. 정답이 검수 전 후보라 공식 지표(`formal_recall`, `formal_mrr`)는 비어 있습니다 |
 | 0.6B·4B 예비 비교 | `python -m database.retrieval_v140_eval --mode model-ab --environment <환경 JSON> --output <결과 폴더>` | B2 청크에서 두 임베딩 모델의 예비 Recall@5·MRR@5. 사람 검수 전 결과입니다 |
 
+v1.3.2 동결 평가에는 레거시 인계본을 지정합니다. PowerShell에서는 이 평가용 터미널에서 아래 두 줄을 실행합니다.
+
+```powershell
+$env:LIFEPOLICY_DATASET_DIR = 'data/handoff'
+python -m database.retrieval_run --record
+```
+
+v1.4.0 평가를 실행할 때는 새 터미널을 열거나 `Remove-Item Env:LIFEPOLICY_DATASET_DIR`로 위 설정을 해제합니다.
+
 - `retrieval_v140_eval`의 `--output`은 필수입니다. 결과는 문서 폴더가 아닌 곳(예: `data/staging/evaluation/retrieval_v140_<날짜>`)에 둡니다.
 
 ### 주요 평가 지표
