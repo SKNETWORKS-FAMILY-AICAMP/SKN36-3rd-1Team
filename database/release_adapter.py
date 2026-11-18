@@ -6,8 +6,8 @@
 
 1. 문서 본문: Document 노드(neo4j/nodes_document.jsonl)의 document_id마다 본문을 찾는다.
    찾는 규칙은 데이터 담당의 검증 스크립트 scripts/verify_candidate_sources.py(verify_sources)와 같다.
+     - extracted_text_path 가 있으면 → 릴리스가 지정한 추출본
      - data/processed/documents.jsonl 에 있는 문서 → 그 text
-     - extracted_text_path 가 있으면 → 그 파일
      - source_type gov24_api       → data/staging/official/gov24_crosscheck_services.jsonl 의 full_text (service_id)
      - source_type youthcenter_api → data/processed/youthcenter_policies.jsonl 의 full_text (plcyNo)
      - doc_type law/ordinance      → local_raw_path 파일에서 '>'로 시작하는 출처 메모 줄을 뺀 본문
@@ -108,10 +108,10 @@ def load_release_documents(package_dir: Path | str, project_root: Path | str) ->
     for node in nodes:
         document_id = node["document_id"]
         try:
-            if document_id in processed:
-                text = processed[document_id]["text"]
-            elif node.get("extracted_text_path"):
+            if node.get("extracted_text_path"):
                 text = _inside(root, node["extracted_text_path"]).read_text(encoding="utf-8").strip()
+            elif document_id in processed:
+                text = processed[document_id]["text"]
             elif node.get("source_type") == "gov24_api":
                 text = source("gov24", "data/staging/official/gov24_crosscheck_services.jsonl",
                               "service_id")[str(node["official_id"])]["full_text"]

@@ -22,6 +22,16 @@ def load_corrections() -> dict:
     return json.loads(CORRECTIONS_PATH.read_text(encoding="utf-8"))
 
 
+def omit_outdated_line(text: str, line: str) -> str:
+    """검색용 본문에서 확인된 옛 행 하나만 뺀다. 나머지 문장과 순서는 그대로 둔다."""
+    lines = text.splitlines(keepends=True)
+    matches = [index for index, current in enumerate(lines) if current.rstrip("\r\n") == line]
+    if len(matches) != 1:
+        raise ValueError("교정 대상 문서에서 옛 안내 행을 한 번만 찾을 수 있어야 합니다")
+    del lines[matches[0]]
+    return "".join(lines)
+
+
 def apply_policy_corrections(policies: list, corrections: dict) -> None:
     """정책 노드의 설명 문구와 지역 문자열을 교정한다."""
     by_id = {policy["policy_id"]: policy for policy in policies}

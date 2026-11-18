@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T22:28:58.456432+09:00",
+  "created_at": "2026-11-18T22:58:47.683630+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -27,7 +27,8 @@
     "DOC_STG_EX_001_GOV24",
     "DOC_STG_MOLIT_001_GOV24",
     "DOC_STG_ICN_001_GOV24",
-    "DOC_STG_SEOUL_001_YC"
+    "DOC_STG_SEOUL_001_YC",
+    "DOC_BOK_031_MOE_2026"
   ],
   "added_organization_ids": [
     "AGENCY_국세청_기획재정부",
@@ -91,9 +92,10 @@
     "0c22cbe7-c6ba-5638-867a-cee4511f777d",
     "6e91bec8-e310-5383-bed1-7d1fee1f9d92",
     "e2714b83-1fd2-53e4-8bd4-926ed8a1a319",
-    "ea5cb5e9-0d11-52d3-985f-f92828e021f8"
+    "ea5cb5e9-0d11-52d3-985f-f92828e021f8",
+    "18e2893e-8b45-5f14-bdee-2a19088b0f32"
   ],
-  "added_relationships_count": 88,
+  "added_relationships_count": 89,
   "updated_policy_properties": [
     {
       "policy_id": "POL_001",
@@ -1631,7 +1633,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "7b87474398d9f8562e3a099f62ac2263e62d4183a66cff8df27fcc2eb068f080",
+    "source_sha256": "bbe6865afc25d9ead5601a221d31cf3611e4afbf801d6db1fbe51cf72e33d35b",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8743,7 +8745,7 @@
       {
         "source_id": "GRP_POL_BOK_031_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_75_169M"
+        "target_id": "COND_CHILD_BIRTH_2013_2019"
       },
       {
         "source_id": "GRP_POL_BOK_033_OR_TARGET",
@@ -9638,7 +9640,7 @@
       {
         "source_id": "POL_BOK_031",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_75_169M"
+        "target_id": "COND_CHILD_BIRTH_2013_2019"
       },
       {
         "source_id": "POL_BOK_033",
@@ -9818,7 +9820,7 @@
       "COND_TARGET_AGE_UNDER_18",
       "COND_TARGET_AGE_6_64",
       "COND_TARGET_AGE_6_PLUS",
-      "COND_CHILD_AGE_75_169M",
+      "COND_CHILD_BIRTH_2013_2019",
       "COND_AGE_15_40"
     ],
     "added_condition_group_ids": [
@@ -10004,7 +10006,15 @@
       "GRP_POL_GOV_065_OR_INC",
       "GRP_POL_YC_002_OR_SP"
     ],
-    "region_corrected_chunks": 9
+    "region_corrected_chunks": 9,
+    "search_excerpts_updated": [
+      {
+        "document_id": "DOC_BOK_054",
+        "expected_content_hash": "a9d0504a1537970b12d79c3713f7b98e01abc8271ffce4d12a09950452836fcb",
+        "text": "취학아동(방과후보육료) : '18. 01. 01. ~ '12. 12. 31.까지의 출생 아동",
+        "superseded_by_document_id": "DOC_BOK_031_MOE_2026"
+      }
+    ]
   },
   "application_url_evidence_sha256": "96976115cd7f66eddde09af98b2b6e597677c179107e19f9fa5dacfad09902fc",
   "exact_added_relationships": [
@@ -10082,6 +10092,11 @@
       "source_id": "POL_STG_SEOUL_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_SEOUL_001_YC"
+    },
+    {
+      "source_id": "POL_BOK_031",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_031_MOE_2026"
     },
     {
       "source_id": "POL_STG_MOLIT_002",

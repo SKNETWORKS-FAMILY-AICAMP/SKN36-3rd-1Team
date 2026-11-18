@@ -41,17 +41,17 @@ class FinalV140Smoke(unittest.TestCase):
         return next(p for p in result["policies"] if p["policy_id"] == policy_id)
 
     def test_final_counts(self):
-        self.assertEqual(self.before, {"nodes": 1125, "relationships": 2667})
-        self.assertEqual(self.points_before, 1138)
+        self.assertEqual(self.before, {"nodes": 1126, "relationships": 2668})
+        self.assertEqual(self.points_before, 1139)
         rows = self.runner.read_rows("MATCH ()-[r:REQUIRES_CONDITION]->() RETURN count(r) AS count")
         self.assertEqual(rows[0]["count"], 211)
 
     def test_all_cross_db_links(self):
         report = self.session.verify_cross_db()
-        self.assertEqual(report["qdrant_points"], 1138)
+        self.assertEqual(report["qdrant_points"], 1139)
         self.assertFalse(report["failures"])
         for counts in report["summary"].values():
-            self.assertEqual(counts["PASS"], 1138)
+            self.assertEqual(counts["PASS"], 1139)
 
     def test_real_hybrid_and_checker_for_four_policies(self):
         for policy_id, result in self.results.items():
@@ -97,6 +97,18 @@ class FinalV140Smoke(unittest.TestCase):
         policy = self.entry("POL_009")["graph"]["policy"]
         self.assertEqual((policy["application_start"], policy["application_end"]), ("2024-02-26", "2025-02-25"))
         self.assertIn("2026-03-30", policy["application_status_note"])
+
+    def test_after_school_guide_is_citable(self):
+        from backend.rag.context_builder import build_contexts
+
+        result = self.session.search_policy_context(
+            "2026년 방과후보육료는 몇 년생까지 받을 수 있나요? 출생일 기준을 알려주세요.", k=10)
+        contexts = build_contexts(result["policies"])
+        guide = next((row for row in contexts if row["document_id"] == "DOC_BOK_031_MOE_2026"), None)
+        self.assertIsNotNone(guide, "교육부 출생일 표가 최종 인용 후보에 있어야 합니다.")
+        self.assertEqual(guide["page_number"], 305)
+        self.assertIn("ʼ19. 01. 01. ~ ʼ13. 12. 31.", guide["text"])
+        self.assertTrue(all("'18. 01. 01. ~ '12. 12. 31." not in row["text"] for row in contexts))
 
     def test_z_counts_unchanged(self):
         self.assertEqual(self.runner.read_rows(self.hs.lg.QUERY_TOTAL_COUNTS)[0], self.before)

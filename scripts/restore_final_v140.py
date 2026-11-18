@@ -14,8 +14,8 @@ from urllib.parse import urlsplit
 COLLECTION = "exp_b2_qwen3emb06b_v140_v1"
 MODEL = "qwen3-embedding:0.6b"
 SNAPSHOT_DIMENSIONS = 1024
-SNAPSHOT_POINTS = 1138
-EXPECTED = (246, 261, 599, SNAPSHOT_POINTS, 1125, 2667, 211)
+SNAPSHOT_POINTS = 1139
+EXPECTED = (246, 262, 600, SNAPSHOT_POINTS, 1126, 2668, 211)
 
 
 def require_local_url(value):
