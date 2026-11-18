@@ -86,6 +86,32 @@ def test_policy_fact_questions_remain_question_buttons(monkeypatch, text):
     assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
 
 
+@pytest.mark.parametrize("text", [
+    "거주 형태는 월세만 대상인가요?",
+    "거주 형태는 전세도 대상인가요?",
+    "거주 형태가 기숙사여도 대상인가요?",
+    "거주 형태는 전세도 포함인가요?",
+    "거주 형태는 공동주택도 허용인가요?",
+    "거주 형태는 독립된 주거공간만 인정인가요?",
+    "거주  형태는\n전세도 대상인가요？",
+])
+def test_housing_scope_questions_are_preserved(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("가상 주거 정책의 범위를 알려주세요", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("text", [
+    "거주 형태는 월세인가요?",
+    "거주 형태가 전세인가요?",
+    "거주 형태는 독립된 주거공간인가요?",
+])
+def test_current_housing_fact_requests_still_are_not_questions(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("가상 주거 정책 안내", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == []
+
+
 def test_confirmed_region_question_is_not_asked_again(monkeypatch):
     stub(monkeypatch, response(follows=[{"kind": "question", "text": "현재 거주 지역이 경기도인가요?"}]))
     result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,

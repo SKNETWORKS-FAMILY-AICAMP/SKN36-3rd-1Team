@@ -1,0 +1,28 @@
+{
+  "mode": "sample_only browser + real API/Pipeline/filter; no actual model/DB",
+  "requests": 5,
+  "http_statuses": [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "normal_followups_visible_and_clicked": [
+    "거주 형태는 월세만 대상인가요?",
+    "거주 형태는 전세도 대상인가요?"
+  ],
+  "current_housing_question_hidden": true,
+  "region_request_kind": "ask_info",
+  "profile_update_post_requests": 1,
+  "known_region_not_asked_again": true,
+  "policy_card_expanded": true,
+  "citation_target": "https://example.org/",
+  "source_click_attempted": true,
+  "source_arrival_verified": false,
+  "source_arrival_reason": "IAB did not create a new tab; existing page remained. Sample link only; no official document claim.",
+  "first_failure": "Fixture logging middleware tried to parse the empty OPTIONS body and returned 500 before POST. Restricted logging to POST, restarted own server, retried successfully.",
+  "api_url": "http://127.0.0.1:8192/api/ask",
+  "frontend_url": "http://127.0.0.1:5192/",
+  "paid_calls": 0
+}

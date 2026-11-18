@@ -5,7 +5,7 @@ import unittest
 import os
 import subprocess
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from pydantic import ValidationError
 
@@ -41,6 +41,30 @@ def answer(text="원문 [1]", ids=None, **changes):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_housing_scope_and_current_fact_followups_in_normal_pipeline(self):
+        import json
+        from backend.llm import generator
+
+        for text, keep in (
+            ("거주 형태는 월세만 대상인가요?", True),
+            ("거주 형태는 전세도 대상인가요?", True),
+            ("거주 형태는 전세도 포함인가요?", True),
+            ("거주 형태가 독립된 공간인가요?", False),
+        ):
+            with self.subTest(text=text):
+                raw = json.dumps(answer(follow_up_questions=[{"kind": "question", "text": text}]), ensure_ascii=False)
+                self.search.reset_mock()
+                self.check.reset_mock()
+                with patch.object(generator, "_call_openai", return_value=raw) as sdk:
+                    result = run_ask_pipeline(
+                        AskRequest(question="가상 주거 정책 안내", profile=UserProfile(age=None, region="", income=None), history=[]),
+                        search_fn=self.search, check_fn=self.check, generate_fn=generator.generate_answer,
+                    )
+                self.assertEqual([q.text for q in result.follow_up_questions], [text] if keep else [])
+                self.search.assert_called_once()
+                self.check.assert_called_once()
+                sdk.assert_called_once()
+
     def test_pipeline_import_does_not_load_generator_or_dataset_env(self):
         env = os.environ.copy()
         env.pop("LIFEPOLICY_DATASET_DIR", None)
