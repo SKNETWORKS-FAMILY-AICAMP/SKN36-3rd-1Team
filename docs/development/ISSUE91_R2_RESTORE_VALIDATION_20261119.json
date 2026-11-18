@@ -1,0 +1,497 @@
+{
+  "issue": 91,
+  "date": "2026-11-19",
+  "python": "3.13.15",
+  "platform": "Windows 11 (same PC)",
+  "note": "Generated from .cache/issue91-r2-20261119 reports. No credentials. Local artifacts are not in Git.",
+  "bundle": {
+    "file": "rag-final-v140-r2-027f40b556c5.zip",
+    "sha256": "dd28f8cd14c242bda2e6d5697d5cbf23725e6b7dee7b72f4781830429c579197",
+    "size_bytes": 24270102,
+    "members": [
+      "SHA256SUMS",
+      "b2-r2-v1.12.4.snapshot",
+      "compose.yaml",
+      "package.json",
+      "restore_final_v140.py",
+      "source-027f40b556c5.zip"
+    ],
+    "source_commit": "027f40b556c5408a2f0b9547acef4964254e37b8",
+    "source_archive": "source-027f40b556c5.zip",
+    "source_archive_sha256": "fba51dba140b58d4161a4915104bcb8f7a1d37d3fecab02238e1b964149e1965",
+    "source_archive_files": 528,
+    "source_archive_blob_mismatch": 0,
+    "build_cli_exit_code": 0,
+    "build_cli_status": "PASS",
+    "build_result_status": "BUILT",
+    "superseded_candidate": {
+      "file": "rag-final-v140-r2-fa37b8db47f8.zip",
+      "sha256": "37bd6d1d3341e803c5b182ccdefb80a84b830fdca824aaf15db06fff636ee724",
+      "note": "Statically valid; built before the CLI exit-code fix (exit 1 on success). Kept, not for distribution."
+    }
+  },
+  "package": {
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "dimensions": 1024,
+    "points": 1139,
+    "snapshot": "b2-r2-v1.12.4.snapshot",
+    "snapshot_sha256": "2e07c17ad529882fc638af172018cccf61e9477240d6f1630b2099e70640bca0",
+    "snapshot_size_bytes": 14889472,
+    "manifest_lf_sha256": "d48ef11b599466b394bef15e275be26b24be9dfde1e74771c86b8e3d384acf50",
+    "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+    "qdrant_version": "1.12.4",
+    "release_counts": {
+      "policies": 246,
+      "documents": 262,
+      "release_chunks": 600,
+      "b2_points": 1139,
+      "neo4j_nodes": 1126,
+      "neo4j_relationships": 2668,
+      "requires_condition": 211
+    },
+    "vector_provenance": {
+      "reused_points": 1135,
+      "reused_index_run_id": "RUN_FULL_A_B2_V140_20261107_173008",
+      "reused_vector_subset_digest": "6c6672ca028797455755d19388b1d703c6b7a0cdfd18a3093f30d7d34731b34c",
+      "new_points": 4,
+      "new_index_run_id": "RUN_FULL_A_B2_V140_20261119_015749",
+      "new_point_ids": [
+        "51273d15-dac7-58e2-8e1c-c27f5e5dad86",
+        "5ed6279a-8add-5157-87f4-3341944495ab",
+        "6d4ff9df-64b7-5c79-89d2-3f343af1b745",
+        "7fa02bbf-4c6c-5d8f-b314-6f94d9c34b14"
+      ],
+      "embedding_model": "qwen3-embedding:0.6b",
+      "embedding_model_digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "new_points_ollama_version": "0.40.16",
+      "reused_points_ollama_version": "unknown (기존 문서상 0.40.15로 추정, 직접 기록 없음)"
+    }
+  },
+  "snapshot": {
+    "server_snapshot_name": "exp_b2_qwen3emb06b_v140_v1-1201230305709831-2026-11-18-17-35-20.snapshot",
+    "snapshot_sha256": "2e07c17ad529882fc638af172018cccf61e9477240d6f1630b2099e70640bca0",
+    "snapshot_size_bytes": 14889472,
+    "points": 1139,
+    "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+    "payload_digest": "6bdb5a7347f5208300037cd32daf096d70ab21ab2238e6fac9f0ee28f2bf7743",
+    "fingerprint": "fb1a100060719ee03d509a0c9a725fb8e9af052f57e08efb8e6eb9065fab7235",
+    "qdrant_version": "1.12.4"
+  },
+  "source_db_cross_check_before_packaging": {
+    "qdrant_points": 1139,
+    "status": "PASS",
+    "summary": {
+      "point_id": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "chunk_id_document": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "policy_exists": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "document_exists": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "supported_by": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "document_policy_id": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      },
+      "content_hash": {
+        "PASS": 1139,
+        "MISSING": 0,
+        "MISMATCH": 0,
+        "NOT_TESTED": 0
+      }
+    },
+    "neo4j_totals": {
+      "nodes": 1126,
+      "relationships": 2668
+    }
+  },
+  "isolated_restore": {
+    "compose_project": "issue91-r2-verify-20261119",
+    "qdrant_url": "http://127.0.0.1:56556",
+    "neo4j_uri": "bolt://127.0.0.1:56587",
+    "wrapper": "scripts/restore_r2_isolated.py from the extracted source archive",
+    "preflight_exit_code": 0,
+    "preflight_fingerprint": "8200109ae8409fa5eee155719b15e08512de7d3ca610b0daf3d4b6e2e380d483",
+    "apply_exit_code": 0,
+    "apply_status": "PASS",
+    "servers_before": {
+      "qdrant": {
+        "version": "1.12.4",
+        "collections": [],
+        "aliases": [],
+        "state": "empty"
+      },
+      "neo4j": {
+        "version": "5.26.32",
+        "edition": "community",
+        "database": "neo4j",
+        "totals": {
+          "nodes": 0,
+          "relationships": 0
+        },
+        "state": "empty"
+      },
+      "state": "empty"
+    },
+    "docker": {
+      "qdrant": {
+        "id": "ff53972dc68281ac18f6378269d7f519851ae6837be52ba288f3090e8bac3739",
+        "image": "sha256:241edb9d7778327516ef218f8c74e1bd61b5ea42cd4f193cb8d0896199705636",
+        "started_at": "2026-11-18T18:02:15.077808518Z",
+        "volumes": [
+          "issue91-r2-verify-20261119_qdrant_storage"
+        ]
+      },
+      "neo4j": {
+        "id": "a33450453e7f1233e670bc26df442b33a49f7d3e1081b5753e43d3ac44727e53",
+        "image": "sha256:42ef3ebfd671ebd01fdebb6dcbe80cf7b45eef2aa3d346ef4132f7ef31e67d2f",
+        "started_at": "2026-11-18T18:02:15.078572512Z",
+        "volumes": [
+          "issue91-r2-verify-20261119_neo4j_data",
+          "issue91-r2-verify-20261119_neo4j_logs"
+        ]
+      }
+    },
+    "restore_apply": {
+      "status": "PASS",
+      "counts": [
+        246,
+        262,
+        600,
+        1139,
+        1126,
+        2668,
+        211
+      ],
+      "collection": "exp_b2_qwen3emb06b_v140_v1",
+      "metadata_points_updated": 0,
+      "all_vectors_and_protected_payload_unchanged": true,
+      "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+      "graph_totals": {
+        "nodes": 1126,
+        "relationships": 2668
+      },
+      "full_graph_properties_verified": true,
+      "graph_verification_source": "load_graph.verification",
+      "manifest_lf_sha256": "d48ef11b599466b394bef15e275be26b24be9dfde1e74771c86b8e3d384acf50",
+      "embedding_calls": 0
+    },
+    "post_verify_ok": true,
+    "restore_verify_only": {
+      "status": "PASS",
+      "metadata_points_updated": 0,
+      "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+      "graph_totals": {
+        "nodes": 1126,
+        "relationships": 2668
+      },
+      "full_graph_properties_verified": true,
+      "graph_verification_source": "verify_loaded_graph"
+    },
+    "cross_db": {
+      "status": "PASS",
+      "qdrant_points": 1139,
+      "qdrant_count": 1139,
+      "all_points_read": true,
+      "summary": {
+        "point_id": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "chunk_id_document": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "policy_exists": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_exists": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "supported_by": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "document_policy_id": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        },
+        "content_hash": {
+          "PASS": 1139,
+          "MISSING": 0,
+          "MISMATCH": 0,
+          "NOT_TESTED": 0
+        }
+      },
+      "failures": []
+    },
+    "verify_full_index": {
+      "passed": true,
+      "state": "complete",
+      "count": 1139,
+      "expected": 1139,
+      "id_set_equal": true,
+      "payload_slice_mismatch": 0,
+      "missing_documents": [],
+      "missing_policies": [],
+      "reasons": []
+    },
+    "db_state_after": {
+      "qdrant": {
+        "version": "1.12.4",
+        "collections": [
+          "exp_b2_qwen3emb06b_v140_v1"
+        ],
+        "points": 1139,
+        "dimensions": 1024,
+        "distance": "Cosine",
+        "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3"
+      },
+      "neo4j": {
+        "database": "neo4j",
+        "totals": {
+          "nodes": 1126,
+          "relationships": 2668
+        },
+        "policy": 246,
+        "document": 262,
+        "requires_condition": 211,
+        "counts_match_input": true
+      }
+    },
+    "snapshot_upload_http": "2xx (restore_final_v140 raise_for_status passed; exact code not recorded)"
+  },
+  "original_issue91_db_invariance": {
+    "qdrant": {
+      "url": "http://127.0.0.1:56446",
+      "fingerprint": "fb1a100060719ee03d509a0c9a725fb8e9af052f57e08efb8e6eb9065fab7235",
+      "unchanged": true
+    },
+    "neo4j": {
+      "uri": "bolt://127.0.0.1:56487",
+      "fingerprint": "54094d528c8fad1d57fbd040baf148f1a6b1220f78cc3f59436efd78191225ff",
+      "unchanged": true
+    }
+  },
+  "existing_assets_preserved": [
+    "shared DB containers/volumes (lifepolicy-*, skn36-3rd-1team) not accessed",
+    "pr29/r1 bundles, pr29 snapshot and B2 dump hashes unchanged",
+    "first r2 candidate ZIP, r2 snapshot and snapshot-record unchanged"
+  ],
+  "hybrid_checker_smoke": {
+    "environment": "same Windows PC, extracted source of 027f40b, Docker project issue91-r2-verify-20261119",
+    "command": "python -B -m unittest tests.integration.test_final_v140_smoke tests.integration.test_neo4j_smoke -v",
+    "targets": {
+      "qdrant_url": "http://127.0.0.1:56556",
+      "neo4j_uri": "bolt://127.0.0.1:56587",
+      "ollama_base_url": "http://127.0.0.1:11434",
+      "embedding_model": "qwen3-embedding:0.6b",
+      "dataset": "extracted source data/releases/v1.4.0-candidate",
+      "dotenv_in_source": false
+    },
+    "ran": 19,
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0,
+    "process_exit_code": 0,
+    "exit_code_evidence": "execution session output (not stored in a file)",
+    "tests": [
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_after_school_guide_is_citable",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_all_cross_db_links",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_final_counts",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_gov006_corrected_data_not_legacy_static_flags",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_gov011_corrected_age",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_pol005_exclusion_tree",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_pol009_dates",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_real_hybrid_and_checker_for_four_policies",
+        "result": "ok"
+      },
+      {
+        "module": "test_final_v140_smoke",
+        "test": "test_z_counts_unchanged",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_counts_by_label_and_type_match_input",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_no_notifications_need_review",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_node_id_sets_match_input",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_node_properties_match_input",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_reads_use_read_only_sessions",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_relationship_endpoint_sets_match_input",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_relationship_properties_match_input",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_schema_constraints_and_indexes",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_server_version_is_5_26_series",
+        "result": "ok"
+      },
+      {
+        "module": "test_neo4j_smoke",
+        "test": "test_total_node_and_relationship_counts",
+        "result": "ok"
+      }
+    ],
+    "invariance": {
+      "wrapper_verify_only_fingerprint_before": "276e8883ef9521efa55b664763e89445c16b3455ddcad0506fb0bc024be59f95",
+      "after": "276e8883ef9521efa55b664763e89445c16b3455ddcad0506fb0bc024be59f95",
+      "same": true,
+      "digests_before": {
+        "qdrant": {
+          "points": 1139,
+          "id_set_digest": "a7420ea4c79a9d970f7c82138a2ff7cb72137fca67d7a778618a8a7d406d5d84",
+          "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+          "payload_digest": "6bdb5a7347f5208300037cd32daf096d70ab21ab2238e6fac9f0ee28f2bf7743"
+        },
+        "neo4j": {
+          "totals": {
+            "nodes": 1126,
+            "relationships": 2668
+          },
+          "counts_digest": "05fac3f1e2588b94cddd0e00d1940c97da5aa1ff63098f04298cb8cb5c7240d6",
+          "policy": 246,
+          "document": 262,
+          "requires_condition": 211
+        }
+      },
+      "digests_after": {
+        "qdrant": {
+          "points": 1139,
+          "id_set_digest": "a7420ea4c79a9d970f7c82138a2ff7cb72137fca67d7a778618a8a7d406d5d84",
+          "vector_digest": "8577c3c8698fcb891fb35544eac01ec02066fb5c2ef0313d15b6a26e576da3d3",
+          "payload_digest": "6bdb5a7347f5208300037cd32daf096d70ab21ab2238e6fac9f0ee28f2bf7743"
+        },
+        "neo4j": {
+          "totals": {
+            "nodes": 1126,
+            "relationships": 2668
+          },
+          "counts_digest": "05fac3f1e2588b94cddd0e00d1940c97da5aa1ff63098f04298cb8cb5c7240d6",
+          "policy": 246,
+          "document": 262,
+          "requires_condition": 211
+        }
+      },
+      "digests_same": true,
+      "original_issue91_db_fingerprints_after_smoke": {
+        "qdrant": "fb1a100060719ee03d509a0c9a725fb8e9af052f57e08efb8e6eb9065fab7235",
+        "neo4j": "54094d528c8fad1d57fbd040baf148f1a6b1220f78cc3f59436efd78191225ff"
+      }
+    },
+    "logs": [
+      "71-smoke-stderr.log",
+      "71-smoke-stdout.log (empty)"
+    ]
+  },
+  "full_unit_test_suite": {
+    "passed": 1141,
+    "failed": 56,
+    "errors": 20,
+    "skipped": 45,
+    "note": "Pre-existing failures/errors (legacy dataset conditions, missing local raw files). New failures from Issue #91: 0. Separate from the 19 smoke tests."
+  },
+  "not_verified": [
+    "restore on another PC or OS",
+    "first-time Docker image download",
+    "HTTP API -> LLM -> frontend end-to-end",
+    "follow-up data issues such as #90"
+  ]
+}
