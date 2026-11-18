@@ -151,7 +151,7 @@ flowchart LR
         NTS["국세청 홈택스<br/>(조세특례 가이드)"]
     end
 
-    subgraph Pipeline [LifePolicy 수집·정제 엔진]
+    subgraph Pipeline [SSOK 수집·정제 엔진]
         Collector["신규 수집 파이프라인"]
         Norm["정규화 및 스키마 매핑"]
     end

@@ -8,7 +8,7 @@
 
 ## 1. 전체 시스템 아키텍처 (High-Level Architecture)
 
-SSOK(LifePolicy AI)는 **React 기반 단일 페이지 UI**, **FastAPI 백엔드 서비스**, **Neo4j Graph DB(정량 자격 조건)**, **Qdrant Vector DB(비정형 시맨틱 검색)** 및 **LLM 생성기**로 구성된 3-Tier 하이브리드 RAG 아키텍처를 채택하고 있습니다.
+SSOK는 **React 기반 단일 페이지 UI**, **FastAPI 백엔드 서비스**, **Neo4j Graph DB(정량 자격 조건)**, **Qdrant Vector DB(비정형 시맨틱 검색)** 및 **LLM 생성기**로 구성된 3-Tier 하이브리드 RAG 아키텍처를 채택하고 있습니다.
 
 ```mermaid
 flowchart TD

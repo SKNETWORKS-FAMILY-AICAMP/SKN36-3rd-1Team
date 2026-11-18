@@ -1,4 +1,4 @@
-# LifePolicy AI — 3차 데이터 수집 결과 요약 보고서 (collection_summary.md)
+# SSOK — 3차 데이터 수집 결과 요약 보고서 (collection_summary.md)
 
 > **기준일시:** 2026-11-04 (KST)  
 > **총괄 현황:** 2차 대비 정책 26.3배, 문서 17.6배, 청크 4.3배, Graph 관계 37.9배 대폭 확장 완료
