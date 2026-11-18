@@ -5,9 +5,9 @@ Issue #81 A안: 사람이 검토한 노이즈 청크 27건만 적재 대상에�
     python -m pytest tests/unit/test_noise_chunk_exclusion.py -v
 
 무엇을 확인하는가?
-1) 데이터 제외: v1.4.0 599 → 572, v1.3.2 557 → 530, 제외 ID = 검토 목록 27건, 정상 청크 불변
+1) 데이터 제외: v1.4.0 600 → 573, v1.3.2 557 → 530, 제외 ID = 검토 목록 27건, 정상 청크 불변
 2) 안전성: 본문 변경·누락·중복·검토하지 않은 데이터셋이면 조용히 빼지 않고 멈춘다, 원본 파일 불변
-3) 회귀: A 전략 적재 경로 적용·재실행 시 되살아나지 않음, B2 1,138개·검색 프로필·복원 599 계약 유지
+3) 회귀: A 전략 적재 경로 적용·재실행 시 되살아나지 않음, B2 1,139개·검색 프로필·복원 600 계약 유지
 두 데이터셋 파일을 경로로 직접 읽으므로 LIFEPOLICY_DATASET_DIR 설정과 무관하게 같은 결과가 나온다.
 """
 
@@ -33,7 +33,7 @@ from database.chunking import make_point_id  # noqa: E402
 V140_DIR = hd.DEFAULT_HANDOFF_DIR            # data/releases/v1.4.0-candidate (승인 릴리스)
 V132_DIR = hd.LEGACY_HANDOFF_DIR             # data/handoff (v1.3.2)
 DATASETS = {
-    hd.RELEASE_V140_VERSION: (V140_DIR, 599, 572),
+    hd.RELEASE_V140_VERSION: (V140_DIR, 600, 573),
     "1.3.2": (V132_DIR, 557, 530),
 }
 NOISE_IDS = sorted(hd.REVIEWED_NOISE_CHUNKS)
@@ -55,11 +55,18 @@ class TestReviewedListDefinition(unittest.TestCase):
         self.assertEqual(set(hd.REVIEWED_NOISE_TEXT_SHA256), set(hd.REVIEWED_NOISE_CHUNKS))
 
     def test_short_threshold_is_only_for_candidates(self):
-        # 후보 탐지 기준(120자)은 그대로이며, 두 데이터셋 모두 후보 == 검토 목록이다.
+        # 새 교육부 표는 짧아 후보에 잡히지만 날짜 근거이므로 적재에 남는다.
         self.assertEqual(hd.SHORT_CHUNK_THRESHOLD, 120)
         for version, (directory, _raw, _selected) in DATASETS.items():
             with self.subTest(version=version):
-                self.assertEqual(hd.find_short_chunk_candidates(release_chunks(directory)), NOISE_IDS)
+                chunks = release_chunks(directory)
+                expected = set(NOISE_IDS)
+                if version == hd.RELEASE_V140_VERSION:
+                    guide_id = "DOC_BOK_031_MOE_2026_P305_C01"
+                    expected.add(guide_id)
+                    selected, _ = hd.select_chunks_for_embedding(chunks, version=version)
+                    self.assertIn(guide_id, {chunk["chunk_id"] for chunk in selected})
+                self.assertEqual(set(hd.find_short_chunk_candidates(chunks)), expected)
 
 
 class TestDataExclusion(unittest.TestCase):
@@ -138,7 +145,7 @@ class TestSafetyGuards(unittest.TestCase):
                     hd.select_chunks_for_embedding(self.chunks, version=version)
 
     def test_default_version_is_current_dataset(self):
-        # version을 생략하면 현재 데이터셋(manifest_version)을 쓴다. 현재 데이터셋의 원본으로 572/530이 나온다.
+        # version을 생략하면 현재 데이터셋(manifest_version)을 쓴다. 현재 데이터셋의 원본으로 573/530이 나온다.
         selected, excluded = hd.select_chunks_for_embedding(hd.load_payload_chunks())
         self.assertEqual(len(selected), hd.EXPECTED_CHUNK_COUNT - 27)
         self.assertEqual(len(excluded), 27)
@@ -222,7 +229,7 @@ print(json.dumps({"version": hd.dataset_version(), "b2": len(b2),
 
 
 class TestServicePathsUnchanged(unittest.TestCase):
-    """14·15·18: 서비스 B2(1,138), 검색 프로필, 복원 검증 599 계약은 그대로 (v1.4.0 하위 프로세스)."""
+    """14·15·18: 서비스 B2(1,139), 검색 프로필, 복원 검증 600 계약은 그대로 (v1.4.0 하위 프로세스)."""
 
     @classmethod
     def setUpClass(cls):
@@ -236,19 +243,19 @@ class TestServicePathsUnchanged(unittest.TestCase):
 
     def test_b2_service_chunks_unchanged(self):
         self.assertEqual(self.out["version"], hd.RELEASE_V140_VERSION)
-        self.assertEqual(self.out["b2"], 1138)
+        self.assertEqual(self.out["b2"], 1139)
         self.assertFalse(self.out["b2_has_reviewed_ids"])
 
     def test_search_profile_unchanged(self):
         self.assertEqual((self.out["default_profile"], self.out["index_config"], self.out["collection"]),
                          ("b2_06b_v140", "A_B2_V140", "exp_b2_qwen3emb06b_v140_v1"))
 
-    def test_restore_contract_keeps_599_raw_chunks(self):
+    def test_restore_contract_keeps_600_raw_chunks(self):
         spec = importlib.util.spec_from_file_location("restore_final_v140",
                                                       PROJECT_ROOT / "scripts" / "restore_final_v140.py")
         restore = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(restore)
-        self.assertEqual(restore.EXPECTED[2], 599)
+        self.assertEqual(restore.EXPECTED[2], 600)
         self.assertEqual(self.out["raw_chunks"], restore.EXPECTED[2])
 
 

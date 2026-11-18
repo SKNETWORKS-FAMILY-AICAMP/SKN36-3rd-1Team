@@ -211,15 +211,18 @@ class TestNoiseChunkSelection(unittest.TestCase):
     def setUpClass(cls):
         cls.chunks = hd.load_payload_chunks()
 
-    def test_short_candidates_equal_reviewed_list(self):
+    def test_short_candidates_include_only_reviewed_noise_and_retained_guide(self):
         # 데이터가 바뀌어 후보가 달라지면 FAIL → 사람이 다시 검토해야 한다는 신호.
         candidates = hd.find_short_chunk_candidates(self.chunks)
-        self.assertEqual(candidates, sorted(hd.REVIEWED_NOISE_CHUNKS))
-        self.assertEqual(len(candidates), 27)
+        expected = set(hd.REVIEWED_NOISE_CHUNKS)
+        if hd.dataset_version() == hd.RELEASE_V140_VERSION:
+            expected.add("DOC_BOK_031_MOE_2026_P305_C01")
+        self.assertEqual(candidates, sorted(expected))
+        self.assertEqual(len(hd.REVIEWED_NOISE_CHUNKS), 27)
 
     def test_select_with_exclusion(self):
-        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 599 → 572).
-        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 572}
+        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 600 → 573).
+        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 573}
         version = hd.dataset_version()
         self.assertIn(version, expected_selected, f"기대 건수가 정해지지 않은 데이터셋: {version}")
         selected, excluded = hd.select_chunks_for_embedding(self.chunks, exclude_noise=True)
