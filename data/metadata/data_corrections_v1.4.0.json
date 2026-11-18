@@ -961,6 +961,16 @@
       "unit": "세",
       "evidence_location": "원문 대조 교정",
       "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_75_169M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 75~169개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "75~169",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
     }
   ],
   "age_condition_replacements": [
@@ -1643,11 +1653,11 @@
     },
     {
       "group_id": "GRP_POL_BOK_031_ROOT",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_75_169M",
+      "target_name": "대상 자녀 연령: 75~169개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_031",
       "evidence_location": "원문 대조 교정 (DOC_BOK_031_C01)",
-      "evidence": "대상 아동 연령: 12세 이하 취학아동: 12세 이하 초등학교 취학아동"
+      "evidence": "대상 아동 연령: 12세 이하 취학아동: 12세 이하 초등학교 취학아동 / 「2026년도 보육사업안내」(교육부) 305쪽 '보육료 지원 기준 연령'표: 취학아동(방과후보육료) '19.01.01.~'13.12.31. 출생. 2013년생이 2026년 중 13세가 되므로 개월 수로 자동 비교하지 않음"
     },
     {
       "group_id": "GRP_POL_BOK_033_OR_TARGET",
@@ -5856,8 +5866,8 @@
     },
     {
       "policy_id": "POL_BOK_031",
-      "condition_id": "COND_CHILD_AGE_UNDER_156M",
-      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "condition_id": "COND_CHILD_AGE_75_169M",
+      "target_name": "대상 자녀 연령: 75~169개월(보육 연령반 등 근사, 자동 비교 안 함)",
       "evidence_document_id": "DOC_BOK_031",
       "evidence_location": "원문 대조 교정 (DOC_BOK_031_C01)"
     },
