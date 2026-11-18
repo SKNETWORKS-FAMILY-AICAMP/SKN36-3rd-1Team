@@ -59,6 +59,70 @@ def test_profile_transmitted_without_mutation(monkeypatch):
     assert profile == {"age": 25, "region": "서울특별시", "income": 250, "debug": "ignore"}
 
 
+@pytest.mark.parametrize("text", [
+    "임대차계약서에 따라 월세를 내고 계신가요?",
+    "거주 형태가 독립된 공간인가요, 아니면 같은 집 안인가요?",
+    "거주 형태가 ‘부모님과 별도 거주’(독립된 주거공간)인가요, 아니면 같은 집 안에서 방을 임차하는 형태인가요?",
+    "현재 거주 지역이 경기도인가요?",
+])
+def test_direct_user_fact_questions_are_not_question_buttons(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS)
+    assert not any(item["kind"] == "question" for item in result["follow_up_questions"])
+    assert "시·군·구를 알려" not in result["answer"]
+
+
+@pytest.mark.parametrize("text", [
+    "이 정책의 거주 지역 기준은 무엇인가요?",
+    "임대차계약서는 언제 제출하나요?",
+    "지원 대상의 거주 형태는 어떤가요?",
+    "상담 담당자가 계신가요?",
+    "이 정책의 지역 기준은 경기도가 아닌가요?",
+    "임대차계약서가 없어도 신청할 수 있나요?",
+])
+def test_policy_fact_questions_remain_question_buttons(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+def test_confirmed_region_question_is_not_asked_again(monkeypatch):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": "현재 거주 지역이 경기도인가요?"}]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,
+                              profile={"age": None, "region": "경기도", "income": None})
+    assert result["follow_up_questions"] == []
+
+
+@pytest.mark.parametrize("text", [
+    "현재 거주 지역이 경기도인가요?!",
+    "현재  거주지역은 경기도가 아닌가요?",
+    "거주 형태가 독립된 공간인가요.",
+    "월세를 내고 계시지 않나요?",
+    "월세를 내고\n계신가요？",
+    "현재 거주 지역이\n경기도인가요?",
+])
+def test_personal_request_variants_are_not_question_buttons(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS)
+    assert not any(q["kind"] == "question" for q in result["follow_up_questions"])
+
+
+def test_mixed_user_request_and_policy_question_are_separated(monkeypatch):
+    stub(monkeypatch, response(follows=[{
+        "kind": "question", "text": "현재 거주 지역이 경기도인가요? 신청 서류는 무엇인가요?"
+    }]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS, profile={"region": "경기도"})
+    assert result["follow_up_questions"] == [{"kind": "question", "text": "신청 서류는 무엇인가요?"}]
+
+
+def test_multiple_followup_sentences_keep_output_limit(monkeypatch):
+    stub(monkeypatch, response(follows=[{
+        "kind": "question", "text": "신청 서류는 무엇인가요? 신청 절차는 무엇인가요? 지원액은 얼마인가요? 담당 기관은 어디인가요?"
+    }]))
+    result = g.generate_answer("정책 안내", CONTEXTS, CHECKS)
+    assert len(result["follow_up_questions"]) == 3
+
+
 def test_old_call_is_compatible(monkeypatch):
     captured = []
     stub(monkeypatch, response(), captured)

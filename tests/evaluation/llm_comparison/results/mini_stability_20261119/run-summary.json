@@ -1,0 +1,163 @@
+{
+  "requests": 31,
+  "cost_usd": 0.08281140000000001,
+  "http_dispatches": 31,
+  "sdk_retries": 0,
+  "meaning_pass": 26,
+  "meaning_fail": 5,
+  "final_prompt_requests": 18,
+  "raw_final_difference_cases": [
+    "RQ040",
+    "RQ042",
+    "RQ040_R2",
+    "RQ040_R3",
+    "RQ042_R2",
+    "RQ042_R3",
+    "RQ040_P_R2",
+    "RQ040_FIXED_R1",
+    "RQ040_FIXED_R2",
+    "RQ042_FIXED_R1",
+    "RQ042_FIXED_R2",
+    "RQ040",
+    "RQ042",
+    "RQ042_R2",
+    "RQ042_R3",
+    "RQ040_P_R1",
+    "RQ040_P_R2"
+  ],
+  "configured_secret_hits": [],
+  "fixed_provider_inputs_identical": true,
+  "tests": {
+    "passed": 294,
+    "subtests_passed": 125,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runs": [
+    {
+      "path": "baseline_v2\\checker_integrated_20261119_004917_131107",
+      "requests": 2,
+      "cost_usd": 0.00679245,
+      "tokens": {
+        "prompt_tokens": 11807,
+        "cached_input_tokens": 5376,
+        "completion_tokens": 348,
+        "reasoning_tokens": 0
+      },
+      "elapsed_seconds_sum": 6.073,
+      "provider_models": [
+        "gpt-5.4-mini-2026-03-17"
+      ],
+      "started_at": "2026-11-19T00:49:16.989529+09:00",
+      "finished_at": "2026-11-19T00:49:23.378679+09:00",
+      "code_files_sha256": {
+        "tests\\evaluation\\llm_comparison\\compare_checker_integrated.py": "2f4d8a2b03179ce8efc3125ee8c715fb9e2d1df8e95618e7cc6a1eb3aa51cffb",
+        "docs\\development\\retrieval_eval\\questions_candidates_v0.jsonl": "d337142ca926646773c25836ea5d7960c42823034a743e10e3f35dc6ee8294e0",
+        "backend\\rag\\pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+        "backend\\eligibility\\checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+        "backend\\llm\\generator.py": "b06e8dc02e02417f7bbdb35aa0d13ba8ce101b54ab0b34a5b2690a87db2e63e5",
+        "ai\\prompts\\system_prompt.py": "33ef4a2250754b375a7b4cfd8d6dc7b62572c5af70fcf4d25e80f97c86b0a849",
+        "tests\\evaluation\\llm_comparison\\compare_models.py": "dd2e0bed82b8f8128319b10daf2191c42b4e7fba2a22ec070a09ae3fad8a0a74"
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "dataset_version": "1.4.0-candidate",
+      "search_profile": "b2_06b_v140",
+      "budget_mode": "stop before the next request once known cumulative cost reaches the threshold",
+      "retrieval_mode": "fresh live retrieval per request"
+    },
+    {
+      "path": "checker_integrated_20261119_004140_913108",
+      "requests": 13,
+      "cost_usd": 0.03539685000000001,
+      "tokens": {
+        "prompt_tokens": 79813,
+        "cached_input_tokens": 55168,
+        "completion_tokens": 2839,
+        "reasoning_tokens": 0
+      },
+      "elapsed_seconds_sum": 41.004,
+      "provider_models": [
+        "gpt-5.4-mini-2026-03-17"
+      ],
+      "started_at": "2026-11-19T00:41:39.763666+09:00",
+      "finished_at": "2026-11-19T00:42:24.004091+09:00",
+      "code_files_sha256": {
+        "tests\\evaluation\\llm_comparison\\compare_checker_integrated.py": "2f4d8a2b03179ce8efc3125ee8c715fb9e2d1df8e95618e7cc6a1eb3aa51cffb",
+        "docs\\development\\retrieval_eval\\questions_candidates_v0.jsonl": "d337142ca926646773c25836ea5d7960c42823034a743e10e3f35dc6ee8294e0",
+        "backend\\rag\\pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+        "backend\\eligibility\\checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+        "backend\\llm\\generator.py": "b06e8dc02e02417f7bbdb35aa0d13ba8ce101b54ab0b34a5b2690a87db2e63e5",
+        "ai\\prompts\\system_prompt.py": "40d61962b82fd8f877fd55e029152eba1c4a68eccbf7ffe6cd352a6de7362502",
+        "tests\\evaluation\\llm_comparison\\compare_models.py": "dd2e0bed82b8f8128319b10daf2191c42b4e7fba2a22ec070a09ae3fad8a0a74"
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "dataset_version": "1.4.0-candidate",
+      "search_profile": "b2_06b_v140",
+      "budget_mode": "stop before the next request once known cumulative cost reaches the threshold",
+      "retrieval_mode": "fresh live retrieval per request"
+    },
+    {
+      "path": "fixed_input_v2\\checker_integrated_20261119_004556_248319",
+      "requests": 5,
+      "cost_usd": 0.0110736,
+      "tokens": {
+        "prompt_tokens": 30798,
+        "cached_input_tokens": 27008,
+        "completion_tokens": 1379,
+        "reasoning_tokens": 0
+      },
+      "elapsed_seconds_sum": 150.986,
+      "provider_models": [
+        "gpt-5.4-mini-2026-03-17"
+      ],
+      "started_at": "2026-11-19T00:45:56.116348+09:00",
+      "finished_at": "2026-11-19T00:48:27.929370+09:00",
+      "code_files_sha256": {
+        "tests\\evaluation\\llm_comparison\\compare_checker_integrated.py": "2f4d8a2b03179ce8efc3125ee8c715fb9e2d1df8e95618e7cc6a1eb3aa51cffb",
+        "docs\\development\\retrieval_eval\\questions_candidates_v0.jsonl": "d337142ca926646773c25836ea5d7960c42823034a743e10e3f35dc6ee8294e0",
+        "backend\\rag\\pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+        "backend\\eligibility\\checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+        "backend\\llm\\generator.py": "b06e8dc02e02417f7bbdb35aa0d13ba8ce101b54ab0b34a5b2690a87db2e63e5",
+        "ai\\prompts\\system_prompt.py": "33ef4a2250754b375a7b4cfd8d6dc7b62572c5af70fcf4d25e80f97c86b0a849",
+        "tests\\evaluation\\llm_comparison\\compare_models.py": "dd2e0bed82b8f8128319b10daf2191c42b4e7fba2a22ec070a09ae3fad8a0a74"
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "dataset_version": "1.4.0-candidate",
+      "search_profile": "b2_06b_v140",
+      "budget_mode": "stop before the next request once known cumulative cost reaches the threshold",
+      "retrieval_mode": "frozen real retrieval for RQ040/042; live retrieval for exact60"
+    },
+    {
+      "path": "retest_v2\\checker_integrated_20261119_004411_315265",
+      "requests": 11,
+      "cost_usd": 0.0295485,
+      "tokens": {
+        "prompt_tokens": 68162,
+        "cached_input_tokens": 47360,
+        "completion_tokens": 2310,
+        "reasoning_tokens": 0
+      },
+      "elapsed_seconds_sum": 29.518,
+      "provider_models": [
+        "gpt-5.4-mini-2026-03-17"
+      ],
+      "started_at": "2026-11-19T00:44:11.181451+09:00",
+      "finished_at": "2026-11-19T00:44:42.089384+09:00",
+      "code_files_sha256": {
+        "tests\\evaluation\\llm_comparison\\compare_checker_integrated.py": "2f4d8a2b03179ce8efc3125ee8c715fb9e2d1df8e95618e7cc6a1eb3aa51cffb",
+        "docs\\development\\retrieval_eval\\questions_candidates_v0.jsonl": "d337142ca926646773c25836ea5d7960c42823034a743e10e3f35dc6ee8294e0",
+        "backend\\rag\\pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+        "backend\\eligibility\\checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+        "backend\\llm\\generator.py": "b06e8dc02e02417f7bbdb35aa0d13ba8ce101b54ab0b34a5b2690a87db2e63e5",
+        "ai\\prompts\\system_prompt.py": "33ef4a2250754b375a7b4cfd8d6dc7b62572c5af70fcf4d25e80f97c86b0a849",
+        "tests\\evaluation\\llm_comparison\\compare_models.py": "dd2e0bed82b8f8128319b10daf2191c42b4e7fba2a22ec070a09ae3fad8a0a74"
+      },
+      "manifest_lf_sha256": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+      "dataset_version": "1.4.0-candidate",
+      "search_profile": "b2_06b_v140",
+      "budget_mode": "stop before the next request once known cumulative cost reaches the threshold",
+      "retrieval_mode": "fresh live retrieval per request"
+    }
+  ]
+}

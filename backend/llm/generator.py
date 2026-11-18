@@ -233,7 +233,7 @@ def _normalize_followup_question(text: str) -> str | None:
     '알려주세요' 같은 사용자 입력 요청을 임의로 의문문으로 바꾸지 않는다.
     그런 요청은 ask_info 또는 answer 본문으로 분리한다.
     """
-    original = text.strip()
+    original = re.sub(r"([?？])[!！.。]+$", r"\1", text.strip())
 
     if not original:
         return None
@@ -263,7 +263,7 @@ def _personal_information_request(
     반환값: age/region/income/detail_region/other 또는 None.
     정책의 기준·지원금·서류 등을 묻는 사용자 질문은 None이어야 한다.
     """
-    text = text.strip()
+    text = " ".join(text.split()).rstrip("?？!！.。")
 
     # 정책 설명을 사용자가 묻는 문장은 개인정보 요청으로 오인하지 않는다.
     if re.search(
@@ -274,6 +274,16 @@ def _personal_information_request(
         text,
     ):
         return None
+
+    # 현재 사용자에게 사실을 확인하는 문장은 사용자→AI question이 아니다.
+    # 정책의 지역 기준 질문과 혼동하지 않도록 '현재 거주 지역'으로 한정한다.
+    if re.fullmatch(r"현재\s*거주\s*지역[은이].{1,30}(?:인가요|아닌가요)", text):
+        return "region"
+    if re.match(r"거주\s*형태[는가].+(?:인가요|아닌가요)$", text) or (
+        re.search(r"(?:(?:내고|거주하고|살고)\s*계(?:신가요|시지\s*않나요)|살고\s*계세요)$", text)
+        and not re.search(r"어디|어느|주민등록|시군구", text)
+    ):
+        return "other"
 
     # 정보 요청 또는 본인 여부 확인을 나타내는 문장만 분류한다.
     asks_value = bool(
@@ -335,7 +345,7 @@ def _info_request_to_answer(
     field: str | None = None,
 ) -> str | None:
     """허용되지 않은 추가 정보 요청을 근거 없는 설명 없이 본문용으로 바꾼다."""
-    if field == "detail_region" or _is_detail_region_request(text):
+    if field == "detail_region" or (field != "other" and _is_detail_region_request(text)):
         named_gu = re.search(
             r"(?<![가-힣])([가-힣]{2,}구)(?:에|의|는|에서|\s|$)",
             text,
@@ -677,7 +687,16 @@ def _validate_model_response(
     normalized = []
     body_requests: list[str] = []
 
+    # 한 항목에 사용자 정보 요청과 정상 정책 질문이 섞여도 각각 판정한다.
+    expanded = []
     for item in follows:
+        if isinstance(item, dict) and item.get("kind") == "question" and isinstance(item.get("text"), str):
+            text = re.sub(r"([?？])[!！.。]+(?=\s|$)", r"\1", item["text"].strip())
+            expanded.extend({**item, "text": part} for part in re.split(r"(?<=[?？])\s+", text) if part)
+        else:
+            expanded.append(item)
+
+    for item in expanded:
         if (
             not isinstance(item, dict)
             or item.get("kind") not in {
@@ -843,7 +862,7 @@ def _validate_model_response(
         "status": raw["status"],
         "answer": answer.strip(),
         "used_source_ids": sorted(set(cited)),
-        "follow_up_questions": normalized,
+        "follow_up_questions": normalized[:3],
     }
 
 
