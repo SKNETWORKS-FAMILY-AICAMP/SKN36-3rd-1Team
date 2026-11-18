@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T11:36:03.540713+09:00",
+  "created_at": "2026-11-18T14:54:34.618530+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "dc56ed287386fbde068ca9dc1ae6d59c678288509855a833a1cab2eedbf680c8",
+    "source_sha256": "33a79057b5f89445cf7c3b3c67de696a92a3e643f079404d61a0be9402ec99d2",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8433,7 +8433,7 @@
       {
         "source_id": "GRP_POL_BOK_004_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_AGE_15_39"
+        "target_id": "COND_AGE_15_40"
       },
       {
         "source_id": "GRP_POL_BOK_018_ROOT",
@@ -8488,7 +8488,7 @@
       {
         "source_id": "GRP_POL_STG_ICN_001_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_AGE_19_39"
+        "target_id": "COND_AGE_18_39"
       },
       {
         "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -9328,7 +9328,7 @@
       {
         "source_id": "POL_BOK_004",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_AGE_15_39"
+        "target_id": "COND_AGE_15_40"
       },
       {
         "source_id": "POL_BOK_018",
@@ -9383,7 +9383,7 @@
       {
         "source_id": "POL_STG_ICN_001",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_AGE_19_39"
+        "target_id": "COND_AGE_18_39"
       },
       {
         "source_id": "POL_STG_MOLIT_001",
@@ -9818,7 +9818,99 @@
       "COND_TARGET_AGE_UNDER_18",
       "COND_TARGET_AGE_6_64",
       "COND_TARGET_AGE_6_PLUS",
-      "COND_CHILD_AGE_75_169M"
+      "COND_CHILD_AGE_75_169M",
+      "COND_AGE_15_40"
+    ],
+    "added_condition_group_ids": [
+      "GRP_POL_005_OR_EXCL",
+      "GRP_POL_YC_024_REST",
+      "GRP_POL_YC_047_REST",
+      "GRP_POL_YC_053_REST",
+      "GRP_POL_YC_025_REST",
+      "GRP_POL_BOK_002_REST",
+      "GRP_POL_BOK_004_REST",
+      "GRP_POL_BOK_018_REST",
+      "GRP_POL_BOK_027_REST",
+      "GRP_POL_BOK_034_REST",
+      "GRP_POL_BOK_053_REST",
+      "GRP_POL_BOK_063_REST",
+      "GRP_POL_BOK_075_REST",
+      "GRP_POL_BOK_079_REST",
+      "GRP_POL_BOK_095_REST",
+      "GRP_POL_007_REST",
+      "GRP_POL_009_REST",
+      "GRP_POL_STG_ICN_001_REST",
+      "GRP_POL_STG_MOLIT_001_REST",
+      "GRP_POL_010_REST",
+      "GRP_POL_YC_013_REST",
+      "GRP_POL_YC_016_REST",
+      "GRP_POL_YC_019_REST",
+      "GRP_POL_YC_020_REST",
+      "GRP_POL_YC_023_REST",
+      "GRP_POL_YC_030_REST",
+      "GRP_POL_YC_031_REST",
+      "GRP_POL_YC_032_REST",
+      "GRP_POL_YC_034_REST",
+      "GRP_POL_YC_035_REST",
+      "GRP_POL_YC_036_REST",
+      "GRP_POL_YC_038_REST",
+      "GRP_POL_YC_039_REST",
+      "GRP_POL_YC_040_REST",
+      "GRP_POL_YC_041_REST",
+      "GRP_POL_YC_042_REST",
+      "GRP_POL_YC_050_REST",
+      "GRP_POL_YC_051_REST",
+      "GRP_POL_YC_052_REST",
+      "GRP_POL_YC_054_REST",
+      "GRP_POL_YC_055_REST",
+      "GRP_POL_YC_056_REST",
+      "GRP_POL_YC_058_REST",
+      "GRP_POL_YC_061_REST",
+      "GRP_POL_YC_062_REST",
+      "GRP_POL_YC_065_REST",
+      "GRP_POL_YC_021_REST",
+      "GRP_POL_GOV_016_OR_TYPE",
+      "GRP_POL_GOV_016_TYPE_FACILITY",
+      "GRP_POL_GOV_016_TYPE_HOME",
+      "GRP_POL_GOV_016_HOME_OR_INC",
+      "GRP_POL_GOV_054_OR_DIS",
+      "GRP_POL_GOV_054_OR_HH",
+      "GRP_POL_BOK_001_REST",
+      "GRP_POL_BOK_005_REST",
+      "GRP_POL_BOK_005_OR_TARGET",
+      "GRP_POL_BOK_005_ALT",
+      "GRP_POL_BOK_009_REST",
+      "GRP_POL_BOK_013_REST",
+      "GRP_POL_BOK_015_REST",
+      "GRP_POL_BOK_031_REST",
+      "GRP_POL_BOK_033_REST",
+      "GRP_POL_BOK_033_OR_TARGET",
+      "GRP_POL_BOK_033_ALT",
+      "GRP_POL_BOK_036_REST",
+      "GRP_POL_BOK_045_REST",
+      "GRP_POL_BOK_054_REST",
+      "GRP_POL_BOK_055_REST",
+      "GRP_POL_BOK_061_REST",
+      "GRP_POL_BOK_067_REST",
+      "GRP_POL_BOK_068_REST",
+      "GRP_POL_BOK_068_OR_TARGET",
+      "GRP_POL_BOK_068_ALT",
+      "GRP_POL_BOK_069_REST",
+      "GRP_POL_BOK_069_OR_TARGET",
+      "GRP_POL_BOK_069_ALT",
+      "GRP_POL_BOK_071_REST",
+      "GRP_POL_BOK_072_REST",
+      "GRP_POL_STG_EX_001_REST",
+      "GRP_POL_STG_MOIS_001_REST",
+      "GRP_POL_001_REST",
+      "GRP_POL_BOK_008_REST",
+      "GRP_POL_BOK_010_REST",
+      "GRP_POL_BOK_035_REST",
+      "GRP_POL_BOK_038_REST",
+      "GRP_POL_BOK_046_REST",
+      "GRP_POL_BOK_059_REST",
+      "GRP_POL_BOK_060_REST",
+      "GRP_POL_BOK_073_REST"
     ],
     "removed_condition_group_ids": [
       "GRP_POL_GOV_002_OR_HH",

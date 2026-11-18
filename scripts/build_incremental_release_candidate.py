@@ -533,6 +533,8 @@ def build_candidate_release():
         "added_policy_ids": [p["policy_id"] for p in new_policies],
         "added_document_ids": [d["document_id"] for d in new_docs],
         "added_organization_ids": added_agency_ids,
+        # 신규 정책(POL_STG_*)과 함께 들어온 조건 그룹만 담는다. 원문 대조 교정으로 추가한 그룹은
+        # data_corrections.added_condition_group_ids에 따로 적는다.
         "added_condition_group_ids": [cg["group_id"] for cg in new_cgroups],
         "added_qdrant_point_ids": [c["point_id"] for c in new_chunks],
         "added_relationships_count": len(new_rels),
@@ -544,6 +546,7 @@ def build_candidate_release():
             "replacement_relationships": replaced_rels,
             "taxonomy_corrected_chunks": taxonomy_chunks_corrected,
             "added_condition_ids": [node["condition_id"] for node in corrections["new_condition_nodes"]],
+            "added_condition_group_ids": [group["group_id"] for group in corrections["new_condition_groups"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
         },

@@ -41,10 +41,10 @@ class FinalV140Smoke(unittest.TestCase):
         return next(p for p in result["policies"] if p["policy_id"] == policy_id)
 
     def test_final_counts(self):
-        self.assertEqual(self.before, {"nodes": 1124, "relationships": 2667})
+        self.assertEqual(self.before, {"nodes": 1125, "relationships": 2667})
         self.assertEqual(self.points_before, 1138)
         rows = self.runner.read_rows("MATCH ()-[r:REQUIRES_CONDITION]->() RETURN count(r) AS count")
-        self.assertEqual(rows[0]["count"], 136)
+        self.assertEqual(rows[0]["count"], 211)
 
     def test_all_cross_db_links(self):
         report = self.session.verify_cross_db()

@@ -65,7 +65,7 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1124)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1125)
         self.assertEqual(report["counts"]["total_graph_edges"], 2667)
         self.assertEqual(len(chunks), 599)
 

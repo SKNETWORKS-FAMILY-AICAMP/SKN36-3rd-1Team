@@ -141,7 +141,7 @@ class CrossDbAndHashGuards(unittest.TestCase):
 
     def test_snapshot_criteria_and_package_points_are_fixed(self):
         self.assertEqual((restore.SNAPSHOT_DIMENSIONS, restore.SNAPSHOT_POINTS), (1024, 1138))
-        self.assertEqual(restore.EXPECTED, (246, 261, 599, 1138, 1004, 2431, 136))
+        self.assertEqual(restore.EXPECTED, (246, 261, 599, 1138, 1125, 2667, 211))
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             (folder / "snapshot").write_bytes(b"sample_only")
@@ -197,16 +197,16 @@ class RestoreExecutionPaths(unittest.TestCase):
         package = {"manifest_lf_sha256": "sample_manifest", "snapshot_sha256": "sample_hash",
                    "vector_digest": restore.vector_digest(before)}
         graph = object()
-        validation = SimpleNamespace(ok=True, node_counts={"sample": 1004},
-                                     relationship_counts={"REQUIRES_CONDITION": 136, "sample": 2295})
+        validation = SimpleNamespace(ok=True, node_counts={"sample": 1125},
+                                     relationship_counts={"REQUIRES_CONDITION": 211, "sample": 2456})
         client, driver, runner = MagicMock(), MagicMock(), MagicMock()
         client.get_collections.return_value.collections = []
         client.get_collection.return_value = SimpleNamespace(
             points_count=restore.SNAPSHOT_POINTS, config=SimpleNamespace(params=SimpleNamespace(
                 vectors=SimpleNamespace(size=restore.SNAPSHOT_DIMENSIONS, distance="Cosine"))))
         runner.read_rows.return_value = {"unused": True}  # replaced by contract-shaped rows below
-        runner.read_rows.side_effect = ([{"nodes": 1004, "relationships": 2431}],) if verify_only else (
-            [{"nodes": 0, "relationships": 0}], [{"nodes": 1004, "relationships": 2431}])
+        runner.read_rows.side_effect = ([{"nodes": 1125, "relationships": 2667}],) if verify_only else (
+            [{"nodes": 0, "relationships": 0}], [{"nodes": 1125, "relationships": 2667}])
         verification = {"ok": True, "node_properties": {"ok": True}, "relationship_properties": {"ok": True}}
         load_result = {"ok": True, "verification": verification}
         direct_result = verification
