@@ -112,10 +112,15 @@ def _household_group(policy_id: str) -> str:
     return f"GRP_{policy_id}_OR_HH"
 
 
+def _condition_removals(corrections: dict) -> list:
+    """소득 조건 교정과 특수 조건 제거(우대·순위 조건을 필수에서 빼기)는 같은 모양이라 함께 처리한다."""
+    return corrections["income_condition_corrections"] + corrections.get("special_condition_removals", [])
+
+
 def removed_group_ids(corrections: dict) -> set:
-    """API 가구 항목 전체 선택에서 잘못 만들어진 가구유형 OR 그룹."""
+    """API 가구 항목 전체 선택에서 잘못 만들어진 가구유형 OR 그룹과, 통째로 지우는 소득·특수 조건 그룹."""
     groups = {_household_group(item["policy_id"]) for item in corrections["household_condition_removals"]}
-    return groups | {item["group_id"] for item in corrections["income_condition_corrections"] if item["action"] == "remove"}
+    return groups | {item["group_id"] for item in _condition_removals(corrections) if item["action"] == "remove"}
 
 
 def apply_relationship_corrections(relationships: list, corrections: dict) -> tuple:
@@ -133,7 +138,7 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
         remove.add(("REQUIRES_CONDITION", item["policy_id"], item["condition_id"]))
         remove.add(("CONTAINS_CONDITION", f"GRP_{item['policy_id']}_ROOT", item["condition_id"]))
 
-    for item in corrections["income_condition_corrections"]:
+    for item in _condition_removals(corrections):
         if item["action"] == "remove":
             remove.add(("CONTAINS_GROUP", f"GRP_{item['policy_id']}_ROOT", item["group_id"]))
             remove.update(("REQUIRES_CONDITION", item["policy_id"], condition_id) for condition_id in item["before"])
@@ -192,6 +197,15 @@ def apply_relationship_corrections(relationships: list, corrections: dict) -> tu
                   "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
                   "evidence_location": item["evidence_location"], "review_status": "extracted"}
                  for item in corrections["group_group_additions"]]
+    # 조건 트리에 새로 넣은 조건은 정책-조건 직접 관계(REQUIRES_CONDITION)도 함께 이어야 한다.
+    # 검색 계층이 정책의 REQUIRES 목록과 트리 안 조건 목록이 같은지 확인하기 때문이다.
+    existing = {(row["source_id"], row["target_id"]) for row in kept if row["relation"] == "REQUIRES_CONDITION"}
+    for item in corrections.get("requires_condition_additions", []):
+        assert (item["policy_id"], item["condition_id"]) not in existing, \
+            f"이미 있는 REQUIRES 관계를 다시 추가함: {item['policy_id']} {item['condition_id']}"
+        new_rows.append({"source_id": item["policy_id"], "relation": "REQUIRES_CONDITION", "target_id": item["condition_id"],
+                         "target_name": item["target_name"], "evidence_document_id": item["evidence_document_id"],
+                         "evidence_location": item["evidence_location"], "review_status": "extracted"})
     for item in corrections["life_stage_corrections"]:
         for stage in [value for value in item["after"] if value not in item["before"]]:
             new_rows.append({"source_id": item["policy_id"], "relation": "APPLIES_TO_LIFESTAGE",

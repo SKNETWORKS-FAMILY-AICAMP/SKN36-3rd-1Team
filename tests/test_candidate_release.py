@@ -65,8 +65,8 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1004)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2431)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1071)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2575)
         self.assertEqual(len(chunks), 599)
 
     def test_only_declared_baseline_policy_property_changed(self):
@@ -78,7 +78,10 @@ class CandidateIntegrityTests(unittest.TestCase):
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
             if name == "condition_group":
-                old = dc.apply_group_corrections(old, corrections)
+                # 동결 v1.3.2에는 신규 9건(POL_STG_*) 그룹이 없으므로, 그 그룹을 대상으로 한 논리 교정은 빼고 적용한다
+                old_ids = {row[key] for row in old}
+                old = dc.apply_group_corrections(old, {**corrections, "empty_group_logic_corrections": [
+                    item for item in corrections["empty_group_logic_corrections"] if item["group_id"] in old_ids]})
             if name == "policy":
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
