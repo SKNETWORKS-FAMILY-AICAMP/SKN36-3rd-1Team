@@ -60,14 +60,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 261)
-        self.assertEqual(report["chunks_checked_against_body"], 599)
+        self.assertEqual(report["body_hashes_checked"], 262)
+        self.assertEqual(report["chunks_checked_against_body"], 600)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1004)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2431)
-        self.assertEqual(len(chunks), 599)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1126)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2668)
+        self.assertEqual(len(chunks), 600)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
@@ -75,10 +75,14 @@ class CandidateIntegrityTests(unittest.TestCase):
         actual_changes = set()
         corrections = dc.load_corrections()
         removed_groups = dc.removed_group_ids(corrections)
+        changed_documents = {item["document_id"]: item for item in corrections["outdated_document_lines"]}
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
             if name == "condition_group":
-                old = dc.apply_group_corrections(old, corrections)
+                # 동결 v1.3.2에는 신규 9건(POL_STG_*) 그룹이 없으므로, 그 그룹을 대상으로 한 논리 교정은 빼고 적용한다
+                old_ids = {row[key] for row in old}
+                old = dc.apply_group_corrections(old, {**corrections, "empty_group_logic_corrections": [
+                    item for item in corrections["empty_group_logic_corrections"] if item["group_id"] in old_ids]})
             if name == "policy":
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
@@ -91,6 +95,11 @@ class CandidateIntegrityTests(unittest.TestCase):
                     self.assertNotIn(original[key], new)
                     continue
                 current = dict(new[original[key]])
+                if name == "document" and original[key] in changed_documents:
+                    self.assertEqual(current.pop("extracted_text_path"),
+                                     f"data/releases/v1.4.0-candidate/source_text/{original[key]}.txt")
+                    self.assertNotEqual(current["content_hash"], original["content_hash"])
+                    current["content_hash"] = original["content_hash"]
                 if name == "policy":
                     for field in dc.SOURCE_REVIEW_FIELDS:
                         current.pop(field, None)
@@ -120,7 +129,21 @@ class CandidateIntegrityTests(unittest.TestCase):
                 row = {**row, "region": region_policies[row["policy_id"]]["after"]}
             if row["policy_id"] in life_stage_policies:
                 row = {**row, "life_stages": life_stage_policies[row["policy_id"]]["after"]}
+            correction = changed_documents.get(row["document_id"])
+            if correction and correction["text"] in row["text"]:
+                row = {**row, "text": dc.omit_outdated_line(row["text"], correction["text"])}
             self.assertIn(json.dumps(row, sort_keys=True), new_chunks)
+
+    def test_after_school_birth_dates_use_the_current_guide(self):
+        guide_id = "DOC_BOK_031_MOE_2026"
+        condition_id = "COND_CHILD_BIRTH_2013_2019"
+        chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        guide = next(row for row in chunks if row["document_id"] == guide_id)
+        self.assertIn("ʼ19. 01. 01. ~ ʼ13. 12. 31.", guide["text"])
+        self.assertTrue(all("'18. 01. 01. ~ '12. 12. 31." not in row["text"] for row in chunks))
+        links = [row for row in rows(PACKAGE / "neo4j/relationships.jsonl") if row["target_id"] == condition_id]
+        self.assertEqual({row["relation"] for row in links}, {"CONTAINS_CONDITION", "REQUIRES_CONDITION"})
+        self.assertEqual({row["evidence_document_id"] for row in links}, {guide_id})
 
     def test_merged_gwangju_jeonnam_code_is_not_nationwide(self):
         self.assertEqual(map_zip_codes_to_regions("12870"), ["광주광역시", "전라남도"])

@@ -3,7 +3,7 @@
 
 - 가상 패키지: 누락·중복·해시 불일치·문서 내 메타데이터 불일치에서 멈추는지, 문서별 값을 합치지 않는지
 - 실제 릴리스(하위 프로세스, LIFEPOLICY_DATASET_DIR): 문서 261·해시 일치, 문서별 메타데이터, B2/B3 청크,
-  Qdrant payload 필수 필드, Neo4j 1,004노드/2,431관계 입력 검증, 원본 파일 불변
+  Qdrant payload 필수 필드, Neo4j 1,125노드/2,667관계 입력 검증, 원본 파일 불변
 - 명시적 v1.3.2 선택 시 호환 동작 회귀
 공식 정책 내용의 정확성은 검증하지 않는다 (저장된 원천과의 일치만 본다).
 """
@@ -211,30 +211,30 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_release_files_unchanged_and_manifest_matches(self):
         self.assertEqual(self.before, self.after)
-        self.assertEqual(len(self.before), 21)
+        self.assertEqual(len(self.before), 22)
         self.assertEqual(self.out["manifest_bad"], [])
 
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 261, 599, 1004, 2431])
+        self.assertEqual(self.out["expected"], [246, 262, 600, 1126, 2668])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
-        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (261, 261))
+        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (262, 262))
         self.assertTrue(self.out["documents_equal_nodes"])
         self.assertEqual(self.out["hash_mismatch"], 0)
 
     def test_metadata_per_document_preserved(self):
-        self.assertEqual(self.out["metadata_documents"], 261)
+        self.assertEqual(self.out["metadata_documents"], 262)
         self.assertTrue(self.out["metadata_keyed_by_document"])
         self.assertTrue(self.out["metadata_preserved"])
-        # 정책 단위로 합치면 충돌하는 5개 정책: 문서별 값이 그대로 남아 있어야 한다
+        # 정책 단위로 합치면 충돌하는 6개 정책: 문서별 값이 그대로 남아 있어야 한다
         self.assertEqual(self.out["policy_level_conflicts_kept"],
-                         ["POL_001", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_SEOUL_001"])
+                         ["POL_001", "POL_BOK_031", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_SEOUL_001"])
 
     def test_b2_b3_chunks_and_payloads(self):
-        for name, expected in (("A_B2_V140", 1138), ("B_B3_V140", 1220)):
+        for name, expected in (("A_B2_V140", 1139), ("B_B3_V140", 1221)):
             plan = self.out[name]
             with self.subTest(config=name):
                 self.assertEqual((plan["chunks"], plan["expected"]), (expected, expected))
@@ -257,7 +257,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_neo4j_graph_input(self):
         self.assertTrue(self.out["graph_ok"])
-        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1004, 2431))
+        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1126, 2668))
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):

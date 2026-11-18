@@ -10,7 +10,7 @@
 - 인계 파일(data/handoff/)은 절대 수정하지 않는다. 읽기만 한다.
 - 검토된 노이즈 청크 27건(REVIEWED_NOISE_CHUNKS)은 원본에서 삭제하지 않는다. 원본 파일은 그대로 두고,
   A 전략으로 적재할 때 select_chunks_for_embedding()이 기본으로 제외한다 (Issue #81).
-  v1.3.2는 557 → 530건, v1.4.0-candidate는 599 → 572건이 적재 대상이다.
+  v1.3.2는 557 → 530건, v1.4.0-candidate는 600 → 573건이 적재 대상이다.
   exclude_noise=False를 명시해 호출하면 기존처럼 원본 전체를 그대로 돌려준다.
 - 페이지 번호는 원문 페이지 단위로 청킹된 PDF 문서에서만 사용한다. 확인되지 않은 페이지는 None.
 """
@@ -170,9 +170,9 @@ SHORT_CHUNK_THRESHOLD = 120
 #   데이터가 바뀌어 둘이 달라지면 테스트가 FAIL이 되고, 그때 다시 검토한다.
 #
 # Issue #81 A안 (데이터 담당 장반석과 합의):
-# - 릴리스 청크 원본(load_payload_chunks)은 그대로 둔다: v1.4.0 599건, v1.3.2 557건.
-# - 적재할 때만 이 목록의 27건을 기본으로 뺀다(select_chunks_for_embedding): v1.4.0 572건, v1.3.2 530건.
-# - 서비스 B2 청크(1,138개, chunking.py)와는 다른 데이터다. B2와 Neo4j, 운영 Qdrant는 바꾸지 않는다.
+# - 릴리스 청크 원본(load_payload_chunks)은 그대로 둔다: v1.4.0 600건, v1.3.2 557건.
+# - 적재할 때만 이 목록의 27건을 기본으로 뺀다(select_chunks_for_embedding): v1.4.0 573건, v1.3.2 530건.
+# - 서비스 B2 청크(1,139개, chunking.py)와는 다른 데이터다. B2와 Neo4j, 운영 Qdrant는 바꾸지 않는다.
 REASON_URL_TAIL = "출처 URL 꼬리만 남음"
 REASON_URL_TAIL_AND_TIMESTAMP = "출처 URL 꼬리 + 최종수정일시만 남음"
 REASON_BOARD_NAVIGATION = "게시판 이전글/다음글 메뉴만 남음"
@@ -280,7 +280,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def load_payload_chunks() -> list[dict[str, Any]]:
-    """릴리스 청크 원본 전체를 읽는다 (v1.4.0 599건, v1.3.2 557건). 원본 그대로이며 노이즈도 빼지 않는다.
+    """릴리스 청크 원본 전체를 읽는다 (v1.4.0 600건, v1.3.2 557건). 원본 그대로이며 노이즈도 빼지 않는다.
     적재 대상만 필요하면 select_chunks_for_embedding으로 검토된 27건을 뺀다 (Issue #81)."""
     return read_jsonl(PAYLOAD_CHUNKS_PATH)
 
@@ -364,9 +364,9 @@ def select_chunks_for_embedding(
     """
     릴리스 청크 중 임베딩·적재할 청크와 제외할 청크를 나눈다. (Issue #81 A안)
 
-    입력: 릴리스 청크 원본 전체 (load_payload_chunks 결과: v1.4.0 599건, v1.3.2 557건)
+    입력: 릴리스 청크 원본 전체 (load_payload_chunks 결과: v1.4.0 600건, v1.3.2 557건)
     출력: (적재할 청크, 제외된 청크) — 순서는 원본 순서 그대로이고, 두 리스트의 합은 원본 건수와 같다.
-    exclude_noise=True(기본값): 사람이 검토한 REVIEWED_NOISE_CHUNKS 27건만 뺀다 (v1.4.0 → 572, v1.3.2 → 530).
+    exclude_noise=True(기본값): 사람이 검토한 REVIEWED_NOISE_CHUNKS 27건만 뺀다 (v1.4.0 → 573, v1.3.2 → 530).
       짧다는 이유만으로 빼지 않는다. 검토 목록에 없는 짧은 청크는 그대로 적재 대상에 남는다.
     exclude_noise=False: 아무것도 빼지 않고 원본 전체를 돌려준다.
     version: 청크가 나온 데이터셋의 manifest_version (생략하면 현재 데이터셋의 dataset_version()).

@@ -45,6 +45,36 @@ def get_file_sha256(path: Path) -> str:
             h.update(chunk)
     return h.hexdigest()
 
+
+def prepare_document_excerpts(documents: list[dict], corrections: dict) -> dict[str, str]:
+    """보존된 본문을 검증하고, 옛 기준 행을 뺀 검색용 파일을 후보에 따로 기록한다."""
+    omissions = corrections.get("outdated_document_lines", [])
+    if not omissions:
+        return {}
+    by_id = {row["document_id"]: row for row in documents}
+    source_ids = {item["document_id"] for item in omissions}
+    with (BASE_DIR / "data/processed/documents.jsonl").open(encoding="utf-8") as source:
+        bodies = {row["document_id"]: row["text"] for row in map(json.loads, source)
+                  if row["document_id"] in source_ids}
+    updated = {}
+    for item in omissions:
+        doc_id = item["document_id"]
+        document = by_id[doc_id]
+        text = bodies[doc_id]
+        expected = item["expected_content_hash"]
+        if (document["content_hash"] != expected or hashlib.sha256(text.encode()).hexdigest() != expected
+                or item["superseded_by_document_id"] not in by_id or doc_id in updated):
+            raise ValueError(f"옛 안내 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
+        excerpt = dc.omit_outdated_line(text, item["text"]).replace("\r\n", "\n").replace("\r", "\n").strip()
+        path = CANDIDATE_DIR / "source_text" / f"{doc_id}.txt"
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(excerpt + "\n", encoding="utf-8", newline="\n")
+        document["extracted_text_path"] = path.relative_to(BASE_DIR).as_posix()
+        document["content_hash"] = hashlib.sha256(excerpt.encode()).hexdigest()
+        updated[doc_id] = item["text"]
+    return updated
+
+
 # -----------------------------------------------------------------------------
 # 표준 매핑 테이블 정의 (기존 v1.3.2 데이터 계약 준수)
 # -----------------------------------------------------------------------------
@@ -224,6 +254,9 @@ def build_candidate_release():
             new_docs.append(sd)
 
     merged_documents = documents + new_docs
+    # 복지로 원본은 보존하고, 동결 인계본의 문서는 복사한 뒤 후보 검색 본문을 별도로 만든다.
+    merged_documents = [dict(document) for document in merged_documents]
+    outdated_lines = prepare_document_excerpts(merged_documents, corrections)
     with open(neo4j_out / "nodes_document.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for d in merged_documents:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
@@ -464,6 +497,14 @@ def build_candidate_release():
             new_chunks.append(sc)
 
     merged_chunks = chunks + new_chunks
+    changed_excerpts = set()
+    for chunk in merged_chunks:
+        line = outdated_lines.get(chunk["document_id"])
+        if line and line in chunk["text"]:
+            chunk["text"] = dc.omit_outdated_line(chunk["text"], line)
+            changed_excerpts.add(chunk["document_id"])
+    if changed_excerpts != set(outdated_lines):
+        raise ValueError("옛 안내 행이 후보 청크에서 누락되었거나 분리되어 있습니다")
     region_chunks_corrected = dc.apply_region_to_chunks(merged_chunks, corrections)
     taxonomy_chunks_corrected = dc.apply_taxonomy_to_chunks(merged_chunks, merged_policies, corrections)
     with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8", newline="\n") as f:
@@ -533,6 +574,8 @@ def build_candidate_release():
         "added_policy_ids": [p["policy_id"] for p in new_policies],
         "added_document_ids": [d["document_id"] for d in new_docs],
         "added_organization_ids": added_agency_ids,
+        # 신규 정책(POL_STG_*)과 함께 들어온 조건 그룹만 담는다. 원문 대조 교정으로 추가한 그룹은
+        # data_corrections.added_condition_group_ids에 따로 적는다.
         "added_condition_group_ids": [cg["group_id"] for cg in new_cgroups],
         "added_qdrant_point_ids": [c["point_id"] for c in new_chunks],
         "added_relationships_count": len(new_rels),
@@ -544,8 +587,10 @@ def build_candidate_release():
             "replacement_relationships": replaced_rels,
             "taxonomy_corrected_chunks": taxonomy_chunks_corrected,
             "added_condition_ids": [node["condition_id"] for node in corrections["new_condition_nodes"]],
+            "added_condition_group_ids": [group["group_id"] for group in corrections["new_condition_groups"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
+            "search_excerpts_updated": corrections.get("outdated_document_lines", []),
         },
         "application_url_evidence_sha256": get_file_sha256(
             BASE_DIR / "data/metadata/application_url_evidence_v1.4.0.json"
@@ -601,6 +646,7 @@ def build_candidate_release():
         f"- 설명 문구 {len(corrections['text_corrections'])}건, 지역 {len(corrections['region_corrections'])}건, 연령 조건 제거 {len(corrections['age_condition_removals'])}건·원문 값 교체 {len(corrections['age_condition_replacements'])}건, 가구 조건 교정 {len(corrections['household_condition_removals'])}건을 적용했다.",
         f"- 관계 {len(removed_rels)}개 제거·교체, {len(replaced_rels)}개 추가(교체분 포함), 표기 교정 청크 {taxonomy_chunks_corrected}개. 함께 가구유형 OR 그룹 {len(dc.removed_group_ids(corrections))}개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.",
         "- `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.",
+        "- 방과후보육료 출생일 기준은 교육부 2026년도 안내서 인쇄 297쪽(PDF 305쪽)을 연결했다. 복지로 영유아보육료의 옛 방과후 연령 표 행은 후보 검색 본문에서 제외했다.",
     ]
     counts_section = "\n".join(rows)
 
@@ -621,7 +667,7 @@ def build_candidate_release():
 
 - 기존 정책 {len(application_changes)}건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
-- `data/handoff/`, 기존 정제본, 기존 문서·관계·청크·원문 해시는 수정하지 않는다.
+- `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
 ---

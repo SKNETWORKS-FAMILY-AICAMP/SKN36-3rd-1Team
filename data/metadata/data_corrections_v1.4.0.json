@@ -631,6 +631,356 @@
       "unit": "개월",
       "evidence_location": "정부24 지원대상",
       "description": "양육 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_AGE_7_120",
+      "type": "AGE",
+      "name": "연령조건: 만 7세 이상",
+      "operator": "BETWEEN",
+      "value": "7~120",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 7세 이상)"
+    },
+    {
+      "condition_id": "COND_AGE_18_20",
+      "type": "AGE",
+      "name": "연령조건: 만 18세~20세",
+      "operator": "BETWEEN",
+      "value": "18~20",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 18세~20세)"
+    },
+    {
+      "condition_id": "COND_AGE_0_64",
+      "type": "AGE",
+      "name": "연령조건: 만 64세 이하",
+      "operator": "BETWEEN",
+      "value": "0~64",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 64세 이하)"
+    },
+    {
+      "condition_id": "COND_AGE_0_24",
+      "type": "AGE",
+      "name": "연령조건: 만 24세 이하",
+      "operator": "BETWEEN",
+      "value": "0~24",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 24세 이하)"
+    },
+    {
+      "condition_id": "COND_AGE_20_49",
+      "type": "AGE",
+      "name": "연령조건: 만 20세~49세",
+      "operator": "BETWEEN",
+      "value": "20~49",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 20세~49세)"
+    },
+    {
+      "condition_id": "COND_AGE_19_34",
+      "type": "AGE",
+      "name": "연령조건: 만 19세~34세",
+      "operator": "BETWEEN",
+      "value": "19~34",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 19세~34세)"
+    },
+    {
+      "condition_id": "COND_AGE_15_69",
+      "type": "AGE",
+      "name": "연령조건: 만 15세~69세",
+      "operator": "BETWEEN",
+      "value": "15~69",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 15세~69세)"
+    },
+    {
+      "condition_id": "COND_AGE_18_29",
+      "type": "AGE",
+      "name": "연령조건: 만 18세~29세",
+      "operator": "BETWEEN",
+      "value": "18~29",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 18세~29세)"
+    },
+    {
+      "condition_id": "COND_AGE_18_45",
+      "type": "AGE",
+      "name": "연령조건: 만 18세~45세",
+      "operator": "BETWEEN",
+      "value": "18~45",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 18세~45세)"
+    },
+    {
+      "condition_id": "COND_AGE_19_24",
+      "type": "AGE",
+      "name": "연령조건: 만 19세~24세",
+      "operator": "BETWEEN",
+      "value": "19~24",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 19세~24세)"
+    },
+    {
+      "condition_id": "COND_SP_장애인거주시설_이용인",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 서울시 관할 장애인거주시설 이용인",
+      "operator": "IN",
+      "value": "서울시 관할 장애인거주시설 이용인",
+      "unit": "특성",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 서울특별시 관할 운영시설에 거주하는 장애인, 소득제한 없음). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_SP_재가장애인",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 서울시 주민등록 재가 장애인",
+      "operator": "IN",
+      "value": "서울시 주민등록 재가 장애인",
+      "unit": "특성",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 서울특별시에 주민등록이 등재된 재가 장애인). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_SP_차상위계층",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 차상위계층",
+      "operator": "IN",
+      "value": "차상위계층",
+      "unit": "특성",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 차상위계층). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_SP_사지마비_와상",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 사지마비 와상 장애인",
+      "operator": "IN",
+      "value": "사지마비 와상",
+      "unit": "특성",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 사지마비 와상 장애인). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_SP_24시간_호흡기",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 24시간 호흡기 착용 장애인",
+      "operator": "IN",
+      "value": "24시간 호흡기 착용",
+      "unit": "특성",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 24시간 호흡기 착용 장애인). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_SP_활동지원_X1_360점",
+      "type": "SPECIAL_TARGET",
+      "name": "특화조건: 서비스 지원 종합조사 X1영역(기능제한) 360점 이상",
+      "operator": "GTE",
+      "value": "X1>=360",
+      "unit": "점",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (특화조건: 장애인 서비스 지원 종합조사 X1영역 360점 이상, 최중증). 프로필 미지원 → needs_check"
+    },
+    {
+      "condition_id": "COND_HH_취약가구",
+      "type": "HOUSING_HOUSEHOLD",
+      "name": "가구주거조건: 취약가구",
+      "operator": "EQUAL",
+      "value": "취약가구",
+      "unit": "유형",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (가구주거조건: 취약가구). 「2025 장애인활동지원 사업안내」 정의: 수급자 외 주민등록상 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상 중 어느 하나. 포항시 적용 미확인이라 확정 판정에 쓰지 않음 → needs_check"
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "operator": "LT",
+      "value": "156",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_36_97M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "36~97",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_37M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 37개월 미만",
+      "operator": "LT",
+      "value": "37",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_108M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 108개월 미만(만 9세 미만)",
+      "operator": "LT",
+      "value": "108",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "operator": "LT",
+      "value": "216",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_0_97M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "0~97",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_24_85M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "24~85",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_144M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 144개월 미만(만 12세 미만)",
+      "operator": "LT",
+      "value": "144",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_UNDER_228M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 228개월 미만(만 19세 미만)",
+      "operator": "LT",
+      "value": "228",
+      "unit": "개월",
+      "evidence_location": "원문 대조 교정",
+      "description": "양육·대상 자녀의 연령 조건. 신청자 나이가 아니다."
+    },
+    {
+      "condition_id": "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 가구 유형: 신혼부부, 예비신혼부부, 한부모가족(6세 이하 자녀), 유자녀 혼인가구(6세 이하 자녀), 신생아 가구(2년 이내 출산·입양, 태아 포함)",
+      "operator": "IN",
+      "value": "신혼부부, 예비신혼부부, 한부모가족(6세 이하 자녀), 유자녀 혼인가구(6세 이하 자녀), 신생아 가구(2년 이내 출산·입양, 태아 포함)",
+      "unit": "유형",
+      "evidence_location": "원문 대조 교정",
+      "description": "신청 가구 유형. 유형마다 자녀 나이 기준이 다르고 자녀 요건이 없는 유형도 있어 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_9_24",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 9~24세",
+      "operator": "BETWEEN",
+      "value": "9~24",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_18_PLUS",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 18세 이상",
+      "operator": "GTE",
+      "value": "18",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_6_17",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 6~17세",
+      "operator": "BETWEEN",
+      "value": "6~17",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_UNDER_18",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 18세 미만",
+      "operator": "LT",
+      "value": "18",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_6_64",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 6~64세",
+      "operator": "BETWEEN",
+      "value": "6~64",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_TARGET_AGE_6_PLUS",
+      "type": "SPECIAL_TARGET",
+      "name": "대상자 연령: 6세 이상",
+      "operator": "GTE",
+      "value": "6",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "혜택을 받는 대상자 본인의 연령. 보호자가 대신 신청할 수 있어 신청자 나이로 비교하지 않는다(확인 필요)."
+    },
+    {
+      "condition_id": "COND_CHILD_BIRTH_2013_2019",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 출생일: 2013-12-31~2019-01-01 (2026년 안내서, 자동 비교 안 함)",
+      "operator": "BETWEEN",
+      "value": "2013-12-31~2019-01-01",
+      "unit": "출생일",
+      "evidence_location": "교육부 2026년도 보육사업안내 인쇄 297쪽(PDF 305쪽)",
+      "description": "방과후보육료 출생일 구간. 신청자 나이와 비교하지 않는다."
+    },
+    {
+      "condition_id": "COND_AGE_15_40",
+      "type": "AGE",
+      "name": "연령조건: 만 15세~40세(신청 월에 만 40세가 되는 자 포함)",
+      "operator": "BETWEEN",
+      "value": "15~40",
+      "unit": "세",
+      "evidence_location": "원문 대조 교정",
+      "description": "정책 지원 자격 조건 (연령조건: 만 15세~39세, 신청 월에 만 40세가 되는 자까지 포함). 신청 월을 알 수 없어 40세는 확인 필요로 둔다."
     }
   ],
   "age_condition_replacements": [
@@ -774,6 +1124,728 @@
       "evidence_document_id": "DOC_WORK24_001",
       "evidence_location": "DOC_WORK24_001 지원 제외 대상",
       "evidence": "고용24 국민내일배움카드 안내(DOC_WORK24_001) 지원 제외 대상"
+    },
+    {
+      "group_id": "GRP_POL_YC_024_ROOT",
+      "condition_id": "COND_AGE_7_120",
+      "target_name": "연령조건: 만 7세 이상",
+      "evidence_document_id": "DOC_YC_024",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "경기컬처패스 만7세 이상 경기도 거주자 (경기도청 일생활균형 사업 표 https://www.gg.go.kr/contents/contents.do?ciIdx=987382&menuId=1534258 (11-17 저장))"
+    },
+    {
+      "group_id": "GRP_POL_YC_047_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_047",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "만 19세 이상 만 39세 이하인 사람 (GH 경기도형 창업특화주택 입주자 모집공고(모집공고일 2026.10.2.))"
+    },
+    {
+      "group_id": "GRP_POL_YC_053_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_053",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "「경기도 청년 기본 조례」에 따라 19세 이상 ~ 39세 이하인 자 (경기도시장상권진흥원 2026년 소상공인 청년 창업 원스텝 모집 공고(GMR-2026-018호, 예비 창업자, 신청기간 2026.5.8.~6.18.))"
+    },
+    {
+      "group_id": "GRP_POL_YC_025_ROOT",
+      "condition_id": "COND_AGE_18_20",
+      "target_name": "연령조건: 만 18세~20세",
+      "evidence_document_id": "DOC_YC_025",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "2006~2007년 (2006.01.01.~2007.12.31.) 출생자 (청년문화예술패스 신청안내. 원문 '19세~20세'는 연 나이(출생연도). 만 나이로는 18~20세라 18~20으로 넣고, 출생연도 기준은 안내 문구로 보여 줌)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_002_ROOT",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_BOK_002",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "19세 이상의 등록장애인을 지원합니다."
+    },
+    {
+      "group_id": "GRP_POL_BOK_004_ROOT",
+      "condition_id": "COND_AGE_15_40",
+      "target_name": "연령조건: 만 15세~40세(신청 월에 만 40세가 되는 자 포함)",
+      "evidence_document_id": "DOC_BOK_004",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "가입연령 : 신청 당시 만 15세~ 39세 ※ 신청 월의 전월에 만 15세가 된 자 ~ 신청 월에 만 40세가 되는 자 (DOC_BOK_004_C01). 신청 월을 프로필로 알 수 없어 40세까지 범위에 넣는다"
+    },
+    {
+      "group_id": "GRP_POL_BOK_018_ROOT",
+      "condition_id": "COND_AGE_0_64",
+      "target_name": "연령조건: 만 64세 이하",
+      "evidence_document_id": "DOC_BOK_018",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "만 65세 미만의 기준중위소득 70% 이하 계층 (하한 없음은 0으로 둠)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_027_ROOT",
+      "condition_id": "COND_AGE_0_24",
+      "target_name": "연령조건: 만 24세 이하",
+      "evidence_document_id": "DOC_BOK_027",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "아동을 양육하는 부 또는 모가 24세 이하 (신청자=양육하는 부·모)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_034_ROOT",
+      "condition_id": "COND_AGE_65_120",
+      "target_name": "연령조건: 만 65세 이상",
+      "evidence_document_id": "DOC_BOK_034",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "연령 : 만 65세이상인 자"
+    },
+    {
+      "group_id": "GRP_POL_BOK_053_ROOT",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_BOK_053",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "신청하는 달을 기준으로 18세 이상을 대상으로 합니다. (월 기준(그 달에 18세가 되는 사람 포함)이라 경계 1개월 차이 가능)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_063_ROOT",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_BOK_063",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "신청 월 현재 18세 이상인 자 (18~20세 재학생 제외는 별도(이번에 넣지 않음))"
+    },
+    {
+      "group_id": "GRP_POL_BOK_075_ROOT",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_BOK_075",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "만 19세 이상 국민 중 월 15회 이상 대중교통 이용자 (POL_STG_MOLIT_001과 같은 사업)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_079_ROOT",
+      "condition_id": "COND_AGE_20_49",
+      "target_name": "연령조건: 만 20세~49세",
+      "evidence_document_id": "DOC_BOK_079",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "모든 20~49세 남녀 중 검사 희망자"
+    },
+    {
+      "group_id": "GRP_POL_BOK_095_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_BOK_095",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "청년(18~39세)을 지원합니다."
+    },
+    {
+      "group_id": "GRP_POL_007_ROOT",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_NHUF_008",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "만 19세 이상 ~ 만 34세 이하 청년"
+    },
+    {
+      "group_id": "GRP_POL_009_ROOT",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_MOLIT_001",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "19세~34세 독립거주 무주택 청년"
+    },
+    {
+      "group_id": "GRP_POL_STG_ICN_001_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
+      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
+      "evidence": "서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」",
+      "review_status": "needs_review"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_STG_MOLIT_001_GOV24",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "만 19세 이상의 국민 (v1.4.0 청크 DOC_STG_MOLIT_001_GOV24에서 확인)"
+    },
+    {
+      "group_id": "GRP_POL_010_ROOT",
+      "condition_id": "COND_AGE_15_69",
+      "target_name": "연령조건: 만 15세~69세",
+      "evidence_document_id": "DOC_MOEL_002",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "연령: 만 15세 ~ 69세 (국민취업지원제도. Ⅰ유형(요건심사형·선발형)과 Ⅱ유형 모두 '15세~69세 구직자'라 공통 신청자 나이로 넣음. 유형별 소득·재산·취업경험(15~34세 청년 특례 포함)은 나머지 그룹에 남김(유형별 OR 구조는 draft_legacy_conditions.json))"
+    },
+    {
+      "group_id": "GRP_POL_YC_002_ROOT",
+      "condition_id": "COND_AGE_18_29",
+      "target_name": "연령조건: 만 18세~29세",
+      "evidence_document_id": "DOC_YC_002",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=29, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_013_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_013",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_014_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_014",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_016_ROOT",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_YC_016",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=99, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인) / 18~99세를 상한 없음으로)"
+    },
+    {
+      "group_id": "GRP_POL_YC_019_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_019",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_020_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_020",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_021_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_021",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_023_ROOT",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_YC_023",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=34, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_030_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_030",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_031_ROOT",
+      "condition_id": "COND_AGE_15_39",
+      "target_name": "연령조건: 만 15세~39세",
+      "evidence_document_id": "DOC_YC_031",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=15, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_032_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_032",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_034_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_034",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_035_ROOT",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_YC_035",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=34, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_036_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_036",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_038_ROOT",
+      "condition_id": "COND_AGE_15_39",
+      "target_name": "연령조건: 만 15세~39세",
+      "evidence_document_id": "DOC_YC_038",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=15, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_039_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_039",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_040_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_040",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_041_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_041",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_042_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_042",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_048_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_048",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_049_ROOT",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_049",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=45, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_050_ROOT",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_050",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=45, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_051_ROOT",
+      "condition_id": "COND_AGE_19_24",
+      "target_name": "연령조건: 만 19세~24세",
+      "evidence_document_id": "DOC_YC_051",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=24, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_052_ROOT",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_052",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=45, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_054_ROOT",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=45, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_055_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_055",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_056_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_056",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_057_ROOT",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_057",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=18, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_058_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_058",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_061_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_061",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_062_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_062",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_063_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_063",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_064_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_064",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_YC_065_ROOT",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_065",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "sprtTrgtMinAge=19, sprtTrgtMaxAge=39, sprtTrgtAgeLmtYn=N (온통청년 API 나이 칸. 상세 화면 연령 칸과 같음(2026-11-17 확인))"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_TYPE_FACILITY",
+      "condition_id": "COND_SP_장애인거주시설_이용인",
+      "target_name": "특화조건: 서울시 관할 장애인거주시설 이용인",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "거주시설 장애인: 서울특별시 관할 운영시설에 거주하는 장애인 (소득제한 없음)"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_TYPE_HOME",
+      "condition_id": "COND_SP_재가장애인",
+      "target_name": "특화조건: 서울시 주민등록 재가 장애인",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "재가 장애인: 서울특별시에 주민등록이 등재된 기초생활수급자 또는 차상위계층 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_HOME_OR_INC",
+      "condition_id": "COND_SP_기초생활수급자",
+      "target_name": "특화조건: 기초생활수급자",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "재가 장애인: 서울특별시에 주민등록이 등재된 기초생활수급자 또는 차상위계층 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_HOME_OR_INC",
+      "condition_id": "COND_SP_차상위계층",
+      "target_name": "특화조건: 차상위계층",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "재가 장애인: 서울특별시에 주민등록이 등재된 기초생활수급자 또는 차상위계층 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_DIS",
+      "condition_id": "COND_SP_사지마비_와상",
+      "target_name": "특화조건: 사지마비 와상 장애인",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "사지마비 와상 또는 24시간 호흡기를 착용한 장애인 중 X1영역(기능제한) 360점 이상인 독거 및 취약가구 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_DIS",
+      "condition_id": "COND_SP_24시간_호흡기",
+      "target_name": "특화조건: 24시간 호흡기 착용 장애인",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "사지마비 와상 또는 24시간 호흡기를 착용한 장애인 중 X1영역(기능제한) 360점 이상인 독거 및 취약가구 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_ROOT",
+      "condition_id": "COND_SP_활동지원_X1_360점",
+      "target_name": "특화조건: 서비스 지원 종합조사 X1영역(기능제한) 360점 이상",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "사지마비 와상 또는 24시간 호흡기를 착용한 장애인 중 X1영역(기능제한) 360점 이상인 독거 및 취약가구 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_HH",
+      "condition_id": "COND_HH_1인가구",
+      "target_name": "가구주거조건: 1인가구",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "사지마비 와상 또는 24시간 호흡기를 착용한 장애인 중 X1영역(기능제한) 360점 이상인 독거 및 취약가구 장애인"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_HH",
+      "condition_id": "COND_HH_취약가구",
+      "target_name": "가구주거조건: 취약가구",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정",
+      "evidence": "사지마비 와상 또는 24시간 호흡기를 착용한 장애인 중 X1영역(기능제한) 360점 이상인 독거 및 취약가구 장애인"
+    },
+    {
+      "group_id": "GRP_POL_BOK_001_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_001",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_001_C01)",
+      "evidence": "대상 아동 연령: 12세 이하: 아동의 연령이 12세 이하"
+    },
+    {
+      "group_id": "GRP_POL_BOK_005_OR_TARGET",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_005",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_005_C01)",
+      "evidence": "대상 자녀 연령: 2세 미만: 출생일로부터 2세 미만의 자녀"
+    },
+    {
+      "group_id": "GRP_POL_BOK_009_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_009",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_009_C01)",
+      "evidence": "대상 영아 연령: 0~24개월(만 2세 미만): 저소득층 가구의 영아(0~24개월)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_013_ROOT",
+      "condition_id": "COND_CHILD_AGE_36_97M",
+      "target_name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_013",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_013_C01)",
+      "evidence": "대상 유아 연령: 3~5세반(출생연도 기준): 3~5세 유아 / 「2026년도 보육사업안내」(교육부) 304~305쪽 3~5세반(누리과정): '22~'20년생, 조기입학 '23.1.2.~3.1.생, 취학유예 '19년생. 연령반이 출생연도로 정해져 개월 수로 자동 비교하지 않음"
+    },
+    {
+      "group_id": "GRP_POL_BOK_015_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_015",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_015_C01)",
+      "evidence": "대상 장애아동 연령: 미취학 12세 이하: 미취학 12세 이하의 장애아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_031_ROOT",
+      "condition_id": "COND_CHILD_BIRTH_2013_2019",
+      "target_name": "대상 자녀 출생일: 2013-12-31~2019-01-01 (2026년 안내서, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_031_MOE_2026",
+      "evidence_location": "교육부 2026년도 보육사업안내 인쇄 297쪽(PDF 305쪽) 보육료 지원 기준 연령 표",
+      "evidence": "취학아동(방과후보육료) ʼ19. 01. 01. ~ ʼ13. 12. 31. / 출생일 기준이므로 개월 수로 자동 비교하지 않음",
+      "review_status": "verified"
+    },
+    {
+      "group_id": "GRP_POL_BOK_033_OR_TARGET",
+      "condition_id": "COND_CHILD_AGE_UNDER_37M",
+      "target_name": "대상 자녀 연령: 37개월 미만",
+      "evidence_document_id": "DOC_BOK_033",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_033_C01)",
+      "evidence": "대상 영유아 연령: 0~36개월: 0~36개월 영유아의 부모"
+    },
+    {
+      "group_id": "GRP_POL_BOK_036_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_108M",
+      "target_name": "대상 자녀 연령: 108개월 미만(만 9세 미만)",
+      "evidence_document_id": "DOC_BOK_036",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_036_C01)",
+      "evidence": "대상 아동 연령: 만 9세 미만: 만 9세미만 아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_045_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_BOK_045",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_045_C01)",
+      "evidence": "대상 장애아동 연령: 18세 미만: 18세 미만 장애아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_054_ROOT",
+      "condition_id": "COND_CHILD_AGE_0_97M",
+      "target_name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_054",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_054_C01)",
+      "evidence": "대상 아동 연령: 0~5세반(출생연도 기준): 0~5세 아동의 보육료 / 「2026년도 보육사업안내」(교육부) 304~305쪽 0~5세반 보육료 지원대상과 '보육료 지원 기준 연령'표: 0세반 '25.1.1. 이후 출생 ~ 5세반 '20.1.1.~'20.12.31.(취학유예 '19년생). 연령반이 출생연도로 정해져 개월 수로 자동 비교하지 않음"
+    },
+    {
+      "group_id": "GRP_POL_BOK_055_ROOT",
+      "condition_id": "COND_CHILD_AGE_24_85M",
+      "target_name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_055",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_055_C02)",
+      "evidence": "대상 아동 연령: 24개월 이상 86개월 미만: 24개월 이상 86개월 미만 아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_061_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_BOK_061",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_061_C01)",
+      "evidence": "대상 장애아동 연령: 만 18세 미만: 만 18세 미만의 장애정도가 심한 장애아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_067_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_144M",
+      "target_name": "대상 자녀 연령: 144개월 미만(만 12세 미만)",
+      "evidence_document_id": "DOC_BOK_067",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_067_C01)",
+      "evidence": "대상 아동 연령: 만 12세 미만: 만 12세 미만 비장애아동"
+    },
+    {
+      "group_id": "GRP_POL_BOK_068_OR_TARGET",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_068",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_068_C01)",
+      "evidence": "대상 자녀 연령: 만 12세 이하: 만12세 이하의 다문화가정의 자녀"
+    },
+    {
+      "group_id": "GRP_POL_BOK_069_OR_TARGET",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_069",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_069_C01)",
+      "evidence": "대상 아동 연령: 0~12세: 0세(임산부) 이상 12세 이하"
+    },
+    {
+      "group_id": "GRP_POL_BOK_071_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_071",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_071_C01)",
+      "evidence": "대상 출생아: 출생 후 2년 이내: 생년월일로부터 2년이 초과되지 않는 출생아"
+    },
+    {
+      "group_id": "GRP_POL_BOK_072_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_072",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_072_C01)",
+      "evidence": "대상 아동 연령: 2세 미만(0~23개월): 2세 미만의 아동(0~23개월)"
+    },
+    {
+      "group_id": "GRP_POL_STG_EX_001_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_228M",
+      "target_name": "대상 자녀 연령: 228개월 미만(만 19세 미만)",
+      "evidence_document_id": "DOC_STG_EX_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_EX_001_GOV24_01)",
+      "evidence": "대상 자녀 연령: 만 19세 미만(2명 이상): 만 19세 미만"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOIS_001_ROOT",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_STG_MOIS_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_MOIS_001_GOV24_01)",
+      "evidence": "대상 자녀 연령: 18세 미만(2명 이상): 만18세 미만의 자녀 2명 이상을 양육하는 자"
+    },
+    {
+      "group_id": "GRP_POL_001_ROOT",
+      "condition_id": "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD",
+      "target_name": "대상 가구 유형: 신혼부부, 예비신혼부부, 한부모가족(6세 이하 자녀), 유자녀 혼인가구(6세 이하 자녀), 신생아 가구(2년 이내 출산·입양, 태아 포함)",
+      "evidence_document_id": "DOC_LH_001",
+      "evidence_location": "원문 대조 교정 (DOC_LH_001_P03_C01)",
+      "evidence": "대상 가구 유형: 6세 이하 자녀를 둔 모자가족"
+    },
+    {
+      "group_id": "GRP_POL_BOK_008_ROOT",
+      "condition_id": "COND_TARGET_AGE_9_24",
+      "target_name": "대상자 연령: 9~24세",
+      "evidence_document_id": "DOC_BOK_008",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_008_C01)",
+      "evidence": "대상 청소년 연령: 9~24세(본인 또는 보호자 신청): 9세 이상 24세 이하 청소년"
+    },
+    {
+      "group_id": "GRP_POL_BOK_010_ROOT",
+      "condition_id": "COND_TARGET_AGE_9_24",
+      "target_name": "대상자 연령: 9~24세",
+      "evidence_document_id": "DOC_BOK_010",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_010_C01)",
+      "evidence": "대상 여성청소년 연령: 9~24세(본인 또는 보호자 신청): 9~24세 여성청소년"
+    },
+    {
+      "group_id": "GRP_POL_BOK_035_ROOT",
+      "condition_id": "COND_TARGET_AGE_18_PLUS",
+      "target_name": "대상자 연령: 18세 이상",
+      "evidence_document_id": "DOC_BOK_035",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_035_C01)",
+      "evidence": "대상 장애인 연령: 만 18세 이상(본인 또는 보호자 신청): 만 18세이상"
+    },
+    {
+      "group_id": "GRP_POL_BOK_038_ROOT",
+      "condition_id": "COND_TARGET_AGE_6_17",
+      "target_name": "대상자 연령: 6~17세",
+      "evidence_document_id": "DOC_BOK_038",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_038_C01)",
+      "evidence": "대상 장애인 연령: 만 6세 이상 18세 미만(본인 또는 보호자 신청, 재학생 예외 있음): 만 6세 이상 ~ 만18세 미만"
+    },
+    {
+      "group_id": "GRP_POL_BOK_046_ROOT",
+      "condition_id": "COND_TARGET_AGE_UNDER_18",
+      "target_name": "대상자 연령: 18세 미만",
+      "evidence_document_id": "DOC_BOK_046",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_046_C01)",
+      "evidence": "대상 장애아동 연령: 18세 미만(본인 또는 보호자 신청, 재학생 예외 있음): 18세 미만"
+    },
+    {
+      "group_id": "GRP_POL_BOK_059_ROOT",
+      "condition_id": "COND_TARGET_AGE_UNDER_18",
+      "target_name": "대상자 연령: 18세 미만",
+      "evidence_document_id": "DOC_BOK_059",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_059_C01)",
+      "evidence": "대상 아동 연령: 만 18세 미만(본인 또는 보호자 신청): 만 18세 미만의 아동복지시설"
+    },
+    {
+      "group_id": "GRP_POL_BOK_060_ROOT",
+      "condition_id": "COND_TARGET_AGE_6_64",
+      "target_name": "대상자 연령: 6~64세",
+      "evidence_document_id": "DOC_BOK_060",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_060_C01)",
+      "evidence": "대상 장애인 연령: 6~64세(본인 또는 보호자 신청, 65세 예외 있음): 6세 이상 ~ 64세 등록장애인"
+    },
+    {
+      "group_id": "GRP_POL_BOK_073_ROOT",
+      "condition_id": "COND_TARGET_AGE_6_PLUS",
+      "target_name": "대상자 연령: 6세 이상",
+      "evidence_document_id": "DOC_BOK_073",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_073_C01)",
+      "evidence": "대상자 연령: 6세 이상(학생 본인 또는 부모 신청): 6세 이상(2019.12.31 이전 출생자)"
     }
   ],
   "category_corrections": [
@@ -879,8 +1951,8 @@
     "POL_STG_NTS_001",
     "POL_GOV_050"
   ],
-  "revised_at": "2026-11-09",
-  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영",
+  "revised_at": "2026-11-18",
+  "revision_note": "2026-11-09: 분야·대상·생애단계 표기, POL_005 제외 조건, 소득 구간 전체 선택 교정 추가; 공식 페이지 재조회 기반 연령 조건 24건·소득 조건 6건 교정 추가; 정책별 소득·가구 원문 확인 결과(source_review) 추가; POL_GOV_064 소득 그룹 제거와 신청 기간 확인 결과(application) 추가; POL_GOV_050 대상 자녀 연령 교정; POL_GOV_050 생애단계 교정; period_ended 고정값을 application_start·application_end 날짜로 대체; 하위 조건이 없는 AND 루트 그룹 16개를 UNKNOWN으로 변경; POL_009 신청 날짜를 원래 사업 기간으로 정정; POL_002 시작일 연도 정정; 원문에 상시신청이 명시된 정책에 application_is_ongoing 추가; 소득 needs_review 6건 추가 원문 확인 반영; #79 원문으로 확인한 신청자 나이 조건 추가(나이 외 조건은 하위 UNKNOWN 그룹으로 남김), 우대·순위 조건을 필수에서 제거(special_condition_removals), 정책-조건 직접 관계 추가 키(requires_condition_additions); #80 소득·가구 원문 대조 결과 반영, POL_GOV_016·054 유형별 조건 구조, POL_GOV_016 소득 그룹 mark_unknown→remove; #79 수혜자 나이 27건(자녀 월령 19, 대상자 나이 8)을 신청자 나이와 구분해 추가, POL_001 가구 유형 안내 조건 추가; PR #89 리뷰 반영: POL_BOK_004 상한 40세(신청 월 만 40세 포함), POL_STG_ICN_001은 정부24 원문 18~39세로 연결; PR #89 2차 리뷰 반영: POL_GOV_016 유형 조건에 서울시 관할 시설·서울시 주민등록 제한을 이름에 명시; POL_STG_ICN_001 나이를 인천 서구 사업안내서 기준 19~39세로 정정; POL_STG_ICN_001 나이 조건 관계를 검수 대기(needs_review)로 표시",
   "new_condition_groups": [
     {
       "group_id": "GRP_POL_005_OR_EXCL",
@@ -888,6 +1960,622 @@
       "logic": "OR",
       "is_root": false,
       "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외"
+    },
+    {
+      "group_id": "GRP_POL_YC_024_REST",
+      "policy_id": "POL_YC_024",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_047_REST",
+      "policy_id": "POL_YC_047",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_053_REST",
+      "policy_id": "POL_YC_053",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_025_REST",
+      "policy_id": "POL_YC_025",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_002_REST",
+      "policy_id": "POL_BOK_002",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_004_REST",
+      "policy_id": "POL_BOK_004",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_018_REST",
+      "policy_id": "POL_BOK_018",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_027_REST",
+      "policy_id": "POL_BOK_027",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_034_REST",
+      "policy_id": "POL_BOK_034",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_053_REST",
+      "policy_id": "POL_BOK_053",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_063_REST",
+      "policy_id": "POL_BOK_063",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_075_REST",
+      "policy_id": "POL_BOK_075",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_079_REST",
+      "policy_id": "POL_BOK_079",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_095_REST",
+      "policy_id": "POL_BOK_095",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_007_REST",
+      "policy_id": "POL_007",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_009_REST",
+      "policy_id": "POL_009",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_STG_ICN_001_REST",
+      "policy_id": "POL_STG_ICN_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOLIT_001_REST",
+      "policy_id": "POL_STG_MOLIT_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_010_REST",
+      "policy_id": "POL_010",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_013_REST",
+      "policy_id": "POL_YC_013",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_016_REST",
+      "policy_id": "POL_YC_016",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_019_REST",
+      "policy_id": "POL_YC_019",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_020_REST",
+      "policy_id": "POL_YC_020",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_023_REST",
+      "policy_id": "POL_YC_023",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_030_REST",
+      "policy_id": "POL_YC_030",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_031_REST",
+      "policy_id": "POL_YC_031",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_032_REST",
+      "policy_id": "POL_YC_032",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_034_REST",
+      "policy_id": "POL_YC_034",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_035_REST",
+      "policy_id": "POL_YC_035",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_036_REST",
+      "policy_id": "POL_YC_036",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_038_REST",
+      "policy_id": "POL_YC_038",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_039_REST",
+      "policy_id": "POL_YC_039",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_040_REST",
+      "policy_id": "POL_YC_040",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_041_REST",
+      "policy_id": "POL_YC_041",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_042_REST",
+      "policy_id": "POL_YC_042",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_050_REST",
+      "policy_id": "POL_YC_050",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_051_REST",
+      "policy_id": "POL_YC_051",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_052_REST",
+      "policy_id": "POL_YC_052",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_054_REST",
+      "policy_id": "POL_YC_054",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_055_REST",
+      "policy_id": "POL_YC_055",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_056_REST",
+      "policy_id": "POL_YC_056",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_058_REST",
+      "policy_id": "POL_YC_058",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_061_REST",
+      "policy_id": "POL_YC_061",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_062_REST",
+      "policy_id": "POL_YC_062",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_065_REST",
+      "policy_id": "POL_YC_065",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_YC_021_REST",
+      "policy_id": "POL_YC_021",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 우대 조건을 지운 뒤 남은 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_OR_TYPE",
+      "policy_id": "POL_GOV_016",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[신청 유형] 거주시설 장애인 또는 재가 장애인 중 하나에 해당 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_TYPE_FACILITY",
+      "policy_id": "POL_GOV_016",
+      "logic": "AND",
+      "is_root": false,
+      "description": "[거주시설 장애인] 서울특별시 관할 장애인거주시설 이용인 중 지역자립 욕구가 있는 사람. 소득제한 없음"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_TYPE_HOME",
+      "policy_id": "POL_GOV_016",
+      "logic": "AND",
+      "is_root": false,
+      "description": "[재가 장애인] 서울특별시에 주민등록이 등재된 재가 장애인으로 기초생활수급자 또는 차상위계층"
+    },
+    {
+      "group_id": "GRP_POL_GOV_016_HOME_OR_INC",
+      "policy_id": "POL_GOV_016",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[수급·차상위] 기초생활수급자 또는 차상위계층 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_DIS",
+      "policy_id": "POL_GOV_054",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[장애 상태] 사지마비 와상 또는 24시간 호흡기 착용 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_GOV_054_OR_HH",
+      "policy_id": "POL_GOV_054",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[가구 유형] 독거(1인)가구 또는 취약가구 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_001_REST",
+      "policy_id": "POL_BOK_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_005_REST",
+      "policy_id": "POL_BOK_005",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_005_OR_TARGET",
+      "policy_id": "POL_BOK_005",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[대상] 대상 자녀 연령: 2세 미만 또는 임신 중이거나 출산한 수급권자 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_005_ALT",
+      "policy_id": "POL_BOK_005",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "다른 대상 경로: 임신 중이거나 출산한 수급권자 (프로필 미지원, 확인 필요)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_009_REST",
+      "policy_id": "POL_BOK_009",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_013_REST",
+      "policy_id": "POL_BOK_013",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_015_REST",
+      "policy_id": "POL_BOK_015",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_031_REST",
+      "policy_id": "POL_BOK_031",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_033_REST",
+      "policy_id": "POL_BOK_033",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_033_OR_TARGET",
+      "policy_id": "POL_BOK_033",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[대상] 대상 영유아 연령: 0~36개월 또는 임산부 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_033_ALT",
+      "policy_id": "POL_BOK_033",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "다른 대상 경로: 임산부 (프로필 미지원, 확인 필요)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_036_REST",
+      "policy_id": "POL_BOK_036",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_045_REST",
+      "policy_id": "POL_BOK_045",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_054_REST",
+      "policy_id": "POL_BOK_054",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_055_REST",
+      "policy_id": "POL_BOK_055",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_061_REST",
+      "policy_id": "POL_BOK_061",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_067_REST",
+      "policy_id": "POL_BOK_067",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_068_REST",
+      "policy_id": "POL_BOK_068",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_068_OR_TARGET",
+      "policy_id": "POL_BOK_068",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[대상] 대상 자녀 연령: 만 12세 이하 또는 초등학교 재학 중이면 12세 초과도 가능한 예외 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_068_ALT",
+      "policy_id": "POL_BOK_068",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "다른 대상 경로: 초등학교 재학 중이면 12세 초과도 가능한 예외 (프로필 미지원, 확인 필요)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_069_REST",
+      "policy_id": "POL_BOK_069",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_069_OR_TARGET",
+      "policy_id": "POL_BOK_069",
+      "logic": "OR",
+      "is_root": false,
+      "description": "[대상] 대상 아동 연령: 0~12세 또는 임산부 (OR)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_069_ALT",
+      "policy_id": "POL_BOK_069",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "다른 대상 경로: 임산부 (프로필 미지원, 확인 필요)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_071_REST",
+      "policy_id": "POL_BOK_071",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_072_REST",
+      "policy_id": "POL_BOK_072",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_STG_EX_001_REST",
+      "policy_id": "POL_STG_EX_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOIS_001_REST",
+      "policy_id": "POL_STG_MOIS_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_001_REST",
+      "policy_id": "POL_001",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_008_REST",
+      "policy_id": "POL_BOK_008",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_010_REST",
+      "policy_id": "POL_BOK_010",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_035_REST",
+      "policy_id": "POL_BOK_035",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_038_REST",
+      "policy_id": "POL_BOK_038",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_046_REST",
+      "policy_id": "POL_BOK_046",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_059_REST",
+      "policy_id": "POL_BOK_059",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_060_REST",
+      "policy_id": "POL_BOK_060",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
+    },
+    {
+      "group_id": "GRP_POL_BOK_073_REST",
+      "policy_id": "POL_BOK_073",
+      "logic": "UNKNOWN",
+      "is_root": false,
+      "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"
     }
   ],
   "group_group_additions": [
@@ -897,6 +2585,622 @@
       "target_name": "참여제외 OR 그룹 (GRP_POL_005_OR_EXCL)",
       "evidence_document_id": "DOC_WORK24_001",
       "evidence_location": "DOC_WORK24_001 지원 제외 대상"
+    },
+    {
+      "source_id": "GRP_POL_YC_024_ROOT",
+      "target_id": "GRP_POL_YC_024_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_024_REST)",
+      "evidence_document_id": "DOC_YC_024",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_047_ROOT",
+      "target_id": "GRP_POL_YC_047_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_047_REST)",
+      "evidence_document_id": "DOC_YC_047",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_053_ROOT",
+      "target_id": "GRP_POL_YC_053_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_053_REST)",
+      "evidence_document_id": "DOC_YC_053",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_025_ROOT",
+      "target_id": "GRP_POL_YC_025_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_025_REST)",
+      "evidence_document_id": "DOC_YC_025",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_002_ROOT",
+      "target_id": "GRP_POL_BOK_002_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_002_REST)",
+      "evidence_document_id": "DOC_BOK_002",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_004_ROOT",
+      "target_id": "GRP_POL_BOK_004_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_004_REST)",
+      "evidence_document_id": "DOC_BOK_004",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_018_ROOT",
+      "target_id": "GRP_POL_BOK_018_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_018_REST)",
+      "evidence_document_id": "DOC_BOK_018",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_027_ROOT",
+      "target_id": "GRP_POL_BOK_027_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_027_REST)",
+      "evidence_document_id": "DOC_BOK_027",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_034_ROOT",
+      "target_id": "GRP_POL_BOK_034_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_034_REST)",
+      "evidence_document_id": "DOC_BOK_034",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_053_ROOT",
+      "target_id": "GRP_POL_BOK_053_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_053_REST)",
+      "evidence_document_id": "DOC_BOK_053",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_063_ROOT",
+      "target_id": "GRP_POL_BOK_063_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_063_REST)",
+      "evidence_document_id": "DOC_BOK_063",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_075_ROOT",
+      "target_id": "GRP_POL_BOK_075_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_075_REST)",
+      "evidence_document_id": "DOC_BOK_075",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_079_ROOT",
+      "target_id": "GRP_POL_BOK_079_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_079_REST)",
+      "evidence_document_id": "DOC_BOK_079",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_095_ROOT",
+      "target_id": "GRP_POL_BOK_095_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_095_REST)",
+      "evidence_document_id": "DOC_BOK_095",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_007_ROOT",
+      "target_id": "GRP_POL_007_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_007_REST)",
+      "evidence_document_id": "DOC_NHUF_008",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_009_ROOT",
+      "target_id": "GRP_POL_009_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_009_REST)",
+      "evidence_document_id": "DOC_MOLIT_001",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_STG_ICN_001_ROOT",
+      "target_id": "GRP_POL_STG_ICN_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_ICN_001_REST)",
+      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
+      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세"
+    },
+    {
+      "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
+      "target_id": "GRP_POL_STG_MOLIT_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_MOLIT_001_REST)",
+      "evidence_document_id": "DOC_STG_MOLIT_001_GOV24",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_010_ROOT",
+      "target_id": "GRP_POL_010_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_010_REST)",
+      "evidence_document_id": "DOC_MOEL_002",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_013_ROOT",
+      "target_id": "GRP_POL_YC_013_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_013_REST)",
+      "evidence_document_id": "DOC_YC_013",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_016_ROOT",
+      "target_id": "GRP_POL_YC_016_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_016_REST)",
+      "evidence_document_id": "DOC_YC_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_019_ROOT",
+      "target_id": "GRP_POL_YC_019_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_019_REST)",
+      "evidence_document_id": "DOC_YC_019",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_020_ROOT",
+      "target_id": "GRP_POL_YC_020_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_020_REST)",
+      "evidence_document_id": "DOC_YC_020",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_023_ROOT",
+      "target_id": "GRP_POL_YC_023_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_023_REST)",
+      "evidence_document_id": "DOC_YC_023",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_030_ROOT",
+      "target_id": "GRP_POL_YC_030_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_030_REST)",
+      "evidence_document_id": "DOC_YC_030",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_031_ROOT",
+      "target_id": "GRP_POL_YC_031_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_031_REST)",
+      "evidence_document_id": "DOC_YC_031",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_032_ROOT",
+      "target_id": "GRP_POL_YC_032_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_032_REST)",
+      "evidence_document_id": "DOC_YC_032",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_034_ROOT",
+      "target_id": "GRP_POL_YC_034_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_034_REST)",
+      "evidence_document_id": "DOC_YC_034",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_035_ROOT",
+      "target_id": "GRP_POL_YC_035_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_035_REST)",
+      "evidence_document_id": "DOC_YC_035",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_036_ROOT",
+      "target_id": "GRP_POL_YC_036_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_036_REST)",
+      "evidence_document_id": "DOC_YC_036",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_038_ROOT",
+      "target_id": "GRP_POL_YC_038_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_038_REST)",
+      "evidence_document_id": "DOC_YC_038",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_039_ROOT",
+      "target_id": "GRP_POL_YC_039_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_039_REST)",
+      "evidence_document_id": "DOC_YC_039",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_040_ROOT",
+      "target_id": "GRP_POL_YC_040_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_040_REST)",
+      "evidence_document_id": "DOC_YC_040",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_041_ROOT",
+      "target_id": "GRP_POL_YC_041_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_041_REST)",
+      "evidence_document_id": "DOC_YC_041",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_042_ROOT",
+      "target_id": "GRP_POL_YC_042_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_042_REST)",
+      "evidence_document_id": "DOC_YC_042",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_050_ROOT",
+      "target_id": "GRP_POL_YC_050_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_050_REST)",
+      "evidence_document_id": "DOC_YC_050",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_051_ROOT",
+      "target_id": "GRP_POL_YC_051_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_051_REST)",
+      "evidence_document_id": "DOC_YC_051",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_052_ROOT",
+      "target_id": "GRP_POL_YC_052_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_052_REST)",
+      "evidence_document_id": "DOC_YC_052",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_054_ROOT",
+      "target_id": "GRP_POL_YC_054_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_054_REST)",
+      "evidence_document_id": "DOC_YC_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_055_ROOT",
+      "target_id": "GRP_POL_YC_055_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_055_REST)",
+      "evidence_document_id": "DOC_YC_055",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_056_ROOT",
+      "target_id": "GRP_POL_YC_056_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_056_REST)",
+      "evidence_document_id": "DOC_YC_056",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_058_ROOT",
+      "target_id": "GRP_POL_YC_058_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_058_REST)",
+      "evidence_document_id": "DOC_YC_058",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_061_ROOT",
+      "target_id": "GRP_POL_YC_061_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_061_REST)",
+      "evidence_document_id": "DOC_YC_061",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_062_ROOT",
+      "target_id": "GRP_POL_YC_062_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_062_REST)",
+      "evidence_document_id": "DOC_YC_062",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_065_ROOT",
+      "target_id": "GRP_POL_YC_065_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_065_REST)",
+      "evidence_document_id": "DOC_YC_065",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_YC_021_ROOT",
+      "target_id": "GRP_POL_YC_021_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_021_REST)",
+      "evidence_document_id": "DOC_YC_021",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_016_ROOT",
+      "target_id": "GRP_POL_GOV_016_OR_TYPE",
+      "target_name": "신청 유형 OR 그룹",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_016_OR_TYPE",
+      "target_id": "GRP_POL_GOV_016_TYPE_FACILITY",
+      "target_name": "거주시설 장애인 그룹",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_016_OR_TYPE",
+      "target_id": "GRP_POL_GOV_016_TYPE_HOME",
+      "target_name": "재가 장애인 그룹",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_016_TYPE_HOME",
+      "target_id": "GRP_POL_GOV_016_HOME_OR_INC",
+      "target_name": "수급·차상위 OR 그룹",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_054_ROOT",
+      "target_id": "GRP_POL_GOV_054_OR_DIS",
+      "target_name": "장애 상태 OR 그룹",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_GOV_054_ROOT",
+      "target_id": "GRP_POL_GOV_054_OR_HH",
+      "target_name": "가구 유형 OR 그룹",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "source_id": "GRP_POL_BOK_001_ROOT",
+      "target_id": "GRP_POL_BOK_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_001_REST)",
+      "evidence_document_id": "DOC_BOK_001",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_001_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_005_ROOT",
+      "target_id": "GRP_POL_BOK_005_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_005_REST)",
+      "evidence_document_id": "DOC_BOK_005",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_005_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_005_ROOT",
+      "target_id": "GRP_POL_BOK_005_OR_TARGET",
+      "target_name": "대상 OR 그룹",
+      "evidence_document_id": "DOC_BOK_005",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_005_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_005_OR_TARGET",
+      "target_id": "GRP_POL_BOK_005_ALT",
+      "target_name": "다른 대상 경로: 임신 중이거나 출산한 수급권자",
+      "evidence_document_id": "DOC_BOK_005",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_005_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_009_ROOT",
+      "target_id": "GRP_POL_BOK_009_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_009_REST)",
+      "evidence_document_id": "DOC_BOK_009",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_009_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_013_ROOT",
+      "target_id": "GRP_POL_BOK_013_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_013_REST)",
+      "evidence_document_id": "DOC_BOK_013",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_013_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_015_ROOT",
+      "target_id": "GRP_POL_BOK_015_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_015_REST)",
+      "evidence_document_id": "DOC_BOK_015",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_015_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_031_ROOT",
+      "target_id": "GRP_POL_BOK_031_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_031_REST)",
+      "evidence_document_id": "DOC_BOK_031",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_031_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_033_ROOT",
+      "target_id": "GRP_POL_BOK_033_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_033_REST)",
+      "evidence_document_id": "DOC_BOK_033",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_033_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_033_ROOT",
+      "target_id": "GRP_POL_BOK_033_OR_TARGET",
+      "target_name": "대상 OR 그룹",
+      "evidence_document_id": "DOC_BOK_033",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_033_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_033_OR_TARGET",
+      "target_id": "GRP_POL_BOK_033_ALT",
+      "target_name": "다른 대상 경로: 임산부",
+      "evidence_document_id": "DOC_BOK_033",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_033_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_036_ROOT",
+      "target_id": "GRP_POL_BOK_036_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_036_REST)",
+      "evidence_document_id": "DOC_BOK_036",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_036_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_045_ROOT",
+      "target_id": "GRP_POL_BOK_045_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_045_REST)",
+      "evidence_document_id": "DOC_BOK_045",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_045_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_054_ROOT",
+      "target_id": "GRP_POL_BOK_054_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_054_REST)",
+      "evidence_document_id": "DOC_BOK_054",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_054_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_055_ROOT",
+      "target_id": "GRP_POL_BOK_055_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_055_REST)",
+      "evidence_document_id": "DOC_BOK_055",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_055_C02)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_061_ROOT",
+      "target_id": "GRP_POL_BOK_061_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_061_REST)",
+      "evidence_document_id": "DOC_BOK_061",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_061_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_067_ROOT",
+      "target_id": "GRP_POL_BOK_067_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_067_REST)",
+      "evidence_document_id": "DOC_BOK_067",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_067_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_068_ROOT",
+      "target_id": "GRP_POL_BOK_068_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_068_REST)",
+      "evidence_document_id": "DOC_BOK_068",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_068_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_068_ROOT",
+      "target_id": "GRP_POL_BOK_068_OR_TARGET",
+      "target_name": "대상 OR 그룹",
+      "evidence_document_id": "DOC_BOK_068",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_068_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_068_OR_TARGET",
+      "target_id": "GRP_POL_BOK_068_ALT",
+      "target_name": "다른 대상 경로: 초등학교 재학 중이면 12세 초과도 가능한 예외",
+      "evidence_document_id": "DOC_BOK_068",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_068_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_069_ROOT",
+      "target_id": "GRP_POL_BOK_069_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_069_REST)",
+      "evidence_document_id": "DOC_BOK_069",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_069_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_069_ROOT",
+      "target_id": "GRP_POL_BOK_069_OR_TARGET",
+      "target_name": "대상 OR 그룹",
+      "evidence_document_id": "DOC_BOK_069",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_069_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_069_OR_TARGET",
+      "target_id": "GRP_POL_BOK_069_ALT",
+      "target_name": "다른 대상 경로: 임산부",
+      "evidence_document_id": "DOC_BOK_069",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_069_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_071_ROOT",
+      "target_id": "GRP_POL_BOK_071_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_071_REST)",
+      "evidence_document_id": "DOC_BOK_071",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_071_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_072_ROOT",
+      "target_id": "GRP_POL_BOK_072_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_072_REST)",
+      "evidence_document_id": "DOC_BOK_072",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_072_C01)"
+    },
+    {
+      "source_id": "GRP_POL_STG_EX_001_ROOT",
+      "target_id": "GRP_POL_STG_EX_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_EX_001_REST)",
+      "evidence_document_id": "DOC_STG_EX_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_EX_001_GOV24_01)"
+    },
+    {
+      "source_id": "GRP_POL_STG_MOIS_001_ROOT",
+      "target_id": "GRP_POL_STG_MOIS_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_MOIS_001_REST)",
+      "evidence_document_id": "DOC_STG_MOIS_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_MOIS_001_GOV24_01)"
+    },
+    {
+      "source_id": "GRP_POL_001_ROOT",
+      "target_id": "GRP_POL_001_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_001_REST)",
+      "evidence_document_id": "DOC_LH_001",
+      "evidence_location": "원문 대조 교정 (DOC_LH_001_P03_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_008_ROOT",
+      "target_id": "GRP_POL_BOK_008_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_008_REST)",
+      "evidence_document_id": "DOC_BOK_008",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_008_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_010_ROOT",
+      "target_id": "GRP_POL_BOK_010_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_010_REST)",
+      "evidence_document_id": "DOC_BOK_010",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_010_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_035_ROOT",
+      "target_id": "GRP_POL_BOK_035_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_035_REST)",
+      "evidence_document_id": "DOC_BOK_035",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_035_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_038_ROOT",
+      "target_id": "GRP_POL_BOK_038_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_038_REST)",
+      "evidence_document_id": "DOC_BOK_038",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_038_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_046_ROOT",
+      "target_id": "GRP_POL_BOK_046_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_046_REST)",
+      "evidence_document_id": "DOC_BOK_046",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_046_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_059_ROOT",
+      "target_id": "GRP_POL_BOK_059_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_059_REST)",
+      "evidence_document_id": "DOC_BOK_059",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_059_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_060_ROOT",
+      "target_id": "GRP_POL_BOK_060_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_060_REST)",
+      "evidence_document_id": "DOC_BOK_060",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_060_C01)"
+    },
+    {
+      "source_id": "GRP_POL_BOK_073_ROOT",
+      "target_id": "GRP_POL_BOK_073_REST",
+      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_BOK_073_REST)",
+      "evidence_document_id": "DOC_BOK_073",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_073_C01)"
     }
   ],
   "group_description_corrections": [
@@ -1112,7 +3416,7 @@
     },
     {
       "policy_id": "POL_GOV_016",
-      "action": "mark_unknown",
+      "action": "remove",
       "group_id": "GRP_POL_GOV_016_OR_INC",
       "before": [
         "COND_INC_중위소득_0_50_",
@@ -1121,14 +3425,8 @@
         "COND_INC_중위소득_101_200_",
         "COND_INC_중위소득_200_초과"
       ],
-      "after": [
-        "COND_INC_중위소득_0_50_",
-        "COND_INC_중위소득_51_75_",
-        "COND_INC_중위소득_76_100_",
-        "COND_INC_중위소득_101_200_",
-        "COND_INC_중위소득_200_초과"
-      ],
-      "evidence": "재가장애인은 기초생활수급자·차상위계층, 거주시설 장애인은 소득제한 없음으로 대상별 기준이 다름"
+      "after": [],
+      "evidence": "원문에 중위소득 수치가 없음. 소득 기준은 재가 장애인 유형의 수급·차상위 자격으로 옮김(11-18 합의)"
     },
     {
       "policy_id": "POL_GOV_017",
@@ -1819,10 +4117,9 @@
         "check_point": "신청 유형과 연소득(일반형은 부부합산 5천만원 이하 등)"
       },
       "POL_GOV_016": {
-        "status": "needs_review",
-        "followup": "ask_user",
-        "note": "정부24는 거주시설 장애인 소득제한 없음, 재가장애인 기초생활수급자·차상위계층이고, 서울시복지재단 표는 구분 없이 수급자·차상위로 표기해 서로 다름",
-        "check_point": "거주시설 이용 여부와 재가장애인의 수급·차상위 여부"
+        "status": "not_specified",
+        "note": "원문에 중위소득 수치가 없음. 재가 장애인은 기초생활수급자·차상위계층(유형 조건으로 구조화), 거주시설 장애인은 소득제한 없음. 정부24 화면과 서울시 주거서비스 안내서가 같음(2026-11-17 확인)",
+        "check_point": "거주시설 이용 여부와 재가 장애인의 수급·차상위 여부"
       },
       "POL_GOV_036": {
         "status": "needs_review",
@@ -1879,6 +4176,74 @@
       "POL_GOV_054": {
         "status": "not_specified",
         "note": "정부24 안내에 소득 기준 미기재. 포항시 일반 장애인활동지원 안내는 소득수준과 무관하게 신청가능. 포항시 자체 지침은 미확인"
+      },
+      "POL_GOV_025": {
+        "status": "needs_review",
+        "note": "주거급여수급자가 대상. 그래프 중위소득 0~50% 구간은 원문 수치가 아님(주거급여 수급 자격을 근사)",
+        "followup": "ask_user",
+        "check_point": "주거급여 수급 여부"
+      },
+      "POL_GOV_026": {
+        "status": "needs_review",
+        "note": "저소득 기준 수치 없음. 고독사 위험도로 선정",
+        "followup": "check_notice",
+        "check_point": "저소득 기준과 고독사 위험군 선정 여부"
+      },
+      "POL_GOV_031": {
+        "status": "needs_review",
+        "note": "기초생활보장수급자 중 동 추천 세대. 중위소득 구간은 원문 수치가 아님",
+        "followup": "ask_user",
+        "check_point": "기초생활보장 수급 여부와 동 추천"
+      },
+      "POL_GOV_033": {
+        "status": "specified",
+        "note": "2026년 차상위계층 이하(4인 3,247,369원 = 기준 중위소득 50%)가 그래프 0~50% 구간과 일치"
+      },
+      "POL_GOV_044": {
+        "status": "needs_review",
+        "note": "자활사업 참여자 또는 자산형성 통장 가입자가 대상. 원문에 소득 구간 없음",
+        "followup": "ask_user",
+        "check_point": "자활사업 참여 또는 희망저축·청년내일저축 가입 여부"
+      },
+      "POL_GOV_046": {
+        "status": "specified",
+        "note": "희망저축 Ⅰ·Ⅱ(수급·차상위)와 청년내일저축(중위소득 50% 이하) 모두 50% 이하라 그래프 0~50% 구간과 일치"
+      },
+      "POL_GOV_049": {
+        "status": "needs_review",
+        "note": "기초생활수급 가구의 초·중학생이 대상. 중위소득 구간은 원문 수치가 아님",
+        "followup": "ask_user",
+        "check_point": "기초생활 수급 여부"
+      },
+      "POL_GOV_052": {
+        "status": "needs_review",
+        "note": "생계·의료급여 수급자이면서 장애인연금 대상자",
+        "followup": "ask_user",
+        "check_point": "생계·의료급여 수급과 장애인연금 대상 여부"
+      },
+      "POL_GOV_055": {
+        "status": "needs_review",
+        "note": "생계·의료급여 수급 가구가 대상",
+        "followup": "ask_user",
+        "check_point": "생계·의료급여 수급 여부"
+      },
+      "POL_GOV_060": {
+        "status": "needs_review",
+        "note": "국민임대주택 거주 수급자 가구가 대상",
+        "followup": "ask_user",
+        "check_point": "국민임대주택 거주와 수급 여부"
+      },
+      "POL_GOV_062": {
+        "status": "needs_review",
+        "note": "의료급여 수급자·차상위 본인경감대상자 중 산정특례 등록자",
+        "followup": "ask_user",
+        "check_point": "의료급여·차상위 본인경감 대상과 산정특례 등록 여부"
+      },
+      "POL_GOV_063": {
+        "status": "needs_review",
+        "note": "생계·의료급여 수급자 중 65세 이상",
+        "followup": "ask_user",
+        "check_point": "생계·의료급여 수급 여부"
       }
     },
     "household": {
@@ -2083,6 +4448,50 @@
         "followup": "ask_user",
         "note": "독거 및 취약가구 대상. 2025 장애인활동지원 사업안내의 취약가구는 수급자 외 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상인 경우이나 포항시 적용은 미확인",
         "check_point": "독거 또는 취약가구 해당 여부"
+      },
+      "POL_GOV_001": {
+        "status": "needs_review",
+        "note": "정부24 원문에 무주택 문구가 없음. 그래프 무주택 조건은 API 가구 항목에서 온 값(주택도시기금 월세대출 요건으로 보이나 이 원문에는 없음)",
+        "followup": "check_notice",
+        "check_point": "무주택 여부(주택도시기금 주거안정 월세대출 요건)"
+      },
+      "POL_GOV_007": {
+        "status": "specified",
+        "note": "북한이탈주민 요건이 그래프 조건과 일치"
+      },
+      "POL_GOV_008": {
+        "status": "specified",
+        "note": "북한이탈주민 요건 일치. 가산금 사유(60세 이상·한부모·장애 등 OR)는 구조화되지 않음"
+      },
+      "POL_GOV_026": {
+        "status": "specified",
+        "note": "1인 가구 요건이 그래프 조건과 일치"
+      },
+      "POL_GOV_028": {
+        "status": "not_specified",
+        "note": "첫째아 이상 출산가정이 대상이라 다자녀 요건 없음. 그래프 다자녀가구 조건 제거"
+      },
+      "POL_GOV_037": {
+        "status": "needs_review",
+        "note": "미혼모자가족복지시설 입소 세대가 대상. 그래프 한부모·조손 조건은 근사이고 시설 입소·자립 요건은 구조화되지 않음",
+        "followup": "check_notice",
+        "check_point": "미혼모자가족복지시설 1년 6개월 이상 입소와 자격증·취업·졸업 요건"
+      },
+      "POL_GOV_039": {
+        "status": "needs_review",
+        "note": "수원시 거주 외국인(체류 90일 초과)이 대상이라 다문화가족 요건이 아님. 그래프 다문화가족 조건 제거",
+        "followup": "ask_user",
+        "check_point": "수원시 거주 외국인 여부와 국내 체류 90일 초과"
+      },
+      "POL_GOV_053": {
+        "status": "specified",
+        "note": "결혼이민여성 요건이 다문화가족 조건과 일치. 출산 1년 이내 요건은 구조화되지 않음"
+      },
+      "POL_GOV_065": {
+        "status": "needs_review",
+        "note": "한부모가족은 감면 대상 8가지(광주 거주자·장애인·학교 단체·5.18 유공자·한부모·다자녀·보훈·수급자) 중 하나인데 그래프는 한부모를 필수(AND)로 둠. 그래프 한부모 조건 제거",
+        "followup": "ask_user",
+        "check_point": "감면 대상(광주 거주·장애인·한부모·다자녀·보훈·수급자 등) 해당 여부"
       }
     }
   },
@@ -2425,6 +4834,531 @@
       "before": "AND",
       "after": "UNKNOWN",
       "evidence": "연령·소득·가구 조건 교정 후 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_YC_024_ROOT",
+      "policy_id": "POL_YC_024",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_024_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_047_ROOT",
+      "policy_id": "POL_YC_047",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_047_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_053_ROOT",
+      "policy_id": "POL_YC_053",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_053_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_025_ROOT",
+      "policy_id": "POL_YC_025",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_025_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_002_ROOT",
+      "policy_id": "POL_BOK_002",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_002_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_004_ROOT",
+      "policy_id": "POL_BOK_004",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_004_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_018_ROOT",
+      "policy_id": "POL_BOK_018",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_018_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_027_ROOT",
+      "policy_id": "POL_BOK_027",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_027_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_034_ROOT",
+      "policy_id": "POL_BOK_034",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_034_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_053_ROOT",
+      "policy_id": "POL_BOK_053",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_053_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_063_ROOT",
+      "policy_id": "POL_BOK_063",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_063_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_075_ROOT",
+      "policy_id": "POL_BOK_075",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_075_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_079_ROOT",
+      "policy_id": "POL_BOK_079",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_079_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_095_ROOT",
+      "policy_id": "POL_BOK_095",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_BOK_095_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_007_ROOT",
+      "policy_id": "POL_007",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_007_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_009_ROOT",
+      "policy_id": "POL_009",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_009_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_STG_ICN_001_ROOT",
+      "policy_id": "POL_STG_ICN_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_STG_ICN_001_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
+      "policy_id": "POL_STG_MOLIT_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_STG_MOLIT_001_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_010_ROOT",
+      "policy_id": "POL_010",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_010_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_013_ROOT",
+      "policy_id": "POL_YC_013",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_013_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_016_ROOT",
+      "policy_id": "POL_YC_016",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_016_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_019_ROOT",
+      "policy_id": "POL_YC_019",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_019_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_020_ROOT",
+      "policy_id": "POL_YC_020",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_020_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_023_ROOT",
+      "policy_id": "POL_YC_023",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_023_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_030_ROOT",
+      "policy_id": "POL_YC_030",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_030_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_031_ROOT",
+      "policy_id": "POL_YC_031",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_031_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_032_ROOT",
+      "policy_id": "POL_YC_032",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_032_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_034_ROOT",
+      "policy_id": "POL_YC_034",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_034_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_035_ROOT",
+      "policy_id": "POL_YC_035",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_035_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_036_ROOT",
+      "policy_id": "POL_YC_036",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_036_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_038_ROOT",
+      "policy_id": "POL_YC_038",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_038_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_039_ROOT",
+      "policy_id": "POL_YC_039",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_039_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_040_ROOT",
+      "policy_id": "POL_YC_040",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_040_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_041_ROOT",
+      "policy_id": "POL_YC_041",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_041_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_042_ROOT",
+      "policy_id": "POL_YC_042",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_042_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_050_ROOT",
+      "policy_id": "POL_YC_050",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_050_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_051_ROOT",
+      "policy_id": "POL_YC_051",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_051_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_052_ROOT",
+      "policy_id": "POL_YC_052",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_052_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_054_ROOT",
+      "policy_id": "POL_YC_054",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_054_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_055_ROOT",
+      "policy_id": "POL_YC_055",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_055_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_056_ROOT",
+      "policy_id": "POL_YC_056",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_056_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_058_ROOT",
+      "policy_id": "POL_YC_058",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_058_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_061_ROOT",
+      "policy_id": "POL_YC_061",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_061_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_062_ROOT",
+      "policy_id": "POL_YC_062",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_062_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_YC_065_ROOT",
+      "policy_id": "POL_YC_065",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "신청자 나이 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹(GRP_POL_YC_065_REST)으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_GOV_028_ROOT",
+      "policy_id": "POL_GOV_028",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "원문과 맞지 않는 가구 조건을 지우면 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_GOV_065_ROOT",
+      "policy_id": "POL_GOV_065",
+      "before": "AND",
+      "after": "UNKNOWN",
+      "evidence": "원문과 맞지 않는 가구 조건을 지우면 하위 조건이 남지 않음. 빈 AND가 조건 충족으로 읽히지 않도록 UNKNOWN으로 표기"
+    },
+    {
+      "group_id": "GRP_POL_BOK_001_ROOT",
+      "policy_id": "POL_BOK_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_005_ROOT",
+      "policy_id": "POL_BOK_005",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_009_ROOT",
+      "policy_id": "POL_BOK_009",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_013_ROOT",
+      "policy_id": "POL_BOK_013",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_015_ROOT",
+      "policy_id": "POL_BOK_015",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_031_ROOT",
+      "policy_id": "POL_BOK_031",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_033_ROOT",
+      "policy_id": "POL_BOK_033",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_036_ROOT",
+      "policy_id": "POL_BOK_036",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_045_ROOT",
+      "policy_id": "POL_BOK_045",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_054_ROOT",
+      "policy_id": "POL_BOK_054",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_055_ROOT",
+      "policy_id": "POL_BOK_055",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_061_ROOT",
+      "policy_id": "POL_BOK_061",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_067_ROOT",
+      "policy_id": "POL_BOK_067",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_068_ROOT",
+      "policy_id": "POL_BOK_068",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_069_ROOT",
+      "policy_id": "POL_BOK_069",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_071_ROOT",
+      "policy_id": "POL_BOK_071",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_072_ROOT",
+      "policy_id": "POL_BOK_072",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_STG_EX_001_ROOT",
+      "policy_id": "POL_STG_EX_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_STG_MOIS_001_ROOT",
+      "policy_id": "POL_STG_MOIS_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_001_ROOT",
+      "policy_id": "POL_001",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_008_ROOT",
+      "policy_id": "POL_BOK_008",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_010_ROOT",
+      "policy_id": "POL_BOK_010",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_035_ROOT",
+      "policy_id": "POL_BOK_035",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_038_ROOT",
+      "policy_id": "POL_BOK_038",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_046_ROOT",
+      "policy_id": "POL_BOK_046",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_059_ROOT",
+      "policy_id": "POL_BOK_059",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_060_ROOT",
+      "policy_id": "POL_BOK_060",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
+    },
+    {
+      "group_id": "GRP_POL_BOK_073_ROOT",
+      "policy_id": "POL_BOK_073",
+      "before": "UNKNOWN",
+      "after": "AND",
+      "evidence": "수혜자 나이(또는 가구 유형) 조건을 원문으로 확인해 추가. 나머지 조건은 하위 UNKNOWN 그룹으로 남겨 나이만으로 적합 판정이 나지 않게 함"
     }
   ],
   "application_notes_with_dates": [
@@ -2471,5 +5405,739 @@
     "POL_STG_EX_001": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청",
     "POL_STG_MOLIT_001": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청",
     "POL_STG_MOLIT_002": "정부24 상세 페이지 재조회(2026-11-10) 신청 기간: 상시신청"
-  }
+  },
+  "requires_condition_additions": [
+    {
+      "policy_id": "POL_YC_024",
+      "condition_id": "COND_AGE_7_120",
+      "target_name": "연령조건: 만 7세 이상",
+      "evidence_document_id": "DOC_YC_024",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_047",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_047",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_053",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_053",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_025",
+      "condition_id": "COND_AGE_18_20",
+      "target_name": "연령조건: 만 18세~20세",
+      "evidence_document_id": "DOC_YC_025",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_002",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_BOK_002",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_004",
+      "condition_id": "COND_AGE_15_40",
+      "target_name": "연령조건: 만 15세~40세(신청 월에 만 40세가 되는 자 포함)",
+      "evidence_document_id": "DOC_BOK_004",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_018",
+      "condition_id": "COND_AGE_0_64",
+      "target_name": "연령조건: 만 64세 이하",
+      "evidence_document_id": "DOC_BOK_018",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_027",
+      "condition_id": "COND_AGE_0_24",
+      "target_name": "연령조건: 만 24세 이하",
+      "evidence_document_id": "DOC_BOK_027",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_034",
+      "condition_id": "COND_AGE_65_120",
+      "target_name": "연령조건: 만 65세 이상",
+      "evidence_document_id": "DOC_BOK_034",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_053",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_BOK_053",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_063",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_BOK_063",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_075",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_BOK_075",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_079",
+      "condition_id": "COND_AGE_20_49",
+      "target_name": "연령조건: 만 20세~49세",
+      "evidence_document_id": "DOC_BOK_079",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_095",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_BOK_095",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_007",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_NHUF_008",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_009",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_MOLIT_001",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
+      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
+      "review_status": "needs_review"
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "condition_id": "COND_AGE_19_120",
+      "target_name": "연령조건: 만 19세 이상",
+      "evidence_document_id": "DOC_STG_MOLIT_001_GOV24",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_010",
+      "condition_id": "COND_AGE_15_69",
+      "target_name": "연령조건: 만 15세~69세",
+      "evidence_document_id": "DOC_MOEL_002",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_002",
+      "condition_id": "COND_AGE_18_29",
+      "target_name": "연령조건: 만 18세~29세",
+      "evidence_document_id": "DOC_YC_002",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_013",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_013",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_014",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_014",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_016",
+      "condition_id": "COND_AGE_18_120",
+      "target_name": "연령조건: 만 18세 이상",
+      "evidence_document_id": "DOC_YC_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_019",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_019",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_020",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_020",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_021",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_021",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_023",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_YC_023",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_030",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_030",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_031",
+      "condition_id": "COND_AGE_15_39",
+      "target_name": "연령조건: 만 15세~39세",
+      "evidence_document_id": "DOC_YC_031",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_032",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_032",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_034",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_034",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_035",
+      "condition_id": "COND_AGE_19_34",
+      "target_name": "연령조건: 만 19세~34세",
+      "evidence_document_id": "DOC_YC_035",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_036",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_036",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_038",
+      "condition_id": "COND_AGE_15_39",
+      "target_name": "연령조건: 만 15세~39세",
+      "evidence_document_id": "DOC_YC_038",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_039",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_039",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_040",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_040",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_041",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_041",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_042",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_042",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_048",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_048",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_049",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_049",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_050",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_050",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_051",
+      "condition_id": "COND_AGE_19_24",
+      "target_name": "연령조건: 만 19세~24세",
+      "evidence_document_id": "DOC_YC_051",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_052",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_052",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_054",
+      "condition_id": "COND_AGE_18_45",
+      "target_name": "연령조건: 만 18세~45세",
+      "evidence_document_id": "DOC_YC_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_055",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_055",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_056",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_056",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_057",
+      "condition_id": "COND_AGE_18_39",
+      "target_name": "연령조건: 만 18세~39세",
+      "evidence_document_id": "DOC_YC_057",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_058",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_058",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_061",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_061",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_062",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_062",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_063",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_063",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_064",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_064",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_YC_065",
+      "condition_id": "COND_AGE_19_39",
+      "target_name": "연령조건: 만 19세~39세",
+      "evidence_document_id": "DOC_YC_065",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "condition_id": "COND_SP_장애인거주시설_이용인",
+      "target_name": "특화조건: 서울시 관할 장애인거주시설 이용인",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "condition_id": "COND_SP_재가장애인",
+      "target_name": "특화조건: 서울시 주민등록 재가 장애인",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "condition_id": "COND_SP_기초생활수급자",
+      "target_name": "특화조건: 기초생활수급자",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_016",
+      "condition_id": "COND_SP_차상위계층",
+      "target_name": "특화조건: 차상위계층",
+      "evidence_document_id": "DOC_GOV_016",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "condition_id": "COND_SP_사지마비_와상",
+      "target_name": "특화조건: 사지마비 와상 장애인",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "condition_id": "COND_SP_24시간_호흡기",
+      "target_name": "특화조건: 24시간 호흡기 착용 장애인",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "condition_id": "COND_SP_활동지원_X1_360점",
+      "target_name": "특화조건: 서비스 지원 종합조사 X1영역(기능제한) 360점 이상",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "condition_id": "COND_HH_1인가구",
+      "target_name": "가구주거조건: 1인가구",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "condition_id": "COND_HH_취약가구",
+      "target_name": "가구주거조건: 취약가구",
+      "evidence_document_id": "DOC_GOV_054",
+      "evidence_location": "원문 대조 교정"
+    },
+    {
+      "policy_id": "POL_BOK_001",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_001",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_001_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_005",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_005",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_005_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_009",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_009",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_009_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_013",
+      "condition_id": "COND_CHILD_AGE_36_97M",
+      "target_name": "대상 자녀 연령: 36~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_013",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_013_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_015",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_015",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_015_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_031",
+      "condition_id": "COND_CHILD_BIRTH_2013_2019",
+      "target_name": "대상 자녀 출생일: 2013-12-31~2019-01-01 (2026년 안내서, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_031_MOE_2026",
+      "evidence_location": "교육부 2026년도 보육사업안내 인쇄 297쪽(PDF 305쪽) 보육료 지원 기준 연령 표",
+      "review_status": "verified"
+    },
+    {
+      "policy_id": "POL_BOK_033",
+      "condition_id": "COND_CHILD_AGE_UNDER_37M",
+      "target_name": "대상 자녀 연령: 37개월 미만",
+      "evidence_document_id": "DOC_BOK_033",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_033_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_036",
+      "condition_id": "COND_CHILD_AGE_UNDER_108M",
+      "target_name": "대상 자녀 연령: 108개월 미만(만 9세 미만)",
+      "evidence_document_id": "DOC_BOK_036",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_036_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_045",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_BOK_045",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_045_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_054",
+      "condition_id": "COND_CHILD_AGE_0_97M",
+      "target_name": "대상 자녀 연령: 0~97개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_054",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_054_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_055",
+      "condition_id": "COND_CHILD_AGE_24_85M",
+      "target_name": "대상 자녀 연령: 24~85개월(보육 연령반 등 근사, 자동 비교 안 함)",
+      "evidence_document_id": "DOC_BOK_055",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_055_C02)"
+    },
+    {
+      "policy_id": "POL_BOK_061",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_BOK_061",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_061_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_067",
+      "condition_id": "COND_CHILD_AGE_UNDER_144M",
+      "target_name": "대상 자녀 연령: 144개월 미만(만 12세 미만)",
+      "evidence_document_id": "DOC_BOK_067",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_067_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_068",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_068",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_068_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_069",
+      "condition_id": "COND_CHILD_AGE_UNDER_156M",
+      "target_name": "대상 자녀 연령: 156개월 미만(만 13세 미만)",
+      "evidence_document_id": "DOC_BOK_069",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_069_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_071",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_071",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_071_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_072",
+      "condition_id": "COND_CHILD_AGE_UNDER_24M",
+      "target_name": "대상 자녀 연령: 24개월 미만",
+      "evidence_document_id": "DOC_BOK_072",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_072_C01)"
+    },
+    {
+      "policy_id": "POL_STG_EX_001",
+      "condition_id": "COND_CHILD_AGE_UNDER_228M",
+      "target_name": "대상 자녀 연령: 228개월 미만(만 19세 미만)",
+      "evidence_document_id": "DOC_STG_EX_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_EX_001_GOV24_01)"
+    },
+    {
+      "policy_id": "POL_STG_MOIS_001",
+      "condition_id": "COND_CHILD_AGE_UNDER_216M",
+      "target_name": "대상 자녀 연령: 216개월 미만(만 18세 미만)",
+      "evidence_document_id": "DOC_STG_MOIS_001_GOV24",
+      "evidence_location": "원문 대조 교정 (CHK_DOC_STG_MOIS_001_GOV24_01)"
+    },
+    {
+      "policy_id": "POL_001",
+      "condition_id": "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD",
+      "target_name": "대상 가구 유형: 신혼부부, 예비신혼부부, 한부모가족(6세 이하 자녀), 유자녀 혼인가구(6세 이하 자녀), 신생아 가구(2년 이내 출산·입양, 태아 포함)",
+      "evidence_document_id": "DOC_LH_001",
+      "evidence_location": "원문 대조 교정 (DOC_LH_001_P03_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_008",
+      "condition_id": "COND_TARGET_AGE_9_24",
+      "target_name": "대상자 연령: 9~24세",
+      "evidence_document_id": "DOC_BOK_008",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_008_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_010",
+      "condition_id": "COND_TARGET_AGE_9_24",
+      "target_name": "대상자 연령: 9~24세",
+      "evidence_document_id": "DOC_BOK_010",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_010_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_035",
+      "condition_id": "COND_TARGET_AGE_18_PLUS",
+      "target_name": "대상자 연령: 18세 이상",
+      "evidence_document_id": "DOC_BOK_035",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_035_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_038",
+      "condition_id": "COND_TARGET_AGE_6_17",
+      "target_name": "대상자 연령: 6~17세",
+      "evidence_document_id": "DOC_BOK_038",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_038_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_046",
+      "condition_id": "COND_TARGET_AGE_UNDER_18",
+      "target_name": "대상자 연령: 18세 미만",
+      "evidence_document_id": "DOC_BOK_046",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_046_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_059",
+      "condition_id": "COND_TARGET_AGE_UNDER_18",
+      "target_name": "대상자 연령: 18세 미만",
+      "evidence_document_id": "DOC_BOK_059",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_059_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_060",
+      "condition_id": "COND_TARGET_AGE_6_64",
+      "target_name": "대상자 연령: 6~64세",
+      "evidence_document_id": "DOC_BOK_060",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_060_C01)"
+    },
+    {
+      "policy_id": "POL_BOK_073",
+      "condition_id": "COND_TARGET_AGE_6_PLUS",
+      "target_name": "대상자 연령: 6세 이상",
+      "evidence_document_id": "DOC_BOK_073",
+      "evidence_location": "원문 대조 교정 (DOC_BOK_073_C01)"
+    }
+  ],
+  "special_condition_removals": [
+    {
+      "policy_id": "POL_YC_002",
+      "action": "remove",
+      "group_id": "GRP_POL_YC_002_OR_SP",
+      "before": [
+        "COND_SP_기초생활수급자",
+        "COND_SP_한부모가정",
+        "COND_SP_장애인",
+        "COND_SP_기타"
+      ],
+      "evidence": "온통청년 상세 '심사 및 발표 우선선발(18명)→ 일반선발(17명)→ 예비선발(5명)', '나. 우선선발 증빙자료 … 1순위: 수급자증명서'. 특화분야는 우선선발 순위이고 필수 자격이 아님"
+    },
+    {
+      "policy_id": "POL_YC_021",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_YC_021_ROOT",
+      "before": [
+        "COND_SP_기초생활수급자"
+      ],
+      "evidence": "온통청년 상세 추가사항 '사회적 배려층*‧국내봉사 사회공헌도 높은 청년 우대 *사회적 배려층 우대 : 기초생활수급자, 차상위계층, …'"
+    },
+    {
+      "policy_id": "POL_GOV_028",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_028_ROOT",
+      "before": [
+        "COND_HH_다자녀가구"
+      ],
+      "evidence": "첫째아 이상 출산가정이 대상이라 다자녀 요건 없음. 그래프 다자녀가구 조건 제거"
+    },
+    {
+      "policy_id": "POL_GOV_039",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_039_ROOT",
+      "before": [
+        "COND_HH_다문화가족"
+      ],
+      "evidence": "수원시 거주 외국인(체류 90일 초과)이 대상이라 다문화가족 요건이 아님. 그래프 다문화가족 조건 제거"
+    },
+    {
+      "policy_id": "POL_GOV_065",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_065_ROOT",
+      "before": [
+        "COND_HH_한부모가정_조손가정"
+      ],
+      "evidence": "한부모가족은 감면 대상 8가지(광주 거주자·장애인·학교 단체·5.18 유공자·한부모·다자녀·보훈·수급자) 중 하나인데 그래프는 한부모를 필수(AND)로 둠. 그래프 한부모 조건 제거"
+    },
+    {
+      "policy_id": "POL_GOV_054",
+      "action": "remove_condition",
+      "group_id": "GRP_POL_GOV_054_ROOT",
+      "before": [
+        "COND_AGE_0_120",
+        "COND_HH_1인가구"
+      ],
+      "evidence": "나이 0~120은 원문 근거 없는 자리채움 값. 1인가구는 루트 필수에서 빼고 OR(독거 / 취약가구) 안으로 옮김(11-18 합의)"
+    }
+  ],
+  "age_condition_notes": {
+    "description": "#79 신청자 나이 조건을 넣지 않은 정책과 그 이유. 교정 코드는 이 키를 읽지 않는다(기록용).",
+    "held": {
+      "POL_BOK_043": "65세 이상이지만 '시장·군수·구청장이 인정하는 경우' 예외가 있어 나이로 '해당 안 됨' 판정을 하면 틀릴 수 있음",
+      "POL_004": "만 19~34세지만 창업 보증·자금 지원 대상은 병역 기간만큼 최대 만 39세까지 연장",
+      "POL_003": "원문은 '민법상 성년인 세대주'. 19세는 법 해석이라 원문 숫자가 아님",
+      "POL_STG_SEOUL_001": "만 19~34세지만 제대군인은 복무기간에 따라 최대 만 37세까지 가산(청년몽땅정보통 FAQ 신청단계, 2026-11-18 확인). 나이로 '해당 안 됨'을 내면 35~37세 제대군인이 틀리게 걸러짐",
+      "POL_YC_006": "공고문(2026.8.28.) FAQ '대학생 학자금대출 이자지원에 연령제한이 있나요? - 연령제한은 없음'. 39세('87년생) 이하는 신용회복지원에만 해당. 온통청년 연령 칸(18~39세)은 정책 전체 기준이 아님",
+      "POL_YC_018": "사업안내(대구시) '만 15세 이상 34세 이하 … (군필자의 경우, 복무기간에 비례하여 참여제한 연령을 최대 만39세로 한정)'. 온통청년 연령 칸(19~34세)은 하한이 틀렸고, 군필 연장이 있어 나이로 '해당 안 됨'을 내면 틀릴 수 있음"
+    },
+    "no_applicant_age": {
+      "POL_STG_MOIS_001": "지방세특례제한법 제22조의2 '18세 미만의 자녀 2명 이상을 양육하는 자'는 자녀 나이다. 신청자 나이 기준은 없음. 정부24 구조화 칸의 '대상연령 19~120세'는 원문 근거가 없어 쓰지 않음. 자녀 수·자녀 나이는 applies_to 합의 후"
+    },
+    "source_discrepancies": {
+      "POL_STG_ICN_001": "사업안내서(인천 청년포털 첨부)는 19~39세, 정부24 지원조건 코드는 18~39세(상세 화면은 '청년'만 표기). 사업안내서를 기준으로 19~39세를 쓴다(반석 확인 2026-11-18). 사업안내서는 '서구 소재 중소기업'으로 적고 청년포털은 '전국 중소기업'으로 적어 근무지 조건도 다르다(이번 교정 범위 밖). 사업안내서 사본: 4차_준비/age_conditions/evidence/POL_STG_ICN_001_incheon_welfare_sharing_guide.pdf"
+    },
+    "pending_followups": {
+      "POL_STG_ICN_001": "나이 19~39세의 실제 근거(인천 서구 「복지공유제 사업안내서」)가 후보 문서에 없다. 다음 재적재 때 사업안내서를 Document로 추가하고 evidence_document_id를 그 문서로 바꾼 뒤 review_status를 해제한다. 그 전까지 조건 관계는 review_status=needs_review(검수 대기)다."
+    }
+  },
+  "beneficiary_age_notes": {
+    "description": "#79 수혜자 나이 구분. 자녀 대상은 자녀 월령(SPECIAL_TARGET, 개월), 본인·보호자 겸용은 대상자 나이(SPECIAL_TARGET, 세)로 넣었다. 신청자 나이(AGE)로 넣지 않는다. 유아학비·영유아보육료처럼 출생연도 연령반으로 정하는 정책은 범위(BETWEEN)로 두어 자동 비교하지 않는다. POL_001은 가구 유형 조건 하나로 안내만 한다. 교정 코드는 이 키를 읽지 않는다(기록용).",
+    "not_added": {
+      "POL_BOK_006": "원문의 '9세 미만'은 장애 미등록 영유아도 신청할 수 있다는 예외 규정이라 대상 나이 조건이 아님",
+      "POL_STG_DGU_001": "고교 입학 자녀가 대상이며 원문에 숫자 나이가 없음",
+      "POL_STG_MOHW_001": "출생아 대상이며 원문의 '만25세 미만'은 연계서비스 조건임"
+    },
+    "source_discrepancies": {
+      "POL_BOK_054": "복지로 상세(WLF00003250)의 연령기준 표에 취학아동(방과후보육료)이 '18.01.01.~'12.12.31.로 적혀 있으나, 「2026년도 보육사업안내」 305쪽은 '19.01.01.~'13.12.31.이다. 복지로 화면의 연도 표기가 갱신되지 않은 것으로 보임(반석 확인 2026-11-18). 원문 청크는 수정하지 않는다.",
+      "DOC_BOK_054": "복지로 API 보존본은 2012~2018년 구간을 담고 있다. 교육부 2026년도 보육사업안내 인쇄 297쪽(PDF 305쪽)의 2013~2019년 출생 구간을 DOC_BOK_031_MOE_2026으로 연결한다. 영유아보육료 검색용 본문에서는 방과후보육료의 옛 표 행만 제외한다."
+    }
+  },
+  "outdated_document_lines": [
+    {
+      "document_id": "DOC_BOK_054",
+      "expected_content_hash": "a9d0504a1537970b12d79c3713f7b98e01abc8271ffce4d12a09950452836fcb",
+      "text": "취학아동(방과후보육료) : '18. 01. 01. ~ '12. 12. 31.까지의 출생 아동",
+      "superseded_by_document_id": "DOC_BOK_031_MOE_2026"
+    }
+  ]
 }

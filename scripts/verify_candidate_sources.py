@@ -24,6 +24,7 @@ def verify_sources() -> dict:
     documents = read_jsonl(package / "neo4j/nodes_document.jsonl")
     bodies = {}
     missing_raw = []
+    mismatched_raw = []
     mismatched_hashes = []
 
     def local_path(relative: str) -> Path:
@@ -37,10 +38,12 @@ def verify_sources() -> dict:
         raw_path = local_path(document["local_raw_path"])
         if not raw_path.is_file():
             missing_raw.append(document_id)
-        if document_id in processed:
-            text = processed[document_id]["text"]
-        elif document.get("extracted_text_path"):
+        elif document.get("raw_source_sha256") and hashlib.sha256(raw_path.read_bytes()).hexdigest() != document["raw_source_sha256"]:
+            mismatched_raw.append(document_id)
+        if document.get("extracted_text_path"):
             text = local_path(document["extracted_text_path"]).read_text(encoding="utf-8").strip()
+        elif document_id in processed:
+            text = processed[document_id]["text"]
         elif document["source_type"] == "gov24_api":
             text = gov24[document["official_id"]]["full_text"]
         elif document["source_type"] == "youthcenter_api":
@@ -62,9 +65,10 @@ def verify_sources() -> dict:
         if " ".join(row["text"].split()) not in bodies[row["document_id"]]
     ]
     return {
-        "status": "PASS" if not missing_raw and not mismatched_hashes and not unmatched_chunks else "FAILED",
+        "status": "PASS" if not missing_raw and not mismatched_raw and not mismatched_hashes and not unmatched_chunks else "FAILED",
         "body_hashes_checked": len(documents), "body_hash_mismatches": mismatched_hashes,
         "raw_files_checked": len(documents), "missing_raw_documents": missing_raw,
+        "raw_hash_mismatches": mismatched_raw,
         "chunks_checked_against_body": len(chunks), "unmatched_chunk_ids": unmatched_chunks,
         "scope": "저장된 본문과의 일치 검사. 원문의 최신성이나 정책 내용의 정확성을 새로 판정한 결과는 아님.",
     }
