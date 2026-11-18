@@ -41,7 +41,7 @@ class FinalV140Smoke(unittest.TestCase):
         return next(p for p in result["policies"] if p["policy_id"] == policy_id)
 
     def test_final_counts(self):
-        self.assertEqual(self.before, {"nodes": 1122, "relationships": 2664})
+        self.assertEqual(self.before, {"nodes": 1123, "relationships": 2667})
         self.assertEqual(self.points_before, 1138)
         rows = self.runner.read_rows("MATCH ()-[r:REQUIRES_CONDITION]->() RETURN count(r) AS count")
         self.assertEqual(rows[0]["count"], 136)

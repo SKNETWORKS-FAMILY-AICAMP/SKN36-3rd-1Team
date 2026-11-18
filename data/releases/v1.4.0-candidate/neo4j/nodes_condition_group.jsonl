@@ -1,4 +1,4 @@
-{"group_id": "GRP_POL_001_ROOT", "policy_id": "POL_001", "logic": "UNKNOWN", "is_root": true, "description": "[정정공고][서울지역본부] 26년 1차 신혼·신생아 매입임대Ⅰ 예비입주자 모집공고 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_001_ROOT", "policy_id": "POL_001", "logic": "AND", "is_root": true, "description": "[정정공고][서울지역본부] 26년 1차 신혼·신생아 매입임대Ⅰ 예비입주자 모집공고 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_002_ROOT", "policy_id": "POL_002", "logic": "UNKNOWN", "is_root": true, "description": "기금대출 신혼부부 소득요건 합리화 개정 규정 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_003_ROOT", "policy_id": "POL_003", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 신혼부부전용 전세자금대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_004_ROOT", "policy_id": "POL_004", "logic": "UNKNOWN", "is_root": true, "description": "주택도시기금 청년전용 버팀목전세자금대출 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)"}
@@ -340,6 +340,7 @@
 {"group_id": "GRP_POL_BOK_072_REST", "policy_id": "POL_BOK_072", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_EX_001_REST", "policy_id": "POL_STG_EX_001", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_MOIS_001_REST", "policy_id": "POL_STG_MOIS_001", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_001_REST", "policy_id": "POL_001", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_008_REST", "policy_id": "POL_BOK_008", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_010_REST", "policy_id": "POL_BOK_010", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_035_REST", "policy_id": "POL_BOK_035", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}

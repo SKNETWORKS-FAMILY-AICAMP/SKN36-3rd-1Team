@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T10:42:55.072646+09:00",
+  "created_at": "2026-11-18T11:12:28.740545+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1631,7 +1631,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "2215edc4db91a243984d0fbefd81e067131fd09c85cb18364438a1278ea01c01",
+    "source_sha256": "81e5e05c5daaf5f814e935c4bc470f3d1fbee940b1340a7c6269f79b10177e28",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8738,12 +8738,12 @@
       {
         "source_id": "GRP_POL_BOK_015_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_0_155M"
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
       },
       {
         "source_id": "GRP_POL_BOK_031_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_0_155M"
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
       },
       {
         "source_id": "GRP_POL_BOK_033_OR_TARGET",
@@ -8809,6 +8809,11 @@
         "source_id": "GRP_POL_STG_MOIS_001_ROOT",
         "relation": "CONTAINS_CONDITION",
         "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "GRP_POL_001_ROOT",
+        "relation": "CONTAINS_CONDITION",
+        "target_id": "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD"
       },
       {
         "source_id": "GRP_POL_BOK_008_ROOT",
@@ -9251,6 +9256,11 @@
         "target_id": "GRP_POL_STG_MOIS_001_REST"
       },
       {
+        "source_id": "GRP_POL_001_ROOT",
+        "relation": "CONTAINS_GROUP",
+        "target_id": "GRP_POL_001_REST"
+      },
+      {
         "source_id": "GRP_POL_BOK_008_ROOT",
         "relation": "CONTAINS_GROUP",
         "target_id": "GRP_POL_BOK_008_REST"
@@ -9623,12 +9633,12 @@
       {
         "source_id": "POL_BOK_015",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_0_155M"
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
       },
       {
         "source_id": "POL_BOK_031",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_0_155M"
+        "target_id": "COND_CHILD_AGE_UNDER_156M"
       },
       {
         "source_id": "POL_BOK_033",
@@ -9694,6 +9704,11 @@
         "source_id": "POL_STG_MOIS_001",
         "relation": "REQUIRES_CONDITION",
         "target_id": "COND_CHILD_AGE_UNDER_216M"
+      },
+      {
+        "source_id": "POL_001",
+        "relation": "REQUIRES_CONDITION",
+        "target_id": "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD"
       },
       {
         "source_id": "POL_BOK_008",
@@ -9789,7 +9804,6 @@
       "COND_HH_취약가구",
       "COND_CHILD_AGE_UNDER_156M",
       "COND_CHILD_AGE_36_97M",
-      "COND_CHILD_AGE_0_155M",
       "COND_CHILD_AGE_UNDER_37M",
       "COND_CHILD_AGE_UNDER_108M",
       "COND_CHILD_AGE_UNDER_216M",
@@ -9797,6 +9811,7 @@
       "COND_CHILD_AGE_24_85M",
       "COND_CHILD_AGE_UNDER_144M",
       "COND_CHILD_AGE_UNDER_228M",
+      "COND_TYPE_LH_NEWLYWED_NEWBORN_HOUSEHOLD",
       "COND_TARGET_AGE_9_24",
       "COND_TARGET_AGE_18_PLUS",
       "COND_TARGET_AGE_6_17",
