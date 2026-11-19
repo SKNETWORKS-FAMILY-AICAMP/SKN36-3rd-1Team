@@ -216,6 +216,122 @@ def test_mixed_housing_scope_and_user_fact(monkeypatch, kind):
     ]
 
 
+@pytest.mark.parametrize("text", [
+    "청년월세 지원의 현재 월 소득 기준은 얼마인가요?",
+    "청년월세 지원의 현재 월 소득 기준 금액은 얼마인가요?",
+    "현재 월 소득 기준은 얼마인가요?",
+    "청년월세 지원의 본인 소득 기준은 얼마인가요?",
+    "2026년 기준 중위소득을 알려주세요.",
+    "2026년 기준 중위 소득을 알려주세요.",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "income"), ("ask_info", "region"),
+])
+def test_policy_threshold_not_misread_as_personal_income(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("정책 기준을 알고 싶어요", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("text", [
+    "청년월세 지원 자격을 확인하려면 현재 월 소득을 알려주세요.",
+    "지원 금액을 계산하려면 현재 월 소득을 알려주세요?",
+    "소득 기준을 확인하려면 본인의 월 소득을 알려주세요.",
+    "지원 금액을 계산하려면 소득을 알려주세요?",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "income"), ("ask_info", "region"),
+])
+def test_real_income_request_even_with_policy_words(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("지원 자격을 확인해요", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "field": "income", "text": text}
+    ]
+
+
+@pytest.mark.parametrize("text", [
+    "신청 서류는 무엇인가요?",
+    "신청 절차는 어떻게 되나요?",
+    "지원 대상은 누구인가요?",
+    "지원금 신청 방법은 무엇인가요?",
+])
+@pytest.mark.parametrize("field", ["income", "region", "age"])
+def test_mislabelled_policy_question_does_not_keep_wrong_field(monkeypatch, text, field):
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": field, "text": text}]))
+    actual = g.generate_answer("신청 조건", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("text", [
+    "가구원 수는 몇 명인가요?",
+    "학력은 어떻게 되시나요?",
+    "서류도 알려드릴까요?",
+])
+def test_recovered_policy_question_never_exposes_user_or_offer(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": "income", "text": text}]))
+    actual = g.generate_answer("신청 조건", CONTEXTS, CHECKS)
+    assert not any(item["kind"] == "question" for item in actual["follow_up_questions"])
+
+
+def test_unknown_ask_info_not_reused_as_income(monkeypatch):
+    stub(monkeypatch, response(follows=[{
+        "kind": "ask_info", "field": "income", "text": "오늘 기분은 어떠세요?"
+    }]))
+    actual = g.generate_answer("신청 조건", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == []
+
+
+def test_policy_and_profile_split_do_not_leak_wrong_field(monkeypatch):
+    stub(monkeypatch, response(follows=[{
+        "kind": "ask_info", "field": "income",
+        "text": "신청 서류는 무엇인가요? 현재 거주 지역이 경기도인가요?"
+    }]))
+    actual = g.generate_answer("신청 조건", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": "신청 서류는 무엇인가요?"},
+        {"kind": "ask_info", "field": "region", "text": "현재 거주 지역이 경기도인가요?"},
+    ]
+
+
+
+
+@pytest.mark.parametrize("text,wrong_field,expected_body", [
+    ("자녀 나이는 몇 세인가요?", "child_age", "자녀 나이를 알려 주세요."),
+    ("배우자의 소득을 알려주세요?", "income", None),
+    ("부모님 나이는 몇 세인가요?", "age", None),
+    ("가구원 수는 어떻게 확인하나요?", "household_size", "가구원 수를 알려 주세요."),
+])
+def test_nonself_or_unsupported_request_not_exposed_as_profile_button(
+    monkeypatch, text, wrong_field, expected_body,
+):
+    stub(monkeypatch, response(follows=[{
+        "kind": "ask_info", "field": wrong_field, "text": text,
+    }]))
+    result = g.generate_answer("조건 확인", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == []
+    if expected_body:
+        assert expected_body in result["answer"]
+
+
+def test_existing_region_does_not_remove_missing_age(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "region", "text": "거주 지역을 알려주세요."},
+        {"kind": "ask_info", "field": "age", "text": "나이가 어떻게 되나요?"},
+    ]))
+    result = g.generate_answer("조건 확인", CONTEXTS, CHECKS,
+                               profile={"region": "서울특별시"})
+    assert result["follow_up_questions"] == [
+        {"kind": "ask_info", "field": "age", "text": "나이가 어떻게 되나요?"}
+    ]
+
+
 def test_confirmed_region_question_is_not_asked_again(monkeypatch):
     stub(monkeypatch, response(follows=[{"kind": "question", "text": "현재 거주 지역이 경기도인가요?"}]))
     result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,

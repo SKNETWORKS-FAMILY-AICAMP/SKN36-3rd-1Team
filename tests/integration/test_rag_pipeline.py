@@ -97,6 +97,65 @@ class PipelineTests(unittest.TestCase):
                 self.check.assert_called_once()
                 sdk.assert_called_once()
 
+    def test_latest_policy_question_does_not_become_income_input(self):
+        import json
+        from backend.llm import generator
+
+        examples = (
+            ({"kind": "ask_info", "field": "income", "text": "청년월세 지원의 현재 월 소득 기준은 얼마인가요?"},
+             [("question", "청년월세 지원의 현재 월 소득 기준은 얼마인가요?", None)]),
+            ({"kind": "ask_info", "field": "income", "text": "신청 서류는 무엇인가요?"},
+             [("question", "신청 서류는 무엇인가요?", None)]),
+            ({"kind": "ask_info", "field": "region", "text": "청년월세 지원 자격을 확인하려면 현재 월 소득을 알려주세요."},
+             [("ask_info", "청년월세 지원 자격을 확인하려면 현재 월 소득을 알려주세요.", "income")]),
+        )
+        for follow, expected in examples:
+            with self.subTest(follow=follow):
+                self.search.reset_mock()
+                self.check.reset_mock()
+                raw = json.dumps(answer(follow_up_questions=[follow]), ensure_ascii=False)
+                with patch.object(generator, "_call_openai", return_value=raw) as sdk:
+                    result = run_ask_pipeline(
+                        AskRequest(question="가상 정책", profile=UserProfile(age=None, region="", income=None), history=[]),
+                        search_fn=self.search, check_fn=self.check,
+                        generate_fn=generator.generate_answer,
+                    )
+                self.assertEqual([(q.kind, q.text, q.field) for q in result.follow_up_questions], expected)
+                self.search.assert_called_once()
+                self.check.assert_called_once()
+                sdk.assert_called_once()
+
+    def test_family_and_missing_age_in_normal_pipeline(self):
+        import json
+        from backend.llm import generator
+
+        examples = (
+            ([{"kind": "ask_info", "field": "region", "text": "거주 지역을 알려주세요."},
+              {"kind": "ask_info", "field": "age", "text": "나이가 어떻게 되나요?"}],
+             [("ask_info", "나이가 어떻게 되나요?", "age")], None),
+            ([{"kind": "ask_info", "field": "child_age", "text": "자녀 나이는 몇 세인가요"}],
+             [], "자녀 나이를 알려 주세요."),
+            ([{"kind": "ask_info", "field": "household_size", "text": "가구원 수는 어떻게 확인하나요?"}],
+             [], "가구원 수를 알려 주세요."),
+        )
+        for follows, expected, body_text in examples:
+            with self.subTest(follows=follows):
+                self.search.reset_mock()
+                self.check.reset_mock()
+                raw = json.dumps(answer(follow_up_questions=follows), ensure_ascii=False)
+                with patch.object(generator, "_call_openai", return_value=raw) as sdk:
+                    result = run_ask_pipeline(
+                        AskRequest(question="가상 정책", profile=UserProfile(age=None, region="서울특별시", income=None), history=[]),
+                        search_fn=self.search, check_fn=self.check,
+                        generate_fn=generator.generate_answer,
+                    )
+                self.assertEqual([(q.kind, q.text, q.field) for q in result.follow_up_questions], expected)
+                if body_text:
+                    self.assertIn(body_text, result.answer)
+                self.search.assert_called_once()
+                self.check.assert_called_once()
+                sdk.assert_called_once()
+
     def test_pipeline_import_does_not_load_generator_or_dataset_env(self):
         env = os.environ.copy()
         env.pop("LIFEPOLICY_DATASET_DIR", None)

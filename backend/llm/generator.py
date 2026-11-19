@@ -263,13 +263,30 @@ def _normalize_followup_question(text: str) -> str | None:
 
 
 def _is_explicit_profile_request(text: str) -> bool:
-    """현재 사용자에게 프로필 입력을 명시적으로 요청하는 문장이다."""
-    return bool(re.search(
+    """사용자 자신의 값 요청을 정책의 '현재 소득 기준' 질문과 구별한다."""
+    # '현재 월 소득 기준은 얼마인가요?'는 정책의 요건이지 개인 소득 요구가 아니다.
+    named_profile = re.search(
         r"(?:현재|본인(?:의)?|귀하(?:의)?|제|내)\s*(?:월\s*)?"
         r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
+        r"(?!\s*(?:의\s*)?(?:기준|상한|하한|요건|금액))"
         r".{0,30}(?:얼마|알려|입력|말씀|몇\s*(?:세|살)|어디|어느)",
         text,
-    ))
+    )
+    # 주어가 생략된 '소득을 알려주세요'도 사용자 값 요청이다.
+    direct_matches = re.finditer(
+        r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
+        r"\s*(?:을|를)\s*(?:알려|입력|말씀)",
+        text,
+    )
+    # 중위소득 안내 요청은 개인 소득을 입력하라는 말이 아니다.
+    direct_input = any(
+        not (
+            match.group().startswith("소득")
+            and re.search(r"중위\s*$", text[:match.start()])
+        )
+        for match in direct_matches
+    )
+    return bool(named_profile or direct_input)
 
 
 def _is_policy_criteria_question(text: str) -> bool:
@@ -324,7 +341,8 @@ def _personal_information_request(
         re.search(
             r"알려|입력|말씀|몇\s*(?:명|세|살)|얼마|어디|어느|"
             r"거주\s*하|거주하시|거주하나|주민등록|되셨|"
-            r"(?:혼인|결혼)\s*여부|본인\s*의|귀하의",
+            r"(?:혼인|결혼)\s*여부|본인\s*의|귀하의|"
+            r"나이(?:가|는|를)?\s*어떻게\s*되",
             text,
         )
     )
@@ -340,6 +358,14 @@ def _personal_information_request(
 
     if not asks_value:
         return None
+
+    # 다른 가족 구성원의 나이·소득·거주지는 본인 프로필 필드가 아니다.
+    if re.search(
+        r"(?:자녀|배우자|부모(?:님)?|가구원|가족|세대원)"
+        r".{0,30}(?:나이|연령|소득|수입|급여|거주\s*지역|주소)",
+        text,
+    ):
+        return "other"
 
     if _is_detail_region_request(
         text,
@@ -775,17 +801,29 @@ def _validate_model_response(
             if detected_field in ALLOWED_FIELDS:
                 field = detected_field
             elif detected_field in {"detail_region", "other"}:
+                # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
                 kind = "question"
-            elif _is_policy_criteria_question(text) or (
-                detected_field is None
-                and re.search(
+            elif detected_field is None:
+                # 모델의 field를 신뢰하지 않는다. 문장 자체가 정책 질문이어야만 복구.
+                is_policy_question = bool(re.search(
                     r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|"
+                    r"서류|신청|접수|발급|혜택|절차|방법|문의처|"
                     r"거주\s*형태.*(?:대상|포함|허용|인정))",
                     text,
-                )
-                and _normalize_followup_question(text) is not None
-            ):
-                kind = "question"
+                ))
+                if is_policy_question and _normalize_followup_question(text) is not None:
+                    kind = "question"
+                elif isinstance(field, str) and field not in ALLOWED_FIELDS:
+                    # 지원하지 않는 프로필 입력은 버튼이 아닌 본문 안내로 보존한다.
+                    if _is_redundant_request(text, profile):
+                        continue
+                    request = _info_request_to_answer(text, field)
+                    if request:
+                        body_requests.append(request)
+                    continue
+                else:
+                    # 미확인 ask_info.field를 개인정보 입력 버튼에 전달하지 않는다.
+                    continue
 
         if kind == "ask_info":
             if (
