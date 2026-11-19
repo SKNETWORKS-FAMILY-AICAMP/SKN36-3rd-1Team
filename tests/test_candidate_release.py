@@ -346,9 +346,11 @@ class CandidateIntegrityTests(unittest.TestCase):
         policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
         old = rows(ROOT / "data/handoff/neo4j/nodes_policy.jsonl")
         copied = [dict(row) for row in policies]
-        _, changes = review_candidate_policies(copied, old)
+        reviews, _ = review_candidate_policies(copied, old)
+        # 원천 신청 필드 판정 뒤, 화면을 직접 확인한 교정(#18)까지 적용해야 후보와 같다.
+        changes = dc.apply_application_url_corrections(copied, reviews, old, dc.load_corrections())
         self.assertEqual(copied, policies)
-        self.assertEqual(len(changes), 219)
+        self.assertEqual(len(changes), 235)
 
 
 class DatabaseSafetyTests(unittest.TestCase):

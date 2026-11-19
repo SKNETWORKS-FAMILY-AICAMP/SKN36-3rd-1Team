@@ -82,12 +82,14 @@
   {
     "policy_id": "POL_010",
     "original_url": "https://www.work24.go.kr",
-    "official_apply_url": "https://www.work24.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_homepage_only",
     "evidence_path": "data/handoff/neo4j/nodes_policy.jsonl",
     "evidence_sha256": "8f7ba09e411b7358486922273032e060ed6a43a603e8dcabcca776d73d42fd86",
     "evidence_field": "official_apply_url",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "고용24 첫 화면. 신청은 로그인 뒤 국민취업지원제도 메뉴에서 한다. selectEmssRqutIntro.do는 '제도소개' 안내 화면",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_BOK_001",
@@ -1182,12 +1184,14 @@
   {
     "policy_id": "POL_GOV_012",
     "original_url": "http://www.kics.go.kr",
-    "official_apply_url": "http://www.kics.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_login_list_not_policy_specific",
     "evidence_path": "data/raw/gov24/items/128000000001.json",
     "evidence_sha256": "e8edf0bdb84955f12c4f5b043056f5f17c22be4fbb1a89c9a5c02c01a8ba5d61",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록(88종)의 '피해자 보호·지원'에서 한다. 정책 하나를 가리키는 고정 주소 없음",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_013",
@@ -1202,22 +1206,26 @@
   {
     "policy_id": "POL_GOV_014",
     "original_url": "http://www.kics.go.kr",
-    "official_apply_url": "http://www.kics.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_login_list_not_policy_specific",
     "evidence_path": "data/raw/gov24/items/128000000003.json",
     "evidence_sha256": "c3fb1cdee1934a77cbf976998e45325e8262e91a1ddba1a5a423d6e03b56745d",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록에서 한다. 정책 하나를 가리키는 고정 주소 없음",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_015",
     "original_url": "https://www.withcountry.mil.kr/",
-    "official_apply_url": "https://www.withcountry.mil.kr/",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_phone_or_visit_only",
     "evidence_path": "data/raw/gov24/items/129000000082.json",
     "evidence_sha256": "e6ab15753a1929754a45142e8092d6a1b6f1af33023012304b823f6d2eb8ff97",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "국방부 유해발굴감식단 첫 화면. 유해 소재 제보는 전화 제보(조사과 02-811-6551). 민원신청 메뉴는 전체 안내 화면",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_016",
@@ -1422,12 +1430,14 @@
   {
     "policy_id": "POL_GOV_036",
     "original_url": "http://www.bokjiro.go.kr",
-    "official_apply_url": "http://www.bokjiro.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_login_list_not_policy_specific",
     "evidence_path": "data/raw/gov24/items/369000000115.json",
     "evidence_sha256": "efd0c208259cf07669688d66d51dddcdd061cda16e4df9d29094c1641a6a22db",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_037",
@@ -1522,12 +1532,14 @@
   {
     "policy_id": "POL_GOV_046",
     "original_url": "https://www.bokjiro.go.kr/ssis-teu/index.do",
-    "official_apply_url": "https://www.bokjiro.go.kr/ssis-teu/index.do",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_login_list_not_policy_specific",
     "evidence_path": "data/raw/gov24/items/449000000101.json",
     "evidence_sha256": "8b6fd848b6cd3e76c957b91103f45dcec7ebf473218acc9163721bdece2ce19c",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_047",
@@ -1632,12 +1644,14 @@
   {
     "policy_id": "POL_GOV_057",
     "original_url": "http://www.jinju.go.kr",
-    "official_apply_url": "http://www.jinju.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": "https://www.jinju.go.kr/00134/00616/06681.web",
+    "reason": "manual_review_verified_apply_page",
     "evidence_path": "data/raw/gov24/items/531000000116.json",
     "evidence_sha256": "46c89f545a08f293f6c1133e5b7fe8bd0eba73663dae9b8102d76e76cd4c2f4f",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": true,
+    "manual_review_note": "진주시 '대학생 학자금 대출이자 지원 신청' 본인인증 단계 화면. 2026년 모집(8.3~8.28)은 종료",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_GOV_058",
@@ -1712,12 +1726,14 @@
   {
     "policy_id": "POL_GOV_065",
     "original_url": "https://www.eco-g.or.kr/",
-    "official_apply_url": "https://www.eco-g.or.kr/",
-    "reason": "application_field_present",
+    "official_apply_url": "https://camp.xticket.kr/web/main?shopEncode=a1535c44b7b5b3ab38fd902f0c58f8600f1a57e45999ac4b1a7b8c321f1d2df5",
+    "reason": "manual_review_verified_apply_page",
     "evidence_path": "data/raw/gov24/items/O00018400001.json",
     "evidence_sha256": "486c0f8c84bb8764136761ebbf6918b575cc6887ff9238626286f54314ab1c31",
     "evidence_field": "온라인신청사이트URL",
-    "live_application_page_verified": false
+    "live_application_page_verified": true,
+    "manual_review_note": "승촌보 캠핑장 날짜 선택·예약 화면. 정부24 신청 사이트 값은 운영기관 누리집 첫 화면",
+    "manual_review_checked_at": "2026-11-19"
   },
   {
     "policy_id": "POL_YC_001",
@@ -1772,12 +1788,14 @@
   {
     "policy_id": "POL_YC_006",
     "original_url": "https://minwon.daegu.go.kr/main",
-    "official_apply_url": "https://minwon.daegu.go.kr/main",
-    "reason": "application_field_present",
+    "official_apply_url": "https://minwon.daegu.go.kr/cvpl/AUTN-011/info",
+    "reason": "manual_review_verified_apply_page",
     "evidence_path": "data/raw/youthcenter/items/20261101005400214682.json",
     "evidence_sha256": "56d6b848bca8e639c12b10caaef3a1305edc84cb533e0508ea09b5f1297503ec",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": true,
+    "manual_review_note": "대구 민원 시스템 '2026년도 대학생 학자금대출 이자지원 신청' 화면(서비스 전용 '신청하기' 버튼). 신청기간 2026-09-01~09-30 종료",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_007",
@@ -1792,12 +1810,14 @@
   {
     "policy_id": "POL_YC_008",
     "original_url": "http://www.wisetkmu.kr",
-    "official_apply_url": "http://www.wisetkmu.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_homepage_only",
     "evidence_path": "data/raw/youthcenter/items/20261101005400214680.json",
     "evidence_sha256": "1de2834d0b45a46b82d1eaa2b930a3374e7de22b172ffe32bbf4e27fa05aa2c6",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "사업단 누리집 첫 화면. 프로그램마다 공지의 QR로 신청하며 정책 전용 신청 화면 없음",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_009",
@@ -1822,12 +1842,14 @@
   {
     "policy_id": "POL_YC_011",
     "original_url": "https://robotcontest.kr",
-    "official_apply_url": "https://robotcontest.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_login_list_not_policy_specific",
     "evidence_path": "data/raw/youthcenter/items/20261101005400214674.json",
     "evidence_sha256": "856ab7de02a1f23f5c8efb208ec075bd33135e176b0c34564a0547bc0e724420",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "원천 값 사이트는 11-19·11-20 열람 시 403. 온통청년 '신청바로가기'는 로그인 필요. 모집 마감",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_012",
@@ -1862,12 +1884,14 @@
   {
     "policy_id": "POL_YC_015",
     "original_url": "https://inochongdg.org",
-    "official_apply_url": "https://inochongdg.org",
-    "reason": "application_field_present",
+    "official_apply_url": "https://inochongdg.org/default/product/aa.php",
+    "reason": "manual_review_verified_apply_page",
     "evidence_path": "data/raw/youthcenter/items/20261101005400214669.json",
     "evidence_sha256": "cf64ee79e432fd6343c20e19d5485c4ff9f1918ae3e0135b0f6e8b1b9d0627f9",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": true,
+    "manual_review_note": "한국노총대구지역본부 재직자교육 '수강신청등록' 화면(회원가입 필요)",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_016",
@@ -2202,22 +2226,26 @@
   {
     "policy_id": "POL_YC_049",
     "original_url": "https://www.jinan.go.kr",
-    "official_apply_url": "https://www.jinan.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_phone_or_visit_only",
     "evidence_path": "data/raw/youthcenter/items/20261030005400214622.json",
     "evidence_sha256": "db6e449e1067ff1cb4b315033152c47fe26e32981aad79a3f3d80bb48e646edb",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "진안군청 첫 화면. 진안군청년센터 공지(notice/16, 2026.4.27): 온라인 신청 없이 전화 문의(063-430-8057)",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_050",
     "original_url": "https://www.jinan.go.kr",
-    "official_apply_url": "https://www.jinan.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_phone_or_visit_only",
     "evidence_path": "data/raw/youthcenter/items/20261030005400214621.json",
     "evidence_sha256": "d4f0fc890a796666fc67508258a5be858d8fb4ec44b9c190dd5026915952c1fc",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "진안군청 첫 화면. 2026 입주자 모집공고(진안군청년센터 공고 제2026-05-01호): 이메일 접수",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_051",
@@ -2232,12 +2260,14 @@
   {
     "policy_id": "POL_YC_052",
     "original_url": "https://www.jinan.go.kr",
-    "official_apply_url": "https://www.jinan.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_phone_or_visit_only",
     "evidence_path": "data/raw/youthcenter/items/20261030005400214619.json",
     "evidence_sha256": "23533cc27513b2bb4bb2b36dcaee2ff520ca189cb119337ba4a6da7e37d9f750",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "진안군청 첫 화면. 진안군청년센터 공지(notice/3, 2026.4.3): 청년센터 방문 또는 이메일 접수",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_YC_053",
@@ -2362,22 +2392,26 @@
   {
     "policy_id": "POL_YC_065",
     "original_url": "https://www.sejong.go.kr",
-    "official_apply_url": "https://www.sejong.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_homepage_only",
     "evidence_path": "data/raw/youthcenter/items/20261029005400214581.json",
     "evidence_sha256": "7134f67055b936e262ad272a982c0471e54bdd6b79e98b73b5dbbaddc1837710",
     "evidence_field": "aplyUrlAddr",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "세종시 누리집 첫 화면. 확인된 모집은 2025년 공고(제2025-484호, 청년DB 신청)뿐이며 종료",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_STG_MOLIT_002",
     "original_url": "https://gg24.gg.go.kr",
-    "official_apply_url": "https://gg24.gg.go.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_unrelated_site",
     "evidence_path": "data/staging/policies.jsonl",
     "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
     "evidence_field": "official_apply_url",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "경기도 사이트로 국토교통부 전국 사업과 맞지 않음. 정부24는 본인인증 로그인 뒤 '바로 신청하기'로만 신청서가 열려 고정 주소 없음",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_STG_MOHW_001",
@@ -2422,22 +2456,26 @@
   {
     "policy_id": "POL_STG_EX_001",
     "original_url": "https://www.hipass.co.kr/main.do",
-    "official_apply_url": "https://www.hipass.co.kr/main.do",
-    "reason": "application_field_present",
+    "official_apply_url": "https://www.hipass.co.kr/mchldRdct/noticeForTwo.do",
+    "reason": "manual_review_verified_apply_page",
     "evidence_path": "data/staging/policies.jsonl",
     "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
     "evidence_field": "official_apply_url",
-    "live_application_page_verified": false
+    "live_application_page_verified": true,
+    "manual_review_note": "고속도로 통행료 누리집의 다자녀 할인 '신규 신청' 단계(유의사항→정보동의) 화면. 원천 값은 첫 화면",
+    "manual_review_checked_at": "2026-11-19"
   },
   {
     "policy_id": "POL_STG_MOLIT_001",
     "original_url": "https://korea-pass.kr",
-    "official_apply_url": "https://korea-pass.kr",
-    "reason": "application_field_present",
+    "official_apply_url": null,
+    "reason": "manual_review_no_application_process",
     "evidence_path": "data/staging/policies.jsonl",
     "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
     "evidence_field": "official_apply_url",
-    "live_application_page_verified": false
+    "live_application_page_verified": false,
+    "manual_review_note": "누리집 첫 화면(제목 '모두의카드'). 별도 신청 없이 카드 발급 후 회원가입·카드 등록",
+    "manual_review_checked_at": "2026-11-20"
   },
   {
     "policy_id": "POL_STG_SEOUL_001",

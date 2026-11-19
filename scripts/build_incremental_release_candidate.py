@@ -223,6 +223,10 @@ def build_candidate_release():
     # 신규 정책의 그래프 관계는 수집 단계의 코드값으로 만들므로 표기 교정 전 값을 보관한다
     new_policies_for_edges = [dict(policy) for policy in new_policies]
     corrections = dc.load_corrections()
+    # 원천 신청 필드 판정 뒤, 신청 화면을 직접 확인한 교정(#18)을 덮어쓴다. 변경 목록도 교정 뒤 값으로 다시 만든다.
+    application_changes = dc.apply_application_url_corrections(
+        merged_policies, application_reviews, baseline_policies, corrections,
+    )
     dc.apply_policy_corrections(merged_policies, corrections)
     dc.apply_source_review(merged_policies, corrections)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
@@ -667,6 +671,7 @@ def build_candidate_release():
 
 - 기존 정책 {len(application_changes)}건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
+- 예외로 `data_corrections_v1.4.0.json`의 `application_url_corrections` {len(corrections.get('application_url_corrections', []))}건은 화면을 직접 열어 확인한 교정이다(#18). 그중 {sum(1 for item in corrections.get('application_url_corrections', []) if item['after'])}건은 그 서비스의 신청·예약 화면 주소로 바꾸고, 나머지는 누리집 첫 화면·로그인 뒤 전체 목록·전화·방문·이메일 신청이라 비웠다. 현재 접수 가능 여부는 보증하지 않는다.
 - `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 

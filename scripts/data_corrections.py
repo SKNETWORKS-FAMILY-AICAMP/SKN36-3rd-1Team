@@ -57,6 +57,43 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy["life_stages"] = list(item["after"])
 
 
+def apply_application_url_corrections(policies: list, reviews: list, baseline_policies: list,
+                                      corrections: dict) -> list:
+    """원천 신청 필드 판정 뒤, 실제 화면을 열어 확인한 신청 주소 교정을 적용한다.
+
+    after가 있으면 그 서비스의 신청·예약 화면을 직접 연 주소이고, None이면 신청 화면이 아니라서 비운다.
+    수정 전 값이 다르면 빌드를 멈춘다. 기존 정책의 변경 목록(변경 전후)은 교정 뒤 값으로 다시 만든다.
+    """
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    review_by_id = {row["policy_id"]: row for row in reviews}
+    items = corrections.get("application_url_corrections", [])
+    assert len({item["policy_id"] for item in items}) == len(items), "신청 주소 교정 대상 중복"
+    for item in items:
+        policy = by_id[item["policy_id"]]
+        assert policy.get("official_apply_url") == item["before"], f"신청 주소 교정 전 값 불일치: {item['policy_id']}"
+        policy["official_apply_url"] = item["after"]
+        review = review_by_id[item["policy_id"]]
+        review.update({
+            "official_apply_url": item["after"],
+            "reason": f"manual_review_{item['reason']}",
+            "live_application_page_verified": item["after"] is not None,
+            "manual_review_note": item["evidence"],
+            "manual_review_checked_at": item["checked_at"],
+        })
+    changes = []
+    for baseline in baseline_policies:
+        current = by_id[baseline["policy_id"]]
+        if baseline.get("official_apply_url") != current.get("official_apply_url"):
+            changes.append({
+                "policy_id": baseline["policy_id"],
+                "field": "official_apply_url",
+                "before": baseline.get("official_apply_url"),
+                "after": current.get("official_apply_url"),
+                "reason": review_by_id[baseline["policy_id"]]["reason"],
+            })
+    return changes
+
+
 def apply_source_review(policies: list, corrections: dict) -> None:
     """정책 노드에 소득·가구 항목별 원문 확인 결과를 남긴다. 값이 없는 속성은 만들지 않는다."""
     review = corrections["source_review"]
