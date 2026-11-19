@@ -320,6 +320,72 @@ def test_nonself_or_unsupported_request_not_exposed_as_profile_button(
         assert expected_body in result["answer"]
 
 
+
+@pytest.mark.parametrize("text", [
+    "몇 살이세요?",
+    "몇 세이세요?",
+    "나이가 어떻게 되나요?",
+    "현재 나이가 몇 세인가요?",
+    "만 나이를 알려주세요.",
+    "연령을 입력해 주세요.",
+    "생년월일을 알려주세요.",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "age"), ("ask_info", "region"),
+])
+@pytest.mark.parametrize("age", [None, 25])
+def test_natural_personal_age_requests_and_already_provided_age(
+    monkeypatch, text, kind, field, age,
+):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer("지원 조건을 확인하고 싶어요", CONTEXTS, CHECKS,
+                               profile={"age": age})
+    expected = [] if age is not None else [
+        {"kind": "ask_info", "field": "age", "text": text}
+    ]
+    assert result["follow_up_questions"] == expected
+
+
+@pytest.mark.parametrize("text", [
+    "자녀 나이는 몇 세인가요?",
+    "배우자의 나이가 어떻게 되나요?",
+    "부모님은 몇 살이세요?",
+    "가구원 중 미성년자는 몇 명인가요?",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "age"), ("ask_info", "income"),
+])
+def test_family_age_never_becomes_user_age_input(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer("정책 확인", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == []
+
+
+@pytest.mark.parametrize("text", [
+    "청년월세 지원의 연령 기준은 몇 세인가요?",
+    "이 정책은 만 몇 세까지 신청할 수 있나요?",
+    "지원 대상 나이는 몇 세부터인가요?",
+    "만 19세 이상만 신청할 수 있나요?",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "age"), ("ask_info", "income"),
+])
+def test_policy_age_thresholds_not_personal_age_requests(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer("지원 조건", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+
 def test_existing_region_does_not_remove_missing_age(monkeypatch):
     stub(monkeypatch, response(follows=[
         {"kind": "ask_info", "field": "region", "text": "거주 지역을 알려주세요."},

@@ -156,6 +156,35 @@ class PipelineTests(unittest.TestCase):
                 self.check.assert_called_once()
                 sdk.assert_called_once()
 
+    def test_short_age_prompt_and_family_prompt_use_correct_pipeline_fields(self):
+        import json
+        from backend.llm import generator
+
+        cases = (
+            (None, "몇 살이세요?", [("ask_info", "몇 살이세요?", "age")]),
+            (25, "몇 살이세요?", []),
+            (None, "몇 세이세요?", [("ask_info", "몇 세이세요?", "age")]),
+            (None, "부모님은 몇 살이세요?", []),
+            (None, "이 정책은 만 몇 세까지 신청할 수 있나요?",
+             [("question", "이 정책은 만 몇 세까지 신청할 수 있나요?", None)]),
+        )
+        for age, text, expected in cases:
+            with self.subTest(age=age, text=text):
+                self.search.reset_mock()
+                self.check.reset_mock()
+                follow = {"kind": "ask_info", "field": "age", "text": text}
+                raw = json.dumps(answer(follow_up_questions=[follow]), ensure_ascii=False)
+                with patch.object(generator, "_call_openai", return_value=raw) as sdk:
+                    result = run_ask_pipeline(
+                        AskRequest(question="가상 정책", profile=UserProfile(age=age, region="", income=None), history=[]),
+                        search_fn=self.search, check_fn=self.check,
+                        generate_fn=generator.generate_answer,
+                    )
+                self.assertEqual([(q.kind, q.text, q.field) for q in result.follow_up_questions], expected)
+                self.search.assert_called_once()
+                self.check.assert_called_once()
+                sdk.assert_called_once()
+
     def test_pipeline_import_does_not_load_generator_or_dataset_env(self):
         env = os.environ.copy()
         env.pop("LIFEPOLICY_DATASET_DIR", None)
