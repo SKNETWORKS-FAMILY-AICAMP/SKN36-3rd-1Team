@@ -386,6 +386,61 @@ def test_policy_age_thresholds_not_personal_age_requests(monkeypatch, text, kind
 
 
 
+@pytest.mark.parametrize("text", [
+    "지원 금액을 계산하려면 나이는 몇 세인가요?",
+    "지원 금액을 계산하려면 몇 살이세요?",
+    "신청 자격을 확인하려면 나이가 몇 세인가요?",
+    "지원 대상 여부를 확인하려면 현재 나이가 어떻게 되나요?",
+    "몇 살이세요?",
+    "몇 세이세요?",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "age"),
+    ("ask_info", "income"), ("ask_info", "region"),
+])
+@pytest.mark.parametrize("age", [None, 25])
+def test_policy_prefixed_personal_age_request_still_requires_age(
+    monkeypatch, text, kind, field, age,
+):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer(
+        "가상 정책 자격 확인", CONTEXTS, CHECKS,
+        profile={"age": age, "region": "서울특별시", "income": None},
+    )
+    expected = [] if age is not None else [
+        {"kind": "ask_info", "text": text, "field": "age"}
+    ]
+    assert result["follow_up_questions"] == expected
+
+
+@pytest.mark.parametrize("text", [
+    "이 정책의 지원 금액은 얼마인가요?",
+    "청년월세 지원의 연령 기준은 몇 세인가요?",
+    "이 정책은 만 몇 세까지 신청할 수 있나요?",
+    "현재 월 소득 기준은 얼마인가요?",
+    "지원 대상 나이는 몇 세부터인가요?",
+    "지원 대상 나이는 몇 세인가요?",
+    "신청 서류는 무엇인가요?",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "age"),
+    ("ask_info", "income"), ("ask_info", "region"),
+])
+def test_policy_age_fix_keeps_actual_policy_questions(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer(
+        "정책의 공식 기준", CONTEXTS, CHECKS,
+        profile={"age": None, "region": "서울특별시", "income": None},
+    )
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
 def test_existing_region_does_not_remove_missing_age(monkeypatch):
     stub(monkeypatch, response(follows=[
         {"kind": "ask_info", "field": "region", "text": "거주 지역을 알려주세요."},
