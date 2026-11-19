@@ -65,6 +65,38 @@ class PipelineTests(unittest.TestCase):
                 self.check.assert_called_once()
                 sdk.assert_called_once()
 
+    def test_policy_and_personal_followups_reconcile_in_pipeline(self):
+        import json
+        from backend.llm import generator
+
+        examples = (
+            ([{"kind": "ask_info", "field": "income", "text": "주거급여 기준금액을 알려주세요."}],
+             [("question", "주거급여 기준금액을 알려주세요.", None)]),
+            ([{"kind": "ask_info", "field": "region", "text": "지원 금액을 계산하려면 현재 월 소득을 알려주세요?"}],
+             [("ask_info", "지원 금액을 계산하려면 현재 월 소득을 알려주세요?", "income")]),
+            ([{"kind": "ask_info", "field": "region", "text": "현재 거주 지역이 경기도인가요? 소득 기준은 얼마인가요?"}],
+             [("ask_info", "현재 거주 지역이 경기도인가요?", "region"),
+              ("question", "소득 기준은 얼마인가요?", None)]),
+        )
+        for raw_follows, expected in examples:
+            with self.subTest(follows=raw_follows):
+                self.search.reset_mock()
+                self.check.reset_mock()
+                raw = json.dumps(answer(follow_up_questions=raw_follows), ensure_ascii=False)
+                with patch.object(generator, "_call_openai", return_value=raw) as sdk:
+                    result = run_ask_pipeline(
+                        AskRequest(question="가상 정책", profile=UserProfile(age=None, region="", income=None), history=[]),
+                        search_fn=self.search, check_fn=self.check,
+                        generate_fn=generator.generate_answer,
+                    )
+                self.assertEqual(
+                    [(q.kind, q.text, q.field) for q in result.follow_up_questions],
+                    expected,
+                )
+                self.search.assert_called_once()
+                self.check.assert_called_once()
+                sdk.assert_called_once()
+
     def test_pipeline_import_does_not_load_generator_or_dataset_env(self):
         env = os.environ.copy()
         env.pop("LIFEPOLICY_DATASET_DIR", None)

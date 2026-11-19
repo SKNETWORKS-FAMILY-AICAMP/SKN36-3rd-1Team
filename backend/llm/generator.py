@@ -241,6 +241,14 @@ def _normalize_followup_question(text: str) -> str | None:
     if original.endswith(("?", "？")):
         return original
 
+    # 명백한 정책 기준 안내 요청만 문장부호를 보존해 question으로 허용한다.
+    # 개인 입력 요구나 지원하지 않는 정보 요청에는 적용하지 않는다.
+    if _is_policy_criteria_question(original) and re.search(
+        r"(?:알려|설명|안내|보여)\s*(?:주세요|주십시오)[.!。！]?$",
+        original,
+    ):
+        return original
+
     candidate = original.rstrip(" \t\r\n.!。！")
 
     if re.search(
@@ -254,8 +262,20 @@ def _normalize_followup_question(text: str) -> str | None:
     return None
 
 
+def _is_explicit_profile_request(text: str) -> bool:
+    """현재 사용자에게 프로필 입력을 명시적으로 요청하는 문장이다."""
+    return bool(re.search(
+        r"(?:현재|본인(?:의)?|귀하(?:의)?|제|내)\s*(?:월\s*)?"
+        r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
+        r".{0,30}(?:얼마|알려|입력|말씀|몇\s*(?:세|살)|어디|어느)",
+        text,
+    ))
+
+
 def _is_policy_criteria_question(text: str) -> bool:
-    """정책의 금액·자격 기준 질문을 사용자 입력 요청과 구별한다."""
+    """개인 프로필 요구가 아닌 정책의 금액·자격 기준 질문을 구별한다."""
+    if _is_explicit_profile_request(text):
+        return False
     return bool(re.search(
         r"기준\s*(?:금액|액|중위\s*소득)|"
         r"(?:지원|지급)\s*금액|"
@@ -286,7 +306,7 @@ def _personal_information_request(
         r"몇\s*(?:명|세|살)\s*(?:이상|이하|부터|까지|이어야|여야)|"
         r"주민등록\s*(?:되어야|해야))",
         text,
-    ):
+    ) and not _is_explicit_profile_request(text):
         return None
 
     # 현재 사용자에게 사실을 확인하는 문장은 사용자→AI question이 아니다.
@@ -704,9 +724,14 @@ def _validate_model_response(
     # 한 항목에 사용자 정보 요청과 정상 정책 질문이 섞여도 각각 판정한다.
     expanded = []
     for item in follows:
-        if isinstance(item, dict) and item.get("kind") == "question" and isinstance(item.get("text"), str):
+        if isinstance(item, dict) and isinstance(item.get("text"), str):
             text = re.sub(r"([?？])[!！.。]+(?=\s|$)", r"\1", item["text"].strip())
-            expanded.extend({**item, "text": part} for part in re.split(r"(?<=[?？])\s+", text) if part)
+            parts = [part for part in re.split(r"(?<=[?？])\s+", text) if part]
+            if len(parts) > 1:
+                # 혼합 문장은 모델의 최초 태그·필드를 버리고 각 문장을 재판정한다.
+                expanded.extend({"kind": "question", "text": part} for part in parts)
+            else:
+                expanded.append({**item, "text": text})
         else:
             expanded.append(item)
 
@@ -744,10 +769,23 @@ def _validate_model_response(
             else None
         )
 
-        # 모델이 정책 기준 질문을 ask_info로 잘못 태깅해도
-        # 사용자 정보 입력 버튼 대신 정상 질문 버튼으로 복구한다.
-        if kind == "ask_info" and _is_policy_criteria_question(text):
-            kind = "question"
+        # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
+        # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
+        if kind == "ask_info":
+            if detected_field in ALLOWED_FIELDS:
+                field = detected_field
+            elif detected_field in {"detail_region", "other"}:
+                kind = "question"
+            elif _is_policy_criteria_question(text) or (
+                detected_field is None
+                and re.search(
+                    r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|"
+                    r"거주\s*형태.*(?:대상|포함|허용|인정))",
+                    text,
+                )
+                and _normalize_followup_question(text) is not None
+            ):
+                kind = "question"
 
         if kind == "ask_info":
             if (

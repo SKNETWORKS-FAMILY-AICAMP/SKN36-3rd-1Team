@@ -142,6 +142,80 @@ def test_personal_income_question_remains_ask_info(monkeypatch, text):
     ]
 
 
+@pytest.mark.parametrize("text", [
+    "지원 금액을 계산하려면 현재 월 소득을 알려주세요?",
+    "소득 기준을 확인하려면 본인의 월 소득을 알려주세요.",
+])
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "income"), ("ask_info", "region"),
+])
+def test_policy_keyword_does_not_hide_personal_income(monkeypatch, text, kind, field):
+    follow = {"kind": kind, "text": text}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("조건 확인", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "text": text, "field": "income"}
+    ]
+
+
+@pytest.mark.parametrize("text", [
+    "주거급여 기준금액을 알려주세요.",
+    "주거급여 기준금액을 알려주세요",
+    "주거급여 기준금액을 알려주세요。",
+])
+@pytest.mark.parametrize("kind", ["question", "ask_info"])
+def test_policy_criteria_request_without_question_mark(monkeypatch, text, kind):
+    follow = {"kind": kind, "text": text}
+    if kind == "ask_info":
+        follow["field"] = "income"
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("지원 조건", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("kind,field", [
+    ("question", None), ("ask_info", "region"), ("ask_info", "income"),
+])
+def test_mislabelled_mixed_question_is_split(monkeypatch, kind, field):
+    follow = {"kind": kind, "text": "현재 거주 지역이 경기도인가요? 소득 기준은 얼마인가요?"}
+    if field is not None:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "text": "현재 거주 지역이 경기도인가요?", "field": "region"},
+        {"kind": "question", "text": "소득 기준은 얼마인가요?"},
+    ]
+
+
+@pytest.mark.parametrize("kind", ["question", "ask_info"])
+def test_mixed_income_and_policy_question(monkeypatch, kind):
+    follow = {"kind": kind, "text": "본인의 월 소득을 알려주세요? 주거급여 기준금액은 얼마인가요?"}
+    if kind == "ask_info":
+        follow["field"] = "region"
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("지원 조건", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "text": "본인의 월 소득을 알려주세요?", "field": "income"},
+        {"kind": "question", "text": "주거급여 기준금액은 얼마인가요?"},
+    ]
+
+
+@pytest.mark.parametrize("kind", ["question", "ask_info"])
+def test_mixed_housing_scope_and_user_fact(monkeypatch, kind):
+    follow = {"kind": kind, "text": "거주 형태는 전세도 대상인가요? 현재 거주 지역이 경기도인가요?"}
+    if kind == "ask_info":
+        follow["field"] = "income"
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("가상 정책", CONTEXTS, CHECKS)
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": "거주 형태는 전세도 대상인가요?"},
+        {"kind": "ask_info", "text": "현재 거주 지역이 경기도인가요?", "field": "region"},
+    ]
+
+
 def test_confirmed_region_question_is_not_asked_again(monkeypatch):
     stub(monkeypatch, response(follows=[{"kind": "question", "text": "현재 거주 지역이 경기도인가요?"}]))
     result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,
