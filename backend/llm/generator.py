@@ -254,6 +254,16 @@ def _normalize_followup_question(text: str) -> str | None:
     return None
 
 
+def _is_policy_criteria_question(text: str) -> bool:
+    """정책의 금액·자격 기준 질문을 사용자 입력 요청과 구별한다."""
+    return bool(re.search(
+        r"기준\s*(?:금액|액|중위\s*소득)|"
+        r"(?:지원|지급)\s*금액|"
+        r"(?:소득|급여)\s*(?:기준|상한|하한)",
+        text,
+    ))
+
+
 def _personal_information_request(
     text: str,
     profile: dict | None,
@@ -264,6 +274,9 @@ def _personal_information_request(
     정책의 기준·지원금·서류 등을 묻는 사용자 질문은 None이어야 한다.
     """
     text = " ".join(text.split()).rstrip("?？!！.。")
+
+    if _is_policy_criteria_question(text):
+        return None
 
     # 정책 설명을 사용자가 묻는 문장은 개인정보 요청으로 오인하지 않는다.
     if re.search(
@@ -730,6 +743,11 @@ def _validate_model_response(
             if kind == "ask_info"
             else None
         )
+
+        # 모델이 정책 기준 질문을 ask_info로 잘못 태깅해도
+        # 사용자 정보 입력 버튼 대신 정상 질문 버튼으로 복구한다.
+        if kind == "ask_info" and _is_policy_criteria_question(text):
+            kind = "question"
 
         if kind == "ask_info":
             if (

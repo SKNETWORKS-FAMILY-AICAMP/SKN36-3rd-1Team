@@ -112,6 +112,36 @@ def test_current_housing_fact_requests_still_are_not_questions(monkeypatch, text
     assert result["follow_up_questions"] == []
 
 
+@pytest.mark.parametrize("text", [
+    "주거급여의 2026년 1인 가구 기준 금액도 알려주세요?",
+    "주거급여 기준금액은 얼마인가요?",
+    "소득 기준이 얼마인가요?",
+    "2026년 기준 중위소득은 얼마인가요?",
+    "지원 금액은 얼마인가요?",
+])
+@pytest.mark.parametrize("model_kind", ["question", "ask_info"])
+def test_policy_criteria_questions_do_not_request_personal_income(monkeypatch, text, model_kind):
+    follow = {"kind": model_kind, "text": text}
+    if model_kind == "ask_info":
+        follow["field"] = "income"
+    stub(monkeypatch, response(follows=[follow]))
+    result = g.generate_answer("지원 조건을 알려주세요", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("text", [
+    "본인의 월 소득을 알려주세요?",
+    "현재 월 소득이 얼마인가요?",
+    "귀하의 급여를 알려주세요?",
+])
+def test_personal_income_question_remains_ask_info(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS)
+    assert result["follow_up_questions"] == [
+        {"kind": "ask_info", "text": text, "field": "income"}
+    ]
+
+
 def test_confirmed_region_question_is_not_asked_again(monkeypatch):
     stub(monkeypatch, response(follows=[{"kind": "question", "text": "현재 거주 지역이 경기도인가요?"}]))
     result = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS,
