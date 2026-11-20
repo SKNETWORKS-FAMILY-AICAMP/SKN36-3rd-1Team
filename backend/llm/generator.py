@@ -224,7 +224,10 @@ def _is_ai_offer_question(text: str) -> bool:
         re.search(
             r"(?:드릴까요|드릴래요|드려도\s*될까요|"
             r"(?:안내|설명|정리|추천|조회|검색|비교|확인|살펴|찾아|알려|보여)"
-            r"\s*(?:해\s*)?볼까요)$",
+            r"\s*(?:해\s*)?볼까요|"
+            # '소득 기준도 알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'도
+            # AI가 사용자에게 하는 제안이라 사용자 발화 버튼이 될 수 없다(ask_contract).
+            r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?))$",
             candidate,
         )
     )
@@ -295,6 +298,57 @@ def _mentions_profile_field(text: str, field: str) -> bool:
     return bool(pattern and re.search(pattern, text))
 
 
+_FAMILY_SUBJECT = r"(?:자녀|배우자|부모(?:님)?|가구원|가족|세대원)"
+# 사용자 상태를 존칭 예/아니요로 확인하는 어미. '…할 수 있나요', '…해야 하나요',
+# '…대상인가요', '…되나요'처럼 정책 조건을 묻는 어미는 포함하지 않는다.
+_USER_STATE_ENDINGS = (
+    r"이신가요|이세요|이신지요?|으신가요|으세요|으신지요?|"
+    r"않으시나요|않으셨나요|않으신가요|되시나요|되셨나요"
+)
+_USER_STATE_ENDING = r"(?:" + _USER_STATE_ENDINGS + r")$"
+_USER_STATE_SUBJECTS = {
+    "age": r"(?<![가-힣])(?:나이|연령)|만\s*\d+\s*세|(?<![\d가-힣])\d+\s*세",
+    "region": r"(?<![가-힣])(?:주소지|거주지|주소|거주\s*지역)|사시는\s*곳|사는\s*곳",
+    "income": r"(?:(?<![가-힣])|(?<=월)|(?<=연))(?:소득|수입)(?!공제|세)",
+}
+
+
+def _user_state_confirmation(text: str) -> str | None:
+    """'만 34세 이하이신가요?'처럼 사용자 값을 예/아니요로 확인하는 문장의 필드를 찾는다.
+
+    가족 구성원의 값이나 소득 종류('근로소득이 있으신가요?')는 본인 입력 필드가 아니므로
+    other를 돌려준다. 해당 없으면 None.
+    """
+    text = " ".join(text.split()).rstrip("?？!！.。")
+    family = re.search(
+        _FAMILY_SUBJECT + r".{0,20}(?:만\s*\d+\s*세|\d+\s*세|나이|연령|소득|수입)"
+        r".{0,20}(?:인가요|인지요?|" + _USER_STATE_ENDINGS + r")$",
+        text,
+    )
+    if family:
+        return "other"
+    if not re.search(_USER_STATE_ENDING, text):
+        return None
+    # '…알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'는 AI의 안내 제안이지 상태 확인이 아니다.
+    if re.search(r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?)$", text):
+        return None
+    if re.search(r"(?:근로|사업|재산|이자|배당|연금|기타)\s*소득", text):
+        return "other"
+    for field, pattern in _USER_STATE_SUBJECTS.items():
+        if re.search(pattern, text):
+            return field
+    return None
+
+
+def _has_policy_action(text: str) -> bool:
+    """'거주지 이전 시', '유지되나요', '인정되나요'처럼 정책 적용 동작을 묻는 표현."""
+    return bool(re.search(
+        r"(?:이전|변경|유지|인정|포함|적용|제외|승계)\s*(?:시|하|되|돼|될|된|한|할|해)|"
+        r"해당\s*(?:되|하)|(?:근로|사업|재산|이자|배당|연금)\s*소득",
+        text,
+    ))
+
+
 def _addresses_user(text: str) -> bool:
     """존칭 의문·요청 어미로 AI가 사용자에게 묻는 문장인지 확인한다."""
     return bool(re.search(
@@ -337,7 +391,7 @@ def _is_explicit_profile_request(text: str) -> bool:
 
     # 사용자 값을 받아 기준과 비교하겠다는 요청도 프로필 요청이다.
     # 예: '가구 소득이 얼마인지 알려주시면 기준 금액과 비교해 드릴게요.'
-    if _is_user_income_comparison(text) or re.search(
+    if _is_user_income_comparison(text) or _user_state_confirmation(text) or re.search(
         r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
         r".{0,25}(?:알려|입력|말씀)\s*(?:해\s*)?주시면",
         text,
@@ -393,9 +447,14 @@ def _personal_information_request(
     # '월 소득이 기준 금액보다 낮으신가요?'는 사용자 소득 확인이다.
     # 다른 가족 구성원의 소득 비교는 본인 income 필드가 아니다.
     if _is_user_income_comparison(text):
-        if re.search(r"(?:자녀|배우자|부모(?:님)?|가구원|가족|세대원)", text):
+        if re.search(_FAMILY_SUBJECT, text):
             return "other"
         return "income"
+
+    # '만 34세 이하이신가요?', '주소지가 서울이신가요?'는 사용자 상태 확인이다.
+    state_field = _user_state_confirmation(text)
+    if state_field:
+        return state_field
 
     # 정책 설명을 사용자가 묻는 문장은 개인정보 요청으로 오인하지 않는다.
     if re.search(
@@ -907,7 +966,8 @@ def _validate_model_response(
                     r"서류|신청|접수|발급|지급|혜택|절차|방법|문의처|공제|계산|"
                     r"거주\s*형태.*(?:대상|포함|허용|인정))",
                     text,
-                )) and _normalize_followup_question(text) is not None
+                )) or _has_policy_action(text)
+                is_policy_question = is_policy_question and _normalize_followup_question(text) is not None
                 keeps_model_field = (
                     isinstance(field, str)
                     and field in ALLOWED_FIELDS
@@ -915,6 +975,7 @@ def _validate_model_response(
                     and not _is_policy_criteria_question(
                         " ".join(text.split()).rstrip("?？!！.。")
                     )
+                    and not _has_policy_action(text)
                     and (not is_policy_question or _addresses_user(text))
                 )
                 if keeps_model_field:

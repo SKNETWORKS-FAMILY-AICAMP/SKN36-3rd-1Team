@@ -1160,3 +1160,103 @@ def test_pr92_income_compound_policy_question_is_recovered(monkeypatch):
     stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": "income", "text": text}]))
     actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
     assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+# ==========================================================
+# PR #92 재리뷰: 사용자 상태 예/아니요 확인, 정책 동작 동사·소득 종류 합성어
+# ==========================================================
+
+USER_STATE_CONFIRMATIONS = [
+    ("주소지가 서울이신가요?", "region"),
+    ("월 소득이 200만 원 이하이신가요?", "income"),
+    ("만 34세 이하이신가요?", "age"),
+    ("소득이 기준을 넘지 않으시나요?", "income"),
+    ("나이가 34세를 넘지 않으셨나요?", "age"),
+]
+
+
+@pytest.mark.parametrize("text,field", USER_STATE_CONFIRMATIONS)
+def test_pr92_user_state_confirmation_question_becomes_ask_info(monkeypatch, text, field):
+    """사용자 값을 존칭 예/아니요로 확인하는 문장은 사용자→AI 질문 버튼이 아니다."""
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "ask_info", "field": field, "text": text}]
+
+
+@pytest.mark.parametrize("text,field", USER_STATE_CONFIRMATIONS)
+def test_pr92_user_state_confirmation_ask_info_keeps_field(monkeypatch, text, field):
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": field, "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "ask_info", "field": field, "text": text}]
+
+
+@pytest.mark.parametrize("policy_question", [
+    "만 34세 이하만 신청할 수 있나요?",
+    "월 소득 200만 원 이하여야 하나요?",
+    "서울 거주자만 대상인가요?",
+    "소득이 기준을 넘으면 신청할 수 없나요?",
+    "나이가 34세를 넘으면 지원이 끊기나요?",
+    "거주 형태는 월세만 대상인가요?",
+    "지원 대상 나이는 어떻게 되나요?",
+])
+def test_pr92_policy_condition_question_is_not_user_state(monkeypatch, policy_question):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": policy_question}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": policy_question}]
+
+
+@pytest.mark.parametrize("text", [
+    "배우자 소득이 200만 원 이하이신가요?",
+    "자녀가 만 7세 이하인가요?",
+])
+def test_pr92_family_state_confirmation_is_other(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == []
+    assert g._personal_information_request(text, None) == "other"
+
+
+@pytest.mark.parametrize("text,field", [
+    ("거주지 이전 시 지원이 유지되나요?", "region"),
+    ("근로소득만 인정되나요?", "income"),
+    ("사업소득도 소득에 포함되나요?", "income"),
+    ("주소를 변경하면 다시 신청해야 하나요?", "region"),
+])
+def test_pr92_policy_action_question_mistagged_as_ask_info_becomes_question(monkeypatch, text, field):
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": field, "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+@pytest.mark.parametrize("kind,field,text,expected", [
+    ("question", None, "현재 거주지가 어디세요?", {"kind": "ask_info", "field": "region", "text": "현재 거주지가 어디세요?"}),
+    ("ask_info", "income", "가구 소득이 얼마인지 알려주시면 기준 금액과 비교해 드릴게요.",
+     {"kind": "ask_info", "field": "income", "text": "가구 소득이 얼마인지 알려주시면 기준 금액과 비교해 드릴게요."}),
+])
+def test_pr92_user_requests_stay_ask_info_after_policy_verb_rule(monkeypatch, kind, field, text, expected):
+    follow = {"kind": kind, "text": text}
+    if field:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [expected]
+
+
+def test_pr92_earned_income_existence_is_not_income_amount_or_button(monkeypatch):
+    """'근로소득이 있으신가요?'는 소득 금액(income 입력칸)이 아니라 소득 종류 확인이다."""
+    text = "근로소득이 있으신가요?"
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == []
+
+
+@pytest.mark.parametrize("text", [
+    "국민취업지원제도 I유형의 소득 기준도 알고 싶으신가요?",
+    "연령별 지원 내용도 궁금하신가요?",
+    "주소지 변경 방법도 안내받기를 원하시나요?",
+])
+def test_pr92_offer_question_is_not_user_state(monkeypatch, text):
+    """'…알고 싶으신가요?'는 AI의 안내 제안이지 사용자 값 확인이 아니다(실제 모델 출력에서 발견)."""
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert not any(f["kind"] == "ask_info" for f in actual["follow_up_questions"])

@@ -78,7 +78,7 @@
     "tests/unit/test_llm_profile_followups.py": "62028d1f4c1c382f47b66753d153ed895dd8e799d2d85524d56bcca1a6588149",
     "tests/integration/test_rag_pipeline.py": "d6e13bb0ff683bd63698fab09b07daf1113eaad1841b2ec0568cb2517f2242b0"
   },
-  "dataset_path": "C:\\dev\\project\\SKN36-3rd-1Team\\.mini-82-check\\data\\releases\\v1.4.0-candidate",
+  "dataset_path": "data/releases/v1.4.0-candidate",
   "prompt_tokens": 0,
   "completion_tokens": 0,
   "new_model_responses": 0,
