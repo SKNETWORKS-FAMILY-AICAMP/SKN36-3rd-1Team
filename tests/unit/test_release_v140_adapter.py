@@ -217,7 +217,7 @@ class ApprovedReleaseTests(unittest.TestCase):
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 262, 600, 1126, 2668])
+        self.assertEqual(self.out["expected"], [246, 262, 600, 1127, 2668])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
@@ -257,7 +257,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_neo4j_graph_input(self):
         self.assertTrue(self.out["graph_ok"])
-        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1126, 2668))
+        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1127, 2668))
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):
