@@ -87,9 +87,11 @@ def test_attributes_ignored_when_hold_is_false():
     assert _statuses(result, "eligibility") == ["eligible"]
 
 
-@pytest.mark.parametrize("attrs", [[], None, "age", ["age", ""], ["age", 3], ["education"], ["target"]])
+@pytest.mark.parametrize("attrs", [[], None, "age", ["age", ""], ["age", 3], ["education"], ["target"],
+                                   ["age", "education"], ["region", "unknown_field"]])
 def test_unusable_attributes_fall_back_to_all(attrs):
     # education·target은 Checker 조건 필드명이지만 공통 목록에는 없으므로 보수적으로 전체 보류한다.
+    # 정상 값과 섞여 와도 모르는 값을 건너뛰고 일부만 보류하지 않는다.
     quality = {"hold_auto_eligibility": True, "affected_attributes": attrs}
     assert checker._affected_fields(quality, {}, False) == {ALL_ELIGIBILITY_FIELDS}
 
@@ -140,11 +142,11 @@ def test_combined_search_warnings_are_accepted():
 
 def test_static_flag_values_are_accepted_through_search_summary():
     # 정적 목록 경고는 affects를 목록 값으로 직접 넣는다. 그 경로로 들어온 값도 그대로 받는다.
+    # 공개 함수 assess_policy_data_quality를 거쳐 검색 결과와 같은 요약을 만든다.
     flags = [{"code": "MARRIAGE_CHILD_NOT_MODELED", "evidence_level": "handoff_text", "severity": "medium",
               "handoff_semantic_match": "suspected", "affects": ["marriage", "children"], "evidence": "sample_only"}]
-    warnings = []
-    hs._apply_static_flags(flags, warnings)
-    quality = hs._hold_summary([hs._annotate(w) for w in warnings])
+    quality = hs.assess_policy_data_quality({"policy": {}}, flags)
 
+    assert quality["hold_auto_eligibility"] is True
     assert quality["affected_attributes"] == ["children", "marriage"]
     assert checker._affected_fields(quality, {}, False) == {"children", "marriage"}
