@@ -1,0 +1,398 @@
+[
+  {
+    "question_id": "RQ027",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 5,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.005864499995368533,
+    "follow_up_questions": [
+      {
+        "kind": "ask_info",
+        "text": "주거급여의 2026년 1인 가구 기준 금액도 알려주세요?",
+        "field": "income"
+      }
+    ]
+  },
+  {
+    "question_id": "RQ036",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 4,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0011013999974238686,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민취업지원제도 I유형의 소득 기준도 알려주세요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민취업지원제도 I유형의 취업경험 요건은 어떻게 되나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_FIXED_R1",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0009205000023939647,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 무엇인가요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드는 어떻게 신청하나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 내용은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_FIXED_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0008423999970545992,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 누구인가요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드로 받을 수 있는 지원 내용은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_FIXED_R1",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0012862000003224239,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "청년월세 한시 특별지원의 신청 자격은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "청년월세 지원의 신청 방법은 어디서 확인하나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_FIXED_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0007439999972120859,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "청년월세 한시 특별지원의 제외대상은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "청년월세 지원의 신청 자격은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ031_EXACT60",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0011375000030966476,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "수산자원보호 직접지불제의 신청서류는 무엇인가요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "수산자원보호 직접지불제의 제외 대상은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ031",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0008398999998462386,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "수산자원보호 직접지불제의 다른 지급요건은 무엇인가요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "수산자원보호 직접지불제의 신청 방법은 어떻게 되나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0007637999951839447,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 누구인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0006505000055767596,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "청년월세 한시 특별지원의 제외대상은 더 있나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "청년월세 지원의 신청 자격은 어떻게 되나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0006999999968684278,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_R3",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0007060999996610917,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 누구인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.000665299994579982,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "청년월세 지원의 신청 자격은 어떤 기준으로 보나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "청년월세 한시 특별지원의 제외대상은 더 있나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_R3",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0007033000001683831,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "청년월세 한시 특별지원의 다른 제외대상도 알고 싶나요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_P_R1",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0008879000015440397,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 제외 대상은 누구인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040_P_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 1,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.000683400001435075,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국민내일배움카드의 지원 내용은 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_P_R1",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0006643999950028956,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "경기도 청년월세 지원의 신청 자격과 제외 조건은 어디에서 확인할 수 있나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "국토교통부 청년월세 한시 특별지원의 신청 서류는 무엇인가요?",
+        "field": null
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042_P_R2",
+    "mode": "saved old-data search and model output replay; not new real evaluation",
+    "answer_preserved": true,
+    "search_mock_calls": 1,
+    "checker_calls": 2,
+    "generator_mock_calls": 1,
+    "paid_calls": 0,
+    "elapsed_seconds": 0.0006542999981320463,
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "국토교통부 청년월세 한시 특별지원의 신청 대상과 제외대상은 어떻게 되나요?",
+        "field": null
+      },
+      {
+        "kind": "question",
+        "text": "경기도 청년월세 지원의 신청 자격은 어디에서 확인할 수 있나요?",
+        "field": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,89 @@
+{
+  "status": "scheduled_after_planned_reload",
+  "paid_calls": 0,
+  "estimated_cost_usd": 0,
+  "reason": "Current older DB is intentional in the Notion workflow. Run after 민혁님 reload and verify loaded manifest/profile before paid calls.",
+  "model": "gpt-5.4-mini",
+  "planned_calls": 14,
+  "estimated_plan_cost_usd": [
+    0.04,
+    0.07
+  ],
+  "proposed_cumulative_stop_usd": 0.1,
+  "last_call_may_exceed_threshold": true,
+  "sdk_retries": 0,
+  "planned_cases": [
+    {
+      "question_id": "RQ027",
+      "question": "2026년 주거급여 4인 가구 소득인정액 기준 금액은 얼마인가요?"
+    },
+    {
+      "question_id": "RQ031",
+      "question": "수산자원보호 직접지불제는 1년에 며칠 이상 조업해야 하나요?"
+    },
+    {
+      "question_id": "RQ036",
+      "question": "국민취업지원제도 I유형 요건심사형의 재산 기준은 얼마인가요?"
+    },
+    {
+      "question_id": "RQ040",
+      "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ042",
+      "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ040_R2",
+      "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ040_R3",
+      "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ042_R2",
+      "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ042_R3",
+      "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ040_P_R1",
+      "question": "저는 현재 공무원입니다. 국민내일배움카드를 발급받을 수 있는 대상인가요?"
+    },
+    {
+      "question_id": "RQ040_P_R2",
+      "question": "저는 현재 공무원입니다. 국민내일배움카드를 발급받을 수 있는 대상인가요?"
+    },
+    {
+      "question_id": "RQ042_P_R1",
+      "question": "부모님 소유의 집을 임차해 월세를 내는 청년입니다. 국토교통부와 경기도 청년 월세 지원에서 각각 지원받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ042_P_R2",
+      "question": "부모님 소유의 집을 임차해 월세를 내는 청년입니다. 국토교통부와 경기도 청년 월세 지원에서 각각 지원받을 수 있나요?"
+    },
+    {
+      "question_id": "RQ031_EXACT60",
+      "question": "수산자원보호 직접지불제에서 해당 연도 조업일수가 정확히 60일이면 지급요건을 충족하나요? 원문의 지급요건과 지급제한 기준을 구분해서 알려주세요."
+    }
+  ],
+  "files_sha256": {
+    "backend/llm/generator.py": "ed326b4b55d70c28e342196bd3e017f01fcb57285a0d120b9fc1c47ba0a8ad6a",
+    "ai/prompts/system_prompt.py": "33ef4a2250754b375a7b4cfd8d6dc7b62572c5af70fcf4d25e80f97c86b0a849",
+    "backend/rag/pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+    "backend/eligibility/checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+    "tests/unit/test_llm_profile_followups.py": "62028d1f4c1c382f47b66753d153ed895dd8e799d2d85524d56bcca1a6588149",
+    "tests/integration/test_rag_pipeline.py": "d6e13bb0ff683bd63698fab09b07daf1113eaad1841b2ec0568cb2517f2242b0"
+  },
+  "dataset_path": "data/releases/v1.4.0-candidate",
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "new_model_responses": 0,
+  "head_commit": "446276df2bc1a674abc11adef130d63745329375",
+  "base_commit": "e76451848ff35d5397f10d0370b4b196165305f4",
+  "final_code_is_uncommitted": true,
+  "code_merge_blocker": false
+}

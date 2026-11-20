@@ -1,0 +1,15 @@
+﻿question_id,call,meaning,reason,bold_spans,follow_up_kinds,cost_usd
+RQ027,pass,pass,"2026년 4인 가구 소득인정액 3,117,474원/월을 채택 원문(DOC_BOK_047_C01)과 대조",1,question,0.0056925
+RQ031,pass,fail,60일 이상을 첫 문장에서 확정 기준으로 제시. 60일 이하 미지급 문구는 인용하지만 경계 충돌을 유보하지 않음(기존 한계와 동일),1,question/question,0.00364035
+RQ036,pass,pass,재산 4억원 이하·15~34세 청년 5억원 이하와 최신 데이터의 15~69세 조건을 원문(DOC_MOEL_001/002)과 대조,3,question/question,0.0036696
+RQ040,pass,pass,"공무원 지원 제외를 직접 결론으로 안내, 원문(DOC_WORK24_001_C03)과 일치",2,question/question,0.0041721
+RQ042,pass,pass,국토부 청년월세의 2촌 이내 주택 임차 제외를 직접 안내하고 경기도 정책의 근거 부족을 분리,2,question/question,0.0035496
+RQ040_R2,pass,pass,"공무원 지원 제외를 직접 결론으로 안내, 원문(DOC_WORK24_001_C03)과 일치",2,question/question,0.0012894
+RQ040_R3,pass,pass,"공무원 지원 제외를 직접 결론으로 안내, 원문(DOC_WORK24_001_C03)과 일치",1,question/question,0.0012534
+RQ042_R2,pass,pass,국토부 청년월세의 2촌 이내 주택 임차 제외를 직접 안내하고 경기도 정책의 근거 부족을 분리,2,question/question,0.0018873
+RQ042_R3,pass,pass,국토부 청년월세의 2촌 이내 주택 임차 제외를 직접 안내하고 경기도 정책의 근거 부족을 분리,2,question/question,0.0018153
+RQ040_P_R1,pass,pass,"공무원 지원 제외를 직접 결론으로 안내, 원문(DOC_WORK24_001_C03)과 일치",2,question/question,0.0041181
+RQ040_P_R2,pass,pass,"공무원 지원 제외를 직접 결론으로 안내, 원문(DOC_WORK24_001_C03)과 일치",1,question/question,0.0013839
+RQ042_P_R1,pass,pass,국토부 청년월세의 2촌 이내 주택 임차 제외를 직접 안내하고 경기도 정책의 근거 부족을 분리,3,question/question,0.00370935
+RQ042_P_R2,pass,pass,국토부 청년월세의 2촌 이내 주택 임차 제외를 직접 안내하고 경기도 정책의 근거 부족을 분리,2,question/question,0.00173565
+RQ031_EXACT60,pass,fail,"정확히 60일을 요건 충족으로 읽고, 60일이 '60일 이하'에 해당하지 않는다고 잘못 설명함(60은 60 이하에 포함). 이전 평가보다 나빠진 오답",2,question/question/question,0.0043911
