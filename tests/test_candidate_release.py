@@ -342,6 +342,24 @@ class CandidateIntegrityTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             relationship_query("UNTRUSTED_RELATION")
 
+    def test_manual_apply_url_flag_follows_verified_stage(self):
+        # 신청 버튼까지만 본 주소는 남기되 '실제 신청 화면 확인'으로 올리지 않는다(가상 데이터).
+        def run(after, stage):
+            policies = [{"policy_id": "POL_S1", "official_apply_url": "https://example.test/"}]
+            reviews = [{"policy_id": "POL_S1", "official_apply_url": "https://example.test/"}]
+            item = {"policy_id": "POL_S1", "before": "https://example.test/", "after": after, "reason": "sample_only",
+                    "evidence": "sample_only", "checked_at": "2026-11-20", "verified_stage": stage}
+            dc.apply_application_url_corrections(policies, reviews, [], {"application_url_corrections": [item]})
+            return policies[0]["official_apply_url"], reviews[0]["live_application_page_verified"]
+
+        self.assertEqual(run("https://example.test/apply", "identity_check"), ("https://example.test/apply", True))
+        self.assertEqual(run("https://example.test/info", "apply_button_out_of_period"), ("https://example.test/info", False))
+        self.assertEqual(run(None, None), (None, False))
+        with self.assertRaises(AssertionError):
+            run("https://example.test/info", None)
+        with self.assertRaises(AssertionError):
+            run(None, "booking_screen")
+
     def test_review_is_repeatable_from_captured_evidence(self):
         policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
         old = rows(ROOT / "data/handoff/neo4j/nodes_policy.jsonl")

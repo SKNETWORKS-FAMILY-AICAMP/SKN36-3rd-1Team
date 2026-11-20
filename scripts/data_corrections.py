@@ -57,11 +57,17 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy["life_stages"] = list(item["after"])
 
 
+# 실제 신청·예약 화면까지 들어가 본 단계. 신청 버튼이나 안내만 본 경우는 확인 완료로 올리지 않는다.
+VERIFIED_APPLICATION_STAGES = frozenset({"booking_screen", "application_step", "identity_check"})
+APPLICATION_STAGES = VERIFIED_APPLICATION_STAGES | {"apply_button_out_of_period"}
+
+
 def apply_application_url_corrections(policies: list, reviews: list, baseline_policies: list,
                                       corrections: dict) -> list:
     """원천 신청 필드 판정 뒤, 실제 화면을 열어 확인한 신청 주소 교정을 적용한다.
 
-    after가 있으면 그 서비스의 신청·예약 화면을 직접 연 주소이고, None이면 신청 화면이 아니라서 비운다.
+    after가 있으면 그 서비스 전용 신청 경로를 직접 연 주소이고, None이면 신청 화면이 아니라서 비운다.
+    어디까지 봤는지는 verified_stage에 적고, 실제 신청·예약 단계까지 본 경우만 live_application_page_verified를 true로 둔다.
     수정 전 값이 다르면 빌드를 멈춘다. 기존 정책의 변경 목록(변경 전후)은 교정 뒤 값으로 다시 만든다.
     """
     by_id = {policy["policy_id"]: policy for policy in policies}
@@ -71,12 +77,18 @@ def apply_application_url_corrections(policies: list, reviews: list, baseline_po
     for item in items:
         policy = by_id[item["policy_id"]]
         assert policy.get("official_apply_url") == item["before"], f"신청 주소 교정 전 값 불일치: {item['policy_id']}"
+        stage = item.get("verified_stage")
+        if item["after"] is None:
+            assert stage is None, f"비운 신청 주소에 확인 단계가 있음: {item['policy_id']}"
+        else:
+            assert stage in APPLICATION_STAGES, f"신청 주소의 확인 단계가 없거나 알 수 없음: {item['policy_id']}"
         policy["official_apply_url"] = item["after"]
         review = review_by_id[item["policy_id"]]
         review.update({
             "official_apply_url": item["after"],
             "reason": f"manual_review_{item['reason']}",
-            "live_application_page_verified": item["after"] is not None,
+            "live_application_page_verified": stage in VERIFIED_APPLICATION_STAGES,
+            "manual_review_stage": stage,
             "manual_review_note": item["evidence"],
             "manual_review_checked_at": item["checked_at"],
         })

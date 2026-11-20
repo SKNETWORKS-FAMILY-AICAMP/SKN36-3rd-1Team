@@ -1259,8 +1259,9 @@
       "target_name": "연령조건: 만 19세~39세",
       "evidence_document_id": "DOC_STG_ICN_001_GOV24",
       "evidence_location": "원문 대조 교정: 인천 서해구 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 인천청년포털 공지 msg_seq=491 첨부, SHA-256 2631564d…5752f) 기본요건 '③ 서해구‧검단구 청년 (…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
-      "evidence": "서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」",
-      "review_status": "needs_review"
+      "evidence": "③ 서해구‧검단구 청년 (주민등록초본 및 외국인등록 사실증명서, 국내 거소 사실 증명서 기준, 19~39세) — 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026)",
+      "review_status": "needs_review",
+      "previous_evidence": "[이전 근거, 2024년 제2호 사업 문서라 과거 기록으로만 둠] 서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」"
     },
     {
       "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -6140,7 +6141,7 @@
       "superseded_by_document_id": "DOC_BOK_031_MOE_2026"
     }
   ],
-  "application_url_corrections_note": "#18 규칙서 §5.4: 그 서비스의 실제 신청·예약 화면만 official_apply_url에 둔다. 누리집 첫 화면, 로그인 뒤 전체 목록, 다른 기관 사이트, 전화·방문·이메일 신청은 null로 둔다. after가 있는 행은 브라우저로 신청 화면을 직접 연 결과다(근거 기록: 4차_준비/messages/apply_url_review_20261120.md, 4차_준비/messages/issue18_review_20261119.md). 실시간 접수 가능 여부는 보증하지 않는다.",
+  "application_url_corrections_note": "#18 규칙서 §5.4: 그 서비스의 실제 신청·예약 화면만 official_apply_url에 둔다. 누리집 첫 화면, 로그인 뒤 전체 목록, 다른 기관 사이트, 전화·방문·이메일 신청은 null로 둔다. after가 있는 행은 브라우저로 그 서비스 전용 신청 경로를 직접 연 결과이며, 어디까지 봤는지 verified_stage에 적는다(booking_screen 예약 화면 / application_step 신청 단계 / identity_check 신청 본인인증 / apply_button_out_of_period 신청 버튼까지, 기간 외). live_application_page_verified는 앞의 세 단계만 true다(근거 기록: 4차_준비/messages/apply_url_review_20261120.md, 4차_준비/messages/issue18_review_20261119.md). 실시간 접수 가능 여부는 보증하지 않는다.",
   "application_url_corrections": [
     {
       "policy_id": "POL_GOV_065",
@@ -6148,7 +6149,8 @@
       "after": "https://camp.xticket.kr/web/main?shopEncode=a1535c44b7b5b3ab38fd902f0c58f8600f1a57e45999ac4b1a7b8c321f1d2df5",
       "reason": "verified_apply_page",
       "evidence": "승촌보 캠핑장 날짜 선택·예약 화면. 정부24 신청 사이트 값은 운영기관 누리집 첫 화면",
-      "checked_at": "2026-11-19"
+      "checked_at": "2026-11-19",
+      "verified_stage": "booking_screen"
     },
     {
       "policy_id": "POL_STG_EX_001",
@@ -6156,7 +6158,8 @@
       "after": "https://www.hipass.co.kr/mchldRdct/noticeForTwo.do",
       "reason": "verified_apply_page",
       "evidence": "고속도로 통행료 누리집의 다자녀 할인 '신규 신청' 단계(유의사항→정보동의) 화면. 원천 값은 첫 화면",
-      "checked_at": "2026-11-19"
+      "checked_at": "2026-11-19",
+      "verified_stage": "application_step"
     },
     {
       "policy_id": "POL_GOV_057",
@@ -6164,23 +6167,27 @@
       "after": "https://www.jinju.go.kr/00134/00616/06681.web",
       "reason": "verified_apply_page",
       "evidence": "진주시 '대학생 학자금 대출이자 지원 신청' 본인인증 단계 화면. 2026년 모집(8.3~8.28)은 종료",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": "identity_check"
     },
     {
       "policy_id": "POL_YC_006",
       "before": "https://minwon.daegu.go.kr/main",
       "after": "https://minwon.daegu.go.kr/cvpl/AUTN-011/info",
       "reason": "verified_apply_page",
-      "evidence": "대구 민원 시스템 '2026년도 대학생 학자금대출 이자지원 신청' 화면(서비스 전용 '신청하기' 버튼). 신청기간 2026-09-01~09-30 종료",
-      "checked_at": "2026-11-20"
+      "evidence": "대구 민원 시스템의 서비스 전용 '2026년도 대학생 학자금대출 이자지원 신청' 화면. '신청하기' 버튼까지 확인했고 신청기간(2026-09-01~09-30) 밖이라 버튼을 누르면 '신청가능 기간이 아닙니다' 알림이 나옴. 실제 신청서는 확인하지 못함",
+      "checked_at": "2026-11-20",
+      "verified_stage": "apply_button_out_of_period"
     },
     {
       "policy_id": "POL_YC_015",
       "before": "https://inochongdg.org",
-      "after": "https://inochongdg.org/default/product/aa.php",
-      "reason": "verified_apply_page",
-      "evidence": "한국노총대구지역본부 재직자교육 '수강신청등록' 화면(회원가입 필요)",
-      "checked_at": "2026-11-20"
+      "after": null,
+      "reason": "list_only_not_verified",
+      "evidence": "한국노총대구지역본부 재직자교육 '수강신청등록' 화면(inochongdg.org/default/product/aa.php)은 열리지만 수강신청 목록에 등록된 교육과정이 없어 실제 신청 화면은 확인하지 못함(2026-11-20, GPT 검수 재확인). 과정이 등록되면 recheck_candidate_url을 다시 확인한다",
+      "checked_at": "2026-11-20",
+      "recheck_candidate_url": "https://inochongdg.org/default/product/aa.php",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_GOV_012",
@@ -6188,7 +6195,8 @@
       "after": null,
       "reason": "login_list_not_policy_specific",
       "evidence": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록(88종)의 '피해자 보호·지원'에서 한다. 정책 하나를 가리키는 고정 주소 없음",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_GOV_014",
@@ -6196,7 +6204,8 @@
       "after": null,
       "reason": "login_list_not_policy_specific",
       "evidence": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록에서 한다. 정책 하나를 가리키는 고정 주소 없음",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_GOV_036",
@@ -6204,7 +6213,8 @@
       "after": null,
       "reason": "login_list_not_policy_specific",
       "evidence": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_GOV_046",
@@ -6212,7 +6222,8 @@
       "after": null,
       "reason": "login_list_not_policy_specific",
       "evidence": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_STG_MOLIT_002",
@@ -6220,7 +6231,8 @@
       "after": null,
       "reason": "unrelated_site",
       "evidence": "경기도 사이트로 국토교통부 전국 사업과 맞지 않음. 정부24는 본인인증 로그인 뒤 '바로 신청하기'로만 신청서가 열려 고정 주소 없음",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_011",
@@ -6228,7 +6240,8 @@
       "after": null,
       "reason": "login_list_not_policy_specific",
       "evidence": "원천 값 사이트는 11-19·11-20 열람 시 403. 온통청년 '신청바로가기'는 로그인 필요. 모집 마감",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_049",
@@ -6236,7 +6249,8 @@
       "after": null,
       "reason": "phone_or_visit_only",
       "evidence": "진안군청 첫 화면. 진안군청년센터 공지(notice/16, 2026.4.27): 온라인 신청 없이 전화 문의(063-430-8057)",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_052",
@@ -6244,7 +6258,8 @@
       "after": null,
       "reason": "phone_or_visit_only",
       "evidence": "진안군청 첫 화면. 진안군청년센터 공지(notice/3, 2026.4.3): 청년센터 방문 또는 이메일 접수",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_010",
@@ -6252,7 +6267,8 @@
       "after": null,
       "reason": "homepage_only",
       "evidence": "고용24 첫 화면. 신청은 로그인 뒤 국민취업지원제도 메뉴에서 한다. selectEmssRqutIntro.do는 '제도소개' 안내 화면",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_GOV_015",
@@ -6260,7 +6276,8 @@
       "after": null,
       "reason": "phone_or_visit_only",
       "evidence": "국방부 유해발굴감식단 첫 화면. 유해 소재 제보는 전화 제보(조사과 02-811-6551). 민원신청 메뉴는 전체 안내 화면",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_008",
@@ -6268,7 +6285,8 @@
       "after": null,
       "reason": "homepage_only",
       "evidence": "사업단 누리집 첫 화면. 프로그램마다 공지의 QR로 신청하며 정책 전용 신청 화면 없음",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_050",
@@ -6276,7 +6294,8 @@
       "after": null,
       "reason": "phone_or_visit_only",
       "evidence": "진안군청 첫 화면. 2026 입주자 모집공고(진안군청년센터 공고 제2026-05-01호): 이메일 접수",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_YC_065",
@@ -6284,7 +6303,8 @@
       "after": null,
       "reason": "homepage_only",
       "evidence": "세종시 누리집 첫 화면. 확인된 모집은 2025년 공고(제2025-484호, 청년DB 신청)뿐이며 종료",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     },
     {
       "policy_id": "POL_STG_MOLIT_001",
@@ -6292,7 +6312,8 @@
       "after": null,
       "reason": "no_application_process",
       "evidence": "누리집 첫 화면(제목 '모두의카드'). 별도 신청 없이 카드 발급 후 회원가입·카드 등록",
-      "checked_at": "2026-11-20"
+      "checked_at": "2026-11-20",
+      "verified_stage": null
     }
   ]
 }
