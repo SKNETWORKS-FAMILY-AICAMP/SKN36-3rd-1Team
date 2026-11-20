@@ -65,7 +65,7 @@ class CandidateIntegrityTests(unittest.TestCase):
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1126)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1127)
         self.assertEqual(report["counts"]["total_graph_edges"], 2668)
         self.assertEqual(len(chunks), 600)
 
@@ -299,9 +299,15 @@ class CandidateIntegrityTests(unittest.TestCase):
                 self.assertNotIn((f"GRP_{item['policy_id']}_ROOT", "CONTAINS_CONDITION", item["condition_id"]), edges)
         self.assertIn(("POL_GOV_002", "REQUIRES_CONDITION", "COND_AGE_0_65"), edges)
         self.assertNotIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_AGE_0_1"), edges)
-        self.assertIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
+        # #39: 전주시 조례 '24개월 이하'. 다른 정책이 쓰는 24개월 미만 조건은 그대로 둔다.
+        self.assertIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_LE_24M"), edges)
+        self.assertNotIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
+        self.assertIn(("POL_BOK_005", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
         conditions = {row["condition_id"]: row for row in rows(PACKAGE / "neo4j/nodes_eligibility_condition.jsonl")}
-        self.assertEqual(conditions["COND_CHILD_AGE_UNDER_24M"]["type"], "SPECIAL_TARGET")
+        self.assertEqual(conditions["COND_CHILD_AGE_LE_24M"]["type"], "SPECIAL_TARGET")
+        self.assertEqual((conditions["COND_CHILD_AGE_LE_24M"]["operator"], conditions["COND_CHILD_AGE_LE_24M"]["value"],
+                          conditions["COND_CHILD_AGE_LE_24M"]["unit"]), ("LTE", "24", "개월"))
+        self.assertEqual(conditions["COND_CHILD_AGE_UNDER_24M"]["operator"], "LT")
 
     def test_detail_targets_stay_and_review_corrections_apply(self):
         chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
