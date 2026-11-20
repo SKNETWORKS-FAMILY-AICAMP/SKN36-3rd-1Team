@@ -118,11 +118,27 @@ def test_every_search_quality_code_is_accepted_without_fallback(code):
         return
     # 검색이 지정한 범위를 그대로 받는다. 모르는 값이라서 전체 보류로 넘어가지 않는다.
     assert accepted == set(meta["affects"])
+    if ALL_ELIGIBILITY_FIELDS in accepted:
+        # 전체 보류는 결과만으로는 '모르는 값이라 넘어간 경우'와 구분되지 않는다.
+        # 검색이 "all"을 직접 보냈는지 확인해서, Checker가 스스로 넘어간 결과가 아님을 보장한다.
+        assert quality["affected_attributes"] == [ALL_ELIGIBILITY_FIELDS]
+    else:
+        assert set(quality["affected_attributes"]) <= SCOPED_ELIGIBILITY_FIELDS
 
     result = check_eligibility(PROFILE, _policy(quality))
     assert _statuses(result, "eligibility") == ["needs_check"]
     held_age = "age" in accepted or ALL_ELIGIBILITY_FIELDS in accepted
     assert _statuses(result, "age") == (["needs_check"] if held_age else ["eligible"])
+
+
+def test_search_all_mixed_with_scoped_keeps_both():
+    # 전체 보류 코드와 개별 항목 코드가 함께 나오면 검색은 ["all", "region"]을 보낸다.
+    # Checker는 개별 항목을 버리지 않고 둘 다 받아, 전체 보류가 모르는 값 때문이 아님을 보여준다.
+    codes = [hs.QUALITY_NEEDS_REVIEW, hs.QUALITY_REGION_DETAIL]
+    quality = hs._hold_summary([hs._annotate({"code": c, "level": "suspected", "message": "sample_only"})
+                                for c in codes])
+    assert quality["affected_attributes"] == [ALL_ELIGIBILITY_FIELDS, "region"]
+    assert checker._affected_fields(quality, {}, False) == {ALL_ELIGIBILITY_FIELDS, "region"}
 
 
 def test_combined_search_warnings_are_accepted():
