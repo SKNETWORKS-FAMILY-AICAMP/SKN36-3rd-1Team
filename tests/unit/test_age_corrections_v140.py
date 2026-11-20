@@ -76,13 +76,16 @@ class TestAgeBoundaries(unittest.TestCase):
         self.assertEqual(self.walk("POL_STG_ICN_001", 39), checker.CHECK)
         self.assertEqual(self.walk("POL_STG_ICN_001", 40), checker.NO)
 
-    def test_pol_stg_icn_001_age_is_pending_review(self):
-        # 실제 근거(사업안내서)가 후보 문서에 없어 조건 관계를 검수 대기로 둔다. 다음 재적재 때 문서 연결 후 해제.
+    def test_pol_stg_icn_001_age_links_to_2026_notice(self):
+        # #90: 2026년 제4호 기업안내문을 후보 문서로 추가해 근거를 연결하고 검수 대기를 해제했다.
         rows = [rel for rel in _rows("relationships.jsonl")
                 if rel["target_id"] == "COND_AGE_19_39"
                 and rel["source_id"] in ("POL_STG_ICN_001", "GRP_POL_STG_ICN_001_ROOT")]
         self.assertEqual(len(rows), 2)
-        self.assertEqual({rel["review_status"] for rel in rows}, {"needs_review"})
+        self.assertEqual({rel["review_status"] for rel in rows}, {"verified"})
+        self.assertEqual({rel["evidence_document_id"] for rel in rows}, {"DOC_STG_ICN_001_NOTICE_2026"})
+        documents = {row["document_id"] for row in _rows("nodes_document.jsonl")}
+        self.assertIn("DOC_STG_ICN_001_NOTICE_2026", documents)
 
     def test_age_alone_never_yields_eligible(self):
         for policy_id in ("POL_010", "POL_BOK_004", "POL_STG_ICN_001", "POL_YC_024"):
