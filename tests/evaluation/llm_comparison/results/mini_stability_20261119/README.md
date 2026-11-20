@@ -37,7 +37,7 @@
 | RQ042 | v1 원질문 3건 중 2건에서 가능성/근거 없는 예외 확인 표현 | 제외 조건 안내를 직접 결론으로 정리 | v2 원질문 3·유사 질문 2·고정 입력 2건에서 핵심 제외 결론 유지. 경기도 근거 부족은 별도 유지 |
 | RQ031 | v1/v2 원질문 모두 상충 문구를 인용하나 첫 문장에서 60일 이상을 확정 기준으로 제시 | 충돌 안내 지침 전달 확인 후 정확히 60일 추가 질문 | 기준 충족으로 읽힌다는 표현 뒤에 충돌 설명. 안전한 첫 결론 기준 실패로 남김 |
 
-테스트 명령과 개별 결과는 `test-results.xml`, 최초 누락 실패는 `initial-test-failure.xml`에 보존했다. 테스트 실행 대상은 conclusion_guidance, profile_followups, llm_generator, llm_exceptions, reception_citation_guardrails, citation_canonicalization, eligibility, rag_pipeline, ask_api, hybrid_ask_fixture, checker_integrated_eval의 11개 파일이다. 전체 저장소 테스트나 프론트 검증을 했다고 주장하지 않는다. 프론트 변경은 없다.
+테스트 명령과 개별 결과는 `test-results.xml`, 최초 누락 실패는 `initial-test-failure.xml`에 보존했다(두 파일 모두 로컬 보존, PR 미포함). 테스트 실행 대상은 conclusion_guidance, profile_followups, llm_generator, llm_exceptions, reception_citation_guardrails, citation_canonicalization, eligibility, rag_pipeline, ask_api, hybrid_ask_fixture, checker_integrated_eval의 11개 파일이다. 전체 저장소 테스트나 프론트 검증을 했다고 주장하지 않는다. 프론트 변경은 없다.
 
 ## 실제 평가 결과
 
@@ -64,7 +64,7 @@
 - 데이터 버전 `1.4.0-candidate`, 검색 프로필 `b2_06b_v140`, manifest 정규화 SHA-256 `49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389`.
 - 최종 지침 파일 SHA-256 `33ef4a2250754b375a7b4cfd8d6dc7b62572c5af70fcf4d25e80f97c86b0a849`. 최초 v1과 최종 v2 해시는 각 실행 `run.json`에 구분했다.
 - 코드·질문·프롬프트·데이터 해시, Git 상태, 질문·가상 빈 프로필·검색 결과·생성 입력·원본 출력·최종 답변·인용·usage·비용·지연을 기존 평가 도구로 저장했다. 실제 제공자 입력과 반환 모델 버전도 별도 저장했다.
-- CSV와 JSONL을 재읽어 행별 값, 요청 수, 비용 합계, 완료 상태를 대조했다. 모든 요청이 체크포인트와 연결된다. `validation.json`과 `assessment.csv`를 참고한다.
+- CSV와 JSONL을 재읽어 행별 값, 요청 수, 비용 합계, 완료 상태를 대조했다. 모든 요청이 체크포인트와 연결된다. `assessment.csv`(PR 포함)와 `validation.json`(로컬 보존, PR 미포함)을 참고한다.
 - 모델 원본의 의미 실패가 후처리에서 고쳐진 것처럼 보고하지 않았다. 17건에서 인용 번호 정리가 있었지만, 인용 번호와 개행 정규화를 제외한 답변 문구는 31건 모두 유지됐다. Generator 입력과 API 응답의 정책별 조건 판정도 동일했다.
 - 기존 Generator의 중첩 Contact 객체는 제공자 입력에서 문자열로 직렬화된다. 조건·접수 판정 필드는 변하지 않았지만 전체 입력 표현이 기록의 JSON 객체와 같다고 주장하지 않는다. 이 별도 직렬화 정리는 이번 의미 보완에 섞지 않았다.
 - 설정된 비밀값의 원문·URL 인코딩 형태를 결과 후보에서 검사해 발견 0건이었다. 값 자체는 출력하지 않았다. DB 쓰기·공공 API 호출·설치·Docker 실행은 하지 않았다.
@@ -77,4 +77,4 @@
 4. 실제 HTTP 브라우저 화면 대조는 이번 요청 범위에 포함해 실행하지 않았다. 실제 검색→Checker→Generator→응답 계약 경로와 모의 API 테스트를 검증했다.
 5. 과거 최초 RQ027/nano의 원본 출력·전체 판정 입력 누락을 복구한 작업은 아니다. 기존 기록을 덮어쓰지 않았다.
 
-이슈 댓글 초안과 PR 초안은 로컬 `issue-82-comment.md`, `pr-draft.md`에 보존했다. 실제 PR 본문은 커밋·푸시 상태에 맞춰 갱신한다. 이슈 댓글은 게시하지 않는다.
+이슈 댓글 초안과 PR 초안은 로컬 `issue-82-comment.md`, `pr-draft.md`에 보존했다(PR 미포함). 실제 PR 본문은 커밋·푸시 상태에 맞춰 갱신한다. 이슈 댓글은 게시하지 않는다.

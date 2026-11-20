@@ -114,7 +114,9 @@ def _requests_profile_value(text: str, field: str) -> bool:
         return bool(
             re.search(
                 r"(?:거주|사시는|사는|살고|주소|지역|시[·\s/-]?도).{0,40}(?:어디|어느|알려|입력|말씀|무엇)|"
-                r"어디.{0,25}(?:거주|사시|살고|주소|지역)",
+                r"어디.{0,25}(?:거주|사시|살고|주소|지역)|"
+                # '어느 지역에 거주하시나요?'는 사용자 값 요청, '어느 지역 거주자가 대상인가요?'는 아니다.
+                r"어느\s*(?:지역|시[·\s/-]?도|곳)(?:에|에서)?\s*(?:거주하시|사시|살고\s*계시)",
                 text,
             )
         )
@@ -122,8 +124,9 @@ def _requests_profile_value(text: str, field: str) -> bool:
     if field == "income":
         return bool(
             re.search(
-                r"(?:소득|수입|급여).{0,35}(?:얼마|알려|입력|말씀|어떻게\s*되)|"
-                r"얼마.{0,20}(?:소득|수입|급여)",
+                # '주거급여'의 '급여'는 사용자 소득이 아니다.
+                r"(?<!주거)(?:소득|수입|급여).{0,35}(?:얼마|알려|입력|말씀|어떻게\s*되)|"
+                r"얼마.{0,20}(?<!주거)(?:소득|수입|급여)",
                 text,
             )
         )
@@ -262,6 +265,40 @@ def _normalize_followup_question(text: str) -> str | None:
     return None
 
 
+def _is_user_income_comparison(text: str) -> bool:
+    """사용자 소득이 정책 기준보다 낮은지·이하인지 묻는 AI→사용자 확인 문장.
+
+    '소득이 기준 중위소득 60% 이하인가요?'는 사용자 상태 확인이고,
+    '소득이 기준 중위소득 60% 이하여야 하나요?'는 정책 요건 질문이다.
+    """
+    return bool(re.search(
+        r"(?<!주거)(?:소득|수입|급여)(?:이|가|은|는)\s*.{0,40}?"
+        r"(?:기준|중위\s*소득).{0,30}?"
+        r"(?:(?:낮|높|적|많)으(?:신가요|세요|신지)|"
+        r"(?:이하|이상|미만|초과)(?:이신가요|인가요|이세요|이신지|인지))",
+        text,
+    ))
+
+
+def _mentions_profile_field(text: str, field: str) -> bool:
+    """문장이 모델이 지정한 허용 필드의 사용자 값을 다루는지 느슨하게 확인한다."""
+    patterns = {
+        "age": r"나이|연령|생년월일|몇\s*(?:살|세)",
+        "region": r"지역|거주|주소|사시|살고|시[·\s/-]?도",
+        "income": r"(?<!주거)(?:소득|수입|급여)|월급|연봉",
+    }
+    pattern = patterns.get(field)
+    return bool(pattern and re.search(pattern, text))
+
+
+def _addresses_user(text: str) -> bool:
+    """존칭 의문·요청 어미로 AI가 사용자에게 묻는 문장인지 확인한다."""
+    return bool(re.search(
+        r"시(?:나요|는지|면)|신가요|신지|세요|십니까|주시면|주십시오",
+        text,
+    ))
+
+
 def _is_explicit_profile_request(text: str) -> bool:
     """사용자 자신의 값 요청을 정책의 '현재 소득 기준' 질문과 구별한다."""
     # '현재 월 소득 기준은 얼마인가요?'는 정책의 요건이지 개인 소득 요구가 아니다.
@@ -277,19 +314,32 @@ def _is_explicit_profile_request(text: str) -> bool:
     age_question = bool(re.search(
         r"(?:나이(?:가|는)?|연령(?:이|은)?)\s*"
         r"(?:몇\s*(?:세|살)\s*(?:인가요|입니까|이세요|인가|일까요)|"
-        r"어떻게\s*되(?:나요|세요|십니까))|"
+        r"어떻게\s*되(?:나요|세요|시나요|십니까))|"
         r"몇\s*(?:살|세)\s*(?:이세요|세요|이신가요|이십니까)",
         text,
     ))
+    # 정책의 연령 범위 질문. 존칭 '되시나요'는 사용자에게 묻는 말이라 제외한다.
+    # '어떻게 되나요/범위'는 '지원 대상 나이는'처럼 주어 바로 뒤에 붙은 경우만 정책 질문이다.
+    # '지원 대상 여부를 확인하려면 현재 나이가 어떻게 되나요?'는 사용자 나이 요청이다.
     policy_age_subject = bool(re.search(
         r"(?:지원\s*대상|자격\s*(?:기준|조건)|정책(?:의)?)"
-        r".{0,15}(?:나이|연령)(?:가|는)?\s*몇\s*(?:세|살)",
+        r".{0,15}(?:나이|연령)(?:가|는)?\s*몇\s*(?:세|살)|"
+        r"(?:지원\s*대상|자격\s*(?:기준|조건)|정책)(?:의)?\s*"
+        r"(?:나이|연령)(?:가|는|은|이)?\s*(?:어떻게\s*되(?:나요|는지)|범위)",
         text,
     ))
     if age_question and not policy_age_subject:
         return True
 
-    # 주어가 생략된 '소득을 알려주세요'도 사용자 값 요청이다.
+    # 사용자 값을 받아 기준과 비교하겠다는 요청도 프로필 요청이다.
+    # 예: '가구 소득이 얼마인지 알려주시면 기준 금액과 비교해 드릴게요.'
+    if _is_user_income_comparison(text) or re.search(
+        r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
+        r".{0,25}(?:알려|입력|말씀)\s*(?:해\s*)?주시면",
+        text,
+    ):
+        return True
+
     # 주어가 생략된 '소득을 알려주세요'도 사용자 값 요청이다.
     direct_matches = re.finditer(
         r"(?:소득|수입|급여|나이|연령|생년월일|거주\s*지역|주소)"
@@ -314,7 +364,10 @@ def _is_policy_criteria_question(text: str) -> bool:
     return bool(re.search(
         r"기준\s*(?:금액|액|중위\s*소득)|"
         r"(?:지원|지급)\s*금액|"
-        r"(?:소득|급여)\s*(?:기준|상한|하한)",
+        r"(?:소득|급여)\s*(?:기준|상한|하한)|"
+        # '연령 요건', '지역 제한', '소득 산정 방법'은 정책 요건 질문이다.
+        r"(?:나이|연령|지역|거주|소득|수입)\s*(?:의\s*)?"
+        r"(?:요건|제한|조건|범위|산정|계산\s*방법)",
         text,
     ))
 
@@ -332,6 +385,13 @@ def _personal_information_request(
 
     if _is_policy_criteria_question(text):
         return None
+
+    # '월 소득이 기준 금액보다 낮으신가요?'는 사용자 소득 확인이다.
+    # 다른 가족 구성원의 소득 비교는 본인 income 필드가 아니다.
+    if _is_user_income_comparison(text):
+        if re.search(r"(?:자녀|배우자|부모(?:님)?|가구원|가족|세대원)", text):
+            return "other"
+        return "income"
 
     # 정책 설명을 사용자가 묻는 문장은 개인정보 요청으로 오인하지 않는다.
     if re.search(
@@ -665,6 +725,20 @@ def _validated_contexts(
     return cleaned, ids
 
 
+def _limit_follow_ups(items: list[dict], limit: int = 3) -> list[dict]:
+    """계약의 '0~3개 권장'을 지키되, 문장 분리로 늘어난 경우 프로필 입력 요청을 먼저 남긴다.
+
+    프로필 입력은 판정에 필요한 값이고 question 버튼은 선택 사항이라서다.
+    남는 항목은 원래 순서를 유지한다.
+    """
+    if len(items) <= limit:
+        return items
+    asks = [i for i, item in enumerate(items) if item.get("kind") == "ask_info"][:limit]
+    others = [i for i, item in enumerate(items) if item.get("kind") != "ask_info"]
+    keep = sorted(asks + others[: limit - len(asks)])
+    return [items[i] for i in keep]
+
+
 def _validate_model_response(
     raw: Any,
     source_ids: set[int],
@@ -822,14 +896,26 @@ def _validate_model_response(
                 # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
                 kind = "question"
             elif detected_field is None:
-                # 모델의 field를 신뢰하지 않는다. 문장 자체가 정책 질문이어야만 복구.
+                # 감지 정규식이 놓친 경우, 모델 field는 문장이 실제로 그 필드를
+                # 다룰 때만 쓴다. 정책 질문은 사용자에게 묻는 존칭 문장이 아니면 복구한다.
                 is_policy_question = bool(re.search(
-                    r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|"
-                    r"서류|신청|접수|발급|혜택|절차|방법|문의처|"
+                    r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|제한|조건|"
+                    r"서류|신청|접수|발급|지급|혜택|절차|방법|문의처|"
                     r"거주\s*형태.*(?:대상|포함|허용|인정))",
                     text,
-                ))
-                if is_policy_question and _normalize_followup_question(text) is not None:
+                )) and _normalize_followup_question(text) is not None
+                keeps_model_field = (
+                    isinstance(field, str)
+                    and field in ALLOWED_FIELDS
+                    and _mentions_profile_field(text, field)
+                    and not _is_policy_criteria_question(
+                        " ".join(text.split()).rstrip("?？!！.。")
+                    )
+                    and (not is_policy_question or _addresses_user(text))
+                )
+                if keeps_model_field:
+                    pass
+                elif is_policy_question:
                     kind = "question"
                 elif isinstance(field, str) and field not in ALLOWED_FIELDS:
                     # 지원하지 않는 프로필 입력은 버튼이 아닌 본문 안내로 보존한다.
@@ -975,7 +1061,7 @@ def _validate_model_response(
         "status": raw["status"],
         "answer": answer.strip(),
         "used_source_ids": sorted(set(cited)),
-        "follow_up_questions": normalized[:3],
+        "follow_up_questions": _limit_follow_ups(normalized),
     }
 
 

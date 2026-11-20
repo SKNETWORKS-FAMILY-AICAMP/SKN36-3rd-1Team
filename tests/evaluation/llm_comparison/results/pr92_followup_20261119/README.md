@@ -1,6 +1,6 @@
 # PR #92 리뷰 후속 수정·검증
 
-검증일: 2026-11-19 KST. PR 최신 head `446276df2bc1a674abc11adef130d63745329375`, base `dev/e76451848ff35d5397f10d0370b4b196165305f4`를 다시 확인했다. 후속 커밋에서 해결된 변경은 없었다.
+검증일: 2026-11-19 KST. (아래 머리말과 본문은 당시 기준이다. 이후 커밋과 2026-11-20 수정은 문서 끝 "후속 커밋과 리뷰 회귀 수정" 절을 본다.) 당시 PR 최신 head `446276df2bc1a674abc11adef130d63745329375`, base `dev/e76451848ff35d5397f10d0370b4b196165305f4`를 다시 확인했다. 후속 커밋에서 해결된 변경은 없었다.
 작업 위치: `C:\dev\project\SKN36-3rd-1Team\.mini-82-check`, 브랜치 `codex/82-mini-answer-stability`.
 기존 루트 폴더·이전 평가 기록·미추적 자료를 보존했다. 이 검증은 커밋 전에 수행했으며, 이후 사용자 요청으로 수정 코드·공개 요약을 커밋·푸시하고 PR #92를 갱신한다. 이슈 댓글 등록·병합은 포함하지 않는다.
 
@@ -20,9 +20,9 @@
 
 | 순서 | 실제 결과 | 조치·재시험 |
 | --- | --- | --- |
-| 수정 전 추가 단위 테스트 | 정상 범위 7건 실패, 개인 사실 질문 3건 통과 | `initial-regression.xml`에 보존 |
+| 수정 전 추가 단위 테스트 | 정상 범위 7건 실패, 개인 사실 질문 3건 통과 | `initial-regression.xml`에 보존(로컬, PR 미포함) |
 | 필터 수정 후 첫 통합 실행 | 305 통과·125 하위 사례 통과, 추가 Pipeline 하위 사례 4건 실패 | 새 테스트가 `UserProfile()` 필수 필드를 생략한 작성 오류. `age=None, region='', income=None`을 명시해 바로잡음. 기대값 완화 없음 |
-| 같은 11개 관련 파일 최종 실행 | 305 통과·129 하위 사례 통과, 실패·오류·건너뜀 0 | `test-results.xml` |
+| 같은 11개 관련 파일 최종 실행 | 305 통과·129 하위 사례 통과, 실패·오류·건너뜀 0 | `test-results.xml`(로컬, PR 미포함) |
 | 브라우저 최초 시도 | OPTIONS가 검증용 기록 미들웨어에서 500. 실제 POST 전 단계 | 가상 기록 서버만 POST 본문을 읽도록 수정·재시작. 같은 질문의 ‘다시 시도’ 후 200 완료 |
 
 테스트 명령은 `python -m pytest -q`에 conclusion_guidance, profile_followups, llm_generator, llm_exceptions, reception_citation_guardrails, citation_canonicalization, eligibility, rag_pipeline, ask_api, hybrid_ask_fixture, checker_integrated_eval의 11개 파일을 지정했다. 기존 가상환경과 빈 `OPENAI_API_KEY`, 차단된 `OPENAI_BASE_URL`을 사용했다. Windows 소켓 제한 밖에서 모의 API 테스트를 실행했다. 전체 저장소·프론트 테스트 재실행 결과로 표시하지 않는다.
@@ -40,9 +40,9 @@
 
 프로젝트의 manifest 동등성 판정은 False였다. **같은 버전명이라는 이유로 같은 데이터라고 판단하지 않았다.**
 
-검색 프로필은 `b2_06b_v140`, 구성 `A_B2_V140`, 컬렉션 `exp_b2_qwen3emb06b_v140_v1`, 모델 `qwen3-embedding:0.6b`, 1024차원·Cosine·`policy_section_body_v2`다. 실제 Qdrant의 차원·거리·각 point 모델 표시는 이 설정과 일치한다. Ollama `/api/tags`에서도 같은 모델·1024차원을 확인했고 현재 설치 digest를 `ollama-readonly.json`에 기록했다. 기존 벡터를 재계산하지 않았으므로 과거 벡터의 생성 바이너리까지 현재 digest와 같다고 입증한 것은 아니다.
+검색 프로필은 `b2_06b_v140`, 구성 `A_B2_V140`, 컬렉션 `exp_b2_qwen3emb06b_v140_v1`, 모델 `qwen3-embedding:0.6b`, 1024차원·Cosine·`policy_section_body_v2`다. 실제 Qdrant의 차원·거리·각 point 모델 표시는 이 설정과 일치한다. Ollama `/api/tags`에서도 같은 모델·1024차원을 확인했고 현재 설치 digest를 `ollama-readonly.json`(로컬 보존, PR 미포함)에 기록했다. 기존 벡터를 재계산하지 않았으므로 과거 벡터의 생성 바이너리까지 현재 digest와 같다고 입증한 것은 아니다.
 
-세부 근거는 `version-audit.json`(기존 read-only 검증 함수 사용), `question-impact.json`, `ollama-readonly.json`에 있다. 공유 DB 쓰기·삭제·재적재·임베딩 생성은 없었다.
+세부 근거는 `version-audit.json`(기존 read-only 검증 함수 사용, 로컬 보존·PR 미포함), `question-impact.json`(PR 포함), `ollama-readonly.json`(로컬 보존·PR 미포함)에 있다. 공유 DB 쓰기·삭제·재적재·임베딩 생성은 없었다.
 
 ## 변경 범위와 기존 문항 영향
 
@@ -97,4 +97,79 @@ RQ031 첫 결론의 경계 유보 실패는 재생에서도 그대로이며 해�
 
 민혁님 재적재 후에는 ① 읽기 전용 ID·속성·관계·payload 대조 ② 프로필/모델/차원 확인 ③ 위 14건 평가 및 별도 결과 저장 ④ 호출·인용 형식·핵심 의미 분리 판정 ⑤ 실제 화면 대조 순서로 이어간다. 그때의 코드·프롬프트·실제 DB 버전을 새 기록에 함께 고정한다. 이번에는 공유 DB를 우회·변경하지 않았다.
 
-PR 제목·본문 및 #82 댓글 갱신 초안은 `pr-update-draft.md`, `issue-82-update-draft.md`에 있으며 게시하지 않았다.
+PR 제목·본문 및 #82 댓글 갱신 초안은 `pr-update-draft.md`, `issue-82-update-draft.md`(로컬 보존, PR 미포함)에 있으며 게시하지 않았다.
+
+## 후속 커밋과 리뷰 회귀 수정 (2026-11-20 갱신)
+
+위 본문의 테스트 수(305 통과·129 하위 사례)와 "테스트 당시 코드 해시와 커밋 코드가 동일" 확인은 **`998b314` 기준**이다. 이후 아래 커밋과 2026-11-20 수정이 더해졌으므로, 현재 코드의 검증 결과는 이 절의 수치를 기준으로 본다.
+
+| 커밋 | 내용 |
+| --- | --- |
+| `fee8bf6` | 정책 기준 질문(`기준 중위소득 금액을 알려주세요.` 등)을 개인 소득 입력 요청과 구분 |
+| `8a81937` | 후속 질문 분류 회귀 정리 |
+| `453b1e2` | 혼합 문장(`…얼마인가요? 나이가 몇 세인가요?`)을 문장별로 재판정, 가족 구성원 정보는 `other`, 후속 질문 최대 3개(계약 "0~3개 권장") |
+| `abcdadb`, `b1bf644` | `몇 살이세요?`, `나이가 어떻게 되세요?` 등 자연스러운 나이 요청 인식, 정책 문맥 안의 개인 나이 요청 보존 |
+| 2026-11-20 수정 | 아래 회귀·반례 수정 |
+
+### 2026-11-20 수정 내용 (`backend/llm/generator.py`)
+
+1. **회귀 수정:** `453b1e2`가 감지 정규식이 놓친 정상 `ask_info`(`거주 지역은?`, `어느 지역에 거주하시나요?`, `정책 신청을 위해 나이가 몇 살인지 알려주세요.`)까지 버리거나 질문 버튼으로 바꾸던 문제. 기존 테스트 `test_llm_generator.py::test_follow_up_field`가 `453b1e2`부터 실패했다. 모델이 허용 필드로 태그했고 문장이 실제로 그 필드를 다루며 정책 요건 질문이 아닐 때만 모델 field를 유지한다. 정책 질문 표현이 있어도 사용자에게 묻는 존칭 어미면 입력 요청으로 본다. 필드와 무관한 문장·잘못 태그된 정책 질문을 막던 `453b1e2`의 의도는 유지했다.
+2. **사용자 소득 비교:** `소득이 기준 중위소득 60% 이하인가요?`, `월 소득이 기준 금액보다 낮으신가요?`, `…소득이 얼마인지 알려주시면 기준 금액과 비교…`는 income 입력 요청. 배우자·자녀 등 가족 소득 비교는 `other`(질문 버튼 아님). `…이하여야 하나요?` 같은 요건 질문은 정책 질문으로 남는다.
+3. **question으로 온 사용자 정보 요청:** `어느 지역에 거주하시나요?`→region, `지원 대상 확인을 위해 나이가 어떻게 되시나요?`→age. `어느 지역 거주자가 대상인가요?`, `지원 대상 나이는 어떻게 되나요?`는 정책 질문으로 유지한다(후자는 `b1bf644`에서 age 입력으로 잘못 분류되던 것을 함께 바로잡음).
+4. **정책 요건 질문:** `지역 제한이 있는지 알려주세요.`, `연령 요건을 알려주세요.`, `소득 산정 방법을 알려주세요.`는 모델이 ask_info로 태그해도 question으로 복구한다(dev부터 입력 요청으로 잘못 분류). `주거급여는 언제 지급되나요?`도 복구한다.
+5. **`주거급여`의 `급여`:** 사용자 소득으로 읽지 않는다.
+6. **3개 제한:** 문장 분리로 4개 이상이 되면 프로필 입력 요청(`ask_info`)을 먼저 남기고 나머지는 원래 순서대로 채운다. 계약 "0~3개 권장"은 그대로다.
+7. 중복 주석 1줄 삭제. 정책 ID·완성 문장 예외 목록은 추가하지 않았다. 시스템 프롬프트·API 계약·Checker는 바꾸지 않았다.
+
+회귀 테스트(`tests/unit/test_llm_profile_followups.py`의 `test_pr92_*`): 1차 9건, 2차 11건이 수정 전 실패하는 것을 확인한 뒤 수정했다. 기존 개선 유지 사례도 함께 고정했다.
+
+### 검증 (빈 `OPENAI_API_KEY`, 새 유료 호출 0회·비용 $0, DB 쓰기 없음)
+
+| 항목 | 결과 |
+| --- | --- |
+| `test_llm_generator`, `test_llm_profile_followups`, `test_llm_conclusion_guidance`, `test_rag_pipeline` | 469 통과·115 하위 사례 통과, 실패 0 |
+| 전체 `pytest` — dev `e764518` | 53 실패·1027 통과·45 건너뜀·20 오류 |
+| 전체 `pytest` — 최종 수정본(`b1bf644` + 패치) | 53 실패·1326 통과·45 건너뜀·20 오류. **실패·오류 목록이 dev와 완전히 동일, 새 실패 0건** |
+| 저장된 실제 모델 후속 질문 102건 재생 | dev 대비 7건 변경, `b1bf644` 대비 1건 변경(아래 표) |
+| sample_only 브라우저 재검증 | POST 5건 모두 200(아래 절) |
+
+두 전체 실행은 저장소 밖 임시 worktree에서 같은 조건으로 돌렸다. git 미추적 원본 3개(`data/raw/gov24/items/449000000108.json`, `359000000104.json`, `data/releases/v1/gov24_public_services.jsonl`)만 루트 폴더에서 복사했고, 이 보강으로 `test_contacts_chunking_boundary.py::test_doc_gov_029_contacts_no_longer_truncated` 1건이 양쪽 모두 통과로 바뀌었다.
+
+남은 공통 실패 53건·오류 20건은 데이터·색인·릴리스 검증 테스트 11개 파일에만 있고, 이 파일들은 LLM·Generator·프롬프트 코드를 import하지 않는다.
+
+| 원인 | 실패 | 오류 | 파일 |
+| --- | ---: | ---: | --- |
+| 구버전 인계 데이터와 1.4.0 정책 메타데이터 불일치(`POL_001`) | 12 | 17 | c1_section_titles, full_index, vector_store |
+| 데이터셋 경로가 1.4.0이라 1.3.2 전용 색인 구성 거부 | 9 | 0 | hybrid_profiles |
+| 고정 manifest·출력 해시와 로컬 데이터 불일치 | 12 | 3 | candidate_release, chunking, chunking_b3, hybrid_profiles, retrieval_eval, retrieval_run, vector_store |
+| 로컬 Qdrant 색인 컬렉션 없음 | 2 | 0 | hybrid_profiles |
+| 실문서 청킹 위치·건수 검사(로컬 원문 상태 의존) | 14 | 0 | chunking, chunking_b3, handoff_data, hybrid_profiles, retrieval_eval |
+| 기타 데이터 형식(구버전 chunk_id, legacy 메타데이터, 제외 구간 사유) | 3 | 0 | chunking, handoff_data, release_v140_adapter |
+| git 미추적 원본 파일 부재 | 1 | 0 | candidate_release |
+
+### 102건 재생에서 바뀐 항목
+
+| 모델 출력 | dev | `b1bf644` | 최종본 | 이유 |
+| --- | --- | --- | --- | --- |
+| question/ask_info `주거급여의 2026년 1인 가구 기준 금액도 알려주세요?` (2건) | ask_info/income | question | question | 정책 기준 질문 |
+| question `주거급여 기준임대료는 지역별로 얼마인가요?` | ask_info/income | question | question | 정책 기준 질문 |
+| question `부모님과의 임대차계약서…로 월세를 내고 계신가요?` | question | 제거 | 제거 | 사용자 현재 사실 확인 |
+| question `거주 형태가 ‘부모님과 별도 거주’…인가요, 아니면…?` | question | 제거 | 제거 | 사용자 현재 사실 확인 |
+| question `현재 거주 지역이 경기도인가요?` | question | ask_info/region | ask_info/region | 사용자 지역 확인 |
+| ask_info/income `2026년 주거급여 1~5인 가구 기준을 함께 알려줄 수 있나요?` | ask_info/income | ask_info/income | question | 사용자가 AI에게 묻는 정책 기준 질문(`주거급여`의 `급여`를 소득으로 읽던 문제 수정) |
+
+### sample_only 브라우저 재검증 (최종 수정본)
+
+실제 API·Pipeline·필터를 실행하고 검색·Checker·모델 출력은 가상 fixture를 썼다. DB·LLM 호출 0회, 기존 8000·5173 서버는 건드리지 않았다(별도 8192·5192 사용 후 종료). fixture와 요청 기록은 로컬에만 두고 PR에 포함하지 않는다.
+
+| 조작 | 결과 |
+| --- | --- |
+| 거주 형태 범위 질문 장면 | 범위 질문 2개 버튼 표시, 현재 사실 질문 제거. 버튼 클릭 시 POST 1건·200 |
+| 입력 요청 장면 | region(모델은 question으로 보냄)·age·income이 모두 `ask_info`로 "추가로 확인할 정보"에 표시. region 칩 클릭 시 질문 전송 없이 지역 선택 UI 열림 |
+| 지역 경기 선택 후 다시 확인 | 원래 질문 + `region: 경기`로 POST 1건·200, 응답에서 region 재요청 없음 |
+| 혼합 문장 장면 | `지원 금액은 얼마인가요?`(question)와 `나이가 몇 세인가요?`(age 입력)로 분리 표시 |
+| 출처 링크 클릭 | 링크는 `target="_blank" rel="noopener noreferrer"`. 클릭 시 페이지가 example.org 새 탭을 열려고 했으나 앱 내장 브라우저가 자동화 입력의 새 탭을 차단해 **도착은 미확인**. 사용자가 직접 클릭해야 확인 가능 |
+
+테스트 시점 코드 해시(LF 기준 SHA-256): `backend/llm/generator.py` `a64fcd54acbcf524dba5a3546875fe94aab80c551e1cf0658855f519999c89ce`, `ai/prompts/system_prompt.py` `334aa3b219d040862c161b146c86f2da75110d93f914cf4568371304d2f0b823`(프롬프트 변경 없음).
+
+**이번 갱신에서 실제 GPT-5.4-mini 재평가는 하지 않았다.** 위 결과는 자동 테스트·저장 응답 재생·가상 화면 검증이다. 2026-11-20 읽기 전용 대조에서 Neo4j는 여전히 노드 1004·관계 2431, Qdrant는 1138 points(최신 대비 payload 5개 불일치·1개 누락)로 **최신 데이터 재적재 전**이었다. 최신 데이터 기반 실제 모델 평가와 실제 상담 화면 검증은 민혁님 재적재 후 진행한다.

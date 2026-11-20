@@ -957,3 +957,170 @@ def test_pr_sensitive_personal_info_is_never_a_question_button(monkeypatch):
     actual = g.generate_answer("질문", CONTEXTS, CHECKS)
     assert actual["follow_up_questions"] == []
     assert "주민등록번호" not in actual["answer"]
+
+
+# ==========================================================
+# PR #92 리뷰: 감지기가 놓친 정상 ask_info 보존
+# ==========================================================
+
+@pytest.mark.parametrize("request_text,field", [
+    ("거주 지역은?", "region"),
+    ("어느 지역에 거주하시나요?", "region"),
+    ("정책 신청을 위해 나이가 몇 살인지 알려주세요.", "age"),
+    ("지원 대상 확인을 위해 나이가 어떻게 되시나요?", "age"),
+    ("가구 소득이 얼마인지 알려주시면 기준 금액과 비교해 드릴게요.", "income"),
+    ("월 소득이 기준 금액보다 낮으신가요?", "income"),
+    ("소득이 기준 중위소득 60% 이하인가요?", "income"),
+])
+def test_pr92_model_tagged_profile_request_is_kept(monkeypatch, request_text, field):
+    """모델이 허용 필드로 태그한 사용자 입력 요청은 감지 정규식이 놓쳐도 버리지 않는다."""
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": field, "text": request_text}
+    ]))
+    actual = g.generate_answer("신청 가능한가요?", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "field": field, "text": request_text}
+    ]
+
+
+@pytest.mark.parametrize("policy_question", [
+    "기준 중위소득 금액을 알려주세요.",
+    "주거급여 기준임대료는 지역별로 얼마인가요?",
+    "주거급여의 2026년 1인 가구 기준 금액도 알려주세요?",
+])
+def test_pr92_policy_criteria_mistagged_as_income_becomes_question(monkeypatch, policy_question):
+    """정책 기준 질문은 모델이 ask_info/income으로 잘못 태그해도 question으로 복구한다."""
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "income", "text": policy_question}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": policy_question}
+    ]
+
+
+@pytest.mark.parametrize("request_text", [
+    "월 소득이 기준 금액보다 낮으신가요?",
+    "소득이 기준 중위소득 60% 이하인가요?",
+])
+def test_pr92_income_comparison_request_is_not_question_button(monkeypatch, request_text):
+    """사용자 소득을 기준과 비교해 달라는 AI 요청은 사용자→AI 질문 버튼이 아니다."""
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": request_text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert {"kind": "question", "text": request_text} not in actual["follow_up_questions"]
+
+
+def test_pr92_existing_fixes_are_kept(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "전세도 대상인가요?"},
+        {"kind": "question", "text": "거주 형태는 월세만 대상인가요?"},
+        {"kind": "question", "text": "현재 월세로 살고 계신가요?"},
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": "전세도 대상인가요?"},
+        {"kind": "question", "text": "거주 형태는 월세만 대상인가요?"},
+    ]
+
+
+def test_pr92_family_age_is_not_profile_age():
+    assert g._personal_information_request("자녀 나이가 몇 살인가요?", None) == "other"
+
+
+def test_pr92_mixed_sentence_is_split(monkeypatch):
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "지원 금액은 얼마인가요? 나이가 몇 세인가요?"}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "question", "text": "지원 금액은 얼마인가요?"},
+        {"kind": "ask_info", "field": "age", "text": "나이가 몇 세인가요?"},
+    ]
+
+
+# ==========================================================
+# PR #92 남은 한계: question으로 온 사용자 정보 요청, 정책 요건 질문, 3개 제한
+# ==========================================================
+
+@pytest.mark.parametrize("request_text,expected", [
+    ("어느 지역에 거주하시나요?", "region"),
+    ("지원 대상 확인을 위해 나이가 어떻게 되시나요?", "age"),
+])
+def test_pr92_user_question_tagged_as_question_becomes_ask_info(monkeypatch, request_text, expected):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": request_text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [
+        {"kind": "ask_info", "field": expected, "text": request_text}
+    ]
+
+
+@pytest.mark.parametrize("policy_question", [
+    "어느 지역 거주자가 대상인가요?",
+    "지원 대상 나이는 몇 세부터인가요?",
+    "지원 대상 나이는 어떻게 되나요?",
+    "몇 살부터 신청할 수 있나요?",
+    "거주 형태는 월세만 대상인가요?",
+    "신청하시려면 어떤 서류가 필요하신가요?",
+    "지원금은 언제 받으시나요?",
+])
+def test_pr92_policy_question_stays_question(monkeypatch, policy_question):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": policy_question}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": policy_question}]
+
+
+@pytest.mark.parametrize("policy_question,field", [
+    ("지역 제한이 있는지 알려주세요.", "region"),
+    ("연령 요건을 알려주세요.", "age"),
+    ("소득 산정 방법을 알려주세요.", "income"),
+    ("주거급여는 언제 지급되나요?", "income"),
+])
+def test_pr92_policy_requirement_mistagged_as_ask_info_becomes_question(monkeypatch, policy_question, field):
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": field, "text": policy_question}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": policy_question}]
+
+
+def test_pr92_housing_benefit_word_is_not_income_input(monkeypatch):
+    """'주거급여'의 '급여'를 사용자 소득 입력 요청으로 읽지 않는다."""
+    stub(monkeypatch, response(follows=[
+        {"kind": "ask_info", "field": "income", "text": "주거급여 신청 시 주의할 점을 알려주세요."}
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert not any(f["kind"] == "ask_info" for f in actual["follow_up_questions"])
+
+
+def test_pr92_age_request_mentioning_policy_requirement_is_kept(monkeypatch):
+    text = "만 나이를 알려주시면 해당 정책의 연령 요건에 맞는지 확인해 드릴게요."
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": "age", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "ask_info", "field": "age", "text": text}]
+
+
+@pytest.mark.parametrize("kind,field", [("question", None), ("ask_info", "income")])
+def test_pr92_spouse_income_comparison_is_not_profile_or_button(monkeypatch, kind, field):
+    """배우자 소득은 본인 income 필드가 아니고, 사용자→AI 질문 버튼도 아니다."""
+    text = "배우자 소득이 기준 중위소득 이하인가요?"
+    follow = {"kind": kind, "text": text}
+    if field:
+        follow["field"] = field
+    stub(monkeypatch, response(follows=[follow]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == []
+    assert g._personal_information_request(text, None) == "other"
+
+
+def test_pr92_split_does_not_drop_profile_request_at_limit(monkeypatch):
+    """문장 분리로 4개가 돼도 아직 없는 프로필 입력 요청은 3개 제한에서 남긴다."""
+    stub(monkeypatch, response(follows=[
+        {"kind": "question", "text": "신청 서류는 무엇인가요?"},
+        {"kind": "question", "text": "신청 절차는 어떻게 되나요?"},
+        {"kind": "question", "text": "지원 금액은 얼마인가요? 나이가 몇 세인가요?"},
+    ]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert len(actual["follow_up_questions"]) == 3
+    assert {"kind": "ask_info", "field": "age", "text": "나이가 몇 세인가요?"} in actual["follow_up_questions"]
+    # 남은 항목은 원래 순서를 유지한다.
+    assert actual["follow_up_questions"][0] == {"kind": "question", "text": "신청 서류는 무엇인가요?"}
