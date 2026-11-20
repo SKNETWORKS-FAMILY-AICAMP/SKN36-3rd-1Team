@@ -1,5 +1,9 @@
 # Issue #43 — 팀원용 최종 DB 복원·검증
 
+> **현재 배포본(2026-11-19): r2** — PR #87·#89 반영, 정책 246 / 문서 262 / 릴리스 청크 600 / B2 1,139 Point /
+> Neo4j 1,126노드·2,668관계 / REQUIRES_CONDITION 211. 복원은 문서 끝의 [r2 절](#r2-최신-배포본-2026-11-19)과
+> [ISSUE91_R2_VERIFY_RUNBOOK.md](ISSUE91_R2_VERIFY_RUNBOOK.md)를 따른다. 바로 아래 기준값은 a44bf08 시점 기록이다.
+
 ## 기준과 준비물
 
 소스는 PR #35·#37 병합 a44bf08 및 #43 복원 도구다.
@@ -181,7 +185,8 @@ MATCH (n) RETURN count(n) AS nodes;
 MATCH ()-[r]->() RETURN count(r) AS relationships;
 ```
 
-기준값(§ 기준과 준비물): Qdrant 1,138 Point, Neo4j 1,004노드·2,431관계. 이 수치와 크게 다르면 다른
+기준값(§ 기준과 준비물): Qdrant 1,138 Point, Neo4j 1,004노드·2,431관계(r2 배포본은 Qdrant 1,139 Point,
+Neo4j 1,126노드·2,668관계). 복원한 배포본의 수치와 크게 다르면 다른
 프로젝트의 볼륨을 잘못 연결했을 가능성이 높다. 두 DB를 모두 연결한 뒤에는 `resolve-report.json` 또는
 `verify-report.json`의 cross-DB 검사 결과로 두 DB가 같은 복원본인지 최종 확인한다(§ 복원·정합화·전체
 무결성 검사). 숫자만 맞고 실제 PASS가 아니면 서로 다른 복원본을 섞어 쓰고 있는 것이다.
@@ -198,6 +203,8 @@ Qdrant·Neo4j 연결을 모두 통과한 뒤에 나면 LLM 쪽이다. `LLM_MODEL
 
 ## PR45 review package r1 — 최신 배포본 (2026-11-10)
 
+> 2026-11-19부터는 아래 [r2 절](#r2-최신-배포본-2026-11-19)의 배포본을 쓴다. 이 절은 r1 기록으로 남긴다.
+
 새로 복원할 때는 이 배포본을 쓴다. 이전 배포본(§ 위)은 과거 기록으로만 남긴다.
 
 - ZIP: `rag-final-v140-pr45-review-worktree-20261110-r1.zip` (로컬 아티팩트: `.cache/rag-final-v140-pr45-review-worktree-20261110-r1.zip`)
@@ -207,3 +214,21 @@ Qdrant·Neo4j 연결을 모두 통과한 뒤에 나면 LLM 쪽이다. `LLM_MODEL
 - 번들에서 `source-pr45-review-worktree.zip`을 풀어 그 소스와 `scripts/restore_final_v140.py`를 쓴다. 이전 소스 아카이브나 다른 체크아웃을 쓰지 않는다.
 
 검증 수치(건수, cross-DB PASS, 벡터 다이제스트 등)는 [PR45_PACKAGE_VALIDATION_20261110.json](PR45_PACKAGE_VALIDATION_20261110.json)에 이미 기록돼 있으니 여기서 반복하지 않는다. `.env`·비밀값·모델·4B 벡터는 이 배포본에 포함되지 않는다.
+
+## r2 최신 배포본 (2026-11-19)
+
+PR #87·#89 병합 후 최신 v1.4.0-candidate 기준이다. 새로 복원할 때는 이 배포본을 쓴다.
+
+- ZIP: `rag-final-v140-r2-027f40b556c5.zip` (로컬 아티팩트: `.cache/issue91-r2-20261119/bundle-r2/`, Git에 넣지 않음)
+- ZIP SHA-256: `dd28f8cd14c242bda2e6d5697d5cbf23725e6b7dee7b72f4781830429c579197`
+- 출처: 커밋 `027f40b556c5408a2f0b9547acef4964254e37b8`의 `git archive`(`source-027f40b556c5.zip`, 528개 파일)
+- 기준: 정책 246 / 문서 262 / 릴리스 청크 600 / B2 1,139 Point·1,024차원·Cosine /
+  Neo4j 1,126노드·2,668관계 / REQUIRES_CONDITION 211, manifest(LF) `d48ef11b…`, vector_digest `8577c3c8…`
+- 복원: 압축을 푼 source의 `docs/development/issue91_r2_verify.compose.yaml`과 `scripts/restore_r2_isolated.py`
+  (고정 포트·전용 인증 변수·Docker 소유·빈 서버·fingerprint 확인 후 이 문서의 `restore_final_v140.restore()`를 호출).
+  팀원 PC 설치·백엔드 연결은 [ISSUE91_R2_TEAM_LOCAL_DB_GUIDE.md](ISSUE91_R2_TEAM_LOCAL_DB_GUIDE.md),
+  작성자 검증 절차는 [ISSUE91_R2_VERIFY_RUNBOOK.md](ISSUE91_R2_VERIFY_RUNBOOK.md).
+- 검증 기록: [ISSUE91_R2_RESTORE_VALIDATION_20261119.md](ISSUE91_R2_RESTORE_VALIDATION_20261119.md)
+  (같은 PC의 새 볼륨 독립 복원, cross-DB 7개 항목 각 1,139 PASS, Hybrid·checker 스모크 19개 PASS).
+  다른 PC·OS와 HTTP·LLM·프론트엔드 E2E는 미검증.
+- `rag-final-v140-r2-fa37b8db47f8.zip`은 CLI 종료 코드 수정 전 후보이며 배포하지 않는다.

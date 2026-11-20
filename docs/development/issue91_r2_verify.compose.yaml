@@ -1,0 +1,43 @@
+# Issue #91 r2 번들 독립 복원 검증 전용 (Qdrant + Neo4j). NEW project/volumes only.
+# - #91 원본(issue91-r2-qdrant-20261119 / issue91-r2-neo4j-20261119)·공유 DB와 별도 프로젝트다.
+#   볼륨·네트워크 이름 앞에 프로젝트 이름이 붙는다: issue91-r2-verify-20261119_qdrant_storage / _neo4j_data / _neo4j_logs
+#   기존 볼륨(external)·컨테이너(container_name)·바인드 마운트를 쓰지 않는다.
+# - 인증은 검증 전용 환경 변수만 쓴다: ISSUE91_VERIFY_QDRANT_API_KEY, ISSUE91_VERIFY_NEO4J_PASSWORD.
+#   번들의 compose.yaml(issue43)은 QDRANT_API_KEY·NEO4J_PASSWORD 같은 일반 이름을 써서 원본·공유 값과 섞일 수 있어 쓰지 않는다.
+#   scripts/restore_r2_isolated.py가 같은 변수만 읽고, restore 호출 동안만 QDRANT_URL·NEO4J_URI 등을 고정값으로 덮어쓴다.
+# - 이미지: Qdrant 1.12.4 / Neo4j Community 5.26.32 (r1 복원·#91 원본과 같은 digest).
+# - 포트: Qdrant 127.0.0.1:56556, Neo4j Bolt 127.0.0.1:56587. Neo4j HTTP는 복원 도구가 쓰지 않아 열지 않는다.
+# - 정리에 `down -v`를 쓰지 않는다. 실패한 볼륨은 보존하고 새 프로젝트 이름으로 다시 시작한다.
+name: issue91-r2-verify-20261119
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4@sha256:241edb9d7778327516ef218f8c74e1bd61b5ea42cd4f193cb8d0896199705636
+    ports:
+      - "127.0.0.1:56556:6333"
+    environment:
+      QDRANT__SERVICE__API_KEY: ${ISSUE91_VERIFY_QDRANT_API_KEY:?Set ISSUE91_VERIFY_QDRANT_API_KEY in this PowerShell session}
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    mem_limit: 1g
+    cpus: 2
+    restart: "no"
+  neo4j:
+    image: neo4j:5.26-community@sha256:42ef3ebfd671ebd01fdebb6dcbe80cf7b45eef2aa3d346ef4132f7ef31e67d2f
+    ports:
+      - "127.0.0.1:56587:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${ISSUE91_VERIFY_NEO4J_PASSWORD:?Set ISSUE91_VERIFY_NEO4J_PASSWORD in this PowerShell session}
+      NEO4J_server_memory_heap_initial__size: 128m
+      NEO4J_server_memory_heap_max__size: 256m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    mem_limit: 1280m
+    cpus: 2
+    restart: "no"
+volumes:
+  qdrant_storage:
+  neo4j_data:
+  neo4j_logs:
