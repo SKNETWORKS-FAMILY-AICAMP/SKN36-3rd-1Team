@@ -1267,10 +1267,10 @@
       "group_id": "GRP_POL_STG_ICN_001_ROOT",
       "condition_id": "COND_AGE_19_39",
       "target_name": "연령조건: 만 19세~39세",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서해구 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 인천청년포털 공지 msg_seq=491 첨부, SHA-256 2631564d…5752f) 기본요건 '③ 서해구‧검단구 청년 (…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)",
       "evidence": "③ 서해구‧검단구 청년 (주민등록초본 및 외국인등록 사실증명서, 국내 거소 사실 증명서 기준, 19~39세) — 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026)",
-      "review_status": "needs_review",
+      "review_status": "verified",
       "previous_evidence": "[이전 근거, 2024년 제2호 사업 문서라 과거 기록으로만 둠] 서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」"
     },
     {
@@ -2713,8 +2713,8 @@
       "source_id": "GRP_POL_STG_ICN_001_ROOT",
       "target_id": "GRP_POL_STG_ICN_001_REST",
       "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_ICN_001_REST)",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서해구 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 인천청년포털 공지 msg_seq=491 첨부, SHA-256 2631564d…5752f) 기본요건 '③ 서해구‧검단구 청년 (…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세"
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)"
     },
     {
       "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -5534,9 +5534,9 @@
       "policy_id": "POL_STG_ICN_001",
       "condition_id": "COND_AGE_19_39",
       "target_name": "연령조건: 만 19세~39세",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서해구 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 인천청년포털 공지 msg_seq=491 첨부, SHA-256 2631564d…5752f) 기본요건 '③ 서해구‧검단구 청년 (…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
-      "review_status": "needs_review"
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)",
+      "review_status": "verified"
     },
     {
       "policy_id": "POL_STG_MOLIT_001",
@@ -6129,7 +6129,7 @@
       "POL_GOV_050": "정부24 '서비스 대상'·'지원대상'은 '24개월 미만', 같은 페이지 '지원내용'과 조례 3개 조항은 '24개월 이하'. 조례를 따라 24개월 이하(LTE 24)로 둔다(반석 확정 2026-11-20). 조례에는 '최대 2년·240만원' 같은 지급 상한이 없고 매월 27일 지급(제6조 제4항)만 있다. 근거 기록: 4차_준비/messages/issue39_pol_gov_050_criteria_20261119.md"
     },
     "pending_followups": {
-      "POL_STG_ICN_001": "나이 19~39세의 2026년 근거(제4호 기업안내문)가 후보 문서에 없다. 문서·청크를 추가하면 문서·청크 수가 바뀌어 검색 설정과 테스트의 기대값(database/ 포함)이 함께 바뀌므로, PR #93(r2 재적재) 병합 뒤 별도 교정으로 문서를 추가하고 evidence_document_id를 그 문서로 바꾼 다음 review_status를 해제한다. 그 전까지 조건 관계는 review_status=needs_review(검수 대기)다."
+      "POL_STG_ICN_001": "해결(2026-11-20): 2026년 제4호 기업안내문을 Document(DOC_STG_ICN_001_NOTICE_2026)로 추가하고 evidence_document_id를 바꾼 뒤 review_status를 verified로 해제했다."
     }
   },
   "beneficiary_age_notes": {
@@ -6326,5 +6326,19 @@
       "checked_at": "2026-11-20",
       "verified_stage": null
     }
-  ]
+  ],
+  "eligibility_source_notes": {
+    "description": "조건 노드로 만들지 않은 자격 기준의 원문 대조 기록. 교정 코드는 이 키를 읽지 않는다(기록용).",
+    "POL_GOV_006": {
+      "issue": "#97",
+      "evidence_document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "basis": "수산업ㆍ어촌 공익기능 증진을 위한 직접지불제도 운영에 관한 법률 시행령 제6조 제1항(해양수산부장관이 정하여 고시하는 최소 조업일수 이상을 조업한 경우에 지급) → 해양수산부고시 제2024-6호 제2조·[별표]",
+      "notes": [
+        "정부24의 '60일 이하 미지급'은 법령 근거가 없다. 고시 [별표] 기준(해당 연도에 60일 이상 조업)을 적용한다. 정확히 60일이면 충족한다.",
+        "총허용어획량(TAC)을 적용하는 어종을 주로 어획하는 어선은 30일 이상 조업하여도 인정한다(고시 [별표])."
+      ],
+      "data_policy": "정부24 인용 청크(DOC_GOV_006_C02~C04)는 원문 그대로 둔다. 조업일수·주 어획 어종을 묻는 입력 항목이 없어 Checker 조건은 추가하지 않고, GRP_POL_GOV_006_ROOT는 UNKNOWN으로 둔다.",
+      "checked_at": "2026-11-20"
+    }
+  }
 }
