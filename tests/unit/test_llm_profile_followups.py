@@ -1124,3 +1124,39 @@ def test_pr92_split_does_not_drop_profile_request_at_limit(monkeypatch):
     assert {"kind": "ask_info", "field": "age", "text": "나이가 몇 세인가요?"} in actual["follow_up_questions"]
     # 남은 항목은 원래 순서를 유지한다.
     assert actual["follow_up_questions"][0] == {"kind": "question", "text": "신청 서류는 무엇인가요?"}
+
+
+# ==========================================================
+# PR #92 최종 점검: 합성어·정책 기준 문장의 모델 field 오유지, 소득 비교 변형
+# ==========================================================
+
+@pytest.mark.parametrize("text,field", [
+    ("연령 기준을 확인하시려면 공고를 보세요?", "age"),
+    ("지역별 지원 내용이 궁금하신가요?", "region"),
+    ("고령자 연령대별 지원 금액은 얼마인가요?", "age"),
+    ("지역사회서비스 신청 방법은 무엇인가요?", "region"),
+])
+def test_pr92_compound_or_policy_word_does_not_keep_model_field(monkeypatch, text, field):
+    """'지역별', '근로소득공제', '연령 기준'처럼 필드 단어가 정책 문맥에 쓰이면 입력 요청이 아니다."""
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": field, "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert not any(f["kind"] == "ask_info" for f in actual["follow_up_questions"])
+
+
+@pytest.mark.parametrize("text", [
+    "수입이 기준보다 적으신 편인가요?",
+    "소득이 기준 중위소득 이하가 아니신가요?",
+    "급여가 기준 중위소득 50% 이하이신가요?",
+])
+def test_pr92_income_comparison_variants_become_income_request(monkeypatch, text):
+    stub(monkeypatch, response(follows=[{"kind": "question", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "ask_info", "field": "income", "text": text}]
+
+
+def test_pr92_income_compound_policy_question_is_recovered(monkeypatch):
+    """'근로소득공제'는 사용자 소득이 아니라 정책 질문이므로 question으로 복구한다."""
+    text = "근로소득공제는 어떻게 계산하나요?"
+    stub(monkeypatch, response(follows=[{"kind": "ask_info", "field": "income", "text": text}]))
+    actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
+    assert actual["follow_up_questions"] == [{"kind": "question", "text": text}]
