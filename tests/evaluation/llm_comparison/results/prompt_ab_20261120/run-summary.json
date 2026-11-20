@@ -1,0 +1,35 @@
+{
+  "requests": 8,
+  "http_dispatches": 8,
+  "sdk_retries": 0,
+  "cost_usd": 0.0293997,
+  "budget_usd": 0.06,
+  "status": "completed",
+  "model": "gpt-5.4-mini",
+  "meaning_pass": 4,
+  "meaning_fail": 4,
+  "max_bold_spans": 2,
+  "manifest_lf_sha256": "d48ef11b599466b394bef15e275be26b24be9dfde1e74771c86b8e3d384acf50",
+  "reload_check": {
+    "manifest_lf_sha256": "d48ef11b599466b394bef15e275be26b24be9dfde1e74771c86b8e3d384acf50",
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "qdrant_points": 1139,
+    "neo4j_totals": {
+      "nodes": 1126,
+      "relationships": 2668
+    },
+    "db_endpoints": "r2 restore: qdrant 127.0.0.1:56556, neo4j 127.0.0.1:56587",
+    "restore_bundle": "rag-final-v140-r2-027f40b556c5.zip (SHA-256 dd28f8cd…, 03-verify PASS)"
+  },
+  "files_sha256": {
+    "tests\\evaluation\\llm_comparison\\compare_checker_integrated.py": "2f4d8a2b03179ce8efc3125ee8c715fb9e2d1df8e95618e7cc6a1eb3aa51cffb",
+    "docs\\development\\retrieval_eval\\questions_candidates_v0.jsonl": "d337142ca926646773c25836ea5d7960c42823034a743e10e3f35dc6ee8294e0",
+    "backend\\rag\\pipeline.py": "2c5ad1449c12e8cbdd1dc4961afc1cedfdf7fe9b60be6bcff8c7876b8804a05b",
+    "backend\\eligibility\\checker.py": "7d15f7629fa2a712363439b05234fef65a2c815696f44f2a95521cb623b2d187",
+    "backend\\llm\\generator.py": "c1809acb8183d38b3e297457e4b28fddb964971276000b77b1ca7c17cc9cfdd3",
+    "ai\\prompts\\system_prompt.py": "83b37dbd238c8043060a59fc8f91cd7e19e3c136a42ec16f2afc088b1f711056",
+    "tests\\evaluation\\llm_comparison\\compare_models.py": "dd2e0bed82b8f8128319b10daf2191c42b4e7fba2a22ec070a09ae3fad8a0a74"
+  },
+  "started_at": "2026-11-20T15:36:41.716471+09:00"
+}

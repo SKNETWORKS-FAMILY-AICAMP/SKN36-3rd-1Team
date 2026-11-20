@@ -41,6 +41,11 @@ def test_conclusion_guidance_is_sent_and_evidence_is_preserved(monkeypatch, ques
     assert "독립된 '네/아니요'로 시작하지 말고" in system
     assert "질문에서 이미 명시한 사실" in system
     assert "수치 경계·예외·적용 연도가 충돌" in system
+    # #97(RQ031): 경계값은 첫 문장에서 유보하고, 이상·이하가 그 값을 포함한다는 규칙을 전달한다.
+    assert "첫 문장에서 그 경계값은 원문끼리 결론이 달라 확정할 수 없다" in system
+    assert "'이상'·'이하'는 그 값을 포함하고 '초과'·'미만'은 포함하지 않습니다" in system
+    # 굵은 글씨는 정책 수와 관계없이 답변 전체에서 2곳 이하.
+    assert "답변 전체에서 최대 2곳" in system
     payload = json.loads(calls[0][1]["content"].split("\n", 1)[1])
     assert payload["question"] == question
     assert payload["policy_checks"] == checks
