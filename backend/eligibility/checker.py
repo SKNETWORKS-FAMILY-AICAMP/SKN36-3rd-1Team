@@ -14,6 +14,7 @@ import re
 from datetime import date, datetime, timedelta, timezone
 
 from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
+from database.unknown_group_scope import scoped_income_quality_attributes
 
 KST = timezone(timedelta(hours=9))
 
@@ -391,6 +392,28 @@ def _walk(
     return group_status, items
 
 
+def _has_certain_and_failure(group: dict, profile: dict, affected: set[str]) -> bool:
+    """Detect an unaffected, definitely failed required AND condition.
+
+    Unknown, OR and NOT branches are never guessed from their child states.
+    """
+    if not isinstance(group, dict) or str(group.get("logic") or "").upper() != "AND":
+        return False
+    conditions = group.get("conditions")
+    if isinstance(conditions, list):
+        for condition in conditions:
+            if (
+                isinstance(condition, dict)
+                and _field(condition) not in affected
+                and _condition(condition, profile)["status"] == NO
+            ):
+                return True
+    children = group.get("groups")
+    return isinstance(children, list) and any(
+        _has_certain_and_failure(child, profile, affected) for child in children
+    )
+
+
 def _affected_fields(
     quality: dict,
     eligibility: dict,
@@ -400,10 +423,13 @@ def _affected_fields(
     if graph_missing:
         return {"all"}
 
-    if (
-        eligibility.get("unknown_logic_groups")
-        or eligibility.get("structure_issues")
-    ):
+    if eligibility.get("structure_issues"):
+        return {"all"}
+
+    scoped = scoped_income_quality_attributes(eligibility, quality)
+    if scoped is not None:
+        return scoped
+    if eligibility.get("unknown_logic_groups"):
         return {"all"}
 
     if not quality.get("hold_auto_eligibility"):
@@ -814,8 +840,22 @@ def check_eligibility(
                 )
             )
 
+    # #40: a known failed AND condition is decisive despite unknown income.
+    # Preserve only the root aggregate, never an unverified child group.
+    safe_failed_root_ids: set[int] = set()
+    if (
+        len(root_results) == 1
+        and not (walk_issues - {"unknown_logic"})
+        and isinstance(trees, list) and len(trees) == 1
+        and scoped_income_quality_attributes(eligibility, quality) is not None
+        and _has_certain_and_failure(trees[0], profile, affected)
+    ):
+        safe_failed_root_ids.add(id(root_results[0]))
+
     if affected:
         for item in conditions:
+            if id(item) in safe_failed_root_ids and item["status"] == NO:
+                continue
             if (
                 "all" in affected
                 or item["field"] in affected
@@ -842,6 +882,8 @@ def check_eligibility(
     if affected and "all" not in affected:
         for item in conditions:
             if item["field"] == "eligibility":
+                if id(item) in safe_failed_root_ids and item["status"] == NO:
+                    continue
                 item["status"] = CHECK
 
                 if "데이터 품질 경고" not in item["reason"]:

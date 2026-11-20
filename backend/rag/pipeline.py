@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
+from database.unknown_group_scope import scoped_income_quality_attributes
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
@@ -174,21 +175,28 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     graph_policy = graph.get("policy") or {}
     structure = graph.get("eligibility") or {}
     quality = policy.get("data_quality") or {}
-    affected = set(quality.get("affected_attributes") or [])
-    # 검색이 반환하는 그룹 ID와 구조 오류만으로는 영향받는 필드를 확정할 수 없다.
+    scoped_unknown = scoped_income_quality_attributes(structure, quality)
+    affected = (scoped_unknown if scoped_unknown is not None
+                else set(quality.get("affected_attributes") or []))
+    # 구조 오류나 범위를 확인할 수 없는 UNKNOWN은 기존과 같이 전체 보류.
     hold_all = (
         not graph or policy.get("graph_status") == "MISSING_IN_GRAPH"
         or bool(affected - SCOPED_CONDITION_FIELDS)
         or (quality.get("hold_auto_eligibility") and not affected)
         or any(isinstance(warning, dict) and warning.get("blocks_auto_eligibility") and not warning.get("affects")
                for warning in quality.get("warnings", []))
-        or structure.get("unknown_logic_groups") or structure.get("structure_issues")
+        or (structure.get("unknown_logic_groups") and scoped_unknown is None)
+        or structure.get("structure_issues")
     )
     conditions = [condition.model_dump() for condition in result.conditions]
     for condition in conditions:
         field = condition["field"].lower()
         # Checker가 이미 보류한 조건의 사유(원문 확인 결과·공고 확인 항목 등)는 그대로 둔다.
         if condition["status"] == "needs_check":
+            continue
+        # Checker has established an unaffected failed AND requirement.
+        if (scoped_unknown is not None and field == "eligibility"
+                and condition["status"] == "ineligible"):
             continue
         # 보류 원인별로 사유를 다르게 적는다. 입력 누락을 데이터 오류로 안내하지 않는다.
         # 범위가 있는 경고라도 미확인 필드가 그 범위 밖이라고 단정할 수 없다.
