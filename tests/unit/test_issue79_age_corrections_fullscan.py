@@ -243,7 +243,13 @@ def test_issue79_age_replacements(replacement):
 
 
 def test_issue79_pending_review_remains_separate():
-    """#90: Incheon age evidence is still pending review."""
+    """#90: Keep the Incheon age evidence pending until verified."""
+
+    # TODO(#90):
+    # 공식 사업안내서가 Document로 추가되고 근거 관계의
+    # review_status가 해제되면 이 테스트도 함께 갱신한다.
+    # 현재는 검수 대기 상태가 실수로 해제되지 않았는지 확인한다.
+
     policy_id = "POL_STG_ICN_001"
     condition_id = "COND_AGE_19_39"
 
@@ -258,6 +264,7 @@ def test_issue79_pending_review_remains_separate():
     ]
 
     assert len(matches) == 2
+
     assert {
         row.get("review_status")
         for row in matches
