@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-21T13:07:09.786356+09:00",
+  "created_at": "2026-11-21T22:39:48.209694+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1810,7 +1810,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "4227e5b440c1e296fa01dad9bf926159edf6110a2935565b7591d66e1f5c2108",
+    "source_sha256": "4c365cfd73c9d66019ac87af05496b35a49efec71fb61d6fe6189fc5f605eb74",
     "removed_relationships": [
       {
         "source_id": "POL_001",
