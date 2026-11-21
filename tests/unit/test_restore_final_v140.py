@@ -141,7 +141,7 @@ class CrossDbAndHashGuards(unittest.TestCase):
 
     def test_snapshot_criteria_and_package_points_are_fixed(self):
         self.assertEqual((restore.SNAPSHOT_DIMENSIONS, restore.SNAPSHOT_POINTS), (1024, 1139))
-        self.assertEqual(restore.EXPECTED, (246, 267, 660, 1139, 1132, 2673, 211))
+        self.assertEqual(restore.EXPECTED, (246, 267, 659, 1139, 1132, 2673, 211))
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             (folder / "snapshot").write_bytes(b"sample_only")
@@ -237,7 +237,7 @@ class RestoreExecutionPaths(unittest.TestCase):
         replace(hd, "verify_manifest_checksums", return_value=[])
         replace(hd, "load_documents", return_value=documents)
         replace(hd, "load_payload_metadata", return_value={})
-        replace(hd, "load_payload_chunks", return_value=[None] * 660)
+        replace(hd, "load_payload_chunks", return_value=[None] * 659)
         replace(fi, "manifest_sha256", return_value="sample_manifest")
         replace(fi, "build_config_chunks", return_value=(chunks, {}))
         replace(lg, "read_graph_input", return_value=graph)

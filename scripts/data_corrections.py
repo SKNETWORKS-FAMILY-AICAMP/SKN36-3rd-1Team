@@ -32,6 +32,15 @@ def omit_outdated_line(text: str, line: str) -> str:
     return "".join(lines)
 
 
+def omit_held_lines(text: str, lines: list[str]) -> str:
+    """보류한 FAQ 행을 검색용 본문에서 뺀다. 행 사이 빈 줄은 하나만 남기고, 나머지 문장과 순서는 그대로 둔다."""
+    for line in lines:
+        text = omit_outdated_line(text, line)
+    while "\n\n\n" in text:
+        text = text.replace("\n\n\n", "\n\n")
+    return text.strip()
+
+
 def apply_policy_corrections(policies: list, corrections: dict) -> None:
     """정책 노드의 설명 문구와 지역 문자열을 교정한다."""
     by_id = {policy["policy_id"]: policy for policy in policies}

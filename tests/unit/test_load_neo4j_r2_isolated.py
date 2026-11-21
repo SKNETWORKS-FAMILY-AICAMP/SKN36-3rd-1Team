@@ -146,7 +146,7 @@ class GuardTests(unittest.TestCase):
 class ReferenceTests(unittest.TestCase):
     def test_latest_release_counts_match_pinned_expectation(self):
         ref = Reference.get()
-        self.assertEqual(ref["counts"], (246, 267, 660, 1139, 1132, 2673, 211))
+        self.assertEqual(ref["counts"], (246, 267, 659, 1139, 1132, 2673, 211))
         self.assertEqual(ref["counts"], tuple(restore.EXPECTED))
         self.assertTrue(ref["validation"]["ok"])
         self.assertEqual(ref["manifest_lf_sha256"], seed.MANIFEST_LF_SHA256)

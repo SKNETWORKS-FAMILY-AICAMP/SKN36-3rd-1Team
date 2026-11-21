@@ -211,13 +211,14 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_release_files_unchanged_and_manifest_matches(self):
         self.assertEqual(self.before, self.after)
-        self.assertEqual(len(self.before), 22)
+        # 릴리스 파일 수: #104에서 검색용 본문 source_text/DOC_STG_SEOUL_001_FAQ_2026.txt 추가(22 → 23)
+        self.assertEqual(len(self.before), 23)
         self.assertEqual(self.out["manifest_bad"], [])
 
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 267, 660, 1132, 2673])
+        self.assertEqual(self.out["expected"], [246, 267, 659, 1132, 2673])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
@@ -234,7 +235,7 @@ class ApprovedReleaseTests(unittest.TestCase):
                          ["POL_001", "POL_BOK_031", "POL_GOV_006", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_MOLIT_001", "POL_STG_SEOUL_001"])
 
     def test_b2_b3_chunks_and_payloads(self):
-        for name, expected in (("A_B2_V140", 1224), ("B_B3_V140", 1322)):
+        for name, expected in (("A_B2_V140", 1227), ("B_B3_V140", 1314)):
             plan = self.out[name]
             with self.subTest(config=name):
                 self.assertEqual((plan["chunks"], plan["expected"]), (expected, expected))
