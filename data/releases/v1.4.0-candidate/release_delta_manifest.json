@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-20T17:15:21.256661+09:00",
+  "created_at": "2026-11-21T13:07:09.786356+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -30,7 +30,10 @@
     "DOC_STG_SEOUL_001_YC",
     "DOC_BOK_031_MOE_2026",
     "DOC_GOV_006_MOF_NOTICE_2024",
-    "DOC_STG_ICN_001_NOTICE_2026"
+    "DOC_STG_ICN_001_NOTICE_2026",
+    "DOC_STG_MOLIT_001_FAQ_2026",
+    "DOC_STG_NTS_001_FAQ_2026",
+    "DOC_STG_SEOUL_001_FAQ_2026"
   ],
   "added_organization_ids": [
     "AGENCY_국세청_기획재정부",
@@ -97,9 +100,67 @@
     "ea5cb5e9-0d11-52d3-985f-f92828e021f8",
     "18e2893e-8b45-5f14-bdee-2a19088b0f32",
     "1efaad59-1eeb-54ad-a137-211d00e22406",
-    "d072baf2-9cde-58a8-87bb-807d41e34f9c"
+    "d072baf2-9cde-58a8-87bb-807d41e34f9c",
+    "7e796008-eaba-5080-bd6f-8553bac5dd53",
+    "e53b411d-0e00-566e-9f13-4b714bd17ea2",
+    "7d424d81-baaa-5a5e-9499-57788699f218",
+    "13e35722-b10d-57ba-97df-a905d354023d",
+    "a3849816-5fa6-5c4f-8a88-2b87ab760af3",
+    "70b0737c-3580-5cc9-8e77-03a0bfa01f80",
+    "2ddd9e39-fb84-5494-98af-32bddc8cf88a",
+    "c44211b0-9cbb-542d-8723-ba9352ea880a",
+    "6a0753d0-8ce1-513b-9a21-fe8e130ed34a",
+    "2876f006-492c-5455-8880-94b1ef829929",
+    "8fd264b3-bb29-577c-939f-1a6faa2f3f1e",
+    "1654c8bd-4bfb-5bc8-abcf-bf06d332dfc8",
+    "e1b695e7-2040-53fb-a2e1-ca2aab8ac6b2",
+    "64622251-18c4-5a3f-ae78-09d3987feb38",
+    "30f510eb-6603-5e43-85cb-388f9070ef74",
+    "7143057e-dab3-50b0-8c7e-71d84de80fd1",
+    "b42c3120-ceef-58f4-a1cb-199739e4a045",
+    "413169c4-fab9-58f3-9be1-c4e7d155c69a",
+    "84f52774-fa48-5e92-9444-4b5f5b683ca4",
+    "f9a80800-270a-5399-b929-7d27aa4f863e",
+    "dc85193f-811f-5eec-8798-6d3234e1d4cd",
+    "90aa346f-55a5-5ab1-ba70-6bdd71f7eade",
+    "ad0b3958-d00b-5783-85f7-c26ddcb9f29e",
+    "995995e6-c73c-509d-8e32-f300aa62f426",
+    "514046b9-6a91-5bd4-b58e-e72ccd769663",
+    "5991653f-dfa4-53df-b816-95e9bcd124db",
+    "22582ee6-630a-5cde-a12b-abd77d9330ec",
+    "a518b3f2-fa51-5029-8469-dd117145038c",
+    "b1f95f7a-36e2-5577-9edf-f8523d25ab4b",
+    "d5327a3d-1e50-5bfd-903e-12c75612942c",
+    "0c07a012-7b6f-5479-843c-84c63d4a98c0",
+    "864c20c2-25a3-558f-b8e7-fb456cd7ffc1",
+    "13b375fb-69ce-5b91-ad64-2158e429452c",
+    "d7a2be4c-1bb8-5e92-9e67-bafec62f8190",
+    "46d0084f-71e6-5196-82a6-88e6a8040126",
+    "7cc5f4d6-3595-5020-8cea-11ca04e37fb5",
+    "dab7030d-113e-5f42-9260-7adef203c525",
+    "378b1559-750e-5d4e-846d-3a185b1acf75",
+    "fe8a0cec-5de2-50e2-8042-52ff0fbe2e4d",
+    "a2adab6c-89a0-525d-a5dc-38598f3903a6",
+    "75a09ada-82e2-51e6-98bb-f3995c41e3aa",
+    "c586f180-812e-5c66-9d81-d6a97c198d9e",
+    "13dced10-a386-5a1e-b28f-0d0a44ab8185",
+    "d9e49f10-f9cd-5fbe-82cf-14d056e3cb9a",
+    "98914efa-c45a-5342-ad66-67a5d245744d",
+    "ddff5ae8-f649-5fe2-8e1c-d600f3f9f818",
+    "71b016fd-5d53-52aa-b6ae-a4b1312b2e8d",
+    "ace7e8cc-0b34-526c-a090-fe0a8ad63715",
+    "7c4a7549-a8bc-55c4-b2bb-20800af4b687",
+    "6f9828f9-2a71-59ff-943c-4370d30ac915",
+    "6c426cd7-31c0-58d0-82cd-5db09852f5e6",
+    "4dd20a19-1105-5668-a2a9-bc78a4ec0bb0",
+    "88bf3edd-75c4-5e49-a64f-7a8a1f630561",
+    "60c88498-4bec-58e9-9d6d-20ca4c3ae1a4",
+    "f9691db4-f5dd-5fcb-b48a-bb199b350821",
+    "2dd97e23-6118-5848-8d2c-cfc423361a6e",
+    "fd4dca65-a9b8-5405-8c0b-92c3cf57192f",
+    "8e81729c-c1f0-5e38-9f0c-ef61a96353e3"
   ],
-  "added_relationships_count": 91,
+  "added_relationships_count": 94,
   "updated_policy_properties": [
     {
       "policy_id": "POL_001",
@@ -1749,7 +1810,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "75eb68783d5aecc28f8ca8f206168e6fa78f9d27db4a2e098e6a466e2fce2eaa",
+    "source_sha256": "4227e5b440c1e296fa01dad9bf926159edf6110a2935565b7591d66e1f5c2108",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -9884,7 +9945,7 @@
         "target_id": "LIFESTAGE_중장년"
       }
     ],
-    "taxonomy_corrected_chunks": 89,
+    "taxonomy_corrected_chunks": 114,
     "added_condition_ids": [
       "COND_AGE_12_24",
       "COND_AGE_6_64",
@@ -10224,6 +10285,21 @@
       "source_id": "POL_STG_ICN_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_ICN_001_NOTICE_2026"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_NTS_001_FAQ_2026"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_FAQ_2026"
     },
     {
       "source_id": "POL_STG_MOLIT_002",

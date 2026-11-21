@@ -142,15 +142,19 @@ def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) ->
     by_id = {policy["policy_id"]: policy for policy in policies}
     category_policies = {item["policy_id"] for item in corrections["category_corrections"]}
     align = set(corrections["chunk_life_stage_alignment_policies"])
+    # 정책명을 교정한 정책은 청크의 policy_name도 맞춘다. 임베딩 입력의 정책명 줄이 청크 메타데이터에서 오기 때문이다.
+    align_names = set(corrections.get("chunk_policy_name_alignment_policies", []))
     changed = 0
     for chunk in chunks:
         policy = by_id[chunk["policy_id"]]
-        before = (chunk["category"], chunk["life_stages"])
+        before = (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
         if chunk["policy_id"] in category_policies:
             chunk["category"] = policy["category"]
         if chunk["policy_id"] in align:
             chunk["life_stages"] = list(policy["life_stages"])
-        changed += before != (chunk["category"], chunk["life_stages"])
+        if chunk["policy_id"] in align_names:
+            chunk["policy_name"] = policy["policy_name"]
+        changed += before != (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
     return changed
 
 
