@@ -257,7 +257,7 @@
 {"group_id": "GRP_POL_STG_NTS_001_ROOT", "policy_id": "POL_STG_NTS_001", "logic": "UNKNOWN", "is_root": true, "description": "중소기업 취업자 소득세 감면 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_MOIS_001_ROOT", "policy_id": "POL_STG_MOIS_001", "logic": "AND", "is_root": true, "description": "다자녀가구 자동차취득세 감면 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_EX_001_ROOT", "policy_id": "POL_STG_EX_001", "logic": "AND", "is_root": true, "description": "고속도로 다자녀가구 통행료 할인 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_STG_MOLIT_001_ROOT", "policy_id": "POL_STG_MOLIT_001", "logic": "AND", "is_root": true, "description": "K-패스 (대중교통비 환급지원) 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
+{"group_id": "GRP_POL_STG_MOLIT_001_ROOT", "policy_id": "POL_STG_MOLIT_001", "logic": "AND", "is_root": true, "description": "모두의 카드(K-패스) (대중교통비 환급지원) 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_SEOUL_001_ROOT", "policy_id": "POL_STG_SEOUL_001", "logic": "UNKNOWN", "is_root": true, "description": "서울특별시 청년수당 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_ICN_001_ROOT", "policy_id": "POL_STG_ICN_001", "logic": "AND", "is_root": true, "description": "중소기업 재직청년 복지공유제 지원 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_005_OR_EXCL", "policy_id": "POL_005", "logic": "OR", "is_root": false, "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외"}

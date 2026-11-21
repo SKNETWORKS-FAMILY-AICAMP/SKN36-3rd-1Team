@@ -217,12 +217,14 @@ class TestNoiseChunkSelection(unittest.TestCase):
         expected = set(hd.REVIEWED_NOISE_CHUNKS)
         if hd.dataset_version() == hd.RELEASE_V140_VERSION:
             expected.add("DOC_BOK_031_MOE_2026_P305_C01")
+            # 서울 청년수당 소개 탭의 마지막 섹션(문의 전화 2줄). 짧지만 연락처라 임베딩에 남긴다(#104 검토).
+            expected.add("DOC_STG_SEOUL_001_INTRO_2026_C04")
         self.assertEqual(candidates, sorted(expected))
         self.assertEqual(len(hd.REVIEWED_NOISE_CHUNKS), 27)
 
     def test_select_with_exclusion(self):
-        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 602 → 575).
-        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 575}
+        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 663 → 636).
+        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 636}
         version = hd.dataset_version()
         self.assertIn(version, expected_selected, f"기대 건수가 정해지지 않은 데이터셋: {version}")
         selected, excluded = hd.select_chunks_for_embedding(self.chunks, exclude_noise=True)

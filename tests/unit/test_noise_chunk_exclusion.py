@@ -33,7 +33,7 @@ from database.chunking import make_point_id  # noqa: E402
 V140_DIR = hd.DEFAULT_HANDOFF_DIR            # data/releases/v1.4.0-candidate (승인 릴리스)
 V132_DIR = hd.LEGACY_HANDOFF_DIR             # data/handoff (v1.3.2)
 DATASETS = {
-    hd.RELEASE_V140_VERSION: (V140_DIR, 602, 575),
+    hd.RELEASE_V140_VERSION: (V140_DIR, 663, 636),
     "1.3.2": (V132_DIR, 557, 530),
 }
 NOISE_IDS = sorted(hd.REVIEWED_NOISE_CHUNKS)
@@ -62,10 +62,12 @@ class TestReviewedListDefinition(unittest.TestCase):
                 chunks = release_chunks(directory)
                 expected = set(NOISE_IDS)
                 if version == hd.RELEASE_V140_VERSION:
-                    guide_id = "DOC_BOK_031_MOE_2026_P305_C01"
-                    expected.add(guide_id)
+                    # 서울 청년수당 소개 탭의 문의 전화 2줄도 짧지만 연락처라 적재에 남는다(#104 검토).
+                    kept_ids = ("DOC_BOK_031_MOE_2026_P305_C01", "DOC_STG_SEOUL_001_INTRO_2026_C04")
+                    expected.update(kept_ids)
                     selected, _ = hd.select_chunks_for_embedding(chunks, version=version)
-                    self.assertIn(guide_id, {chunk["chunk_id"] for chunk in selected})
+                    for kept_id in kept_ids:
+                        self.assertIn(kept_id, {chunk["chunk_id"] for chunk in selected})
                 self.assertEqual(set(hd.find_short_chunk_candidates(chunks)), expected)
 
 
@@ -243,7 +245,7 @@ class TestServicePathsUnchanged(unittest.TestCase):
 
     def test_b2_service_chunks_unchanged(self):
         self.assertEqual(self.out["version"], hd.RELEASE_V140_VERSION)
-        self.assertEqual(self.out["b2"], 1141)
+        self.assertEqual(self.out["b2"], 1233)
         self.assertFalse(self.out["b2_has_reviewed_ids"])
 
     def test_search_profile_unchanged(self):
@@ -255,7 +257,7 @@ class TestServicePathsUnchanged(unittest.TestCase):
                                                       PROJECT_ROOT / "scripts" / "restore_final_v140.py")
         restore = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(restore)
-        self.assertEqual(restore.EXPECTED[2], 602)
+        self.assertEqual(restore.EXPECTED[2], 663)
         self.assertEqual(self.out["raw_chunks"], restore.EXPECTED[2])
 
 

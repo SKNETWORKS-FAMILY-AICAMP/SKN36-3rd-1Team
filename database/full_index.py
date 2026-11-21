@@ -61,11 +61,11 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
                 "model": "qwen3-embedding:4b", "dim": 2560},
     # 승인된 v1.4.0 릴리스(data/releases/v1.4.0-candidate, PR #16·#17). 본문·문서별 메타데이터는 release_adapter.
     # 검색 근거를 변경하면 새 DB에서 청크를 다시 집계하고 검증한다.
-    "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1141,
+    "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1233,
                   "dataset": "1.4.0-candidate"},
-    "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1223,
+    "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1320,
                   "dataset": "1.4.0-candidate"},
-    "A_B2_4B_V140": {"collection": "exp_b2_qwen3emb4b_v140_v1", "strategy": "B2", "expected_chunks": 1141,
+    "A_B2_4B_V140": {"collection": "exp_b2_qwen3emb4b_v140_v1", "strategy": "B2", "expected_chunks": 1233,
                      "dataset": "1.4.0-candidate", "model": "qwen3-embedding:4b", "dim": 2560},
 }
 # 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다

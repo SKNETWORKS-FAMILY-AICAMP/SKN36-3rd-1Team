@@ -146,7 +146,7 @@ class GuardTests(unittest.TestCase):
 class ReferenceTests(unittest.TestCase):
     def test_latest_release_counts_match_pinned_expectation(self):
         ref = Reference.get()
-        self.assertEqual(ref["counts"], (246, 264, 602, 1139, 1129, 2670, 211))
+        self.assertEqual(ref["counts"], (246, 268, 663, 1139, 1133, 2674, 211))
         self.assertEqual(ref["counts"], tuple(restore.EXPECTED))
         self.assertTrue(ref["validation"]["ok"])
         self.assertEqual(ref["manifest_lf_sha256"], seed.MANIFEST_LF_SHA256)
@@ -175,7 +175,7 @@ class LoadTests(unittest.TestCase):
     def test_dry_run_on_empty_db_has_no_writes(self):
         output = r2.dry_run(self.runner, self.ref)
         self.assertEqual((output["state"], output["totals"], output["db_writes"]), ("empty", {"nodes": 0, "relationships": 0}, 0))
-        self.assertEqual(output["expected_totals"], {"nodes": 1129, "relationships": 2670})
+        self.assertEqual(output["expected_totals"], {"nodes": 1133, "relationships": 2674})
         self.assertRegex(output["fingerprint"], r"^[0-9a-f]{64}$")
         self.assertEqual(self.runner.writes(), [])
 
@@ -191,9 +191,9 @@ class LoadTests(unittest.TestCase):
     def test_load_writes_full_graph_into_the_verified_runner(self):
         result = r2.load(self.runner, self.ref, True, fingerprint(self.runner, self.ref))
         self.assertEqual(result["status"], "LOADED")
-        self.assertEqual(result["totals"], {"nodes": 1129, "relationships": 2670})
+        self.assertEqual(result["totals"], {"nodes": 1133, "relationships": 2674})
         self.assertTrue(result["verification_ok"])
-        self.assertEqual((len(self.runner.nodes), len(self.runner.relationships)), (1129, 2670))
+        self.assertEqual((len(self.runner.nodes), len(self.runner.relationships)), (1133, 2674))
         self.assertEqual(sum(1 for r in self.runner.relationships if r[0] == "REQUIRES_CONDITION"), 211)
         self.assertEqual(r2.verify(self.runner, self.ref)["ok"], True)
         complete = r2.dry_run(self.runner, self.ref)
@@ -236,7 +236,7 @@ class LoadTests(unittest.TestCase):
         with self.assertRaisesRegex(r2.Neo4jR2Error, "empty"):             # 빈 DB에는 resume 불가
             r2.load(FakeNeo4j(), self.ref, True, fingerprint(FakeNeo4j(), self.ref), resume=True)
         result = r2.load(runner, self.ref, True, partial["fingerprint"], resume=True)
-        self.assertEqual((result["status"], result["totals"]), ("LOADED", {"nodes": 1129, "relationships": 2670}))
+        self.assertEqual((result["status"], result["totals"]), ("LOADED", {"nodes": 1133, "relationships": 2674}))
 
 
 class CrossDbTests(unittest.TestCase):

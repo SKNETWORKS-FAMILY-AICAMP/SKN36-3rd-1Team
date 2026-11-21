@@ -60,14 +60,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 264)
-        self.assertEqual(report["chunks_checked_against_body"], 602)
+        self.assertEqual(report["body_hashes_checked"], 268)
+        self.assertEqual(report["chunks_checked_against_body"], 663)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1129)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2670)
-        self.assertEqual(len(chunks), 602)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1133)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2674)
+        self.assertEqual(len(chunks), 663)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
@@ -87,8 +87,12 @@ class CandidateIntegrityTests(unittest.TestCase):
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
                                  for item in corrections[group]}
+                # 동결 v1.3.2에 없는 신규 정책(POL_STG_*)의 설명 문구 교정(예: 모두의카드 정책명)은 빼고 적용한다
+                old_policy_ids = {row[key] for row in old}
                 dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids],
-                                            {**corrections, "category_corrections": []})
+                                            {**corrections, "category_corrections": [], "text_corrections": [
+                                                item for item in corrections["text_corrections"]
+                                                if item["policy_id"] in old_policy_ids]})
             new = {row[key]: row for row in rows(PACKAGE / "neo4j" / f"nodes_{name}.jsonl")}
             for original in old:
                 if name == "condition_group" and original[key] in removed_groups:
