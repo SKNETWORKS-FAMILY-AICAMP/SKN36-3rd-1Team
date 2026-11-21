@@ -42,7 +42,9 @@ def flat_text(table: dict) -> str:
 def render_table(number: int, table: dict) -> str:
     """머리글 줄 하나와, 열 이름을 셀마다 붙인 행 줄. 청크가 표 중간에서 나뉘어도 행 줄만으로 읽힌다."""
     columns = table["columns"]
-    prefix = f"{table['title']} — " if table["title"] else f"{columns[0]} "
+    # 한시 표처럼 적용 기간이 있으면 행마다 붙인다(청크가 잘려도 기간이 함께 간다). 기간은 같은 답변 본문의 문장이다.
+    period = f"({table['period']}) " if table.get("period") else ""
+    prefix = f"{table['title']} {period}— " if table["title"] else f"{columns[0]} "
     lines = [f"[표 {number}] 열: " + " | ".join(columns)]
     for row in table["rows"]:
         if len(row) != len(columns):

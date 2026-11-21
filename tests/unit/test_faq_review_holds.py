@@ -90,10 +90,26 @@ class FaqReviewHoldTests(unittest.TestCase):
         self.assertEqual(len(rows), 28)
         self.assertIn("시·도 강원: 특별지원지역 양구군, 화천군 | 우대지원지역 고성군, 삼척시, 양양군, 영월군,정선군, 철원군, "
                       "태백시, 평창군,홍천군, 횡성군 | 일반지방권 강릉시, 동해시, 속초시,원주시, 인제군, 춘천시", rows)
+        # 지난 한시 표는 행마다 적용 기간이 붙어 있어야 한다(조장 지시 2026-11-22)
+        temporary = [row for row in rows if row.startswith("한시적 변경되는 모두의카드 정액형 금액")]
+        self.assertEqual(len(temporary), 4)
+        self.assertTrue(all("(2026년 4월 1일부터 2026년 9월 30일까지)" in row for row in temporary))
         # 청크가 표 중간에서 나뉘어도, 행 하나는 어느 청크에든 통째로 들어 있어야 한다
         for source, texts in self.texts(KPASS_DOC).items():
             for row in rows:
                 self.assertTrue(any(row in t for t in texts), f"{source}: {row[:40]}")
+
+
+    def test_kpass_policy_name_is_spaced_on_node_and_chunks(self):
+        name = "모두의 카드(K-패스) (대중교통비 환급지원)"
+        with (PACKAGE / "neo4j/nodes_policy.jsonl").open(encoding="utf-8") as source:
+            policies = {row["policy_id"]: row for row in map(json.loads, source)}
+        self.assertEqual(policies["POL_STG_MOLIT_001"]["policy_name"], name)
+        names = {c["policy_name"] for c in self.release if c["policy_id"] == "POL_STG_MOLIT_001"}
+        self.assertEqual(names, {name})
+        # 원문 본문은 공식 표기(붙여 씀)를 유지한다
+        self.assertIn("모두의카드", self.documents[KPASS_DOC]["text"])
+        self.assertNotIn("모두의 카드(K-패스)", self.documents[KPASS_DOC]["text"])
 
 
 if __name__ == "__main__":
