@@ -247,18 +247,56 @@ def _blocking_warning_scope(
     )
 
 
+def _quality_summary_matches_warning_scope(
+    quality: dict,
+    fields: set[str],
+    blocking_codes: set[str],
+) -> bool:
+    """Validate quality metadata against the blocking warning scope.
+
+    Hold reasons must reference known blocking warning codes.
+    Affected attributes must be within the verified warning scope.
+
+    The summary may contain the legacy 'all' marker, but this does not
+    independently authorize narrowing.
+    """
+    reasons = quality.get("hold_reasons")
+    summary = quality.get("affected_attributes")
+
+    reasons_valid = reasons is None or (
+        isinstance(reasons, list)
+        and all(
+            isinstance(reason, str) and reason in blocking_codes
+            for reason in reasons
+        )
+    )
+
+    allowed_fields = fields | {"all"}
+
+    summary_valid = (
+        isinstance(summary, list)
+        and bool(summary)
+        and all(
+            isinstance(field, str) and field in allowed_fields
+            for field in summary
+        )
+    )
+
+    return reasons_valid and summary_valid
+
+
 def scoped_income_quality_attributes(
     eligibility: dict,
     quality: dict,
 ) -> set[str] | None:
-    """Narrow only when structure, warnings and summary all independently agree."""
-    if not income_only_unknown_under_and(eligibility):
-        return None
+    """Narrow only when structure, warnings and summary agree."""
+    scope_allowed = (
+        income_only_unknown_under_and(eligibility)
+        and isinstance(quality, dict)
+        and quality.get("hold_auto_eligibility") is True
+    )
 
-    if (
-        not isinstance(quality, dict)
-        or quality.get("hold_auto_eligibility") is not True
-    ):
+    if not scope_allowed:
         return None
 
     warning_scope = _blocking_warning_scope(
@@ -270,27 +308,12 @@ def scoped_income_quality_attributes(
 
     fields, blocking_codes = warning_scope
 
-    reasons = quality.get("hold_reasons")
-    summary = quality.get("affected_attributes")
-
-    if reasons is not None and (
-        not isinstance(reasons, list)
-        or any(
-            not isinstance(reason, str)
-            or reason not in blocking_codes
-            for reason in reasons
+    return (
+        fields
+        if _quality_summary_matches_warning_scope(
+            quality,
+            fields,
+            blocking_codes,
         )
-    ):
-        return None
-
-    if not isinstance(summary, list) or not summary:
-        return None
-
-    if any(
-        not isinstance(field, str)
-        or field not in fields | {"all"}
-        for field in summary
-    ):
-        return None
-
-    return fields
+        else None
+    )
