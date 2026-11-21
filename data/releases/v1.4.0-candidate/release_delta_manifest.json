@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-18T22:58:47.683630+09:00",
+  "created_at": "2026-11-20T14:53:30.002587+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -152,6 +152,13 @@
       "before": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
       "after": null,
       "reason": "missing_application_url"
+    },
+    {
+      "policy_id": "POL_010",
+      "field": "official_apply_url",
+      "before": "https://www.work24.go.kr",
+      "after": null,
+      "reason": "manual_review_homepage_only"
     },
     {
       "policy_id": "POL_BOK_001",
@@ -917,11 +924,32 @@
       "reason": "missing_application_url"
     },
     {
+      "policy_id": "POL_GOV_012",
+      "field": "official_apply_url",
+      "before": "http://www.kics.go.kr",
+      "after": null,
+      "reason": "manual_review_login_list_not_policy_specific"
+    },
+    {
       "policy_id": "POL_GOV_013",
       "field": "official_apply_url",
       "before": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=751979&bnefType=all&svcId=128000000002",
       "after": null,
       "reason": "missing_application_url"
+    },
+    {
+      "policy_id": "POL_GOV_014",
+      "field": "official_apply_url",
+      "before": "http://www.kics.go.kr",
+      "after": null,
+      "reason": "manual_review_login_list_not_policy_specific"
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "field": "official_apply_url",
+      "before": "https://www.withcountry.mil.kr/",
+      "after": null,
+      "reason": "manual_review_phone_or_visit_only"
     },
     {
       "policy_id": "POL_GOV_016",
@@ -1064,6 +1092,13 @@
       "reason": "missing_application_url"
     },
     {
+      "policy_id": "POL_GOV_036",
+      "field": "official_apply_url",
+      "before": "http://www.bokjiro.go.kr",
+      "after": null,
+      "reason": "manual_review_login_list_not_policy_specific"
+    },
+    {
       "policy_id": "POL_GOV_037",
       "field": "official_apply_url",
       "before": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001339&bnefType=all&svcId=374000000115",
@@ -1125,6 +1160,13 @@
       "before": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003158&bnefType=all&svcId=439000000835",
       "after": null,
       "reason": "missing_application_url"
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "field": "official_apply_url",
+      "before": "https://www.bokjiro.go.kr/ssis-teu/index.do",
+      "after": null,
+      "reason": "manual_review_login_list_not_policy_specific"
     },
     {
       "policy_id": "POL_GOV_047",
@@ -1197,6 +1239,13 @@
       "reason": "missing_application_url"
     },
     {
+      "policy_id": "POL_GOV_057",
+      "field": "official_apply_url",
+      "before": "http://www.jinju.go.kr",
+      "after": "https://www.jinju.go.kr/00134/00616/06681.web",
+      "reason": "manual_review_verified_apply_page"
+    },
+    {
       "policy_id": "POL_GOV_058",
       "field": "official_apply_url",
       "before": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003134&bnefType=all&svcId=569000000343",
@@ -1239,6 +1288,13 @@
       "reason": "missing_application_url"
     },
     {
+      "policy_id": "POL_GOV_065",
+      "field": "official_apply_url",
+      "before": "https://www.eco-g.or.kr/",
+      "after": "https://camp.xticket.kr/web/main?shopEncode=a1535c44b7b5b3ab38fd902f0c58f8600f1a57e45999ac4b1a7b8c321f1d2df5",
+      "reason": "manual_review_verified_apply_page"
+    },
+    {
       "policy_id": "POL_YC_001",
       "field": "official_apply_url",
       "before": "https://www.jeonbuk.go.kr/index.jeonbuk?menuCd=DOM_000000104015059002",
@@ -1274,6 +1330,13 @@
       "reason": "reference_url_only"
     },
     {
+      "policy_id": "POL_YC_006",
+      "field": "official_apply_url",
+      "before": "https://minwon.daegu.go.kr/main",
+      "after": "https://minwon.daegu.go.kr/cvpl/AUTN-011/info",
+      "reason": "manual_review_verified_apply_page"
+    },
+    {
       "policy_id": "POL_YC_007",
       "field": "official_apply_url",
       "before": "www.dgist.ac.kr",
@@ -1281,11 +1344,25 @@
       "reason": "invalid_http_url"
     },
     {
+      "policy_id": "POL_YC_008",
+      "field": "official_apply_url",
+      "before": "http://www.wisetkmu.kr",
+      "after": null,
+      "reason": "manual_review_homepage_only"
+    },
+    {
       "policy_id": "POL_YC_010",
       "field": "official_apply_url",
       "before": "https://www.daegu.go.kr/YouthPolicy/index.do",
       "after": null,
       "reason": "guidance_or_notice_page"
+    },
+    {
+      "policy_id": "POL_YC_011",
+      "field": "official_apply_url",
+      "before": "https://robotcontest.kr",
+      "after": null,
+      "reason": "manual_review_login_list_not_policy_specific"
     },
     {
       "policy_id": "POL_YC_012",
@@ -1307,6 +1384,13 @@
       "before": "https://www.daegu.go.kr/YouthPolicy/index.do",
       "after": null,
       "reason": "guidance_or_notice_page"
+    },
+    {
+      "policy_id": "POL_YC_015",
+      "field": "official_apply_url",
+      "before": "https://inochongdg.org",
+      "after": null,
+      "reason": "manual_review_list_only_not_verified"
     },
     {
       "policy_id": "POL_YC_016",
@@ -1540,11 +1624,32 @@
       "reason": "reference_url_only"
     },
     {
+      "policy_id": "POL_YC_049",
+      "field": "official_apply_url",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "manual_review_phone_or_visit_only"
+    },
+    {
+      "policy_id": "POL_YC_050",
+      "field": "official_apply_url",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "manual_review_phone_or_visit_only"
+    },
+    {
       "policy_id": "POL_YC_051",
       "field": "official_apply_url",
       "before": "https://youth.gg.go.kr",
       "after": null,
       "reason": "reference_url_only"
+    },
+    {
+      "policy_id": "POL_YC_052",
+      "field": "official_apply_url",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "manual_review_phone_or_visit_only"
     },
     {
       "policy_id": "POL_YC_053",
@@ -1629,11 +1734,18 @@
       "before": "https://www.xn--289ax9fnsqbqat17bcmg.com/",
       "after": null,
       "reason": "reference_url_only"
+    },
+    {
+      "policy_id": "POL_YC_065",
+      "field": "official_apply_url",
+      "before": "https://www.sejong.go.kr",
+      "after": null,
+      "reason": "manual_review_homepage_only"
     }
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "bbe6865afc25d9ead5601a221d31cf3611e4afbf801d6db1fbe51cf72e33d35b",
+    "source_sha256": "2e5bf7beedad018308dfc2b51c5325a8075b082d0221c2a631f8a6beb852e89c",
     "removed_relationships": [
       {
         "source_id": "POL_001",
