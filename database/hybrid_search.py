@@ -915,6 +915,8 @@ def assess_policy_data_quality(context: dict[str, Any] | None,
     if unknown_groups:
         # Narrow only when every UNKNOWN is an income-only descendant of AND.
         # The income predicate itself is never automatically verified.
+        # Consumer validates this `affects` field together with full warnings
+        # and the original tree; it is not just a presentation annotation.
         scope = ["income"] if income_only_unknown_under_and(eligibility) else ["all"]
         warnings.append({"code": QUALITY_UNKNOWN_CONDITION, "level": "caution",
                          "group_ids": unknown_groups, "affects": scope,

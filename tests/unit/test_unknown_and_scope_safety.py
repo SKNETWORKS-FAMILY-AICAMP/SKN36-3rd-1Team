@@ -80,3 +80,26 @@ def test_income_unknown_keeps_certain_age_failure():
     assert age[0]["status"] == "ineligible"
     assert root["status"] == "ineligible"
     assert original == policy
+
+
+@pytest.mark.parametrize("affects,expected", [
+    (["income"], {"income"}),
+    (["all"], {"income"}),  # explicitly supported legacy payload
+    (["region"], None),
+    (["income", "age"], None),
+])
+def test_search_warning_affects_is_validated_and_consumed(affects, expected):
+    quality = _quality()
+    quality["warnings"][0]["affects"] = affects
+    assert scoped_income_quality_attributes(_tree(), quality) == expected
+
+
+def test_multiple_unknown_groups_do_not_expand_scope_without_exact_metadata():
+    eligibility = _tree()
+    eligibility["condition_tree"][0]["groups"].append({
+        "group_id": "SECOND", "logic": "UNKNOWN",
+        "conditions": [{"type": "INCOME"}], "groups": [],
+    })
+    assert scoped_income_quality_attributes(eligibility, _quality()) is None
+    eligibility["unknown_logic_groups"].append("SECOND")
+    assert scoped_income_quality_attributes(eligibility, _quality()) == {"income"}

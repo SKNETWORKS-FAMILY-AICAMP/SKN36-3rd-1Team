@@ -10,6 +10,48 @@ from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 UNKNOWN_WARNING = "UNKNOWN_CONDITION_GROUP"
 
 
+def unavailable_group(group: object, depth: int) -> bool:
+    """Shared traversal cutoff for Checker and UNKNOWN scope inspection."""
+    return (
+        depth > 10
+        or not isinstance(group, dict)
+        or bool(group.get("cycle"))
+        or bool(group.get("not_loaded"))
+    )
+
+
+def can_preserve_scoped_failed_root(
+    eligibility: dict,
+    scoped_unknown: set[str] | None,
+    affected: set[str],
+    *,
+    root_status: str,
+    has_certain_required_failure: bool,
+    hold_all: bool = False,
+    walk_issues: set[str] | None = None,
+) -> bool:
+    """Single decision gate shared by Checker and Pipeline.
+
+    The caller must supply proof of a *directly evaluated* failed condition on
+    a mandatory AND-only path. The shared guard never infers that from a
+    failed OR/NOT child or from the root status alone.
+    """
+    if hold_all or scoped_unknown is None or affected != scoped_unknown:
+        return False
+    if root_status != "ineligible" or not has_certain_required_failure:
+        return False
+    if walk_issues and (walk_issues - {"unknown_logic"}):
+        return False
+    trees = eligibility.get("condition_tree") if isinstance(eligibility, dict) else None
+    return (
+        isinstance(trees, list)
+        and len(trees) == 1
+        and isinstance(trees[0], dict)
+        and str(trees[0].get("logic") or "").upper() == "AND"
+        and not eligibility.get("structure_issues")
+    )
+
+
 def income_only_unknown_under_and(eligibility: dict) -> bool:
     """True only when every UNKNOWN group is an income-only AND descendant.
 
@@ -32,9 +74,7 @@ def income_only_unknown_under_and(eligibility: dict) -> bool:
     found: set[str] = set()
 
     def visit(group: dict, all_and: bool, depth: int) -> bool:
-        if depth > 10 or not isinstance(group, dict):
-            return False
-        if group.get("cycle") or group.get("not_loaded"):
+        if unavailable_group(group, depth):
             return False
         conditions = group.get("conditions")
         children = group.get("groups")
@@ -63,52 +103,66 @@ def income_only_unknown_under_and(eligibility: dict) -> bool:
     return visit(trees[0], True, 0) and bool(found) and found == set(declared)
 
 
-def scoped_income_quality_attributes(eligibility: dict, quality: dict) -> set[str] | None:
-    """Return provably scoped warning fields, or None for conservative fallback.
+def _blocking_warning_scope(warnings: object) -> tuple[set[str], set[str]] | None:
+    """Merge validated warning scopes; legacy UNKNOWN `all` means income only.
 
-    The legacy summary may say affected_attributes=['all']; narrow it only
-    when the complete warning inventory supports the income-only exception.
+    Only an UNKNOWN warning may use the legacy `all` scope. Any other
+    global/unknown warning forces the caller back to a global hold.
     """
-    if not income_only_unknown_under_and(eligibility):
-        return None
-    if not isinstance(quality, dict) or quality.get("hold_auto_eligibility") is not True:
-        return None
-    warnings = quality.get("warnings")
     if not isinstance(warnings, list) or not warnings:
         return None
-    fields: set[str] = {"income"}
+
+    fields: set[str] = set()
     blocking_codes: set[str] = set()
-    unknown_seen = 0
+    unknown_count = 0
     for warning in warnings:
         if not isinstance(warning, dict) or not isinstance(warning.get("code"), str):
             return None
         if warning.get("blocks_auto_eligibility") is False:
             continue
-        code = warning["code"]
-        blocking_codes.add(code)
         affects = warning.get("affects")
-        if not isinstance(affects, list) or not affects:
+        if (not isinstance(affects, list) or not affects
+                or any(not isinstance(field, str) or not field for field in affects)):
             return None
-        if not all(isinstance(field, str) and field for field in affects):
-            return None
+
+        code = warning["code"]
         affected = set(affects)
+        blocking_codes.add(code)
         if code == UNKNOWN_WARNING:
-            unknown_seen += 1
-            if not affected <= {"all", "income"}:
+            unknown_count += 1
+            if not affected <= {"income", "all"}:
                 return None
+            # Use Search's `affects=[income]` directly; `all` remains accepted
+            # for old search payloads only after strict structure validation.
+            fields.update(affected - {"all"})
+            if "all" in affected:
+                fields.add("income")
         else:
             if not affected <= SCOPED_ELIGIBILITY_FIELDS:
                 return None
             fields.update(affected)
-    if unknown_seen != 1:
+    return (fields, blocking_codes) if unknown_count == 1 else None
+
+
+def scoped_income_quality_attributes(eligibility: dict, quality: dict) -> set[str] | None:
+    """Narrow only when structure, warnings and summary all independently agree."""
+    if not income_only_unknown_under_and(eligibility):
         return None
+    if not isinstance(quality, dict) or quality.get("hold_auto_eligibility") is not True:
+        return None
+
+    warning_scope = _blocking_warning_scope(quality.get("warnings"))
+    if warning_scope is None:
+        return None
+    fields, blocking_codes = warning_scope
+
     reasons = quality.get("hold_reasons")
+    summary = quality.get("affected_attributes")
     if reasons is not None and (
         not isinstance(reasons, list)
         or any(not isinstance(reason, str) or reason not in blocking_codes for reason in reasons)
     ):
         return None
-    summary = quality.get("affected_attributes")
     if not isinstance(summary, list) or not summary:
         return None
     if any(not isinstance(field, str) or field not in fields | {"all"} for field in summary):

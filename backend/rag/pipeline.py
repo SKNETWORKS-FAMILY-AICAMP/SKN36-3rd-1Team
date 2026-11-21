@@ -11,7 +11,11 @@ from pydantic import ValidationError
 from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from database.unknown_group_scope import scoped_income_quality_attributes
+from backend.eligibility.checker import certain_required_and_failure
+from database.unknown_group_scope import (
+    can_preserve_scoped_failed_root,
+    scoped_income_quality_attributes,
+)
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
@@ -189,14 +193,33 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
         or structure.get("structure_issues")
     )
     conditions = [condition.model_dump() for condition in result.conditions]
-    for condition in conditions:
+    root_index = next(
+        (i for i in range(len(conditions) - 1, -1, -1)
+         if conditions[i]["field"].lower() == "eligibility"),
+        None,
+    )
+    # At this boundary `raw` is only schema-validated, not proof-validated.
+    # Recheck an unaffected direct AND failure before preserving the root.
+    preserve_root = (
+        root_index is not None
+        and not hold_all
+        and scoped_unknown is not None
+        and can_preserve_scoped_failed_root(
+            structure, scoped_unknown, affected,
+            root_status=conditions[root_index]["status"],
+            has_certain_required_failure=certain_required_and_failure(
+                structure, profile, affected,
+            ),
+            hold_all=bool(hold_all),
+        )
+    )
+    for index, condition in enumerate(conditions):
         field = condition["field"].lower()
         # Checker가 이미 보류한 조건의 사유(원문 확인 결과·공고 확인 항목 등)는 그대로 둔다.
         if condition["status"] == "needs_check":
             continue
-        # Checker has established an unaffected failed AND requirement.
-        if (scoped_unknown is not None and field == "eligibility"
-                and condition["status"] == "ineligible"):
+        # Same strict safety gate as Checker; never preserve unrelated groups.
+        if preserve_root and index == root_index:
             continue
         # 보류 원인별로 사유를 다르게 적는다. 입력 누락을 데이터 오류로 안내하지 않는다.
         # 범위가 있는 경고라도 미확인 필드가 그 범위 밖이라고 단정할 수 없다.

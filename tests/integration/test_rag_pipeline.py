@@ -1191,3 +1191,56 @@ class RequestSchemaTests(unittest.TestCase):
             with self.subTest(updates=updates), self.assertRaises(ValidationError):
                 UserProfile.model_validate({**base, **updates})
         self.assertEqual(UserProfile.model_validate({**base, "income": 3.5}).income, 3.5)
+
+
+# Issue #40 reviewer request: cover the narrowing branch in the existing Pipeline suite.
+def test_issue40_review_existing_pipeline_suite_rechecks_failed_root_proof():
+    from copy import deepcopy
+    from backend.eligibility.checker import check_eligibility
+    from backend.rag.pipeline import _policy_check
+
+    item = policy()
+    item["graph"]["eligibility"] = {
+        "condition_tree": [{
+            "group_id": "ROOT", "logic": "AND",
+            "conditions": [{"type": "AGE", "operator": "BETWEEN", "value": "19~34"}],
+            "groups": [{"group_id": "INC", "logic": "UNKNOWN",
+                        "conditions": [{"type": "INCOME", "value": "pending"}], "groups": []}],
+        }],
+        "unknown_logic_groups": ["INC"], "structure_issues": [],
+    }
+    item["data_quality"] = {
+        "hold_auto_eligibility": True,
+        "affected_attributes": ["income"],
+        "warnings": [{"code": "UNKNOWN_CONDITION_GROUP", "affects": ["income"],
+                      "blocks_auto_eligibility": True}],
+    }
+    context = {"url": "https://example.org/notice"}
+
+    failed_profile = {"age": 45, "region": None, "income": None}
+    verified = check_eligibility(failed_profile, item)
+    final = _policy_check(item, verified, failed_profile, context)
+    root = [row for row in final["conditions"] if row["field"] == "eligibility"][-1]
+    assert root["status"] == "ineligible"
+
+    # An untrusted serialized result claiming a failed root without an actual
+    # failed required condition must NOT bypass the hold in Pipeline.
+    passed_profile = {"age": 25, "region": None, "income": None}
+    forged = deepcopy(check_eligibility(passed_profile, item))
+    for row in reversed(forged["conditions"]):
+        if row["field"] == "eligibility":
+            row["status"] = "ineligible"
+            break
+    final = _policy_check(item, forged, passed_profile, context)
+    root = [row for row in final["conditions"] if row["field"] == "eligibility"][-1]
+    assert root["status"] == "needs_check"
+
+    # Other global warnings must still force a hold despite a real age failure.
+    unsafe = deepcopy(item)
+    unsafe["data_quality"]["warnings"].append({
+        "code": "NEEDS_REVIEW", "affects": ["all"], "blocks_auto_eligibility": True,
+    })
+    unsafe["data_quality"]["affected_attributes"] = ["all"]
+    final = _policy_check(unsafe, verified, failed_profile, context)
+    root = [row for row in final["conditions"] if row["field"] == "eligibility"][-1]
+    assert root["status"] == "needs_check"

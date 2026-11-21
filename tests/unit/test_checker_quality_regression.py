@@ -108,3 +108,26 @@ def test_out_of_search_scope_attribute_holds_all(attribute):
 def test_search_scoped_attributes_are_supported(attribute):
     result = check_eligibility({"age": 25}, _policy([attribute]))
     assert _status(result, "eligibility") == ["needs_check"]
+
+
+# Issue #40 reviewer request: cover narrowing in the existing Checker suite.
+def test_issue40_review_existing_checker_suite_preserves_required_age_failure():
+    policy = _policy()
+    eligibility = policy["graph"]["eligibility"]
+    eligibility["condition_tree"][0]["conditions"][0]["value"] = "19~34"
+    eligibility["condition_tree"][0]["groups"] = [
+        {"group_id": "INCOME_UNKNOWN", "logic": "UNKNOWN",
+         "conditions": [{"type": "INCOME", "value": "pending"}], "groups": []},
+    ]
+    eligibility["unknown_logic_groups"] = ["INCOME_UNKNOWN"]
+    policy["data_quality"] = {
+        "hold_auto_eligibility": True, "affected_attributes": ["all"],
+        "warnings": [{"code": "UNKNOWN_CONDITION_GROUP", "affects": ["income"],
+                      "blocks_auto_eligibility": True}],
+    }
+    failed = check_eligibility({"age": 45}, policy)
+    assert _status(failed, "age") == ["ineligible"]
+    assert _status(failed, "eligibility")[-1] == "ineligible"
+    passed = check_eligibility({"age": 25}, policy)
+    assert _status(passed, "age") == ["eligible"]
+    assert _status(passed, "eligibility")[-1] == "needs_check"
