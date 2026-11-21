@@ -14,6 +14,7 @@ from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
+    normalize_quality_affected_attributes,
     scoped_income_quality_attributes,
 )
 from database.region_search import ALIASES, SIDOS
@@ -180,8 +181,15 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     structure = graph.get("eligibility") or {}
     quality = policy.get("data_quality") or {}
     scoped_unknown = scoped_income_quality_attributes(structure, quality)
-    affected = (scoped_unknown if scoped_unknown is not None
-                else set(quality.get("affected_attributes") or []))
+    if scoped_unknown is not None:
+        affected = scoped_unknown
+    else:
+        summary = quality.get("affected_attributes")
+        affected = (
+            normalize_quality_affected_attributes(summary)
+            if summary or quality.get("hold_auto_eligibility")
+            else set()
+        )
     # 구조 오류나 범위를 확인할 수 없는 UNKNOWN은 기존과 같이 전체 보류.
     hold_all = (
         not graph or policy.get("graph_status") == "MISSING_IN_GRAPH"

@@ -13,9 +13,9 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
-from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
+    normalize_quality_affected_attributes,
     scoped_income_quality_attributes,
     unavailable_group,
 )
@@ -463,36 +463,7 @@ def _affected_fields(
     if not quality.get("hold_auto_eligibility"):
         return set()
 
-    attrs = quality.get("affected_attributes")
-
-    if not isinstance(attrs, list) or not attrs:
-        return {"all"}
-
-    aliases = {
-        "residence": "region",
-        "location": "region",
-        "housing_household": "housing",
-        "household": "housing",
-    }
-
-    # 검색 계층·Pipeline과 같은 공통 상수. 판단(별칭 변환·전체 보류)은 이 함수가 그대로 맡는다.
-    supported = SCOPED_ELIGIBILITY_FIELDS | {ALL_ELIGIBILITY_FIELDS}
-
-    normalized = set()
-
-    for attr in attrs:
-        if not isinstance(attr, str) or not attr.strip():
-            return {"all"}
-
-        name = attr.strip().lower()
-        field = aliases.get(name, name)
-
-        if field not in supported:
-            return {"all"}
-
-        normalized.add(field)
-
-    return normalized or {"all"}
+    return normalize_quality_affected_attributes(quality.get("affected_attributes"))
 
 
 def _safe_review_text(value: object) -> str:
