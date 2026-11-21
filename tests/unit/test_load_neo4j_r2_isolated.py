@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from r2_release_gate import r2_release_only  # noqa: E402  (r2 실데이터 테스트는 r2 릴리스에서만)
 from test_neo4j_loader import FakeGraphRunner  # noqa: E402
 from test_update_b2_from_snapshot import FakeQdrant  # noqa: E402
 
@@ -143,6 +144,7 @@ class GuardTests(unittest.TestCase):
                 r2.server_info(runner)
 
 
+@r2_release_only
 class ReferenceTests(unittest.TestCase):
     def test_latest_release_counts_match_pinned_expectation(self):
         ref = Reference.get()
@@ -167,6 +169,7 @@ class ReferenceTests(unittest.TestCase):
                 r2.load_reference()
 
 
+@r2_release_only
 class LoadTests(unittest.TestCase):
     def setUp(self):
         self.ref = Reference.get()
@@ -239,6 +242,7 @@ class LoadTests(unittest.TestCase):
         self.assertEqual((result["status"], result["totals"]), ("LOADED", {"nodes": 1126, "relationships": 2668}))
 
 
+@r2_release_only
 class CrossDbTests(unittest.TestCase):
     """실제 B2 청크 1,139개 payload를 담은 FakeQdrant + 적재된 FakeNeo4j로 교차 검증 (벡터는 sample_only)."""
 
@@ -310,6 +314,7 @@ class CliTests(unittest.TestCase):
                 with self.subTest(url=url):
                     self.assertEqual(r2.main(["--neo4j-url", url]), 1)
 
+    @r2_release_only
     def test_dry_run_cli_uses_one_verified_driver_for_the_runner(self):
         from neo4j.exceptions import AuthError
         good = SimpleNamespace(verify_connectivity=lambda: None, close=lambda: None)
