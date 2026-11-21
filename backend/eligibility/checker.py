@@ -13,7 +13,12 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
-from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
+from database.unknown_group_scope import (
+    can_preserve_scoped_failed_root,
+    normalize_quality_affected_attributes,
+    scoped_income_quality_attributes,
+    unavailable_group,
+)
 
 KST = timezone(timedelta(hours=9))
 
@@ -296,15 +301,13 @@ def _walk(
     depth: int = 0,
     *,
     issues: set[str] | None = None,
+    required_and_path: bool = False,
+    affected: set[str] | None = None,
+    certain_failures: list[bool] | None = None,
 ) -> tuple[str, list[dict]]:
-    """조건 트리를 한 번만 순회하며 결과와 구조 오류를 수집한다."""
+    """Evaluate a tree once, collecting decisive AND failures when requested."""
 
-    if (
-        depth > 10
-        or not isinstance(group, dict)
-        or group.get("cycle")
-        or group.get("not_loaded")
-    ):
+    if unavailable_group(group, depth):
         if issues is not None:
             issues.add("invalid_group")
         return CHECK, [
@@ -365,6 +368,16 @@ def _walk(
 
         items.append(item)
         states.append(item["status"])
+        if (
+            certain_failures is not None
+            and required_and_path
+            and logic == "AND"
+            and isinstance(condition, dict)
+            and affected is not None
+            and _field(condition) not in affected
+            and item["status"] == NO
+        ):
+            certain_failures[0] = True
 
     for child in children:
         status, nested = _walk(
@@ -372,6 +385,9 @@ def _walk(
             profile,
             depth + 1,
             issues=issues,
+            required_and_path=required_and_path and logic == "AND",
+            affected=affected,
+            certain_failures=certain_failures,
         )
 
         states.append(status)
@@ -391,54 +407,63 @@ def _walk(
     return group_status, items
 
 
+def certain_required_and_failure(
+    eligibility: dict, profile: dict, affected: set[str]
+) -> bool:
+    """Independently verify the proof at the Pipeline trust boundary.
+
+    Checker itself reuses the original _walk results and never calls this
+    function. Pipeline accepts serialized results, so it must not trust a
+    caller-supplied `ineligible` root without checking its original condition.
+    """
+    trees = eligibility.get("condition_tree") if isinstance(eligibility, dict) else None
+    if not isinstance(trees, list) or len(trees) != 1:
+        return False
+
+    def find(group: dict, depth: int) -> bool:
+        if unavailable_group(group, depth):
+            return False
+        if str(group.get("logic") or "").upper() != "AND":
+            return False
+        conditions = group.get("conditions")
+        children = group.get("groups")
+        if not isinstance(conditions, list) or not isinstance(children, list):
+            return False
+        if any(
+            isinstance(condition, dict)
+            and _field(condition) not in affected
+            and _condition(condition, profile)["status"] == NO
+            for condition in conditions
+        ):
+            return True
+        return any(find(child, depth + 1) for child in children)
+
+    return find(trees[0], 0)
+
+
 def _affected_fields(
     quality: dict,
     eligibility: dict,
     graph_missing: bool,
+    *,
+    scoped_unknown: set[str] | None = None,
 ) -> set[str]:
 
     if graph_missing:
         return {"all"}
 
-    if (
-        eligibility.get("unknown_logic_groups")
-        or eligibility.get("structure_issues")
-    ):
+    if eligibility.get("structure_issues"):
+        return {"all"}
+
+    if scoped_unknown is not None:
+        return scoped_unknown
+    if eligibility.get("unknown_logic_groups"):
         return {"all"}
 
     if not quality.get("hold_auto_eligibility"):
         return set()
 
-    attrs = quality.get("affected_attributes")
-
-    if not isinstance(attrs, list) or not attrs:
-        return {"all"}
-
-    aliases = {
-        "residence": "region",
-        "location": "region",
-        "housing_household": "housing",
-        "household": "housing",
-    }
-
-    # 검색 계층·Pipeline과 같은 공통 상수. 판단(별칭 변환·전체 보류)은 이 함수가 그대로 맡는다.
-    supported = SCOPED_ELIGIBILITY_FIELDS | {ALL_ELIGIBILITY_FIELDS}
-
-    normalized = set()
-
-    for attr in attrs:
-        if not isinstance(attr, str) or not attr.strip():
-            return {"all"}
-
-        name = attr.strip().lower()
-        field = aliases.get(name, name)
-
-        if field not in supported:
-            return {"all"}
-
-        normalized.add(field)
-
-    return normalized or {"all"}
+    return normalize_quality_affected_attributes(quality.get("affected_attributes"))
 
 
 def _safe_review_text(value: object) -> str:
@@ -753,9 +778,17 @@ def check_eligibility(
         or not graph
     )
 
+    scoped_unknown = (
+        scoped_income_quality_attributes(eligibility, quality)
+        if not missing else None
+    )
+    affected = _affected_fields(
+        quality, eligibility, missing, scoped_unknown=scoped_unknown,
+    )
     conditions: list[dict] = []
     root_results: list[dict] = []
     walk_issues: set[str] = set()
+    certain_failures = [False]
 
     if (
         missing
@@ -774,7 +807,11 @@ def check_eligibility(
 
     else:
         for tree in trees:
-            _, details = _walk(tree, profile, issues=walk_issues)
+            _, details = _walk(
+                tree, profile, issues=walk_issues,
+                required_and_path=scoped_unknown is not None and len(trees) == 1,
+                affected=affected, certain_failures=certain_failures,
+            )
             # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
             # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
             root_results.append(details[-1])
@@ -790,12 +827,6 @@ def check_eligibility(
                     "확인되지 않았습니다.",
                 )
             )
-
-    affected = _affected_fields(
-        quality,
-        eligibility,
-        missing,
-    )
 
     for field in sorted(affected - {"all"}):
         if (
@@ -814,8 +845,23 @@ def check_eligibility(
                 )
             )
 
+    # Preserve the *single root object* only when both the shared safety
+    # gate and the already-evaluated mandatory AND condition prove failure.
+    safe_failed_root = root_results[0] if (
+        len(root_results) == 1
+        and can_preserve_scoped_failed_root(
+            eligibility, scoped_unknown, affected,
+            root_status=root_results[0]["status"],
+            has_certain_required_failure=certain_failures[0],
+            hold_all=missing or "all" in affected,
+            walk_issues=walk_issues,
+        )
+    ) else None
+
     if affected:
         for item in conditions:
+            if item is safe_failed_root and item["status"] == NO:
+                continue
             if (
                 "all" in affected
                 or item["field"] in affected
@@ -842,6 +888,8 @@ def check_eligibility(
     if affected and "all" not in affected:
         for item in conditions:
             if item["field"] == "eligibility":
+                if item is safe_failed_root and item["status"] == NO:
+                    continue
                 item["status"] = CHECK
 
                 if "데이터 품질 경고" not in item["reason"]:
