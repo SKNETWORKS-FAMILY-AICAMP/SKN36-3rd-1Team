@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
-- **최종 검증 일시**: 2026-11-21 23:12:35 KST
+- **최종 검증 일시**: 2026-11-21 23:51:44 KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -13,15 +13,15 @@
 | 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |
 | :--- | ---: | ---: | ---: |
 | 정책 (`Policy`) | 237 | 246 | +9 |
-| 근거 문서 (`Document`) | 246 | 267 | +21 |
+| 근거 문서 (`Document`) | 246 | 268 | +22 |
 | • 신규 문서 `verified_official_api` | - | 8 | +8 |
 | • 신규 문서 `verified_official_raw` | - | 4 | +4 |
-| • 신규 문서 `verified_official_text` | - | 9 | +9 |
-| 벡터 청크 (`Chunk`) | 557 | 659 | +102 |
-| 그래프 노드 (전체) | 1034 | 1132 | +98 |
+| • 신규 문서 `verified_official_text` | - | 10 | +10 |
+| 벡터 청크 (`Chunk`) | 557 | 663 | +106 |
+| 그래프 노드 (전체) | 1034 | 1133 | +99 |
 | • Organization | 116 | 123 | +7 |
 | • ConditionGroup | 343 | 351 | +9 (루트 UNKNOWN) |
-| 그래프 관계 (전체) | 3615 | 2673 | +94 |
+| 그래프 관계 (전체) | 3615 | 2674 | +95 |
 | • ADMINISTERED_BY | 237 | 246 | +9 |
 | • APPLIES_TO_LIFESTAGE | 419 | 437 | +18 |
 | • AVAILABLE_IN | 238 | 247 | +9 |
@@ -30,7 +30,7 @@
 | • HAS_CATEGORY | 237 | 246 | +9 |
 | • HAS_ROOT_CONDITION_GROUP | 237 | 246 | +9 |
 | • REQUIRES_CONDITION | 735 | 211 | +-524 |
-| • SUPPORTED_BY | 246 | 267 | +21 |
+| • SUPPORTED_BY | 246 | 268 | +22 |
 | • TARGETS | 424 | 443 | +19 |
 
 ## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)

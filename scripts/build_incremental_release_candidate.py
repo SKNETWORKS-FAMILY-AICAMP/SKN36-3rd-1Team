@@ -82,7 +82,7 @@ def prepare_held_excerpts(documents: list[dict], corrections: dict) -> dict[str,
     """공식 FAQ 안에서 서로 맞지 않거나 기한이 지난 행을 검색용 본문에서 보류한다.
 
     staging 추출본(원문)은 그대로 두고, 후보의 source_text에 보류 행을 뺀 본문을 따로 쓴다.
-    대체 문서가 없는 '확인 필요' 보류이므로 사유와 상태를 반드시 적게 한다.
+    사유와 상태는 반드시 적고, 기준 문서(superseded_by_document_id)를 적었다면 후보에 있어야 한다.
     """
     held: dict[str, list[str]] = {}
     for item in corrections.get("held_document_lines", []):
@@ -92,6 +92,10 @@ def prepare_held_excerpts(documents: list[dict], corrections: dict) -> dict[str,
     by_id = {row["document_id"]: row for row in documents}
     updated = {}
     for doc_id, items in held.items():
+        missing = [i["superseded_by_document_id"] for i in items
+                   if i.get("superseded_by_document_id") and i["superseded_by_document_id"] not in by_id]
+        if missing:
+            raise ValueError(f"보류 행의 기준 문서가 후보에 없습니다: {missing}")
         document = by_id[doc_id]
         source = BASE_DIR / document["extracted_text_path"]
         if not source.is_relative_to(STAGING_DIR):

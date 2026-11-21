@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "data/releases/v1.4.0-candidate"
 SEOUL_DOC = "DOC_STG_SEOUL_001_FAQ_2026"
 KPASS_DOC = "DOC_STG_MOLIT_001_FAQ_2026"
+INTRO_DOC = "DOC_STG_SEOUL_001_INTRO_2026"  # 보류 항목의 기준: 공식 소개 탭
 SEOUL_STAGING = ROOT / "data/staging/official/faq/youth_seoul_allowance_faq_20261118.txt"
 # 답변 근거로 무경고 전달되면 안 되는 문구 (검수에서 B2 C002·C016으로 재현)
 SHORT_TERM_EXCLUSION = "③ 주 30시간 이하 또는 3개월 이하의 단기근로자(취업자)"
@@ -31,7 +32,7 @@ class FaqReviewHoldTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         documents = load_release_documents(PACKAGE, ROOT)
-        cls.documents = {d["document_id"]: d for d in documents if d["document_id"] in (SEOUL_DOC, KPASS_DOC)}
+        cls.documents = {d["document_id"]: d for d in documents if d["document_id"] in (SEOUL_DOC, KPASS_DOC, INTRO_DOC)}
         selected = list(cls.documents.values())
         cls.strategy_chunks = {strategy: chunking.chunk_documents(selected, strategy=strategy)[0]
                                for strategy in ("B2", "B3")}
@@ -50,6 +51,15 @@ class FaqReviewHoldTests(unittest.TestCase):
                 self.assertFalse([t for t in texts if phrase in t], f"{source}: {phrase}")
         # 같은 FAQ의 다른 항목(단기근로자 신청 가능 안내)은 남는다
         self.assertTrue(any("단기근로를 하고 있습니다. 신청 가능한가요?" in t for t in self.texts(SEOUL_DOC)["B2"]))
+
+    def test_intro_tab_is_the_searchable_basis(self):
+        # 팀 결정(2026-11-21): 단기근로자 자격과 증빙 보관 기한은 소개 탭 기준
+        for source, texts in self.texts(INTRO_DOC).items():
+            joined = " ".join(texts)
+            self.assertIn("단, 주30시간 이하 또는 3개월 이하 단기근로자 신청 가능", joined, source)
+            self.assertIn("증빙자료를 2026.12.31.까지 보관 바람", joined, source)
+        for item in dc.load_corrections()["held_document_lines"]:
+            self.assertEqual(item["superseded_by_document_id"], INTRO_DOC)
 
     def test_original_faq_text_is_preserved(self):
         original = SEOUL_STAGING.read_text(encoding="utf-8")

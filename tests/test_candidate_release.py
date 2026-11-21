@@ -60,14 +60,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 267)
-        self.assertEqual(report["chunks_checked_against_body"], 659)
+        self.assertEqual(report["body_hashes_checked"], 268)
+        self.assertEqual(report["chunks_checked_against_body"], 663)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1132)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2673)
-        self.assertEqual(len(chunks), 659)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1133)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2674)
+        self.assertEqual(len(chunks), 663)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
