@@ -1,4 +1,3 @@
-
 """SSOK 자격 조건 판정기 (ask_contract v1.0).
 
 입력은 Hybrid 검색 결과의 정책 객체 한 건이다.
@@ -405,6 +404,152 @@ def _walk(
     )
 
     return group_status, items
+
+
+def _positive_exclusion_matches(
+    group: dict,
+    profile: dict,
+    depth: int = 0,
+) -> tuple[str, list[dict]]:
+    """Find proven matching conditions in an exclusion operand.
+
+    Only AND/OR operands with a confirmed eligible result
+    can provide exclusion evidence. Nested NOT and unknown
+    structures are conservatively left unconfirmed.
+    """
+    if unavailable_group(group, depth):
+        return CHECK, []
+
+    logic = str(group.get("logic") or "").upper()
+    if logic not in {"AND", "OR"}:
+        return CHECK, []
+
+    conditions = group.get("conditions")
+    children = group.get("groups")
+
+    if not isinstance(conditions, list) or not isinstance(children, list):
+        return CHECK, []
+
+    states = []
+    matches = []
+
+    for condition in conditions:
+        if not isinstance(condition, dict):
+            states.append(CHECK)
+            continue
+
+        item = _condition(condition, profile)
+        states.append(item["status"])
+
+        if item["status"] == OK:
+            matches.append(item)
+
+    for child in children:
+        if not isinstance(child, dict):
+            states.append(CHECK)
+            continue
+
+        status, child_matches = _positive_exclusion_matches(
+            child, profile, depth + 1
+        )
+        states.append(status)
+
+        if status == OK:
+            matches.extend(child_matches)
+
+    result = _combine(logic, states)
+
+    if result != OK:
+        return result, []
+
+    return OK, matches
+
+
+def _collect_exclusion_reasons(
+    tree: dict,
+    profile: dict,
+) -> list[dict]:
+    """Collect confirmed NOT exclusion reasons for display only.
+
+    This function never changes the Checker's calculation
+    or any conditions[].status.
+    """
+    matched = []
+
+    def visit(group: dict, depth: int = 0) -> None:
+        if unavailable_group(group, depth):
+            return
+
+        logic = str(group.get("logic") or "").upper()
+        if logic not in {"AND", "OR", "NOT"}:
+            return
+
+        conditions = group.get("conditions")
+        children = group.get("groups")
+
+        if not isinstance(conditions, list) or not isinstance(children, list):
+            return
+
+        if logic == "NOT":
+            # A valid NOT group must have exactly one operand.
+            if len(conditions) + len(children) != 1:
+                return
+
+            if conditions:
+                condition = conditions[0]
+                if not isinstance(condition, dict):
+                    return
+
+                item = _condition(condition, profile)
+                if item["status"] == OK:
+                    matched.append(item)
+            else:
+                child = children[0]
+                if not isinstance(child, dict):
+                    return
+
+                status, matches = _positive_exclusion_matches(
+                    child, profile, depth + 1
+                )
+
+                if status == OK:
+                    matched.extend(matches)
+
+            return
+
+        # Only mandatory AND paths may establish a confirmed exclusion.
+        # A NOT branch under OR is optional and must not create a reason.
+        if logic != "AND":
+            return
+
+        for child in children:
+            if isinstance(child, dict):
+                visit(child, depth + 1)
+
+    visit(tree)
+
+    reasons = []
+    seen = set()
+
+    for item in matched:
+        reason = (
+            f"{item['reason'].rstrip('.')}."
+            " 해당 조건은 지원 제외 기준이며,"
+            " 입력하신 정보가 제외 대상에 해당합니다."
+        )
+
+        key = (item["field"], item["label"], reason)
+        if key in seen:
+            continue
+
+        seen.add(key)
+        reasons.append({
+            "field": item["field"],
+            "label": item["label"],
+            "reason": reason,
+        })
+
+    return reasons
 
 
 def certain_required_and_failure(
@@ -936,10 +1081,27 @@ def check_eligibility(
                         "종합 판정을 보류합니다."
                     )
 
+    # #78: 종합 판정이 명확히 ineligible인 단일 조건 트리에서만
+    # 표시용 제외 사유를 수집한다.
+    # 계산용 conditions[].status는 변경하지 않는다.
+    exclusion_reasons = None
+
+    if (
+        isinstance(trees, list)
+        and len(trees) == 1
+        and len(root_results) == 1
+        and root_results[0]["status"] == NO
+    ):
+        matches = _collect_exclusion_reasons(
+            trees[0], profile
+        )
+        exclusion_reasons = matches or None
+
     return {
         "policy_id": policy_id,
         "conditions": conditions,
         "reception_status": _reception_status(policy),
+        "exclusion_reasons": exclusion_reasons,
     }
 
 
