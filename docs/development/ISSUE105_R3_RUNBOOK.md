@@ -1,5 +1,10 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
+> **2026-11-23 갱신 — #110 반영 재구축 준비:** build 프로필을 새 격리 프로젝트 `issue105-r3b-build`(56666/56697)로 바꿨다(§3).
+> 아래 2026-11-22 기록(#104 기준 build·snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`)은 보존 자산이며 #110 반영본이 아니다.
+> `R3_PINS`는 아직 #104 값이다. #110 데이터 병합 후 별도 단계에서 미확정으로 되돌리고 r3b 서버 계획으로 다시 확정한다.
+> 예정: 원본 snapshot(r2·#31)에서 재구축 → 재임베딩 B2 108·B3 123(26개는 payload만 갱신) → 새 빈 Neo4j에 1133/2674 전체 적재.
+
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
 > **완료한 작업 (build 격리 서버 `issue105-r3-build`)**
@@ -68,15 +73,27 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 ## 3. 격리 환경
 
-| 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 |
-|---|---|---|---|---|
-| build | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` |
-| verify | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` |
+| 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 | 출력 폴더 |
+|---|---|---|---|---|---|
+| build (r3b, #110 재구축용, 현재) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` |
+| verify | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | (보고서만) |
+| **보존** build-104 (#104 기준, 대상 아님) | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3\` |
 
-다음 접속은 거부된다.
+- build 프로필은 2026-11-23에 r3b로 바꿨다(`R3_ENVIRONMENTS["build"]`, compose `issue105_r3b_build.compose.yaml`).
+- #104 build는 `PRESERVED_R3_ENVIRONMENTS["build-104"]`에 기록만 남긴다. 도구가 선택할 수 없고, 그 값에서 거부 목록이 만들어진다. 기존 compose(`issue105_r3_build.compose.yaml`)는 바꾸지 않았다.
+- #104 산출물(B2 1233 `d1fa3194…`·B3 1320 `a471e21f…` 컬렉션, Neo4j 1133/2674, snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`, 보고서 25~40, DPAPI 파일)은 그대로 보존한다.
+  - 현재 도구로는 #104 build 서버에 접속할 수 없다. #104 상태는 ZIP과 verify 복원으로만 다시 확인한다.
 
-- **포트:** 공유·r1·r2 포트(6333·7687·36333·56446·56487·56556·56587 등, `FOREIGN_PORTS`)
-- **인증값:** 원본·공유·r2 인증값과 같은 값(`QDRANT_API_KEY`, `NEO4J_PASSWORD`, `ISSUE91_*`)
+다음 접속·출력은 거부된다.
+
+- **포트:** 공유·r1·r2 포트(6333·7687·36333·56446·56487·56556·56587 등)와 보존 #104 build 포트(56646·56677) — `FOREIGN_PORTS`
+  - verify 래퍼는 여기에 현재 build(r3b) 포트까지 더해 거부한다.
+- **인증값:** 원본·공유·r2·보존 #104 build 인증값과 같은 값(`QDRANT_API_KEY`, `NEO4J_PASSWORD`, `ISSUE91_*`, `ISSUE105_R3_BUILD_*`) — `FOREIGN_SECRET_ENVS`
+- **Docker 소유:** build 프로필 프로젝트(`issue105-r3b-build`) 라벨과 그 프로젝트 볼륨만 인정한다. #104 프로젝트·볼륨(`issue105-r3-build_*`)의 컨테이너는 거부한다.
+- **출력 경로:** 보존 폴더 `.cache\issue105-r3\` 안에는 새 파일도 만들지 않는다. `is_preserved_output`이 CLI 인자 검사 단계에서 쓰기 전에 거부한다.
+  - 대상: `update_r3_collections`의 `--report`·`--write-plan`, `load_neo4j_r3_isolated --report`, `plan_r3_vector_reuse --report`, `restore_r3_isolated --report`, `build_restore_bundle_r3`의 `--out-dir`(함수 안에서도 다시 확인)
+  - `--plan`·`--bundle` 읽기는 허용한다.
+- `environment()`는 build·verify 프로필이 보존·외부 자산과 프로젝트·포트·인증 변수가 겹치면 거부한다.
 
 정리할 때는 `down -v`를 쓰지 않는다. 실패한 볼륨은 보존하고, 새 프로젝트 이름으로 다시 시작한다.
 

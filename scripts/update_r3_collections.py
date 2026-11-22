@@ -15,7 +15,7 @@ r2 update_b2_from_snapshot의 단계·보호 장치를 컬렉션별로 일반화
 보호 장치
   - 주소: http://127.0.0.1:<build qdrant_port>만. 공유·r1·r2 포트(FOREIGN_PORTS) 거부. QDRANT_URL·.env 미사용
   - 인증: ISSUE105_R3_BUILD_QDRANT_API_KEY만. 원본·공유·r2 인증값과 같으면 거부. 값은 출력하지 않는다
-  - Docker 소유: 쓰기 전(그리고 dry-run fingerprint에) issue105-r3-build 프로젝트의 qdrant·neo4j 서비스가 정확히 하나씩,
+  - Docker 소유: 쓰기 전(그리고 dry-run fingerprint에) build 프로필 프로젝트(현재 issue105-r3b-build)의 qdrant·neo4j 서비스가 정확히 하나씩,
     실행 중, 고정 이미지 digest, 127.0.0.1 바인딩만, 프로젝트 전용 볼륨만인지 확인한다(restore_r2_isolated.verify_docker_ownership).
     다른 프로젝트가 같은 포트를 쓰거나, 프로젝트 이름이 같아도 볼륨이 다르면 거부. 쓰기 후 식별 정보가 바뀌어도 실패
   - 서버: Qdrant 1.12.4, 컬렉션은 r3 두 이름만(그 밖의 컬렉션이 하나라도 있으면 공유·기존 DB로 보고 거부), 1024·Cosine
@@ -493,6 +493,8 @@ def main(argv: list[str] | None = None) -> int:
     for path in (args.report, args.write_plan):
         if path and path.exists():
             parser.error("이미 있는 파일은 덮어쓰지 않습니다")
+        if path and profiles.is_preserved_output(path):
+            parser.error("보존 자산 폴더(#104 r3, .cache/issue105-r3) 안에는 새 파일도 만들지 않습니다")
     client = None
     try:
         url = require_isolated_url(args.qdrant_url)

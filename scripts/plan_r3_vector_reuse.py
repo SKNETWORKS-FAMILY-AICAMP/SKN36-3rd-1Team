@@ -370,6 +370,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.report and args.report.exists():
         parser.error("이미 있는 보고서는 덮어쓰지 않습니다")
+    if args.report and profiles.is_preserved_output(args.report):
+        parser.error("보존 자산 폴더(#104 r3, .cache/issue105-r3) 안에는 새 파일도 만들지 않습니다")
     try:
         release = load_release()
         plans = {}

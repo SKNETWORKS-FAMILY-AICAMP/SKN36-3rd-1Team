@@ -7,7 +7,7 @@ r3에서 달라지는 것은 기준값(최신 릴리스, R3_PINS)과 대상(buil
 보호 장치
   - 주소: bolt://127.0.0.1:<build bolt_port>만 (공유·r2 포트 거부, neo4j:// 라우팅 거부). NEO4J_URI·.env 미사용
   - 인증: ISSUE105_R3_BUILD_NEO4J_PASSWORD만 (원본·공유·r2 값 재사용 거부). 틀린 비밀번호가 거부되는지 먼저 확인
-  - Docker 소유: dry-run과 쓰기 전후에 issue105-r3-build 프로젝트 소유를 확인한다(update_r3_collections.require_build_ownership).
+  - Docker 소유: dry-run과 쓰기 전후에 build 프로필 프로젝트(현재 issue105-r3b-build) 소유를 확인한다(update_r3_collections.require_build_ownership).
     fingerprint = Neo4j 서버 상태 지문 + Docker 식별 정보
   - 쓰기(--load/--resume): R3_PINS 확정 + --confirm-write + dry-run fingerprint 일치. 빈 DB(load) 또는 부분 적재(resume)에서만
   - 교차 검증(--cross-db, 읽기 전용): 컬렉션마다 Point 수·전체 벡터 digest(R3_PINS) → verify_cross_db → verify_full_index,
@@ -230,6 +230,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--cross-db 에는 --qdrant-url 이 필요합니다")
     if args.report and args.report.exists():
         parser.error("이미 있는 보고서는 덮어쓰지 않습니다")
+    if args.report and profiles.is_preserved_output(args.report):
+        parser.error("보존 자산 폴더(#104 r3, .cache/issue105-r3) 안에는 새 파일도 만들지 않습니다")
     driver = qdrant_client = None
     try:
         url = require_isolated_bolt_url(args.neo4j_url)

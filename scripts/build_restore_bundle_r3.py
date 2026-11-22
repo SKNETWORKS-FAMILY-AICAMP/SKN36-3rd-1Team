@@ -47,7 +47,8 @@ from scripts import restore_profiles_v140 as profiles  # noqa: E402
 from scripts import restore_r2_isolated as r2w  # noqa: E402  (읽기 전용 docker 실행기 재사용)
 from scripts import update_r3_collections as qdrant_r3  # noqa: E402
 
-DEFAULT_OUT_DIR = ROOT / ".cache" / "issue105-r3" / "bundle-r3"
+# r3b build 출력 폴더. #104 산출물(.cache/issue105-r3/bundle-r3)은 보존 자산이라 create_snapshot·build_bundle이 거부한다.
+DEFAULT_OUT_DIR = ROOT / profiles.environment("build")["out_dir"] / "bundle-r3"
 VERIFY_COMPOSE = profiles.R3_ENVIRONMENTS["verify"]["compose"]
 MANIFEST_SOURCE = f"{profiles.RELEASE_DIR}/manifest.json"
 REQUIRED_COMMIT_PATHS = (VERIFY_COMPOSE, profiles.RESTORE_SCRIPT, profiles.PROFILE_SCRIPT,
@@ -62,6 +63,13 @@ QDRANT_SNAPSHOT_ROOT = "/qdrant/snapshots"       # Qdrant 1.12 기본 snapshot �
 
 def snapshot_paths(out_dir: Path, key: str) -> tuple[Path, Path]:
     return Path(out_dir) / profiles.R3_COLLECTIONS[key]["snapshot_member"], Path(out_dir) / f"snapshot-record-{key}.json"
+
+
+def require_new_output_dir(out_dir: Path) -> Path:
+    """snapshot·번들 출력 폴더가 보존 자산 폴더(#104 r3 .cache/issue105-r3) 안이면 서버·로컬 쓰기 전에 거부한다."""
+    if profiles.is_preserved_output(out_dir):
+        raise BundleError("출력 폴더가 보존 자산 폴더(#104 r3) 안입니다 → 쓰지 않음 (.cache/issue105-r3b/ 사용)")
+    return Path(out_dir)
 
 
 def partial_path(target: Path) -> Path:
@@ -157,6 +165,7 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
     """
     if not confirm_write:
         raise BundleError("confirm_write=True 없이 snapshot을 만들지 않습니다")
+    require_new_output_dir(out_dir)
     pins = profiles.require_finalized(pins)
     planner.validate_plan(plan, release, pins, require_pins=True)
     key = plan["collection_key"]
@@ -385,6 +394,7 @@ def build_bundle(snapshots: dict[str, tuple[Path, Path]], source_sha: str, out_d
     """
     if not confirm_write:
         raise BundleError("confirm_write=True 없이 번들을 만들지 않습니다")
+    require_new_output_dir(out_dir)
     pins = profiles.require_finalized(pins)
     if set(snapshots) != set(profiles.COLLECTION_KEYS):
         raise BundleError("B2·B3 snapshot이 모두 필요합니다")
@@ -494,6 +504,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--create-snapshot 에는 --collection, --plan, --qdrant-url, --expect-fingerprint 가 필요합니다")
     if args.build and not args.source_commit:
         parser.error("--build 에는 --source-commit 이 필요합니다")
+    if (args.create_snapshot or args.build) and profiles.is_preserved_output(args.out_dir):
+        parser.error("--out-dir 이 보존 자산 폴더(#104 r3, .cache/issue105-r3) 안입니다 → 쓰지 않음")
     client = None
     try:
         if args.create_snapshot:

@@ -205,6 +205,8 @@ def main(argv: list[str] | None = None, ctx_factory=Context) -> int:
         parser.error("--apply 에는 --confirm-write 와 --expect-fingerprint 가 필요합니다")
     if args.report and args.report.exists():
         parser.error("이미 있는 보고서는 덮어쓰지 않습니다")
+    if args.report and profiles.is_preserved_output(args.report):
+        parser.error("보존 자산 폴더(#104 r3, .cache/issue105-r3) 안에는 새 파일도 만들지 않습니다")
     name = "apply" if args.apply else "verify-only" if args.verify_only else "preflight"
     try:
         os.environ["LIFEPOLICY_DATASET_DIR"] = str(ROOT / profiles.RELEASE_DIR)   # database 모듈 import 전에 고정

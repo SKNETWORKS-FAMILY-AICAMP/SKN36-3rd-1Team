@@ -195,7 +195,7 @@ class SnapshotRestoreTests(Case):
         post, calls = self.poster(client, "b2")
         result = self.restore(client, "b2", post)
         self.assertEqual((result["status"], result["points"], result["docker_project"]),
-                         ("RESTORED", 5, "issue105-r3-build"))
+                         ("RESTORED", 5, "issue105-r3b-build"))   # r3b build 프로젝트 (#104 build는 보존 자산)
         self.assertEqual(calls[0]["params"]["checksum"], profiles.R3_SOURCES["b2"]["snapshot_sha256"])
         self.assertTrue(calls[0]["url"].endswith(f"/collections/{self.s.collection('b2')}/snapshots/upload"))
         post, _ = self.poster(client, "b3")       # 다른 r3 컬렉션이 이미 있어도 대상이 없으면 허용

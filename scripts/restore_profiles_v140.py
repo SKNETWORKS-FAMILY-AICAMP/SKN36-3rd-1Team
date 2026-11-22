@@ -20,8 +20,11 @@ r2(#91)와 r3(#105)의 기대값·manifest·vector digest·snapshot 정보를 �
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DATASET_VERSION = "1.4.0-candidate"
 RELEASE_DIR = "data/releases/v1.4.0-candidate"
@@ -117,23 +120,41 @@ COLLECTION_KEYS = tuple(R3_COLLECTIONS)
 
 # 격리 Docker 프로젝트. build = 갱신·적재·snapshot 생성용, verify = 번들 독립 복원 검증용.
 # 포트는 r2·공유·이전 작업 포트와 겹치지 않아야 한다(테스트가 확인).
+# build는 #110 반영 재구축용 r3b 프로젝트다 (2026-11-23). #104 기준 build(issue105-r3-build)는 아래
+# PRESERVED_R3_ENVIRONMENTS에 기록만 남기고, 그 포트·인증 변수는 FOREIGN_*로 거부한다(r3 도구가 접속하지 않음).
 R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
-    "build": {"project": "issue105-r3-build", "compose": "docs/development/issue105_r3_build.compose.yaml",
-              "qdrant_port": 56646, "bolt_port": 56677,
-              "qdrant_key_env": "ISSUE105_R3_BUILD_QDRANT_API_KEY",
-              "neo4j_password_env": "ISSUE105_R3_BUILD_NEO4J_PASSWORD"},
+    "build": {"project": "issue105-r3b-build", "compose": "docs/development/issue105_r3b_build.compose.yaml",
+              "qdrant_port": 56666, "bolt_port": 56697,
+              "qdrant_key_env": "ISSUE105_R3B_BUILD_QDRANT_API_KEY",
+              "neo4j_password_env": "ISSUE105_R3B_BUILD_NEO4J_PASSWORD",
+              "out_dir": ".cache/issue105-r3b"},
     "verify": {"project": "issue105-r3-verify", "compose": "docs/development/issue105_r3_verify.compose.yaml",
                "qdrant_port": 56656, "bolt_port": 56687,
                "qdrant_key_env": "ISSUE105_R3_VERIFY_QDRANT_API_KEY",
                "neo4j_password_env": "ISSUE105_R3_VERIFY_NEO4J_PASSWORD"},
 }
-# 원본·공유·r1·r2·이전 실험 DB 포트. r3 도구는 이 포트로는 절대 접속하지 않는다.
+# 보존 자산(읽기·쓰기 모두 대상 아님): #104 기준 r3 build. B2 1233(d1fa3194…)·B3 1320(a471e21f…)·Neo4j 1133/2674,
+# snapshot·ZIP·보고서는 .cache/issue105-r3/에 있다. 이 표는 기록과 거부 목록 생성용이며 도구가 선택할 수 없다.
+PRESERVED_R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
+    "build-104": {"project": "issue105-r3-build", "compose": "docs/development/issue105_r3_build.compose.yaml",
+                  "qdrant_port": 56646, "bolt_port": 56677,
+                  "qdrant_key_env": "ISSUE105_R3_BUILD_QDRANT_API_KEY",
+                  "neo4j_password_env": "ISSUE105_R3_BUILD_NEO4J_PASSWORD",
+                  "out_dir": ".cache/issue105-r3"},
+}
+# 원본·공유·r1·r2·이전 실험·보존 r3 DB 포트. r3 도구는 이 포트로는 절대 접속하지 않는다.
 FOREIGN_PORTS = frozenset({6333, 6334, 16333, 36333, 46333, 46335, 46336, 56336, 56339, 56446, 56556,
                            7474, 7687, 17474, 17687, 18474, 18687, 19687, 47474, 47687,
-                           57474, 57477, 57687, 57690, 56487, 56587})
-# r3 도구가 쓰면 안 되는 인증 변수 (원본·공유·r2 값 재사용 금지)
+                           57474, 57477, 57687, 57690, 56487, 56587,
+                           *(env[name] for env in PRESERVED_R3_ENVIRONMENTS.values()
+                             for name in ("qdrant_port", "bolt_port"))})
+# r3 도구가 쓰면 안 되는 인증 변수 (원본·공유·r2·보존 r3 build 값 재사용 금지)
 FOREIGN_SECRET_ENVS = ("QDRANT_API_KEY", "NEO4J_PASSWORD", "ISSUE91_NEO4J_PASSWORD",
-                       "ISSUE91_VERIFY_QDRANT_API_KEY", "ISSUE91_VERIFY_NEO4J_PASSWORD")
+                       "ISSUE91_VERIFY_QDRANT_API_KEY", "ISSUE91_VERIFY_NEO4J_PASSWORD",
+                       *(env[name] for env in PRESERVED_R3_ENVIRONMENTS.values()
+                         for name in ("qdrant_key_env", "neo4j_password_env")))
+# r3 도구가 Docker 소유를 인정하면 안 되는 프로젝트 (보존 r3 build 등)
+FOREIGN_PROJECTS = frozenset(env["project"] for env in PRESERVED_R3_ENVIRONMENTS.values())
 
 BUNDLE_NAME = "rag-final-v140-r3"
 SCHEMA_VERSION = 2
@@ -213,7 +234,33 @@ def is_finalized(pins: dict[str, Any] | None = None) -> bool:
 def environment(name: str) -> dict[str, Any]:
     if name not in R3_ENVIRONMENTS:
         raise ProfileError(f"알 수 없는 r3 환경: {name}")
-    return dict(R3_ENVIRONMENTS[name])
+    env = R3_ENVIRONMENTS[name]
+    secrets = (env["qdrant_key_env"], env["neo4j_password_env"])
+    if (env["project"] in FOREIGN_PROJECTS or {env["qdrant_port"], env["bolt_port"]} & FOREIGN_PORTS
+            or set(secrets) & set(FOREIGN_SECRET_ENVS)):
+        raise ProfileError(f"r3 환경 {name}이 보존·외부 자산(프로젝트·포트·인증 변수)과 겹칩니다")
+    return dict(env)
+
+
+def _real(path) -> str:
+    return os.path.normcase(os.path.realpath(os.path.abspath(str(path))))
+
+
+def is_preserved_output(path) -> bool:
+    """path가 보존 자산 폴더(#104 .cache/issue105-r3 등) 자체이거나 그 안이면 True. (파일 내용은 읽지 않는다)"""
+    target = _real(path)
+    for env in PRESERVED_R3_ENVIRONMENTS.values():
+        preserved = _real(os.path.join(PROJECT_ROOT, env["out_dir"]))
+        if target == preserved or target.startswith(preserved.rstrip(os.sep) + os.sep):
+            return True
+    return False
+
+
+def require_output_path(path, what: str = "출력 경로"):
+    """r3 도구의 새 파일(보고서·계획·snapshot·번들)을 보존 자산 폴더 안에 만들지 않는다. CLI 인자 검사 단계에서 호출한다."""
+    if path is not None and is_preserved_output(path):
+        raise ProfileError(f"{what}가 보존 자산 폴더(#104 r3) 안입니다 → 새 파일도 만들지 않음 (.cache/issue105-r3b/ 사용)")
+    return path
 
 
 def services_for(name: str) -> dict[str, dict[str, Any]]:
