@@ -405,6 +405,33 @@ def _walk(
 
     return group_status, items
 
+def _is_confirmed_exclusion_match(
+    condition: dict,
+    item: dict,
+) -> bool:
+    """확정적으로 안내 가능한 제외 조건인지 확인한다.
+
+    계산용 status는 변경하지 않는다.
+    0~120세는 데이터상 광범위한 연령 범위이므로
+    공식 기준 확인 전에는 확정 제외 사유로 사용하지 않는다.
+    """
+    if item["status"] != OK:
+        return False
+
+    if _field(condition) == "age":
+        match = _AGE_RANGE.fullmatch(
+            str(condition.get("value") or "")
+        )
+
+        if match:
+            low, high = map(int, match.groups())
+
+            if (low, high) == (
+                0, NO_UPPER_LIMIT_SENTINEL
+            ):
+                return False
+
+    return True
 
 def _positive_exclusion_matches(
     group: dict,
@@ -441,7 +468,7 @@ def _positive_exclusion_matches(
         item = _condition(condition, profile)
         states.append(item["status"])
 
-        if item["status"] == OK:
+        if _is_confirmed_exclusion_match(condition, item):
             matches.append(item)
 
     for child in children:
@@ -501,7 +528,7 @@ def _collect_exclusion_reasons(
                     return
 
                 item = _condition(condition, profile)
-                if item["status"] == OK:
+                if _is_confirmed_exclusion_match(condition, item):
                     matched.append(item)
             else:
                 child = children[0]

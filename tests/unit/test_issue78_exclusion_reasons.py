@@ -1,4 +1,3 @@
-
 """Issue #78: NOT exclusion reasons regression tests."""
 
 import pytest
@@ -164,3 +163,60 @@ def test_issue78_optional_or_branch_does_not_confirm_exclusion():
 
     assert result["conditions"][-1]["status"] == checker.NO
     assert not result.get("exclusion_reasons")
+
+
+@pytest.mark.parametrize("direct_not", [False, True])
+def test_issue78_unverified_full_age_range_is_not_exclusion(
+    direct_not,
+):
+    """0~120세는 공식 기준 확인 전 확정 제외 사유가 아니다."""
+    policy = sample_exclusion_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    exclusion = root["groups"][0]
+
+    age_condition = exclusion["groups"][0]["conditions"][0]
+    age_condition["value"] = "0~120"
+
+    if direct_not:
+        exclusion["conditions"] = [age_condition]
+        exclusion["groups"] = []
+
+    result = checker.check_eligibility(
+        {"age": 80, "region": None, "income": None},
+        policy,
+    )
+
+    # 계산용 판정은 기존대로 유지한다.
+    assert result["conditions"][-1]["status"] == checker.NO
+
+    # 공식 확인이 필요한 범위를 확정 제외 사유로 사용하지 않는다.
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_confirmed_age_with_other_unknown_exclusions():
+    """다른 제외 항목이 미확인이어도 확인된 나이 사유는 유지한다."""
+    policy = sample_exclusion_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    exclusion_or = root["groups"][0]["groups"][0]
+
+    exclusion_or["conditions"].append(
+        {
+            "type": "SPECIAL_TARGET",
+            "name": "추가 제외 항목",
+            "value": "공식 기준 확인 필요",
+        }
+    )
+
+    result = checker.check_eligibility(
+        {"age": 80, "region": None, "income": None},
+        policy,
+    )
+
+    assert result["conditions"][-1]["status"] == checker.NO
+
+    reasons = result["exclusion_reasons"]
+    assert reasons is not None
+    assert len(reasons) == 1
+    assert reasons[0]["field"] == "age"
+    assert "75" in reasons[0]["reason"]
+    assert "제외" in reasons[0]["reason"]
