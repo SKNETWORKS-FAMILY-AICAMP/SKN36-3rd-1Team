@@ -2,7 +2,8 @@
 
 > **2026-11-23 갱신 — #110 반영 재구축 준비:** build 프로필을 새 격리 프로젝트 `issue105-r3b-build`(56666/56697)로 바꿨다(§3).
 > 아래 2026-11-22 기록(#104 기준 build·snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`)은 보존 자산이며 #110 반영본이 아니다.
-> `R3_PINS`는 아직 #104 값이다. #110 데이터 병합 후 별도 단계에서 미확정으로 되돌리고 r3b 서버 계획으로 다시 확정한다.
+> **C0 진입 (2026-11-23, #110 병합 `7aa5266`):** `R3_PINS`를 #110 릴리스 기준 pending으로 바꿨다(§5.5.2). manifest `29b57236…`·release_counts·points만 확정, 계획·임베딩 결과 값은 미확정.
+> #104 기준 1·2차 확정값은 §5.5(아래 기록)에 그대로 보존한다.
 > 예정: 원본 snapshot(r2·#31)에서 재구축 → 재임베딩 B2 108·B3 123(26개는 payload만 갱신) → 새 빈 Neo4j에 1133/2674 전체 적재.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
@@ -286,6 +287,21 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 - 신규 Point는 모두 `qwen3-embedding:0.6b`·1024차원·`policy_section_body_v2`이다.
 - 재사용 Point는 원래 `index_run_id`를 그대로 보존한다. 그래서 B2 한 컬렉션 안에 실행 ID 3개(재사용 2 + 신규 1)가, B3에는 2개가 섞여 있다. 버그가 아니며, 실행 ID 하나로 컬렉션 전체를 대표할 수 없다.
 - **한계:** 과거 실행(2026-11-07·2026-11-19)의 Ollama 모델 digest는 Point payload나 보고서에 기록되지 않았다. 재사용 벡터가 신규와 같은 모델 빌드인지는 모델 이름·차원·입력 규칙으로만 확인된다. 신규 임베딩 직전에는 모델 digest가 r2 기록(`ac6da0df…`)과 같은지 수동으로 확인했다.
+
+#### 5.5.2 #110 반영 r3b 재확정 — 단계별 기준값과 허용 쓰기 (2026-11-23)
+
+`R3_PIN_STAGE`(선언)와 `pin_stage()`(값에서 계산)가 같아야 한다. 테스트가 확인하므로 값만 바꾸고 단계를 잊을 수 없다.
+
+| 단계 | 기준값 상태 | 기준값 게이트를 통과하는 쓰기 (`STAGE_ALLOWED_WRITES`) | 거부되는 쓰기 |
+|---|---|---|---|
+| **pending (C0, 현재)** | manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`, release_counts 246·268·663·1133·2674·211, points B2 1233·B3 1320, remove_count 0. 나머지(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest) None | 원본 snapshot 복원(`--restore-snapshot`), `--write-plan`, `--report` (새 로컬 파일) | `--apply`, `--index`, Neo4j `--load`·`--resume`, `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 `--apply` |
+| stage1 (C1) | 위 + r3b 서버 계획의 reuse·embed·delete·plan_sha256·reuse_vector_digest. 최종 vector_digest 두 칸만 None | pending + `--apply`, `--index`, Neo4j `--load`·`--resume` | `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 |
+| final (C2) | 위 + complete 상태의 컬렉션별 vector_digest. None 0 | 모든 쓰기 (각 단계의 Docker 소유·fingerprint·서버 상태 검사는 그대로) | (기준값 게이트로는 없음) |
+
+- C0 값은 릴리스 파일에서 다시 계산해 확인했다(manifest 파일 34개 체크섬 일치, 12개 정책 `application_start/end` = null, 12개 `source_text` SHA = `content_hash`).
+- `load_release()`는 C0 값(manifest·건수·points)과 다르면 거부한다. 쓰기용 계획 검증(`require_pins`)은 C0에서 거부되고, 검토용 검증은 확정된 칸만 대조한다.
+- `remove_count` 0은 예상값이다. r3b 서버 계획의 값이 다르면 `validate_plan`이 거부하므로, 그때 근거를 검토해 C1에서 고친다.
+- 예상 계획(확정 아님): B2 재사용 1125·삭제 14·신규 94·임베딩 108, B3 재사용 1197·삭제 23·신규 100·임베딩 123.
 
 ### 5.6 독립 복원 검증 (verify 환경)
 

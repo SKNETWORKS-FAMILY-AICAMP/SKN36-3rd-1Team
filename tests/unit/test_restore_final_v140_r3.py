@@ -19,7 +19,8 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import MANIFEST, RUN_OLD, R3Qdrant, Sample, pending_pins, sample_vector, stage1_pins  # noqa: E402
+from r3_fixtures import (MANIFEST, RUN_OLD, R3Qdrant, Sample, final_sample_pins, pending_pins,  # noqa: E402
+                         sample_vector, stage1_pins)
 
 from database import full_index as fi, handoff_data as hd, hybrid_search as hs  # noqa: E402
 from database.neo4j import load_graph as lg  # noqa: E402
@@ -121,9 +122,13 @@ class CheckBundleTests(unittest.TestCase):
                 with self.assertRaises(profiles.ProfileError):
                     r3.check_bundle(self.b.folder, pins)           # 미확정·1차 상태는 최종 복원 불가
 
-    def test_real_final_pins_pass_the_gate_and_reject_a_foreign_manifest(self):
-        """실제 2차 확정 R3_PINS는 기준값 게이트를 통과하고, sample_only 번들의 manifest가 달라 거부된다."""
+    def test_final_shape_pins_pass_the_gate_and_reject_a_foreign_manifest(self):
+        """2차 확정 모양(현재 릴리스 manifest)은 기준값 게이트를 통과하고, sample_only 번들의 manifest가 달라 거부된다."""
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
+            r3.check_bundle(self.b.folder, final_sample_pins())
+
+    def test_real_c0_pins_refuse_every_bundle(self):
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
             r3.check_bundle(self.b.folder)
 
     def test_r2_package_and_wrong_contents_are_refused(self):
@@ -369,8 +374,10 @@ class RestoreTests(unittest.TestCase):
         for pins in (pending_pins(), stage1_pins()):
             with self.assertRaises(profiles.ProfileError):
                 self.run_restore(R3Qdrant(), pins=pins)
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+            self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C0): 기준값 게이트에서 거부
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
-            self.run_restore(R3Qdrant(), pins=None)                # 실제 2차 확정값: 게이트 통과 후 번들 불일치 거부
+            self.run_restore(R3Qdrant(), pins=final_sample_pins())  # 2차 확정 모양: 게이트 통과 후 번들 불일치 거부
 
 
 class CliTests(unittest.TestCase):
@@ -384,11 +391,12 @@ class CliTests(unittest.TestCase):
             with patch.dict(os.environ, {"QDRANT_API_KEY": "sample_only_never_printed"}):
                 with patch.object(profiles, "R3_PINS", stage1_pins()):
                     self.assertEqual(r3.main(["--bundle", folder, "--report", str(fresh)]), 1)
-                self.assertEqual(r3.main(["--bundle", folder, "--report", str(final)]), 1)   # 빈 폴더: 번들 없음
+                with patch.object(profiles, "R3_PINS", final_sample_pins()):
+                    self.assertEqual(r3.main(["--bundle", folder, "--report", str(final)]), 1)   # 빈 폴더: 번들 없음
             output = json.loads(fresh.read_text(encoding="utf-8"))
             final_output = json.loads(final.read_text(encoding="utf-8"))
         self.assertEqual(output["error_type"], "ProfileError")
-        self.assertNotEqual(final_output["error_type"], "ProfileError")   # 실제 2차 확정값은 기준값 게이트 통과
+        self.assertNotEqual(final_output["error_type"], "ProfileError")   # 2차 확정 모양은 기준값 게이트 통과
         for result in (output, final_output):
             self.assertNotIn("sample_only_never_printed", json.dumps(result))
 

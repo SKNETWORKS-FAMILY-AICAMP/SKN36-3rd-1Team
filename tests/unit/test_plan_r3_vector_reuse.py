@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import RUN_OLD, RUN_OTHER, Sample, pending_pins, sample_vector  # noqa: E402
+from r3_fixtures import RUN_OLD, RUN_OTHER, Sample, pending_pins, sample_vector, stage1_pins  # noqa: E402
 
 from database import full_index as fi, handoff_data as hd  # noqa: E402
 from scripts import plan_r3_vector_reuse as planner  # noqa: E402
@@ -118,11 +118,19 @@ class ValidatePlanTests(unittest.TestCase):
             planner.validate_plan(plan, self.s.release, pending_pins(), self.s.sources, require_pins=True,
                                   deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
-    def test_real_stage1_pins_reject_a_plan_from_another_release(self):
-        """실제 1차 R3_PINS는 합성(sample_only) 계획을 manifest 불일치로 거부한다 (다른 릴리스 계획 혼입 방지)."""
+    def test_stage1_pins_reject_a_plan_from_another_release(self):
+        """1차 확정 모양(현재 릴리스 manifest)은 합성(sample_only) 계획을 manifest 불일치로 거부한다 (다른 릴리스 계획 혼입 방지)."""
         with self.assertRaisesRegex(planner.PlanError, "현재 릴리스|r3 고정값"):
+            planner.validate_plan(self.plans["b2"], self.s.release, stage1_pins(), self.s.sources,
+                                  require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
+
+    def test_real_c0_pins_refuse_pinned_plan_validation_but_allow_review(self):
+        """C0 실제 R3_PINS: 쓰기용 계획 검증(require_pins)은 기준값 게이트에서 거부, 검토용 검증은 확정된 칸만 대조한다."""
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
             planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
+        with self.assertRaisesRegex(planner.PlanError, r"r3 고정값과 다릅니다: \['points'\]"):   # C0에서 확정된 points(1233)와 다름
+            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources)
 
     def test_finalized_pins_must_match_the_plan(self):
         pins = self.s.pins_for(self.plans)
@@ -247,7 +255,8 @@ class CliTests(unittest.TestCase):
             result = json.loads(report.read_text(encoding="utf-8"))
             with self.assertRaises(SystemExit):
                 planner.main(["--report", str(report)])          # 기존 보고서 덮어쓰기 거부
-        self.assertEqual((result["db_writes"], result["embedding_calls"], result["r3_pins_finalized"]), (0, 0, True))   # 2차 확정 상태
+        self.assertEqual((result["db_writes"], result["embedding_calls"], result["r3_pins_finalized"]),
+                         (0, 0, profiles.R3_PIN_STAGE == "final"))   # C0(pending)에서는 False
         self.assertEqual((result["not_planned"], result["plan_basis"]), (["b2", "b3"], "dump_preview"))
         with self.assertRaises(SystemExit):
             planner.main(["--write-plan-dir", "sample_only"])           # 덤프 계획 파일 저장 옵션은 없다

@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import pending_pins, stage1_pins  # noqa: E402
+from r3_fixtures import SAMPLE_PLAN_VALUES, final_sample_pins, pending_pins, stage1_pins  # noqa: E402
 
 from database import full_index as fi  # noqa: E402
 from scripts import build_restore_bundle_v140 as b2b  # noqa: E402
@@ -42,14 +42,57 @@ class R2ProfileTests(unittest.TestCase):
 
 
 class R3PinTests(unittest.TestCase):
-    """세 상태를 각각 검증한다: 전부 미확정(pending_pins) / 1차 확정(stage1_pins) / 2차 확정(실제 R3_PINS)."""
+    """단계별 검증: 전부 미확정(pending_pins) / 1차(stage1_pins) / 2차(final_sample_pins) + 실제 R3_PINS(C0, #110 반영)."""
 
-    def test_real_r3_pins_are_fully_finalized(self):
-        """2차 확정: 미확정 0개 → 기준값 게이트는 모든 단계를 통과시킨다 (각 단계의 다른 검사는 그대로)."""
-        self.assertTrue(profiles.is_finalized())
-        self.assertEqual(profiles.missing_pins(), [])
-        self.assertIs(profiles.require_finalized(), profiles.R3_PINS)
-        self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), profiles.R3_PINS)
+    PLAN_FIELDS = ("vector_digest", "reuse_count", "reuse_vector_digest", "embed_count", "delete_count", "plan_sha256")
+
+    def assert_well_formed(self, pins):
+        """확정된 칸은 형식·상호 일관성을 지켜야 한다 (미확정 칸은 None만 허용)."""
+        if pins["manifest_lf_sha256"] is not None:
+            self.assertRegex(pins["manifest_lf_sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(set(pins["release_counts"]), set(profiles.RELEASE_COUNT_KEYS))
+        self.assertTrue(all(v is None or (type(v) is int and v > 0) for v in pins["release_counts"].values()))
+        for key in profiles.COLLECTION_KEYS:          # subTest를 쓰지 않는다 (호출자가 AssertionError를 직접 받아야 함)
+            c = pins["collections"][key]
+            self.assertEqual(c["remove_count"], 0, key)
+            for field in ("vector_digest", "reuse_vector_digest", "plan_sha256"):
+                if c[field] is not None:
+                    self.assertRegex(c[field], r"^[0-9a-f]{64}$", f"{key}.{field}")
+            if c["vector_digest"] is not None:
+                self.assertNotEqual(c["vector_digest"], c["reuse_vector_digest"], key)   # 신규 임베딩이 더해진 최종 값
+                self.assertNotEqual(c["vector_digest"], profiles.R3_SOURCES[key]["vector_digest"], key)
+            if None not in (c["points"], c["reuse_count"], c["embed_count"], c["delete_count"]):
+                self.assertEqual(c["reuse_count"] + c["embed_count"], c["points"], key)
+                self.assertLessEqual(c["delete_count"], c["embed_count"], key)
+                # 재사용 + 삭제 후 재임베딩 = 원본 snapshot Point 수 (remove 0)
+                self.assertEqual(c["reuse_count"] + c["delete_count"], profiles.R3_SOURCES[key]["points"], key)
+        finals = [pins["collections"][k]["vector_digest"] for k in profiles.COLLECTION_KEYS
+                  if pins["collections"][k]["vector_digest"] is not None]
+        self.assertEqual(len(set(finals)), len(finals))                            # 컬렉션마다 다른 값
+
+    def test_real_r3_pins_are_c0_pending_for_the_110_release(self):
+        """C0: 릴리스 파일에서 확인한 manifest·건수·points만 확정. 확정 쓰기는 기준값 게이트에서 모두 거부된다."""
+        pins = profiles.R3_PINS
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
+        self.assertEqual(pins["manifest_lf_sha256"], "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7")
+        self.assertEqual(pins["release_counts"], {"policies": 246, "documents": 268, "release_chunks": 663,
+                                                  "neo4j_nodes": 1133, "neo4j_relationships": 2674,
+                                                  "requires_condition": 211})
+        self.assertEqual({k: pins["collections"][k]["points"] for k in profiles.COLLECTION_KEYS}, {"b2": 1233, "b3": 1320})
+        self.assertEqual(sorted(profiles.missing_pins()),
+                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in self.PLAN_FIELDS))
+        self.assertFalse(profiles.is_finalized())
+        for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
+            with self.subTest(deferred=deferred), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+                profiles.require_finalized(deferred=deferred)
+        self.assert_well_formed(pins)
+
+    def test_declared_stage_must_match_the_values(self):
+        """단계 상수와 실제 값이 어긋나면(값만 바꾸고 단계를 잊음) 실패해야 한다."""
+        self.assertIn(profiles.R3_PIN_STAGE, profiles.PIN_STAGES)
+        self.assertEqual(profiles.pin_stage(), profiles.R3_PIN_STAGE)
+        self.assertEqual([profiles.pin_stage(p) for p in (pending_pins(), stage1_pins(), final_sample_pins())],
+                         ["pending", "stage1", "final"])
 
     def test_stage1_fixture_defers_only_final_vector_digests(self):
         stage1 = stage1_pins()
@@ -57,37 +100,32 @@ class R3PinTests(unittest.TestCase):
         with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
             profiles.require_finalized(stage1)
         self.assertIs(profiles.require_finalized(stage1, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), stage1)
-        # 1차 확정 값은 실제 R3_PINS와 vector_digest 두 칸만 다르다
-        real = profiles.r3_pins()
+        # 1차 확정 모양은 2차 모양과 vector_digest 두 칸만 다르고, 릴리스 값(manifest·건수·points)은 실제 R3_PINS와 같다
+        final = final_sample_pins()
         for key in profiles.COLLECTION_KEYS:
-            real["collections"][key]["vector_digest"] = None
-        self.assertEqual(stage1, real)
+            final["collections"][key]["vector_digest"] = None
+        self.assertEqual(stage1, final)
+        real = profiles.R3_PINS
+        self.assertEqual((stage1["manifest_lf_sha256"], stage1["release_counts"]),
+                         (real["manifest_lf_sha256"], real["release_counts"]))
+        self.assertEqual({k: stage1["collections"][k]["points"] for k in profiles.COLLECTION_KEYS},
+                         {k: real["collections"][k]["points"] for k in profiles.COLLECTION_KEYS})
 
     def test_pending_fixture_is_refused_even_for_the_update_stage(self):
         with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
             profiles.require_finalized(pending_pins(), deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
         self.assertIn("manifest_lf_sha256", profiles.missing_pins(pending_pins()))
 
-    def test_final_pins_are_well_formed_and_internally_consistent(self):
-        pins = profiles.R3_PINS
-        self.assertRegex(pins["manifest_lf_sha256"], r"^[0-9a-f]{64}$")
-        self.assertEqual(set(pins["release_counts"]), set(profiles.RELEASE_COUNT_KEYS))
-        self.assertTrue(all(type(v) is int and v > 0 for v in pins["release_counts"].values()))
-        digests = [pins["collections"][k]["vector_digest"] for k in profiles.COLLECTION_KEYS]
-        self.assertEqual(len(set(digests)), len(digests))                         # 컬렉션마다 다른 값
+    def test_final_shape_is_well_formed_and_internally_consistent(self):
+        pins = final_sample_pins()
+        self.assertTrue(profiles.is_finalized(pins))
+        self.assert_well_formed(pins)
         for key in profiles.COLLECTION_KEYS:
-            with self.subTest(key=key):
-                c = pins["collections"][key]
-                self.assertRegex(c["vector_digest"], r"^[0-9a-f]{64}$")            # 2차 확정
-                self.assertNotEqual(c["vector_digest"], c["reuse_vector_digest"])  # 신규 임베딩이 더해진 최종 값
-                self.assertNotEqual(c["vector_digest"], profiles.R3_SOURCES[key]["vector_digest"])
-                self.assertRegex(c["plan_sha256"], r"^[0-9a-f]{64}$")
-                self.assertRegex(c["reuse_vector_digest"], r"^[0-9a-f]{64}$")
-                self.assertEqual(c["reuse_count"] + c["embed_count"], c["points"])
-                self.assertLessEqual(c["delete_count"], c["embed_count"])
-                self.assertEqual(c["remove_count"], 0)
-                # 재사용 + 삭제 후 재임베딩 = 원본 snapshot Point 수 (remove 0)
-                self.assertEqual(c["reuse_count"] + c["delete_count"], profiles.R3_SOURCES[key]["points"])
+            self.assertEqual({f: pins["collections"][key][f] for f in SAMPLE_PLAN_VALUES[key]}, SAMPLE_PLAN_VALUES[key])
+        broken = final_sample_pins()
+        broken["collections"]["b2"]["reuse_count"] += 1                          # 합계가 어긋나면 잡아낸다
+        with self.assertRaises(AssertionError):
+            self.assert_well_formed(broken)
 
     def test_final_pins_match_the_checked_out_release(self):
         """기준값의 manifest·건수·Point 수가 현재 체크아웃된 릴리스 파일에서 다시 계산한 값과 같다."""
@@ -116,9 +154,9 @@ class R3PinTests(unittest.TestCase):
         original = profiles.r3_pins()
         copied = profiles.r3_pins()
         copied["manifest_lf_sha256"] = "b" * 64
-        copied["collections"]["b2"]["vector_digest"] = None
+        copied["collections"]["b2"]["vector_digest"] = "c" * 64
         self.assertEqual(profiles.R3_PINS, original)
-        self.assertTrue(profiles.is_finalized())
+        self.assertEqual(profiles.pin_stage(), profiles.R3_PIN_STAGE)
 
     def test_r3_collections_match_full_index_configs(self):
         for key in profiles.COLLECTION_KEYS:

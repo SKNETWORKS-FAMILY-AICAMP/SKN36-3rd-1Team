@@ -43,10 +43,29 @@ def pending_pins():
     return pins
 
 
-def stage1_pins():
-    """1차 확정 상태: 실제 R3_PINS와 같되 컬렉션별 최종 vector_digest 두 칸만 미확정(None).
-    실제 R3_PINS가 2차 확정된 뒤에도 '1차 상태에서는 갱신 단계만 통과하고 최종 단계는 거부'를 계속 검증하기 위한 값."""
+# final_sample_pins()의 계획·결과 값 (sample_only). reuse + embed = points, reuse + delete = 원본 snapshot Point 수.
+SAMPLE_PLAN_VALUES = {
+    "b2": {"reuse_count": 1125, "embed_count": 108, "delete_count": 14, "vector_digest": "1" * 64,
+           "reuse_vector_digest": "2" * 64, "plan_sha256": "3" * 64},
+    "b3": {"reuse_count": 1197, "embed_count": 123, "delete_count": 23, "vector_digest": "4" * 64,
+           "reuse_vector_digest": "5" * 64, "plan_sha256": "6" * 64},
+}
+
+
+def final_sample_pins():
+    """2차 확정(final) 모양: manifest·release_counts·points는 실제 R3_PINS(현재 릴리스에서 확인한 값)를 쓰고,
+    계획·임베딩 결과 값은 SAMPLE_PLAN_VALUES(sample_only)로 채운다. 실제 R3_PINS 단계와 무관하게
+    '확정값이면 기준값 게이트를 통과하고 그 다음 검사에서 멈춘다'를 검증하기 위한 값."""
     pins = profiles.r3_pins()
+    for key in profiles.COLLECTION_KEYS:
+        pins["collections"][key].update(SAMPLE_PLAN_VALUES[key], remove_count=0)
+    return pins
+
+
+def stage1_pins():
+    """1차 확정(stage1) 모양: final_sample_pins()에서 컬렉션별 최종 vector_digest 두 칸만 미확정(None).
+    '1차 상태에서는 갱신 단계만 통과하고 최종 단계는 거부'를 검증하기 위한 값."""
+    pins = final_sample_pins()
     for key in profiles.COLLECTION_KEYS:
         pins["collections"][key]["vector_digest"] = None
     return pins

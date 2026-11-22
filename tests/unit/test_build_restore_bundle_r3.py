@@ -17,7 +17,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from r3_fixtures import (FakeDocker, Sample, build_container, good_build_docker, pending_pins,  # noqa: E402
-                         sample_vector, stage1_pins)
+                         final_sample_pins, sample_vector, stage1_pins)
 
 from scripts import build_restore_bundle_r3 as bundle  # noqa: E402
 from scripts import build_restore_bundle_v140 as b2b  # noqa: E402
@@ -628,11 +628,15 @@ class CreateSnapshotTests(unittest.TestCase):
 class PlanModeTests(unittest.TestCase):
     def test_plan_is_read_only_and_lists_missing_pins(self):
         with tempfile.TemporaryDirectory() as folder:
-            output = bundle.plan(None, Path(folder))
+            output = bundle.plan(None, Path(folder))                   # 실제 R3_PINS (C0)
             with patch.object(profiles, "R3_PINS", stage1_pins()):
                 stage1 = bundle.plan(None, Path(folder))
+            with patch.object(profiles, "R3_PINS", final_sample_pins()):
+                final = bundle.plan(None, Path(folder))
             self.assertEqual(list(Path(folder).iterdir()), [])
-        self.assertEqual((output["writes"], output["r3_pins_finalized"], output["missing_pins"]), (0, True, []))   # 2차 확정
+        self.assertEqual((output["writes"], output["r3_pins_finalized"]), (0, False))
+        self.assertEqual(sorted(output["missing_pins"]), sorted(profiles.missing_pins()))
+        self.assertEqual((final["writes"], final["r3_pins_finalized"], final["missing_pins"]), (0, True, []))   # 2차 모양
         self.assertEqual((stage1["writes"], stage1["r3_pins_finalized"]), (0, False))
         self.assertEqual(sorted(stage1["missing_pins"]), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))   # 1차 확정 상태
 
