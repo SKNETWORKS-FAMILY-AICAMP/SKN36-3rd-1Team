@@ -148,28 +148,58 @@ def test_selected_policy_one_search_no_other_card_and_no_extra_generation():
     assert result.policy_checks[0].official_requirements is None
 
 
-def test_selected_policy_outside_profile_region_is_judged_not_hidden():
-    """sample_only: 부산 사용자가 서울 한정 정책을 고르면 근거 없음으로 숨기지 않고 지역 조건을 판정 결과로 보여 준다."""
+def _regional_policy(pid, region_names):
+    """sample_only: 실제 검색 결과처럼 지역 제한은 조건 트리가 아니라 graph.regions(AVAILABLE_IN)에만 있다."""
     from backend.eligibility.checker import check_eligibility
-    seoul = policy("POL_A")
-    seoul["graph"]["eligibility"] = {"condition_tree": [{"group_id": "G", "logic": "AND", "groups": [],
-        "conditions": [{"type": "REGION", "operator": "EQ", "value": "서울특별시"}]}],
+    item = policy(pid)
+    item["graph"]["regions"] = [{"region_id": f"R{i}", "name": name} for i, name in enumerate(region_names)]
+    item["graph"]["eligibility"] = {"condition_tree": [{"group_id": "G", "logic": "AND", "groups": [],
+        "conditions": [{"type": "AGE", "operator": "BETWEEN", "value": "19~34"}]}],
         "unknown_logic_groups": [], "structure_issues": []}
+    return item, check_eligibility
 
+
+def _ask_selected(item, check_fn, region, selected=True):
     def search(question, filters=None, k=10):
         # 검색 계층처럼 지역 필터가 있으면 다른 지역 정책을 걸러 낸다.
-        if filters and "region" in filters:
+        if filters and "region" in filters and filters["region"] not in {r["name"] for r in item["graph"]["regions"]}:
             return {"policies": []}
-        return {"policies": [seoul] if filters and filters.get("policy_id") == "POL_A" else []}
+        return {"policies": [item]}
+    generate = Mock(return_value=answer())
+    request = AskRequest(question="신청할 수 있나요?", profile={"age": 25, "region": region, "income": None},
+                         history=[], selected_policy_id=item["policy_id"] if selected else None)
+    return run_ask_pipeline(request, search_fn=search, check_fn=check_fn, generate_fn=generate), generate
 
-    request = AskRequest(question="신청할 수 있나요?", profile={"age": 25, "region": "부산", "income": None},
-                         history=[], selected_policy_id="POL_A")
-    result = run_ask_pipeline(request, search_fn=search, check_fn=check_eligibility, generate_fn=Mock(return_value=answer()))
-    assert result.status != "no_evidence"
-    assert [p.policy_id for p in result.policy_checks] == ["POL_A"]
-    region = [c for c in result.policy_checks[0].conditions if c.field == "region"]
-    # 충족으로 안내하지 않는다(불충족 또는 공식 근거 확인 필요).
-    assert region and region[0].status in {"ineligible", "needs_check"}
+
+def test_selected_policy_outside_profile_region_is_held_not_hidden():
+    """부산 사용자가 서울 한정 정책을 고르면 근거 없음으로 숨기지 않고, 지역 확인 필요와 종합 보류로 보여 준다."""
+    item, check_fn = _regional_policy("POL_A", ["서울특별시"])
+    result, generate = _ask_selected(item, check_fn, "부산")
+    assert result.status != "no_evidence" and [p.policy_id for p in result.policy_checks] == ["POL_A"]
+    rows = {c.field: c for c in result.policy_checks[0].conditions}
+    assert rows["region"].status == "needs_check"
+    assert "서울특별시" in rows["region"].reason and "부산광역시" in rows["region"].reason
+    assert rows["age"].status == "eligible"  # 지역과 무관한 판정은 그대로 둔다.
+    assert rows["eligibility"].status == "needs_check"  # 나이만 맞아도 종합 충족으로 안내하지 않는다.
+    # LLM도 같은 보류 결과를 받는다.
+    sent = generate.call_args.args[2][0]["conditions"]
+    assert any(row["field"] == "region" and row["status"] == "needs_check" for row in sent)
+
+
+@pytest.mark.parametrize("names, region", [(["서울특별시"], "서울"), (["전국"], "부산"), (["서울특별시"], "")])
+def test_selected_policy_region_match_nationwide_or_missing_input_is_unchanged(names, region):
+    item, check_fn = _regional_policy("POL_A", names)
+    result, _ = _ask_selected(item, check_fn, region)
+    rows = {c.field: c for c in result.policy_checks[0].conditions}
+    assert "region" not in rows and rows["eligibility"].status == "eligible"
+
+
+def test_region_hold_applies_only_to_selected_policy_requests():
+    # 선택 정책이 아닌 기존 상담은 지역 필터로 이미 걸러지므로 판정 결과를 바꾸지 않는다.
+    item, check_fn = _regional_policy("POL_A", ["서울특별시", "부산광역시"])
+    result, _ = _ask_selected(item, check_fn, "부산", selected=False)
+    rows = {c.field: c for c in result.policy_checks[0].conditions}
+    assert "region" not in rows and rows["eligibility"].status == "eligible"
 
 
 def test_selected_policy_absent_does_not_answer_another_policy():

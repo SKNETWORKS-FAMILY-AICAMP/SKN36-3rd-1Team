@@ -169,6 +169,31 @@ def _collect_contacts(contexts) -> list[Contact]:
     return list(contacts.values())
 
 
+def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str | None) -> None:
+    """선택 정책은 지역 필터 없이 찾으므로 정책의 대상 지역(AVAILABLE_IN)과 입력 지역을 직접 대조한다.
+
+    v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 지역 관계로만 갖고 있어 Checker가 지역을 판정하지 않는다.
+    입력 지역이 대상 지역·전국에 없으면 확인 필요로 보류한다. 확정 불충족으로 단정하지 않는다.
+    """
+    regions = (policy.get("graph") or {}).get("regions") or []
+    names = {str(region.get("name")).strip() for region in regions
+             if isinstance(region, dict) and str(region.get("name") or "").strip()}
+    if not profile_region or not names or "전국" in names or profile_region in names:
+        return
+    conditions = check["conditions"]
+    if any(row["field"].lower() == "region" and row["status"] == "ineligible" for row in conditions):
+        return
+    region_row = {"field": "region", "label": "거주 지역", "status": "needs_check",
+                  "reason": f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
+                            "거주 요건을 공식 공고에서 확인해 주세요."}
+    conditions = [row for row in conditions if row["field"].lower() != "region"]
+    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
+    if root is not None and root["status"] == "eligible":
+        root["status"] = "needs_check"
+        root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
+    check["conditions"] = [region_row, *conditions]
+
+
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
     try:
         result = EligibilityOutput.model_validate(raw)
@@ -561,6 +586,8 @@ def run_ask_pipeline(
     checks = []
     for pid, selected in contexts_by_policy.items():
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
+        if request.selected_policy_id:
+            _hold_selected_policy_region(by_id[pid], check, profile["region"])
         contacts = _collect_contacts(selected)
         if not contacts:
             # 미채택 후보 청크에서만 찾았다 — 그 청크는 답변의 citations에 들어가지 않으므로,
