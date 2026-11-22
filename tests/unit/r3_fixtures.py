@@ -78,6 +78,7 @@ class R3Qdrant(FakeQdrant):
         super().__init__({}, size=size, version=version)
         self.collections = {name: copy.deepcopy(points) for name, points in (collections or {}).items()}
         self.aliases, self.snapshots = [], []
+        self.snapshot_checksum = None          # create_snapshot이 돌려줄 checksum (기본 None = 서버가 값을 안 줌)
 
     def get_aliases(self):
         return SimpleNamespace(aliases=[SimpleNamespace(alias_name=a, collection_name="x") for a in self.aliases])
@@ -90,7 +91,7 @@ class R3Qdrant(FakeQdrant):
     def create_snapshot(self, collection_name, wait=True):
         self.writes.append(("create_snapshot", collection_name))
         self.snapshots.append(collection_name)
-        return SimpleNamespace(name=f"{collection_name}-sample_only.snapshot", checksum=None, size=None)
+        return SimpleNamespace(name=f"{collection_name}-sample_only.snapshot", checksum=self.snapshot_checksum, size=None)
 
 
 def sample_vector(value):

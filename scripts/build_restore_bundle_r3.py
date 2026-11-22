@@ -4,8 +4,9 @@
   --create-snapshot --collection b2|b3 [서버 쓰기, build 프로젝트 Qdrant만]
       build Docker 소유 확인 → 격리 서버 → build 서버 기준 계획(basis=server_snapshot) 대비 상태 complete
       → Point 수·전체 벡터 digest = R3_PINS → dry-run fingerprint(서버 상태 + Docker 식별 정보)
-      → verify_full_index → snapshot 생성 → 내려받기(.partial) → SHA-256·크기 대조 → fingerprint 재확인
-      → snapshot-<key>.snapshot + snapshot-record-<key>.json (기존 파일 덮어쓰기 거부)
+      → verify_full_index → .partial 배타적 생성(이미 있으면 서버 호출 없이 거부) → snapshot 생성 → 내려받기
+      → fingerprint 재확인 → SHA-256 검증(서버 checksum, 없으면 서버 파일 sha256sum — 크기만으로 통과 없음)
+      → 하드 링크로 최종 이름 + snapshot-record-<key>.json (기존 파일 덮어쓰기·삭제 없음, 검증 근거 기록)
   --build [로컬 쓰기, 출력 폴더만]
       커밋 확인(40자리 SHA, manifest LF = R3_PINS, 필수 파일, 인증 파일 이름 없음,
                커밋의 기준값 모듈 = 작업 트리 것 — 줄바꿈 차이만 허용, 커밋되지 않은 R3_PINS 변경은 거부)
@@ -20,6 +21,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import shutil
 import sys
 import tempfile
@@ -39,6 +42,7 @@ from scripts import plan_r3_vector_reuse as planner  # noqa: E402
 from scripts import restore_final_v140 as restore  # noqa: E402
 from scripts import restore_final_v140_r3 as restore_r3  # noqa: E402
 from scripts import restore_profiles_v140 as profiles  # noqa: E402
+from scripts import restore_r2_isolated as r2w  # noqa: E402  (읽기 전용 docker 실행기 재사용)
 from scripts import update_r3_collections as qdrant_r3  # noqa: E402
 
 DEFAULT_OUT_DIR = ROOT / ".cache" / "issue105-r3" / "bundle-r3"
@@ -48,10 +52,66 @@ REQUIRED_COMMIT_PATHS = (VERIFY_COMPOSE, profiles.RESTORE_SCRIPT, profiles.PROFI
                          "scripts/restore_final_v140.py", MANIFEST_SOURCE, "requirements.txt")
 RESTORE_MEMBER = Path(profiles.RESTORE_SCRIPT).name
 BundleError = b2b.BundleError
+SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
+CONTAINER_ID = re.compile(r"^[0-9a-f]{64}$")
+COLLECTION_NAME = re.compile(r"^[A-Za-z0-9_]{1,200}$")
+QDRANT_SNAPSHOT_ROOT = "/qdrant/snapshots"       # Qdrant 1.12 기본 snapshot 경로 (컨테이너 안)
 
 
 def snapshot_paths(out_dir: Path, key: str) -> tuple[Path, Path]:
     return Path(out_dir) / profiles.R3_COLLECTIONS[key]["snapshot_member"], Path(out_dir) / f"snapshot-record-{key}.json"
+
+
+def partial_path(target: Path) -> Path:
+    return target.with_name(target.name + ".partial")
+
+
+def docker_exec_sha256(identity: dict[str, Any], collection: str, name: str, docker=None) -> str:
+    """
+    서버 snapshot 파일의 SHA-256을 컨테이너 안에서 읽기 전용으로 계산한다 (docker exec <컨테이너 ID> sha256sum).
+    대상은 소유 확인을 통과한 build Qdrant 컨테이너 ID(이름 아님) + 검증한 컬렉션 이름 + 서버가 돌려준 snapshot 이름뿐이다.
+    출력이 정확히 "<64 hex>  <같은 경로>" 한 줄이 아니면 실패한다.
+    """
+    container = str((identity.get("qdrant") or {}).get("id", ""))
+    if not CONTAINER_ID.match(container) or not COLLECTION_NAME.match(collection) or not b2b.SNAPSHOT_NAME.match(name):
+        raise BundleError("서버 snapshot SHA 확인 대상(컨테이너 ID·컬렉션·이름) 형식이 예상과 다릅니다")
+    path = f"{QDRANT_SNAPSHOT_ROOT}/{collection}/{name}"
+    lines = (docker or r2w.run_docker)(["exec", container, "sha256sum", "--", path]).strip().splitlines()
+    match = re.fullmatch(r"([0-9a-f]{64})  (.+)", lines[0]) if len(lines) == 1 else None
+    if not match or match.group(2) != path:
+        raise BundleError("서버 snapshot SHA-256 출력 형식이 예상과 다릅니다")
+    return match.group(1)
+
+
+def verify_snapshot_integrity(description, local_sha: str, local_size: int, server_sha256) -> dict[str, Any]:
+    """
+    내려받은 파일이 서버 snapshot과 같은지 확인한다. 크기 일치만으로는 통과시키지 않는다.
+    - 서버가 돌려준 checksum이 64자리 소문자 hex면 그 값과 로컬 SHA-256을 비교한다.
+    - checksum이 없거나 형식이 다르면 server_sha256()(서버 파일 SHA, 읽기 전용)과 비교한다. 이것도 안 되면 실패.
+    반환값(검증 근거)은 기록 JSON의 snapshot_integrity에 그대로 남긴다.
+    """
+    checksum, size = getattr(description, "checksum", None), getattr(description, "size", None)
+    if size is not None and size != local_size:
+        raise BundleError("내려받은 snapshot 크기가 서버 값과 다릅니다")
+    evidence: dict[str, Any] = {"local_sha256": local_sha, "local_size_bytes": local_size,
+                                "server_reported_size_bytes": size,
+                                "server_reported_checksum": checksum if isinstance(checksum, str) else None}
+    if isinstance(checksum, str) and SHA256_HEX.match(checksum):
+        if checksum != local_sha:
+            raise BundleError("내려받은 snapshot SHA-256이 서버 checksum과 다릅니다")
+        evidence.update(method="server_reported_checksum", server_sha256=checksum)
+    else:
+        evidence["server_reported_checksum_status"] = "missing" if checksum is None else "invalid_format"
+        try:
+            server_sha = server_sha256()
+        except Exception as error:
+            raise BundleError(f"서버 checksum이 없고 서버 snapshot 파일 SHA도 확인하지 못했습니다 → 검증 불가 "
+                              f"({type(error).__name__})") from error
+        if not (isinstance(server_sha, str) and SHA256_HEX.match(server_sha)) or server_sha != local_sha:
+            raise BundleError("내려받은 snapshot SHA-256이 서버 snapshot 파일 SHA-256과 다릅니다")
+        evidence.update(method="server_file_sha256_docker_exec", server_sha256=server_sha)
+    evidence["verified"] = True
+    return evidence
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +120,15 @@ def snapshot_paths(out_dir: Path, key: str) -> tuple[Path, Path]:
 def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, Any], out_dir: Path, *,
                     confirm_write: bool = False, expected_fingerprint: str | None = None,
                     pins: dict[str, Any] | None = None, environ=None, http_get=None, verify_slices=None,
-                    docker=None) -> dict:
+                    docker=None, server_sha256=None) -> dict:
+    """
+    파일 보호 (2026-11-22 보완)
+      - 최종 snapshot·기록 JSON·.partial 중 하나라도 있으면 서버 쓰기 전에 거부한다 (기존 파일은 지우지도 덮어쓰지도 않음).
+      - create_snapshot 호출 전에 .partial을 배타적으로 새로 만든다(open "xb"). 다른 작업이 먼저 만들었으면 거부 → 서버 호출 0회.
+      - 실패 시 정리는 이번 실행이 만든 .partial(같은 파일 식별자)만 지운다. 강제 종료로 남은 .partial은 다음 실행이 보존·거부한다.
+      - 최종 이름은 하드 링크(os.link)로 만든다 → 같은 이름이 생겨 있으면 FileExistsError로 거부(덮어쓰기 없음).
+    무결성: verify_snapshot_integrity (서버 checksum 또는 서버 파일 SHA와 로컬 SHA 일치 필수, 크기만으로 통과 없음)
+    """
     if not confirm_write:
         raise BundleError("confirm_write=True 없이 snapshot을 만들지 않습니다")
     pins = profiles.require_finalized(pins)
@@ -71,8 +139,10 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
     identity = qdrant_r3.require_build_ownership(docker)
     api_key = qdrant_r3.read_secret(qdrant_r3.API_KEY_ENV, environ)
     target, record_path = snapshot_paths(out_dir, key)
-    if target.exists() or record_path.exists():
-        raise BundleError("snapshot·기록 파일이 이미 있습니다 (덮어쓰지 않음)")
+    partial = partial_path(target)
+    existing = [p.name for p in (target, record_path, partial) if p.exists()]
+    if existing:
+        raise BundleError(f"snapshot·기록·.partial 파일이 이미 있습니다 (덮어쓰거나 지우지 않음): {existing}")
     qdrant_r3.require_isolated_server(client)
     state = qdrant_r3.inspect_state(client, plan, release)
     if (state["state"] != "complete" or state["points"] != pinned["points"]
@@ -84,34 +154,49 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
                                                              documents=release["documents"])))()
     if not slices.get("passed"):
         raise BundleError("verify_full_index 실패 → snapshot을 만들지 않음")
-    description = client.create_snapshot(collection_name=spec["collection"], wait=True)
-    name = getattr(description, "name", "") or ""
-    if not b2b.SNAPSHOT_NAME.match(name):
-        raise BundleError("서버가 돌려준 snapshot 이름 형식이 예상과 다릅니다")
     if http_get is None:
         import requests
         http_get = requests.get
     Path(out_dir).mkdir(parents=True, exist_ok=True)
-    partial = target.with_name(target.name + ".partial")
-    response = http_get(f"{url.rstrip('/')}/collections/{spec['collection']}/snapshots/{name}",
-                        headers={"api-key": api_key}, timeout=qdrant_r3.UPLOAD_TIMEOUT_SECONDS, stream=True)
     try:
+        stream = partial.open("xb")                  # 이번 실행 소유의 임시 파일 (배타적 생성)
+    except FileExistsError as error:
+        raise BundleError("다른 작업이 .partial을 먼저 만들었습니다 (지우지 않음, snapshot 생성 안 함)") from error
+    owned = os.fstat(stream.fileno())
+    response = None
+    try:
+        description = client.create_snapshot(collection_name=spec["collection"], wait=True)
+        name = getattr(description, "name", "") or ""
+        if not b2b.SNAPSHOT_NAME.match(name):
+            raise BundleError("서버가 돌려준 snapshot 이름 형식이 예상과 다릅니다")
+        response = http_get(f"{url.rstrip('/')}/collections/{spec['collection']}/snapshots/{name}",
+                            headers={"api-key": api_key}, timeout=qdrant_r3.UPLOAD_TIMEOUT_SECONDS, stream=True)
         if getattr(response, "status_code", None) != 200:
             raise BundleError(f"snapshot 내려받기 실패: HTTP {getattr(response, 'status_code', None)}")
-        with partial.open("xb") as stream:
-            for block in response.iter_content(chunk_size=1024 * 1024):
-                stream.write(block)
+        for block in response.iter_content(chunk_size=1024 * 1024):
+            stream.write(block)
+        stream.close()
         sha, size = restore.file_sha(partial), partial.stat().st_size
-        if (description.checksum and description.checksum != sha) or (description.size and description.size != size):
-            raise BundleError("내려받은 snapshot의 SHA-256·크기가 서버 값과 다릅니다")
         after = qdrant_r3.inspect_state(client, plan, release)
         after_identity = qdrant_r3.require_build_ownership(docker)
         if qdrant_r3.server_fingerprint(client, after, after_identity) != expected_fingerprint:
             raise BundleError("snapshot 후 컬렉션·컨테이너 fingerprint가 바뀌었습니다")
-        partial.rename(target)
-    except Exception:
-        if partial.exists():
-            partial.unlink()          # 이 함수가 만든 미완성 파일만 지운다
+        integrity = verify_snapshot_integrity(
+            description, sha, size,
+            server_sha256 or (lambda: docker_exec_sha256(after_identity, spec["collection"], name, docker)))
+        try:
+            os.link(partial, target)                 # 최종 이름이 이미 있으면 FileExistsError (덮어쓰지 않음)
+        except FileExistsError as error:
+            raise BundleError("최종 snapshot 이름이 그 사이에 생겼습니다 (덮어쓰지 않음)") from error
+        partial.unlink()
+    except BaseException:
+        stream.close()
+        try:
+            current = os.stat(partial)
+            if (current.st_dev, current.st_ino) == (owned.st_dev, owned.st_ino):
+                partial.unlink()                     # 이번 실행이 만든 미완성 파일만 지운다
+        except FileNotFoundError:
+            pass
         raise
     finally:
         close = getattr(response, "close", None)
@@ -123,12 +208,16 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
               "fingerprint": expected_fingerprint, "qdrant_version": profiles.QDRANT_VERSION,
               "docker_project": qdrant_r3.BUILD_PROJECT, "plan_basis": plan["basis"],
               "server_snapshot_name": name, "snapshot_file": target.name, "snapshot_sha256": sha,
-              "snapshot_size_bytes": size, "verify_full_index_passed": True,
+              "snapshot_size_bytes": size, "snapshot_integrity": integrity, "verify_full_index_passed": True,
               "plan_sha256": planner.plan_sha256(plan), "plan_counts": plan["counts"],
               "source": plan["source"], "manifest_lf_sha256": plan["manifest_lf_sha256"],
               "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
               "server_state_note": "서버 /qdrant/snapshots에 snapshot 파일이 남아 있다 (컬렉션 데이터는 불변)"}
-    planner.write_new_json(record_path, record)
+    try:
+        planner.write_new_json(record_path, record)
+    except Exception as error:
+        raise BundleError(f"snapshot 파일은 검증·보존했지만 기록 JSON을 만들지 못했습니다 ({type(error).__name__}). "
+                          "같은 경로 재실행은 거부되므로 파일을 사람이 확인한다") from error
     return record
 
 

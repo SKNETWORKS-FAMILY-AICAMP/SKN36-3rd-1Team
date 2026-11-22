@@ -266,18 +266,31 @@ class CreateSnapshotTests(unittest.TestCase):
                               "payload": planner.reuse_payload(chunks[point_id], self.s.metadata,
                                                                self.s.release["content_hashes"], run)}
 
-    def create(self, key, **kwargs):
+    def data(self, key):
+        return f"sample_only downloaded {key}".encode()
+
+    def create(self, key, *, checksum="match", blocks=None, **kwargs):
+        """checksum="match"면 서버가 내려받을 내용과 같은 SHA-256 checksum을 돌려준다(그 밖의 값은 그대로 돌려줌)."""
         plan = self.plans[key]
         docker = kwargs.get("docker") or self.docker
         fp = update.server_fingerprint(self.client, update.inspect_state(self.client, plan, self.s.release),
                                        update.require_build_ownership(self.docker))
-        data = f"sample_only downloaded {key}".encode()
+        data = self.data(key)
+        self.client.snapshot_checksum = hashlib.sha256(data).hexdigest() if checksum == "match" else checksum
         options = {"confirm_write": True, "expected_fingerprint": fp, "pins": self.pins, "environ": ENV,
                    "docker": docker,
                    "http_get": lambda url, headers, timeout, stream: SimpleNamespace(
-                       status_code=200, iter_content=lambda chunk_size: [data], close=lambda: None),
+                       status_code=200, iter_content=lambda chunk_size: (blocks() if blocks else [data]),
+                       close=lambda: None),
                    "verify_slices": lambda: {"passed": True}, **kwargs}
         return bundle.create_snapshot(self.client, URL, plan, self.s.release, Path(self.tmp.name), **options)
+
+    def out(self, key):
+        snapshot, record = bundle.snapshot_paths(Path(self.tmp.name), key)
+        return snapshot, record, bundle.partial_path(snapshot)
+
+    def collections_state(self):
+        return json.dumps(self.client.collections, sort_keys=True)
 
     def test_snapshot_and_record_for_each_collection(self):
         for key in profiles.COLLECTION_KEYS:
@@ -285,6 +298,9 @@ class CreateSnapshotTests(unittest.TestCase):
                 record = self.create(key)
                 snapshot, record_path = bundle.snapshot_paths(Path(self.tmp.name), key)
                 self.assertEqual(record["snapshot_sha256"], restore.file_sha(snapshot))
+                self.assertEqual(record["snapshot_integrity"]["method"], "server_reported_checksum")
+                self.assertEqual(record["snapshot_integrity"]["server_sha256"], restore.file_sha(snapshot))
+                self.assertFalse(bundle.partial_path(snapshot).exists())
                 self.assertEqual((record["points"], record["vector_digest"]),
                                  (6, self.pins["collections"][key]["vector_digest"]))
                 self.assertEqual(json.loads(record_path.read_text(encoding="utf-8"))["plan_sha256"],
@@ -317,6 +333,153 @@ class CreateSnapshotTests(unittest.TestCase):
         with self.assertRaisesRegex(b2b.BundleError, "상태 이상"):
             self.create("b2")
         self.assertEqual(self.client.snapshots, [])
+
+    # --- 기존 파일 보호 (.partial·최종 snapshot·기록 JSON) -------------------------------------------
+    def test_existing_partial_snapshot_or_record_is_refused_before_any_server_call(self):
+        """강제 종료 등으로 남은 파일: 서버 snapshot 0회, 파일 내용·SHA 불변, 다른 파일도 만들지 않음."""
+        for index in range(3):
+            with self.subTest(existing=("partial", "snapshot", "record")[index]):
+                key = profiles.COLLECTION_KEYS[index % 2]
+                paths = self.out(key)
+                leftover = paths[(2, 0, 1)[index]]
+                leftover.parent.mkdir(parents=True, exist_ok=True)
+                leftover.write_bytes(b"sample_only leftover from an earlier run")
+                before = restore.file_sha(leftover)
+                state = self.collections_state()
+                with self.assertRaisesRegex(b2b.BundleError, "이미 있습니다"):
+                    self.create(key)
+                self.assertEqual(restore.file_sha(leftover), before)
+                self.assertEqual([p.exists() for p in paths], [p == leftover for p in paths])
+                self.assertEqual((self.client.snapshots, self.collections_state()), ([], state))
+                leftover.rename(leftover.with_name(leftover.name + ".kept-by-test"))   # 다음 subTest 격리 (삭제 아님)
+
+    def test_partial_created_by_another_job_after_precheck_is_kept(self):
+        """사전 검사 뒤 다른 작업이 .partial을 만들면 배타적 생성이 실패 → 서버 호출 없이 거부, 그 파일은 그대로."""
+        snapshot, _record, partial = self.out("b2")
+
+        def other_job():
+            partial.parent.mkdir(parents=True, exist_ok=True)
+            partial.write_bytes(b"sample_only other job")
+            return {"passed": True}
+        with self.assertRaisesRegex(b2b.BundleError, "다른 작업"):
+            self.create("b2", verify_slices=other_job)
+        self.assertEqual(partial.read_bytes(), b"sample_only other job")
+        self.assertEqual((snapshot.exists(), self.client.snapshots), (False, []))
+
+    def test_final_name_created_meanwhile_is_not_overwritten(self):
+        snapshot, record, partial = self.out("b2")
+
+        def sha_while_other_job_writes_final():
+            snapshot.write_bytes(b"sample_only other job final")
+            return hashlib.sha256(self.data("b2")).hexdigest()
+        with self.assertRaisesRegex(b2b.BundleError, "그 사이"):
+            self.create("b2", checksum=None, server_sha256=sha_while_other_job_writes_final)
+        self.assertEqual(snapshot.read_bytes(), b"sample_only other job final")
+        self.assertEqual((partial.exists(), record.exists()), (False, False))   # 이번 실행 임시 파일만 정리
+
+    # --- SHA 검증 --------------------------------------------------------------------------------
+    def test_checksum_mismatch_or_unverifiable_sha_fails_without_final_files(self):
+        expected = hashlib.sha256(self.data("b2")).hexdigest()
+        cases = {
+            "checksum_mismatch": (dict(checksum="0" * 64), "서버 checksum과 다릅니다"),
+            "checksum_null_no_server_sha": (dict(checksum=None), "검증 불가"),          # FakeDocker는 exec 거부
+            "checksum_invalid_no_server_sha": (dict(checksum=expected.upper()), "검증 불가"),
+            "checksum_null_server_sha_mismatch": (dict(checksum=None, server_sha256=lambda: "1" * 64),
+                                                  "서버 snapshot 파일 SHA-256과 다릅니다"),
+            "checksum_null_server_sha_invalid": (dict(checksum=None, server_sha256=lambda: "not-a-sha"),
+                                                 "서버 snapshot 파일 SHA-256과 다릅니다"),
+        }
+        state = self.collections_state()
+        for name, (kwargs, message) in cases.items():
+            with self.subTest(case=name):
+                with self.assertRaisesRegex(b2b.BundleError, message):
+                    self.create("b2", **kwargs)
+                self.assertEqual([p.exists() for p in self.out("b2")], [False, False, False])
+        self.assertEqual(self.collections_state(), state)
+        self.assertEqual(len(self.client.snapshots), len(cases))   # 서버 snapshot은 남는다 (자동 삭제 없음)
+
+    def test_size_match_alone_is_not_integrity(self):
+        data = self.data("b3")
+        self.client.snapshot_checksum = None
+        original = self.client.create_snapshot
+
+        def with_size(collection_name, wait=True):
+            return SimpleNamespace(**{**vars(original(collection_name, wait)), "size": len(data)})
+        with patch.object(self.client, "create_snapshot", with_size):
+            with self.assertRaisesRegex(b2b.BundleError, "검증 불가"):
+                self.create("b3", checksum=None)
+        self.assertFalse(self.out("b3")[0].exists())
+
+    def test_server_file_sha_fallback_records_evidence(self):
+        expected = hashlib.sha256(self.data("b3")).hexdigest()
+        record = self.create("b3", checksum=None, server_sha256=lambda: expected)
+        evidence = record["snapshot_integrity"]
+        self.assertEqual((evidence["method"], evidence["server_sha256"], evidence["local_sha256"], evidence["verified"],
+                          evidence["server_reported_checksum_status"]),
+                         ("server_file_sha256_docker_exec", expected, expected, True, "missing"))
+        saved = json.loads(self.out("b3")[1].read_text(encoding="utf-8"))
+        self.assertEqual(saved["snapshot_integrity"], evidence)
+
+    def test_docker_exec_sha256_reads_only_the_owned_container_file(self):
+        identity = update.require_build_ownership(self.docker)
+        collection, name = self.s.collection("b2"), f"{self.s.collection('b2')}-sample_only.snapshot"
+        path = f"/qdrant/snapshots/{collection}/{name}"
+        calls = []
+
+        def docker(args, output=None):
+            calls.append(list(args))
+            return output if output is not None else f"{'a' * 64}  {path}\n"
+        self.assertEqual(bundle.docker_exec_sha256(identity, collection, name, docker), "a" * 64)
+        self.assertEqual(calls, [["exec", identity["qdrant"]["id"], "sha256sum", "--", path]])
+        for output in (f"{'a' * 64}  /qdrant/snapshots/other/{name}\n", f"{'A' * 64}  {path}\n",
+                       f"{'a' * 64}  {path}\n{'a' * 64}  {path}\n", ""):
+            with self.subTest(output=output[:20]), self.assertRaises(b2b.BundleError):
+                bundle.docker_exec_sha256(identity, collection, name, lambda args, o=output: o)
+        calls.clear()
+        for bad_identity, bad_collection, bad_name in (({"qdrant": {"id": "short"}}, collection, name),
+                                                       (identity, "../etc", name), (identity, collection, "../x.snapshot")):
+            with self.assertRaises(b2b.BundleError):
+                bundle.docker_exec_sha256(bad_identity, bad_collection, bad_name, docker)
+        self.assertEqual(calls, [])                                   # 형식이 틀리면 docker를 부르지 않음
+
+    # --- 중간 실패 시 기존 자산 보존 ------------------------------------------------------------------
+    def sentinels(self):
+        """다른 컬렉션의 완성 snapshot·기록과 관계없는 파일 (기존 자산 역할)."""
+        other_snapshot, other_record = bundle.snapshot_paths(Path(self.tmp.name), "b3")
+        files = {other_snapshot: b"sample_only b3 final", other_record: b"{}",
+                 Path(self.tmp.name) / "sample_only-unrelated.txt": b"keep"}
+        for path, content in files.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        return files
+
+    def test_download_failure_keeps_existing_files_and_removes_only_own_partial(self):
+        files = self.sentinels()
+
+        def broken():
+            yield b"sample_only first block"
+            raise OSError("sample_only connection reset")
+        state = self.collections_state()
+        with self.assertRaisesRegex(OSError, "connection reset"):
+            self.create("b2", blocks=broken)
+        with self.assertRaisesRegex(b2b.BundleError, "HTTP 500"):
+            self.create("b2", http_get=lambda url, headers, timeout, stream: SimpleNamespace(status_code=500,
+                                                                                            close=lambda: None))
+        self.assertEqual({p: p.read_bytes() for p in files}, files)
+        self.assertEqual([p.exists() for p in self.out("b2")], [False, False, False])
+        self.assertEqual(self.collections_state(), state)
+
+    def test_record_write_failure_keeps_verified_snapshot_and_existing_files(self):
+        files = self.sentinels()
+        with patch.object(planner, "write_new_json", side_effect=OSError("sample_only disk full")):
+            with self.assertRaisesRegex(b2b.BundleError, "기록 JSON"):
+                self.create("b2")
+        snapshot, record, partial = self.out("b2")
+        self.assertEqual((snapshot.read_bytes(), record.exists(), partial.exists()), (self.data("b2"), False, False))
+        self.assertEqual({p: p.read_bytes() for p in files}, files)
+        with self.assertRaisesRegex(b2b.BundleError, "이미 있습니다"):
+            self.create("b2")                                          # 재실행은 거부, 파일은 그대로
+        self.assertEqual(snapshot.read_bytes(), self.data("b2"))
 
 
 class PlanModeTests(unittest.TestCase):

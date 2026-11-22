@@ -198,6 +198,27 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 - 같은 이름의 ZIP·체크섬·보고서가 있으면 거부한다(덮어쓰지 않음).
 - `--create-snapshot`은 서버 계획만 받고, build Docker 소유를 확인한다. fingerprint에는 서버 상태와 컨테이너 식별 정보가 함께 들어간다.
 
+**snapshot 파일 보호·무결성** (2026-11-22 보완, `build_restore_bundle_r3.create_snapshot`)
+
+- 출력 폴더: `.cache\issue105-r3\bundle-r3\` (Git 제외). 파일: `<b2|b3>-r3-v1.12.4.snapshot`, `snapshot-record-<b2|b3>.json`
+- 최종 snapshot·기록 JSON·`.partial` 중 하나라도 있으면 Qdrant 호출 전에 거부한다. 기존 파일은 지우거나 덮어쓰지 않는다.
+  - 강제 종료로 남은 `.partial`도 보존한다. 사람이 확인하고 새 출력 폴더(`--out-dir`)를 쓰거나 파일을 옮긴 뒤 다시 실행한다.
+- `create_snapshot` 호출 전에 `.partial`을 배타적으로 새로 만든다. 다른 작업이 먼저 만들었으면 거부한다(서버 snapshot 0개).
+- 실패 시 정리는 이번 실행이 만든 `.partial`(같은 파일 식별자)만 지운다.
+- 최종 이름은 하드 링크로 만든다. 그 사이 같은 이름이 생겼으면 거부한다(덮어쓰기 없음).
+- **SHA-256 검증은 생략할 수 없다.** 크기 일치만으로는 통과하지 않는다.
+  1. 서버가 돌려준 checksum이 64자리 소문자 hex면 로컬 SHA-256과 전체 값을 비교한다.
+  2. checksum이 없거나 형식이 다르면 서버 snapshot 파일 SHA-256을 읽기 전용으로 계산해 비교한다:
+     `docker exec <소유 확인한 qdrant 컨테이너 ID> sha256sum -- /qdrant/snapshots/<컬렉션>/<서버 snapshot 이름>`
+     - 컨테이너 ID(64자리)·컬렉션·snapshot 이름 형식이 틀리면 docker를 부르지 않는다. 출력이 정확히 한 줄 `<hex>  <같은 경로>`가 아니면 실패.
+     - 2026-11-22 확인: 업로드한 원본 snapshot 2개는 서버 목록에서 checksum이 null이었고, 이 방법의 SHA가 로컬 원본 SHA(`2e07c17a…`, `502b7b7e…`)와 같았다.
+  3. 둘 다 안 되면 실패한다(검증 불가).
+- 기록 JSON의 `snapshot_integrity`에 검증 근거를 남긴다: `method`(`server_reported_checksum` 또는 `server_file_sha256_docker_exec`), `local_sha256`, `server_sha256`, 서버가 돌려준 checksum·크기, `verified`.
+- 중간 실패 시 남는 것
+  - 서버: 생성된 snapshot은 컨테이너 안 `/qdrant/snapshots/<컬렉션>/`에 남는다(볼륨 아님, 자동 삭제 없음). 재실행하면 서버 snapshot이 하나 더 생긴다.
+  - 로컬: 이번 실행의 `.partial`은 정리된다. 기록 JSON만 실패하면 검증된 snapshot 파일은 남고, 같은 경로 재실행은 거부된다.
+  - 컬렉션 데이터: snapshot 생성 후 fingerprint(Point 수·vector·payload digest·컨테이너)를 다시 확인한다.
+
 **복원 쪽 fail-closed 검증** (`restore_final_v140_r3`)
 
 - `SHA256SUMS`가 번들 구성 파일 6개(snapshot 2, source ZIP, compose, 복원 도구, package.json)를 정확히 나열해야 한다. 빠지거나 추가된 파일이 있으면 거부한다.
