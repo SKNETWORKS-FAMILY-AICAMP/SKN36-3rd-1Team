@@ -129,9 +129,10 @@ class CommitEolTests(unittest.TestCase):
                 work = path / profiles.PROFILE_SCRIPT
                 original = work.read_bytes()
                 newline = b"\r\n" if autocrlf else b"\n"
-                changed = original.replace(b'"manifest_lf_sha256": None,', b'"manifest_lf_sha256": "' + b"a" * 64 + b'",', 1)
+                # 커밋하지 않은 R3_PINS 확정값 (예: 2차 확정할 vector_digest를 작업 트리에만 기록)
+                changed = original.replace(b'"vector_digest": None,', b'"vector_digest": "' + b"a" * 64 + b'",', 1)
                 self.assertNotEqual(changed, original)
-                work.write_bytes(changed)                                  # 커밋하지 않은 R3_PINS 확정값
+                work.write_bytes(changed)
                 with self.assertRaisesRegex(b2b.BundleError, "기준값 모듈"):
                     bundle.check_source_commit(sha, path, pins)
                 work.write_bytes(original + b"# sample_only" + newline)    # 내용 한 줄 추가
@@ -321,7 +322,7 @@ class PlanModeTests(unittest.TestCase):
             output = bundle.plan(None, Path(folder))
             self.assertEqual(list(Path(folder).iterdir()), [])
         self.assertEqual((output["writes"], output["r3_pins_finalized"]), (0, False))
-        self.assertIn("manifest_lf_sha256", output["missing_pins"])
+        self.assertEqual(sorted(output["missing_pins"]), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))   # 1차 확정 상태
 
     def test_cli_write_modes_require_flags(self):
         for extra in (["--build"], ["--create-snapshot", "--confirm-write"], ["--build", "--confirm-write"]):

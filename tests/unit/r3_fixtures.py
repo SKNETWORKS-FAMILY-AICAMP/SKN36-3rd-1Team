@@ -32,6 +32,17 @@ RUN_OTHER = dict(RUN_OLD, index_run_id="RUN_SAMPLE_ONLY_OTHER")
 MANIFEST = "a" * 64
 OLD_HASHES = {"DOC_S0": "0" * 64, "DOC_S1": "1" * 64, "DOC_S2": "2" * 64, "DOC_S3": "4" * 64}
 NEW_HASHES = dict(OLD_HASHES, DOC_S2="3" * 64)
+def pending_pins():
+    """R3_PINS와 같은 구조의 '전부 미확정' 기준값 (remove_count 0만 기본값). 실제 R3_PINS가 확정된 뒤에도
+    '미확정이면 거부한다'는 경계를 계속 검증하기 위한 테스트 전용 값."""
+    pins = profiles.r3_pins()
+    pins["manifest_lf_sha256"] = None
+    pins["release_counts"] = {key: None for key in profiles.RELEASE_COUNT_KEYS}
+    for key in profiles.COLLECTION_KEYS:
+        pins["collections"][key] = {field: (0 if field == "remove_count" else None) for field in pins["collections"][key]}
+    return pins
+
+
 BUILD_PROJECT = profiles.R3_ENVIRONMENTS["build"]["project"]
 BUILD_SERVICES = profiles.services_for("build")
 

@@ -1,7 +1,7 @@
 """Issue #105 복원 기준값(scripts/restore_profiles_v140.py)과 r3 Compose 정적 검사.
 
 - R2 표가 #91 r2 도구의 실제 상수와 같은지 (r2 기준을 한곳에서 읽어도 값이 갈라지지 않게)
-- R3 기준값은 최신 데이터 병합 전이므로 미확정(None)이고, 미확정이면 쓰기 경로가 막히는지
+- R3 기준값은 1차 확정(최종 vector_digest만 미확정) 상태이고, 그 값이 현재 릴리스와 같으며, 갱신 단계만 통과하는지
 - r3 격리 포트·프로젝트·인증 변수가 공유·r1·r2 자산과 겹치지 않는지
 """
 import re
@@ -36,13 +36,42 @@ class R2ProfileTests(unittest.TestCase):
 
 
 class R3PinTests(unittest.TestCase):
-    def test_r3_pins_are_pending_until_latest_data_is_merged(self):
+    def test_r3_pins_are_stage1_finalized_with_only_final_vector_digests_pending(self):
+        """1차 확정: 남은 미확정은 컬렉션별 최종 vector_digest 두 칸뿐 → 갱신 단계만 통과, 그 밖은 거부."""
         self.assertFalse(profiles.is_finalized())
-        missing = profiles.missing_pins()
-        self.assertIn("manifest_lf_sha256", missing)
-        self.assertIn("collections.b3.vector_digest", missing)
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
             profiles.require_finalized()
+        self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), profiles.R3_PINS)
+
+    def test_stage1_pins_are_well_formed_and_internally_consistent(self):
+        pins = profiles.R3_PINS
+        self.assertRegex(pins["manifest_lf_sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(set(pins["release_counts"]), set(profiles.RELEASE_COUNT_KEYS))
+        self.assertTrue(all(type(v) is int and v > 0 for v in pins["release_counts"].values()))
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                c = pins["collections"][key]
+                self.assertIsNone(c["vector_digest"])                              # 임베딩 후 2차 확정
+                self.assertRegex(c["plan_sha256"], r"^[0-9a-f]{64}$")
+                self.assertRegex(c["reuse_vector_digest"], r"^[0-9a-f]{64}$")
+                self.assertEqual(c["reuse_count"] + c["embed_count"], c["points"])
+                self.assertLessEqual(c["delete_count"], c["embed_count"])
+                self.assertEqual(c["remove_count"], 0)
+                # 재사용 + 삭제 후 재임베딩 = 원본 snapshot Point 수 (remove 0)
+                self.assertEqual(c["reuse_count"] + c["delete_count"], profiles.R3_SOURCES[key]["points"])
+
+    def test_stage1_pins_match_the_checked_out_release(self):
+        """1차 기준값의 manifest·건수·Point 수가 현재 체크아웃된 릴리스 파일에서 다시 계산한 값과 같다."""
+        from database import handoff_data as hd
+        from scripts import plan_r3_vector_reuse as planner
+        if hd.dataset_version() != profiles.DATASET_VERSION:
+            self.skipTest("NOT_RUN: v1.4.0-candidate 데이터셋이 아님")
+        release = planner.load_release(profiles.r3_pins())             # 고정값과 다르면 PlanError
+        self.assertEqual(release["manifest_lf_sha256"], profiles.R3_PINS["manifest_lf_sha256"])
+        self.assertEqual(release["counts"], profiles.R3_PINS["release_counts"])
+        for key in profiles.COLLECTION_KEYS:
+            self.assertEqual(len(release["collections"][key]["chunks"]), profiles.R3_PINS["collections"][key]["points"])
 
     def test_finalized_pins_pass_and_schema_changes_are_detected(self):
         pins = profiles.r3_pins()
@@ -56,9 +85,12 @@ class R3PinTests(unittest.TestCase):
         self.assertFalse(profiles.is_finalized(pins))
 
     def test_r3_pins_copy_does_not_change_the_module(self):
+        original = profiles.R3_PINS["manifest_lf_sha256"]
         copied = profiles.r3_pins()
         copied["manifest_lf_sha256"] = "b" * 64
-        self.assertIsNone(profiles.R3_PINS["manifest_lf_sha256"])
+        copied["collections"]["b2"]["vector_digest"] = "c" * 64
+        self.assertEqual(profiles.R3_PINS["manifest_lf_sha256"], original)
+        self.assertIsNone(profiles.R3_PINS["collections"]["b2"]["vector_digest"])
 
     def test_r3_collections_match_full_index_configs(self):
         for key in profiles.COLLECTION_KEYS:

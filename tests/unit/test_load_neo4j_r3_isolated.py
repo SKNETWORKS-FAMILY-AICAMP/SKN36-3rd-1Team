@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import FakeDocker, R3Qdrant, RUN_OLD, build_container, good_build_docker  # noqa: E402
+from r3_fixtures import FakeDocker, R3Qdrant, RUN_OLD, build_container, good_build_docker, pending_pins  # noqa: E402
 from test_load_neo4j_r2_isolated import FakeNeo4j  # noqa: E402
 
 from database import handoff_data as hd  # noqa: E402
@@ -134,7 +134,7 @@ class ReferenceAndLoadTests(unittest.TestCase):
     def test_load_requires_finalized_matching_pins(self):
         runner = FakeNeo4j()
         with self.assertRaises(profiles.ProfileError):
-            r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=profiles.r3_pins(),
+            r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=pending_pins(),
                     docker=self.docker)
         wrong = dict(self.pins, manifest_lf_sha256="0" * 64)
         with self.assertRaisesRegex(r3.Neo4jR3Error, "r3 고정값"):
@@ -172,6 +172,16 @@ class ReferenceAndLoadTests(unittest.TestCase):
         qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
         with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
             r3.cross_check(qdrant, runner, self.ref, pins=pins)            # 교차 검증은 최종값까지 필요
+
+    def test_real_stage1_pins_pass_the_load_gate_but_not_cross_check(self):
+        """실제 1차 R3_PINS(manifest·건수가 현재 릴리스와 같음)로 메모리 FakeNeo4j 적재 게이트를 통과한다 (실제 DB 아님)."""
+        runner = FakeNeo4j()
+        result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=profiles.r3_pins(),
+                         docker=self.docker)
+        self.assertEqual(result["status"], "LOADED")
+        qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+            r3.cross_check(qdrant, runner, self.ref, pins=profiles.r3_pins())
 
     def test_load_stops_before_writing_without_build_ownership(self):
         runner = FakeNeo4j()

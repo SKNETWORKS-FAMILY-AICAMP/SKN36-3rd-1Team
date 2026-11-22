@@ -1,8 +1,19 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
-> 상태 (2026-11-22): **코드 구현 + 2차 리뷰 P1 수정 완료**. 실제 DB 적재·임베딩·snapshot·ZIP 생성은 하지 않았다.
-> r3 기준값(`R3_PINS`)은 최신 데이터(#95·#96·#98·#104) 병합 전이라 **미확정(None)** 이다.
-> 미확정 상태에서 허용되는 쓰기는 §1.1의 두 가지뿐이고, 나머지 쓰기는 모두 거부된다.
+> 상태 (2026-11-22): **`R3_PINS` 1차 확정** (최신 데이터 병합본 `a60f5bc` 기준).
+>
+> **완료한 작업**
+> - build 격리 서버(`issue105-r3-build`)에 B2(r2)·B3(#31) 원본 snapshot을 복원했고, digest가 기록과 일치했다.
+> - 서버 계획(`basis=server_snapshot`)을 만들고 검증했다.
+>
+> **아직 하지 않은 작업:** 갱신(`--apply`)·임베딩(`--index`)·Neo4j 적재·snapshot·ZIP 생성
+>
+> **현재 허용 범위**
+> - 남은 미확정은 컬렉션별 최종 `vector_digest` 두 칸뿐이다. 그래서 갱신 단계(§5.5 1차)만 기준값 게이트를 통과한다.
+> - snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
+> - 근거 보고서(로컬): `.cache\issue105-r3\05-b3-plan-verify.json`, `10-b2-plan-verify.json`
+>
+> §1.1 표의 "미확정" 행은 최신 데이터 병합 전 상태의 경계를 설명하며, 테스트(`PendingPinTests`)로 계속 확인한다.
 
 ### 1.1 `R3_PINS` 미확정 상태의 쓰기 경계
 
@@ -199,7 +210,11 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 
 `vector_digest`는 임베딩 완료 후에만 정해지므로, 두 번에 나눠 기록·커밋한다(사용자가 Git 관리).
 
-1. **서버 계획 검토 후(1차):** manifest·release_counts·points·reuse·embed·delete·remove·plan_sha256을 기록한다.
+1. **서버 계획 검토 후(1차, 2026-11-22 반영 완료):** manifest·release_counts·points·reuse·embed·delete·remove·plan_sha256을 기록한다.
+   - 반영값: manifest `2e22d2a7…b509`, release_counts 246·268·663·1133·2674·211
+   - B2: points 1233, reuse 1137, embed 96, delete 2, plan_sha256 `fb91460e…1fa1`
+   - B3: points 1320, reuse 1209, embed 111, delete 11, plan_sha256 `94fbaf91…7ec8`
+   - remove는 두 컬렉션 모두 0이다.
    - 컬렉션별 `vector_digest` 두 칸은 None으로 둔다. 임시값을 넣지 않는다.
    - 이 상태에서 허용되는 쓰기는 **갱신 단계**뿐이다: `--apply`, `--index`, Neo4j `--load`·`--resume`
    - 근거: `restore_profiles_v140.UPDATE_STAGE_DEFERRED_PINS`. 이 두 칸 외의 None은 미룰 수 없다.

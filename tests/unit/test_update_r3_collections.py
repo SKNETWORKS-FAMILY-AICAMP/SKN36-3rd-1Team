@@ -16,7 +16,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from r3_fixtures import (FakeDocker, R3Qdrant, Sample, build_container, good_build_docker,  # noqa: E402
-                         sample_vector)
+                         pending_pins, sample_vector)
 
 from database import full_index as fi  # noqa: E402
 from scripts import plan_r3_vector_reuse as planner  # noqa: E402
@@ -256,7 +256,7 @@ class StateTests(Case):
         client, plan = self.s.client(), self.plans["b2"]
         current = fingerprint(client, plan, self.s.release, self.docker)
         with self.assertRaises(profiles.ProfileError):
-            update.apply_updates(client, plan, self.s.release, True, current, profiles.r3_pins(), docker=self.docker)
+            update.apply_updates(client, plan, self.s.release, True, current, pending_pins(), docker=self.docker)
         with self.assertRaisesRegex(update.UpdateError, "confirm_write"):
             update.apply_updates(client, plan, self.s.release, False, current, self.pins, docker=self.docker)
         with self.assertRaisesRegex(update.UpdateError, "fingerprint"):

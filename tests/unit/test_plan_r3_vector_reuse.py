@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import RUN_OLD, RUN_OTHER, Sample, sample_vector  # noqa: E402
+from r3_fixtures import RUN_OLD, RUN_OTHER, Sample, pending_pins, sample_vector  # noqa: E402
 
 from database import full_index as fi, handoff_data as hd  # noqa: E402
 from scripts import plan_r3_vector_reuse as planner  # noqa: E402
@@ -111,9 +111,18 @@ class ValidatePlanTests(unittest.TestCase):
 
     def test_pending_pins_allow_dry_run_but_block_write_paths(self):
         plan = self.plans["b2"]
-        planner.validate_plan(plan, self.s.release, profiles.r3_pins(), self.s.sources)
+        planner.validate_plan(plan, self.s.release, pending_pins(), self.s.sources)
         with self.assertRaises(profiles.ProfileError):
-            planner.validate_plan(plan, self.s.release, profiles.r3_pins(), self.s.sources, require_pins=True)
+            planner.validate_plan(plan, self.s.release, pending_pins(), self.s.sources, require_pins=True)
+        with self.assertRaises(profiles.ProfileError):                 # 갱신 단계도 vector_digest 외 미확정은 거부
+            planner.validate_plan(plan, self.s.release, pending_pins(), self.s.sources, require_pins=True,
+                                  deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
+
+    def test_real_stage1_pins_reject_a_plan_from_another_release(self):
+        """실제 1차 R3_PINS는 합성(sample_only) 계획을 manifest 불일치로 거부한다 (다른 릴리스 계획 혼입 방지)."""
+        with self.assertRaisesRegex(planner.PlanError, "현재 릴리스|r3 고정값"):
+            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
+                                  require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
     def test_finalized_pins_must_match_the_plan(self):
         pins = self.s.pins_for(self.plans)
@@ -130,14 +139,14 @@ class ValidatePlanTests(unittest.TestCase):
     def test_plan_from_another_release_or_source_is_rejected(self):
         release = dict(self.s.release, manifest_lf_sha256="b" * 64)
         with self.assertRaisesRegex(planner.PlanError, "현재 릴리스"):
-            planner.validate_plan(self.plans["b2"], release, profiles.r3_pins(), self.s.sources)
+            planner.validate_plan(self.plans["b2"], release, pending_pins(), self.s.sources)
         sources = dict(self.s.sources, b2=dict(self.s.sources["b2"], vector_digest="0" * 64))
         with self.assertRaisesRegex(planner.PlanError, "원본"):
-            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), sources)
+            planner.validate_plan(self.plans["b2"], self.s.release, pending_pins(), sources)
         tampered = copy.deepcopy(self.plans["b2"])
         tampered["new"].update(tampered["reuse"])
         with self.assertRaisesRegex(planner.PlanError, "겹칩니다"):
-            planner.validate_plan(tampered, self.s.release, profiles.r3_pins(), self.s.sources)
+            planner.validate_plan(tampered, self.s.release, pending_pins(), self.s.sources)
 
     def test_plan_basis_server_and_preview_are_never_mixed(self):
         """P1-3: 같은 원본이라도 payload가 다르면 plan_sha256이 달라진다 → 덤프 계획은 고정값·쓰기에 쓰지 않는다."""
@@ -161,7 +170,7 @@ class ValidatePlanTests(unittest.TestCase):
             with self.subTest(basis=bad):
                 plan = dict(server, basis=bad)
                 with self.assertRaisesRegex(planner.PlanError, "basis"):
-                    planner.validate_plan(plan, s.release, profiles.r3_pins(), s.sources)
+                    planner.validate_plan(plan, s.release, pending_pins(), s.sources)
         with self.assertRaisesRegex(planner.PlanError, "계획 기준"):
             planner.build_plan("b3", s.records["b3"], s.release, s.sources, basis="sample_only")
 
