@@ -1,12 +1,15 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
-> **2026-11-23 갱신 — #110 반영 재구축 준비:** build 프로필을 새 격리 프로젝트 `issue105-r3b-build`(56666/56697)로 바꿨다(§3).
+> **2026-11-23 갱신 — Issue #105 r3b 재구축 준비 (#110 데이터 정정 반영):** build 프로필을 새 격리 프로젝트 `issue105-r3b-build`(56666/56697)로 바꿨다(§3).
 > 아래 2026-11-22 기록(#104 기준 build·snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`)은 보존 자산이며 #110 반영본이 아니다.
 > **C0 진입 (2026-11-23, #110 병합 `7aa5266`):** `R3_PINS`를 #110 릴리스 기준 pending으로 바꿨다(§5.5.2). manifest `29b57236…`·release_counts·points만 확정, 계획·임베딩 결과 값은 미확정.
 > #104 기준 1·2차 확정값은 §5.5(아래 기록)에 그대로 보존한다.
 > **C1 진입 (2026-11-23, 1931ca8 기준):** r3b 서버 계획 값을 확정해 `R3_PIN_STAGE = "stage1"`로 바꿨다(§5.5.2). 최종 `vector_digest` 두 칸만 미확정.
 > **C2 완료 (2026-11-23, HEAD `43729a7` 위 미커밋 변경):** `R3_PIN_STAGE = "stage2"`. B2 1,233·B3 1,320 Point의 최종 digest를 기존 서버 dry-run 보고서와 대조해 확정했다(§5.5.3). C1 값은 유지했다.
-> 다음 작업은 r3b Neo4j 적재·검증이다(§5.5.4). 이번 C2 인계에서는 실제 DB·Docker·임베딩·snapshot·ZIP 작업을 실행하지 않았다.
+> (C2 인계 당시 기록) 다음 작업은 r3b Neo4j 적재·검증이다(§5.5.4). 이번 C2 인계에서는 실제 DB·Docker·임베딩·snapshot·ZIP 작업을 실행하지 않았다.
+> → **현재 상태:** 그 뒤 Neo4j 적재·교차 검증(§5.5.5), snapshot·최종 번들 생성, 독립 복원까지 모두 PASS했다(§5.7, 보고서 19·20·21).
+> **C2 커밋·최종 번들·독립 복원 완료 (2026-11-23):** C2는 `1c007e7`로 커밋됐다. 그 커밋을 source로 한 최종 번들 `rag-final-v140-r3-1c007e75d1c2.zip`(SHA-256 `a233264e…4eb5`)을 만들었고, 분리된 verify 환경(`issue105-r3-verify`)에서 preflight → `--apply` → `--verify-only`가 모두 PASS했다(§5.7, 보고서 19·20·21).
+> r3b build 쪽 Neo4j 적재·교차 검증(보고서 13~16)과 snapshot 생성(17·18) 기록은 §5.5.5에 있다. 남은 작업과 검증 한계는 §7에 있다.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -78,7 +81,7 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 | 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 | 출력 폴더 |
 |---|---|---|---|---|---|
-| build (r3b, #110 재구축용, 현재) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` |
+| build (r3b, Issue #105 재구축용 — #110 데이터 정정 반영, 현재) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` |
 | verify | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | (보고서만) |
 | **보존** build-104 (#104 기준, 대상 아님) | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3\` |
 
@@ -290,7 +293,7 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 - 재사용 Point는 원래 `index_run_id`를 그대로 보존한다. 그래서 B2 한 컬렉션 안에 실행 ID 3개(재사용 2 + 신규 1)가, B3에는 2개가 섞여 있다. 버그가 아니며, 실행 ID 하나로 컬렉션 전체를 대표할 수 없다.
 - **한계:** 과거 실행(2026-11-07·2026-11-19)의 Ollama 모델 digest는 Point payload나 보고서에 기록되지 않았다. 재사용 벡터가 신규와 같은 모델 빌드인지는 모델 이름·차원·입력 규칙으로만 확인된다. 신규 임베딩 직전에는 모델 digest가 r2 기록(`ac6da0df…`)과 같은지 수동으로 확인했다.
 
-#### 5.5.2 #110 반영 r3b 재확정 — 단계별 기준값과 허용 쓰기 (2026-11-23)
+#### 5.5.2 Issue #105 r3b 기준값 재확정 (#110 데이터 정정 반영) — 단계별 기준값과 허용 쓰기 (2026-11-23)
 
 `R3_PIN_STAGE`(선언)와 `pin_stage()`(값에서 계산)가 같아야 한다. 테스트가 확인하므로 값만 바꾸고 단계를 잊을 수 없다.
 
@@ -311,7 +314,7 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
   - 원본: B2 r2 snapshot 1139 `8577c3c8…`, B3 #31 snapshot 1220 `0a794e34…` (R3_SOURCES와 같음). 계획 파일 SHA-256: `plan-b2.json` `65e530d7…`, `plan-b3.json` `8e7d6258…` (로컬, Git 제외)
 - 참고: 원본 snapshot 복원 보고서(`01-b3-restore.json`, `02-b2-restore.json`)의 최상위 `mode="dry-run"`·`db_writes=0`은 복원 직후 실행한 확인용 dry-run 값이다. 실제 쓰기 결과는 `result.status="RESTORED"`에 있다(§7).
 
-#### 5.5.3 C2 완료 근거 — #110 반영 r3b (2026-11-23)
+#### 5.5.3 C2 완료 근거 — Issue #105 r3b (#110 데이터 정정 반영) (2026-11-23)
 
 기존 보고서를 읽어 대조했다. 이번 인계 작업에서 서버를 다시 호출한 결과는 아니다.
 
@@ -356,6 +359,20 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 .venv/Scripts/python.exe -B scripts/load_neo4j_r3_isolated.py --neo4j-url bolt://127.0.0.1:56697 --cross-db --qdrant-url http://127.0.0.1:56666 --report .cache/issue105-r3b-neo4j-next/04-cross-db.json
 ```
 
+#### 5.5.5 r3b build 환경 Neo4j 적재·교차 검증·snapshot 결과 (2026-11-23, 완료 기록)
+
+§5.5.4 절차를 실제로 실행한 결과다. 보고서는 `.cache\issue105-r3b\`에 있다(Git 제외). 이 문서 작업에서는 서버를 다시 호출하지 않고 보고서 원문만 대조했다.
+
+| 보고서 | 결과 |
+|---|---|
+| `13-neo4j-pre-load-dryrun.json` | PASS, `mode=dry-run`, `state=empty`, 노드·관계 0, `db_writes=0` |
+| `14-neo4j-load.json` | PASS, `mode=load`, `state=complete`, 노드 1133·관계 2674 |
+| `15-neo4j-verify.json` | PASS, `mode=verify`, `ok=true`, 노드 1133·관계 2674, `db_writes=0` |
+| `16-cross-db-verify.json` | PASS, `mode=cross-db`, `db_writes=0`. B2 1233·B3 1320 Point, digest = R3_PINS, `cross_db=PASS`, `full_index_verification.passed=true`, `qdrant_unchanged=true` |
+| `17-b2-pre-snapshot-dryrun.json`, `18-b3-pre-snapshot-dryrun.json` | snapshot 직전 fresh dry-run (fingerprint 발급용) |
+
+- snapshot 기록(`bundle-r3b-20261123-01\snapshot-record-b2.json`·`-b3.json`): `snapshot_integrity.method=server_reported_checksum`, `verified=true`, `verify_full_index_passed=true`. 로컬 snapshot 파일 SHA-256이 기록과 같다(이번 문서 작업에서 다시 계산해 확인).
+
 ### 5.6 독립 복원 검증 (verify 환경)
 
 ```powershell
@@ -370,6 +387,346 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
 2. 컬렉션마다 차원·Point 수·전체 digest·payload 정합성 확인
 3. Neo4j `load_graph(verify=True)`
 4. 컬렉션마다 Neo4j 교차 검증(`verify_cross_db`)과 원문 슬라이스 검증(`verify_full_index`)
+
+Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차와 결과는 §5.7에 정리했다.
+
+### 5.7 Issue #105 최종 번들 독립 복원 (#110 데이터 정정 반영, 2026-11-23)
+
+이 절은 **완료 기록**(§5.7.1, §5.7.9)과 **다시 수행할 때의 절차**(§5.7.3~5.7.8, §5.7.10)를 구분한다. 절차의 명령은 Windows PowerShell 5.1 기준이고, 이번 문서 작업에서는 실행하지 않았다.
+
+#### 5.7.1 최종 번들 구성과 체크섬 (완료 기록)
+
+- 위치(로컬, Git 제외): `.cache\issue105-r3b\bundle-r3b-20261123-01\`
+- 번들: `rag-final-v140-r3-1c007e75d1c2.zip`, 37,912,062 bytes
+  - SHA-256 `a233264e2634256db45b82a7bcfe238dd1619c3a99492fc2b757a64887ca4eb5`
+  - 실제 파일 해시 = `.zip.sha256` = `.zip.report.json`의 `bundle_sha256` (이번 문서 작업에서 다시 계산해 확인)
+- source commit: `1c007e75d1c2c9d94857a76e066539fb11a65ce6` (C2 커밋), 커밋 파일 603개, manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`
+- 구성 파일 7개 (평평한 구조):
+
+| 파일 | 내용 |
+|---|---|
+| `b2-r3-v1.12.4.snapshot` | B2 1233 Point, 16,025,600 bytes, SHA-256 `834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89` |
+| `b3-r3-v1.12.4.snapshot` | B3 1320 Point, 17,081,344 bytes, SHA-256 `91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8` |
+| `source-1c007e75d1c2.zip` | `git archive <source_commit>` (미커밋·미추적 파일 없음) |
+| `compose.yaml` | `docs/development/issue105_r3_verify.compose.yaml` (커밋 blob) |
+| `restore_final_v140_r3.py` | 복원 도구 (커밋 blob) |
+| `package.json` | schema 2, 컬렉션별 points·vector_digest·payload_digest·snapshot SHA·크기·벡터 출처, Neo4j `release_files` 15개 |
+| `SHA256SUMS` | 위 6개 파일의 SHA-256 |
+
+- `package.json`의 컬렉션 값: B2 vector `90d0f593…689d`·payload `0584dbbf…6bd0`, B3 vector `718046c3…7120`·payload `b4d6a9bc…d539` (R3_PINS 최종값과 같음)
+
+#### 5.7.2 build 환경과 verify 환경 분리
+
+| 구분 | build (r3b) | verify |
+|---|---|---|
+| Compose 프로젝트 | `issue105-r3b-build` | `issue105-r3-verify` |
+| Qdrant / Bolt | 127.0.0.1:56666 / 56697 | 127.0.0.1:56656 / 56687 |
+| 인증 변수 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` |
+| 볼륨 | `issue105-r3b-build_*` | `issue105-r3-verify_qdrant_storage`, `_neo4j_data`, `_neo4j_logs` |
+| 역할 | 갱신·임베딩·Neo4j 적재·snapshot·번들 | 번들만으로 빈 DB에 복원·검증 |
+
+- verify 래퍼(`restore_r3_isolated.py`)는 verify 고정 주소만 허용하고, build·#104·r2·공유 포트(`DENIED_PORTS`)와 그 인증값 재사용을 거부한다.
+- 래퍼는 Docker 소유를 확인한다: 두 포트의 컨테이너가 정확히 `issue105-r3-verify`의 qdrant·neo4j이고, 고정 이미지 digest, 127.0.0.1 바인딩, 그 프로젝트 볼륨만 써야 한다.
+- 서버 조건: Qdrant 컬렉션 0·별칭 0, Neo4j 노드·관계 0인 빈 서버만 받는다. 그래서 verify 프로젝트 하나는 **복원 1회용**이다.
+- 이번 실행의 컨테이너 ID(보고서 19~21): qdrant `29ed29788919…`, neo4j `6de7d57c5af1…`. 둘 다 2026-11-22T19:16:39Z에 시작했고 위 볼륨 3개를 사용했다.
+
+#### 5.7.3 안전한 압축 해제와 독립 소스 준비 (절차)
+
+이번 독립 복원에 적용한 조건을 재현하는 절차다. 위치는 `.cache\issue105-r3b\independent-restore-20261123-01\bundle`(번들 7개, `SHA256SUMS` 대조 OK)과 `...\repo`(source ZIP, `.git`·`.venv` 없음)였다. 아래 명령은 그 조건을 PowerShell 5.1로 옮긴 것이며, 이번 문서 작업에서는 실행하지 않았다.
+
+- 조건:
+  - 번들 ZIP SHA-256이 §5.7.1과 같아야 한다.
+  - 풀기 전에 ZIP 엔트리를 모두 검사한다: 절대 경로·드라이브·역슬래시·`..`·`.`·심볼릭 링크·중복 이름(대소문자 무시)이면 중단한다. 번들 ZIP은 하위 경로도 거부한다.
+  - **새 폴더에만** 풀고, 파일을 하나씩 만들 때 기존 파일이 있으면 실패하게 한다(덮어쓰기 금지).
+  - 풀고 나서 `SHA256SUMS`의 목록·해시가 실제 파일과 정확히 같아야 한다.
+  - 어느 단계든 실패하면 만든 폴더를 지우지 말고 그대로 둔 채 멈춘다. 자동으로 다시 실행하지 않는다(새 폴더 이름으로 사람이 다시 시작).
+- 필요 조건: Windows PowerShell 5.1, .NET Framework 4.7.2 이상(`ZipArchiveEntry.ExternalAttributes`로 링크를 판별한다)
+
+```powershell
+$ErrorActionPreference = 'Stop'
+Set-Location 'C:\dev\project\SKN36-3rd-1Team'
+$zip     = '.cache\issue105-r3b\bundle-r3b-20261123-01\rag-final-v140-r3-1c007e75d1c2.zip'
+$zipSha  = 'a233264e2634256db45b82a7bcfe238dd1619c3a99492fc2b757a64887ca4eb5'
+$root    = '.cache\issue105-r3b\independent-restore-20261123-02'        # 새 이름 (기존 -01 폴더는 증거로 보존)
+$bundle  = Join-Path $root 'bundle'
+$repo    = Join-Path $root 'repo'
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function Expand-R3ZipSafely {
+  param([Parameter(Mandatory = $true)][string]$ZipPath,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [switch]$FlatOnly)
+  if (Test-Path -LiteralPath $Destination) { throw "이미 있음: $Destination → 중단 (덮어쓰기 금지)" }
+  $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $ZipPath).Path)
+  try {
+    $seen = @{}
+    foreach ($entry in $archive.Entries) {
+      $name = $entry.FullName
+      if ($null -eq $entry.PSObject.Properties['ExternalAttributes']) { throw '.NET Framework 4.7.2 이상이 필요합니다 → 중단' }
+      if ([string]::IsNullOrEmpty($name) -or $name.StartsWith('/') -or $name.Contains('\') -or $name.Contains(':')) { throw "허용하지 않는 경로: $name" }
+      $parts = $name.TrimEnd('/') -split '/'
+      if (($parts -contains '..') -or ($parts -contains '.') -or ($parts -contains '')) { throw "경로 탈출·빈 경로: $name" }
+      if ($FlatOnly -and (($parts.Count -ne 1) -or $name.EndsWith('/'))) { throw "하위 경로 엔트리: $name" }
+      if ((($entry.ExternalAttributes -shr 16) -band 0xF000) -eq 0xA000) { throw "심볼릭 링크: $name" }
+      $key = $name.ToLowerInvariant()
+      if ($seen.ContainsKey($key)) { throw "중복 엔트리: $name" }
+      $seen[$key] = $true
+    }
+    $rootFull = [System.IO.Path]::GetFullPath($Destination)
+    [void][System.IO.Directory]::CreateDirectory($rootFull)                 # 위에서 없음을 확인한 새 폴더
+    $prefix = $rootFull.TrimEnd('\') + '\'
+    foreach ($entry in $archive.Entries) {
+      $target = [System.IO.Path]::GetFullPath((Join-Path $rootFull ($entry.FullName -replace '/', '\')))
+      if (-not $target.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw "경로 탈출: $($entry.FullName)" }
+      if ($entry.FullName.EndsWith('/')) { [void][System.IO.Directory]::CreateDirectory($target); continue }
+      [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($target))
+      [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $target, $false)   # $false = 기존 파일 덮어쓰기 금지
+    }
+  } finally {
+    $archive.Dispose()
+  }
+}
+
+if (Test-Path -LiteralPath $root) { throw "이미 있음: $root → 중단 (새 이름 사용)" }
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLower() -ne $zipSha) { throw '번들 ZIP SHA-256 불일치 → 중단' }
+Expand-R3ZipSafely -ZipPath $zip -Destination $bundle -FlatOnly
+
+$sums = @{}
+foreach ($line in Get-Content -LiteralPath (Join-Path $bundle 'SHA256SUMS') -Encoding UTF8) {
+  if (-not $line.Trim()) { continue }
+  $hash, $name = $line -split '\s+', 2
+  $sums[$name.Trim().TrimStart('*')] = $hash.ToLower()
+}
+$files = @(Get-ChildItem -LiteralPath $bundle -File | Where-Object { $_.Name -ne 'SHA256SUMS' } | ForEach-Object { $_.Name })
+if ((@($sums.Keys | Sort-Object) -join '|') -ne (@($files | Sort-Object) -join '|')) { throw 'SHA256SUMS 목록과 실제 파일이 다릅니다 → 중단' }
+foreach ($name in $sums.Keys) {
+  if ((Get-FileHash -LiteralPath (Join-Path $bundle $name) -Algorithm SHA256).Hash.ToLower() -ne $sums[$name]) { throw "체크섬 불일치: $name → 중단" }
+}
+Expand-R3ZipSafely -ZipPath (Join-Path $bundle 'source-1c007e75d1c2.zip') -Destination $repo
+if (-not (Test-Path -LiteralPath (Join-Path $repo 'scripts\restore_r3_isolated.py'))) { throw '소스 트리에 복원 래퍼가 없습니다 → 중단' }
+```
+
+- 래퍼는 `--repo`가 **자신이 들어 있는 소스 트리**인지 확인한다. 그래서 압축을 푼 `repo\scripts\restore_r3_isolated.py`를 실행하고 `--repo`에 그 `repo`를 넘긴다.
+- Python은 이 저장소의 `.venv\Scripts\python.exe`를 쓴다(소스 트리에는 `.venv`가 없음). 래퍼는 import와 데이터셋 경로를 자신의 소스 트리로 고정한다.
+- 아래 §5.7.4~5.7.8은 **같은 PowerShell 세션**에서 위 변수(`$root`, `$bundle`, `$repo`)를 이어서 쓴다.
+
+#### 5.7.4 인증 환경 변수 (절차, 실제 값은 기록하지 않음)
+
+- verify 전용 값 두 개를 새로 만들어 DPAPI(`Export-Clixml`, 현재 Windows 사용자만 복호화 가능)로 저장한다. build·#104·r2·공유 값과 같으면 래퍼가 거부한다.
+- 이번 실행에서 verify 인증값을 어디에 보관했는지는 보고서에 남지 않았다. 아래 경로는 권장 예시다.
+- 값을 화면·로그·보고서에 출력하지 않는다.
+- **환경 변수는 단계마다 `try { Enter-R3VerifySecrets; … } finally { Exit-R3VerifySecrets }` 안에서만 설정한다.** 어느 단계에서 오류가 나도 `finally`가 현재 PowerShell 프로세스에서 두 값을 지운다(§5.7.5~§5.7.8의 각 블록). 인증 파일은 지우지 않는다.
+
+```powershell
+function New-R3Secret { $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b) }
+function Read-R3Secret([string]$path) {
+  $s = Import-Clixml -Path $path; $p = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)
+  try { [Runtime.InteropServices.Marshal]::PtrToStringBSTR($p) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($p); $s.Dispose() }
+}
+$verifyKeyFile = '.cache\issue105-r3b\verify_qdrant_api_key.clixml'
+$verifyPwFile  = '.cache\issue105-r3b\verify_neo4j_password.clixml'
+function Enter-R3VerifySecrets {
+  # 현재 프로세스에만 설정한다. 값은 출력하지 않는다.
+  foreach ($f in $verifyKeyFile, $verifyPwFile) { if (-not (Test-Path -LiteralPath $f)) { throw "인증 파일이 없습니다: $f → 중단" } }
+  $env:ISSUE105_R3_VERIFY_QDRANT_API_KEY = Read-R3Secret $verifyKeyFile
+  $env:ISSUE105_R3_VERIFY_NEO4J_PASSWORD = Read-R3Secret $verifyPwFile
+  if ($env:ISSUE105_R3_VERIFY_QDRANT_API_KEY -eq $env:ISSUE105_R3_VERIFY_NEO4J_PASSWORD) { throw 'verify 인증값 두 개가 같습니다 → 중단' }
+}
+function Exit-R3VerifySecrets {
+  # 성공·실패와 관계없이 finally에서 호출한다. 인증 파일은 지우지 않는다.
+  [Environment]::SetEnvironmentVariable('ISSUE105_R3_VERIFY_QDRANT_API_KEY', $null, 'Process')
+  [Environment]::SetEnvironmentVariable('ISSUE105_R3_VERIFY_NEO4J_PASSWORD', $null, 'Process')
+}
+# 최초 1회만: 새 파일로 저장 (이미 있으면 건너뛰고, -NoClobber 때문에 덮어쓰지도 않음). 환경 변수는 여기서 설정하지 않는다.
+if (-not (Test-Path -LiteralPath $verifyKeyFile)) { ConvertTo-SecureString (New-R3Secret) -AsPlainText -Force | Export-Clixml -Path $verifyKeyFile -NoClobber }
+if (-not (Test-Path -LiteralPath $verifyPwFile))  { ConvertTo-SecureString (New-R3Secret) -AsPlainText -Force | Export-Clixml -Path $verifyPwFile -NoClobber }
+```
+
+#### 5.7.5 새 Docker 환경 생성 전 충돌 검사 (절차)
+
+- 프로젝트 이름(`issue105-r3-verify`)과 고정 포트(Qdrant 56656, Bolt 56687)만 쓴다. 다른 프로젝트·볼륨·네트워크는 건드리지 않는다.
+- PowerShell 5.1에서는 외부 명령(docker)이 실패해도 예외가 나지 않는다. 그래서 `$LASTEXITCODE`를 직접 확인하는 함수로 감싸고, **모든 호출은 이름 있는 매개변수 `-DockerArgs @(...)`로 넘긴다.**
+- 아래 검사 중 하나라도 걸리면 `throw`로 멈추고, `finally`에서 인증 환경 변수를 지운다. 기존 프로젝트·볼륨이 있으면 **정리하지 말고 멈춘다.**
+
+```powershell
+function Invoke-R3Docker {
+  param([Parameter(Mandatory = $true)][string[]]$DockerArgs)
+  $ErrorActionPreference = 'Continue'                                      # 외부 명령 stderr로 멈추지 않게 하고 종료 코드로 판정
+  $out = & docker @DockerArgs
+  if ($LASTEXITCODE -ne 0) { throw "docker $($DockerArgs -join ' ') 실패 (exit $LASTEXITCODE) → 중단" }
+  return @($out | Where-Object { $_ -and $_.Trim() })
+}
+$project = 'issue105-r3-verify'; $ports = 56656, 56687
+$compose = Join-Path $bundle 'compose.yaml'
+
+try {
+  # 1) 인증 환경 변수 (값은 출력하지 않음, compose 구성에 필요)
+  Enter-R3VerifySecrets
+
+  # 2) Docker 데몬·명령 자체
+  [void](Invoke-R3Docker -DockerArgs @('version', '--format', '{{.Server.Version}}'))
+
+  # 3) 같은 프로젝트의 컨테이너·볼륨·네트워크가 없어야 한다
+  if (Invoke-R3Docker -DockerArgs @('ps', '-a', '--filter', "label=com.docker.compose.project=$project", '--format', '{{.Names}}')) { throw "$project 컨테이너가 이미 있습니다 → 중단" }
+  if (Invoke-R3Docker -DockerArgs @('volume', 'ls', '--filter', "label=com.docker.compose.project=$project", '--format', '{{.Name}}')) { throw "$project 볼륨(라벨)이 이미 있습니다 → 중단" }
+  if (@(Invoke-R3Docker -DockerArgs @('volume', 'ls', '--format', '{{.Name}}')) -like "${project}_*") { throw "$project 이름의 볼륨이 이미 있습니다 → 중단" }
+  if (@(Invoke-R3Docker -DockerArgs @('network', 'ls', '--format', '{{.Name}}')) -like "${project}*") { throw "$project 네트워크가 이미 있습니다 → 중단" }
+
+  # 4) 호스트 포트: Docker가 게시한 포트와 Windows에서 듣고 있는 포트 모두 비어 있어야 한다
+  foreach ($port in $ports) {
+    if (Invoke-R3Docker -DockerArgs @('ps', '-a', '--filter', "publish=$port", '--format', '{{.Names}}')) { throw "포트 $port 를 쓰는 컨테이너가 있습니다 → 중단" }
+    if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) { throw "포트 $port 가 이미 열려 있습니다 → 중단" }
+  }
+
+  # 5) Compose 구성 (필수 인증 변수·문법·프로젝트 이름)
+  [void](Invoke-R3Docker -DockerArgs @('compose', '-f', $compose, 'config', '--quiet'))
+  if (-not (@(Invoke-R3Docker -DockerArgs @('compose', '-f', $compose, 'config')) -match "^name:\s*$project\s*$")) { throw "compose 프로젝트 이름이 $project 가 아닙니다 → 중단" }
+
+  # 6) 위 검사를 모두 통과하고 실행 승인을 받은 뒤에만 기동 (실패해도 자동 재시도·정리하지 않음)
+  [void](Invoke-R3Docker -DockerArgs @('compose', '-f', $compose, 'up', '-d'))
+} finally {
+  Exit-R3VerifySecrets
+}
+```
+
+- `down -v`, `docker volume rm`, `docker system prune` 같은 삭제 명령은 쓰지 않는다. 다시 하려면 새 프로젝트 이름과 포트가 필요하고, 프로필·compose 변경 승인이 필요하다.
+- 기동 뒤의 Docker 소유·이미지 digest·바인딩·볼륨 확인은 다음 단계의 래퍼 preflight가 한다. 컨테이너는 인증값을 기동할 때 받았으므로, 이후 단계에서 환경 변수를 다시 설정하는 것은 래퍼가 접속할 때 쓰기 위해서다.
+
+#### 5.7.6 Preflight (절차, 읽기 전용)
+
+- 보고서는 **새 폴더의 새 파일**에만 쓴다. 이미 있으면 멈춘다. 기존 보고서 19·20·21은 증거로 보존한다.
+- 래퍼도 기존 보고서 파일과 보존 폴더(#104 `.cache\issue105-r3`)를 거부한다.
+
+```powershell
+$py        = '.\.venv\Scripts\python.exe'
+$wrapper   = Join-Path $repo 'scripts\restore_r3_isolated.py'
+$runDir    = '.cache\issue105-r3b\verify-run-20261123-02'                  # 새 이름 (기존 보고서 폴더와 겹치지 않게)
+$preReport = Join-Path $runDir '01-verify-preflight.json'
+$appReport = Join-Path $runDir '02-verify-apply.json'
+$verReport = Join-Path $runDir '03-verify-only.json'
+
+function Read-R3Report([string]$path) { Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json }
+function Assert-R3Counts($counts) {
+  $want = @{ policies = 246; documents = 268; release_chunks = 663; neo4j_nodes = 1133; neo4j_relationships = 2674; requires_condition = 211 }
+  foreach ($k in $want.Keys) { if ($counts.$k -ne $want[$k]) { throw "건수 불일치: $k = $($counts.$k) (기대 $($want[$k])) → 중단" } }
+}
+
+if (Test-Path -LiteralPath $runDir) { throw "이미 있음: $runDir → 중단 (보고서 덮어쓰기 금지)" }
+[void](New-Item -ItemType Directory -Path $runDir)
+try {
+  Enter-R3VerifySecrets
+  & $py -B $wrapper --repo $repo --bundle $bundle --report $preReport
+  if ($LASTEXITCODE -ne 0) { throw "preflight 실패 (exit $LASTEXITCODE) → 중단, 재실행 금지" }
+} finally {
+  Exit-R3VerifySecrets
+}
+$pre = Read-R3Report $preReport
+if ($pre.status -ne 'PASS' -or $pre.mode -ne 'preflight' -or $pre.db_writes -ne 0 -or $pre.servers.state -ne 'empty' `
+    -or $pre.restore_preflight.status -ne 'PREFLIGHT_PASS_NO_WRITES' -or $pre.fingerprint -cnotmatch '^[0-9a-f]{64}$') {
+  throw 'preflight 결과가 조건과 다릅니다 → 중단'
+}
+Assert-R3Counts $pre.restore_preflight.counts
+if ($pre.restore_preflight.snapshots.b2 -ne '834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89' -or
+    $pre.restore_preflight.snapshots.b3 -ne '91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8') { throw 'snapshot SHA-256 불일치 → 중단' }
+"preflight fingerprint: $($pre.fingerprint)"                              # 사람이 확인 (인증값 아님)
+```
+
+#### 5.7.7 복원 `--apply` (절차, 1회만)
+
+- 직전 preflight 보고서(`$preReport`)의 fingerprint만 쓴다. 래퍼는 그 값과 현재 상태(Docker 식별 정보 + 서버 상태)가 같을 때만 쓴다.
+- 쓰기 순서: snapshot 2개 업로드 → 컬렉션 검증(차원·Point 수·전체 digest·payload) → Neo4j `load_graph(verify=True)` → 컬렉션마다 `verify_cross_db`와 `verify_full_index` → 이어서 읽기 전용 재검증(`post_verify`)
+- 실패하면 **다시 실행하지 않는다**(§5.7.10). 새 fingerprint를 발급받아 자동으로 재시도하지 않는다. 컨테이너·볼륨·보고서는 그대로 둔다.
+
+```powershell
+if (Test-Path -LiteralPath $appReport) { throw "이미 있음: $appReport → 중단 (재실행 금지)" }
+$expected = (Read-R3Report $preReport).fingerprint
+if ($expected -cnotmatch '^[0-9a-f]{64}$') { throw 'preflight fingerprint 형식 오류 → 중단' }
+try {
+  Enter-R3VerifySecrets
+  & $py -B $wrapper --repo $repo --bundle $bundle --apply --confirm-write --expect-fingerprint $expected --report $appReport
+  $applyExit = $LASTEXITCODE
+} finally {
+  Exit-R3VerifySecrets
+}
+if (-not (Test-Path -LiteralPath $appReport)) { throw "apply 보고서가 없습니다 (exit $applyExit) → 중단, 재실행 금지" }
+$app = Read-R3Report $appReport
+if ($applyExit -ne 0 -or $app.status -ne 'PASS' -or $app.mode -ne 'apply' -or $app.restore_apply.status -ne 'PASS' `
+    -or $app.post_verify.status -ne 'PASS' -or $app.restore_apply.embedding_calls -ne 0) {
+  throw "apply 실패 또는 조건 불일치 (exit $applyExit) → 중단. 상태를 보존하고 재실행하지 않는다"
+}
+Assert-R3Counts $app.restore_apply.counts
+```
+
+#### 5.7.8 별도 `--verify-only` (절차, 읽기 전용)
+
+- **apply 보고서가 PASS일 때만** 실행한다. 복원과 분리된 실행으로 다시 읽어 확인한다.
+
+```powershell
+$app = Read-R3Report $appReport
+if ($app.status -ne 'PASS' -or $app.restore_apply.status -ne 'PASS' -or $app.post_verify.status -ne 'PASS') { throw 'apply가 PASS가 아닙니다 → verify-only 실행 안 함' }
+if (Test-Path -LiteralPath $verReport) { throw "이미 있음: $verReport → 중단 (덮어쓰기 금지)" }
+try {
+  Enter-R3VerifySecrets
+  & $py -B $wrapper --repo $repo --bundle $bundle --verify-only --report $verReport
+  if ($LASTEXITCODE -ne 0) { throw "verify-only 실패 (exit $LASTEXITCODE) → 중단, 재실행 금지" }
+} finally {
+  Exit-R3VerifySecrets
+}
+$ver = Read-R3Report $verReport
+if ($ver.status -ne 'PASS' -or $ver.mode -ne 'verify-only' -or $ver.db_writes -ne 0 -or $ver.servers.state -ne 'complete' `
+    -or $ver.post_verify.status -ne 'PASS' -or $ver.post_verify.embedding_calls -ne 0 `
+    -or -not $ver.post_verify.all_vectors_and_protected_payload_unchanged -or -not $ver.post_verify.full_graph_properties_verified) {
+  throw 'verify-only 결과가 조건과 다릅니다 → 중단'
+}
+Assert-R3Counts $ver.post_verify.counts
+foreach ($key in 'b2', 'b3') {
+  $c = $ver.post_verify.collections.$key
+  if ($c.cross_db.status -ne 'PASS' -or -not $c.cross_db.all_points_read -or @($c.cross_db.failures).Count -ne 0 -or -not $c.verify_full_index_passed) {
+    throw "$key 교차 검증·전체 인덱스 검증 실패 → 중단"
+  }
+}
+"verify-only fingerprint (복원 후): $($ver.fingerprint)"
+```
+
+- 기대 결과는 이번 실행(§5.7.9)과 같다: B2 1233·B3 1320 Point, Neo4j 1133/2674, Cross-DB 검사 17,871개(B2 8,631 + B3 9,240) PASS, MISSING·MISMATCH·NOT_TESTED 0.
+- fingerprint는 복원 전(preflight, 빈 서버)과 복원 후(verify-only, complete)가 다르다. 서버 상태가 fingerprint에 들어가기 때문이다.
+
+#### 5.7.9 실제 검증 결과와 증거 (완료 기록, 2026-11-23)
+
+모든 보고서는 `.cache\issue105-r3b\`에 있다(Git 제외). 이 문서 작업에서는 보고서 원문만 다시 읽어 대조했고, 서버에는 접속하지 않았다.
+
+| 단계 | 보고서 | 확인된 값 |
+|---|---|---|
+| preflight | `19-verify-preflight.json` | `status=PASS`, `mode=preflight`, `db_writes=0`, `servers.state=empty`(Qdrant 컬렉션 0, Neo4j 노드·관계 0, Qdrant 1.12.4, Neo4j 5.26.32 community), `restore_preflight.status=PREFLIGHT_PASS_NO_WRITES`, snapshot SHA = §5.7.1, fingerprint `2333fef226167277162e2cb010981951b9f61dbc9612d30ca8e9d9ed998daa2c` |
+| 복원 | `20-verify-apply.json` | `status=PASS`, `mode=apply`, `restore_apply.status=PASS`, `post_verify.status=PASS`, `embedding_calls=0`, `all_vectors_and_protected_payload_unchanged=true`, `full_graph_properties_verified=true` (적재 검증 `load_graph.verification`, 재검증 `verify_loaded_graph`), 소스 동일성 파일 4개·Neo4j `release_files` 15개 일치 |
+| 별도 재검증 | `21-verify-only.json` | `status=PASS`, `mode=verify-only`, `db_writes=0`, `servers.state=complete`(Qdrant `restored_collection`: 컬렉션 2개, Neo4j `complete`: 1133/2674), `post_verify.status=PASS`, `embedding_calls=0`, 최종 fingerprint `f85a25136144357beb9e09bfb2df9665a2bc4c3945541c302f65198df4a55051` |
+
+- **건수** (20·21의 `counts`): 정책 246, 문서 268, 릴리스 청크 663, Neo4j 노드 1133, 관계 2674, `REQUIRES_CONDITION` 211
+- **B2** (`exp_b2_qwen3emb06b_v140_v1`): 1233 Point, vector digest `90d0f593…689d`, `verify_full_index_passed=true`
+  - `cross_db.status=PASS`, `all_points_read=true`, 실패 0
+  - 7개 검사 × 1233 = PASS 8,631, MISSING·MISMATCH·NOT_TESTED 0
+  - `metadata_points_updated=0`
+- **B3** (`exp_b3_qwen3emb06b_v140_v1`): 1320 Point, vector digest `718046c3…7120`, `verify_full_index_passed=true`
+  - `cross_db.status=PASS`, `all_points_read=true`, 실패 0
+  - 7개 검사 × 1320 = PASS 9,240, MISSING·MISMATCH·NOT_TESTED 0
+  - `metadata_points_updated=0`
+- **Neo4j:** 노드 1133·관계 2674, 전체 속성 검증 true
+- **Cross-DB 합계:** 17,871개 검사(B2 8,631 + B3 9,240) PASS. MISSING·MISMATCH·NOT_TESTED 0
+- **fingerprint 구분:** 복원 전(preflight, 빈 서버) `2333fef2…a2c` / 복원 후(verify-only, complete) `f85a2513…051`
+- **보고서 표기 참고**
+  - `20-verify-apply.json`에는 최상위 `db_writes` 필드가 없다. 이 보고서의 최상위 `servers` 값(empty)과 fingerprint(`2333fef2…`)는 쓰기 **직전** preflight 상태다.
+  - 복원 결과는 `restore_apply`·`post_verify` 안에 있다. 21번의 Qdrant 서버 상태 표기는 `restored_collection`이고, 전체 상태 `servers.state`가 `complete`다.
+
+#### 5.7.10 실패 시 중단 원칙과 자산 보존
+
+- 어느 단계든 실패하면 **같은 명령을 다시 실행하지 않는다.** 새 fingerprint로 자동 재시도하지 않는다.
+- verify 컨테이너·볼륨·부분 복원 상태를 그대로 둔다. 래퍼는 빈 서버만 받으므로, 다시 하려면 **새 프로젝트 이름**으로 새 환경을 만든다(승인 필요).
+- 쓰지 않는 명령: `down -v`, `docker volume rm`, `docker system prune`, Neo4j `DELETE`·`DETACH DELETE`·`DROP`, Qdrant 컬렉션 삭제
+- 실패 보고서와 로그는 보존한다. 상태는 읽기 전용 명령(`--verify-only`, preflight)으로만 확인한다.
+- 보존 대상(어떤 경우에도 변경·삭제하지 않음):
+  - #104 산출물 `.cache\issue105-r3\`, #91 r2 snapshot·ZIP, #31 B3 원본 snapshot
+  - r3b build 볼륨과 `.cache\issue105-r3b\`의 계획·보고서·snapshot·번들
+  - DPAPI 인증 파일, 기존 미추적 경로 11개
 
 ## 6. r2 호환성과 데이터 PR 병합 시 주의
 
@@ -390,8 +747,10 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
 ## 7. 미검증·남은 작업
 
 - build 환경의 Docker 실행·snapshot 복원·갱신·임베딩은 완료했다(§5.5).
-- **미실행:** Neo4j 적재(`--load`), `--cross-db` 교차 검증, `--create-snapshot`, ZIP 생성(`--build`), verify 환경 독립 복원
-  - 위 56677의 빈 DB 설명은 #104 보존 기록이다. 현재 r3b Neo4j(`bolt://127.0.0.1:56697`)의 상태는 이번 C2 인계에서 접속 확인하지 않았다. 다음 실행은 §5.5.4의 dry-run부터 시작한다.
+- ~~**미실행:** Neo4j 적재(`--load`), `--cross-db` 교차 검증, `--create-snapshot`, ZIP 생성(`--build`), verify 환경 독립 복원~~
+  → **현재 상태 (2026-11-23):** Issue #105 r3b 기준(#110 데이터 정정 반영)으로 모두 실행·PASS (§5.5.5 보고서 13~18, §5.7 보고서 19~21, 번들 `a233264e…4eb5`).
+  - (C2 인계 당시 기록) 위 56677의 빈 DB 설명은 #104 보존 기록이다. 현재 r3b Neo4j(`bolt://127.0.0.1:56697`)의 상태는 이번 C2 인계에서 접속 확인하지 않았다. 다음 실행은 §5.5.4의 dry-run부터 시작한다.
+    → 이후 §5.5.4 절차대로 dry-run부터 실행해 적재·검증·교차 검증이 PASS했다(§5.5.5). 이 줄은 당시 시점의 기록으로 남긴다.
 - 실제 `docker ps`·`docker inspect` 출력 형식과 FakeDocker의 일치(테스트 더블 기준. r2 verify 래퍼는 실제 환경에서 동작 확인됨)
 - 과거 재사용 벡터의 모델 digest(기록 없음, §5.5.1)
 - `update_r3_collections`의 `--restore-snapshot`·`--apply`·`--index` 보고서: 최상위 `mode`·`db_writes`가 쓰기 뒤 확인용 dry-run 값으로 덮인다(`main()`의 `output.update(dry_run(...))`). 실제 쓰기 결과는 `result`에 있다. 표시 개선은 별도 작업
@@ -401,3 +760,12 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
   - 통과 기준과 별칭 정규화 여부는 팀 결정 사항이다.
 - `tests/integration/test_final_v140_smoke.py`의 r3 버전(두 컬렉션)
 - 팀원 설치 가이드의 r3 갱신
+- **최종 독립 복원 이후 남은 작업과 검증 한계 (2026-11-23)**
+  - 검증 범위: 번들 무결성, 빈 DB 복원, 건수·digest·payload·그래프 속성, Qdrant↔Neo4j 교차 연결, 원문 슬라이스까지다. **검색 품질·답변 품질·FastAPI → RAG → LLM → React E2E는 검증하지 않았다.**
+  - 독립 복원은 같은 PC·같은 OS 사용자·같은 Docker Desktop에서 실행했다. 다른 PC·OS와 팀원 환경의 설치는 확인하지 않았다.
+  - 복원에 쓴 Python 의존성은 이 저장소의 `.venv`다. 압축을 푼 소스 트리에 `requirements.txt`로 새 가상환경을 만드는 절차는 확인하지 않았다.
+  - verify 인증값의 실제 보관 위치는 보고서에 없다(§5.7.4는 권장 예시). 다음 실행 전에 확인이 필요하다.
+  - 최종 ZIP과 보고서는 `.cache`(Git 제외)에만 있다. 팀 공유 위치와 보관 기간은 팀 결정 사항이다.
+  - 번들 source commit은 `1c007e7`이다. 이 문서 갱신을 커밋하면 PR HEAD가 source commit보다 앞선다. 복원 계약의 비교 대상 파일(복원 도구·기준값 모듈·r2 복원 도구·manifest)은 바뀌지 않는다.
+  - dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.
+  - verify 환경(`issue105-r3-verify`)은 복원 1회용이다. 컨테이너·볼륨을 유지할지 정리할지는 별도 승인 사항이다(삭제 명령은 이 문서에 넣지 않음).
