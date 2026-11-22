@@ -528,7 +528,8 @@ def run_ask_pipeline(
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
     if request.selected_policy_id:
-        filters = {**(filters or {}), "policy_id": request.selected_policy_id}
+        # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
+        filters = {"policy_id": request.selected_policy_id}
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
     if request.selected_policy_id:
         # 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.

@@ -56,6 +56,21 @@ it('제외 사유는 API가 제공한 문구만 표시한다', () => {
 it.each([123, {}, [{ label: '기준', value: 123 }], [{ label: '기준', value: '값', document_id: {} }]])('잘못된 공식 기준 응답 %j를 화면 진입 전에 거부한다', bad => {
   expect(isAskResponse(response({ ...policy(), official_requirements: bad }))).toBe(false);
 });
+it('검수된 공식 기준이 없으면 지원대상 원문 발췌를 같은 자리에 원문 링크와 함께 보여 준다', () => {
+  const p = policy(); p.requirement_excerpts = [{ label: '지원대상', text: '만 19~34세 (sample_only)', document_id: 'D9', chunk_id: 'C9', source_url: 'https://example.org/excerpt' }];
+  const section = render(p).split('aria-label="공식 자격기준"')[1].split('</section>')[0];
+  expect(section).toContain('공식 자격기준 · 원문 발췌'); expect(section).toContain('만 19~34세 (sample_only)');
+  expect(section).toContain('href="https://example.org/excerpt"'); expect(isAskResponse(response(p))).toBe(true);
+});
+it('검수된 공식 기준(#76)이 있으면 원문 발췌보다 그것을 보여 준다', () => {
+  const p = policy(); p.official_requirements = [{ label: '소득', value: '검수된 값', document_id: 'D1' }];
+  p.requirement_excerpts = [{ label: '지원대상', text: '발췌 값', document_id: 'D9', chunk_id: 'C9', source_url: 'https://example.org/excerpt' }];
+  const section = render(p).split('aria-label="공식 자격기준"')[1].split('</section>')[0];
+  expect(section).toContain('검수된 값'); expect(section).not.toContain('발췌 값'); expect(section).not.toContain('원문 발췌');
+});
+it.each([123, [{ label: '지원대상', text: '' }], [{ label: '지원대상', text: '값', document_id: 'D', chunk_id: 'C' }], [{ text: '값', document_id: 'D', chunk_id: 'C', source_url: '' }]])('잘못된 원문 발췌 응답 %j를 화면 진입 전에 거부한다', bad => {
+  expect(isAskResponse(response({ ...policy(), requirement_excerpts: bad }))).toBe(false);
+});
 it('문의처 출처의 잘못된 타입도 거부한다', () => {
   expect(isAskResponse(response({ ...policy(), contacts: [{ agency: '기관', phone: null, source_url: {} }] }))).toBe(false);
 });

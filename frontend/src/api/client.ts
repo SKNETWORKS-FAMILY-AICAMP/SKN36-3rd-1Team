@@ -56,7 +56,10 @@ export function isPolicyCheck(item: unknown): item is import('./types').PolicyCh
       && (item.official_requirements == null || (Array.isArray(item.official_requirements) && item.official_requirements.every((requirement: unknown) =>
         isObject(requirement) && isString(requirement.label) && !!requirement.label.trim()
         && isString(requirement.value) && !!requirement.value.trim()
-        && isOptionalString(requirement.document_id) && isOptionalString(requirement.chunk_id) && isOptionalString(requirement.source_url))))
+        && isOptionalString(requirement.document_id) && isOptionalString(requirement.chunk_id))))
+      && (item.requirement_excerpts == null || (Array.isArray(item.requirement_excerpts) && item.requirement_excerpts.every((excerpt: unknown) =>
+        isObject(excerpt) && isString(excerpt.label) && !!excerpt.label.trim() && isString(excerpt.text) && !!excerpt.text.trim()
+        && isString(excerpt.document_id) && isString(excerpt.chunk_id) && isString(excerpt.source_url))))
       && (item.required_documents == null || (Array.isArray(item.required_documents) && item.required_documents.every((doc: unknown) =>
         isObject(doc) && isString(doc.text) && !!doc.text.trim() && isString(doc.document_id) && isString(doc.chunk_id) && isString(doc.source_url))))
       && (item.exclusion_reasons == null || (Array.isArray(item.exclusion_reasons) && item.exclusion_reasons.every((reason: unknown) =>

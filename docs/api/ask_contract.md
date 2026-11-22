@@ -632,7 +632,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 - 설정된 `LIFEPOLICY_DATASET_DIR` 릴리스 파일에서 읽는다. 목록 조회는 DB 검색·임베딩·LLM을 호출하지 않는다. 기존 서버의 검색 세션 수명은 유지한다.
 - 응답: `items`, 필터 후 전체 `total`, `offset`, `limit`, `dataset_version`, manifest 원본 바이트의 `manifest_sha256`, KST `evaluated_on`, `source_kind=release_files`, 전체 지역·분야 선택지 `regions/categories`.
-- item: `policy_id/policy_name/agency/regions/categories/source_url/official_apply_url/reception_status/application_schedule/required_documents/official_requirements`. 개인 `conditions`·자격 점수는 없다.
+- item: `policy_id/policy_name/agency/regions/categories/source_url/official_apply_url/reception_status/application_schedule/required_documents/requirement_excerpts`. 개인 `conditions`·자격 점수와 검수된 공식 기준(`official_requirements`, #76)은 없다.
 - 파일 버전은 검색 DB의 적재 버전을 증명하지 않는다. DB 최신 여부는 별도 검증한다.
 - 파일·ID·참조·manifest 해시가 잘못됐으면 503 `POLICY_CATALOG_UNAVAILABLE`. 이전 캐시를 최신 결과로 대신 반환하지 않는다. 해시 비교의 줄바꿈 동등성은 handoff_data와 동일(raw/LF/CRLF).
 - 분류·문자열 필터와 정렬은 페이지 분할 전에 적용한다. 지역은 명시된 관계의 정확한 이름으로 필터한다(전국 자동 포함·추론 없음).
@@ -641,7 +641,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 ### 선택 정책 상담
 
 `AskRequest.selected_policy_id`: 선택 문자열 또는 null. 형식 `^POL_[A-Z0-9_]+$`, 최대128자. 없는 기존 요청은 동일하게 처리한다.
-기존 검색 1회의 필터에 policy_id를 추가하고, 다른 정책이 반환돼도 제거한다. 선택 정책의 인용 가능한 근거가 없으면 no_evidence이며 다른 정책으로 대체·추가 검색·LLM 재호출하지 않는다. 프론트는 재시도·추가 조건 입력에도 동일 ID를 유지한다.
+기존 검색 1회를 프로필 지역 필터 없이 `policy_id` 필터로만 실행하고, 다른 정책이 반환돼도 제거한다. 사용자가 고른 정책이 프로필 지역과 다르면 검색에서 빼지 않고 Checker가 지역 조건을 판정한다. 선택 정책의 인용 가능한 근거가 없으면 no_evidence이며 다른 정책으로 대체·추가 검색·LLM 재호출하지 않는다. 프론트는 재시도·추가 조건 입력에도 동일 ID를 유지한다.
 
 ### 신청 일정
 
@@ -652,7 +652,9 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 `required_documents`: 선택 목록 또는 null. 각 항목은 `{text, document_id, chunk_id, source_url}`. 원문 `[구비서류]`, `[제출서류]` 블록만 그대로 발췌한다. 완전한 제출 서류 목록을 보증하지 않으며 화면은 ‘서류 발췌’와 원문 확인 안내를 함께 표시한다.
 
-`official_requirements`: 기존 `{label,value,document_id,chunk_id}`에 선택 `source_url`을 추가한다. `[지원대상]`, `[선정기준]`, `[지원대상 및 선정기준]` 블록을 원문 그대로 전달할 수 있다. 연도·단위·값을 환산하거나 검수 완료 상태로 승격하지 않는다. 같은 문서·본문 중복만 제거한다.
+`requirement_excerpts`: 선택 목록 또는 null. 각 항목은 `{label, text, document_id, chunk_id, source_url}`. 원문 `[지원대상]`, `[선정기준]`, `[지원대상 및 선정기준]` 블록만 그대로 발췌한다. 연도·단위·값을 환산하거나 검수 완료 상태로 승격하지 않는다. 같은 문서·본문 중복만 제거한다.
+
+`official_requirements`는 이 작업에서 채우지 않는다. 반석의 값·단위·연도·출처 검수 뒤 #76-A가 채우는 기존 계약 그대로이며, 그 전까지 `null`이다. 화면은 `official_requirements`가 있으면 그것을, 없으면 `requirement_excerpts`를 같은 '공식 자격기준' 자리에 '원문 발췌'로 표시한다.
 
 상담은 실제 채택 청크에서만 발췌하며, 목록은 해당 정책의 같은 릴리스 청크에서만 발췌한다. 목록 정보가 곧 답변 인용이나 개인 판정 근거로 자동 채택되는 것은 아니다. 필드 생략/null은 이전 응답과 호환된다. source_url이 없으면 동일 document_id의 citation만 연결하며 카드 대표 URL로 대체하지 않는다.
 

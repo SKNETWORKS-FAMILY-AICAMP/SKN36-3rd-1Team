@@ -61,13 +61,12 @@ class ExclusionReason(BaseModel):
 
 
 class OfficialRequirement(BaseModel):
-    """정책의 공식 기준 원문 발췌. value는 원문 그대로이며 임의 환산·검수 완료 승격 금지."""
+    """정책이 요구하는 공식 기준 하나(#77 계약 — 자리만 예약, #76-A가 채운다). value는 원문 그대로이며 임의 환산 금지."""
 
     label: NonBlank
     value: NonBlank
     document_id: str | None = None
     chunk_id: str | None = None
-    source_url: str | None = None
 
 
 class SourceExcerpt(BaseModel):
@@ -76,6 +75,11 @@ class SourceExcerpt(BaseModel):
     document_id: NonBlank
     chunk_id: NonBlank
     source_url: str
+
+
+class RequirementExcerpt(SourceExcerpt):
+    """[지원대상]·[선정기준] 원문 블록 발췌(#107). 검수된 공식 기준(official_requirements, #76)이 아니다."""
+    label: NonBlank
 
 
 class ApplicationSchedule(BaseModel):
@@ -95,7 +99,9 @@ class PolicyCheck(EligibilityOutput):
     source_url: str
     official_apply_url: str | None
     contacts: list[Contact] | None = None
-    # 제외 사유의 조건 트리 구현은 #78이 담당한다. 공식 기준은 명시된 원문 블록만 발췌한다.
+    requirement_excerpts: list[RequirementExcerpt] | None = None
+    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. 아래 둘은 자리만 예약한 것으로,
+    # Pipeline이 항상 None을 돌려준다 — 값을 채우는 구현은 각각 #78·#76-A에서 한다.
     exclusion_reasons: list[ExclusionReason] | None = None
     official_requirements: list[OfficialRequirement] | None = None
 
@@ -112,7 +118,7 @@ class PolicySummary(BaseModel):
     reception_status: ReceptionStatus
     application_schedule: ApplicationSchedule | None
     required_documents: list[SourceExcerpt] | None = None
-    official_requirements: list[OfficialRequirement] | None = None
+    requirement_excerpts: list[RequirementExcerpt] | None = None
 
 
 class PolicyListResponse(BaseModel):

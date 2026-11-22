@@ -61,13 +61,12 @@ export interface ExclusionReason {
   reason: string;
 }
 
-/** 명시된 지원대상·선정기준 원문 발췌. 검수 완료나 개인 자격 확정으로 해석하지 않는다. */
+/** 정책이 요구하는 공식 자격 기준 하나(값·단위·연도, "내 조건 판정"과는 분리). #77 계약에서 자리만 예약, 값은 #76-A가 채운다(아직 항상 null). */
 export interface OfficialRequirement {
   label: string;
   value: string;
   document_id?: string | null;
   chunk_id?: string | null;
-  source_url?: string | null;
 }
 
 export interface SourceExcerpt {
@@ -75,6 +74,11 @@ export interface SourceExcerpt {
   document_id: string;
   chunk_id: string;
   source_url: string;
+}
+
+/** [지원대상]·[선정기준] 원문 블록 발췌(#107). 검수된 공식 기준이나 개인 자격 확정으로 해석하지 않는다. */
+export interface RequirementExcerpt extends SourceExcerpt {
+  label: string;
 }
 
 export interface ApplicationSchedule {
@@ -101,7 +105,9 @@ export interface PolicyCheck {
   contacts?: Contact[] | null;
   /** #78 구현 전까지는 항상 null(#77 계약 자리 예약). */
   exclusion_reasons?: ExclusionReason[] | null;
-  /** 같은 정책의 원문 발췌가 있을 때만 제공. 없으면 null/생략. */
+  /** 같은 정책의 지원대상·선정기준 원문 발췌가 있을 때만 제공. 없으면 null/생략. */
+  requirement_excerpts?: RequirementExcerpt[] | null;
+  /** #76-A 구현 전까지는 항상 null(#77 계약 자리 예약). */
   official_requirements?: OfficialRequirement[] | null;
 }
 

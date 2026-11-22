@@ -31,5 +31,8 @@ def application_details(contexts: list[dict]) -> dict:
     sections = source_sections(contexts, DOCUMENT_LABELS | REQUIREMENT_LABELS) or []
     documents = [{"text": row["value"], **{key: row[key] for key in ("document_id", "chunk_id", "source_url")}}
                  for row in sections if row["label"] in DOCUMENT_LABELS]
-    requirements = [row for row in sections if row["label"] in REQUIREMENT_LABELS]
-    return {"required_documents": documents or None, "official_requirements": requirements or None}
+    # 검수된 공식 기준(official_requirements, #76)과 구분해 원문 발췌 필드로만 전달한다.
+    requirements = [{"label": row["label"], "text": row["value"],
+                     **{key: row[key] for key in ("document_id", "chunk_id", "source_url")}}
+                    for row in sections if row["label"] in REQUIREMENT_LABELS]
+    return {"required_documents": documents or None, "requirement_excerpts": requirements or None}

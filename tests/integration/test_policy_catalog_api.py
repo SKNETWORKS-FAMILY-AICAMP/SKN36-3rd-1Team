@@ -67,8 +67,11 @@ def test_catalog_pagination_filters_and_no_network(package):
         a = body["items"][0]
         assert a["application_schedule"]["days_to_end"] == 3
         assert a["required_documents"][0]["text"] == "신청서 (sample_only)"
-        assert a["official_requirements"][0]["value"] == "2025년 기준 100% 이하 (sample_only)"
-        assert a["official_requirements"][0]["document_id"] == "DOC_POL_A"
+        assert a["requirement_excerpts"][0]["text"] == "2025년 기준 100% 이하 (sample_only)"
+        assert a["requirement_excerpts"][0]["label"] == "지원대상"
+        assert a["requirement_excerpts"][0]["document_id"] == "DOC_POL_A"
+        # 검수된 공식 기준(#76) 자리는 목록에 없다. 원문 발췌와 섞지 않는다.
+        assert "official_requirements" not in a
         assert "conditions" not in a
         assert client.get("/api/policies?status=soon").json()["total"] == 1
         assert client.get("/api/policies?status=ongoing").json()["items"][0]["policy_id"] == "POL_C"
@@ -136,11 +139,37 @@ def test_selected_policy_one_search_no_other_card_and_no_extra_generation():
     search = Mock(return_value={"policies": [selected, other]}); generate = Mock(return_value=answer())
     request = AskRequest(question="조건 확인", profile={"age": 25, "region": "서울", "income": None}, history=[], selected_policy_id="POL_A")
     result = run_ask_pipeline(request, search_fn=search, check_fn=checker, generate_fn=generate)
-    search.assert_called_once_with("조건 확인", filters={"region": "서울특별시", "policy_id": "POL_A"}, k=10)
+    # 선택 정책은 지역 필터 없이 정책 ID로만 찾는다. 지역은 Checker가 판정한다.
+    search.assert_called_once_with("조건 확인", filters={"policy_id": "POL_A"}, k=10)
     generate.assert_called_once()
     assert [p.policy_id for p in result.policy_checks] == ["POL_A"]
     assert result.policy_checks[0].required_documents[0].text == "신청서"
-    assert result.policy_checks[0].official_requirements[0].value == "2025년 기준"
+    assert result.policy_checks[0].requirement_excerpts[0].text == "2025년 기준"
+    assert result.policy_checks[0].official_requirements is None
+
+
+def test_selected_policy_outside_profile_region_is_judged_not_hidden():
+    """sample_only: 부산 사용자가 서울 한정 정책을 고르면 근거 없음으로 숨기지 않고 지역 조건을 판정 결과로 보여 준다."""
+    from backend.eligibility.checker import check_eligibility
+    seoul = policy("POL_A")
+    seoul["graph"]["eligibility"] = {"condition_tree": [{"group_id": "G", "logic": "AND", "groups": [],
+        "conditions": [{"type": "REGION", "operator": "EQ", "value": "서울특별시"}]}],
+        "unknown_logic_groups": [], "structure_issues": []}
+
+    def search(question, filters=None, k=10):
+        # 검색 계층처럼 지역 필터가 있으면 다른 지역 정책을 걸러 낸다.
+        if filters and "region" in filters:
+            return {"policies": []}
+        return {"policies": [seoul] if filters and filters.get("policy_id") == "POL_A" else []}
+
+    request = AskRequest(question="신청할 수 있나요?", profile={"age": 25, "region": "부산", "income": None},
+                         history=[], selected_policy_id="POL_A")
+    result = run_ask_pipeline(request, search_fn=search, check_fn=check_eligibility, generate_fn=Mock(return_value=answer()))
+    assert result.status != "no_evidence"
+    assert [p.policy_id for p in result.policy_checks] == ["POL_A"]
+    region = [c for c in result.policy_checks[0].conditions if c.field == "region"]
+    # 충족으로 안내하지 않는다(불충족 또는 공식 근거 확인 필요).
+    assert region and region[0].status in {"ineligible", "needs_check"}
 
 
 def test_selected_policy_absent_does_not_answer_another_policy():
@@ -162,9 +191,11 @@ def test_schedule_reuses_checker_and_unknown_is_not_invented():
 
 def test_source_sections_exact_blocks_preserve_units_and_do_not_guess():
     contexts = [{"document_id": "D", "chunk_id": "C", "url": "https://example.org/", "text": "설명 중 서류가 필요합니다. 소득은 50%"}]
-    assert application_details(contexts) == {"required_documents": None, "official_requirements": None}
+    assert application_details(contexts) == {"required_documents": None, "requirement_excerpts": None}
     contexts[0]["text"] = "[제출서류]\n2025년 서류 A\n[지원대상]\n월 50만원 이하\n[문의처]\n기관 129"
     result = application_details(contexts + contexts)
     assert len(result["required_documents"]) == 1
-    assert result["official_requirements"][0]["value"] == "월 50만원 이하"
+    assert result["requirement_excerpts"] == [{"label": "지원대상", "text": "월 50만원 이하", "document_id": "D",
+                                               "chunk_id": "C", "source_url": "https://example.org/"}]
+    assert "official_requirements" not in result
     assert "문의처" not in result["required_documents"][0]["text"]

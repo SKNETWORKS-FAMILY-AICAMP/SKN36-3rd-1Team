@@ -9,7 +9,7 @@ const policies: PolicyCheck[] = [
   { policy_id: 'SAMPLE_A', policy_name: '가상 정책 A · 공식 기준 있음', agency: '가상 기관 A', reception_status: 'unknown',
     source_url: 'https://example.org/policy-a', official_apply_url: null,
     conditions: [{ field: 'income', label: '소득', status: 'needs_check', reason: '가구 소득 기준은 공고 확인이 필요해요.' }],
-    official_requirements: [{ label: '소득', value: '2025년 기준 중위소득 100% 이하 (가상 예시)', document_id: 'SAMPLE_DA', chunk_id: 'SAMPLE_CA' }] },
+    requirement_excerpts: [{ label: '지원대상', text: '2025년 기준 중위소득 100% 이하 (가상 예시)', document_id: 'SAMPLE_DA', chunk_id: 'SAMPLE_CA', source_url: 'https://example.org/requirements-a' }] },
   { policy_id: 'SAMPLE_B', policy_name: '가상 정책 B · 이전 응답', agency: '', reception_status: 'closed',
     source_url: '', official_apply_url: null,
     conditions: [{ field: 'age', label: '나이', status: 'needs_check', reason: '만 나이를 입력해 주세요.' }] },

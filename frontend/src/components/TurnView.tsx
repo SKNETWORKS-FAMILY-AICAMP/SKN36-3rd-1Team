@@ -383,6 +383,10 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   }
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
+  // 검수된 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.
+  const requirementRows: { label: string; value: string; document_id?: string | null; chunk_id?: string | null; source_url?: string | null }[] =
+    p.official_requirements?.length ? p.official_requirements
+      : (p.requirement_excerpts ?? []).map(e => ({ label: e.label, value: e.text, document_id: e.document_id, chunk_id: e.chunk_id, source_url: e.source_url }));
   // '신청하기'는 신청 주소가 확인됐고 출처 주소와 다를 때만 보여 준다.
   // 예시 응답은 실제 주소가 없으므로 버튼 모양만 보여 주고 알림을 띄운다.
   const hasApplyLink = sample
@@ -426,9 +430,9 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
           );
         })}
       </ul>
-      {!!p.official_requirements?.length && <section className="policy-official" aria-label="공식 자격기준">
-        <h4>공식 자격기준 · 원문 발췌</h4><p className="policy-condition-note">원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.</p>
-        <ul className="rows">{p.official_requirements.map((requirement, i) => {
+      {!!requirementRows.length && <section className="policy-official" aria-label="공식 자격기준">
+        <h4>{p.official_requirements?.length ? '공식 자격기준' : '공식 자격기준 · 원문 발췌'}</h4><p className="policy-condition-note">원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.</p>
+        <ul className="rows">{requirementRows.map((requirement, i) => {
           // 대표 원문으로 대체하면 다른 문서의 기준을 가리킬 수 있다. 동일 문서 ID의 출처만 연결한다.
           const source = requirement.document_id ? sources.find(s => s.document_id === requirement.document_id && safeHttpUrl(s.url)) : null;
           const href = safeHttpUrl(requirement.source_url) ?? (source ? safeHttpUrl(source.url) : null);
