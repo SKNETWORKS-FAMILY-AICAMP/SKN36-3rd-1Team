@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
-import type { AskResponse, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
+import type { AskResponse, Citation, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
 import { hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
@@ -8,6 +8,9 @@ import { lifeHref, mapHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
 import { LOADING_STAGES, policyQuestion } from '../config/request';
 import type { GraphIndex } from '../graph/graphModel';
+import { scheduleView, scheduledPolicies } from '../lib/applicationSchedule';
+import { useScheduleDay } from './ScheduleClock';
+import { PolicyPersonalActions } from './SavedPolicies';
 import { policyLifeStages } from '../graph/lifeStages';
 
 export type Turn =
@@ -31,7 +34,7 @@ interface Props {
   /** 예시 응답 모드(백엔드 주소 없음)인지. 응답이 오기 전 표시와 시연 안내에 쓴다. */
   sampleMode: boolean;
   /** 정책 카드의 '이 정책 물어보기': 만든 질문을 상담 질문 흐름(App의 ask)으로 보낸다. */
-  onAskPolicy?: (question: string, origin: HTMLElement) => void;
+  onAskPolicy?: (question: string, origin: HTMLElement, policyId?: string) => void;
 }
 
 export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode, onAskPolicy }: Props) {
@@ -137,6 +140,7 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
   r: AskResponse; onFollowUp: Props['onFollowUp']; onDemoApply: () => void; onAskPolicy?: Props['onAskPolicy'];
 }) {
   const policyGroup = useId();
+  const today = useScheduleDay();
   const [policyIndex, setPolicyIndex] = useState<GraphIndex | null>(null);
   const hasLivePolicies = !r.is_sample && r.policy_checks.length > 0;
   useEffect(() => {
@@ -230,10 +234,10 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
     blocks.push(
       <Block key="policies" title={`관련 정책 ${r.policy_checks.length}개`} icon="check" tag={r.is_sample ? '시연용 가상 데이터' : undefined}>
         <div className="policy-list">
-          {policyRows(r.policy_checks, r.is_sample ? null : policyIndex).map(({ policy, period }) => (
-            <PolicyCard key={policy.policy_id} p={policy} period={period}
+          {scheduledPolicies(r.policy_checks, today, 'all', 'deadline').map(({ policy, schedule }) => (
+            <PolicyCard key={policy.policy_id} p={policy} period={schedule.period}
               stages={!r.is_sample && policyIndex ? policyLifeStages(policyIndex, policy.policy_id) : []}
-              group={policyGroup} sample={r.is_sample} onDemoApply={onDemoApply} onAskPolicy={onAskPolicy} />
+              group={policyGroup} sample={r.is_sample} onDemoApply={onDemoApply} onAskPolicy={onAskPolicy} sources={r.citations} />
           ))}
         </div>
       </Block>,
@@ -308,26 +312,6 @@ function StageChips({ stages }: { stages: string[] }) {
   );
 }
 
-function policyRows(policies: PolicyCheck[], index: GraphIndex | null) {
-  return policies.map((policy) => {
-    const data = index?.nodes.get(policy.policy_id)?.data;
-    const text = (value: unknown) => typeof value === 'string' ? value.trim() : '';
-    const start = text(data?.application_start);
-    const end = text(data?.application_end);
-    const deadline = policy.reception_status === 'open' && /^\d{4}-\d{2}-\d{2}$/.test(end) ? end : '';
-    const period = start && end ? `${start} ~ ${end}`
-      : end ? `종료일 ${end}`
-      : start ? `시작일 ${start}${data?.application_is_ongoing === true ? ' · 상시 접수' : ''}`
-      : text(data?.application_period);
-    return { policy, deadline, period };
-  }).sort((a, b) => {
-    const closedOrder = Number(a.policy.reception_status === 'closed') - Number(b.policy.reception_status === 'closed');
-    if (closedOrder) return closedOrder;
-    if (!a.deadline || !b.deadline) return Number(!a.deadline) - Number(!b.deadline);
-    return a.deadline.localeCompare(b.deadline);
-  });
-}
-
 const OFFICIAL_ELIGIBILITY_NOTICE = '신청 자격은 공식 공고에서 확인해 주세요.';
 /** 제외(NOT) 그룹에 입력 정보가 해당할 때(lib/conditionGroups `matchesExclusion`). 어떤 조건인지는 원문에서 확인하게 한다. */
 const EXCLUSION_NOTICE = '입력하신 정보가 이 정책의 지원 제외 대상 조건에 해당해요. 공식 원문의 제외 대상을 확인해 주세요.';
@@ -368,9 +352,10 @@ function conditionReasonForDisplay(reason: string) {
   return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
-function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy }: {
+export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy, sources = [] }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
   onAskPolicy?: Props['onAskPolicy'];
+  sources?: Citation[];
 }) {
   const unjudged = isUnjudgedOnly(p.conditions);
   const incomeNotices = new Set<string>();
@@ -386,7 +371,9 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
   });
   const showVerdict = hasOnlyAndGroups(p.conditions);
   const hidesVerdict = !showVerdict && displayedConditions.some(({ status }) => status !== 'needs_check');
-  const [rcls, rlabel] = RECEPTION_LABEL[p.reception_status];
+  const schedule = scheduleView(p, useScheduleDay());
+  const [rcls] = RECEPTION_LABEL[schedule.status];
+  const rlabel = schedule.label;
   const labelsByBadge = new Map<string, { cls: string; labels: Set<string> }>();
   for (const { status, label } of displayedConditions) {
     const [cls, badge] = conditionBadge(status, showVerdict);
@@ -401,16 +388,16 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
   const hasApplyLink = sample
     ? !!p.official_apply_url && p.official_apply_url !== p.source_url
     : !!applyHref && applyHref !== sourceHref;
-  const canApply = hasApplyLink && p.reception_status !== 'closed' && p.reception_status !== 'before';
+  const canApply = hasApplyLink && !!p.application_schedule && schedule.status === 'open';
   return (
     <details className="pcard" name={group}>
       <summary className="ptop">
         <b>{p.policy_name}</b>
-        {p.reception_status !== 'unknown' && <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>}
+        {schedule.badge && <span className="schedule-countdown">{schedule.badge}</span>}
+        <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>
       </summary>
       <div className="policy-meta">
         {p.agency && <small>{p.agency}</small>}
-        {p.reception_status === 'unknown' && <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>}
       </div>
       <StageChips stages={stages} />
       <ul className="rows">
@@ -418,6 +405,13 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
           <span className="k">신청 기간</span>
           <span className="why">{period || '공식 원문에서 확인해 주세요.'}</span>
         </li>
+        <li><span className="k">신청 기관</span><span className="why">{p.agency || '공식 공고에서 확인해 주세요.'}</span></li>
+        {!p.required_documents?.length && <li><span className="k">필요 서류</span><span className="why">이 카드에는 확인된 서류 목록이 제공되지 않았어요.
+          {sourceHref && <> <a href={sourceHref} target="_blank" rel="noopener noreferrer">공식 원문에서 서류 확인 ↗</a></>}
+        </span></li>}
+        {p.required_documents?.map((doc, i) => <li key={`${doc.document_id}-${doc.chunk_id}-${i}`}><span className="k">서류 발췌</span><span className="why source-excerpt">{doc.text}
+          {safeHttpUrl(doc.source_url) && <> · <a href={safeHttpUrl(doc.source_url)!} target="_blank" rel="noopener noreferrer">서류 원문 ↗</a></>}
+          <small> 제출 대상별 추가 서류·전체 목록은 공식 공고에서 확인해 주세요.</small></span></li>)}
         {/* phone은 항상 깨끗한 전화번호 형식이 아닐 수 있다(예: "각 기관 120 센터"). 원문 그대로 보여 준다. */}
         {p.contacts?.map((c, i) => {
           const href = safeHttpUrl(c.source_url);
@@ -432,6 +426,18 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
           );
         })}
       </ul>
+      {!!p.official_requirements?.length && <section className="policy-official" aria-label="공식 자격기준">
+        <h4>공식 자격기준 · 원문 발췌</h4><p className="policy-condition-note">원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.</p>
+        <ul className="rows">{p.official_requirements.map((requirement, i) => {
+          // 대표 원문으로 대체하면 다른 문서의 기준을 가리킬 수 있다. 동일 문서 ID의 출처만 연결한다.
+          const source = requirement.document_id ? sources.find(s => s.document_id === requirement.document_id && safeHttpUrl(s.url)) : null;
+          const href = safeHttpUrl(requirement.source_url) ?? (source ? safeHttpUrl(source.url) : null);
+          return <li key={`${requirement.document_id ?? ''}-${requirement.chunk_id ?? ''}-${i}`}><span className="k">{requirement.label}</span>
+            <span className="why source-excerpt">{requirement.value}{href ? <> · <a href={href} target="_blank" rel="noopener noreferrer">기준 원문 ↗</a></> : <small> · 해당 기준의 출처 링크는 제공되지 않았어요.</small>}</span></li>;
+        })}</ul>
+      </section>}
+      {(unjudged || displayedConditions.length > 0) && <h4 className="policy-check-heading">내 조건 확인</h4>}
+      {!!p.exclusion_reasons?.length && <ul className="policy-exclusions" aria-label="지원 제외 사유">{p.exclusion_reasons.map((reason, i) => <li key={`${reason.field}-${i}`}><b>{reason.label}</b> · {reason.reason}</li>)}</ul>}
       {unjudged ? (
         // 비교할 조건이 없다는 사유만 있으면 '추가 확인 필요' 대신 미판정 상태와 기준을 볼 곳만 안내한다.
         // 원문을 인용했어도 답변이 신청 방법만 다룰 수 있어, 답변에 기준이 있다고 가정하지 않는다.
@@ -472,11 +478,12 @@ function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy
         </>
       )}
       <div className="pfoot">
+        <PolicyPersonalActions policy={p} sample={sample} />
         {/* 비교한 조건이 없는 카드에는 맞지 않는 안내라 숨긴다 */}
-        {!unjudged && <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>}
+        {!unjudged && displayedConditions.length > 0 && <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>}
         {/* 예시 정책은 실제 데이터에 없어 질문·관계 지도로 연결하지 않는다 */}
         {!sample && onAskPolicy && (
-          <button type="button" className="btn btn-o" onClick={(event) => onAskPolicy(policyQuestion(p.policy_name), event.currentTarget)}>
+          <button type="button" className="btn btn-o" onClick={(event) => onAskPolicy(policyQuestion(p.policy_name), event.currentTarget, p.policy_id)}>
             이 정책 물어보기
           </button>
         )}

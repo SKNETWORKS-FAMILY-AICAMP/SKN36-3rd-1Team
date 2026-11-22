@@ -11,7 +11,8 @@ from pydantic import ValidationError
 from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from backend.eligibility.checker import certain_required_and_failure
+from backend.eligibility.checker import certain_required_and_failure, application_schedule
+from backend.rag.source_sections import application_details
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -526,7 +527,12 @@ def run_ask_pipeline(
     notice = {"kind": "warn", "title": "추가 확인 필요",
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
+    if request.selected_policy_id:
+        filters = {**(filters or {}), "policy_id": request.selected_policy_id}
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
+    if request.selected_policy_id:
+        # 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
+        policies = [policy for policy in policies if policy["policy_id"] == request.selected_policy_id]
     # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
     ranked = rank_citable_contexts(policies)
     citable = {context["policy_id"] for context in ranked}
@@ -563,6 +569,8 @@ def run_ask_pipeline(
                 for contact in _collect_contacts(candidates_by_policy.get(pid, ()))
             ]
         check["contacts"] = contacts or None
+        check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
+        check.update(application_details(selected))
         checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:

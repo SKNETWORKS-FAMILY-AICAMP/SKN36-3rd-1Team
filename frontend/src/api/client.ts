@@ -1,9 +1,10 @@
 import type { AskRequest, AskResponse } from './types';
+import { isApplicationSchedule } from '../lib/applicationSchedule';
 import { mockAsk } from '../mock/mockAsk';
 import { ASK_TIMEOUT_MS } from '../config/request';
 
 /** 백엔드 주소. 비어 있으면 예시 응답으로 동작한다(.env.example 참고). */
-const ASK_API_URL = (import.meta.env.VITE_ASK_API_URL as string | undefined)?.trim() || '';
+export const ASK_API_URL = (import.meta.env.VITE_ASK_API_URL as string | undefined)?.trim() || '';
 
 export const usingSample = !ASK_API_URL;
 
@@ -46,6 +47,29 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 const isString = (value: unknown) => typeof value === 'string';
 const isNullableString = (value: unknown) => value === null || isString(value);
+const isOptionalString = (value: unknown) => value == null || isString(value);
+
+export function isPolicyCheck(item: unknown): item is import('./types').PolicyCheck {
+  return isObject(item) && isString(item.policy_id) && isString(item.policy_name) && isString(item.agency)
+      && isString(item.source_url) && isNullableString(item.official_apply_url)
+      && (item.application_schedule == null || isApplicationSchedule(item.application_schedule))
+      && (item.official_requirements == null || (Array.isArray(item.official_requirements) && item.official_requirements.every((requirement: unknown) =>
+        isObject(requirement) && isString(requirement.label) && !!requirement.label.trim()
+        && isString(requirement.value) && !!requirement.value.trim()
+        && isOptionalString(requirement.document_id) && isOptionalString(requirement.chunk_id) && isOptionalString(requirement.source_url))))
+      && (item.required_documents == null || (Array.isArray(item.required_documents) && item.required_documents.every((doc: unknown) =>
+        isObject(doc) && isString(doc.text) && !!doc.text.trim() && isString(doc.document_id) && isString(doc.chunk_id) && isString(doc.source_url))))
+      && (item.exclusion_reasons == null || (Array.isArray(item.exclusion_reasons) && item.exclusion_reasons.every((reason: unknown) =>
+        isObject(reason) && isString(reason.field) && isString(reason.label) && isString(reason.reason))))
+      && (item.reception_status === 'before' || item.reception_status === 'open'
+        || item.reception_status === 'closed' || item.reception_status === 'unknown')
+      && Array.isArray(item.conditions) && item.conditions.every((condition: unknown) =>
+        isObject(condition) && isString(condition.field) && isString(condition.label) && isString(condition.reason)
+        && (condition.status === 'eligible' || condition.status === 'ineligible' || condition.status === 'needs_check'))
+      && (item.contacts == null || (Array.isArray(item.contacts) && item.contacts.every((contact: unknown) =>
+        isObject(contact) && isString(contact.agency) && isNullableString(contact.phone)
+        && isOptionalString(contact.document_id) && isOptionalString(contact.chunk_id) && isOptionalString(contact.source_url))));
+}
 
 export function isAskResponse(value: unknown): value is AskResponse {
   if (!isObject(value)) return false;
@@ -55,16 +79,7 @@ export function isAskResponse(value: unknown): value is AskResponse {
       isObject(item) && isString(item.title) && isString(item.url)
       && (item.document_id === undefined || isString(item.document_id))
       && (item.page_number == null || Number.isInteger(item.page_number)))
-    && Array.isArray(value.policy_checks) && value.policy_checks.every((item: unknown) =>
-      isObject(item) && isString(item.policy_id) && isString(item.policy_name) && isString(item.agency)
-      && isString(item.source_url) && isNullableString(item.official_apply_url)
-      && (item.reception_status === 'before' || item.reception_status === 'open'
-        || item.reception_status === 'closed' || item.reception_status === 'unknown')
-      && Array.isArray(item.conditions) && item.conditions.every((condition: unknown) =>
-        isObject(condition) && isString(condition.field) && isString(condition.label) && isString(condition.reason)
-        && (condition.status === 'eligible' || condition.status === 'ineligible' || condition.status === 'needs_check'))
-      && (item.contacts == null || (Array.isArray(item.contacts) && item.contacts.every((contact: unknown) =>
-        isObject(contact) && isString(contact.agency) && isNullableString(contact.phone)))))
+    && Array.isArray(value.policy_checks) && value.policy_checks.every(isPolicyCheck)
     && Array.isArray(value.follow_up_questions) && value.follow_up_questions.every((item: unknown) =>
       isObject(item) && isString(item.text) && (item.kind === 'question' ? item.field == null || isString(item.field)
         : item.kind === 'ask_info' && (item.field === 'age' || item.field === 'region' || item.field === 'income')))
