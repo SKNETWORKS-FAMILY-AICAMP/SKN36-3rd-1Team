@@ -229,7 +229,7 @@ class StateTests(Case):
         self.assertEqual(update.dry_run(client, "b3", self.s.release, docker=self.docker)["state"], "absent")
         output = update.dry_run(client, "b2", self.s.release, docker=self.docker)
         self.assertEqual((output["state"], output["db_writes"], output["r3_pins_finalized"]),
-                         ("source", 0, profiles.R3_PIN_STAGE == "final"))   # 실제 R3_PINS 단계 (C0에서는 False)
+                         ("source", 0, profiles.R3_PIN_STAGE == "stage2"))   # 실제 R3_PINS 단계 (C0에서는 False)
         self.assertEqual(output["plan_object"], self.plans["b2"])
         self.assertEqual(output["plan_object"]["basis"], profiles.PLAN_BASIS_SERVER)   # 서버 계획 = 최종 고정 기준
         self.assertEqual(output["proposed_pins"]["embed_count"], 3)

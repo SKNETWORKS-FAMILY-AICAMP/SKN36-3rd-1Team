@@ -6,9 +6,9 @@
 - 1차 확정(stage1_pins, 최종 vector_digest 두 칸만 None): 갱신 단계(--apply·--index·Neo4j --load)만 기준값 게이트를
   통과하고(그 뒤 계획·fingerprint·소유 확인이 계속 지킨다), snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
 - 2차 확정(final_sample_pins, 미확정 0개): 모든 단계가 기준값 게이트를 통과하고, 다른 릴리스·잘못된 값은 다음 검사에서 멈춘다.
-- 실제 R3_PINS(C1 stage1, #110 반영 r3b 서버 계획 2026-11-23): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고,
-  갱신 단계는 기준값 게이트를 통과해 다음 검사에서 멈추며, 최종 단계 쓰기는 vector_digest 미확정으로 거부된다
-  (바꿔 끼우지 않고 실제 값으로 확인).
+- 실제 R3_PINS(C2 stage2, #110 반영 r3b 최종 dry-run 2026-11-23): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고,
+  모든 쓰기 진입점이 기준값 게이트를 통과한 뒤 다음 검사(계획·manifest·digest·Docker)에서 멈춘다
+  (바꿔 끼우지 않고 실제 값으로 확인, 실제 쓰기 0).
 DB·Docker·Ollama 접속 없음 (sample_only 테스트 더블).
 """
 import hashlib
@@ -73,6 +73,21 @@ class Base(unittest.TestCase):
                                                   "x", docker=self.docker),
         }
         return update_stage, full
+
+    def expected_entry_errors(self):
+        return {
+            "update --apply": (planner.PlanError, "r3 고정값과 다릅니다"),
+            "update --index": (planner.PlanError, "r3 고정값과 다릅니다"),
+            "neo4j --load": (neo4j_r3.Neo4jR3Error, "r3 고정값"),
+            # 교차 검증은 핀 통과 뒤 첫 서버 읽기에서 테스트 더블이 차단한다.
+            # 실제 digest 거부는 test_load_neo4j_r3_isolated에서 따로 검증한다.
+            "neo4j --cross-db": (AssertionError, "쓰기·외부 호출 금지"),
+            "bundle --create-snapshot": (planner.PlanError, "r3 고정값과 다릅니다"),
+            "bundle --build": (bundle.BundleError, "snapshot이 모두 필요"),
+            "restore check_bundle": (FileNotFoundError, "SHA256SUMS"),
+            "restore --apply": (FileNotFoundError, "SHA256SUMS"),
+            "wrapper --apply": (FileNotFoundError, "SHA256SUMS"),
+        }
 
 
 class PendingPinTests(Base):
@@ -197,7 +212,7 @@ class FinalPinTests(Base):
 
     def test_pins_are_final(self):
         self.assertTrue(profiles.is_finalized())
-        self.assertEqual((profiles.missing_pins(), profiles.pin_stage()), ([], "final"))
+        self.assertEqual((profiles.missing_pins(), profiles.pin_stage()), ([], "stage2"))
 
     def test_every_stage_passes_the_pin_gate_and_later_guards_still_stop(self):
         never = AssertionError("쓰기·외부 호출 금지")
@@ -207,13 +222,8 @@ class FinalPinTests(Base):
             update_stage, full = self.entries(folder, runner, never)
             for name, call in {**update_stage, **full}.items():
                 with self.subTest(entry=name), patch.dict(os.environ, {}):
-                    try:
+                    with self.assertRaisesRegex(*self.expected_entry_errors()[name]):
                         call()
-                        self.fail("멈춰야 한다")
-                    except profiles.ProfileError as error:
-                        self.fail(f"2차 확정 기준값인데 기준값 게이트에서 멈춤: {error}")
-                    except Exception:      # 계획·릴리스·번들·Docker 등 다음 검사에서 멈춘다
-                        pass
             self.assertEqual(list(Path(folder).iterdir()), [])
         self.assertEqual(self.client.writes, [])
 
@@ -235,42 +245,34 @@ class FinalPinTests(Base):
             planner_mod.load_release(bad)
 
 
-class RealStage1PinTests(Base):
-    """실제 R3_PINS (바꿔 끼우지 않음). #110 반영 C1: 계획 값까지 확정, 최종 vector_digest 두 칸만 미확정."""
+class RealFinalPinTests(Base):
+    """실제 R3_PINS (바꿔 끼우지 않음). #110 반영 C2: 미확정 0. 기준값 게이트 통과 ≠ 무조건 허용 — 다음 검사가 계속 지킨다."""
 
-    def test_declared_stage_matches_the_values_and_only_final_digests_are_missing(self):
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage1", "stage1"))
-        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
+    def test_declared_stage_matches_the_values_and_nothing_is_missing(self):
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage2", "stage2"))
+        self.assertEqual(profiles.missing_pins(), [])
 
-    def test_update_stage_passes_the_pin_gate_and_later_guards_stop_foreign_input(self):
-        """실제 1차 확정값: --apply·--index·Neo4j --load는 ProfileError 없이 다음 검사(계획·그래프 기준)에서 멈춘다."""
+    def test_every_entry_passes_the_pin_gate_and_later_guards_stop_foreign_input(self):
         never = AssertionError("쓰기·외부 호출 금지")
         runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
         with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never), \
                 patch.object(r2w, "run_docker", side_effect=never):
-            update_stage, _full = self.entries(folder, runner, never)
+            update_stage, full = self.entries(folder, runner, never)
             expected = {"update --apply": (planner.PlanError, "r3 고정값과 다릅니다"),
                         "update --index": (planner.PlanError, "r3 고정값과 다릅니다"),
                         "neo4j --load": (neo4j_r3.Neo4jR3Error, "r3 고정값")}
             for name, call in update_stage.items():
                 with self.subTest(entry=name), self.assertRaisesRegex(*expected[name]):
                     call()
-        self.assertEqual(self.client.writes, [])
-
-    def test_final_stage_writes_are_refused_for_missing_vector_digest_with_real_pins(self):
-        never = AssertionError("쓰기·외부 호출 금지")
-        runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
-        with tempfile.TemporaryDirectory() as folder:
-            _update_stage, full = self.entries(folder, runner, never)
             for name, call in full.items():
-                with self.subTest(entry=name), patch.dict(os.environ, {}), \
-                        self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
-                    call()
+                with self.subTest(entry=name), patch.dict(os.environ, {}):
+                    with self.assertRaisesRegex(*self.expected_entry_errors()[name]):
+                        call()
             self.assertEqual(list(Path(folder).iterdir()), [])
         self.assertEqual(self.client.writes, [])
 
     def test_cli_apply_and_index_stop_at_the_plan_check_before_docker_or_writes(self):
-        """다른(sample_only) 릴리스 계획은 실제 1차 확정값과 맞지 않아 Docker·쓰기 전에 PlanError로 멈춘다."""
+        """다른(sample_only) 릴리스 계획은 실제 최종 확정값과 맞지 않아 Docker·쓰기 전에 PlanError로 멈춘다."""
         from database import embedding as em
         with tempfile.TemporaryDirectory() as folder, \
                 patch.object(r2w, "run_docker", side_effect=AssertionError("Docker 호출 금지")), \
@@ -290,16 +292,34 @@ class RealStage1PinTests(Base):
                     self.assertNotIn(ENV[update.API_KEY_ENV], json.dumps(output))
         self.assertEqual(self.client.writes, [])
 
-    def test_cli_neo4j_load_passes_the_pin_gate_and_stops_at_the_connection(self):
-        """실제 1차 확정값은 Neo4j 적재 기준값 게이트를 통과한다 → 다음 단계(접속)에서 막아 쓰기 0을 확인한다."""
+    def test_cli_neo4j_load_and_cross_db_pass_the_pin_gate_and_stop_at_the_connection(self):
+        """실제 최종 확정값은 Neo4j 적재·교차 검증 기준값 게이트를 통과한다 → 접속 단계에서 막아 쓰기 0을 확인한다."""
+        url = f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}"
         with tempfile.TemporaryDirectory() as folder, \
                 patch("neo4j.GraphDatabase.driver", side_effect=AssertionError("접속 금지")) as driver:
-            report = Path(folder) / "neo4j-load.json"
-            code = neo4j_r3.main(["--neo4j-url", f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}", "--load",
-                                  "--confirm-write", "--expect-fingerprint", "0" * 64, "--report", str(report)])
-            output = json.loads(report.read_text(encoding="utf-8"))
-        self.assertEqual((code, output["error_type"]), (1, "AssertionError"))
+            for name, extra in (("load", ["--load", "--confirm-write", "--expect-fingerprint", "0" * 64]),
+                                ("cross-db", ["--cross-db", "--qdrant-url", URL])):
+                with self.subTest(mode=name):
+                    report = Path(folder) / f"neo4j-{name}.json"
+                    code = neo4j_r3.main(["--neo4j-url", url, *extra, "--report", str(report)])
+                    output = json.loads(report.read_text(encoding="utf-8"))
+                    self.assertEqual((code, output["error_type"]), (1, "AssertionError"))
         self.assertTrue(driver.called)
+
+    def test_real_final_pins_reject_foreign_sample_plan_and_wrong_manifest(self):
+        """sample 계획은 실제 points부터 다르므로 거부된다. 개별 digest 변조 검증을 대신하지 않는다."""
+        plan = self.s.plan("b2")
+        for field, value in (("plan_sha256", "0" * 64), ("reuse_vector_digest", "0" * 64)):
+            with self.subTest(field=field):
+                bad = profiles.r3_pins()
+                bad["collections"]["b2"][field] = value
+                self.assertNotEqual(bad, profiles.R3_PINS)
+                with self.assertRaises(planner.PlanError):      # sample 계획은 실제 값과 다르다 (points 1233 ≠ 6)
+                    planner.validate_plan(plan, self.s.release, bad, self.s.sources, require_pins=True)
+        bad = profiles.r3_pins()
+        bad["manifest_lf_sha256"] = "0" * 64
+        with self.assertRaisesRegex(planner.PlanError, "manifest"):
+            planner.load_release(bad)
 
 
 class StageMapTests(unittest.TestCase):
@@ -307,7 +327,7 @@ class StageMapTests(unittest.TestCase):
 
     def test_pin_stage_of_each_fixture(self):
         self.assertEqual([profiles.pin_stage(p) for p in (pending_pins(), stage1_pins(), final_sample_pins())],
-                         ["pending", "stage1", "final"])
+                         ["pending", "stage1", "stage2"])
         broken = final_sample_pins()
         del broken["collections"]["b3"]
         self.assertEqual(profiles.pin_stage(broken), "pending")        # 스키마가 깨지면 확정 쓰기 없음
@@ -320,8 +340,8 @@ class StageMapTests(unittest.TestCase):
         update_stage = {"update_r3_collections --apply", "update_r3_collections --index",
                         "load_neo4j_r3_isolated --load/--resume"}
         self.assertEqual(set(table["stage1"]) - set(table["pending"]), update_stage)
-        self.assertTrue(set(profiles.WRITES_REQUIRING_PINS) <= set(table["final"]))
-        for stage, pins in (("pending", pending_pins()), ("stage1", stage1_pins()), ("final", final_sample_pins())):
+        self.assertTrue(set(profiles.WRITES_REQUIRING_PINS) <= set(table["stage2"]))
+        for stage, pins in (("pending", pending_pins()), ("stage1", stage1_pins()), ("stage2", final_sample_pins())):
             with self.subTest(stage=stage):
                 update_ok = not [m for m in profiles.missing_pins(pins) if m not in profiles.UPDATE_STAGE_DEFERRED_PINS]
                 self.assertEqual(update_ok, update_stage <= set(table[stage]))

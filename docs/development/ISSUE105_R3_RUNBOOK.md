@@ -5,7 +5,8 @@
 > **C0 진입 (2026-11-23, #110 병합 `7aa5266`):** `R3_PINS`를 #110 릴리스 기준 pending으로 바꿨다(§5.5.2). manifest `29b57236…`·release_counts·points만 확정, 계획·임베딩 결과 값은 미확정.
 > #104 기준 1·2차 확정값은 §5.5(아래 기록)에 그대로 보존한다.
 > **C1 진입 (2026-11-23, 1931ca8 기준):** r3b 서버 계획 값을 확정해 `R3_PIN_STAGE = "stage1"`로 바꿨다(§5.5.2). 최종 `vector_digest` 두 칸만 미확정.
-> 예정: 원본 snapshot(r2·#31)에서 재구축 → 재임베딩 B2 108·B3 123(26개는 payload만 갱신) → 새 빈 Neo4j에 1133/2674 전체 적재.
+> **C2 완료 (2026-11-23, HEAD `43729a7` 위 미커밋 변경):** `R3_PIN_STAGE = "stage2"`. B2 1,233·B3 1,320 Point의 최종 digest를 기존 서버 dry-run 보고서와 대조해 확정했다(§5.5.3). C1 값은 유지했다.
+> 다음 작업은 r3b Neo4j 적재·검증이다(§5.5.4). 이번 C2 인계에서는 실제 DB·Docker·임베딩·snapshot·ZIP 작업을 실행하지 않았다.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -296,8 +297,8 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 | 단계 | 기준값 상태 | 기준값 게이트를 통과하는 쓰기 (`STAGE_ALLOWED_WRITES`) | 거부되는 쓰기 |
 |---|---|---|---|
 | pending (C0, 2026-11-23 완료) | manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`, release_counts 246·268·663·1133·2674·211, points B2 1233·B3 1320, remove_count 0. 나머지(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest) None | 원본 snapshot 복원(`--restore-snapshot`), `--write-plan`, `--report` (새 로컬 파일) | `--apply`, `--index`, Neo4j `--load`·`--resume`, `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 `--apply` |
-| **stage1 (C1, 현재)** | 위 + r3b 서버 계획의 reuse·embed·delete·plan_sha256·reuse_vector_digest. 최종 vector_digest 두 칸만 None | pending + `--apply`, `--index`, Neo4j `--load`·`--resume` | `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 |
-| final (C2) | 위 + complete 상태의 컬렉션별 vector_digest. None 0 | 모든 쓰기 (각 단계의 Docker 소유·fingerprint·서버 상태 검사는 그대로) | (기준값 게이트로는 없음) |
+| stage1 (C1, 완료) | 위 + r3b 서버 계획의 reuse·embed·delete·plan_sha256·reuse_vector_digest. 최종 vector_digest 두 칸만 None | pending + `--apply`, `--index`, Neo4j `--load`·`--resume` | `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 |
+| **stage2 (C2, 현재)** | 위 + complete 상태의 컬렉션별 vector_digest. None 0 | 모든 쓰기 (각 단계의 Docker 소유·fingerprint·서버 상태 검사는 그대로) | (기준값 게이트로는 없음. 실행 승인을 뜻하지 않음) |
 
 - C0 값은 릴리스 파일에서 다시 계산해 확인했다(manifest 파일 34개 체크섬 일치, 12개 정책 `application_start/end` = null, 12개 `source_text` SHA = `content_hash`).
 - `load_release()`는 C0 값(manifest·건수·points)과 다르면 거부한다. 쓰기용 계획 검증(`require_pins`)은 C0에서 거부되고, 검토용 검증은 확정된 칸만 대조한다.
@@ -309,6 +310,51 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
     - 재사용 1197 = identical 990 + metadata_refresh 179 + core_refresh 28(#110 26 + 기존 위치 보정 2). 실행 ID `…20261107_173026` 1197
   - 원본: B2 r2 snapshot 1139 `8577c3c8…`, B3 #31 snapshot 1220 `0a794e34…` (R3_SOURCES와 같음). 계획 파일 SHA-256: `plan-b2.json` `65e530d7…`, `plan-b3.json` `8e7d6258…` (로컬, Git 제외)
 - 참고: 원본 snapshot 복원 보고서(`01-b3-restore.json`, `02-b2-restore.json`)의 최상위 `mode="dry-run"`·`db_writes=0`은 복원 직후 실행한 확인용 dry-run 값이다. 실제 쓰기 결과는 `result.status="RESTORED"`에 있다(§7).
+
+#### 5.5.3 C2 완료 근거 — #110 반영 r3b (2026-11-23)
+
+기존 보고서를 읽어 대조했다. 이번 인계 작업에서 서버를 다시 호출한 결과는 아니다.
+
+| 항목 | B2 | B3 |
+|---|---|---|
+| 보고서 (`.cache/issue105-r3b/`) | `11-b2-final-dryrun.json` | `12-b3-final-dryrun.json` |
+| status / state | PASS / complete | PASS / complete |
+| points | 1233 | 1320 |
+| full_vector_digest = proposed_final_pins.vector_digest | `90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d` | `718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120` |
+| payload_pending / missing_for_index / delete_present / problems | 0 / [] / [] / [] | 0 / [] / [] / [] |
+| reuse_vector_digest_matches_plan | true | true |
+| db_writes / embedding_calls (최종 dry-run) | 0 / 0 | 0 / 0 |
+
+- 보고서의 `r3_pins_finalized=false`는 **C2 코드를 반영하기 전 C1 상태**를 뜻한다. 서버의 `complete`와 모순되지 않는다. 기존 보고서를 고쳐 쓰지 않는다.
+- manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`, release_counts 246·268·663·1133·2674·211 및 C1의 points·reuse_count·embed_count·delete_count·remove_count·reuse_vector_digest·plan_sha256을 그대로 유지한다.
+- `R3_PIN_STAGE`, `pin_stage()`, `PIN_STAGES`, `STAGE_ALLOWED_WRITES`는 최종 단계를 `stage2`로 통일한다. `require_finalized()`의 미확정 차단과 갱신 단계의 두 digest만 유예하는 규칙은 유지한다.
+- 확정 핀을 통과하더라도 다른 계획·manifest·digest, 잘못된 fingerprint·소유·주소·인증, 기존 출력 파일은 계속 거부한다. pending/stage1 테스트를 유지하고, 양쪽 컬렉션의 digest만 변조하는 테스트를 추가했다(아래). skip은 추가하지 않는다.
+- 번들은 확정 핀이 담긴 커밋과 작업 트리의 소스 일치가 필요하다. 현재 미커밋 C2 상태는 번들 생성 완료가 아니다.
+
+**C2 회귀 검증 결과 (2026-11-23, Claude 재검증)**
+
+- 관련 r2/r3 unit 14개 파일: **269 passed, 13 skipped, 1 failed**. 실패 1건은 `DefaultDatasetRegressionTests`이며 HEAD 기준선에 있던 실패다. skip은 모두 r2 `NOT_APPLICABLE`이다.
+- 전체 `tests/unit`: **55 failed, 1673 passed, 17 skipped, 20 errors**. 실패 목록이 HEAD(`43729a7`, C1) 기준선과 같아 **신규 실패 0, 사라진 실패 0**이다. 기존 실패는 1.3.2 전용 기대값, 고정 평가셋, 정적 플래그 manifest, 로컬 컬렉션 없음 등 이전부터 있던 것이다.
+- 실제 stage2 핀 게이트 테스트: 모든 쓰기 진입점이 기준값 게이트를 통과한 뒤 다음 검사(계획·manifest·digest·Docker·접속)에서 멈추고 실제 쓰기는 0이다. pending/stage1 fixture 테스트도 유지했다.
+- **Point 수는 같고 vector_digest만 다른 경우**: 실제 핀으로 만든 최소 번들에서 B2·B3 각각 `check_bundle`이 그 컬렉션에서 거부하는 테스트(`RealPinBundleDigestTests`)를 추가해 통과했다. 계획 검증(`validate_plan`)은 vector_digest를 대조하지 않으므로, 그 경로의 sample 계획 테스트는 digest 변조 검증으로 보지 않는다.
+- 실행 방식: 기존 `.venv` pytest. 테스트용 Git 저장소·가짜 snapshot·ZIP은 `tempfile.TemporaryDirectory()`(시스템 TEMP, 프로젝트 밖)에만 만든다. Docker·Qdrant·Neo4j·네트워크는 테스트 더블이거나 실패하도록 patch되어 있다. OS 수준 격리는 아니며, 실행 전후 보호 자산 SHA 비교로 불변을 확인했다.
+- 이전 Codex 인계 실행(62 failed, 130 passed)은 감사 훅이 `.zip`·`.snapshot` 쓰기와 테스트용 Git 픽스처를 차단해 생긴 환경 차단 실패였다. 해당 자료(`.cache/issue105-c2-audit-20261123/`, `C:\dev\issue105-c2-verification-20261123-01`)는 실행하거나 고치지 않고 보존했다.
+
+#### 5.5.4 다음 Neo4j 절차 — 별도 실행 승인 후
+
+`load_neo4j_r3_isolated.py --help`의 인자와 구현을 확인했다. 아래는 **실행하지 않은 후속 절차**다. §5.2~5.5.1의 56646/56677 명령은 #104 보존 기록이며 현재 대상이 아니다.
+
+1. 이미 준비된 `issue105-r3b-build`와 전용 인증 환경 변수 `ISSUE105_R3B_BUILD_NEO4J_PASSWORD`, `ISSUE105_R3B_BUILD_QDRANT_API_KEY`를 사용한다. 값은 출력하지 않고 공유·r2·#104 인증을 재사용하지 않는다.
+2. 새 보고서 폴더를 선택한다(아래 `.cache/issue105-r3b-neo4j-next/`는 예시이며 이번 작업에서 만들지 않음). 기본 dry-run으로 대상 상태·Docker 소유·fingerprint를 확인한다. `state=empty`여야 `--load`를 진행한다.
+3. 직전 **Neo4j dry-run** fingerprint를 사람이 확인해 넣는다. Qdrant의 11/12 보고서 fingerprint를 재사용하지 않는다. partial이면 중단·검토하고 별도 승인 없이 `--resume`하지 않는다.
+4. 적재 후 `--verify`, B2/B3 `--cross-db`를 순서대로 확인한다. 기대 그래프는 노드 1133·관계 2674·REQUIRES_CONDITION 211이다. 교차 검증은 points·digest·문서 연결·원문 슬라이스·검증 전후 Qdrant 불변까지 통과해야 한다.
+
+```powershell
+.venv/Scripts/python.exe -B scripts/load_neo4j_r3_isolated.py --neo4j-url bolt://127.0.0.1:56697 --report .cache/issue105-r3b-neo4j-next/01-preflight.json
+.venv/Scripts/python.exe -B scripts/load_neo4j_r3_isolated.py --neo4j-url bolt://127.0.0.1:56697 --load --confirm-write --expect-fingerprint <직전_Neo4j_dry-run_값> --report .cache/issue105-r3b-neo4j-next/02-load.json
+.venv/Scripts/python.exe -B scripts/load_neo4j_r3_isolated.py --neo4j-url bolt://127.0.0.1:56697 --verify --report .cache/issue105-r3b-neo4j-next/03-verify.json
+.venv/Scripts/python.exe -B scripts/load_neo4j_r3_isolated.py --neo4j-url bolt://127.0.0.1:56697 --cross-db --qdrant-url http://127.0.0.1:56666 --report .cache/issue105-r3b-neo4j-next/04-cross-db.json
+```
 
 ### 5.6 독립 복원 검증 (verify 환경)
 
@@ -345,7 +391,7 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
 
 - build 환경의 Docker 실행·snapshot 복원·갱신·임베딩은 완료했다(§5.5).
 - **미실행:** Neo4j 적재(`--load`), `--cross-db` 교차 검증, `--create-snapshot`, ZIP 생성(`--build`), verify 환경 독립 복원
-  - build Neo4j(`bolt://127.0.0.1:56677`)는 아직 비어 있다. 그래서 교차 검증의 성공 여부는 알 수 없다.
+  - 위 56677의 빈 DB 설명은 #104 보존 기록이다. 현재 r3b Neo4j(`bolt://127.0.0.1:56697`)의 상태는 이번 C2 인계에서 접속 확인하지 않았다. 다음 실행은 §5.5.4의 dry-run부터 시작한다.
 - 실제 `docker ps`·`docker inspect` 출력 형식과 FakeDocker의 일치(테스트 더블 기준. r2 verify 래퍼는 실제 환경에서 동작 확인됨)
 - 과거 재사용 벡터의 모델 digest(기록 없음, §5.5.1)
 - `update_r3_collections`의 `--restore-snapshot`·`--apply`·`--index` 보고서: 최상위 `mode`·`db_writes`가 쓰기 뒤 확인용 dry-run 값으로 덮인다(`main()`의 `output.update(dry_run(...))`). 실제 쓰기 결과는 `result`에 있다. 표시 개선은 별도 작업

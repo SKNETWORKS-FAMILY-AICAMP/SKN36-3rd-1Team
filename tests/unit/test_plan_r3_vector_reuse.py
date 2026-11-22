@@ -124,14 +124,13 @@ class ValidatePlanTests(unittest.TestCase):
             planner.validate_plan(self.plans["b2"], self.s.release, stage1_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
-    def test_real_stage1_pins_gate_and_compare_the_pinned_plan_values(self):
-        """실제 R3_PINS(C1): 갱신 단계 검증은 기준값 게이트를 통과한 뒤 계획 값(points 등)을 대조해 다른 계획을 거부하고,
-        최종 단계 검증(vector_digest까지 요구)은 기준값 게이트에서 거부된다."""
-        with self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):
-            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
-                                  require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
-        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
-            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources, require_pins=True)
+    def test_real_final_pins_pass_the_gate_and_compare_the_pinned_plan_values(self):
+        """실제 R3_PINS(C2 final): 최종·갱신 단계 검증 모두 기준값 게이트를 통과한 뒤 계획 값(points 등)을 대조해
+        다른(sample_only) 계획을 거부한다."""
+        for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
+            with self.subTest(deferred=bool(deferred)), self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):
+                planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
+                                      require_pins=True, deferred=deferred)
 
     def test_finalized_pins_must_match_the_plan(self):
         pins = self.s.pins_for(self.plans)
@@ -257,7 +256,7 @@ class CliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 planner.main(["--report", str(report)])          # 기존 보고서 덮어쓰기 거부
         self.assertEqual((result["db_writes"], result["embedding_calls"], result["r3_pins_finalized"]),
-                         (0, 0, profiles.R3_PIN_STAGE == "final"))   # C0(pending)에서는 False
+                         (0, 0, profiles.R3_PIN_STAGE == "stage2"))   # C0(pending)에서는 False
         self.assertEqual((result["not_planned"], result["plan_basis"]), (["b2", "b3"], "dump_preview"))
         with self.assertRaises(SystemExit):
             planner.main(["--write-plan-dir", "sample_only"])           # 덤프 계획 파일 저장 옵션은 없다

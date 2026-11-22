@@ -42,7 +42,7 @@ class R2ProfileTests(unittest.TestCase):
 
 
 class R3PinTests(unittest.TestCase):
-    """단계별 검증: 전부 미확정(pending_pins) / 1차(stage1_pins) / 2차(final_sample_pins) + 실제 R3_PINS(C0, #110 반영)."""
+    """단계별 검증: 전부 미확정(pending_pins) / 1차(stage1_pins) / 2차(final_sample_pins) + 실제 R3_PINS(C2, #110 반영)."""
 
     PLAN_FIELDS = ("vector_digest", "reuse_count", "reuse_vector_digest", "embed_count", "delete_count", "plan_sha256")
 
@@ -70,35 +70,36 @@ class R3PinTests(unittest.TestCase):
                   if pins["collections"][k]["vector_digest"] is not None]
         self.assertEqual(len(set(finals)), len(finals))                            # 컬렉션마다 다른 값
 
-    def test_real_r3_pins_are_stage1_for_the_110_release(self):
-        """C1: r3b 서버 계획 값까지 확정, 최종 vector_digest 두 칸만 미확정 → 갱신 단계만 기준값 게이트 통과."""
+    def test_real_r3_pins_are_final_for_the_110_release(self):
+        """C2(stage2): r3b 최종 dry-run의 vector_digest까지 확정, 미확정 0 → 모든 기준값 게이트 통과."""
         pins = profiles.R3_PINS
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage1", "stage1"))
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage2", "stage2"))
         self.assertEqual(pins["manifest_lf_sha256"], "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7")
         self.assertEqual(pins["release_counts"], {"policies": 246, "documents": 268, "release_chunks": 663,
                                                   "neo4j_nodes": 1133, "neo4j_relationships": 2674,
                                                   "requires_condition": 211})
         plan = {"b2": {"points": 1233, "reuse_count": 1125, "embed_count": 108, "delete_count": 14, "remove_count": 0,
                        "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
-                       "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738"},
+                       "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738",
+                       "vector_digest": "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d"},
                 "b3": {"points": 1320, "reuse_count": 1197, "embed_count": 123, "delete_count": 23, "remove_count": 0,
                        "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
-                       "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d"}}
+                       "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d",
+                       "vector_digest": "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120"}}
         for key in profiles.COLLECTION_KEYS:
-            self.assertEqual({f: pins["collections"][key][f] for f in plan[key]}, plan[key])
-            self.assertIsNone(pins["collections"][key]["vector_digest"])
-        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
+            self.assertEqual(pins["collections"][key], plan[key])
+        self.assertEqual(profiles.missing_pins(), [])
+        self.assertTrue(profiles.is_finalized())
+        self.assertIs(profiles.require_finalized(), pins)
         self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), pins)
-        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
-            profiles.require_finalized()
-        self.assert_well_formed(pins)            # reuse + embed = points, reuse + delete = 원본 Point 수 (B2 1139, B3 1220)
+        self.assert_well_formed(pins)            # 최종 ≠ 재사용 부분 ≠ 원본 digest, 합계 일관성
 
     def test_declared_stage_must_match_the_values(self):
         """단계 상수와 실제 값이 어긋나면(값만 바꾸고 단계를 잊음) 실패해야 한다."""
         self.assertIn(profiles.R3_PIN_STAGE, profiles.PIN_STAGES)
         self.assertEqual(profiles.pin_stage(), profiles.R3_PIN_STAGE)
         self.assertEqual([profiles.pin_stage(p) for p in (pending_pins(), stage1_pins(), final_sample_pins())],
-                         ["pending", "stage1", "final"])
+                         ["pending", "stage1", "stage2"])
 
     def test_stage1_fixture_defers_only_final_vector_digests(self):
         stage1 = stage1_pins()

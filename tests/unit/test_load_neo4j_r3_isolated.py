@@ -129,7 +129,7 @@ class ReferenceAndLoadTests(unittest.TestCase):
     def test_dry_run_on_empty_db_has_no_writes(self):
         runner = FakeNeo4j()
         output = r3.dry_run(runner, self.ref, docker=self.docker)
-        self.assertEqual((output["state"], output["db_writes"], output["r3_pins_finalized"]), ("empty", 0, profiles.R3_PIN_STAGE == "final"))   # 실제 R3_PINS 단계 (C0에서는 False)
+        self.assertEqual((output["state"], output["db_writes"], output["r3_pins_finalized"]), ("empty", 0, profiles.R3_PIN_STAGE == "stage2"))   # 실제 R3_PINS 단계 (C0에서는 False)
         self.assertEqual(runner.writes(), [])
 
     def test_load_requires_finalized_matching_pins(self):
@@ -160,6 +160,19 @@ class ReferenceAndLoadTests(unittest.TestCase):
                 self.assertEqual(item["cross_db"]["qdrant_points"], len(self.points[key]))
                 self.assertTrue(item["full_index_verification"]["passed"])
                 self.assertTrue(item["qdrant_unchanged"])
+        self.assertEqual(qdrant.writes, [])
+
+    def test_cross_check_rejects_each_wrong_digest_with_matching_point_counts(self):
+        runner = FakeNeo4j()
+        r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=self.pins,
+                docker=self.docker)
+        qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
+        self.assertEqual(r3.cross_check(qdrant, runner, self.ref, pins=self.pins)["status"], "PASS")
+        for key in profiles.COLLECTION_KEYS:
+            bad = json.loads(json.dumps(self.pins))
+            bad["collections"][key]["vector_digest"] = "0" * 64
+            with self.subTest(collection=key), self.assertRaisesRegex(r3.Neo4jR3Error, f"{key} Point .*벡터 digest"):
+                r3.cross_check(qdrant, runner, self.ref, pins=bad)
         self.assertEqual(qdrant.writes, [])
 
     def test_load_is_allowed_before_final_vector_digests_are_known(self):
@@ -197,13 +210,14 @@ class ReferenceAndLoadTests(unittest.TestCase):
             r3.cross_check(qdrant, runner, self.ref, pins=final_sample_pins())
         self.assertEqual(qdrant.writes, [])
 
-    def test_real_stage1_pins_pass_the_load_gate_but_refuse_cross_check(self):
-        """실제 R3_PINS(C1 stage1): 메모리 FakeNeo4j 적재 게이트는 통과하고, 교차 검증은 vector_digest 미확정으로 거부된다."""
+    def test_real_final_pins_pass_load_and_cross_check_gates_then_compare_digests(self):
+        """실제 R3_PINS(C2 final): 메모리 FakeNeo4j 적재와 교차 검증의 기준값 게이트를 통과하고, sample_only 벡터는 실제 고정
+        Point 수(1233)·digest와 달라 교차 검증 단계에서 거부된다. 실제 교차 검증 성공을 뜻하지 않는다."""
         runner = FakeNeo4j()
         result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), docker=self.docker)
         self.assertEqual(result["status"], "LOADED")
         qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
-        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+        with self.assertRaisesRegex(r3.Neo4jR3Error, "b2 Point .*r3 고정값과 다릅니다"):
             r3.cross_check(qdrant, runner, self.ref)
         self.assertEqual(qdrant.writes, [])
 

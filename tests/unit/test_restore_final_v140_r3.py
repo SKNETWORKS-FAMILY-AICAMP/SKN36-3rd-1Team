@@ -103,6 +103,50 @@ class Bundle:
             "".join(f"{r2.file_sha(self.folder / m)}  {m}\n" for m in (members or self.members())), encoding="utf-8")
 
 
+class RealPinBundleDigestTests(unittest.TestCase):
+    """실제 R3_PINS(C2 stage2)로 만든 최소 번들(sample_only 바이트)에서 Point 수는 그대로 두고 vector_digest만 바꾸면
+    해당 컬렉션에서 거부된다. B2·B3 각각 확인한다 (계획 대조가 아니라 번들 메타데이터 대조 경로)."""
+
+    def build(self, folder: Path, tamper: str | None = None) -> None:
+        pins = profiles.R3_PINS
+        commit = "c" * 40
+        members = {profiles.R3_COLLECTIONS[k]["snapshot_member"]: f"sample_only {k} snapshot".encode()
+                   for k in profiles.COLLECTION_KEYS}
+        members.update({f"source-{commit[:12]}.zip": b"sample_only source", r3.COMPOSE_MEMBER: b"sample_only compose",
+                        r3.RESTORE_MEMBER: b"sample_only tool"})
+        collections = {}
+        for key in profiles.COLLECTION_KEYS:
+            spec, pinned = profiles.collection_spec(key), pins["collections"][key]
+            member = spec["snapshot_member"]
+            collections[key] = {"collection": spec["collection"], "config": spec["config"],
+                                "dimensions": spec["dimensions"], "points": pinned["points"],
+                                "vector_digest": "0" * 64 if key == tamper else pinned["vector_digest"],
+                                "snapshot": member, "snapshot_sha256": hashlib.sha256(members[member]).hexdigest()}
+        package = {"schema_version": profiles.SCHEMA_VERSION, "bundle": profiles.BUNDLE_NAME,
+                   "manifest_lf_sha256": pins["manifest_lf_sha256"], "release_counts": dict(pins["release_counts"]),
+                   "collections": collections, "source_commit": commit, "source_archive": f"source-{commit[:12]}.zip",
+                   "restore_tool": r3.RESTORE_MEMBER}
+        members["package.json"] = json.dumps(package).encode()
+        for name, data in members.items():
+            (folder / name).write_bytes(data)
+        (folder / "SHA256SUMS").write_text("".join(f"{hashlib.sha256(data).hexdigest()}  {name}\n"
+                                                   for name, data in sorted(members.items())), encoding="utf-8")
+
+    def test_real_final_pins_accept_matching_metadata_and_refuse_digest_only_change(self):
+        self.assertEqual(profiles.pin_stage(), "stage2")
+        with tempfile.TemporaryDirectory() as folder:
+            self.build(Path(folder))
+            package, snapshots = r3.check_bundle(folder)                 # 실제 최종 핀과 같은 메타데이터는 통과
+            self.assertEqual(set(snapshots), set(profiles.COLLECTION_KEYS))
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(tampered=key), tempfile.TemporaryDirectory() as folder:
+                self.build(Path(folder), tamper=key)
+                points = json.loads((Path(folder) / "package.json").read_text(encoding="utf-8"))["collections"][key]["points"]
+                self.assertEqual(points, profiles.R3_PINS["collections"][key]["points"])   # Point 수는 같다
+                with self.assertRaisesRegex(ValueError, rf"count/digest: {key}"):
+                    r3.check_bundle(folder)
+
+
 class CheckBundleTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -127,8 +171,9 @@ class CheckBundleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             r3.check_bundle(self.b.folder, final_sample_pins())
 
-    def test_real_c0_pins_refuse_every_bundle(self):
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+    def test_real_final_pins_pass_the_gate_and_reject_a_foreign_manifest(self):
+        """실제 R3_PINS(C2 final)는 기준값 게이트를 통과하고, sample_only 번들의 manifest가 달라 거부된다."""
+        with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             r3.check_bundle(self.b.folder)
 
     def test_r2_package_and_wrong_contents_are_refused(self):
@@ -374,8 +419,8 @@ class RestoreTests(unittest.TestCase):
         for pins in (pending_pins(), stage1_pins()):
             with self.assertRaises(profiles.ProfileError):
                 self.run_restore(R3Qdrant(), pins=pins)
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-            self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C0): 기준값 게이트에서 거부
+        with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
+            self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C2): 게이트 통과 후 번들 불일치 거부
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             self.run_restore(R3Qdrant(), pins=final_sample_pins())  # 2차 확정 모양: 게이트 통과 후 번들 불일치 거부
 

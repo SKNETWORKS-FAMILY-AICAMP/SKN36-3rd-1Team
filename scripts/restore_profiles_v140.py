@@ -4,9 +4,9 @@ r2(#91)와 r3(#105)의 기대값·manifest·vector digest·snapshot 정보를 �
 
 - R2: #91에서 실제로 검증을 마친 값(동결). 기존 r2 도구(restore_final_v140·seed·update·load·build·restore_r2_isolated)의
   상수는 그대로 두고, 이 표의 값과 같은지는 tests/unit/test_restore_profiles_v140.py가 확인한다.
-- R3: B2·B3 두 컬렉션 + Neo4j. #110 반영 릴리스(manifest 29b57236…, 2026-11-23 병합 7aa5266) 기준 C1(stage1) 단계다.
+- R3: B2·B3 두 컬렉션 + Neo4j. #110 반영 릴리스(manifest 29b57236…, 2026-11-23 병합 7aa5266) 기준 C2(stage2) 단계다. 미확정 값 0개.
   #104 기준(manifest 2e22d2a7…)으로 1·2차 확정했던 값은 보존 자산 기록이며 Runbook §5.5에 남겼다.
-  단계(R3_PIN_STAGE, pin_stage()로 실제 값과 대조): pending → stage1(최종 vector_digest 두 칸만 None) → final(None 0).
+  단계(R3_PIN_STAGE, pin_stage()로 실제 값과 대조): pending → stage1(최종 vector_digest 두 칸만 None) → stage2(None 0).
   None이 하나라도 있으면 require_finalized()가 거부한다. R3_PINS 미확정 상태에서
     허용되는 쓰기 (WRITES_WITHOUT_PINS): build 격리 Qdrant에 원본 snapshot 복원(update_r3_collections --restore-snapshot,
       build Docker 소유 확인·빈 대상 컬렉션 필수), 새 로컬 파일(--write-plan 계획·--report 보고서, 기존 파일 덮어쓰기 거부)
@@ -88,25 +88,32 @@ R3_SOURCES: dict[str, dict[str, Any]] = {
 # C1 (2026-11-23, 1931ca8 기준): r3b build 서버(issue105-r3b-build)에 원본 snapshot(B2 r2 8577c3c8…·B3 #31 0a794e34…)을
 #   복원한 뒤 만든 서버 계획(basis=server_snapshot)의 검증값. 계획 파일(로컬, Git 제외): .cache/issue105-r3b/plan-b2.json
 #   (SHA-256 65e530d7…), plan-b3.json (8e7d6258…), 보고서 03-b2-plan.json·04-b3-plan.json의 proposed_pins와 같다.
-#   remove_count는 두 계획 모두 0(C0 예상과 같음). 최종 vector_digest 두 칸만 임베딩 완료 후 C2에서 확정한다.
+#   remove_count는 두 계획 모두 0(C0 예상과 같음).
+# C2 (2026-11-23, 43729a7 기준): r3b 서버에서 apply(B2 삭제 14·B3 23)·index(B2 108·B3 123) 완료 후, 쓰기와 별도로 서버를
+#   다시 읽은 최종 dry-run(.cache/issue105-r3b/11-b2-final-dryrun.json·12-b3-final-dryrun.json)의 전체 vector_digest.
+#   state=complete, payload_pending 0, 삭제·누락·문제 0, 재사용 부분 digest = 고정값이며, index 보고서(07·10)와 proposed_final_pins가
+#   같은 값이다. 이로써 미확정 0 → snapshot·번들·번들 복원·교차 검증의 기준값 게이트가 열린다(다른 검사는 그대로).
 # #104 기준 1·2차 확정값(manifest 2e22d2a7…, B2 d1fa3194…, B3 a471e21f…)은 보존 기록이다 → Runbook §5.5.
 R3_PINS: dict[str, Any] = {
     "manifest_lf_sha256": "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7",
     "release_counts": {"policies": 246, "documents": 268, "release_chunks": 663, "neo4j_nodes": 1133,
                        "neo4j_relationships": 2674, "requires_condition": 211},
     "collections": {
-        "b2": {"points": 1233, "vector_digest": None, "reuse_count": 1125,
+        "b2": {"points": 1233, "vector_digest": "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d",
+               "reuse_count": 1125,
                "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
                "embed_count": 108, "delete_count": 14, "remove_count": 0,
                "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738"},
-        "b3": {"points": 1320, "vector_digest": None, "reuse_count": 1197,
+        "b3": {"points": 1320, "vector_digest": "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120",
+               "reuse_count": 1197,
                "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
                "embed_count": 123, "delete_count": 23, "remove_count": 0,
                "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d"},
     },
 }
 # 선언한 단계. pin_stage()가 R3_PINS에서 계산한 단계와 같아야 한다(테스트가 확인) → 값만 바꾸고 단계를 잊는 실수를 막는다.
-R3_PIN_STAGE = "stage1"
+# 단계 이름: pending(C0) / stage1(C1) / stage2(C2, 최종 digest까지 확정).
+R3_PIN_STAGE = "stage2"
 
 R3_COLLECTIONS: dict[str, dict[str, Any]] = {
     "b2": {"config": "A_B2_V140", "collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2",
@@ -232,24 +239,24 @@ def is_finalized(pins: dict[str, Any] | None = None) -> bool:
 
 
 # 단계별로 기준값 게이트를 통과하는 쓰기 (각 단계의 Docker 소유·fingerprint·서버 상태 검사는 별도로 그대로 적용된다)
-PIN_STAGES = ("pending", "stage1", "final")
+PIN_STAGES = ("pending", "stage1", "stage2")
 STAGE_ALLOWED_WRITES: dict[str, tuple[str, ...]] = {
     "pending": WRITES_WITHOUT_PINS,
     "stage1": (*WRITES_WITHOUT_PINS, "update_r3_collections --apply", "update_r3_collections --index",
                "load_neo4j_r3_isolated --load/--resume"),
-    "final": (*WRITES_WITHOUT_PINS, *WRITES_REQUIRING_PINS, "load_neo4j_r3_isolated --cross-db (읽기 전용)"),
+    "stage2": (*WRITES_WITHOUT_PINS, *WRITES_REQUIRING_PINS, "load_neo4j_r3_isolated --cross-db (읽기 전용)"),
 }
 
 
 def pin_stage(pins: dict[str, Any] | None = None) -> str:
     """
     기준값에서 계산한 단계. pending = 계획·결과 값이 아직 없음(쓰기는 WRITES_WITHOUT_PINS만),
-    stage1 = 최종 vector_digest 두 칸만 미확정(갱신 단계 쓰기 허용), final = 미확정 0.
+    stage1 = 최종 vector_digest 두 칸만 미확정(갱신 단계 쓰기 허용), stage2 = 미확정 0.
     스키마가 깨졌으면 pending으로 본다(어떤 확정 쓰기도 허용하지 않음).
     """
     missing = missing_pins(pins)
     if not missing:
-        return "final"
+        return "stage2"
     if "<schema>" not in missing and set(missing) <= set(UPDATE_STAGE_DEFERRED_PINS):
         return "stage1"
     return "pending"

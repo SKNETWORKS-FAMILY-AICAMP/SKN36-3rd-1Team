@@ -628,14 +628,13 @@ class CreateSnapshotTests(unittest.TestCase):
 class PlanModeTests(unittest.TestCase):
     def test_plan_is_read_only_and_lists_missing_pins(self):
         with tempfile.TemporaryDirectory() as folder:
-            output = bundle.plan(None, Path(folder))                   # 실제 R3_PINS (C0)
+            output = bundle.plan(None, Path(folder))                   # 실제 R3_PINS (C2 final)
             with patch.object(profiles, "R3_PINS", stage1_pins()):
                 stage1 = bundle.plan(None, Path(folder))
             with patch.object(profiles, "R3_PINS", final_sample_pins()):
                 final = bundle.plan(None, Path(folder))
             self.assertEqual(list(Path(folder).iterdir()), [])
-        self.assertEqual((output["writes"], output["r3_pins_finalized"]), (0, False))
-        self.assertEqual(sorted(output["missing_pins"]), sorted(profiles.missing_pins()))
+        self.assertEqual((output["writes"], output["r3_pins_finalized"], output["missing_pins"]), (0, True, []))   # 실제 C2
         self.assertEqual((final["writes"], final["r3_pins_finalized"], final["missing_pins"]), (0, True, []))   # 2차 모양
         self.assertEqual((stage1["writes"], stage1["r3_pins_finalized"]), (0, False))
         self.assertEqual(sorted(stage1["missing_pins"]), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))   # 1차 확정 상태
