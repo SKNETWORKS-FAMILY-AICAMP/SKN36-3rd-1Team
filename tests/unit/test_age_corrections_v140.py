@@ -97,6 +97,172 @@ class TestAgeBoundaries(unittest.TestCase):
             with self.subTest(age=age):
                 self.assertEqual(self.public("POL_010", age), {checker.CHECK})
 
+    def test_real_applicant_age_leaf_boundaries(self):
+        """#79: 실제 r2 신청자 연령 조건의 양 끝 경계를 검사한다."""
+        cases = {
+            "POL_010": (15, 69),
+            "POL_STG_ICN_001": (19, 39),
+        }
+
+        for policy_id, (low, high) in cases.items():
+            tree, _ = _Graph.policy(policy_id)
+
+            # 실제 Neo4j 조건 트리에서 AGE 조건 추출
+            stack = [tree]
+            age_conditions = []
+
+            while stack:
+                node = stack.pop()
+                age_conditions.extend(
+                    condition
+                    for condition in node.get("conditions", [])
+                    if str(condition.get("type", "")).upper() == "AGE"
+                )
+                stack.extend(node.get("groups", []))
+
+            self.assertEqual(
+                len(age_conditions), 1,
+                f"{policy_id}: AGE 조건 수 확인 필요",
+            )
+
+            condition = age_conditions[0]
+
+            self.assertEqual(condition.get("operator"), "BETWEEN")
+
+            match = checker._AGE_RANGE.fullmatch(
+                str(condition.get("value") or "")
+            )
+            self.assertIsNotNone(match)
+
+            self.assertEqual(
+                tuple(map(int, match.groups())),
+                (low, high),
+            )
+
+            boundary_cases = [
+                (low - 1, checker.NO),
+                (low, checker.OK),
+                (high, checker.OK),
+                (high + 1, checker.NO),
+                (None, checker.CHECK),
+            ]
+
+            for age, expected in boundary_cases:
+                with self.subTest(policy_id=policy_id, age=age):
+                    result = checker._condition(
+                        condition, {"age": age}
+                    )
+                    self.assertEqual(result["field"], "age")
+                    self.assertEqual(result["status"], expected)
+
+    def test_issue79_real_r2_age_api_matches_checker(self):
+        """#79: 실제 r2 조건 트리의 공개 Checker·API·LLM 결과 비교."""
+        from copy import deepcopy
+        from unittest.mock import Mock
+
+        from fastapi.testclient import TestClient
+        from backend.api.main import create_app
+
+        class FakeSession:
+            profile = collection = "issue79_test_only"
+
+            def __init__(self, policy):
+                self.policy = policy
+
+            def search_policy_context(self, question, filters=None, k=10):
+                return {"policies": [deepcopy(self.policy)]}
+
+            def close(self):
+                pass
+
+        cases = {
+            "POL_010": (14, 15, 69, 70, None),
+            "POL_STG_ICN_001": (18, 19, 39, 40, None),
+        }
+
+        for policy_id, ages in cases.items():
+            _, policy = _Graph.policy(policy_id)
+            policy["policy_name"] = f"{policy_id} 테스트 정책"
+            policy["best_rank"] = 1
+
+            # API 검증을 위한 테스트용 증거.
+            # 실제 공식 근거 문서를 대체하는 것은 아니다.
+            policy["evidence"] = [{
+                "rank": 1,
+                "chunk_id": f"TEST_{policy_id}",
+                "document_id": f"TEST_DOC_{policy_id}",
+                "text": "연령 판정 경계 테스트용 증거",
+                "source_url": "https://example.org/notice",
+            }]
+
+            original = deepcopy(policy)
+
+            for age in ages:
+                with self.subTest(policy_id=policy_id, age=age):
+                    profile = {
+                        "age": age,
+                        "region": "",
+                        "income": None,
+                    }
+
+                    expected = checker.check_eligibility(
+                        profile, deepcopy(policy)
+                    )
+
+                    generate = Mock(return_value={
+                        "status": "answered",
+                        "answer": "테스트용 원문 안내 [1]",
+                        "used_source_ids": [1],
+                        "follow_up_questions": [],
+                    })
+
+                    app = create_app(
+                        session_factory=lambda: FakeSession(policy),
+                        generate_fn=generate,
+                    )
+
+                    with TestClient(app) as client:
+                        response = client.post("/api/ask", json={
+                            "question": "지원 가능한 나이인가요?",
+                            "history": [],
+                            "profile": profile,
+                        })
+
+                    self.assertEqual(
+                        response.status_code, 200, response.text
+                    )
+
+                    actual = response.json()["policy_checks"][0]
+                    self.assertEqual(actual["policy_id"], policy_id)
+
+                    expected_age = [
+                        (row["status"], row["reason"])
+                        for row in expected["conditions"]
+                        if row["field"] == "age"
+                    ]
+                    actual_age = [
+                        (row["status"], row["reason"])
+                        for row in actual["conditions"]
+                        if row["field"] == "age"
+                    ]
+
+                    self.assertTrue(
+                        expected_age,
+                        f"{policy_id}: AGE 판정 결과가 없음",
+                    )
+                    self.assertEqual(actual_age, expected_age)
+
+                    llm_conditions = (
+                        generate.call_args.args[2][0]["conditions"]
+                    )
+                    llm_age = [
+                        (row["status"], row["reason"])
+                        for row in llm_conditions
+                        if row["field"] == "age"
+                    ]
+                    self.assertEqual(llm_age, expected_age)
+                    self.assertEqual(policy, original)
+
 
 if __name__ == "__main__":
     unittest.main()
