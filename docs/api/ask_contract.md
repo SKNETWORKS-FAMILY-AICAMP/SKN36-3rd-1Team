@@ -1,7 +1,8 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.4 · 2026-11-17 (v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)  
-> **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.  
+> **버전:** v1.5 · 2026-11-22 (v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.5 변경(2026-11-22 — #107 목록·신청 정보 연결, 강민지, PR #109 팀 리뷰 대상):** 읽기 전용 `GET /api/policies` 추가(§8.1·§9), 요청 `selected_policy_id` 추가(§3.3·§8.2), 응답 `policy_checks[]`에 `application_schedule`·`required_documents`·`requirement_excerpts` 선택 필드 추가(§8.3). 모두 선택 필드라 기존 요청·응답과 호환된다. `official_requirements`·`exclusion_reasons`는 v1.4 계약 그대로(#76-A·#78이 채움). 세부 규칙은 문서 끝 「#107 목록·신청 정보 연결」 절에 둔다.
 > **v1.4 변경(2026-11-17 — #77 완료 기준 마무리, 강민지):** `exclusion_reasons`·`official_requirements` 선택 필드를 §8.3에 기록(자리만 예약, 둘 다 항상 `null`) — #77에서 세 기능(제외 정보·공식 요건·문의처)을 하나의 계약으로 같이 설계하기로 한 것 중 남아 있던 두 자리를 채웠다. 값을 채우는 구현은 각각 [#78](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/78)·[#76-A](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/76)가 한다. `backend/api/schemas.py`의 `ExclusionReason`·`OfficialRequirement`, `frontend/src/api/types.ts`의 같은 이름 타입이 이 정의를 따른다.  
 > **v1.3 변경(2026-11-17 — #77 추가 보완, 강민지):** `Contact`에 `document_id`·`chunk_id`·`source_url` 추가(§8.3) — 같은 정책의 **채택 청크 전체**(없으면 검색된 인용 가능한 미채택 후보)에서 문의처를 모으되, 어느 청크·출처에서 나왔는지 문의처 항목마다 추적할 수 있게 했다. 기관명·번호가 같은 항목은 첫 등장만 남기고, 같은 기관의 다른 번호는 유지한다.  
 > **v1.2 변경(2026-11-17 — #77·#76 contacts 작업 중 강민지가 코드와 문서를 함께 수정):** `policy_checks[].contacts` 선택 필드 추가(§8.3) — `backend/rag/pipeline.py`의 `contacts_from_text`가 정책 원문의 `[문의처]` 블록을 파싱한 결과. `frontend/src/api/types.ts`의 `PolicyCheck.contacts`, `TurnView.tsx`의 문의처 표시(#76)에서 사용.  
@@ -103,6 +104,7 @@ normalized_profile = {
 
 - `normalized_profile["region"] is None` → `filters=None`.
 - 그렇지 않으면 → `filters={"region": normalized_profile["region"]}`.
+- (v1.5) 요청에 `selected_policy_id`가 있으면 지역 필터 대신 `filters={"policy_id": selected_policy_id}`만 쓴다. 사용자가 고른 정책을 지역 필터로 숨기지 않기 위해서다. 검색이 다른 정책을 돌려줘도 버리고, 선택 정책의 인용 가능한 근거가 없으면 `no_evidence`다. 지역은 판정 단계에서 따로 대조한다(§8.3 `conditions`, 끝 절 「선택 정책 상담」).
 - v1.4.0-candidate 환경에서 기존 `region_search.plan_region_search`가 실제 저장 지역값을 기준으로 후보를 만든다. 전국 범위도 함께 검색될 수 있다. **지역 검색 일치는 정책 자격 충족을 뜻하지 않는다.**
 - **모호한 지역 값은 자동으로 검증 완료 취급하지 않는다.** 지역 필터가 제외한 정책까지 모두 조회했다고 주장하지 않는다.
 - 허용 필터는 현재 `database/qdrant/store.py`의 `PAYLOAD_INDEX_FIELDS`에 따른다. `policy_id`, `document_id`, `chunk_id`, `chunking_version`, `category`, `region`, `life_stages`, `verification_status`.
@@ -416,10 +418,11 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | 항목 | 개발 기준 |
 |---|---|
 | 질문 API | `POST /api/ask` |
+| 전체 정책 목록 API (v1.5) | `GET /api/policies` — 릴리스 파일 읽기 전용. 검색·임베딩·LLM·개인 판정 없음. 파라미터·응답은 끝 절 「읽기 전용 전체 목록」 |
 | 상태 확인 | `GET /health` |
 | Swagger | `GET /docs` |
 | 백엔드 실행 | `python -m uvicorn backend.api.main:app --reload --host 127.0.0.1 --port 8000 --env-file .env` |
-| 프론트 설정 | `frontend/.env.local`의 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask` (**전체 URL**) |
+| 프론트 설정 | `frontend/.env.local`의 `VITE_ASK_API_URL=http://127.0.0.1:8000/api/ask` (**전체 URL**). 목록은 `VITE_POLICY_API_URL`(전체 URL)이 있으면 그 주소, 없으면 `VITE_ASK_API_URL`과 같은 서버의 `/api/policies`를 쓴다(v1.5) |
 | CORS | `http://127.0.0.1`과 `http://localhost`는 개발 포트와 관계없이 허용합니다. 그 외 출처는 `ASK_CORS_EXTRA_ORIGINS`에 쉼표로 구분해 명시합니다. 와일드카드(`*`)는 무시합니다. |
 | 프론트 요청 타임아웃 | **60,000ms 적용**. `frontend/src/config/request.ts`의 `ASK_TIMEOUT_MS`를 클라이언트가 사용한다. |
 
@@ -444,6 +447,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | `profile.income` | 0 이상 유한한 `number` 또는 `null`, 단위 만원 |
 | `history` | `role=user/assistant`, `text` 문자열, 최근 10턴까지만 사용 |
 | `awaiting_field` | `string|null`; MVP 확정 판정에 반영되는 필드는 `profile`의 `age/region/income`뿐 |
+| `selected_policy_id` (v1.5, 선택) | `string|null`, 형식 `^POL_[A-Z0-9_]+$`, 최대 128자, 위반 422. 목록에서 고른 정책으로만 상담할 때 사용. 생략·`null`이면 기존과 동일하게 처리(§3.3) |
 
 `age` 정수와 `income` 유한수 검증에서는 bool, NaN, Infinity, 문자열 자동 변환 등에 주의한다. 프론트가 후속 답변을 사용자 프로필에 반영하는지는 프론트 처리(`parseProfile` 등)와 통합 테스트에서 확인한다.
 
@@ -473,7 +477,10 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
          "document_id": "DOC_EXAMPLE", "chunk_id": "DOC_EXAMPLE_C01", "source_url": "https://example.org/notice"}
       ],
       "exclusion_reasons": null,
-      "official_requirements": null
+      "official_requirements": null,
+      "application_schedule": null,
+      "required_documents": null,
+      "requirement_excerpts": null
     }
   ],
   "follow_up_questions": [
@@ -496,8 +503,12 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `source_url`: 해당 정책의 인용 가능한 `evidence[].source_url` 우선 → 적합한 Graph 원문 URL → 없으면 `""`. 링크가 비어 있으면 프론트는 링크 버튼을 숨겨야 한다.
 - `official_apply_url`: 실제 `graph.policy.official_apply_url`에 **유효한 신청 URL**이 있을 때만. 공고 URL을 임의로 복사하지 않는다. 없으면 `null`.
 - `contacts`(선택, v1.2 추가·v1.3 필드 보완): 해당 정책의 **채택 청크 전체**(`contexts`에 선택된 이 정책의 모든 청크)에서 `[문의처]` 블록을 모으고, 그중 유효한 문의처가 하나도 없을 때만 같은 정책의 **인용 가능하지만 채택되지 않은 후보**로 보완한다. `{agency, phone, document_id, chunk_id, source_url}` 목록이며, 원문에 없으면 `null`(빈 배열 아님). 기관명·전화번호가 모두 같은 항목은 첫 등장 순서로 한 번만 남기고, 같은 기관이라도 전화번호가 다르면 둘 다 유지한다. `document_id`·`chunk_id`·`source_url`은 그 문의처가 실제로 나온 청크를 가리키며, `source_url`이 유효한 http(s) 주소가 아니면 `null`이다. `phone`은 원문 숫자·구분자 그대로이며, 번호 뒤에 설명이 더 있으면(예: "각 기관 120 센터") 맥락을 잃지 않도록 구절 전체를 담을 수 있다 — 항상 전화번호 단독 형식은 아니다. 프론트에서 그대로 노출할 때 이 점을 감안한다.
-- `exclusion_reasons`(선택, v1.4 자리 예약 — #78이 채운다): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고, `reason`은 "75세 이상이라 제외 대상입니다" 같은 구체적 문구다. #78에서 Checker의 제외 사유 생성 로직은 구현되었지만, Pipeline·API 응답 연결은 후속 작업이다. 연동 전까지 최종 API 응답에서 이 필드는 `null`이며, Checker의 확정 제외 사유는 데이터 품질 보류와 개별·종합 판정을 존중한다.
-- `official_requirements`(선택, v1.4 자리 예약 — #76-A가 채운다): 정책이 요구하는 공식 자격 기준(값·단위·연도)과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다(#76 참고). `document_id`·`chunk_id`는 그 기준이 실제로 나온 근거를 가리킨다. #76-A 구현 전까지는 항상 `null`이며, Pipeline이 이 필드를 채우는 로직은 아직 없다.
+- `exclusion_reasons`(선택, v1.4 자리 예약 — #78이 채운다): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고, `reason`은 "75세 이상이라 제외 대상입니다" 같은 구체적 문구다. #78에서 Checker의 제외 사유 생성 로직은 구현되었지만, Pipeline·API 응답 연결은 후속 작업이다. 연동 전까지 최종 API 응답에서 이 필드는 `null`이며, Checker의 확정 제외 사유는 데이터 품질 보류와 개별·종합 판정을 존중한다. #107의 원문 블록 발췌는 조건 트리 기반 제외 사유 생성과 구분한다.
+- `official_requirements`(선택, v1.4 자리 예약 — #76-A가 채운다): 정책이 요구하는 공식 자격 기준(값·단위·연도)과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다(#76 참고). `document_id`·`chunk_id`는 그 기준이 실제로 나온 근거를 가리킨다. #76-A 구현 전에는 `null`을 유지한다. 아래 #107 추가 계약의 명시적 원문 블록 발췌와 조건 트리 기반 구조화 구현은 구분한다.
+- `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」).
+- `required_documents`(선택, v1.5): 원문 `[구비서류]`·`[제출서류]` 블록 발췌 `{text, document_id, chunk_id, source_url}` 목록. 완전한 서류 목록을 보증하지 않는다. 없으면 `null`.
+- `requirement_excerpts`(선택, v1.5): 원문 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]` 블록 발췌 `{label, text, document_id, chunk_id, source_url}` 목록. 검수된 공식 기준(`official_requirements`)이 아니며 값·단위·연도를 환산하지 않는다. 없으면 `null`.
+- 선택 정책 지역 보류(v1.5): `selected_policy_id` 요청에서 정책의 대상 지역(`graph.regions`)에 입력 지역도 전국도 없으면, §4.3 Pipeline 방어 규칙대로 처리한다. Checker의 `region` 행이 `eligible`이면 `needs_check`로 내리고 기존 사유 뒤에 지역 불일치 사유를 덧붙인다. `region` 행이 없거나 `needs_check`뿐이면 그 사유는 바꾸지 않고 `{"field": "region", "status": "needs_check"}` 행(대상 지역·입력 지역을 적은 사유)을 따로 앞에 둔다. `ineligible` 행이 있으면 그대로 둔다. 종합(`eligibility`) 행이 `eligible`이면 `needs_check`로 내리고 사유를 덧붙인다. 불충족으로 단정하지 않는다.
 - `checked_at`: **공식 원문 재확인 시간**을 검증 가능할 때만 ISO 8601 문자열. 데이터 수집시각/오늘 날짜를 임의로 넣지 않는다. MVP 기본은 `null`.
 - `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`).
 - `is_sample`: 실제 검색·실제 LLM 응답은 `false`; **프론트 Mock 등 가상 응답만 `true`**.
@@ -518,6 +529,8 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | LLM 출력 JSON·인용 번호·스키마 오류 | 502 | `LLM_OUTPUT_INVALID` |
 | 조건 함수 반환 구조 오류 | 502 | `ELIGIBILITY_OUTPUT_INVALID` |
 | 예기치 않은 서버 코드 오류 | 500 | 내부 오류, 상세 노출 금지 |
+| (v1.5 `GET /api/policies`) 파라미터 오류 | 422 | `status`·`sort` 허용값 밖, `limit` 1~500 밖, `offset` 음수, `q` 200자·`region`·`category` 100자 초과 |
+| (v1.5 `GET /api/policies`) 릴리스 파일 누락·manifest 해시 불일치·ID 중복·참조 누락 | 503 | `POLICY_CATALOG_UNAVAILABLE` ("정책 목록을 잠시 불러올 수 없습니다."). 이전 캐시를 최신 결과로 대신 반환하지 않음 |
 
 오류 JSON은 정상 `AskResponse`가 아니다.
 
@@ -620,3 +633,45 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - [React API 클라이언트 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/frontend/src/api/client.ts)
 
 > **MVP 성공 기준:** 근거 없는 적격/부적격 판정 없음 · 실제 원문 출처만 표시 · React와 API 스키마 일치 · 검색/LLM 오류 분리 · 시연 전 통합 테스트 완료.
+
+
+## #107 목록·신청 정보 연결 (v1.5, PR #109 팀 리뷰 대상, 2026-11-22)
+
+이번 작업에서 강민지가 목록 API·화면 연결을 이어서 구현한다. 판정 규칙·LLM 공급자·DB 재적재는 변경하지 않는다. 기존 v1.4와 호환되는 선택 필드이며 팀 리뷰 대상이다.
+
+### 읽기 전용 전체 목록
+
+`GET /api/policies`: `q`(최대 200자), `region`, `category`(각 최대100자), `status=all|open|before|closed|unknown|soon|ongoing`, `sort=deadline|name`, `offset`(0 이상), `limit`(1~500, 기본500).
+
+- 설정된 `LIFEPOLICY_DATASET_DIR` 릴리스 파일에서 읽는다. 목록 조회는 DB 검색·임베딩·LLM을 호출하지 않는다. 기존 서버의 검색 세션 수명은 유지한다.
+- 응답: `items`, 필터 후 전체 `total`, `offset`, `limit`, `dataset_version`, manifest 원본 바이트의 `manifest_sha256`, KST `evaluated_on`, `source_kind=release_files`, 전체 지역·분야 선택지 `regions/categories`.
+- item: `policy_id/policy_name/agency/regions/categories/source_url/official_apply_url/reception_status/application_schedule/required_documents/requirement_excerpts`. 개인 `conditions`·자격 점수와 검수된 공식 기준(`official_requirements`, #76)은 없다.
+- 파일 버전은 검색 DB의 적재 버전을 증명하지 않는다. DB 최신 여부는 별도 검증한다.
+- 파일·ID·참조·manifest 해시가 잘못됐으면 503 `POLICY_CATALOG_UNAVAILABLE`. 이전 캐시를 최신 결과로 대신 반환하지 않는다. 해시 비교의 줄바꿈 동등성은 handoff_data와 동일(raw/LF/CRLF).
+- 분류·문자열 필터와 정렬은 페이지 분할 전에 적용한다. 지역은 명시된 관계의 정확한 이름으로 필터한다(전국 자동 포함·추론 없음).
+- soon은 open·고정 마감일·0~7일만. 일정 계산은 기존 Checker를 사용한다. 500건 초과 목록은 같은 manifest/판정일의 페이지를 합친다.
+
+### 선택 정책 상담
+
+`AskRequest.selected_policy_id`: 선택 문자열 또는 null. 형식 `^POL_[A-Z0-9_]+$`, 최대128자. 없는 기존 요청은 동일하게 처리한다.
+기존 검색 1회를 프로필 지역 필터 없이 `policy_id` 필터로만 실행하고, 다른 정책이 반환돼도 제거한다. 사용자가 고른 정책이 프로필 지역과 다르면 검색에서 빼지 않는다. v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 정책의 지역 관계(`AVAILABLE_IN`, 검색 결과 `graph.regions`)로만 가지므로, Pipeline이 선택 정책의 대상 지역과 입력 지역을 대조한다. 입력 지역이 대상 지역·전국에 없으면 `region` `needs_check`(대상 지역과 입력 지역을 적은 사유)로 보류하고, 종합 판정이 `eligible`이면 `needs_check`로 보류한다. Checker가 이미 준 `needs_check` 사유는 바꾸지 않는다(§8.3 「선택 정책 지역 보류」). 확정 불충족으로 단정하지 않으며, 입력 지역이 없거나 선택 정책 요청이 아니면 기존 판정을 바꾸지 않는다. 선택 정책의 인용 가능한 근거가 없으면 no_evidence이며 다른 정책으로 대체·추가 검색·LLM 재호출하지 않는다. 프론트는 재시도·추가 조건 입력에도 동일 ID를 유지한다.
+
+### 신청 일정
+
+`policy_checks[].application_schedule`: 선택 객체 또는 null. `evaluated_on`, `start_date/end_date`, `is_ongoing`, `days_to_start/days_to_end`. 기존 Checker 상태와 일치하는 구조화 날짜만 사용한다. 날짜만 있는 계약이며 임의 마감 시각·예산 소진일을 생성하지 않는다.
+필드가 없는 기존 응답의 접수 상태는 표시하되 D-day·캘린더를 만들지 않는다. 오래되거나 일수가 불일치하면 재확인 안내 및 신청 버튼 숨김.
+
+### 원문 발췌
+
+`required_documents`: 선택 목록 또는 null. 각 항목은 `{text, document_id, chunk_id, source_url}`. 원문 `[구비서류]`, `[제출서류]` 블록만 그대로 발췌한다. 완전한 제출 서류 목록을 보증하지 않으며 화면은 ‘서류 발췌’와 원문 확인 안내를 함께 표시한다.
+
+`requirement_excerpts`: 선택 목록 또는 null. 각 항목은 `{label, text, document_id, chunk_id, source_url}`. 원문 `[지원대상]`, `[선정기준]`, `[지원대상 및 선정기준]` 블록만 그대로 발췌한다. 연도·단위·값을 환산하거나 검수 완료 상태로 승격하지 않는다. 같은 문서·본문 중복만 제거한다.
+
+`official_requirements`는 이 작업에서 채우지 않는다. 반석의 값·단위·연도·출처 검수 뒤 #76-A가 채우는 기존 계약 그대로이며, 그 전까지 `null`이다. 화면은 `official_requirements`가 있으면 그것을, 없으면 `requirement_excerpts`를 같은 '공식 자격기준' 자리에 '원문 발췌'로 표시한다.
+
+상담은 실제 채택 청크에서만 발췌하며, 목록은 해당 정책의 같은 릴리스 청크에서만 발췌한다. 목록 정보가 곧 답변 인용이나 개인 판정 근거로 자동 채택되는 것은 아니다. 필드 생략/null은 이전 응답과 호환된다. source_url이 없으면 동일 document_id의 citation만 연결하며 카드 대표 URL로 대체하지 않는다.
+
+### 프론트 갱신
+
+`VITE_POLICY_API_URL`이 있으면 전체 URL을 사용한다. 없고 VITE_ASK_API_URL이 있으면 같은 서버의 `/api/policies`를 사용한다. 둘 다 없으면 배포 스냅샷 탐색으로 표시하고 전체 일정 연결 상태로 과장하지 않는다.
+목록은 최초·KST 날짜 변경·탭 복귀 시 갱신한다. 필터·정렬·저장은 이미 받은 목록을 사용한다. 목록 실패·버전 변경·미확인 일정에서는 과거 마감 임박 안내를 숨긴다. 관심 정책에는 ID·이름·원문 링크만 저장한다.

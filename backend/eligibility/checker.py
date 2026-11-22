@@ -796,6 +796,20 @@ def _reception_status(policy: dict) -> str:
 
 
 
+def application_schedule(policy: dict, reception_status: str) -> dict | None:
+    """기존 접수 판정과 일치하는 구조화 날짜만 화면에 전달한다. 판정 규칙은 변경하지 않는다."""
+    if reception_status == "unknown" or _reception_status(policy) != reception_status:
+        return None
+    node = (policy.get("graph") or {}).get("policy") or {}
+    today = datetime.now(KST).date()
+    start = (node.get("application_start") or "").strip() or None
+    end = (node.get("application_end") or "").strip() or None
+    return {"evaluated_on": today.isoformat(), "start_date": start, "end_date": end,
+            "is_ongoing": node.get("application_is_ongoing") is True,
+            "days_to_start": (date.fromisoformat(start) - today).days if start else None,
+            "days_to_end": (date.fromisoformat(end) - today).days if end else None}
+
+
 # #42: AGE 조건 미추출 안내는 설명 문구에 신청자 연령이 명시된 때만 추가한다.
 # '세대'·'개월'은 숫자 연령으로 보지 않는다. 0~0세는 API 오류이므로 원문 확인 대상이다.
 _AGE_IN_DESCRIPTION = re.compile(

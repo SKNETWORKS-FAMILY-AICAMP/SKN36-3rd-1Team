@@ -4,14 +4,16 @@ from collections.abc import Callable
 from contextlib import asynccontextmanager
 import logging
 import os
+from typing import Literal
 from threading import Lock
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api.schemas import AskRequest, AskResponse
+from backend.api.schemas import AskRequest, AskResponse, PolicyListResponse
+from backend.api.policy_catalog import PolicyCatalog
 from backend.rag.pipeline import AskError, run_ask_pipeline
 from database import embedding
 # handoff_data는 hybrid_search import 중 데이터셋 경로를 고정하므로 먼저 환경을 읽는다.
@@ -95,6 +97,7 @@ def create_app(
     check_fn: Callable = _check_eligibility,
     generate_fn: Callable = _generate_answer,
     display_fn: Callable[[list[dict]], list[dict]] | None = None,
+    catalog_factory: Callable = PolicyCatalog,
 ) -> FastAPI:
     """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다."""
     search_lock = Lock()
@@ -103,6 +106,7 @@ def create_app(
     async def lifespan(application: FastAPI):
         application.state.search_ready = False
         application.state.session = None
+        application.state.catalog = catalog_factory()
         try:
             application.state.session = session_factory()
         except (SearchProfileError, HybridSearchBackendError, OSError) as exc:
@@ -168,6 +172,20 @@ def create_app(
             logger.error("예기치 않은 질문 처리 오류: %s", type(exc).__name__)
             status, message = ERRORS["INTERNAL_ERROR"]
             raise HTTPException(status, detail={"code": "INTERNAL_ERROR", "message": message}) from exc
+
+    @application.get("/api/policies", response_model=PolicyListResponse)
+    def policies(q: str = Query("", max_length=200), region: str = Query("", max_length=100),
+                 category: str = Query("", max_length=100),
+                 status: Literal["all", "open", "before", "closed", "unknown", "soon", "ongoing"] = "all",
+                 sort: Literal["deadline", "name"] = "deadline", offset: int = Query(0, ge=0),
+                 limit: int = Query(500, ge=1, le=500)) -> PolicyListResponse:
+        try:
+            return application.state.catalog.list(q=q, region=region, category=category,
+                status=status, sort=sort, offset=offset, limit=limit)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            logger.warning("정책 목록 로드 실패: %s", type(exc).__name__)
+            raise HTTPException(503, detail={"code": "POLICY_CATALOG_UNAVAILABLE",
+                "message": "정책 목록을 잠시 불러올 수 없습니다."}) from exc
 
     return application
 

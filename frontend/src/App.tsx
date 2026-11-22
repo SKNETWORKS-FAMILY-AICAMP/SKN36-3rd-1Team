@@ -10,6 +10,8 @@ import { planProfileReply } from './lib/profileReply';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge } from './lib/validate';
+import { PolicyScheduleList } from './components/PolicyScheduleList';
+import { PolicyExplorer } from './components/PolicyExplorer';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
@@ -137,7 +139,7 @@ export default function App() {
     if (values.income != null) setIncome(values.income);
   }, []);
 
-  const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null) => {
+  const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null, selectedPolicyId: string | null = null) => {
     let question = raw.trim();
     if (!question) return false;
 
@@ -156,6 +158,7 @@ export default function App() {
       }
       showToast(`${describeProfile(reply)} 조건으로 앞 질문을 다시 확인할게요`);
       ({ question, profile: next, field } = plan);
+      if (previous?.kind === 'qa') selectedPolicyId = requests.current.get(previous.id)?.selected_policy_id ?? null;
     }
     if ([...question].length > QUESTION_MAX_LENGTH) {
       showToast(`질문은 ${QUESTION_MAX_LENGTH.toLocaleString('ko-KR')}자까지 입력할 수 있어요.`);
@@ -169,7 +172,7 @@ export default function App() {
     if (next.age != null) tags.push({ icon: 'cake', text: `${next.age}세` });
     if (next.region) tags.push({ icon: 'pin', text: next.region });
 
-    const request: AskRequest = { question, profile: next, history: history(turnsRef.current), awaiting_field: field };
+    const request: AskRequest = { question, profile: next, history: history(turnsRef.current), awaiting_field: field, selected_policy_id: selectedPolicyId };
     requests.current.set(id, request);
     setTurns((list) => [...list, { id, kind: 'qa', question, tags, state: 'loading' }]);
     void run(id, request);
@@ -212,6 +215,7 @@ export default function App() {
 
   // 상담에서 가장 최근에 나온 정책: 생애주기·관계 지도가 이어서 보여 준다
   const recent = useMemo(() => recentPoliciesFromTurns(turns), [turns]);
+  const latestResponse = useMemo(() => [...turns].reverse().find(t => t.kind === 'qa' && t.state === 'done' && t.response), [turns]);
 
   const profileText = describeProfile(profile);
   const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
@@ -249,6 +253,10 @@ export default function App() {
       <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
+      <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
+        onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
+      <PolicyScheduleList onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
+        onAsk={(question, origin) => { ask(question, origin); }} />
       <section className="board" id="board">
         <div className="wrap">
           <div className="board-h"><h2>상담 <span>결과</span></h2><p>답변마다 근거 출처를 함께 보여 드려요</p></div>
@@ -258,7 +266,7 @@ export default function App() {
           {turns.map((t, i) => (
             <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
               <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}
-                onAskPolicy={(question, origin) => { ask(question, origin); }} />
+                onAskPolicy={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
             </div>
           ))}
           {awaiting && (
@@ -279,7 +287,7 @@ export default function App() {
                 if (!Number.isFinite(numeric) || numeric < 0) return;
                 next.income = numeric;
               }
-              if (!ask(question, null, next, field)) return;
+              if (!ask(question, null, next, field, requests.current.get(awaiting.turnId)?.selected_policy_id)) return;
               applyProfileState(field === 'age' ? { age: next.age } : field === 'region' ? { region: next.region } : { income: next.income });
             }}>
               <label htmlFor="follow-up-condition">{infoField(awaiting.field).label}{awaiting.field === 'income' ? ' (만 원)' : ''}</label>
@@ -293,7 +301,8 @@ export default function App() {
                   max={awaiting.field === 'age' ? AGE_MAX : undefined} step={awaiting.field === 'age' ? 1 : 'any'} />
               )}
               <button type="submit">다시 확인</button>
-              <button type="button" onClick={() => setAwaiting(null)}>취소</button>
+              <button type="button" onClick={() => setAwaiting(null)}>나중에 입력</button>
+              <p className="policy-condition-note">필요한 정보만 선택해서 입력해 주세요. 입력하지 않은 정보로 자격을 추정하지 않아요.</p>
             </form>
           )}
         </div>
