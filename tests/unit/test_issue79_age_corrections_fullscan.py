@@ -223,7 +223,6 @@ def test_issue79_age_graph_and_boundaries(record):
         for row in corrections["age_condition_replacements"]
     ],
 )
-
 def test_issue79_age_replacements(replacement):
     """Check all five documented age condition replacements."""
     policy_id = replacement["policy_id"]
