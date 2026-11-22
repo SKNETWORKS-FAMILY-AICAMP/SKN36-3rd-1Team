@@ -194,6 +194,36 @@ def test_selected_policy_region_match_nationwide_or_missing_input_is_unchanged(n
     assert "region" not in rows and rows["eligibility"].status == "eligible"
 
 
+def test_selected_region_hold_keeps_checker_needs_check_reason():
+    """계약 §4.3: Checker가 needs_check로 준 지역 사유는 지우거나 바꾸지 않고, 지역 불일치 행만 따로 더한다."""
+    item, check_fn = _regional_policy("POL_A", ["서울특별시"])
+    item["data_quality"] = {"hold_auto_eligibility": True, "affected_attributes": ["region"]}
+    raw = check_fn({"age": 25, "region": "부산광역시", "income": None}, item)
+    original = [row["reason"] for row in raw["conditions"] if row["field"] == "region"]
+    result, _ = _ask_selected(item, check_fn, "부산")
+    region = [c for c in result.policy_checks[0].conditions if c.field == "region"]
+    assert original and all(reason in [c.reason for c in region] for reason in original)
+    assert any("서울특별시" in c.reason and "부산광역시" in c.reason for c in region)
+    assert all(c.status == "needs_check" for c in region)
+
+
+def test_selected_region_hold_downgrades_eligible_region_and_appends_reason():
+    item, _ = _regional_policy("POL_A", ["서울특별시"])
+
+    def check_fn(profile, policy_item):
+        return {"policy_id": policy_item["policy_id"], "reception_status": "open", "conditions": [
+            {"field": "region", "label": "거주 지역", "reason": "가상 지역 조건 충족 (sample_only).", "status": "eligible"},
+            {"field": "eligibility", "label": "종합", "reason": "가상 종합 결과 (sample_only).", "status": "eligible"}]}
+
+    result, _ = _ask_selected(item, check_fn, "부산")
+    rows = [c for c in result.policy_checks[0].conditions]
+    region = [c for c in rows if c.field == "region"]
+    assert len(region) == 1 and region[0].status == "needs_check"
+    assert region[0].reason.startswith("가상 지역 조건 충족 (sample_only).") and "부산광역시" in region[0].reason
+    root = [c for c in rows if c.field == "eligibility"][-1]
+    assert root.status == "needs_check" and root.reason.startswith("가상 종합 결과 (sample_only).")
+
+
 def test_region_hold_applies_only_to_selected_policy_requests():
     # 선택 정책이 아닌 기존 상담은 지역 필터로 이미 걸러지므로 판정 결과를 바꾸지 않는다.
     item, check_fn = _regional_policy("POL_A", ["서울특별시", "부산광역시"])

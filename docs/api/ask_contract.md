@@ -508,7 +508,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」).
 - `required_documents`(선택, v1.5): 원문 `[구비서류]`·`[제출서류]` 블록 발췌 `{text, document_id, chunk_id, source_url}` 목록. 완전한 서류 목록을 보증하지 않는다. 없으면 `null`.
 - `requirement_excerpts`(선택, v1.5): 원문 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]` 블록 발췌 `{label, text, document_id, chunk_id, source_url}` 목록. 검수된 공식 기준(`official_requirements`)이 아니며 값·단위·연도를 환산하지 않는다. 없으면 `null`.
-- 선택 정책 지역 보류(v1.5): `selected_policy_id` 요청에서 정책의 대상 지역(`graph.regions`)에 입력 지역도 전국도 없으면 `conditions`에 `{"field": "region", "status": "needs_check"}` 행(대상 지역·입력 지역을 적은 사유)을 넣고, 종합(`eligibility`) 행이 `eligible`이면 `needs_check`로 보류한다. 불충족으로 단정하지 않는다.
+- 선택 정책 지역 보류(v1.5): `selected_policy_id` 요청에서 정책의 대상 지역(`graph.regions`)에 입력 지역도 전국도 없으면, §4.3 Pipeline 방어 규칙대로 처리한다. Checker의 `region` 행이 `eligible`이면 `needs_check`로 내리고 기존 사유 뒤에 지역 불일치 사유를 덧붙인다. `region` 행이 없거나 `needs_check`뿐이면 그 사유는 바꾸지 않고 `{"field": "region", "status": "needs_check"}` 행(대상 지역·입력 지역을 적은 사유)을 따로 앞에 둔다. `ineligible` 행이 있으면 그대로 둔다. 종합(`eligibility`) 행이 `eligible`이면 `needs_check`로 내리고 사유를 덧붙인다. 불충족으로 단정하지 않는다.
 - `checked_at`: **공식 원문 재확인 시간**을 검증 가능할 때만 ISO 8601 문자열. 데이터 수집시각/오늘 날짜를 임의로 넣지 않는다. MVP 기본은 `null`.
 - `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`).
 - `is_sample`: 실제 검색·실제 LLM 응답은 `false`; **프론트 Mock 등 가상 응답만 `true`**.
@@ -654,7 +654,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 ### 선택 정책 상담
 
 `AskRequest.selected_policy_id`: 선택 문자열 또는 null. 형식 `^POL_[A-Z0-9_]+$`, 최대128자. 없는 기존 요청은 동일하게 처리한다.
-기존 검색 1회를 프로필 지역 필터 없이 `policy_id` 필터로만 실행하고, 다른 정책이 반환돼도 제거한다. 사용자가 고른 정책이 프로필 지역과 다르면 검색에서 빼지 않는다. v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 정책의 지역 관계(`AVAILABLE_IN`, 검색 결과 `graph.regions`)로만 가지므로, Pipeline이 선택 정책의 대상 지역과 입력 지역을 대조한다. 입력 지역이 대상 지역·전국에 없으면 `conditions`에 `region` `needs_check`(대상 지역과 입력 지역을 적은 사유)를 넣고, 종합 판정이 `eligible`이면 `needs_check`로 보류한다. 확정 불충족으로 단정하지 않으며, 입력 지역이 없거나 선택 정책 요청이 아니면 기존 판정을 바꾸지 않는다. 선택 정책의 인용 가능한 근거가 없으면 no_evidence이며 다른 정책으로 대체·추가 검색·LLM 재호출하지 않는다. 프론트는 재시도·추가 조건 입력에도 동일 ID를 유지한다.
+기존 검색 1회를 프로필 지역 필터 없이 `policy_id` 필터로만 실행하고, 다른 정책이 반환돼도 제거한다. 사용자가 고른 정책이 프로필 지역과 다르면 검색에서 빼지 않는다. v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 정책의 지역 관계(`AVAILABLE_IN`, 검색 결과 `graph.regions`)로만 가지므로, Pipeline이 선택 정책의 대상 지역과 입력 지역을 대조한다. 입력 지역이 대상 지역·전국에 없으면 `region` `needs_check`(대상 지역과 입력 지역을 적은 사유)로 보류하고, 종합 판정이 `eligible`이면 `needs_check`로 보류한다. Checker가 이미 준 `needs_check` 사유는 바꾸지 않는다(§8.3 「선택 정책 지역 보류」). 확정 불충족으로 단정하지 않으며, 입력 지역이 없거나 선택 정책 요청이 아니면 기존 판정을 바꾸지 않는다. 선택 정책의 인용 가능한 근거가 없으면 no_evidence이며 다른 정책으로 대체·추가 검색·LLM 재호출하지 않는다. 프론트는 재시도·추가 조건 입력에도 동일 ID를 유지한다.
 
 ### 신청 일정
 

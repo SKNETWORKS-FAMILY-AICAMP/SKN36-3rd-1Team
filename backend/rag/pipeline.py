@@ -181,17 +181,23 @@ def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str 
     if not profile_region or not names or "전국" in names or profile_region in names:
         return
     conditions = check["conditions"]
-    if any(row["field"].lower() == "region" and row["status"] == "ineligible" for row in conditions):
+    region_rows = [row for row in conditions if row["field"].lower() == "region"]
+    if any(row["status"] == "ineligible" for row in region_rows):
         return
-    region_row = {"field": "region", "label": "거주 지역", "status": "needs_check",
-                  "reason": f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
-                            "거주 요건을 공식 공고에서 확인해 주세요."}
-    conditions = [row for row in conditions if row["field"].lower() != "region"]
+    mismatch = (f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
+                "거주 요건을 공식 공고에서 확인해 주세요.")
+    # 계약 §4.3: Checker가 needs_check로 준 사유는 바꾸지 않고, 확정 상태만 보류로 내리며 사유를 뒤에 덧붙인다.
+    eligible_rows = [row for row in region_rows if row["status"] == "eligible"]
+    for row in eligible_rows:
+        row["status"] = "needs_check"
+        row["reason"] += f" {mismatch}"
+    if not eligible_rows:
+        # 기존 지역 행이 없거나 needs_check뿐이면 그 사유는 그대로 두고 지역 불일치 행을 따로 앞에 둔다.
+        conditions.insert(0, {"field": "region", "label": "거주 지역", "status": "needs_check", "reason": mismatch})
     root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
     if root is not None and root["status"] == "eligible":
         root["status"] = "needs_check"
         root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
-    check["conditions"] = [region_row, *conditions]
 
 
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
