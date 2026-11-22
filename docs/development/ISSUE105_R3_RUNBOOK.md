@@ -1,19 +1,24 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
-> 상태 (2026-11-22): **`R3_PINS` 1차 확정** (최신 데이터 병합본 `a60f5bc` 기준).
+> 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
-> **완료한 작업**
-> - build 격리 서버(`issue105-r3-build`)에 B2(r2)·B3(#31) 원본 snapshot을 복원했고, digest가 기록과 일치했다.
-> - 서버 계획(`basis=server_snapshot`)을 만들고 검증했다.
+> **완료한 작업 (build 격리 서버 `issue105-r3-build`)**
+> - B2(r2)·B3(#31) 원본 snapshot 복원 → digest가 기록과 일치 (B3 `0a794e34…6371` 포함)
+> - 서버 계획(`basis=server_snapshot`) 생성·검증
+> - 갱신(`--apply`): B2 → B3 순서, 컬렉션마다 1회
+> - 임베딩(`--index`): B2 96개, B3 111개, 컬렉션마다 1회
+> - 최종 상태(complete): B2 1,233 Point `d1fa3194…c427`, B3 1,320 Point `a471e21f…c0ed` → `vector_digest` 두 칸 기록(§5.5 2차)
 >
-> **아직 하지 않은 작업:** 갱신(`--apply`)·임베딩(`--index`)·Neo4j 적재·snapshot·ZIP 생성
+> **아직 하지 않은 작업:** Neo4j 적재(build Neo4j는 비어 있음)·`--cross-db` 교차 검증·snapshot 생성·ZIP 생성·독립 복원
 >
 > **현재 허용 범위**
-> - 남은 미확정은 컬렉션별 최종 `vector_digest` 두 칸뿐이다. 그래서 갱신 단계(§5.5 1차)만 기준값 게이트를 통과한다.
-> - snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
-> - 근거 보고서(로컬): `.cache\issue105-r3\05-b3-plan-verify.json`, `10-b2-plan-verify.json`
+> - 모든 쓰기 진입점이 기준값 게이트를 통과한다. 이후 단계는 각자의 fingerprint·Docker 소유·digest 검사를 따로 통과해야 한다.
+> - 게이트 통과는 테스트 더블로만 확인했다. 실제 교차 검증·번들 생성·복원 성공을 뜻하지 않는다.
+> - 근거 보고서(로컬): `.cache\issue105-r3\05-b3-plan-verify.json`, `10-b2-plan-verify.json`, `20-b2-index-verify.json`, `24-b3-index-verify.json`
 >
-> §1.1 표의 "미확정" 행은 최신 데이터 병합 전 상태의 경계를 설명하며, 테스트(`PendingPinTests`)로 계속 확인한다.
+> **실행 환경:** 모든 명령은 저장소의 `.venv\Scripts\python.exe`로 실행한다(아래 예시의 `python`도 이것을 뜻한다). 다른 Python은 의존성 버전이 달라 쓰지 않는다.
+>
+> §1.1 표의 "미확정" 행은 최신 데이터 병합 전 상태의 경계를 설명한다. 테스트로 세 상태를 계속 확인한다: 전부 미확정(`PendingPinTests`), 1차(`Stage1PinTests`), 2차 실제값(`FinalPinTests`).
 
 ### 1.1 `R3_PINS` 미확정 상태의 쓰기 경계
 
@@ -139,7 +144,7 @@ B3 snapshot을 격리 서버에 복원했을 때의 digest는 **아직 미검증
 >
 > 최종 병합본에서 다시 계산해야 하며, 이 값을 고정값으로 쓰지 않는다.
 
-### 5.3 build 환경 갱신·임베딩 (R3_PINS 1차 확정 후, 컬렉션마다)
+### 5.3 build 환경 갱신·임베딩 (R3_PINS 1차 확정 후, 컬렉션마다 — 2026-11-22 B2·B3 완료)
 
 ```powershell
 python scripts/update_r3_collections.py --qdrant-url http://127.0.0.1:56646 --collection b3 --plan <plan-b3.json>   # payload_pending + fingerprint
@@ -218,9 +223,26 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
    - 컬렉션별 `vector_digest` 두 칸은 None으로 둔다. 임시값을 넣지 않는다.
    - 이 상태에서 허용되는 쓰기는 **갱신 단계**뿐이다: `--apply`, `--index`, Neo4j `--load`·`--resume`
    - 근거: `restore_profiles_v140.UPDATE_STAGE_DEFERRED_PINS`. 이 두 칸 외의 None은 미룰 수 없다.
-2. **임베딩 완료 후(2차):** `update_r3_collections` dry-run(complete)의 `proposed_final_pins.vector_digest`를 검토해 기록하고 커밋한다.
+2. **임베딩 완료 후(2차, 2026-11-22 반영 완료):** `update_r3_collections` dry-run(complete)의 `proposed_final_pins.vector_digest`를 검토해 기록하고 커밋한다.
+   - 반영값: B2 `vector_digest` `d1fa319424c1b682aa75faa4b92680b29eeffd3ae980d49b2c97c67f373dc427` (1,233 Point)
+   - 반영값: B3 `vector_digest` `a471e21fec0b3a7ac486a1d30a63c29f7d4f061ca91503684ae91479afbec0ed` (1,320 Point)
+   - 반영 전 읽기 전용 재확인: 두 컬렉션 모두 complete, exact count = scan 수 = 고정 points, Point ID = 릴리스 대상, 재사용 부분 digest = 고정값, 1024·Cosine, Docker 소유 불변
    - 이후에야 `--cross-db`, `--create-snapshot`, `--build`, 번들 복원이 허용된다.
    - 번들 커밋에는 2차까지 확정한 `restore_profiles_v140.py`가 들어 있어야 한다.
+
+#### 5.5.1 2차 확정 시점의 벡터 출처
+
+| 컬렉션 | 구분 | Point 수 | `index_run_id` |
+|---|---|---|---|
+| B2 | 신규 임베딩 (2026-11-22) | 96 | `RUN_FULL_A_B2_V140_20261122_151453` |
+| B2 | 재사용 (r2 snapshot) | 1,133 | `RUN_FULL_A_B2_V140_20261107_173008` |
+| B2 | 재사용 (r2 snapshot) | 4 | `RUN_FULL_A_B2_V140_20261119_015749` |
+| B3 | 신규 임베딩 (2026-11-22) | 111 | `RUN_FULL_B_B3_V140_20261122_151957` |
+| B3 | 재사용 (#31 snapshot) | 1,209 | `RUN_FULL_B_B3_V140_20261107_173026` |
+
+- 신규 Point는 모두 `qwen3-embedding:0.6b`·1024차원·`policy_section_body_v2`이다.
+- 재사용 Point는 원래 `index_run_id`를 그대로 보존한다. 그래서 B2 한 컬렉션 안에 실행 ID 3개(재사용 2 + 신규 1)가, B3에는 2개가 섞여 있다. 버그가 아니며, 실행 ID 하나로 컬렉션 전체를 대표할 수 없다.
+- **한계:** 과거 실행(2026-11-07·2026-11-19)의 Ollama 모델 digest는 Point payload나 보고서에 기록되지 않았다. 재사용 벡터가 신규와 같은 모델 빌드인지는 모델 이름·차원·입력 규칙으로만 확인된다. 신규 임베딩 직전에는 모델 digest가 r2 기록(`ac6da0df…`)과 같은지 수동으로 확인했다.
 
 ### 5.6 독립 복원 검증 (verify 환경)
 
@@ -255,9 +277,11 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
 
 ## 7. 미검증·남은 작업
 
-- 실제 Docker 실행, snapshot 복원, 임베딩, Neo4j 적재, ZIP 생성, 독립 복원(모두 미실행)
+- build 환경의 Docker 실행·snapshot 복원·갱신·임베딩은 완료했다(§5.5).
+- **미실행:** Neo4j 적재(`--load`), `--cross-db` 교차 검증, `--create-snapshot`, ZIP 생성(`--build`), verify 환경 독립 복원
+  - build Neo4j(`bolt://127.0.0.1:56677`)는 아직 비어 있다. 그래서 교차 검증의 성공 여부는 알 수 없다.
 - 실제 `docker ps`·`docker inspect` 출력 형식과 FakeDocker의 일치(테스트 더블 기준. r2 verify 래퍼는 실제 환경에서 동작 확인됨)
-- B3 #31 snapshot 복원 digest가 `0a794e34…`로 나오는지
+- 과거 재사용 벡터의 모델 digest(기록 없음, §5.5.1)
 - Ollama 모델 digest 확인 자동화(현재 수동)
 - 여섯 표현(모두의카드·모두의 카드·K-패스·k-패스·K패스·k패스) 검색 테스트
   - B2·B3 프로필 각각 확인해야 한다.

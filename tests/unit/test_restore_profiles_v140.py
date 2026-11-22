@@ -1,21 +1,27 @@
 """Issue #105 복원 기준값(scripts/restore_profiles_v140.py)과 r3 Compose 정적 검사.
 
 - R2 표가 #91 r2 도구의 실제 상수와 같은지 (r2 기준을 한곳에서 읽어도 값이 갈라지지 않게)
-- R3 기준값은 1차 확정(최종 vector_digest만 미확정) 상태이고, 그 값이 현재 릴리스와 같으며, 갱신 단계만 통과하는지
+- R3 기준값은 2차 확정(미확정 0개) 상태이고 그 값이 현재 릴리스와 같은지, 그리고 1차 확정·전부 미확정 상태의
+  게이트 동작이 fixture(stage1_pins·pending_pins)로 계속 검증되는지
 - r3 격리 포트·프로젝트·인증 변수가 공유·r1·r2 자산과 겹치지 않는지
 """
 import re
+import sys
 import unittest
 from pathlib import Path
 
-from database import full_index as fi
-from scripts import build_restore_bundle_v140 as b2b
-from scripts import load_neo4j_r2_isolated as neo4j_r2
-from scripts import restore_final_v140 as restore
-from scripts import restore_profiles_v140 as profiles
-from scripts import restore_r2_isolated as r2w
-from scripts import seed_b2_from_r1_vectors as seed
-from scripts import update_b2_from_snapshot as qdrant_r2
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from r3_fixtures import pending_pins, stage1_pins  # noqa: E402
+
+from database import full_index as fi  # noqa: E402
+from scripts import build_restore_bundle_v140 as b2b  # noqa: E402
+from scripts import load_neo4j_r2_isolated as neo4j_r2  # noqa: E402
+from scripts import restore_final_v140 as restore  # noqa: E402
+from scripts import restore_profiles_v140 as profiles  # noqa: E402
+from scripts import restore_r2_isolated as r2w  # noqa: E402
+from scripts import seed_b2_from_r1_vectors as seed  # noqa: E402
+from scripts import update_b2_from_snapshot as qdrant_r2  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -36,23 +42,45 @@ class R2ProfileTests(unittest.TestCase):
 
 
 class R3PinTests(unittest.TestCase):
-    def test_r3_pins_are_stage1_finalized_with_only_final_vector_digests_pending(self):
-        """1차 확정: 남은 미확정은 컬렉션별 최종 vector_digest 두 칸뿐 → 갱신 단계만 통과, 그 밖은 거부."""
-        self.assertFalse(profiles.is_finalized())
-        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
-        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
-            profiles.require_finalized()
+    """세 상태를 각각 검증한다: 전부 미확정(pending_pins) / 1차 확정(stage1_pins) / 2차 확정(실제 R3_PINS)."""
+
+    def test_real_r3_pins_are_fully_finalized(self):
+        """2차 확정: 미확정 0개 → 기준값 게이트는 모든 단계를 통과시킨다 (각 단계의 다른 검사는 그대로)."""
+        self.assertTrue(profiles.is_finalized())
+        self.assertEqual(profiles.missing_pins(), [])
+        self.assertIs(profiles.require_finalized(), profiles.R3_PINS)
         self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), profiles.R3_PINS)
 
-    def test_stage1_pins_are_well_formed_and_internally_consistent(self):
+    def test_stage1_fixture_defers_only_final_vector_digests(self):
+        stage1 = stage1_pins()
+        self.assertEqual(sorted(profiles.missing_pins(stage1)), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+            profiles.require_finalized(stage1)
+        self.assertIs(profiles.require_finalized(stage1, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), stage1)
+        # 1차 확정 값은 실제 R3_PINS와 vector_digest 두 칸만 다르다
+        real = profiles.r3_pins()
+        for key in profiles.COLLECTION_KEYS:
+            real["collections"][key]["vector_digest"] = None
+        self.assertEqual(stage1, real)
+
+    def test_pending_fixture_is_refused_even_for_the_update_stage(self):
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+            profiles.require_finalized(pending_pins(), deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
+        self.assertIn("manifest_lf_sha256", profiles.missing_pins(pending_pins()))
+
+    def test_final_pins_are_well_formed_and_internally_consistent(self):
         pins = profiles.R3_PINS
         self.assertRegex(pins["manifest_lf_sha256"], r"^[0-9a-f]{64}$")
         self.assertEqual(set(pins["release_counts"]), set(profiles.RELEASE_COUNT_KEYS))
         self.assertTrue(all(type(v) is int and v > 0 for v in pins["release_counts"].values()))
+        digests = [pins["collections"][k]["vector_digest"] for k in profiles.COLLECTION_KEYS]
+        self.assertEqual(len(set(digests)), len(digests))                         # 컬렉션마다 다른 값
         for key in profiles.COLLECTION_KEYS:
             with self.subTest(key=key):
                 c = pins["collections"][key]
-                self.assertIsNone(c["vector_digest"])                              # 임베딩 후 2차 확정
+                self.assertRegex(c["vector_digest"], r"^[0-9a-f]{64}$")            # 2차 확정
+                self.assertNotEqual(c["vector_digest"], c["reuse_vector_digest"])  # 신규 임베딩이 더해진 최종 값
+                self.assertNotEqual(c["vector_digest"], profiles.R3_SOURCES[key]["vector_digest"])
                 self.assertRegex(c["plan_sha256"], r"^[0-9a-f]{64}$")
                 self.assertRegex(c["reuse_vector_digest"], r"^[0-9a-f]{64}$")
                 self.assertEqual(c["reuse_count"] + c["embed_count"], c["points"])
@@ -61,8 +89,8 @@ class R3PinTests(unittest.TestCase):
                 # 재사용 + 삭제 후 재임베딩 = 원본 snapshot Point 수 (remove 0)
                 self.assertEqual(c["reuse_count"] + c["delete_count"], profiles.R3_SOURCES[key]["points"])
 
-    def test_stage1_pins_match_the_checked_out_release(self):
-        """1차 기준값의 manifest·건수·Point 수가 현재 체크아웃된 릴리스 파일에서 다시 계산한 값과 같다."""
+    def test_final_pins_match_the_checked_out_release(self):
+        """기준값의 manifest·건수·Point 수가 현재 체크아웃된 릴리스 파일에서 다시 계산한 값과 같다."""
         from database import handoff_data as hd
         from scripts import plan_r3_vector_reuse as planner
         if hd.dataset_version() != profiles.DATASET_VERSION:
@@ -85,12 +113,12 @@ class R3PinTests(unittest.TestCase):
         self.assertFalse(profiles.is_finalized(pins))
 
     def test_r3_pins_copy_does_not_change_the_module(self):
-        original = profiles.R3_PINS["manifest_lf_sha256"]
+        original = profiles.r3_pins()
         copied = profiles.r3_pins()
         copied["manifest_lf_sha256"] = "b" * 64
-        copied["collections"]["b2"]["vector_digest"] = "c" * 64
-        self.assertEqual(profiles.R3_PINS["manifest_lf_sha256"], original)
-        self.assertIsNone(profiles.R3_PINS["collections"]["b2"]["vector_digest"])
+        copied["collections"]["b2"]["vector_digest"] = None
+        self.assertEqual(profiles.R3_PINS, original)
+        self.assertTrue(profiles.is_finalized())
 
     def test_r3_collections_match_full_index_configs(self):
         for key in profiles.COLLECTION_KEYS:

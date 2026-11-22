@@ -16,7 +16,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import FakeDocker, Sample, build_container, good_build_docker, sample_vector  # noqa: E402
+from r3_fixtures import (FakeDocker, Sample, build_container, good_build_docker, pending_pins,  # noqa: E402
+                         sample_vector, stage1_pins)
 
 from scripts import build_restore_bundle_r3 as bundle  # noqa: E402
 from scripts import build_restore_bundle_v140 as b2b  # noqa: E402
@@ -129,8 +130,8 @@ class CommitEolTests(unittest.TestCase):
                 work = path / profiles.PROFILE_SCRIPT
                 original = work.read_bytes()
                 newline = b"\r\n" if autocrlf else b"\n"
-                # 커밋하지 않은 R3_PINS 확정값 (예: 2차 확정할 vector_digest를 작업 트리에만 기록)
-                changed = original.replace(b'"vector_digest": None,', b'"vector_digest": "' + b"a" * 64 + b'",', 1)
+                # 커밋하지 않은 R3_PINS 변경 (예: 확정된 기준값 하나를 작업 트리에서만 바꿈)
+                changed = original.replace(b'"remove_count": 0,', b'"remove_count": 1,', 1)
                 self.assertNotEqual(changed, original)
                 work.write_bytes(changed)
                 with self.assertRaisesRegex(b2b.BundleError, "기준값 모듈"):
@@ -186,7 +187,8 @@ class BuildBundleTests(unittest.TestCase):
 
     def test_refusals_before_any_output(self):
         cases = {
-            "pending_pins": dict(pins=None),
+            "pending_pins": dict(pins=pending_pins()),
+            "stage1_pins": dict(pins=stage1_pins()),
             "no_confirm": dict(confirm_write=False),
         }
         for name, kwargs in cases.items():
@@ -292,8 +294,9 @@ class CreateSnapshotTests(unittest.TestCase):
         self.assertEqual(self.client.snapshots, [self.s.collection(k) for k in profiles.COLLECTION_KEYS])
 
     def test_refusals_without_server_snapshot(self):
-        with self.assertRaises(profiles.ProfileError):
-            self.create("b2", pins=profiles.r3_pins())
+        for pins in (pending_pins(), stage1_pins()):
+            with self.assertRaises(profiles.ProfileError):
+                self.create("b2", pins=pins)                          # 최종 snapshot은 2차 확정값 필요
         foreign = FakeDocker([build_container("b" * 64, "qdrant", project="lifepolicy"),
                               build_container("c" * 64, "neo4j")])
         with self.assertRaisesRegex(update.UpdateError, "Docker 소유"):
@@ -320,9 +323,12 @@ class PlanModeTests(unittest.TestCase):
     def test_plan_is_read_only_and_lists_missing_pins(self):
         with tempfile.TemporaryDirectory() as folder:
             output = bundle.plan(None, Path(folder))
+            with patch.object(profiles, "R3_PINS", stage1_pins()):
+                stage1 = bundle.plan(None, Path(folder))
             self.assertEqual(list(Path(folder).iterdir()), [])
-        self.assertEqual((output["writes"], output["r3_pins_finalized"]), (0, False))
-        self.assertEqual(sorted(output["missing_pins"]), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))   # 1차 확정 상태
+        self.assertEqual((output["writes"], output["r3_pins_finalized"], output["missing_pins"]), (0, True, []))   # 2차 확정
+        self.assertEqual((stage1["writes"], stage1["r3_pins_finalized"]), (0, False))
+        self.assertEqual(sorted(stage1["missing_pins"]), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))   # 1차 확정 상태
 
     def test_cli_write_modes_require_flags(self):
         for extra in (["--build"], ["--create-snapshot", "--confirm-write"], ["--build", "--confirm-write"]):

@@ -3,8 +3,9 @@
 - 미확정(전부 None): WRITES_REQUIRING_PINS의 모든 진입점이 쓰기 전에 ProfileError로 멈추고,
   WRITES_WITHOUT_PINS의 원본 snapshot 복원만 (build Docker 소유 확인을 거쳐) 허용된다.
   실제 R3_PINS가 확정된 뒤에도 이 경계를 계속 검증하도록 profiles.R3_PINS를 '전부 미확정' 값으로 바꿔 끼운다.
-- 1차 확정(실제 R3_PINS, 최종 vector_digest 두 칸만 None): 갱신 단계(--apply·--index·Neo4j --load)만 기준값 게이트를
+- 1차 확정(stage1_pins, 최종 vector_digest 두 칸만 None): 갱신 단계(--apply·--index·Neo4j --load)만 기준값 게이트를
   통과하고(그 뒤 계획·fingerprint·소유 확인이 계속 지킨다), snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
+- 2차 확정(실제 R3_PINS, 미확정 0개): 모든 단계가 기준값 게이트를 통과하고, 다른 릴리스·잘못된 값은 다음 검사에서 멈춘다.
 DB·Docker·Ollama 접속 없음 (sample_only 테스트 더블).
 """
 import hashlib
@@ -20,7 +21,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import R3Qdrant, Sample, good_build_docker, pending_pins  # noqa: E402
+from r3_fixtures import R3Qdrant, Sample, good_build_docker, pending_pins, stage1_pins  # noqa: E402
 
 from database import full_index as fi  # noqa: E402
 from scripts import build_restore_bundle_r3 as bundle  # noqa: E402
@@ -122,9 +123,15 @@ class PendingPinTests(Base):
 
 
 class Stage1PinTests(Base):
-    """실제 R3_PINS (1차 확정: 최종 vector_digest 두 칸만 미확정)."""
+    """1차 확정 상태 (최종 vector_digest 두 칸만 미확정). 실제 R3_PINS가 2차 확정된 뒤에도 stage1_pins()로 바꿔 끼워 검증한다."""
 
-    def test_real_pins_are_stage1(self):
+    def setUp(self):
+        super().setUp()
+        patcher = patch.object(profiles, "R3_PINS", stage1_pins())
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_pins_are_stage1(self):
         self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
 
     def test_update_stage_passes_the_pin_gate_and_later_guards_still_stop_foreign_input(self):
@@ -171,6 +178,50 @@ class Stage1PinTests(Base):
             output = json.loads(report.read_text(encoding="utf-8"))
         self.assertEqual((code, output["status"], output["error_type"]), (1, "FAILED", "PlanError"))
         self.assertNotIn(ENV[update.API_KEY_ENV], json.dumps(output))
+
+
+class FinalPinTests(Base):
+    """실제 R3_PINS (2차 확정: 미확정 0개). 모든 단계가 기준값 게이트를 통과하고, 그 뒤의 검사가 계속 지킨다.
+    여기서는 '기준값 때문에 멈추지 않는다'와 '다른 릴리스·잘못된 값은 다음 검사에서 멈춘다'만 확인한다 (실제 쓰기 없음)."""
+
+    def test_real_pins_are_fully_finalized(self):
+        self.assertTrue(profiles.is_finalized())
+        self.assertEqual(profiles.missing_pins(), [])
+
+    def test_every_stage_passes_the_pin_gate_and_later_guards_still_stop(self):
+        never = AssertionError("쓰기·외부 호출 금지")
+        runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
+        with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never), \
+                patch.object(r2w, "run_docker", side_effect=never):
+            update_stage, full = self.entries(folder, runner, never)
+            for name, call in {**update_stage, **full}.items():
+                with self.subTest(entry=name), patch.dict(os.environ, {}):
+                    try:
+                        call()
+                        self.fail("멈춰야 한다")
+                    except profiles.ProfileError as error:
+                        self.fail(f"2차 확정 기준값인데 기준값 게이트에서 멈춤: {error}")
+                    except Exception:      # 계획·릴리스·번들·Docker 등 다음 검사에서 멈춘다
+                        pass
+            self.assertEqual(list(Path(folder).iterdir()), [])
+        self.assertEqual(self.client.writes, [])
+
+    def test_wrong_digest_manifest_or_plan_sha_in_final_pins_are_refused(self):
+        """확정된 값이라도 실제 계획·릴리스와 다르면 거부된다 (기준값 게이트 통과 ≠ 무조건 허용)."""
+        from scripts import plan_r3_vector_reuse as planner_mod
+        plan = self.s.plan("b2")
+        pins = self.s.pins_for({k: self.s.plan(k) for k in profiles.COLLECTION_KEYS})   # sample_only 완전 확정 값
+        planner_mod.validate_plan(plan, self.s.release, pins, self.s.sources, require_pins=True)
+        for field, value in (("plan_sha256", "0" * 64), ("reuse_vector_digest", "0" * 64), ("points", 999)):
+            with self.subTest(field=field):
+                bad = json.loads(json.dumps(pins))
+                bad["collections"]["b2"][field] = value
+                with self.assertRaises(planner_mod.PlanError):
+                    planner_mod.validate_plan(plan, self.s.release, bad, self.s.sources, require_pins=True)
+        bad = json.loads(json.dumps(pins))
+        bad["manifest_lf_sha256"] = "0" * 64
+        with self.assertRaisesRegex(planner_mod.PlanError, "manifest"):
+            planner_mod.load_release(bad)
 
 
 class UpdateStageDeferralTests(unittest.TestCase):

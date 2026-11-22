@@ -43,6 +43,15 @@ def pending_pins():
     return pins
 
 
+def stage1_pins():
+    """1차 확정 상태: 실제 R3_PINS와 같되 컬렉션별 최종 vector_digest 두 칸만 미확정(None).
+    실제 R3_PINS가 2차 확정된 뒤에도 '1차 상태에서는 갱신 단계만 통과하고 최종 단계는 거부'를 계속 검증하기 위한 값."""
+    pins = profiles.r3_pins()
+    for key in profiles.COLLECTION_KEYS:
+        pins["collections"][key]["vector_digest"] = None
+    return pins
+
+
 BUILD_PROJECT = profiles.R3_ENVIRONMENTS["build"]["project"]
 BUILD_SERVICES = profiles.services_for("build")
 

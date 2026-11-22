@@ -247,7 +247,7 @@ class CliTests(unittest.TestCase):
             result = json.loads(report.read_text(encoding="utf-8"))
             with self.assertRaises(SystemExit):
                 planner.main(["--report", str(report)])          # 기존 보고서 덮어쓰기 거부
-        self.assertEqual((result["db_writes"], result["embedding_calls"], result["r3_pins_finalized"]), (0, 0, False))
+        self.assertEqual((result["db_writes"], result["embedding_calls"], result["r3_pins_finalized"]), (0, 0, True))   # 2차 확정 상태
         self.assertEqual((result["not_planned"], result["plan_basis"]), (["b2", "b3"], "dump_preview"))
         with self.assertRaises(SystemExit):
             planner.main(["--write-plan-dir", "sample_only"])           # 덤프 계획 파일 저장 옵션은 없다

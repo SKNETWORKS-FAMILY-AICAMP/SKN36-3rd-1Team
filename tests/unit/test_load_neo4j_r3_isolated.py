@@ -12,7 +12,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import FakeDocker, R3Qdrant, RUN_OLD, build_container, good_build_docker, pending_pins  # noqa: E402
+from r3_fixtures import (FakeDocker, R3Qdrant, RUN_OLD, build_container, good_build_docker, pending_pins,  # noqa: E402
+                         stage1_pins)
 from test_load_neo4j_r2_isolated import FakeNeo4j  # noqa: E402
 
 from database import handoff_data as hd  # noqa: E402
@@ -128,7 +129,7 @@ class ReferenceAndLoadTests(unittest.TestCase):
     def test_dry_run_on_empty_db_has_no_writes(self):
         runner = FakeNeo4j()
         output = r3.dry_run(runner, self.ref, docker=self.docker)
-        self.assertEqual((output["state"], output["db_writes"], output["r3_pins_finalized"]), ("empty", 0, False))
+        self.assertEqual((output["state"], output["db_writes"], output["r3_pins_finalized"]), ("empty", 0, True))   # 실제 R3_PINS 2차 확정
         self.assertEqual(runner.writes(), [])
 
     def test_load_requires_finalized_matching_pins(self):
@@ -173,15 +174,28 @@ class ReferenceAndLoadTests(unittest.TestCase):
         with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
             r3.cross_check(qdrant, runner, self.ref, pins=pins)            # 교차 검증은 최종값까지 필요
 
-    def test_real_stage1_pins_pass_the_load_gate_but_not_cross_check(self):
-        """실제 1차 R3_PINS(manifest·건수가 현재 릴리스와 같음)로 메모리 FakeNeo4j 적재 게이트를 통과한다 (실제 DB 아님)."""
+    def test_stage1_pins_pass_the_load_gate_but_not_cross_check(self):
+        """1차 상태 R3_PINS(manifest·건수가 현재 릴리스와 같고 최종 digest만 None)는 메모리 FakeNeo4j 적재 게이트를
+        통과하지만 교차 검증 게이트는 거부한다 (실제 DB 아님)."""
+        runner = FakeNeo4j()
+        result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=stage1_pins(),
+                         docker=self.docker)
+        self.assertEqual(result["status"], "LOADED")
+        qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+            r3.cross_check(qdrant, runner, self.ref, pins=stage1_pins())
+
+    def test_real_final_pins_pass_load_and_cross_check_gates_then_compare_digests(self):
+        """실제 2차 확정 R3_PINS: 적재·교차 검증의 기준값 게이트를 통과하고(ProfileError 아님), 그 다음 단계에서
+        sample_only 벡터가 실제 고정 Point 수·digest와 달라 거부된다. 실제 교차 검증 성공을 뜻하지 않는다."""
         runner = FakeNeo4j()
         result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), pins=profiles.r3_pins(),
                          docker=self.docker)
         self.assertEqual(result["status"], "LOADED")
         qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
-        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+        with self.assertRaisesRegex(r3.Neo4jR3Error, "b2 Point .*r3 고정값과 다릅니다"):
             r3.cross_check(qdrant, runner, self.ref, pins=profiles.r3_pins())
+        self.assertEqual(qdrant.writes, [])
 
     def test_load_stops_before_writing_without_build_ownership(self):
         runner = FakeNeo4j()
@@ -207,8 +221,9 @@ class ReferenceAndLoadTests(unittest.TestCase):
     def test_cross_check_refusals(self):
         runner = FakeNeo4j()
         only_b2 = R3Qdrant({profiles.R3_COLLECTIONS["b2"]["collection"]: self.points["b2"]})
-        with self.assertRaises(profiles.ProfileError):
-            r3.cross_check(only_b2, runner, self.ref, pins=profiles.r3_pins())
+        for pins in (pending_pins(), stage1_pins()):
+            with self.assertRaises(profiles.ProfileError):
+                r3.cross_check(only_b2, runner, self.ref, pins=pins)
         with self.assertRaisesRegex(r3.Neo4jR3Error, "두 컬렉션"):
             r3.cross_check(only_b2, runner, self.ref, pins=self.pins)
         both = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})

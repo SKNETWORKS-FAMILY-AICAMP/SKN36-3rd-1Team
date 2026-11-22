@@ -12,6 +12,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from r3_fixtures import pending_pins, stage1_pins  # noqa: E402
 from test_restore_final_v140_r3 import Bundle  # noqa: E402
 from test_restore_r2_isolated import FakeDocker, VerifyNeo4j, VerifyQdrant  # noqa: E402
 
@@ -179,7 +180,10 @@ class RunTests(unittest.TestCase):
         tool.write_bytes(crlf)                                         # 줄바꿈만 다른 같은 도구는 허용
         self.b.write_sums()
         self.assertEqual(self.run_mode("preflight", restore_fn=FakeRestore())["db_writes"], 0)
-        with self.assertRaises(profiles.ProfileError):                 # 실제 R3_PINS는 미확정
+        for pins in (pending_pins(), stage1_pins()):
+            with self.assertRaises(profiles.ProfileError):             # 미확정·1차 상태는 거부
+                wrap.check_source_and_bundle(wrap.ROOT, self.b.folder, pins)
+        with self.assertRaisesRegex(ValueError, "manifest/counts differ"):   # 실제 2차 확정값: 게이트 통과 후 번들 불일치
             wrap.check_source_and_bundle(wrap.ROOT, self.b.folder)
 
     def test_source_archive_must_match_repo(self):
