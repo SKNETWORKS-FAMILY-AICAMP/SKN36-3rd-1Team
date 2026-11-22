@@ -20,6 +20,7 @@ export interface ChatTurnMessage {
 }
 
 export interface AskRequest {
+  selected_policy_id?: string | null;
   question: string;
   profile: UserProfile;
   /** 이어지는 대화를 위해 앞선 질문·답변을 함께 보낸다 (최근 HISTORY_MAX_ITEMS개까지). */
@@ -68,7 +69,30 @@ export interface OfficialRequirement {
   chunk_id?: string | null;
 }
 
+export interface SourceExcerpt {
+  text: string;
+  document_id: string;
+  chunk_id: string;
+  source_url: string;
+}
+
+/** [지원대상]·[선정기준] 원문 블록 발췌(#107). 검수된 공식 기준이나 개인 자격 확정으로 해석하지 않는다. */
+export interface RequirementExcerpt extends SourceExcerpt {
+  label: string;
+}
+
+export interface ApplicationSchedule {
+  evaluated_on: string;
+  start_date: string | null;
+  end_date: string | null;
+  is_ongoing: boolean;
+  days_to_start: number | null;
+  days_to_end: number | null;
+}
+
 export interface PolicyCheck {
+  required_documents?: SourceExcerpt[] | null;
+  application_schedule?: ApplicationSchedule | null;
   policy_id: string;
   policy_name: string;
   agency: string;
@@ -81,8 +105,23 @@ export interface PolicyCheck {
   contacts?: Contact[] | null;
   /** #78 구현 전까지는 항상 null(#77 계약 자리 예약). */
   exclusion_reasons?: ExclusionReason[] | null;
+  /** 같은 정책의 지원대상·선정기준 원문 발췌가 있을 때만 제공. 없으면 null/생략. */
+  requirement_excerpts?: RequirementExcerpt[] | null;
   /** #76-A 구현 전까지는 항상 null(#77 계약 자리 예약). */
   official_requirements?: OfficialRequirement[] | null;
+}
+
+export interface PolicyListResponse {
+  items: (Omit<PolicyCheck, 'conditions'> & { regions: string[]; categories: string[] })[];
+  total: number;
+  offset: number;
+  limit: number;
+  dataset_version: string;
+  manifest_sha256: string;
+  evaluated_on: string;
+  source_kind: 'release_files';
+  regions: string[];
+  categories: string[];
 }
 
 export interface Citation {
