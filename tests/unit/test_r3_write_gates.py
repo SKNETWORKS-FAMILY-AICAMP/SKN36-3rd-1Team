@@ -6,8 +6,9 @@
 - 1차 확정(stage1_pins, 최종 vector_digest 두 칸만 None): 갱신 단계(--apply·--index·Neo4j --load)만 기준값 게이트를
   통과하고(그 뒤 계획·fingerprint·소유 확인이 계속 지킨다), snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
 - 2차 확정(final_sample_pins, 미확정 0개): 모든 단계가 기준값 게이트를 통과하고, 다른 릴리스·잘못된 값은 다음 검사에서 멈춘다.
-- 실제 R3_PINS(C0, #110 반영 2026-11-23): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고, 그 단계에서 허용되지 않은
-  쓰기 진입점이 모두 쓰기 전에 거부된다 (바꿔 끼우지 않고 실제 값으로 확인).
+- 실제 R3_PINS(C1 stage1, #110 반영 r3b 서버 계획 2026-11-23): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고,
+  갱신 단계는 기준값 게이트를 통과해 다음 검사에서 멈추며, 최종 단계 쓰기는 vector_digest 미확정으로 거부된다
+  (바꿔 끼우지 않고 실제 값으로 확인).
 DB·Docker·Ollama 접속 없음 (sample_only 테스트 더블).
 """
 import hashlib
@@ -234,28 +235,49 @@ class FinalPinTests(Base):
             planner_mod.load_release(bad)
 
 
-class RealC0PinTests(Base):
-    """실제 R3_PINS (바꿔 끼우지 않음). #110 반영 C0: manifest·건수·points만 확정, 계획·결과 값은 미확정."""
+class RealStage1PinTests(Base):
+    """실제 R3_PINS (바꿔 끼우지 않음). #110 반영 C1: 계획 값까지 확정, 최종 vector_digest 두 칸만 미확정."""
 
-    def test_declared_stage_matches_the_values_and_only_plan_results_are_missing(self):
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
-        plan_fields = ("vector_digest", "reuse_count", "reuse_vector_digest", "embed_count", "delete_count", "plan_sha256")
-        self.assertEqual(sorted(profiles.missing_pins()),
-                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in plan_fields))
+    def test_declared_stage_matches_the_values_and_only_final_digests_are_missing(self):
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage1", "stage1"))
+        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
 
-    def test_every_pin_requiring_write_is_refused_before_writing_with_real_pins(self):
+    def test_update_stage_passes_the_pin_gate_and_later_guards_stop_foreign_input(self):
+        """실제 1차 확정값: --apply·--index·Neo4j --load는 ProfileError 없이 다음 검사(계획·그래프 기준)에서 멈춘다."""
         never = AssertionError("쓰기·외부 호출 금지")
         runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
-        with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never),                 patch.object(r2w, "run_docker", side_effect=never):
-            update_stage, full = self.entries(folder, runner, never)
-            for name, call in {**update_stage, **full}.items():
-                with self.subTest(entry=name), patch.dict(os.environ, {}),                         self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+        with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never), \
+                patch.object(r2w, "run_docker", side_effect=never):
+            update_stage, _full = self.entries(folder, runner, never)
+            expected = {"update --apply": (planner.PlanError, "r3 고정값과 다릅니다"),
+                        "update --index": (planner.PlanError, "r3 고정값과 다릅니다"),
+                        "neo4j --load": (neo4j_r3.Neo4jR3Error, "r3 고정값")}
+            for name, call in update_stage.items():
+                with self.subTest(entry=name), self.assertRaisesRegex(*expected[name]):
+                    call()
+        self.assertEqual(self.client.writes, [])
+
+    def test_final_stage_writes_are_refused_for_missing_vector_digest_with_real_pins(self):
+        never = AssertionError("쓰기·외부 호출 금지")
+        runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
+        with tempfile.TemporaryDirectory() as folder:
+            _update_stage, full = self.entries(folder, runner, never)
+            for name, call in full.items():
+                with self.subTest(entry=name), patch.dict(os.environ, {}), \
+                        self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
                     call()
             self.assertEqual(list(Path(folder).iterdir()), [])
         self.assertEqual(self.client.writes, [])
 
-    def test_cli_apply_index_and_load_stop_before_docker_or_connections(self):
-        with tempfile.TemporaryDirectory() as folder,                 patch.object(r2w, "run_docker", side_effect=AssertionError("Docker 호출 금지")),                 patch.object(update, "make_isolated_client", side_effect=AssertionError("접속 금지")),                 patch.dict(os.environ, ENV):
+    def test_cli_apply_and_index_stop_at_the_plan_check_before_docker_or_writes(self):
+        """다른(sample_only) 릴리스 계획은 실제 1차 확정값과 맞지 않아 Docker·쓰기 전에 PlanError로 멈춘다."""
+        from database import embedding as em
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.object(r2w, "run_docker", side_effect=AssertionError("Docker 호출 금지")), \
+                patch.object(update, "make_isolated_client", return_value=self.client), \
+                patch.object(em, "make_ollama_embedder", return_value=lambda texts: (_ for _ in ()).throw(
+                    AssertionError("임베딩 호출 금지"))), \
+                patch.dict(os.environ, ENV):
             plan_path = Path(folder) / "plan.json"
             plan_path.write_text(json.dumps(self.plan), encoding="utf-8")
             for mode in (["--apply"], ["--index", "--ollama-url", "http://127.0.0.1:11434"]):
@@ -264,13 +286,20 @@ class RealC0PinTests(Base):
                     code = update.main(["--qdrant-url", URL, "--collection", "b2", "--plan", str(plan_path), *mode,
                                         "--confirm-write", "--expect-fingerprint", "0" * 64, "--report", str(report)])
                     output = json.loads(report.read_text(encoding="utf-8"))
-                    self.assertEqual((code, output["error_type"]), (1, "ProfileError"))
-            with patch("neo4j.GraphDatabase.driver", side_effect=AssertionError("접속 금지")):
-                report = Path(folder) / "neo4j-load.json"
-                code = neo4j_r3.main(["--neo4j-url", f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}", "--load",
-                                      "--confirm-write", "--expect-fingerprint", "0" * 64, "--report", str(report)])
-                output = json.loads(report.read_text(encoding="utf-8"))
-                self.assertEqual((code, output["error_type"]), (1, "ProfileError"))
+                    self.assertEqual((code, output["error_type"]), (1, "PlanError"))
+                    self.assertNotIn(ENV[update.API_KEY_ENV], json.dumps(output))
+        self.assertEqual(self.client.writes, [])
+
+    def test_cli_neo4j_load_passes_the_pin_gate_and_stops_at_the_connection(self):
+        """실제 1차 확정값은 Neo4j 적재 기준값 게이트를 통과한다 → 다음 단계(접속)에서 막아 쓰기 0을 확인한다."""
+        with tempfile.TemporaryDirectory() as folder, \
+                patch("neo4j.GraphDatabase.driver", side_effect=AssertionError("접속 금지")) as driver:
+            report = Path(folder) / "neo4j-load.json"
+            code = neo4j_r3.main(["--neo4j-url", f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}", "--load",
+                                  "--confirm-write", "--expect-fingerprint", "0" * 64, "--report", str(report)])
+            output = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual((code, output["error_type"]), (1, "AssertionError"))
+        self.assertTrue(driver.called)
 
 
 class StageMapTests(unittest.TestCase):

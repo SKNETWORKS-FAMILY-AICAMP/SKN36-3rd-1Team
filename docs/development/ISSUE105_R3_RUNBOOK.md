@@ -4,6 +4,7 @@
 > 아래 2026-11-22 기록(#104 기준 build·snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`)은 보존 자산이며 #110 반영본이 아니다.
 > **C0 진입 (2026-11-23, #110 병합 `7aa5266`):** `R3_PINS`를 #110 릴리스 기준 pending으로 바꿨다(§5.5.2). manifest `29b57236…`·release_counts·points만 확정, 계획·임베딩 결과 값은 미확정.
 > #104 기준 1·2차 확정값은 §5.5(아래 기록)에 그대로 보존한다.
+> **C1 진입 (2026-11-23, 1931ca8 기준):** r3b 서버 계획 값을 확정해 `R3_PIN_STAGE = "stage1"`로 바꿨다(§5.5.2). 최종 `vector_digest` 두 칸만 미확정.
 > 예정: 원본 snapshot(r2·#31)에서 재구축 → 재임베딩 B2 108·B3 123(26개는 payload만 갱신) → 새 빈 Neo4j에 1133/2674 전체 적재.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
@@ -294,14 +295,20 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 
 | 단계 | 기준값 상태 | 기준값 게이트를 통과하는 쓰기 (`STAGE_ALLOWED_WRITES`) | 거부되는 쓰기 |
 |---|---|---|---|
-| **pending (C0, 현재)** | manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`, release_counts 246·268·663·1133·2674·211, points B2 1233·B3 1320, remove_count 0. 나머지(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest) None | 원본 snapshot 복원(`--restore-snapshot`), `--write-plan`, `--report` (새 로컬 파일) | `--apply`, `--index`, Neo4j `--load`·`--resume`, `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 `--apply` |
-| stage1 (C1) | 위 + r3b 서버 계획의 reuse·embed·delete·plan_sha256·reuse_vector_digest. 최종 vector_digest 두 칸만 None | pending + `--apply`, `--index`, Neo4j `--load`·`--resume` | `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 |
+| pending (C0, 2026-11-23 완료) | manifest `29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7`, release_counts 246·268·663·1133·2674·211, points B2 1233·B3 1320, remove_count 0. 나머지(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest) None | 원본 snapshot 복원(`--restore-snapshot`), `--write-plan`, `--report` (새 로컬 파일) | `--apply`, `--index`, Neo4j `--load`·`--resume`, `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 `--apply` |
+| **stage1 (C1, 현재)** | 위 + r3b 서버 계획의 reuse·embed·delete·plan_sha256·reuse_vector_digest. 최종 vector_digest 두 칸만 None | pending + `--apply`, `--index`, Neo4j `--load`·`--resume` | `--cross-db`, `--create-snapshot`, `--build`, 번들 복원 |
 | final (C2) | 위 + complete 상태의 컬렉션별 vector_digest. None 0 | 모든 쓰기 (각 단계의 Docker 소유·fingerprint·서버 상태 검사는 그대로) | (기준값 게이트로는 없음) |
 
 - C0 값은 릴리스 파일에서 다시 계산해 확인했다(manifest 파일 34개 체크섬 일치, 12개 정책 `application_start/end` = null, 12개 `source_text` SHA = `content_hash`).
 - `load_release()`는 C0 값(manifest·건수·points)과 다르면 거부한다. 쓰기용 계획 검증(`require_pins`)은 C0에서 거부되고, 검토용 검증은 확정된 칸만 대조한다.
 - `remove_count` 0은 예상값이다. r3b 서버 계획의 값이 다르면 `validate_plan`이 거부하므로, 그때 근거를 검토해 C1에서 고친다.
-- 예상 계획(확정 아님): B2 재사용 1125·삭제 14·신규 94·임베딩 108, B3 재사용 1197·삭제 23·신규 100·임베딩 123.
+- C1 확정값 (r3b 서버 계획, `basis=server_snapshot`, 계획 파일 원문에서 `plan_sha256`을 다시 계산해 확인):
+  - B2: points 1233, reuse 1125, embed 108(신규 94 + 삭제 후 재임베딩 14), delete 14, remove 0, `reuse_vector_digest` `5e914b9e…fa7b`, `plan_sha256` `80aed399…7738`
+    - 재사용 1125 = identical 1099 + core_refresh 26(#110 `content_hash`만 변경). 실행 ID `…20261107_173008` 1121·`…20261119_015749` 4
+  - B3: points 1320, reuse 1197, embed 123(신규 100 + 재임베딩 23), delete 23, remove 0, `reuse_vector_digest` `d926c898…4cce`, `plan_sha256` `787d6cd3…f02d`
+    - 재사용 1197 = identical 990 + metadata_refresh 179 + core_refresh 28(#110 26 + 기존 위치 보정 2). 실행 ID `…20261107_173026` 1197
+  - 원본: B2 r2 snapshot 1139 `8577c3c8…`, B3 #31 snapshot 1220 `0a794e34…` (R3_SOURCES와 같음). 계획 파일 SHA-256: `plan-b2.json` `65e530d7…`, `plan-b3.json` `8e7d6258…` (로컬, Git 제외)
+- 참고: 원본 snapshot 복원 보고서(`01-b3-restore.json`, `02-b2-restore.json`)의 최상위 `mode="dry-run"`·`db_writes=0`은 복원 직후 실행한 확인용 dry-run 값이다. 실제 쓰기 결과는 `result.status="RESTORED"`에 있다(§7).
 
 ### 5.6 독립 복원 검증 (verify 환경)
 
@@ -341,6 +348,7 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify
   - build Neo4j(`bolt://127.0.0.1:56677`)는 아직 비어 있다. 그래서 교차 검증의 성공 여부는 알 수 없다.
 - 실제 `docker ps`·`docker inspect` 출력 형식과 FakeDocker의 일치(테스트 더블 기준. r2 verify 래퍼는 실제 환경에서 동작 확인됨)
 - 과거 재사용 벡터의 모델 digest(기록 없음, §5.5.1)
+- `update_r3_collections`의 `--restore-snapshot`·`--apply`·`--index` 보고서: 최상위 `mode`·`db_writes`가 쓰기 뒤 확인용 dry-run 값으로 덮인다(`main()`의 `output.update(dry_run(...))`). 실제 쓰기 결과는 `result`에 있다. 표시 개선은 별도 작업
 - Ollama 모델 digest 확인 자동화(현재 수동)
 - 여섯 표현(모두의카드·모두의 카드·K-패스·k-패스·K패스·k패스) 검색 테스트
   - B2·B3 프로필 각각 확인해야 한다.

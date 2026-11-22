@@ -4,7 +4,7 @@ r2(#91)와 r3(#105)의 기대값·manifest·vector digest·snapshot 정보를 �
 
 - R2: #91에서 실제로 검증을 마친 값(동결). 기존 r2 도구(restore_final_v140·seed·update·load·build·restore_r2_isolated)의
   상수는 그대로 두고, 이 표의 값과 같은지는 tests/unit/test_restore_profiles_v140.py가 확인한다.
-- R3: B2·B3 두 컬렉션 + Neo4j. #110 반영 릴리스(manifest 29b57236…, 2026-11-23 병합 7aa5266) 기준 C0(pending) 단계다.
+- R3: B2·B3 두 컬렉션 + Neo4j. #110 반영 릴리스(manifest 29b57236…, 2026-11-23 병합 7aa5266) 기준 C1(stage1) 단계다.
   #104 기준(manifest 2e22d2a7…)으로 1·2차 확정했던 값은 보존 자산 기록이며 Runbook §5.5에 남겼다.
   단계(R3_PIN_STAGE, pin_stage()로 실제 값과 대조): pending → stage1(최종 vector_digest 두 칸만 None) → final(None 0).
   None이 하나라도 있으면 require_finalized()가 거부한다. R3_PINS 미확정 상태에서
@@ -85,22 +85,28 @@ R3_SOURCES: dict[str, dict[str, Any]] = {
 # r3 기준값. None = 미확정 (require_finalized가 거부한다). 값은 dry-run의 proposed_pins를 검토해 옮겨 적는다.
 # C0 (2026-11-23, #110 반영 7aa5266): 릴리스 파일에서 직접 다시 계산해 확인한 값만 적었다.
 #   manifest LF SHA-256·release_counts·컬렉션별 points(B2·B3 청킹 결과 수). load_release()가 이 값과 다르면 거부한다.
-#   계획·임베딩 결과에서만 정해지는 값(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest)은 None이다.
-#   remove_count 0은 "원본에만 있고 삭제 대상도 아닌 Point 0개"라는 예상이며, 계획의 값이 다르면 validate_plan이 거부한다.
+# C1 (2026-11-23, 1931ca8 기준): r3b build 서버(issue105-r3b-build)에 원본 snapshot(B2 r2 8577c3c8…·B3 #31 0a794e34…)을
+#   복원한 뒤 만든 서버 계획(basis=server_snapshot)의 검증값. 계획 파일(로컬, Git 제외): .cache/issue105-r3b/plan-b2.json
+#   (SHA-256 65e530d7…), plan-b3.json (8e7d6258…), 보고서 03-b2-plan.json·04-b3-plan.json의 proposed_pins와 같다.
+#   remove_count는 두 계획 모두 0(C0 예상과 같음). 최종 vector_digest 두 칸만 임베딩 완료 후 C2에서 확정한다.
 # #104 기준 1·2차 확정값(manifest 2e22d2a7…, B2 d1fa3194…, B3 a471e21f…)은 보존 기록이다 → Runbook §5.5.
 R3_PINS: dict[str, Any] = {
     "manifest_lf_sha256": "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7",
     "release_counts": {"policies": 246, "documents": 268, "release_chunks": 663, "neo4j_nodes": 1133,
                        "neo4j_relationships": 2674, "requires_condition": 211},
     "collections": {
-        "b2": {"points": 1233, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
-               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
-        "b3": {"points": 1320, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
-               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
+        "b2": {"points": 1233, "vector_digest": None, "reuse_count": 1125,
+               "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
+               "embed_count": 108, "delete_count": 14, "remove_count": 0,
+               "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738"},
+        "b3": {"points": 1320, "vector_digest": None, "reuse_count": 1197,
+               "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
+               "embed_count": 123, "delete_count": 23, "remove_count": 0,
+               "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d"},
     },
 }
 # 선언한 단계. pin_stage()가 R3_PINS에서 계산한 단계와 같아야 한다(테스트가 확인) → 값만 바꾸고 단계를 잊는 실수를 막는다.
-R3_PIN_STAGE = "pending"
+R3_PIN_STAGE = "stage1"
 
 R3_COLLECTIONS: dict[str, dict[str, Any]] = {
     "b2": {"config": "A_B2_V140", "collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2",

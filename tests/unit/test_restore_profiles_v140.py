@@ -70,22 +70,28 @@ class R3PinTests(unittest.TestCase):
                   if pins["collections"][k]["vector_digest"] is not None]
         self.assertEqual(len(set(finals)), len(finals))                            # 컬렉션마다 다른 값
 
-    def test_real_r3_pins_are_c0_pending_for_the_110_release(self):
-        """C0: 릴리스 파일에서 확인한 manifest·건수·points만 확정. 확정 쓰기는 기준값 게이트에서 모두 거부된다."""
+    def test_real_r3_pins_are_stage1_for_the_110_release(self):
+        """C1: r3b 서버 계획 값까지 확정, 최종 vector_digest 두 칸만 미확정 → 갱신 단계만 기준값 게이트 통과."""
         pins = profiles.R3_PINS
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage1", "stage1"))
         self.assertEqual(pins["manifest_lf_sha256"], "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7")
         self.assertEqual(pins["release_counts"], {"policies": 246, "documents": 268, "release_chunks": 663,
                                                   "neo4j_nodes": 1133, "neo4j_relationships": 2674,
                                                   "requires_condition": 211})
-        self.assertEqual({k: pins["collections"][k]["points"] for k in profiles.COLLECTION_KEYS}, {"b2": 1233, "b3": 1320})
-        self.assertEqual(sorted(profiles.missing_pins()),
-                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in self.PLAN_FIELDS))
-        self.assertFalse(profiles.is_finalized())
-        for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
-            with self.subTest(deferred=deferred), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-                profiles.require_finalized(deferred=deferred)
-        self.assert_well_formed(pins)
+        plan = {"b2": {"points": 1233, "reuse_count": 1125, "embed_count": 108, "delete_count": 14, "remove_count": 0,
+                       "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
+                       "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738"},
+                "b3": {"points": 1320, "reuse_count": 1197, "embed_count": 123, "delete_count": 23, "remove_count": 0,
+                       "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
+                       "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d"}}
+        for key in profiles.COLLECTION_KEYS:
+            self.assertEqual({f: pins["collections"][key][f] for f in plan[key]}, plan[key])
+            self.assertIsNone(pins["collections"][key]["vector_digest"])
+        self.assertEqual(sorted(profiles.missing_pins()), sorted(profiles.UPDATE_STAGE_DEFERRED_PINS))
+        self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), pins)
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+            profiles.require_finalized()
+        self.assert_well_formed(pins)            # reuse + embed = points, reuse + delete = 원본 Point 수 (B2 1139, B3 1220)
 
     def test_declared_stage_must_match_the_values(self):
         """단계 상수와 실제 값이 어긋나면(값만 바꾸고 단계를 잊음) 실패해야 한다."""

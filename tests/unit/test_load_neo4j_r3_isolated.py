@@ -197,15 +197,15 @@ class ReferenceAndLoadTests(unittest.TestCase):
             r3.cross_check(qdrant, runner, self.ref, pins=final_sample_pins())
         self.assertEqual(qdrant.writes, [])
 
-    def test_real_c0_pins_refuse_load_and_cross_check_before_writing(self):
-        """실제 R3_PINS(C0): 적재·교차 검증 모두 기준값 게이트에서 멈춘다 (FakeNeo4j·Qdrant 쓰기 0)."""
+    def test_real_stage1_pins_pass_the_load_gate_but_refuse_cross_check(self):
+        """실제 R3_PINS(C1 stage1): 메모리 FakeNeo4j 적재 게이트는 통과하고, 교차 검증은 vector_digest 미확정으로 거부된다."""
         runner = FakeNeo4j()
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-            r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), docker=self.docker)
+        result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), docker=self.docker)
+        self.assertEqual(result["status"], "LOADED")
         qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
             r3.cross_check(qdrant, runner, self.ref)
-        self.assertEqual((runner.writes(), qdrant.writes), ([], []))
+        self.assertEqual(qdrant.writes, [])
 
     def test_load_stops_before_writing_without_build_ownership(self):
         runner = FakeNeo4j()

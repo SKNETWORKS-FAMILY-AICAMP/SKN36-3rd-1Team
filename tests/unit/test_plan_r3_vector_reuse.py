@@ -124,13 +124,14 @@ class ValidatePlanTests(unittest.TestCase):
             planner.validate_plan(self.plans["b2"], self.s.release, stage1_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
-    def test_real_c0_pins_refuse_pinned_plan_validation_but_allow_review(self):
-        """C0 실제 R3_PINS: 쓰기용 계획 검증(require_pins)은 기준값 게이트에서 거부, 검토용 검증은 확정된 칸만 대조한다."""
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+    def test_real_stage1_pins_gate_and_compare_the_pinned_plan_values(self):
+        """실제 R3_PINS(C1): 갱신 단계 검증은 기준값 게이트를 통과한 뒤 계획 값(points 등)을 대조해 다른 계획을 거부하고,
+        최종 단계 검증(vector_digest까지 요구)은 기준값 게이트에서 거부된다."""
+        with self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):
             planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
-        with self.assertRaisesRegex(planner.PlanError, r"r3 고정값과 다릅니다: \['points'\]"):   # C0에서 확정된 points(1233)와 다름
-            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources)
+        with self.assertRaisesRegex(profiles.ProfileError, "vector_digest"):
+            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources, require_pins=True)
 
     def test_finalized_pins_must_match_the_plan(self):
         pins = self.s.pins_for(self.plans)
