@@ -220,3 +220,40 @@ def test_issue78_confirmed_age_with_other_unknown_exclusions():
     assert reasons[0]["field"] == "age"
     assert "75" in reasons[0]["reason"]
     assert "제외" in reasons[0]["reason"]
+
+
+@pytest.mark.parametrize("affected", [["age"], ["all"], []])
+def test_issue78_affected_quality_does_not_confirm_exclusion(affected):
+    """A quality-held age condition cannot simultaneously be an exclusion."""
+    policy = sample_exclusion_policy()
+    policy["data_quality"] = {
+        "hold_auto_eligibility": True,
+        "affected_attributes": affected,
+    }
+    result = checker.check_eligibility(
+        {"age": 80, "region": None, "income": None}, policy
+    )
+    age_rows = [row for row in result["conditions"] if row["field"] == "age"]
+    assert len(age_rows) == 1
+    assert age_rows[0]["status"] == checker.CHECK
+    assert result["conditions"][-1]["status"] == checker.CHECK
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_only_one_walk_evaluates_each_condition(monkeypatch):
+    """Exclusion display reuses _walk instead of calling _condition twice."""
+    calls = []
+    original = checker._condition
+
+    def counted(condition, profile):
+        calls.append(condition)
+        return original(condition, profile)
+
+    monkeypatch.setattr(checker, "_condition", counted)
+    result = checker.check_eligibility(
+        {"age": 80, "region": None, "income": None},
+        sample_exclusion_policy(),
+    )
+    assert result["exclusion_reasons"]
+    # One SPECIAL_TARGET + one AGE leaf. No second exclusion traversal.
+    assert len(calls) == 2

@@ -56,13 +56,22 @@ def _is_valid_age_range(low: int, high: int) -> bool:
     return 0 <= low <= high <= MAX_VALID_AGE
 
 
+def _is_unverified_full_age_range(low: int, high: int) -> bool:
+    """0~120은 공식 연령 제한을 확정할 수 없는 포괄적 추출 범위다."""
+    return low == 0 and high == NO_UPPER_LIMIT_SENTINEL
+
+
 def _has_no_upper_limit(low: int, high: int) -> bool:
     """상한 120 관례를 무제한으로 표현할지 결정한다.
 
     0~120은 광범위한 추출 범위이므로 자동으로
     연령 무제한이라 단정하지 않는다.
     """
-    return low > 0 and high == NO_UPPER_LIMIT_SENTINEL
+    return (
+        low >= 0
+        and high == NO_UPPER_LIMIT_SENTINEL
+        and not _is_unverified_full_age_range(low, high)
+    )
 
 
 _AGE_RANGE = re.compile(
@@ -212,7 +221,7 @@ def _condition(condition: dict, profile: dict) -> dict:
 
         status = OK if low <= age <= high else NO
 
-        if low == 0 and high == NO_UPPER_LIMIT_SENTINEL:
+        if _is_unverified_full_age_range(low, high):
             return _result(
                 field,
                 status,
@@ -303,8 +312,13 @@ def _walk(
     required_and_path: bool = False,
     affected: set[str] | None = None,
     certain_failures: list[bool] | None = None,
+    exclusion_trace: dict | None = None,
 ) -> tuple[str, list[dict]]:
-    """Evaluate a tree once, collecting decisive AND failures when requested."""
+    """Evaluate once; optionally retain references for exclusion display.
+
+    The trace references the exact result dictionaries in `items`, so the
+    later data-quality downgrades are visible without reevaluating conditions.
+    """
 
     if unavailable_group(group, depth):
         if issues is not None:
@@ -353,6 +367,9 @@ def _walk(
             )
         ]
 
+    if exclusion_trace is not None:
+        exclusion_trace.update(logic=logic, conditions=[], groups=[])
+
     for condition in conditions:
         if not isinstance(condition, dict):
             if issues is not None:
@@ -367,6 +384,8 @@ def _walk(
 
         items.append(item)
         states.append(item["status"])
+        if exclusion_trace is not None:
+            exclusion_trace["conditions"].append((condition, item))
         if (
             certain_failures is not None
             and required_and_path
@@ -379,6 +398,7 @@ def _walk(
             certain_failures[0] = True
 
     for child in children:
+        child_trace = {} if exclusion_trace is not None else None
         status, nested = _walk(
             child,
             profile,
@@ -387,195 +407,145 @@ def _walk(
             required_and_path=required_and_path and logic == "AND",
             affected=affected,
             certain_failures=certain_failures,
+            exclusion_trace=child_trace,
         )
 
         states.append(status)
         items.extend(nested)
+        if exclusion_trace is not None:
+            exclusion_trace["groups"].append(child_trace)
 
     group_status = _combine(logic, states)
 
     # 결과가 프론트 및 LLM에 그대로 전달되므로 내부 group_id는 노출하지 않는다.
-    items.append(
-        _result(
-            "eligibility",
-            group_status,
-            _GROUP_REASONS[logic],
-        )
+    group_item = _result(
+        "eligibility",
+        group_status,
+        _GROUP_REASONS[logic],
     )
+    items.append(group_item)
+    if exclusion_trace is not None:
+        exclusion_trace["result"] = group_item
 
     return group_status, items
 
 def _is_confirmed_exclusion_match(
     condition: dict,
     item: dict,
+    affected: set[str],
 ) -> bool:
-    """확정적으로 안내 가능한 제외 조건인지 확인한다.
-
-    계산용 status는 변경하지 않는다.
-    0~120세는 데이터상 광범위한 연령 범위이므로
-    공식 기준 확인 전에는 확정 제외 사유로 사용하지 않는다.
-    """
-    if item["status"] != OK:
+    """An eligible exclusion operand may be displayed only if verified."""
+    if (
+        item["status"] != OK
+        or "all" in affected
+        or "exclusion" in affected
+        or _field(condition) in affected
+    ):
         return False
 
     if _field(condition) == "age":
-        match = _AGE_RANGE.fullmatch(
-            str(condition.get("value") or "")
-        )
-
-        if match:
+        match = _AGE_RANGE.fullmatch(str(condition.get("value") or ""))
+        if match is not None:
             low, high = map(int, match.groups())
-
-            if (low, high) == (
-                0, NO_UPPER_LIMIT_SENTINEL
-            ):
+            if _is_unverified_full_age_range(low, high):
                 return False
 
     return True
 
+
 def _positive_exclusion_matches(
-    group: dict,
-    profile: dict,
-    depth: int = 0,
-) -> tuple[str, list[dict]]:
-    """Find proven matching conditions in an exclusion operand.
+    trace: dict,
+    affected: set[str],
+) -> list[dict]:
+    """Find proven leaves from _walk's evaluated trace, without recalculation.
 
-    Only AND/OR operands with a confirmed eligible result
-    can provide exclusion evidence. Nested NOT and unknown
-    structures are conservatively left unconfirmed.
+    A positive AND proof must contain confirmed evidence for every operand.
+    A positive OR proof may use any individually confirmed true operand.
+    Nested NOT/invalid groups are left unconfirmed for safety.
     """
-    if unavailable_group(group, depth):
-        return CHECK, []
+    if not isinstance(trace, dict) or trace.get("logic") not in {"AND", "OR"}:
+        return []
+    if trace.get("result", {}).get("status") != OK:
+        return []
 
-    logic = str(group.get("logic") or "").upper()
-    if logic not in {"AND", "OR"}:
-        return CHECK, []
-
-    conditions = group.get("conditions")
-    children = group.get("groups")
-
-    if not isinstance(conditions, list) or not isinstance(children, list):
-        return CHECK, []
-
-    states = []
+    logic = trace["logic"]
     matches = []
-
-    for condition in conditions:
+    for condition, item in trace["conditions"]:
         if not isinstance(condition, dict):
-            states.append(CHECK)
+            if logic == "AND":
+                return []
             continue
-
-        item = _condition(condition, profile)
-        states.append(item["status"])
-
-        if _is_confirmed_exclusion_match(condition, item):
+        if _is_confirmed_exclusion_match(condition, item, affected):
             matches.append(item)
+        elif logic == "AND":
+            return []
 
-    for child in children:
-        if not isinstance(child, dict):
-            states.append(CHECK)
-            continue
-
-        status, child_matches = _positive_exclusion_matches(
-            child, profile, depth + 1
-        )
-        states.append(status)
-
-        if status == OK:
+    for child in trace["groups"]:
+        child_matches = _positive_exclusion_matches(child, affected)
+        if child_matches:
             matches.extend(child_matches)
+        elif logic == "AND":
+            return []
 
-    result = _combine(logic, states)
-
-    if result != OK:
-        return result, []
-
-    return OK, matches
+    return matches
 
 
 def _collect_exclusion_reasons(
-    tree: dict,
-    profile: dict,
+    trace: dict,
+    affected: set[str],
 ) -> list[dict]:
-    """Collect confirmed NOT exclusion reasons for display only.
+    """Collect confirmed mandatory NOT reasons from _walk's result trace.
 
-    This function never changes the Checker's calculation
-    or any conditions[].status.
+    The trace holds references to post-quality-gate condition dictionaries.
+    No condition, boolean group, or original tree is evaluated a second time.
     """
+    if "all" in affected or "exclusion" in affected:
+        return []
+
     matched = []
 
-    def visit(group: dict, depth: int = 0) -> None:
-        if unavailable_group(group, depth):
+    def visit(group: dict) -> None:
+        if not isinstance(group, dict):
             return
-
-        logic = str(group.get("logic") or "").upper()
-        if logic not in {"AND", "OR", "NOT"}:
-            return
-
-        conditions = group.get("conditions")
-        children = group.get("groups")
-
-        if not isinstance(conditions, list) or not isinstance(children, list):
-            return
-
-        if logic == "NOT":
-            # A valid NOT group must have exactly one operand.
+        logic = group.get("logic")
+        if logic == "AND":
+            # NOT inside a selectable OR branch is not a mandatory exclusion.
+            for child in group["groups"]:
+                visit(child)
+        elif logic == "NOT":
+            if group.get("result", {}).get("status") != NO:
+                return
+            conditions = group["conditions"]
+            children = group["groups"]
             if len(conditions) + len(children) != 1:
                 return
-
             if conditions:
-                condition = conditions[0]
-                if not isinstance(condition, dict):
-                    return
-
-                item = _condition(condition, profile)
-                if _is_confirmed_exclusion_match(condition, item):
+                condition, item = conditions[0]
+                if isinstance(condition, dict) and _is_confirmed_exclusion_match(
+                    condition, item, affected
+                ):
                     matched.append(item)
             else:
-                child = children[0]
-                if not isinstance(child, dict):
-                    return
+                matched.extend(_positive_exclusion_matches(children[0], affected))
 
-                status, matches = _positive_exclusion_matches(
-                    child, profile, depth + 1
-                )
-
-                if status == OK:
-                    matched.extend(matches)
-
-            return
-
-        # Only mandatory AND paths may establish a confirmed exclusion.
-        # A NOT branch under OR is optional and must not create a reason.
-        if logic != "AND":
-            return
-
-        for child in children:
-            if isinstance(child, dict):
-                visit(child, depth + 1)
-
-    visit(tree)
-
+    visit(trace)
     reasons = []
     seen = set()
-
     for item in matched:
         reason = (
             f"{item['reason'].rstrip('.')}."
             " 해당 조건은 지원 제외 기준이며,"
             " 입력하신 정보가 제외 대상에 해당합니다."
         )
-
         key = (item["field"], item["label"], reason)
         if key in seen:
             continue
-
         seen.add(key)
         reasons.append({
             "field": item["field"],
             "label": item["label"],
             "reason": reason,
         })
-
     return reasons
 
 
@@ -961,6 +931,8 @@ def check_eligibility(
     root_results: list[dict] = []
     walk_issues: set[str] = set()
     certain_failures = [False]
+    # One optional trace for the only supported unambiguous root.
+    exclusion_trace = {} if isinstance(trees, list) and len(trees) == 1 else None
 
     if (
         missing
@@ -983,6 +955,7 @@ def check_eligibility(
                 tree, profile, issues=walk_issues,
                 required_and_path=scoped_unknown is not None and len(trees) == 1,
                 affected=affected, certain_failures=certain_failures,
+                exclusion_trace=exclusion_trace,
             )
             # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
             # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
@@ -1118,9 +1091,10 @@ def check_eligibility(
         and len(trees) == 1
         and len(root_results) == 1
         and root_results[0]["status"] == NO
+        and exclusion_trace is not None
     ):
         matches = _collect_exclusion_reasons(
-            trees[0], profile
+            exclusion_trace, affected
         )
         exclusion_reasons = matches or None
 
