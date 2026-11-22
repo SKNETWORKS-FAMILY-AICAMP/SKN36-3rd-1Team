@@ -257,3 +257,149 @@ def test_issue78_only_one_walk_evaluates_each_condition(monkeypatch):
     assert result["exclusion_reasons"]
     # One SPECIAL_TARGET + one AGE leaf. No second exclusion traversal.
     assert len(calls) == 2
+
+# ----- #78: composite NOT proofs; preserve conjunction/disjunction semantics -----
+
+def _issue78_compound_age_policy():
+    policy = sample_exclusion_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    root["conditions"] = []
+    root["groups"][0]["groups"] = [
+        {
+            "group_id": "EXCLUSION_AND",
+            "logic": "AND",
+            "conditions": [
+                {"type": "AGE", "name": "65세 이상", "operator": "BETWEEN", "value": "65~120"},
+                {"type": "AGE", "name": "80세 이하", "operator": "BETWEEN", "value": "1~80"},
+            ],
+            "groups": [],
+        }
+    ]
+    return policy
+
+
+@pytest.mark.parametrize(
+    "age, root_status, excluded",
+    [(64, checker.OK, False), (70, checker.NO, True), (81, checker.OK, False)],
+)
+def test_issue78_composite_and_boundaries(age, root_status, excluded):
+    result = checker.check_eligibility({"age": age}, _issue78_compound_age_policy())
+    assert result["conditions"][-1]["status"] == root_status
+    reasons = result["exclusion_reasons"]
+    if excluded:
+        assert reasons is not None and len(reasons) == 1
+        assert reasons[0]["field"] == "age"
+        assert "복합 제외 조건" in reasons[0]["label"]
+        assert "65" in reasons[0]["reason"]
+        assert "80" in reasons[0]["reason"]
+        assert "모두 충족" in reasons[0]["reason"]
+    else:
+        assert reasons is None
+
+
+@pytest.mark.parametrize("age, composite", [(70, True), (100, False)])
+def test_issue78_or_of_and_proof_not_split(age, composite):
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    exclusion = root["groups"][0]
+    compound = exclusion["groups"][0]
+    exclusion["groups"] = [{
+        "group_id": "EXCLUSION_OR",
+        "logic": "OR",
+        "conditions": [
+            {"type": "AGE", "name": "95세 이상", "operator": "BETWEEN", "value": "95~110"}
+        ],
+        "groups": [compound],
+    }]
+    result = checker.check_eligibility({"age": age}, policy)
+    assert result["conditions"][-1]["status"] == checker.NO
+    reasons = result["exclusion_reasons"]
+    assert reasons is not None and len(reasons) == 1
+    assert ("복합 제외 조건" in reasons[0]["label"]) is composite
+    if composite:
+        assert "65" in reasons[0]["reason"] and "80" in reasons[0]["reason"]
+    else:
+        assert "95" in reasons[0]["reason"]
+
+
+def test_issue78_and_of_or_proof_is_single_joint_reason():
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    compound = root["groups"][0]["groups"][0]
+    compound["conditions"] = [compound["conditions"][1]]
+    compound["groups"] = [{
+        "group_id": "CHOICE_OR",
+        "logic": "OR",
+        "conditions": [
+            {"type": "AGE", "name": "65세 이상", "operator": "BETWEEN", "value": "65~120"},
+            {"type": "AGE", "name": "66세 이상", "operator": "BETWEEN", "value": "66~120"},
+        ],
+        "groups": [],
+    }]
+    result = checker.check_eligibility({"age": 70}, policy)
+    assert result["conditions"][-1]["status"] == checker.NO
+    reasons = result["exclusion_reasons"]
+    assert reasons is not None and len(reasons) == 1
+    assert "복합 제외 조건" in reasons[0]["label"]
+    assert "80" in reasons[0]["reason"]
+
+
+def test_issue78_two_or_terms_are_independent_exclusions():
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    disjunction = root["groups"][0]["groups"][0]
+    disjunction["logic"] = "OR"
+    result = checker.check_eligibility({"age": 70}, policy)
+    assert result["conditions"][-1]["status"] == checker.NO
+    reasons = result["exclusion_reasons"]
+    assert reasons is not None and len(reasons) == 2
+    assert all("복합 제외 조건" not in r["label"] for r in reasons)
+
+
+def test_issue78_and_with_unverified_full_range_is_not_confirmed():
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    compound = root["groups"][0]["groups"][0]
+    compound["conditions"][1]["value"] = "0~120"
+    result = checker.check_eligibility({"age": 70}, policy)
+    assert result["conditions"][-1]["status"] == checker.NO
+    assert result["exclusion_reasons"] is None
+
+
+@pytest.mark.parametrize("affected", [["age"], ["all"], ["exclusion"]])
+def test_issue78_compound_quality_hold_does_not_confirm_exclusion(affected):
+    policy = _issue78_compound_age_policy()
+    policy["data_quality"] = {
+        "hold_auto_eligibility": True,
+        "affected_attributes": affected,
+    }
+    result = checker.check_eligibility({"age": 70}, policy)
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_incomplete_compound_and_is_not_confirmed():
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    compound = root["groups"][0]["groups"][0]
+    compound["conditions"].append({
+        "type": "SPECIAL_TARGET",
+        "name": "원문 확인이 필요한 추가 조건",
+        "value": "미검증",
+    })
+    result = checker.check_eligibility({"age": 70}, policy)
+    assert result["conditions"][-1]["status"] == checker.CHECK
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_composite_does_not_recalculate_conditions(monkeypatch):
+    calls = []
+    original = checker._condition
+
+    def counted(condition, profile):
+        calls.append(condition)
+        return original(condition, profile)
+
+    monkeypatch.setattr(checker, "_condition", counted)
+    result = checker.check_eligibility({"age": 70}, _issue78_compound_age_policy())
+    assert result["exclusion_reasons"]
+    assert len(calls) == 2

@@ -456,12 +456,14 @@ def _is_confirmed_exclusion_match(
 def _positive_exclusion_matches(
     trace: dict,
     affected: set[str],
-) -> list[dict]:
-    """Find proven leaves from _walk's evaluated trace, without recalculation.
+) -> list[list[dict]]:
+    """Derive sufficient exclusion proofs from the existing _walk trace.
 
-    A positive AND proof must contain confirmed evidence for every operand.
-    A positive OR proof may use any individually confirmed true operand.
-    Nested NOT/invalid groups are left unconfirmed for safety.
+    Each inner list is ONE jointly sufficient proof. OR supplies alternative
+    proofs; AND requires one confirmed proof for every operand. A nested OR
+    within an AND uses one actually verified alternative, not every one.
+    An unsupported/unknown operand makes its AND proof unavailable.
+    No condition is evaluated again.
     """
     if not isinstance(trace, dict) or trace.get("logic") not in {"AND", "OR"}:
         return []
@@ -469,47 +471,56 @@ def _positive_exclusion_matches(
         return []
 
     logic = trace["logic"]
-    matches = []
+    operands: list[list[list[dict]]] = []
+
     for condition, item in trace["conditions"]:
-        if not isinstance(condition, dict):
-            if logic == "AND":
-                return []
-            continue
-        if _is_confirmed_exclusion_match(condition, item, affected):
-            matches.append(item)
+        if isinstance(condition, dict) and _is_confirmed_exclusion_match(
+            condition, item, affected
+        ):
+            operands.append([[item]])
         elif logic == "AND":
             return []
 
     for child in trace["groups"]:
-        child_matches = _positive_exclusion_matches(child, affected)
-        if child_matches:
-            matches.extend(child_matches)
+        alternatives = _positive_exclusion_matches(child, affected)
+        if alternatives:
+            operands.append(alternatives)
         elif logic == "AND":
             return []
 
-    return matches
+    if not operands:
+        return []
+
+    if logic == "OR":
+        # Each proven OR branch suffices independently.
+        return [proof for alternatives in operands for proof in alternatives]
+
+    # AND is a single conjunction, never separate exclusion reasons.
+    # A proven alternative is enough for each nested OR operand.
+    combined = [item for alternatives in operands for item in alternatives[0]]
+    return [combined]
 
 
 def _collect_exclusion_reasons(
     trace: dict,
     affected: set[str],
 ) -> list[dict]:
-    """Collect confirmed mandatory NOT reasons from _walk's result trace.
+    """Format mandatory NOT proofs without losing nested AND/OR semantics.
 
-    The trace holds references to post-quality-gate condition dictionaries.
-    No condition, boolean group, or original tree is evaluated a second time.
+    All proofs reuse _walk's original item references, after quality holds.
+    This function never calls _condition or reevaluates a condition tree.
     """
     if "all" in affected or "exclusion" in affected:
         return []
 
-    matched = []
+    proofs: list[list[dict]] = []
 
     def visit(group: dict) -> None:
         if not isinstance(group, dict):
             return
         logic = group.get("logic")
         if logic == "AND":
-            # NOT inside a selectable OR branch is not a mandatory exclusion.
+            # An optional NOT below an OR is not a mandatory exclusion.
             for child in group["groups"]:
                 visit(child)
         elif logic == "NOT":
@@ -524,28 +535,40 @@ def _collect_exclusion_reasons(
                 if isinstance(condition, dict) and _is_confirmed_exclusion_match(
                     condition, item, affected
                 ):
-                    matched.append(item)
+                    proofs.append([item])
             else:
-                matched.extend(_positive_exclusion_matches(children[0], affected))
+                proofs.extend(_positive_exclusion_matches(children[0], affected))
 
     visit(trace)
-    reasons = []
+    reasons: list[dict] = []
     seen = set()
-    for item in matched:
-        reason = (
-            f"{item['reason'].rstrip('.')}."
-            " 해당 조건은 지원 제외 기준이며,"
-            " 입력하신 정보가 제외 대상에 해당합니다."
-        )
-        key = (item["field"], item["label"], reason)
+    for proof in proofs:
+        if not proof:
+            continue
+        if len(proof) == 1:
+            item = proof[0]
+            field = item["field"]
+            label = item["label"]
+            reason = (
+                f"{item['reason'].rstrip('.')}."
+                " 해당 조건은 지원 제외 기준이며,"
+                " 입력하신 정보가 제외 대상에 해당합니다."
+            )
+        else:
+            fields = {item["field"] for item in proof}
+            field = proof[0]["field"] if len(fields) == 1 else "eligibility"
+            label = f"{_LABELS.get(field, '자격 요건')} (복합 제외 조건)"
+            details = " / ".join(item["reason"].rstrip(".") for item in proof)
+            reason = (
+                "다음 조건을 모두 충족하여 결합된 지원 제외 기준에 해당합니다: "
+                f"{details}."
+            )
+        key = (field, label, reason)
         if key in seen:
             continue
         seen.add(key)
-        reasons.append({
-            "field": item["field"],
-            "label": item["label"],
-            "reason": reason,
-        })
+        reasons.append({"field": field, "label": label, "reason": reason})
+
     return reasons
 
 
