@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-22T00:15:25.416642+09:00",
+  "created_at": "2026-11-22T23:43:03.074749+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1814,7 +1814,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "9278a43e1da207fe58eaec686c85a534f6bd172b33191f79733abd98b6b0b63a",
+    "source_sha256": "85a6d71b48c21efcdb1dcf177b9f551edf8d826e627ac8f339836ffb00997e51",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -10189,6 +10189,80 @@
       "GRP_POL_YC_002_OR_SP"
     ],
     "region_corrected_chunks": 9,
+    "unverified_application_periods": [
+      {
+        "policy_id": "POL_YC_005",
+        "document_id": "DOC_YC_005",
+        "before": "20261101 ~ 20261130",
+        "expected_content_hash": "06130a7d1af406c661f45712fbaf3133753ac280f076b064aaad398a7c233e84"
+      },
+      {
+        "policy_id": "POL_YC_017",
+        "document_id": "DOC_YC_017",
+        "before": "20260302 ~ 20261231",
+        "expected_content_hash": "88b5433807386757b692f6a48b91a7f6f619a557c50c1949d31de4a1fae28fda"
+      },
+      {
+        "policy_id": "POL_YC_020",
+        "document_id": "DOC_YC_020",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "70e661ec0d4d097ca0f645e5349da775e9e800be724bb47dbe73f381abe7a814"
+      },
+      {
+        "policy_id": "POL_YC_021",
+        "document_id": "DOC_YC_021",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "3cf673234720b8a359e743e8861accfad8b227f2f04e8899a6acda067e134132"
+      },
+      {
+        "policy_id": "POL_YC_022",
+        "document_id": "DOC_YC_022",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "e4ea8072b8a3e6350b19eda8abe10e19b25d9fe06f80ab8d3406071d46607768"
+      },
+      {
+        "policy_id": "POL_YC_024",
+        "document_id": "DOC_YC_024",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "fa36fba5830e27804a02ffe11e5d07317c993ff4fd858eacb60ed5962683ae26"
+      },
+      {
+        "policy_id": "POL_YC_027",
+        "document_id": "DOC_YC_027",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "42bf5ffa6e8cdda248c56352c018848a0622be1891a68e30833c69dea18875fb"
+      },
+      {
+        "policy_id": "POL_YC_028",
+        "document_id": "DOC_YC_028",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "9a5c8a1c4f01a4ec73fc7db33f40e1ce0bb51cbb1a52fac0249418e826bce130"
+      },
+      {
+        "policy_id": "POL_YC_041",
+        "document_id": "DOC_YC_041",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "47aaec5c1b1712a1d6bf8fa3af6e1f0236efa24df4fdfb9f0fa77a139ca06c0e"
+      },
+      {
+        "policy_id": "POL_YC_045",
+        "document_id": "DOC_YC_045",
+        "before": "20260301 ~ 20270228",
+        "expected_content_hash": "fbd0348569d135993413ff3bcd58aaa8cd9d936a3ed87ee23c28755a5db8ea0e"
+      },
+      {
+        "policy_id": "POL_YC_063",
+        "document_id": "DOC_YC_063",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "4cf4927453dc36a5526402263a1d37b99ed669aa89c6879fa0571de3dd06c85d"
+      },
+      {
+        "policy_id": "POL_YC_064",
+        "document_id": "DOC_YC_064",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "ce7ec3f4779835fab5c011437752e540626ee403c14b8145e3b12cf03ed4e064"
+      }
+    ],
     "search_excerpts_updated": [
       {
         "document_id": "DOC_BOK_054",
