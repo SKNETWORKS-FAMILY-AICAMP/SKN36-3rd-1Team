@@ -10,7 +10,8 @@
   --build [로컬 쓰기, 출력 폴더만]
       커밋 확인(40자리 SHA, manifest LF = R3_PINS, 필수 파일, 인증 파일 이름 없음,
                커밋의 기준값 모듈 = 작업 트리 것 — 줄바꿈 차이만 허용, 커밋되지 않은 R3_PINS 변경은 거부)
-      → staging → check_bundle(r3) → <이름>.zip.partial → 압축 내용 전체 재검증 → 최종 이름 → .sha256·보고서
+      → staging(실행별 UUID) → check_bundle(r3) → <이름>.zip.partial(배타적 생성) → 엔트리 검사 후 압축 내용 전체 재검증
+      → 하드 링크로 최종 이름 → .sha256·보고서 (최종 ZIP·.partial·.sha256·보고서가 하나라도 있으면 시작 전 거부, 기존 파일 삭제 없음)
       번들 구성(평평한 파일): b2-r3-v1.12.4.snapshot, b3-r3-v1.12.4.snapshot, source-<sha12>.zip, compose.yaml,
       restore_final_v140_r3.py, package.json, SHA256SUMS
       Neo4j 복원 데이터는 source ZIP의 data/releases/v1.4.0-candidate/neo4j/*이며, 파일별 SHA-256을 package.json에 적는다.
@@ -24,6 +25,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import sys
 import tempfile
 import uuid
@@ -64,6 +66,30 @@ def snapshot_paths(out_dir: Path, key: str) -> tuple[Path, Path]:
 
 def partial_path(target: Path) -> Path:
     return target.with_name(target.name + ".partial")
+
+
+def create_owned(path: Path):
+    """새 파일을 배타적으로 만든다(open "xb"). 반환: (열린 스트림, 파일 식별자). 이미 있으면 FileExistsError."""
+    stream = Path(path).open("xb")
+    return stream, os.fstat(stream.fileno())
+
+
+def remove_if_owned(path: Path, owned) -> None:
+    """path가 이번 실행이 만든 파일(같은 st_dev·st_ino)일 때만 지운다. 다른 파일·없는 파일은 그대로 둔다."""
+    try:
+        current = os.stat(path)
+    except FileNotFoundError:
+        return
+    if (current.st_dev, current.st_ino) == (owned.st_dev, owned.st_ino):
+        Path(path).unlink()
+
+
+def link_no_overwrite(source: Path, target: Path, what: str) -> None:
+    """하드 링크로 최종 이름을 만든다. 같은 이름이 이미 있으면 거부(덮어쓰기 없음)."""
+    try:
+        os.link(source, target)
+    except FileExistsError as error:
+        raise BundleError(f"최종 {what} 이름이 그 사이에 생겼습니다 (덮어쓰지 않음)") from error
 
 
 def docker_exec_sha256(identity: dict[str, Any], collection: str, name: str, docker=None) -> str:
@@ -159,10 +185,9 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
         http_get = requests.get
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     try:
-        stream = partial.open("xb")                  # 이번 실행 소유의 임시 파일 (배타적 생성)
+        stream, owned = create_owned(partial)        # 이번 실행 소유의 임시 파일 (배타적 생성)
     except FileExistsError as error:
         raise BundleError("다른 작업이 .partial을 먼저 만들었습니다 (지우지 않음, snapshot 생성 안 함)") from error
-    owned = os.fstat(stream.fileno())
     response = None
     try:
         description = client.create_snapshot(collection_name=spec["collection"], wait=True)
@@ -184,19 +209,11 @@ def create_snapshot(client, url: str, plan: dict[str, Any], release: dict[str, A
         integrity = verify_snapshot_integrity(
             description, sha, size,
             server_sha256 or (lambda: docker_exec_sha256(after_identity, spec["collection"], name, docker)))
-        try:
-            os.link(partial, target)                 # 최종 이름이 이미 있으면 FileExistsError (덮어쓰지 않음)
-        except FileExistsError as error:
-            raise BundleError("최종 snapshot 이름이 그 사이에 생겼습니다 (덮어쓰지 않음)") from error
+        link_no_overwrite(partial, target, "snapshot")
         partial.unlink()
     except BaseException:
         stream.close()
-        try:
-            current = os.stat(partial)
-            if (current.st_dev, current.st_ino) == (owned.st_dev, owned.st_ino):
-                partial.unlink()                     # 이번 실행이 만든 미완성 파일만 지운다
-        except FileNotFoundError:
-            pass
+        remove_if_owned(partial, owned)              # 이번 실행이 만든 미완성 파일만 지운다
         raise
     finally:
         close = getattr(response, "close", None)
@@ -308,13 +325,32 @@ def build_package(records: dict[str, dict[str, Any]], source: dict[str, Any], so
             "created_at": datetime.now().astimezone().isoformat(timespec="seconds")}
 
 
+def check_zip_entries(archive: zipfile.ZipFile) -> list[str]:
+    """
+    번들 ZIP 엔트리가 모두 '평평한 일반 파일 이름'인지 확인한다 (풀기 전에 호출).
+    거부: 하위 경로·절대 경로·드라이브(:)·역슬래시·제어 문자·'.'·'..'·빈 이름, 폴더 엔트리, 심볼릭 링크 등
+    일반 파일이 아닌 유형, 암호화 엔트리, 중복 이름(대소문자만 다른 이름 포함 — Windows에서 같은 파일이 됨).
+    """
+    infos = archive.infolist()
+    names = [info.filename for info in infos]
+    for info in infos:
+        name = info.filename
+        file_type = (info.external_attr >> 16) & 0o170000
+        if (name in ("", ".", "..") or name != PurePosixPath(name).name or "\\" in name or ":" in name
+                or any(ord(ch) < 32 for ch in name) or info.is_dir()
+                or file_type not in (0, stat.S_IFREG) or info.flag_bits & 0x1):
+            raise BundleError("번들 ZIP에 하위 경로·특수 엔트리(폴더·링크·암호화 등)가 있습니다")
+    if len(set(names)) != len(names) or len({n.casefold() for n in names}) != len(names):
+        raise BundleError("번들 ZIP에 중복 이름이 있습니다")
+    return names
+
+
 def verify_bundle_zip(path: Path, expected_members: set[str] | None = None,
                       pins: dict[str, Any] | None = None) -> dict[str, Any]:
-    """ZIP을 새 임시 폴더에 풀어 SHA256SUMS 전체 대조 + r3 check_bundle로 복원 계약을 검증한다."""
+    """ZIP 엔트리 전체를 먼저 검사(check_zip_entries)한 뒤에만 새 임시 폴더에 풀어 SHA256SUMS 전체 대조 +
+    r3 check_bundle로 복원 계약을 검증한다."""
     with zipfile.ZipFile(path) as archive:
-        names = archive.namelist()
-        if any(n != PurePosixPath(n).name or n in ("", ".", "..") for n in names) or len(set(names)) != len(names):
-            raise BundleError("번들 ZIP에 하위 경로·중복 이름이 있습니다")
+        names = check_zip_entries(archive)
         if expected_members is not None and set(names) != expected_members:
             raise BundleError(f"번들 구성 파일이 다릅니다: 누락 {sorted(expected_members - set(names))}, "
                               f"추가 {sorted(set(names) - expected_members)}")
@@ -338,7 +374,15 @@ def verify_bundle_zip(path: Path, expected_members: set[str] | None = None,
 
 def build_bundle(snapshots: dict[str, tuple[Path, Path]], source_sha: str, out_dir: Path = DEFAULT_OUT_DIR, *,
                  repo: Path = ROOT, confirm_write: bool = False, pins: dict[str, Any] | None = None) -> dict:
-    """snapshots: {"b2": (snapshot, record), "b3": (snapshot, record)}. 실패하면 이 함수가 만든 staging·.partial만 지운다."""
+    """
+    snapshots: {"b2": (snapshot, record), "b3": (snapshot, record)}.
+    파일 보호 (2026-11-22 보완, create_snapshot과 같은 방식)
+      - 최종 ZIP·.zip.partial·.zip.sha256·.zip.report.json 중 하나라도 있으면 쓰기 전에 거부 (지우거나 덮어쓰지 않음)
+      - .zip.partial은 배타적으로 새로 만든다. 다른 작업이 먼저 만들었으면 거부
+      - 실패 시 정리: 이번 실행이 만든 .partial(같은 파일 식별자)과 이번 실행이 만든 UUID staging 폴더만
+      - 최종 ZIP은 하드 링크로 만든다 (같은 이름이 생겼으면 거부). .sha256·보고서는 새 파일로만 쓴다
+      - ZIP 완성 뒤 .sha256·보고서 쓰기가 실패하면 이미 만든 ZIP(·.sha256)은 보존하고 오류로 멈춘다 (자동 재시도 없음)
+    """
     if not confirm_write:
         raise BundleError("confirm_write=True 없이 번들을 만들지 않습니다")
     pins = profiles.require_finalized(pins)
@@ -348,15 +392,17 @@ def build_bundle(snapshots: dict[str, tuple[Path, Path]], source_sha: str, out_d
     out_dir = Path(out_dir)
     final = out_dir / bundle_name(sha)
     side = [final.with_name(final.name + ".sha256"), final.with_name(final.name + ".report.json")]
-    if final.exists() or any(path.exists() for path in side):
-        raise BundleError("같은 이름의 번들·체크섬·보고서가 이미 있습니다 (덮어쓰지 않음)")
+    partial = partial_path(final)
+    existing = [path.name for path in (final, partial, *side) if path.exists()]
+    if existing:
+        raise BundleError(f"같은 이름의 번들·.partial·체크섬·보고서가 이미 있습니다 (덮어쓰거나 지우지 않음): {existing}")
     records = {key: load_snapshot_record(key, *snapshots[key], pins) for key in profiles.COLLECTION_KEYS}
     source = check_source_commit(sha, repo, pins)
     neo4j_files = neo4j_release_files(sha, repo)
     out_dir.mkdir(parents=True, exist_ok=True)
-    staging = out_dir / f".staging-{sha[:12]}-{uuid.uuid4().hex[:8]}"
-    partial = final.with_name(final.name + ".partial")
-    staging.mkdir()
+    staging = out_dir / f".staging-{sha[:12]}-{uuid.uuid4().hex}"
+    staging.mkdir()                                  # 이미 있으면 FileExistsError (기존 폴더는 건드리지 않음)
+    stream = owned = None
     try:
         source_member = f"source-{sha[:12]}.zip"
         members = []
@@ -372,26 +418,39 @@ def build_bundle(snapshots: dict[str, tuple[Path, Path]], source_sha: str, out_d
         members += [source_member, "compose.yaml", RESTORE_MEMBER, "package.json"]
         b2b.write_checksums(staging, members)
         restore_r3.check_bundle(staging, pins)
-        with zipfile.ZipFile(partial, "x", compression=zipfile.ZIP_DEFLATED) as archive:
+        try:
+            stream, owned = create_owned(partial)    # 이번 실행 소유의 .zip.partial (배타적 생성)
+        except FileExistsError as error:
+            raise BundleError("다른 작업이 .zip.partial을 먼저 만들었습니다 (지우지 않음)") from error
+        with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for name in [*members, "SHA256SUMS"]:
                 archive.write(staging / name, arcname=name)
+        stream.close()
         verified = verify_bundle_zip(partial, set(members) | {"SHA256SUMS"}, pins)
-        if final.exists():
-            raise BundleError("같은 이름의 번들이 생겼습니다 (덮어쓰지 않음)")
-        partial.rename(final)
-    except Exception:
-        if partial.exists():
-            partial.unlink()
+        link_no_overwrite(partial, final, "번들 ZIP")
+        partial.unlink()
+    except BaseException:
+        if stream is not None:
+            stream.close()
+            remove_if_owned(partial, owned)          # 이번 실행이 만든 .partial만 지운다
         raise
     finally:
-        shutil.rmtree(staging, ignore_errors=True)
+        shutil.rmtree(staging, ignore_errors=True)   # 이번 실행이 만든 UUID staging 폴더만
     zip_sha = restore.file_sha(final)
-    with side[0].open("x", encoding="utf-8") as stream:
-        stream.write(f"{zip_sha} *{final.name}\n")
+    try:
+        with side[0].open("x", encoding="utf-8") as checksum_stream:
+            checksum_stream.write(f"{zip_sha} *{final.name}\n")
+    except Exception as error:
+        raise BundleError(f"번들 ZIP은 검증·보존했지만 .sha256을 만들지 못했습니다 ({type(error).__name__}). "
+                          "같은 이름 재실행은 거부되므로 파일을 사람이 확인한다") from error
     report = {"status": "BUILT", "bundle": str(final), "bundle_sha256": zip_sha, "bundle_size_bytes": final.stat().st_size,
               "members": verified["members"], "package": package, "source": source,
               "source_archive_files": len(archived), "working_tree": b2b.working_tree_note(repo)}
-    planner.write_new_json(side[1], report)
+    try:
+        planner.write_new_json(side[1], report)
+    except Exception as error:
+        raise BundleError(f"번들 ZIP·.sha256은 보존했지만 보고서를 만들지 못했습니다 ({type(error).__name__}). "
+                          "같은 이름 재실행은 거부되므로 파일을 사람이 확인한다") from error
     return report
 
 

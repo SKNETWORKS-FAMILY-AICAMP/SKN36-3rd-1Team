@@ -195,7 +195,12 @@ python scripts/build_restore_bundle_r3.py --build --confirm-write --source-commi
 - 커밋의 기준값 모듈 내용이 작업 트리와 다르면 거부한다.
   - 줄바꿈 차이만 있으면 허용한다. Windows `core.autocrlf=true`에서는 blob이 LF, 작업 트리가 CRLF이기 때문이다.
   - 커밋하지 않은 `R3_PINS` 변경은 거부한다.
-- 같은 이름의 ZIP·체크섬·보고서가 있으면 거부한다(덮어쓰지 않음).
+- 같은 이름의 ZIP·`.zip.partial`·`.zip.sha256`·`.zip.report.json`이 하나라도 있으면 시작 전에 거부한다. 기존 파일은 지우거나 덮어쓰지 않는다(2026-11-22 보완).
+  - `.zip.partial`은 배타적으로 새로 만든다. 다른 작업이 먼저 만들었으면 거부한다.
+  - 실패 시 정리는 이번 실행이 만든 `.zip.partial`(같은 파일 식별자)과 이번 실행의 UUID staging 폴더(`.staging-<sha12>-<uuid>`)만 한다. 강제 종료로 남은 `.partial`·staging 폴더는 보존한다(사람이 확인 후 옮긴다).
+  - 최종 ZIP은 하드 링크로 만든다. 그 사이 같은 이름이 생겼으면 거부한다.
+  - ZIP 완성 뒤 `.sha256` 또는 보고서 쓰기가 실패하면 이미 만든 ZIP(·`.sha256`)은 보존하고 오류로 멈춘다. 같은 이름 재실행은 거부되며 자동 재시도는 없다.
+- ZIP을 풀기 전에 엔트리 전체를 검사한다(`check_zip_entries`): 하위·절대 경로, 드라이브(`:`), 역슬래시, 제어 문자, `.`·`..`, 폴더 엔트리, 심볼릭 링크 등 일반 파일이 아닌 유형, 암호화 엔트리, 중복 이름(대소문자만 다른 이름 포함)을 거부한다.
 - `--create-snapshot`은 서버 계획만 받고, build Docker 소유를 확인한다. fingerprint에는 서버 상태와 컨테이너 식별 정보가 함께 들어간다.
 
 **snapshot 파일 보호·무결성** (2026-11-22 보완, `build_restore_bundle_r3.create_snapshot`)

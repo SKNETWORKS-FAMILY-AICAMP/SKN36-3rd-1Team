@@ -177,6 +177,8 @@ class BuildBundleTests(unittest.TestCase):
             self.assertNotIn(".env", source.namelist())
             self.assertEqual(archive.read("compose.yaml"), (self.repo.path / bundle.VERIFY_COMPOSE).read_bytes())
         self.assertEqual(list(self.out.glob(".staging-*")), [])
+        self.assertFalse(bundle.partial_path(final).exists())
+        self.assertEqual(Path(str(final) + ".sha256").read_text(encoding="utf-8"), f"{report['bundle_sha256']} *{final.name}\n")
 
     def test_existing_bundle_is_never_overwritten(self):
         report = self.build()
@@ -232,6 +234,147 @@ class BuildBundleTests(unittest.TestCase):
             archive.writestr(".env", "SAMPLE_ONLY=1")
         with self.assertRaises(b2b.BundleError):
             bundle.verify_bundle_zip(extra, pins=self.pins)
+
+    # --- 기존 파일 보호 (.zip.partial·최종 ZIP·.sha256·보고서·staging) ------------------------------------
+    def paths(self):
+        final = self.out / bundle.bundle_name(self.repo.sha)
+        return {"final": final, "partial": bundle.partial_path(final),
+                "sha256": final.with_name(final.name + ".sha256"), "report": final.with_name(final.name + ".report.json")}
+
+    def listing(self):
+        return sorted((str(p.relative_to(self.out)), p.read_bytes() if p.is_file() else None)
+                      for p in self.out.rglob("*")) if self.out.exists() else []
+
+    def test_existing_partial_zip_sha_or_report_is_refused_and_kept(self):
+        for name in ("partial", "final", "sha256", "report"):
+            with self.subTest(existing=name):
+                leftover = self.paths()[name]
+                leftover.parent.mkdir(parents=True, exist_ok=True)
+                leftover.write_bytes(b"sample_only leftover " + name.encode())
+                before = self.listing()
+                with self.assertRaisesRegex(b2b.BundleError, "이미 있습니다"):
+                    self.build()
+                self.assertEqual(self.listing(), before)            # 바이트 불변, staging·다른 파일 생성 없음
+                leftover.rename(leftover.with_name(leftover.name + ".kept-by-test"))   # 다음 subTest 격리 (삭제 아님)
+
+    def test_partial_created_by_another_job_is_kept(self):
+        partial, original = self.paths()["partial"], bundle.restore_r3.check_bundle
+
+        def other_job_then_check(folder, pins=None):
+            partial.write_bytes(b"sample_only other job partial")
+            return original(folder, pins)
+        with patch.object(bundle.restore_r3, "check_bundle", other_job_then_check):
+            with self.assertRaisesRegex(b2b.BundleError, "다른 작업"):
+                self.build()
+        self.assertEqual(partial.read_bytes(), b"sample_only other job partial")
+        self.assertFalse(self.paths()["final"].exists())
+        self.assertEqual(list(self.out.glob(".staging-*")), [])
+
+    def crash_leftovers(self):
+        """강제 종료로 남은 것처럼 보이는 기존 staging 폴더·관계없는 파일."""
+        old = self.out / f".staging-{self.repo.sha[:12]}-sample_only_crashed"
+        old.mkdir(parents=True)
+        (old / "b2-r3-v1.12.4.snapshot").write_bytes(b"sample_only half copied")
+        (self.out / "sample_only-unrelated.txt").write_bytes(b"keep")
+        return old
+
+    def test_zip_or_verify_failure_removes_only_own_partial_and_staging(self):
+        old = self.crash_leftovers()
+        before = self.listing()
+        original_write = zipfile.ZipFile.write
+
+        def failing_write(archive, filename, arcname=None, *args, **kwargs):
+            if arcname == "compose.yaml":
+                raise OSError("sample_only disk full while compressing")
+            return original_write(archive, filename, arcname, *args, **kwargs)
+        with patch.object(zipfile.ZipFile, "write", failing_write):
+            with self.assertRaisesRegex(OSError, "compressing"):
+                self.build()
+        self.assertEqual(self.listing(), before)
+        with patch.object(bundle, "verify_bundle_zip", side_effect=b2b.BundleError("sample_only verify failure")):
+            with self.assertRaisesRegex(b2b.BundleError, "verify failure"):
+                self.build()
+        self.assertEqual(self.listing(), before)                    # 기존 staging·파일 그대로, 이번 실행 산출물 없음
+        self.assertTrue(old.is_dir())
+
+    def test_crash_leftovers_are_preserved_and_build_still_isolated(self):
+        old = self.crash_leftovers()
+        self.paths()["partial"].write_bytes(b"sample_only partial from a killed run")
+        before = self.listing()
+        with self.assertRaisesRegex(b2b.BundleError, "이미 있습니다"):
+            self.build()
+        self.assertEqual(self.listing(), before)
+        self.paths()["partial"].rename(self.out / "kept-partial-by-test")   # 사람이 옮긴 경우 (삭제 아님)
+        report = self.build()                                       # 남은 staging 폴더가 있어도 자기 UUID 폴더만 사용
+        self.assertEqual((old / "b2-r3-v1.12.4.snapshot").read_bytes(), b"sample_only half copied")
+        self.assertEqual((self.out / "kept-partial-by-test").read_bytes(), b"sample_only partial from a killed run")
+        self.assertEqual([p.name for p in self.out.glob(".staging-*")], [old.name])
+        self.assertFalse(self.paths()["partial"].exists())
+        bundle.verify_bundle_zip(Path(report["bundle"]), pins=self.pins)
+
+    def test_final_zip_name_created_meanwhile_is_not_overwritten(self):
+        final, original = self.paths()["final"], bundle.verify_bundle_zip
+
+        def verify_while_other_job_writes_final(*args, **kwargs):
+            result = original(*args, **kwargs)
+            final.write_bytes(b"sample_only other job zip")
+            return result
+        with patch.object(bundle, "verify_bundle_zip", verify_while_other_job_writes_final):
+            with self.assertRaisesRegex(b2b.BundleError, "그 사이"):
+                self.build()
+        self.assertEqual(final.read_bytes(), b"sample_only other job zip")
+        self.assertEqual([self.paths()[k].exists() for k in ("partial", "sha256", "report")], [False, False, False])
+        self.assertEqual(list(self.out.glob(".staging-*")), [])
+
+    def test_sha256_write_failure_keeps_verified_zip(self):
+        original_open = Path.open
+
+        def failing_open(path, mode="r", *args, **kwargs):
+            if path.name.endswith(".zip.sha256"):
+                raise OSError("sample_only disk full")
+            return original_open(path, mode, *args, **kwargs)
+        with patch.object(Path, "open", failing_open):
+            with self.assertRaisesRegex(b2b.BundleError, r"\.sha256"):
+                self.build()
+        paths = self.paths()
+        self.assertEqual([paths[k].exists() for k in ("final", "partial", "sha256", "report")], [True, False, False, False])
+        bundle.verify_bundle_zip(paths["final"], pins=self.pins)    # 보존된 ZIP은 그대로 유효
+        before = self.listing()
+        with self.assertRaisesRegex(b2b.BundleError, "이미 있습니다"):
+            self.build()                                            # 자동 재시도·덮어쓰기 없음
+        self.assertEqual(self.listing(), before)
+
+    def test_report_write_failure_keeps_zip_and_sha256(self):
+        with patch.object(planner, "write_new_json", side_effect=OSError("sample_only disk full")):
+            with self.assertRaisesRegex(b2b.BundleError, "보고서"):
+                self.build()
+        paths = self.paths()
+        self.assertEqual([paths[k].exists() for k in ("final", "partial", "sha256", "report")], [True, False, True, False])
+        self.assertEqual(paths["sha256"].read_text(encoding="utf-8"),
+                         f"{restore.file_sha(paths['final'])} *{paths['final'].name}\n")
+
+    def test_unsafe_zip_entries_are_refused_before_extraction(self):
+        def make(name, entries):
+            path = Path(self.tmp.name) / f"{name}.zip"
+            with zipfile.ZipFile(path, "w") as archive:
+                for entry in entries:                               # 이름(str) 또는 ZipInfo(특수 유형)
+                    archive.writestr(entry, b"sample_only")
+            return path
+        link = zipfile.ZipInfo("link")
+        link.external_attr = (0o120777) << 16                       # 심볼릭 링크
+        fifo = zipfile.ZipInfo("fifo")
+        fifo.external_attr = (0o010644) << 16                       # 일반 파일이 아닌 유형
+        cases = {"parent": ["../evil"], "absolute": ["/evil"], "drive": ["C:evil"], "subdir": ["dir/file"],
+                 "backslash": ["..\\evil"], "control": ["a\x01b"], "dot": ["."], "directory": ["folder/"],
+                 "symlink": [link], "special": [fifo], "duplicate": ["a", "a"], "case_duplicate": ["Readme", "README"]}
+        with patch.object(zipfile.ZipFile, "extractall", side_effect=AssertionError("검사 전에 풀면 안 됨")):
+            for name, entries in cases.items():
+                with self.subTest(case=name), self.assertRaises(b2b.BundleError):
+                    with zipfile.ZipFile(make(name, entries)) as archive:
+                        bundle.check_zip_entries(archive)
+                    bundle.verify_bundle_zip(make(name + "-verify", entries), pins=self.pins)
+        with zipfile.ZipFile(make("flat", ["a.snapshot", "package.json"])) as archive:
+            self.assertEqual(bundle.check_zip_entries(archive), ["a.snapshot", "package.json"])
 
 
 class CreateSnapshotTests(unittest.TestCase):
