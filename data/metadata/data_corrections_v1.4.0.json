@@ -71,6 +71,20 @@
       "find": "2025-10-19 ~ 상시",
       "replace": "2026-10-19 ~ 종료일 미기재",
       "evidence": "주택도시기금 공지 재조회(2026-11-10): 2026.10.19일부터 대출 신청 가능, 작성일 2026.10.16. 상시 문구와 종료일 없음"
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "field": "policy_name",
+      "find": "K-패스",
+      "replace": "모두의 카드(K-패스)",
+      "evidence": "2026년 사업명이 '모두의카드'로 바뀜(korea-pass.kr 누리집 제목 '모두의카드', 공식 FAQ 5번 '모두의카드 정책은 2026년 1월 1일부터 시행', 4번 '모두의카드(K-패스) 전용 카드'). 공식 표기는 붙여 쓰지만, 정책명은 조장 결정(2026-11-22, PR #104 코멘트)대로 '모두의 카드(K-패스)'로 띄어 쓴다. 기존 이름으로도 찾을 수 있게 괄호에 K-패스를 남긴다(#18, #103). 원문 본문은 고치지 않는다."
+    },
+    {
+      "policy_id": "POL_YC_065",
+      "field": "application_period",
+      "find": "상시/공고참조",
+      "replace": "위원회별 청년위원 모집 일정은 공식 공고 확인 필요",
+      "evidence": "'상시'로 모집하지 않는다. 확인된 최근 모집은 2025년 제3기 청년정책조정위원회 청년위원(공고 제2025-484호, 2025.3.1.~3.20., 종료)이고 2026년 공고는 없다. 정책은 유지하고 화면의 신청 기간 칸에 공식 공고 확인 안내를 둔다(조장 결정 2026-11-21, #18)"
     }
   ],
   "region_corrections": [
@@ -981,6 +995,16 @@
       "unit": "세",
       "evidence_location": "원문 대조 교정",
       "description": "정책 지원 자격 조건 (연령조건: 만 15세~39세, 신청 월에 만 40세가 되는 자까지 포함). 신청 월을 알 수 없어 40세는 확인 필요로 둔다."
+    },
+    {
+      "condition_id": "COND_CHILD_AGE_LE_24M",
+      "type": "SPECIAL_TARGET",
+      "name": "대상 자녀 연령: 24개월 이하",
+      "operator": "LTE",
+      "value": "24",
+      "unit": "개월",
+      "evidence_location": "전주시 장애인가정 출산 및 양육 지원 조례 제4조 제1항 제2호",
+      "description": "양육 자녀의 연령 조건(만 개월 수 0~24). 신청자 나이가 아니다."
     }
   ],
   "age_condition_replacements": [
@@ -1015,9 +1039,9 @@
     {
       "policy_id": "POL_GOV_050",
       "before": "COND_AGE_0_1",
-      "after": "COND_CHILD_AGE_UNDER_24M",
-      "after_name": "대상 자녀 연령: 24개월 미만",
-      "evidence": "정부24 지원대상 '24개월 미만 아이'. 같은 페이지의 '24개월 이하' 표기는 담당자 검토 결과 오기로 판단. 신청자 나이와 구분하려고 SPECIAL_TARGET으로 기록"
+      "after": "COND_CHILD_AGE_LE_24M",
+      "after_name": "대상 자녀 연령: 24개월 이하",
+      "evidence": "「전주시 장애인가정 출산 및 양육 지원 조례」(조례 제4072호, 시행 2023.11.9.) 제2조 제4호·제4조 제1항 제2호·제5조 제2항 '24개월 이하'. 정부24 지원내용도 '24개월 이하의 영아'. 정부24 '서비스 대상'의 '24개월 미만'과 다르며, 근거 법령인 조례 문구를 따른다(반석 확정 2026-11-20, #39 A안). 개월 수는 신청자가 아니라 양육하는 영아의 만 개월 수다. 다른 4개 정책이 쓰는 COND_CHILD_AGE_UNDER_24M은 바꾸지 않는다"
     }
   ],
   "group_condition_additions": [
@@ -1257,10 +1281,11 @@
       "group_id": "GRP_POL_STG_ICN_001_ROOT",
       "condition_id": "COND_AGE_19_39",
       "target_name": "연령조건: 만 19세~39세",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
-      "evidence": "서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」",
-      "review_status": "needs_review"
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)",
+      "evidence": "③ 서해구‧검단구 청년 (주민등록초본 및 외국인등록 사실증명서, 국내 거소 사실 증명서 기준, 19~39세) — 「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026)",
+      "review_status": "verified",
+      "previous_evidence": "[이전 근거, 2024년 제2호 사업 문서라 과거 기록으로만 둠] 서구에 거주하고 있는 청년(주민등록초본 및 외국인등록사실증명서 기준, 19~39세) — 「복지공유제 사업안내서(최종)」"
     },
     {
       "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -1939,7 +1964,7 @@
       "after": [
         "영유아"
       ],
-      "evidence": "정부24 지원대상 24개월 미만 아이. 아동(6~12세)·청소년(13~18세) 구간에 해당하지 않음"
+      "evidence": "정부24 지원대상 24개월 이하 영아(조례). 아동(6~12세)·청소년(13~18세) 구간에 해당하지 않음"
     }
   ],
   "chunk_life_stage_alignment_policies": [
@@ -2702,8 +2727,8 @@
       "source_id": "GRP_POL_STG_ICN_001_ROOT",
       "target_id": "GRP_POL_STG_ICN_001_REST",
       "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_STG_ICN_001_REST)",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세"
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)"
     },
     {
       "source_id": "GRP_POL_STG_MOLIT_001_ROOT",
@@ -4118,7 +4143,7 @@
       },
       "POL_GOV_016": {
         "status": "not_specified",
-        "note": "원문에 중위소득 수치가 없음. 재가 장애인은 기초생활수급자·차상위계층(유형 조건으로 구조화), 거주시설 장애인은 소득제한 없음. 정부24 화면과 서울시 주거서비스 안내서가 같음(2026-11-17 확인)",
+        "note": "원문에 중위소득 수치가 없음. 재가 장애인은 기초생활수급자·차상위계층(유형 조건으로 구조화), 거주시설 장애인은 소득제한 없음. 2026년 종로구 공고 제2026-1429호(제5차 장애인자립생활주택 입주자 모집, 2026.10.22.) '3. 신청자격'과 같음(2026-11-20 확인). 같은 해 중랑구 공고 제2026-1088호도 같은 문구",
         "check_point": "거주시설 이용 여부와 재가 장애인의 수급·차상위 여부"
       },
       "POL_GOV_036": {
@@ -4446,7 +4471,7 @@
       "POL_GOV_054": {
         "status": "needs_review",
         "followup": "ask_user",
-        "note": "독거 및 취약가구 대상. 2025 장애인활동지원 사업안내의 취약가구는 수급자 외 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상인 경우이나 포항시 적용은 미확인",
+        "note": "독거 및 취약가구 대상. 「2026년 장애인활동지원 사업안내」(보건복지부) PDF 55쪽의 취약가구는 수급자 외 세대별 주민등록표에 등재된 가구원이 모두 장애 정도가 심한 장애인, 19세 미만, 65세 이상 중 어느 하나에 해당하는 경우(2025년판과 같음, 2026-11-20 확인). 포항시도 이 정의를 쓴다고 본다(2026-11-18 팀 결정). 사용자의 해당 여부는 프로필로 알 수 없어 질문한다",
         "check_point": "독거 또는 취약가구 해당 여부"
       },
       "POL_GOV_001": {
@@ -4720,7 +4745,8 @@
     "POL_GOV_006": "정부24 표시 신청기간이 2025.10.~12월 중으로 날짜가 특정되지 않음. 2026년 일정 미기재",
     "POL_GOV_020": "2025.9.30. 이전 출생아 대상이며 출생일로부터 6개월 이내 신청. 후속 제도 미확인",
     "POL_009": "후속 사업 청년월세 지원사업의 2026년 신규 신청기간은 2026-03-30~05-29 (복지로 확인 2026-11-09). 이 정책의 조건과 근거는 한시 특별지원 기준",
-    "POL_002": "공식 공지에 2026.10.19일부터 신청 가능으로 적혀 있고 종료일은 미기재. 상시 접수 여부는 확인되지 않음"
+    "POL_002": "공식 공지에 2026.10.19일부터 신청 가능으로 적혀 있고 종료일은 미기재. 상시 접수 여부는 확인되지 않음",
+    "POL_YC_065": "위원회별 청년위원 모집 일정은 세종시 공식 공고에서 확인해야 함. 2026년 모집 공고는 확인되지 않았고, 확인된 최근 모집은 2025년 제3기 청년정책조정위원회 청년위원(세종시 공고 제2025-484호, 2025.3.1.~3.20., 종료). 정책은 유지하고 전용 신청 경로가 없어 신청 주소는 비운다(조장 결정 2026-11-21, #18)"
   },
   "empty_group_logic_corrections": [
     {
@@ -5523,9 +5549,9 @@
       "policy_id": "POL_STG_ICN_001",
       "condition_id": "COND_AGE_19_39",
       "target_name": "연령조건: 만 19세~39세",
-      "evidence_document_id": "DOC_STG_ICN_001_GOV24",
-      "evidence_location": "원문 대조 교정: 인천 서구 「복지공유제 사업안내서(최종)」(인천 청년포털 poly_seq=75 첨부, SHA-256 6b8d45f3…d88898) '서구에 거주하고 있는 청년(…19~39세)'. 후보 문서에는 미수록이라 근거 문서는 같은 정책의 정부24 문서로 둔다. 정부24 상세 화면은 '청년'만 적고 있고, 정부24 지원조건 코드(JA0110)는 18세",
-      "review_status": "needs_review"
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)",
+      "review_status": "verified"
     },
     {
       "policy_id": "POL_STG_MOLIT_001",
@@ -6114,10 +6140,11 @@
       "POL_STG_MOIS_001": "지방세특례제한법 제22조의2 '18세 미만의 자녀 2명 이상을 양육하는 자'는 자녀 나이다. 신청자 나이 기준은 없음. 정부24 구조화 칸의 '대상연령 19~120세'는 원문 근거가 없어 쓰지 않음. 자녀 수·자녀 나이는 applies_to 합의 후"
     },
     "source_discrepancies": {
-      "POL_STG_ICN_001": "사업안내서(인천 청년포털 첨부)는 19~39세, 정부24 지원조건 코드는 18~39세(상세 화면은 '청년'만 표기). 사업안내서를 기준으로 19~39세를 쓴다(반석 확인 2026-11-18). 사업안내서는 '서구 소재 중소기업'으로 적고 청년포털은 '전국 중소기업'으로 적어 근무지 조건도 다르다(이번 교정 범위 밖). 사업안내서 사본: 4차_준비/age_conditions/evidence/POL_STG_ICN_001_incheon_welfare_sharing_guide.pdf"
+      "POL_STG_ICN_001": "2026년 제4호 기업안내문(인천청년포털 공지 msg_seq=491, 서해구 기업일자리정책과, 2026-07-06)은 '서해구‧검단구 청년 (…19~39세)', 정부24 지원조건 코드는 18~39세(상세 화면은 '청년'만 표기). 2026년 공고를 기준으로 19~39세를 쓴다(반석 확인 2026-11-20). PR #89 때 근거로 쓴 사업안내서는 2024년 제2호 사업 문서라 과거 참고로만 둔다. 2026년 공고의 근무지는 '인천 소재 중소기업'이고 신청은 전자우편이다. 공고 사본: 4차_준비/age_conditions/evidence/POL_STG_ICN_001_welfare_sharing_no4_notice_2026.hwpx",
+      "POL_GOV_050": "정부24 '서비스 대상'·'지원대상'은 '24개월 미만', 같은 페이지 '지원내용'과 조례 3개 조항은 '24개월 이하'. 조례를 따라 24개월 이하(LTE 24)로 둔다(반석 확정 2026-11-20). 조례에는 '최대 2년·240만원' 같은 지급 상한이 없고 매월 27일 지급(제6조 제4항)만 있다. 근거 기록: 4차_준비/messages/issue39_pol_gov_050_criteria_20261119.md"
     },
     "pending_followups": {
-      "POL_STG_ICN_001": "나이 19~39세의 실제 근거(인천 서구 「복지공유제 사업안내서」)가 후보 문서에 없다. 다음 재적재 때 사업안내서를 Document로 추가하고 evidence_document_id를 그 문서로 바꾼 뒤 review_status를 해제한다. 그 전까지 조건 관계는 review_status=needs_review(검수 대기)다."
+      "POL_STG_ICN_001": "해결(2026-11-20): 2026년 제4호 기업안내문을 Document(DOC_STG_ICN_001_NOTICE_2026)로 추가하고 evidence_document_id를 바꾼 뒤 review_status를 verified로 해제했다."
     }
   },
   "beneficiary_age_notes": {
@@ -6138,6 +6165,286 @@
       "expected_content_hash": "a9d0504a1537970b12d79c3713f7b98e01abc8271ffce4d12a09950452836fcb",
       "text": "취학아동(방과후보육료) : '18. 01. 01. ~ '12. 12. 31.까지의 출생 아동",
       "superseded_by_document_id": "DOC_BOK_031_MOE_2026"
+    }
+  ],
+  "application_url_corrections_note": "#18 규칙서 §5.4: 그 서비스의 실제 신청·예약 화면만 official_apply_url에 둔다. 누리집 첫 화면, 로그인 뒤 전체 목록, 다른 기관 사이트, 전화·방문·이메일 신청은 null로 둔다. after가 있는 행은 브라우저로 그 서비스 전용 신청 경로를 직접 연 결과이며, 어디까지 봤는지 verified_stage에 적는다(booking_screen 예약 화면 / application_step 신청 단계 / identity_check 신청 본인인증 / apply_button_out_of_period 신청 버튼까지, 기간 외). live_application_page_verified는 앞의 세 단계만 true다(근거 기록: 4차_준비/messages/apply_url_review_20261120.md, 4차_준비/messages/issue18_review_20261119.md). 실시간 접수 가능 여부는 보증하지 않는다.",
+  "application_url_corrections": [
+    {
+      "policy_id": "POL_GOV_065",
+      "before": "https://www.eco-g.or.kr/",
+      "after": "https://camp.xticket.kr/web/main?shopEncode=a1535c44b7b5b3ab38fd902f0c58f8600f1a57e45999ac4b1a7b8c321f1d2df5",
+      "reason": "verified_apply_page",
+      "evidence": "승촌보 캠핑장 날짜 선택·예약 화면. 정부24 신청 사이트 값은 운영기관 누리집 첫 화면",
+      "checked_at": "2026-11-19",
+      "verified_stage": "booking_screen"
+    },
+    {
+      "policy_id": "POL_STG_EX_001",
+      "before": "https://www.hipass.co.kr/main.do",
+      "after": "https://www.hipass.co.kr/mchldRdct/noticeForTwo.do",
+      "reason": "verified_apply_page",
+      "evidence": "고속도로 통행료 누리집의 다자녀 할인 '신규 신청' 단계(유의사항→정보동의) 화면. 원천 값은 첫 화면",
+      "checked_at": "2026-11-19",
+      "verified_stage": "application_step"
+    },
+    {
+      "policy_id": "POL_GOV_057",
+      "before": "http://www.jinju.go.kr",
+      "after": "https://www.jinju.go.kr/00134/00616/06681.web",
+      "reason": "verified_apply_page",
+      "evidence": "진주시 '대학생 학자금 대출이자 지원 신청' 본인인증 단계 화면. 2026년 모집(8.3~8.28)은 종료",
+      "checked_at": "2026-11-20",
+      "verified_stage": "identity_check"
+    },
+    {
+      "policy_id": "POL_YC_006",
+      "before": "https://minwon.daegu.go.kr/main",
+      "after": "https://minwon.daegu.go.kr/cvpl/AUTN-011/info",
+      "reason": "verified_apply_page",
+      "evidence": "대구 민원 시스템의 서비스 전용 '2026년도 대학생 학자금대출 이자지원 신청' 화면. '신청하기' 버튼까지 확인했고 신청기간(2026-09-01~09-30) 밖이라 버튼을 누르면 '신청가능 기간이 아닙니다' 알림이 나옴. 실제 신청서는 확인하지 못함",
+      "checked_at": "2026-11-20",
+      "verified_stage": "apply_button_out_of_period"
+    },
+    {
+      "policy_id": "POL_YC_015",
+      "before": "https://inochongdg.org",
+      "after": null,
+      "reason": "list_only_not_verified",
+      "evidence": "한국노총대구지역본부 재직자교육 '수강신청등록' 화면(inochongdg.org/default/product/aa.php)은 열리지만 수강신청 목록에 등록된 교육과정이 없어 실제 신청 화면은 확인하지 못함(2026-11-20, GPT 검수 재확인). 과정이 등록되면 recheck_candidate_url을 다시 확인한다",
+      "checked_at": "2026-11-20",
+      "recheck_candidate_url": "https://inochongdg.org/default/product/aa.php",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_GOV_012",
+      "before": "http://www.kics.go.kr",
+      "after": null,
+      "reason": "login_list_not_policy_specific",
+      "evidence": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록(88종)의 '피해자 보호·지원'에서 한다. 정책 하나를 가리키는 고정 주소 없음",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_GOV_014",
+      "before": "http://www.kics.go.kr",
+      "after": null,
+      "reason": "login_list_not_policy_specific",
+      "evidence": "KICS 형사사법포털 첫 화면. 신청은 로그인 뒤 민원신청 목록에서 한다. 정책 하나를 가리키는 고정 주소 없음",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_GOV_036",
+      "before": "http://www.bokjiro.go.kr",
+      "after": null,
+      "reason": "login_list_not_policy_specific",
+      "evidence": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_GOV_046",
+      "before": "https://www.bokjiro.go.kr/ssis-teu/index.do",
+      "after": null,
+      "reason": "login_list_not_policy_specific",
+      "evidence": "복지로 첫 화면. 복지급여 신청은 본인인증 로그인 뒤 전체 서비스 선택 목록에서 한다",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_002",
+      "before": "https://gg24.gg.go.kr",
+      "after": null,
+      "reason": "unrelated_site",
+      "evidence": "경기도 사이트로 국토교통부 전국 사업과 맞지 않음. 정부24는 본인인증 로그인 뒤 '바로 신청하기'로만 신청서가 열려 고정 주소 없음",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_011",
+      "before": "https://robotcontest.kr",
+      "after": null,
+      "reason": "login_list_not_policy_specific",
+      "evidence": "원천 값 사이트는 11-19·11-20 열람 시 403. 온통청년 '신청바로가기'는 로그인 필요. 모집 마감",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_049",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "phone_or_visit_only",
+      "evidence": "진안군청 첫 화면. 진안군청년센터 공지(notice/16, 2026.4.27): 온라인 신청 없이 전화 문의(063-430-8057)",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_052",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "phone_or_visit_only",
+      "evidence": "진안군청 첫 화면. 진안군청년센터 공지(notice/3, 2026.4.3): 청년센터 방문 또는 이메일 접수",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_010",
+      "before": "https://www.work24.go.kr",
+      "after": null,
+      "reason": "homepage_only",
+      "evidence": "고용24 첫 화면. 신청은 로그인 뒤 국민취업지원제도 메뉴에서 한다. selectEmssRqutIntro.do는 '제도소개' 안내 화면",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_GOV_015",
+      "before": "https://www.withcountry.mil.kr/",
+      "after": null,
+      "reason": "phone_or_visit_only",
+      "evidence": "국방부 유해발굴감식단 첫 화면. 유해 소재 제보는 전화 제보(조사과 02-811-6551). 민원신청 메뉴는 전체 안내 화면",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_008",
+      "before": "http://www.wisetkmu.kr",
+      "after": null,
+      "reason": "homepage_only",
+      "evidence": "사업단 누리집 첫 화면. 프로그램마다 공지의 QR로 신청하며 정책 전용 신청 화면 없음",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_050",
+      "before": "https://www.jinan.go.kr",
+      "after": null,
+      "reason": "phone_or_visit_only",
+      "evidence": "진안군청 첫 화면. 2026 입주자 모집공고(진안군청년센터 공고 제2026-05-01호): 이메일 접수",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_YC_065",
+      "before": "https://www.sejong.go.kr",
+      "after": null,
+      "reason": "homepage_only",
+      "evidence": "세종시 누리집 첫 화면. 확인된 모집은 2025년 공고(제2025-484호, 청년DB 신청)뿐이며 종료",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "before": "https://korea-pass.kr",
+      "after": null,
+      "reason": "no_application_process",
+      "evidence": "누리집 첫 화면(제목 '모두의카드'). 별도 신청 없이 카드 발급 후 회원가입·카드 등록",
+      "checked_at": "2026-11-20",
+      "verified_stage": null
+    }
+  ],
+  "eligibility_source_notes": {
+    "description": "조건 노드로 만들지 않은 자격 기준의 원문 대조 기록. 교정 코드는 이 키를 읽지 않는다(기록용).",
+    "POL_GOV_006": {
+      "issue": "#97",
+      "evidence_document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "basis": "수산업ㆍ어촌 공익기능 증진을 위한 직접지불제도 운영에 관한 법률 시행령 제6조 제1항(해양수산부장관이 정하여 고시하는 최소 조업일수 이상을 조업한 경우에 지급) → 해양수산부고시 제2024-6호 제2조·[별표]",
+      "notes": [
+        "정부24의 '60일 이하 미지급'은 법령 근거가 없다. 고시 [별표] 기준(해당 연도에 60일 이상 조업)을 적용한다. 정확히 60일이면 충족한다.",
+        "총허용어획량(TAC)을 적용하는 어종을 주로 어획하는 어선은 30일 이상 조업하여도 인정한다(고시 [별표])."
+      ],
+      "data_policy": "정부24 인용 청크(DOC_GOV_006_C02~C04)는 원문 그대로 둔다. 조업일수·주 어획 어종을 묻는 입력 항목이 없어 Checker 조건은 추가하지 않고, GRP_POL_GOV_006_ROOT는 UNKNOWN으로 둔다.",
+      "checked_at": "2026-11-20"
+    }
+  },
+  "chunk_policy_name_alignment_policies": [
+    "POL_STG_MOLIT_001"
+  ],
+  "search_alias_notes": {
+    "description": "기록용. 교정 코드는 이 키를 읽지 않는다. 정책명 검색 별칭 필드·키워드 검색이 없어(검색은 벡터+그래프, 별칭 표는 지역명 region_search.ALIASES뿐) 데이터로는 정책명 줄과 원문 본문에 들어간 표기만 검색 입력에 반영된다. 별칭을 원문·정책명에 반복해 넣지 않는다(조장 지시).",
+    "POL_STG_MOLIT_001": {
+      "names": [
+        "모두의카드",
+        "모두의 카드",
+        "K-패스",
+        "k-패스",
+        "K패스",
+        "k패스"
+      ],
+      "in_embedding_input": {
+        "모두의 카드": "정책명 줄(이 정책의 모든 청크) + FAQ 1번 원문 「모두의 카드」",
+        "K-패스": "정책명 줄(이 정책의 모든 청크) + 정부24·FAQ 원문",
+        "모두의카드": "FAQ·정부24 원문 본문(공식 표기)"
+      },
+      "not_in_data": [
+        "k-패스",
+        "K패스",
+        "k패스"
+      ],
+      "needs_search_code": "대소문자·붙임표 차이(k-패스, K패스, k패스)는 데이터에 없어 임베딩 유사도에만 기대게 된다. 확실히 하려면 지역명 ALIASES처럼 질문을 정규화하는 정책명 별칭 표가 검색 코드에 필요하다(예: k패스·K패스·k-패스 → K-패스, 모두의카드 → 모두의 카드). 검색 코드는 민혁님 담당이라 범위 협의 필요(조장 지시 2026-11-22).",
+      "status": "재적재 뒤 여섯 표현별 실제 검색 확인 필요(미검증)"
+    }
+  },
+  "faq_review_notes": {
+    "description": "기록용(이슈 #103 'FAQ별 추가·일부 반영·제외 결과와 근거'). 교정 코드는 이 키를 읽지 않는다. 원문 문구는 고치지 않았다.",
+    "checked_at": "2026-11-21",
+    "duplicate_check": "항목마다 같은 정책의 기존 청크와 15자 단위 겹침을 쟀다. 세 FAQ 전체 최댓값 0.20(국세청 26번). FAQ 안 중복 질문 없음.",
+    "DOC_STG_MOLIT_001_FAQ_2026": {
+      "result": "전부 추가(59항목, 25청크). 1번 답변의 표 4개는 행·열을 복원한 추출본으로 바꿈",
+      "currency_notes": [
+        "1·2번 항목은 2026년 4월 1일~9월 30일 한시 상향(정액 기준금액 50% 인하, 시차 출퇴근 환급률 상향) 안내다. 2026-11-21 기준 기간이 끝났다. 항목 안에 기간이 적혀 있어 원문 그대로 두었다.",
+        "저소득층 환급률이 1·2번(정률 기본형 표)에는 53.3%, 14·45번(적립 기준)에는 53%로 나온다. 정부24 청크(CHK_DOC_STG_MOLIT_001_GOV24_01)는 53%다. 공식 원문끼리의 표기 차이라 어느 쪽으로도 고치지 않았다(needs_review).",
+        "scripts/apply_official_crosscheck.py의 DOC_STG_MOLIT_001_FAQ 미확보 메모는 예전 요약본 문서에 대한 것이다. 이 문서는 공식 누리집 원문이라 별개다."
+      ],
+      "table_restoration": "화면 텍스트에서 셀이 이어져 행·열이 사라졌던 1번 답변의 표 4개(정액형 금액, 한시 정액형 금액, 시·도별 지역 구분, 정률 기본형)를 2026-11-21 공식 상세 화면의 표 HTML(rowspan·colspan 펼침)로 복원했다. 셀 값은 korea-pass_faq_item1_tables_20261121.json에 있고, 셀 값을 이어 붙인 문자열이 11-18 저장본에 정확히 한 번씩 있음을 확인했다(값 변경 없음). 59건 상세 답변 중 표는 1번에만 있다. 변환은 scripts/faq_table_text.py. '[표 n] 열:'·'(빈 칸)'은 구조 표시용으로 붙인 문구다.",
+      "period_tags": "한시 정액형 금액 표(표 2)의 행마다 같은 1번 답변에 적힌 적용 기간 '2026년 4월 1일부터 2026년 9월 30일까지'를 붙였다(조장 지시: 지난 한시 혜택은 이력 근거로 두되 적용 기간이 함께 전달되게). 정률 기본형 표(표 4)는 열 이름에 '2026년 4월~9월 한시적 적용 환급률'이 있어 그대로다. 국세청 Q&A는 답변마다 귀속 연도가 본문에 있다."
+    },
+    "DOC_STG_NTS_001_FAQ_2026": {
+      "result": "전부 추가(34항목, 19청크)",
+      "currency_notes": [
+        "답변 다수가 2011~2018년 귀속분 기준의 개정 경과(감면율 50·70·100% → 90%, 감면기간 3년 → 5년, 청년 연령 29세 → 34세)를 설명한다. 연도가 함께 적혀 있어 원문 그대로 두었다.",
+        "30·31번은 '90%(150만원 한도)'를 적고, 같은 답변 안에서 한도가 200만원으로 상향되었다고 적는다."
+      ]
+    },
+    "DOC_STG_SEOUL_001_FAQ_2026": {
+      "result": "부분 반영(41항목 중 39항목 검색 근거, 2항목 보류)",
+      "held": "held_document_lines 2건: 신청 자격(단기근로자 제외 문구 충돌), 현금사용 소명(2025.12.31. 보관 기한). 두 항목 모두 공식 소개 탭(DOC_STG_SEOUL_001_INTRO_2026, 2026-11-21 추가)을 기준으로 한다.",
+      "currency_notes": [
+        "이전 기록 '연도 표기는 2026년만 나온다'는 틀렸다. 현금사용 소명 항목에 2025.12.31.이 있다(2026-11-21 정정)."
+      ]
+    },
+    "source_discrepancies": {
+      "POL_STG_MOLIT_001_low_income_rate": {
+        "status": "needs_review",
+        "values": {
+          "53.3%": "korea-pass.kr FAQ 1·2번(정률 기본형 표 '저소득 53.3%', 한시 상향 '저소득 53.3% → 83.3%')",
+          "53%": "korea-pass.kr FAQ 14번('저소득층은 53% 적립')·45번('이용요금의 20~53%'), 정부24 서비스 상세(POL_STG_MOLIT_001 benefit '저소득층 : 53%', CHK_DOC_STG_MOLIT_001_GOV24_01)"
+        },
+        "decision": "공식 확인 전까지 어느 값으로도 통일하지 않는다. 원문·청크·정책 속성은 그대로 둔다(조장 결정 2026-11-22).",
+        "checked_at": "2026-11-22"
+      }
+    }
+  },
+  "held_document_lines_note": "공식 FAQ 원문 안에서 서로 맞지 않거나 지난 연도의 기한이 남은 행을 검색용 본문·청크에서 보류한다(기준 문서는 superseded_by_document_id). staging 추출본과 원본은 고치지 않는다. 빌드는 행 전체가 본문에 정확히 한 번 있을 때만 빼고, 보류 행만 있던 청크는 후보에서 뺀다. 공식 FAQ가 고쳐지거나 공고로 기준이 확인되면 항목을 지우고 다시 빌드한다.",
+  "held_document_lines": [
+    {
+      "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+      "expected_content_hash": "ab00724e704f6a708e19838592feda46a8bffaf080579d2012351d416ac5333a",
+      "faq_item": "신청단계 FAQ — 어떤 사람이 신청할 수 있나요?",
+      "text": "신청 자격 | 어떤 사람이 신청할 수 있나요? | ○ 청년수당 신청자격요건 (아래 요건에 모두 해당해야 함) ① 서울시 거주 만 19세 이상~34세 이하* 미취업 청년 중 최종학력 졸업(수료·중퇴·제적)** 미취업 청년 * 졸업일 기준 : 2026년 5월 전 졸업자 또는 졸업예정자 ※ 졸업예정자 : 졸업요건 학점 이수 완료자 ※ 수료일이 5월 전(4월까지)으로 확인 되는 자 * 방송통신대학교·사이버대학·학점은행제에 재학 중인 경우는 이전 최종 학력(고등학교 또는 대학교) 졸업일로 신청 가능 * 만 19세~34세 : 공고월 기준 : 2026.5월 공고기준, 1991년 5월~2007년 5월 출생자만 해당 - 단, 제대군인의 경우 최대 3년 이내 지원 상한연령 가산 [지원 대상] 1년 미만 복무: 만 35세까지(1990. 5. 1. 이후 출생부터) / 1년 이상 ~ 2년 미만 복무: 만 36세까지(1989. 5. 1. 이후 출생부터) / 2년 이상 복무: 만 37세까지(1988. 5. 1. 이후 출생부터) ② 신청일 기준 주민등록상 주소지가 서울시인 미취업 청년 ○ 신청 제외 대상 (아래 요건 중 하나 이상에 해당할 경우 신청 제외) ① 서울 청년수당 사업 참여 이력이 있는 청년 ② 대학 재학생·휴학생 ※ 단, 졸업예정자의 경우 졸업요건 학점 이수를 증명하는 '졸업예정증명서' 또는 '재학증명서와 성적증명서' 증빙시 신청 가능(서류를 통해 졸업요건 학점 이수완료가 확인되어야 함, 학교마다 졸업요건 학점이 다르므로 서류를 통해 졸업학점 이수가 미확인시 서류검증에서 탈락 될 수 있음.) ※ 방송통신대, 사이버대, 학점은행제 재학생 중 이전 최종학력 졸업자는 신청 가능(이전 단계의 최종 학력 졸업을 증명) ③ 주 30시간 이하 또는 3개월 이하의 단기근로자(취업자)* * 근로계약서 등 증빙자료 제출 필요 ④ 서울시 청년수당 사업 동일기간 내 정부 및 지자체 유사사업 참여자 (2026년 5월 1일부터 사업 참여 종료일까지) - 국민취업지원제도(1유형, 2유형), 서울시 청년월세지원 사업, 희망두배청년통장 사업 등 중복참여자 ⑤ 기초생활수급자(생계·의료·주거·교육 수급자) 및 차상위계층 ⑥ 실업급여 사업(신청 시점부터 사업 참여 종료일까지) ⑦ 중위소득 150% 초과 가구 청년 (공고월 전월(4월) 기준 건강보험료로 산정) * 본인이 납부하고 있으면 본인납입 건보료 기준, 본인이 피부양자로 돼 있으면 부양자(세대주) 납입 건보료 기준",
+      "status": "needs_review",
+      "reason": "'신청 제외 대상 ③'에 '주 30시간 이하 또는 3개월 이하의 단기근로자(취업자)'가 있으나, 같은 FAQ의 단기근로자 질문·준비서류 항목과 공식 소개 탭(DOC_STG_SEOUL_001_INTRO_2026)은 '주30시간 이하 또는 3개월 이하 단기근로자 신청 가능(근로시간 증빙 제출 시만 인정)'이라고 안내한다. FAQ 원문은 고치지 않고 이 항목 전체를 답변 근거에서 보류한다. 기준은 소개 탭이다(팀 결정 2026-11-21).",
+      "evidence": "청년몽땅정보통 청년수당 FAQ(신청단계) 2026-11-21 재확인: 두 문구가 그대로 있음. 같은 화면의 소개 탭(tabKind=100) 2026-11-21 확인: '기타요건: 미취업자만 신청가능 단, 주30시간 이하 또는 3개월 이하 단기근로자 신청 가능'.",
+      "superseded_by_document_id": "DOC_STG_SEOUL_001_INTRO_2026"
+    },
+    {
+      "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+      "expected_content_hash": "ab00724e704f6a708e19838592feda46a8bffaf080579d2012351d416ac5333a",
+      "faq_item": "사업기간 이행사항 FAQ — 사용한 현금사용 소명은 어떻게 하면 되나요?",
+      "text": "현금사용 | 사용한 현금사용 소명은 어떻게 하면 되나요? | ○ 청년수당은 전용 체크카드를 사용해야 하여 현금사용(계좌이체)은 원칙적으로 불가하며, 아래의 일부 한정된 항목에 한하여 허용됨 ① 주거 관련 : 전·월세비, 주거 관리비, 주거 관련 대출 ② 생활·공과금 관련 : 전기·가스·수도요금, 통신비, 건강보험료 ③ 교육 관련 : 학자금대출, 자격증·시험 응시료, 해외 생성형 AI 프로그램 이용 ○ 위 항목에 한하여 현금을 사용하는 경우, 매월 자기성장기록서 제출 시 현금사용 내역 및 증빙자료를 제출해야 하며, 추후 자료에 대한 모니터링 및 보완 요청 등의 조치가 있을 수 있으니 관련 자료는 2025.12.31.까지 보관 필요 - 전·월세비 : 전·월세 관련 계약서 + 이체내역서 - 전기·가스·수도요금, 건강보험료, 통신비 : 납부고지서 + 이체내역서 - 주거 관련 대출, 학자금대출 납부 : 대출 계약서류 + 이체내역서 - 자격증·시험 응시료 : 수험표 및 응시서류 + 이체내역서 - 해외 생성형 AI 프로그램 구매 : 거래명세서 또는 영수증 + 이체내역서",
+      "status": "needs_review",
+      "reason": "2026년 사업 FAQ에 '관련 자료는 2025.12.31.까지 보관 필요'가 남아 있으나, 공식 소개 탭(DOC_STG_SEOUL_001_INTRO_2026)은 '개별적으로도 증빙자료를 2026.12.31.까지 보관 바람'이라고 안내한다. FAQ 원문은 고치지 않고 이 항목 전체를 답변 근거에서 보류한다. 기준은 소개 탭이다(팀 결정 2026-11-21).",
+      "evidence": "청년몽땅정보통 청년수당 FAQ(사업기간 이행사항) 2026-11-21 재확인: '2025.12.31.까지 보관 필요' 그대로 있음. 같은 화면의 소개 탭(tabKind=100) 2026-11-21 확인: '2026.12.31.까지 보관 바람'.",
+      "superseded_by_document_id": "DOC_STG_SEOUL_001_INTRO_2026"
     }
   ]
 }

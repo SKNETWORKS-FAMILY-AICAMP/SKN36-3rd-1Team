@@ -60,14 +60,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 262)
-        self.assertEqual(report["chunks_checked_against_body"], 600)
+        self.assertEqual(report["body_hashes_checked"], 268)
+        self.assertEqual(report["chunks_checked_against_body"], 663)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1126)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2668)
-        self.assertEqual(len(chunks), 600)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1133)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2674)
+        self.assertEqual(len(chunks), 663)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
@@ -87,8 +87,12 @@ class CandidateIntegrityTests(unittest.TestCase):
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
                                  for item in corrections[group]}
+                # 동결 v1.3.2에 없는 신규 정책(POL_STG_*)의 설명 문구 교정(예: 모두의카드 정책명)은 빼고 적용한다
+                old_policy_ids = {row[key] for row in old}
                 dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids],
-                                            {**corrections, "category_corrections": []})
+                                            {**corrections, "category_corrections": [], "text_corrections": [
+                                                item for item in corrections["text_corrections"]
+                                                if item["policy_id"] in old_policy_ids]})
             new = {row[key]: row for row in rows(PACKAGE / "neo4j" / f"nodes_{name}.jsonl")}
             for original in old:
                 if name == "condition_group" and original[key] in removed_groups:
@@ -299,9 +303,15 @@ class CandidateIntegrityTests(unittest.TestCase):
                 self.assertNotIn((f"GRP_{item['policy_id']}_ROOT", "CONTAINS_CONDITION", item["condition_id"]), edges)
         self.assertIn(("POL_GOV_002", "REQUIRES_CONDITION", "COND_AGE_0_65"), edges)
         self.assertNotIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_AGE_0_1"), edges)
-        self.assertIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
+        # #39: 전주시 조례 '24개월 이하'. 다른 정책이 쓰는 24개월 미만 조건은 그대로 둔다.
+        self.assertIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_LE_24M"), edges)
+        self.assertNotIn(("POL_GOV_050", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
+        self.assertIn(("POL_BOK_005", "REQUIRES_CONDITION", "COND_CHILD_AGE_UNDER_24M"), edges)
         conditions = {row["condition_id"]: row for row in rows(PACKAGE / "neo4j/nodes_eligibility_condition.jsonl")}
-        self.assertEqual(conditions["COND_CHILD_AGE_UNDER_24M"]["type"], "SPECIAL_TARGET")
+        self.assertEqual(conditions["COND_CHILD_AGE_LE_24M"]["type"], "SPECIAL_TARGET")
+        self.assertEqual((conditions["COND_CHILD_AGE_LE_24M"]["operator"], conditions["COND_CHILD_AGE_LE_24M"]["value"],
+                          conditions["COND_CHILD_AGE_LE_24M"]["unit"]), ("LTE", "24", "개월"))
+        self.assertEqual(conditions["COND_CHILD_AGE_UNDER_24M"]["operator"], "LT")
 
     def test_detail_targets_stay_and_review_corrections_apply(self):
         chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
@@ -342,13 +352,33 @@ class CandidateIntegrityTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             relationship_query("UNTRUSTED_RELATION")
 
+    def test_manual_apply_url_flag_follows_verified_stage(self):
+        # 신청 버튼까지만 본 주소는 남기되 '실제 신청 화면 확인'으로 올리지 않는다(가상 데이터).
+        def run(after, stage):
+            policies = [{"policy_id": "POL_S1", "official_apply_url": "https://example.test/"}]
+            reviews = [{"policy_id": "POL_S1", "official_apply_url": "https://example.test/"}]
+            item = {"policy_id": "POL_S1", "before": "https://example.test/", "after": after, "reason": "sample_only",
+                    "evidence": "sample_only", "checked_at": "2026-11-20", "verified_stage": stage}
+            dc.apply_application_url_corrections(policies, reviews, [], {"application_url_corrections": [item]})
+            return policies[0]["official_apply_url"], reviews[0]["live_application_page_verified"]
+
+        self.assertEqual(run("https://example.test/apply", "identity_check"), ("https://example.test/apply", True))
+        self.assertEqual(run("https://example.test/info", "apply_button_out_of_period"), ("https://example.test/info", False))
+        self.assertEqual(run(None, None), (None, False))
+        with self.assertRaises(AssertionError):
+            run("https://example.test/info", None)
+        with self.assertRaises(AssertionError):
+            run(None, "booking_screen")
+
     def test_review_is_repeatable_from_captured_evidence(self):
         policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
         old = rows(ROOT / "data/handoff/neo4j/nodes_policy.jsonl")
         copied = [dict(row) for row in policies]
-        _, changes = review_candidate_policies(copied, old)
+        reviews, _ = review_candidate_policies(copied, old)
+        # 원천 신청 필드 판정 뒤, 화면을 직접 확인한 교정(#18)까지 적용해야 후보와 같다.
+        changes = dc.apply_application_url_corrections(copied, reviews, old, dc.load_corrections())
         self.assertEqual(copied, policies)
-        self.assertEqual(len(changes), 219)
+        self.assertEqual(len(changes), 235)
 
 
 class DatabaseSafetyTests(unittest.TestCase):

@@ -32,6 +32,15 @@ def omit_outdated_line(text: str, line: str) -> str:
     return "".join(lines)
 
 
+def omit_held_lines(text: str, lines: list[str]) -> str:
+    """보류한 FAQ 행을 검색용 본문에서 뺀다. 행 사이 빈 줄은 하나만 남기고, 나머지 문장과 순서는 그대로 둔다."""
+    for line in lines:
+        text = omit_outdated_line(text, line)
+    while "\n\n\n" in text:
+        text = text.replace("\n\n\n", "\n\n")
+    return text.strip()
+
+
 def apply_policy_corrections(policies: list, corrections: dict) -> None:
     """정책 노드의 설명 문구와 지역 문자열을 교정한다."""
     by_id = {policy["policy_id"]: policy for policy in policies}
@@ -55,6 +64,55 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy = by_id[item["policy_id"]]
         assert sorted(policy["life_stages"]) == sorted(item["before"]), f"생애단계 교정 전 값 불일치: {item['policy_id']}"
         policy["life_stages"] = list(item["after"])
+
+
+# 실제 신청·예약 화면까지 들어가 본 단계. 신청 버튼이나 안내만 본 경우는 확인 완료로 올리지 않는다.
+VERIFIED_APPLICATION_STAGES = frozenset({"booking_screen", "application_step", "identity_check"})
+APPLICATION_STAGES = VERIFIED_APPLICATION_STAGES | {"apply_button_out_of_period"}
+
+
+def apply_application_url_corrections(policies: list, reviews: list, baseline_policies: list,
+                                      corrections: dict) -> list:
+    """원천 신청 필드 판정 뒤, 실제 화면을 열어 확인한 신청 주소 교정을 적용한다.
+
+    after가 있으면 그 서비스 전용 신청 경로를 직접 연 주소이고, None이면 신청 화면이 아니라서 비운다.
+    어디까지 봤는지는 verified_stage에 적고, 실제 신청·예약 단계까지 본 경우만 live_application_page_verified를 true로 둔다.
+    수정 전 값이 다르면 빌드를 멈춘다. 기존 정책의 변경 목록(변경 전후)은 교정 뒤 값으로 다시 만든다.
+    """
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    review_by_id = {row["policy_id"]: row for row in reviews}
+    items = corrections.get("application_url_corrections", [])
+    assert len({item["policy_id"] for item in items}) == len(items), "신청 주소 교정 대상 중복"
+    for item in items:
+        policy = by_id[item["policy_id"]]
+        assert policy.get("official_apply_url") == item["before"], f"신청 주소 교정 전 값 불일치: {item['policy_id']}"
+        stage = item.get("verified_stage")
+        if item["after"] is None:
+            assert stage is None, f"비운 신청 주소에 확인 단계가 있음: {item['policy_id']}"
+        else:
+            assert stage in APPLICATION_STAGES, f"신청 주소의 확인 단계가 없거나 알 수 없음: {item['policy_id']}"
+        policy["official_apply_url"] = item["after"]
+        review = review_by_id[item["policy_id"]]
+        review.update({
+            "official_apply_url": item["after"],
+            "reason": f"manual_review_{item['reason']}",
+            "live_application_page_verified": stage in VERIFIED_APPLICATION_STAGES,
+            "manual_review_stage": stage,
+            "manual_review_note": item["evidence"],
+            "manual_review_checked_at": item["checked_at"],
+        })
+    changes = []
+    for baseline in baseline_policies:
+        current = by_id[baseline["policy_id"]]
+        if baseline.get("official_apply_url") != current.get("official_apply_url"):
+            changes.append({
+                "policy_id": baseline["policy_id"],
+                "field": "official_apply_url",
+                "before": baseline.get("official_apply_url"),
+                "after": current.get("official_apply_url"),
+                "reason": review_by_id[baseline["policy_id"]]["reason"],
+            })
+    return changes
 
 
 def apply_source_review(policies: list, corrections: dict) -> None:
@@ -93,15 +151,19 @@ def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) ->
     by_id = {policy["policy_id"]: policy for policy in policies}
     category_policies = {item["policy_id"] for item in corrections["category_corrections"]}
     align = set(corrections["chunk_life_stage_alignment_policies"])
+    # 정책명을 교정한 정책은 청크의 policy_name도 맞춘다. 임베딩 입력의 정책명 줄이 청크 메타데이터에서 오기 때문이다.
+    align_names = set(corrections.get("chunk_policy_name_alignment_policies", []))
     changed = 0
     for chunk in chunks:
         policy = by_id[chunk["policy_id"]]
-        before = (chunk["category"], chunk["life_stages"])
+        before = (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
         if chunk["policy_id"] in category_policies:
             chunk["category"] = policy["category"]
         if chunk["policy_id"] in align:
             chunk["life_stages"] = list(policy["life_stages"])
-        changed += before != (chunk["category"], chunk["life_stages"])
+        if chunk["policy_id"] in align_names:
+            chunk["policy_name"] = policy["policy_name"]
+        changed += before != (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
     return changed
 
 

@@ -33,7 +33,7 @@ from database.chunking import make_point_id  # noqa: E402
 V140_DIR = hd.DEFAULT_HANDOFF_DIR            # data/releases/v1.4.0-candidate (승인 릴리스)
 V132_DIR = hd.LEGACY_HANDOFF_DIR             # data/handoff (v1.3.2)
 DATASETS = {
-    hd.RELEASE_V140_VERSION: (V140_DIR, 600, 573),
+    hd.RELEASE_V140_VERSION: (V140_DIR, 663, 636),
     "1.3.2": (V132_DIR, 557, 530),
 }
 NOISE_IDS = sorted(hd.REVIEWED_NOISE_CHUNKS)
@@ -62,10 +62,12 @@ class TestReviewedListDefinition(unittest.TestCase):
                 chunks = release_chunks(directory)
                 expected = set(NOISE_IDS)
                 if version == hd.RELEASE_V140_VERSION:
-                    guide_id = "DOC_BOK_031_MOE_2026_P305_C01"
-                    expected.add(guide_id)
+                    # 서울 청년수당 소개 탭의 문의 전화 2줄도 짧지만 연락처라 적재에 남는다(#104 검토).
+                    kept_ids = ("DOC_BOK_031_MOE_2026_P305_C01", "DOC_STG_SEOUL_001_INTRO_2026_C04")
+                    expected.update(kept_ids)
                     selected, _ = hd.select_chunks_for_embedding(chunks, version=version)
-                    self.assertIn(guide_id, {chunk["chunk_id"] for chunk in selected})
+                    for kept_id in kept_ids:
+                        self.assertIn(kept_id, {chunk["chunk_id"] for chunk in selected})
                 self.assertEqual(set(hd.find_short_chunk_candidates(chunks)), expected)
 
 
@@ -224,12 +226,17 @@ print(json.dumps({"version": hd.dataset_version(), "b2": len(b2),
                   "b2_has_reviewed_ids": bool({c["chunk_id"] for c in b2} & set(hd.REVIEWED_NOISE_CHUNKS)),
                   "default_profile": hs.default_profile(), "index_config": profile["index_config"],
                   "collection": fi.FULL_INDEX_CONFIGS[profile["index_config"]]["collection"],
-                  "raw_chunks": len(hd.load_payload_chunks())}))
+                  "raw_chunks": len(hd.load_payload_chunks()),
+                  "selected_chunks": len(hd.select_chunks_for_embedding(hd.load_payload_chunks())[0])}))
 """
 
 
 class TestServicePathsUnchanged(unittest.TestCase):
-    """14·15·18: 서비스 B2(1,139), 검색 프로필, 복원 검증 600 계약은 그대로 (v1.4.0 하위 프로세스)."""
+    """14·15·18: 서비스 B2, 검색 프로필, 원본 청크 수가 현재 릴리스 manifest와 같은지 (v1.4.0 하위 프로세스).
+
+    원본 청크 수는 r2 복원 도구(scripts/restore_final_v140.py)가 아니라 현재 릴리스 manifest 기준으로 본다.
+    r2 복원 도구의 EXPECTED(원본 청크 600 포함)는 r2 계약으로 고정되어 tests/unit/test_restore_final_v140.py가 검증한다(#105).
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -243,20 +250,21 @@ class TestServicePathsUnchanged(unittest.TestCase):
 
     def test_b2_service_chunks_unchanged(self):
         self.assertEqual(self.out["version"], hd.RELEASE_V140_VERSION)
-        self.assertEqual(self.out["b2"], 1139)
+        self.assertEqual(self.out["b2"], 1233)
         self.assertFalse(self.out["b2_has_reviewed_ids"])
 
     def test_search_profile_unchanged(self):
         self.assertEqual((self.out["default_profile"], self.out["index_config"], self.out["collection"]),
                          ("b2_06b_v140", "A_B2_V140", "exp_b2_qwen3emb06b_v140_v1"))
 
-    def test_restore_contract_keeps_600_raw_chunks(self):
-        spec = importlib.util.spec_from_file_location("restore_final_v140",
-                                                      PROJECT_ROOT / "scripts" / "restore_final_v140.py")
-        restore = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(restore)
-        self.assertEqual(restore.EXPECTED[2], 600)
-        self.assertEqual(self.out["raw_chunks"], restore.EXPECTED[2])
+    def test_raw_and_selected_chunks_match_latest_release_manifest(self):
+        manifest = json.loads((V140_DIR / "manifest.json").read_text(encoding="utf-8"))
+        total = manifest["summary"]["total_chunks"]
+        self.assertEqual(total, 663)
+        self.assertEqual(manifest["files"]["qdrant/payload_chunks.jsonl"]["record_count"], total)
+        self.assertEqual(self.out["raw_chunks"], total)                                   # 원본은 줄이지 않는다
+        self.assertEqual(self.out["selected_chunks"], total - len(hd.REVIEWED_NOISE_CHUNKS))   # 검토된 노이즈만 제외
+        self.assertEqual(self.out["selected_chunks"], 636)
 
 
 if __name__ == "__main__":
