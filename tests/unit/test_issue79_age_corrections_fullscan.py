@@ -223,6 +223,7 @@ def test_issue79_age_graph_and_boundaries(record):
         for row in corrections["age_condition_replacements"]
     ],
 )
+
 def test_issue79_age_replacements(replacement):
     """Check all five documented age condition replacements."""
     policy_id = replacement["policy_id"]
@@ -237,9 +238,13 @@ def test_issue79_age_replacements(replacement):
             child_conditions[group_id]
         )
 
+    # 조건 트리에서 교체 여부 확인
     assert new_id in reachable_conditions
     assert old_id not in reachable_conditions
+
+    # 정책의 직접 REQUIRES_CONDITION 관계도 확인
     assert (policy_id, new_id) in required_conditions
+    assert (policy_id, old_id) not in required_conditions
 
 
 def test_issue79_pending_review_remains_separate():
