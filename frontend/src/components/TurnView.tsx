@@ -350,6 +350,35 @@ function conditionReasonForDisplay(reason: string) {
   return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
+/**
+ * Checker 조건 결과를 화면용으로 묶는다(정책 카드·정책 비교 공용).
+ * 그룹 종합 결과 행은 빼고, 같은 소득 안내는 한 번만 남기며, AND 그룹만 있을 때만 적합/불일치 판정을 그대로 보여 준다.
+ */
+export function summarizeConditions(conditions: ConditionResult[]) {
+  const unjudged = isUnjudgedOnly(conditions);
+  const incomeNotices = new Set<string>();
+  // 그룹 종합 결과 행(…해야 합니다(종합 결과))은 계산 과정이라 화면에서 뺀다.
+  const displayedConditions = conditions.filter((condition) => {
+    const { field, status, label, reason } = condition;
+    if (isGroupRow(condition)) return false;
+    if (field !== 'income' || status !== 'needs_check') return true;
+    const key = JSON.stringify([label, reason]);
+    if (incomeNotices.has(key)) return false;
+    incomeNotices.add(key);
+    return true;
+  });
+  const showVerdict = hasOnlyAndGroups(conditions);
+  const hidesVerdict = !showVerdict && displayedConditions.some(({ status }) => status !== 'needs_check');
+  const labelsByBadge = new Map<string, { cls: string; labels: Set<string> }>();
+  for (const { status, label } of displayedConditions) {
+    const [cls, badge] = conditionBadge(status, showVerdict);
+    const entry = labelsByBadge.get(badge) ?? { cls, labels: new Set<string>() };
+    entry.labels.add(label);
+    labelsByBadge.set(badge, entry);
+  }
+  return { unjudged, displayedConditions, showVerdict, hidesVerdict, labelsByBadge, excluded: matchesExclusion(conditions) };
+}
+
 export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy, sources = [], onOpenMap, askAsPrimary = false }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
   onAskPolicy?: Props['onAskPolicy'];
@@ -361,30 +390,10 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
 }) {
   const savedState = useSavedPolicies();
   const isSaved = !sample && !!savedState?.saved.some(s => s.policy_id === p.policy_id);
-  const unjudged = isUnjudgedOnly(p.conditions);
-  const incomeNotices = new Set<string>();
-  // 그룹 종합 결과 행(…해야 합니다(종합 결과))은 계산 과정이라 화면에서 뺀다.
-  const displayedConditions = p.conditions.filter((condition) => {
-    const { field, status, label, reason } = condition;
-    if (isGroupRow(condition)) return false;
-    if (field !== 'income' || status !== 'needs_check') return true;
-    const key = JSON.stringify([label, reason]);
-    if (incomeNotices.has(key)) return false;
-    incomeNotices.add(key);
-    return true;
-  });
-  const showVerdict = hasOnlyAndGroups(p.conditions);
-  const hidesVerdict = !showVerdict && displayedConditions.some(({ status }) => status !== 'needs_check');
+  const { unjudged, displayedConditions, showVerdict, hidesVerdict, labelsByBadge } = summarizeConditions(p.conditions);
   const schedule = scheduleView(p, useScheduleDay());
   const [rcls] = RECEPTION_LABEL[schedule.status];
   const rlabel = schedule.label;
-  const labelsByBadge = new Map<string, { cls: string; labels: Set<string> }>();
-  for (const { status, label } of displayedConditions) {
-    const [cls, badge] = conditionBadge(status, showVerdict);
-    const entry = labelsByBadge.get(badge) ?? { cls, labels: new Set<string>() };
-    entry.labels.add(label);
-    labelsByBadge.set(badge, entry);
-  }
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
   // 검수된 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.

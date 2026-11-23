@@ -12,6 +12,7 @@ import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge } from './lib/validate';
 import { PolicyScheduleList } from './components/PolicyScheduleList';
 import { PolicyExplorer } from './components/PolicyExplorer';
+import type { ConsultedCheck } from './lib/policyCompare';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
@@ -224,6 +225,15 @@ export default function App() {
   // 상담에서 가장 최근에 나온 정책: 생애주기·관계 지도가 이어서 보여 준다
   const recent = useMemo(() => recentPoliciesFromTurns(turns), [turns]);
   const latestResponse = useMemo(() => [...turns].reverse().find(t => t.kind === 'qa' && t.state === 'done' && t.response), [turns]);
+  // 정책 비교용: 정책마다 가장 최근 상담(예시 응답 제외)의 Checker 결과와 그때 입력한 조건. 새로 판정하지 않는다
+  const consulted = useMemo(() => {
+    const map = new Map<string, ConsultedCheck>();
+    for (const t of [...turns].reverse()) {
+      if (t.kind !== 'qa' || t.state !== 'done' || !t.response || t.response.is_sample) continue;
+      for (const check of t.response.policy_checks) if (!map.has(check.policy_id)) map.set(check.policy_id, { check, tags: t.tags.map(tag => tag.text) });
+    }
+    return map;
+  }, [turns]);
 
   const profileText = describeProfile(profile);
   const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
@@ -324,6 +334,7 @@ export default function App() {
       <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
         onOpenMap={() => { explorerScroll.current = window.scrollY; }}
         active={onAskPage}
+        consulted={consulted}
         onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
       </div>
 

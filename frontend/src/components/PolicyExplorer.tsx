@@ -7,17 +7,19 @@ import { PolicyCard } from './TurnView';
 import { useSavedPolicies } from './SavedPolicies';
 import { useScheduleDay } from './ScheduleClock';
 import { loadPolicyCatalog, POLICY_API_URL } from '../api/policyCatalog';
-import { COMPARE_MAX, COMPARE_MIN } from '../lib/policyCompare';
+import { COMPARE_MAX, COMPARE_MIN, type ConsultedCheck } from '../lib/policyCompare';
 import { PolicyCompare } from './PolicyCompare';
 
 // 상담 화면이 너무 길어지지 않도록 처음엔 두 줄(데스크톱 3열 기준)만 보여 준다
 const PAGE_SIZE = 6;
 const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
-export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true }: {
+export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;
   /** 상담 화면이 보이는 중인지. false면 포커스·탭 복귀 갱신을 건너뛴다 */
   active?: boolean;
+  /** 정책별 최근 상담 Checker 결과(정책 비교 카드에서만 쓴다) */
+  consulted?: Map<string, ConsultedCheck>;
 }) {
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -86,7 +88,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   if (comparing && compareInputs.length >= COMPARE_MIN) {
     return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
       <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2></div>
-      <PolicyCompare inputs={compareInputs} onAsk={onAsk} onOpenMap={onOpenMap}
+      <PolicyCompare inputs={compareInputs} consulted={consulted} onAsk={onAsk} onOpenMap={onOpenMap}
         onBack={() => { setComparing(false); sectionRef.current?.scrollIntoView({ block: 'start' }); }} />
     </div></section>;
   }
