@@ -10,6 +10,10 @@ r2 래퍼(restore_r2_isolated)와 달리 환경 변수를 덮어쓰지 않고, �
   - Docker 소유 확인: 두 포트의 컨테이너가 정확히 이 프로젝트의 qdrant·neo4j 서비스, 실행 중, 고정 이미지 digest,
     127.0.0.1 바인딩만, 이 프로젝트 이름의 볼륨만. 프로젝트에 다른 컨테이너가 있어도 거부
   - 서버: Qdrant 1.12.4·키 없는 요청 401·컬렉션 0·별칭 0, Neo4j 5.26.32 community·틀린 비밀번호 거부·노드/관계 0
+  - 복원 결과(#111 P1-3): 실제 컬렉션은 임시 이름 2개(<정식>__tmp_<32 hex>), 정식 이름은 그 임시 컬렉션을
+    가리키는 alias 2개다. 이 짝이 정확할 때만 Qdrant 상태가 "published"이고, Neo4j complete와 함께일 때만
+    verify-only를 허용한다. 정식 이름 컬렉션·부분 alias·다른 컬렉션/alias가 있으면 거부한다.
+  - 이 보호 장치들은 다른 쓰기 주체가 접근할 가능성을 낮출 뿐 잠금이 아니다 (restore_final_v140_r3 "덮어쓰기 안전 경계")
   - fingerprint: Docker 식별 정보 + 서버 상태. --apply는 직전 preflight fingerprint와 같을 때만, 복원 후 식별 정보 재확인
   - 소스·번들: --repo는 이 래퍼가 들어 있는 소스 트리, 번들의 restore_final_v140_r3.py가 그 트리 것과 바이트 동일
   - R3_PINS가 확정되지 않으면 check_bundle 단계에서 거부된다
@@ -46,7 +50,35 @@ FOREIGN_SECRET_ENVS = (*profiles.FOREIGN_SECRET_ENVS, BUILD["qdrant_key_env"], B
 DENIED_PORTS = profiles.FOREIGN_PORTS | {BUILD["qdrant_port"], BUILD["bolt_port"]}
 SERVICES = profiles.services_for("verify")
 EXPECTED_COLLECTIONS = sorted(spec["collection"] for spec in profiles.R3_COLLECTIONS.values())
+CANONICAL = {key: spec["collection"] for key, spec in profiles.R3_COLLECTIONS.items()}
 IsolationError = r2w.IsolationError
+
+
+def inspect_servers(qdrant_client, neo4j_runner, graph) -> dict[str, Any]:
+    """r2 래퍼의 inspect_servers(버전·Neo4j 상태)를 그대로 쓰고, Qdrant 상태만 r3 C안 기준으로 다시 판정한다 (읽기 전용).
+
+    Qdrant: empty(컬렉션·alias 0) / published(임시 2개 + 정식 alias 2개 정확히 짝) / not_published(그 밖의 모든 상태)
+    전체: empty+empty → empty, Neo4j complete + published → complete, 그 밖 → neo4j_<상태>+qdrant_<상태>
+    """
+    servers = r2w.inspect_servers(qdrant_client, neo4j_runner, graph, expected_collections=EXPECTED_COLLECTIONS)
+    collections = servers["qdrant"]["collections"]
+    aliases = restore_r3.alias_mapping(qdrant_client)
+    if not collections and not aliases:
+        qdrant_state = "empty"
+    elif restore_r3.published_state(collections, aliases, CANONICAL) is not None:
+        qdrant_state = "published"
+    else:
+        qdrant_state = "not_published"
+    graph_state = servers["neo4j"]["state"]
+    if (graph_state, qdrant_state) == ("empty", "empty"):
+        state = "empty"
+    elif (graph_state, qdrant_state) == ("complete", "published"):
+        state = "complete"
+    else:
+        state = f"neo4j_{graph_state}+qdrant_{qdrant_state}"
+    servers["qdrant"] = {**servers["qdrant"], "aliases": dict(sorted(aliases.items())), "state": qdrant_state}
+    servers["state"] = state
+    return servers
 
 
 def require_target_urls(qdrant_url: str = QDRANT_URL, neo4j_uri: str = NEO4J_URI) -> None:
@@ -135,8 +167,7 @@ class Context:
         driver = self.neo4j_factory(self.values["neo4j"])
         try:
             runner = (self.runner_factory or (lambda d: lg.Neo4jDriverRunner(d, database=NEO4J_DATABASE)))(driver)
-            servers = r2w.inspect_servers(client, runner, self.graph or lg.read_graph_input(),
-                                          expected_collections=EXPECTED_COLLECTIONS)
+            servers = inspect_servers(client, runner, self.graph or lg.read_graph_input())
         finally:
             client.close()
             driver.close()
@@ -182,7 +213,8 @@ def run(mode: str, repo: Path, bundle: Path, ctx: Context, *, confirm_write: boo
         return {"mode": mode, **base, "restore_apply": result, "post_verify": verification}
     if mode == "verify-only":
         if servers["state"] != "complete":
-            raise IsolationError(f"검증 대상 상태가 {servers['state']}입니다 (complete여야 함)")
+            raise IsolationError(f"검증 대상 상태가 {servers['state']}입니다 "
+                                 "(complete여야 함: Neo4j complete + Qdrant published)")
         verification = call(False, True)
         if verification.get("status") != "PASS":
             raise IsolationError("verify-only 검증 실패")
@@ -216,6 +248,8 @@ def main(argv: list[str] | None = None, ctx_factory=Context) -> int:
     except (IsolationError, ValueError) as error:
         result = {"status": "FAILED", "mode": name, "error_type": type(error).__name__, "reason": str(error)[:800],
                   "action": "자동 재실행하지 않는다. 대상 DB는 보존한다. 원인 확인 후 새 프로젝트·새 볼륨에서 다시 시작한다."}
+        if isinstance(error, restore_r3.PublishError):   # alias 공개 단계 실패: 부분 공개 여부·현재 매핑 기록
+            result["partial_publish"], result["aliases"] = error.partial_publish, error.aliases
     except Exception as error:
         result = {"status": "FAILED", "mode": name, "error_type": type(error).__name__,
                   "action": "자동 재실행하지 않는다. 컨테이너 상태와 검증용 인증 변수를 확인한다."}

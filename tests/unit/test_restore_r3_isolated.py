@@ -3,10 +3,12 @@
 FakeDocker·VerifyQdrant·VerifyNeo4j(r2 래퍼 테스트 더블)와 sample_only 번들만 쓴다. Docker·DB 접속 없음.
 """
 import copy
+import json
 import os
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,6 +19,7 @@ from test_restore_final_v140_r3 import Bundle  # noqa: E402
 from test_restore_r2_isolated import FakeDocker, VerifyNeo4j, VerifyQdrant  # noqa: E402
 
 from database.neo4j import load_graph as lg  # noqa: E402
+from scripts import restore_final_v140_r3 as restore_r3  # noqa: E402
 from scripts import restore_profiles_v140 as profiles  # noqa: E402
 from scripts import restore_r2_isolated as r2w  # noqa: E402
 from scripts import restore_r3_isolated as wrap  # noqa: E402
@@ -39,7 +42,7 @@ def good_docker():
     return FakeDocker([container("q" * 64, "qdrant"), container("n" * 64, "neo4j")])
 
 
-def make_ctx(docker=None, qdrant=None):
+def make_ctx(docker=None, qdrant=None, runner=None):
     from neo4j.exceptions import AuthError
     qdrant = qdrant if qdrant is not None else VerifyQdrant()
 
@@ -49,8 +52,35 @@ def make_ctx(docker=None, qdrant=None):
         return SimpleNamespace(close=lambda: None)
 
     return wrap.Context(dict(VALUES), docker=docker or good_docker(), qdrant_factory=lambda values: qdrant,
-                        neo4j_factory=neo4j_factory, runner_factory=lambda driver: VerifyNeo4j(),
+                        neo4j_factory=neo4j_factory, runner_factory=lambda driver: runner or VerifyNeo4j(),
                         http_get=lambda url, timeout: SimpleNamespace(status_code=401), graph=GRAPH)
+
+
+B2, B3 = wrap.CANONICAL["b2"], wrap.CANONICAL["b3"]
+TB2, TB3 = restore_r3.temp_collection_name(B2, "a" * 32), restore_r3.temp_collection_name(B3, "b" * 32)
+
+
+class AliasQdrant(VerifyQdrant):
+    """alias 매핑까지 돌려주는 VerifyQdrant (r2 테스트 더블은 alias 대상을 "x"로만 준다)."""
+
+    def __init__(self, collections, aliases):
+        super().__init__({})
+        self.collections = {name: {} for name in collections}
+        self.alias_map = dict(aliases)
+
+    def get_aliases(self):
+        return SimpleNamespace(aliases=[SimpleNamespace(alias_name=a, collection_name=c)
+                                        for a, c in self.alias_map.items()])
+
+
+def published_qdrant():
+    return AliasQdrant([TB2, TB3], {B2: TB2, B3: TB3})
+
+
+def loaded_runner():
+    runner = VerifyNeo4j()
+    lg.load_graph(GRAPH, runner, batch_size=500, verify=False)        # sample 그래프를 fake Neo4j에만 적재
+    return runner
 
 
 class FakeRestore:
@@ -164,11 +194,46 @@ class RunTests(unittest.TestCase):
         with self.assertRaisesRegex(wrap.IsolationError, "비어 있지 않습니다"):
             self.run_mode("preflight", ctx=make_ctx(qdrant=busy), restore_fn=FakeRestore())
         both = VerifyQdrant({})
-        both.collections = {name: {} for name in wrap.EXPECTED_COLLECTIONS}
+        both.collections = {name: {} for name in wrap.EXPECTED_COLLECTIONS}       # 옛 방식(정식 이름 직접 복원)
         state = make_ctx(qdrant=both).snapshot()[1]
-        self.assertEqual(state["qdrant"]["state"], "restored_collection")
+        self.assertEqual(state["qdrant"]["state"], "not_published")
         with self.assertRaisesRegex(wrap.IsolationError, "complete"):
             self.run_mode("verify-only", ctx=make_ctx(qdrant=both), restore_fn=FakeRestore())
+        aliased = published_qdrant()
+        with self.assertRaisesRegex(wrap.IsolationError, "비어 있지 않습니다"):    # published DB에는 다시 쓰지 않음
+            self.run_mode("preflight", ctx=make_ctx(qdrant=aliased), restore_fn=FakeRestore())
+
+    def test_verify_only_is_refused_outside_the_published_state(self):
+        cases = {
+            "direct_public_collections": AliasQdrant([B2, B3], {}),
+            "temps_without_aliases": AliasQdrant([TB2, TB3], {}),
+            "partial_publish": AliasQdrant([TB2, TB3], {B2: TB2}),
+            "swapped_aliases": AliasQdrant([TB2, TB3], {B2: TB3, B3: TB2}),
+            "extra_alias": AliasQdrant([TB2, TB3], {B2: TB2, B3: TB3, "sample_only_alias": TB2}),
+            "extra_collection": AliasQdrant([TB2, TB3, "exp_other_sample_only"], {B2: TB2, B3: TB3}),
+            "public_collection_and_alias": AliasQdrant([TB2, TB3, B3], {B2: TB2, B3: TB3}),
+        }
+        for name, qdrant in cases.items():
+            with self.subTest(state=name):
+                fake = FakeRestore()
+                ctx = make_ctx(qdrant=qdrant, runner=loaded_runner())
+                self.assertEqual(ctx.snapshot()[1]["qdrant"]["state"], "not_published")
+                with self.assertRaisesRegex(wrap.IsolationError, "complete"):
+                    self.run_mode("verify-only", ctx=ctx, restore_fn=fake)
+                self.assertEqual(fake.calls, [])
+        fake = FakeRestore()                                            # Qdrant는 published여도 Neo4j가 비면 거부
+        with self.assertRaisesRegex(wrap.IsolationError, "complete"):
+            self.run_mode("verify-only", ctx=make_ctx(qdrant=published_qdrant()), restore_fn=fake)
+        self.assertEqual(fake.calls, [])
+
+    def test_verify_only_passes_in_the_published_state(self):
+        fake = FakeRestore()
+        ctx = make_ctx(qdrant=published_qdrant(), runner=loaded_runner())
+        result = self.run_mode("verify-only", ctx=ctx, restore_fn=fake)
+        self.assertEqual((result["servers"]["state"], result["db_writes"]), ("complete", 0))
+        self.assertEqual(result["servers"]["qdrant"]["state"], "published")
+        self.assertEqual(result["servers"]["qdrant"]["aliases"], {B2: TB2, B3: TB3})
+        self.assertEqual([(c["apply"], c["verify_only"]) for c in fake.calls], [(False, True)])
 
     def test_bundle_tool_must_match_source_tree(self):
         tool = self.b.folder / "restore_final_v140_r3.py"
@@ -218,6 +283,18 @@ class CliTests(unittest.TestCase):
             report.write_text("{}", encoding="utf-8")
             with self.assertRaises(SystemExit):
                 wrap.main(["--bundle", folder, "--report", str(report)])
+
+    def test_partial_publish_is_reported_as_failed(self):
+        error = restore_r3.PublishError("Alias publish failed (sample_only)", partial_publish=True, aliases={B2: TB2})
+        with tempfile.TemporaryDirectory() as folder, \
+                unittest.mock.patch.dict(os.environ, ENV), unittest.mock.patch.object(wrap, "run", side_effect=error):
+            report = Path(folder) / "r.json"
+            self.assertEqual(wrap.main(["--bundle", folder, "--apply", "--confirm-write", "--expect-fingerprint",
+                                        "0" * 64, "--report", str(report)], ctx_factory=lambda values: None), 1)
+            output = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual((output["status"], output["error_type"]), ("FAILED", "PublishError"))
+        self.assertEqual((output["partial_publish"], output["aliases"]), (True, {B2: TB2}))
+        self.assertNotIn(VALUES["qdrant"], json.dumps(output))
 
     def test_missing_secrets_fail_without_connection(self):
         environ = copy.deepcopy(dict(os.environ))

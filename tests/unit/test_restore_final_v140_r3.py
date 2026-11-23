@@ -4,6 +4,7 @@
 source ZIP에는 --repo(이 저장소)와 대조하는 파일만 넣는다. 릴리스·그래프·교차 검증 함수는 mock으로 바꾼다.
 Qdrant는 R3Qdrant(벡터 비트 보존), Neo4j는 MagicMock 실행기다. 실제 DB·Docker 접속 없음.
 """
+import copy
 import hashlib
 import json
 import os
@@ -34,6 +35,11 @@ SETTINGS = {"QDRANT_URL": "http://127.0.0.1:56656", "QDRANT_API_KEY": "sample_on
             "NEO4J_URI": "bolt://127.0.0.1:56687", "NEO4J_USER": "neo4j", "NEO4J_PASSWORD": "sample_only_pw"}
 SOURCE_COMMIT = "1" * 40
 ORIGINAL_RESTORE = r3.restore          # CLI 테스트가 r3.restore를 바꿔 끼워도 시나리오는 원래 함수를 부른다
+B2 = profiles.R3_COLLECTIONS["b2"]["collection"]
+B3 = profiles.R3_COLLECTIONS["b3"]["collection"]
+OTHER = "exp_other_sample_only"
+TOKEN_B2, TOKEN_B3 = "a" * 32, "b" * 32               # 테스트 고정 토큰 (실제는 secrets.token_hex(16))
+TB2, TB3 = r3.temp_collection_name(B2, TOKEN_B2), r3.temp_collection_name(B3, TOKEN_B3)
 
 
 def neo4j_release_files(root=ROOT):
@@ -277,7 +283,11 @@ class RestoreTests(unittest.TestCase):
         self.calls = {"cross": [], "slices": [], "uploads": []}
 
     def run_restore(self, client, *, apply=False, verify_only=False, totals=None, cross=None, settings=SETTINGS,
-                    pins="default", fail_upload=None, load_result=None):
+                    pins="default", fail_upload=None, load_result=None, before_post=None, after_post=None,
+                    tokens=(TOKEN_B2, TOKEN_B3)):
+        """before_post(name, client): POST가 서버에서 처리되기 직전(검사 이후) 외부 작업을 흉내 낸다.
+        after_post(name, client): 업로드가 끝난 직후, 복원 도구의 다음 검사 전에 외부 작업을 흉내 낸다.
+        tokens: 임시 이름 토큰 (테스트만 고정값. 실제 기본값은 secrets.token_hex(16))."""
         s = self.b.s
         runner = MagicMock()
         totals = totals or ([[{"nodes": 10, "relationships": 12}]] if verify_only
@@ -290,18 +300,26 @@ class RestoreTests(unittest.TestCase):
             return (cross or {}).get(collection, {"status": "PASS", "failures": [], "qdrant_points": 6,
                                                   "qdrant_count": 6, "all_points_read": True, "summary": {}})
 
-        def slices(name, *, client, chunks, documents):
-            self.calls["slices"].append(name)
+        def slices(name, *, client, chunks, documents, collection=None):
+            self.calls["slices"].append((name, collection))
             return {"passed": True}
 
         def post(url, params, headers, files, timeout):
             name = url.split("/collections/")[1].split("/")[0]
             self.calls["uploads"].append((name, params["checksum"], params["priority"]))
+            match = r3.TEMP_NAME.fullmatch(name)
+            if match is None:                                      # 정식 이름 업로드는 HTTP까지 오면 안 된다
+                raise AssertionError(f"snapshot upload to non-temporary name: {name}")
+            if before_post:
+                before_post(name, client)
             if name == fail_upload:
                 return SimpleNamespace(status_code=500)
-            key = next(k for k in profiles.COLLECTION_KEYS if profiles.R3_COLLECTIONS[k]["collection"] == name)
+            key = next(k for k in profiles.COLLECTION_KEYS if profiles.R3_COLLECTIONS[k]["collection"] == match["canonical"])
+            # 실제 Qdrant처럼 같은 이름 컬렉션이 있어도 통째로 덮어쓴다
             client.collections[name] = {p: {"payload": dict(r["payload"]), "vector": list(r["vector"])}
                                         for p, r in self.b.records[key].items()}
+            if after_post:
+                after_post(name, client)
             return SimpleNamespace(status_code=200)
 
         validation = SimpleNamespace(ok=True, node_counts={"sample": 10},
@@ -322,48 +340,55 @@ class RestoreTests(unittest.TestCase):
             stack.enter_context(patch.object(fi, "verify_full_index", side_effect=slices))
             args = Namespace(repo=ROOT, bundle=self.b.folder, apply=apply, verify_only=verify_only)
             return ORIGINAL_RESTORE(args, settings=settings, pins=self.b.pins if pins == "default" else pins,
-                              http_post=post, client_factory=lambda st: client,
-                              driver_factory=lambda st: SimpleNamespace(verify_connectivity=lambda: None,
-                                                                        close=lambda: None))
+                                    http_post=post, client_factory=lambda st: client,
+                                    driver_factory=lambda st: SimpleNamespace(verify_connectivity=lambda: None,
+                                                                              close=lambda: None),
+                                    token_factory=iter(tokens).__next__)
 
     def final_client(self):
-        return R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.b.records[k] for k in profiles.COLLECTION_KEYS})
+        """published 상태: 임시 컬렉션 2개 + 정식 alias 2개 (C안 복원 결과)."""
+        client = R3Qdrant({TB2: self.b.records["b2"], TB3: self.b.records["b3"]})
+        client.aliases = {B2: TB2, B3: TB3}
+        return client
 
     def test_preflight_writes_nothing(self):
         client = R3Qdrant()
         result = self.run_restore(client)
         self.assertEqual(result["status"], "PREFLIGHT_PASS_NO_WRITES")
-        self.assertEqual((client.writes, self.calls["uploads"]), ([], []))
+        self.assertEqual((client.writes, self.calls["uploads"], client.alias_ops), ([], [], []))
 
     def test_apply_uploads_both_snapshots_and_cross_checks_each_collection(self):
         client = R3Qdrant()
         result = self.run_restore(client, apply=True)
         self.assertEqual(result["status"], "PASS")
-        names = [profiles.R3_COLLECTIONS[k]["collection"] for k in profiles.COLLECTION_KEYS]
-        self.assertEqual([u[0] for u in self.calls["uploads"]], names)
+        self.assertEqual([u[0] for u in self.calls["uploads"]], [TB2, TB3])          # 임시 이름에만 업로드
         self.assertTrue(all(u[2] == "snapshot" and len(u[1]) == 64 for u in self.calls["uploads"]))
-        self.assertEqual(self.calls["cross"], names)
-        self.assertEqual(self.calls["slices"], [profiles.R3_COLLECTIONS[k]["config"] for k in profiles.COLLECTION_KEYS])
+        self.assertEqual(self.calls["cross"], [TB2, TB3])                             # 공개 전 임시 이름으로 검증
+        self.assertEqual(self.calls["slices"], [(profiles.R3_COLLECTIONS["b2"]["config"], TB2),
+                                                (profiles.R3_COLLECTIONS["b3"]["config"], TB3)])
         self.assertEqual({k: v["points"] for k, v in result["collections"].items()}, {"b2": 6, "b3": 6})
+        self.assertEqual(result["physical_collections"], {"b2": TB2, "b3": TB3})
+        self.assertEqual((result["aliases"], client.aliases), ({B2: TB2, B3: TB3}, {B2: TB2, B3: TB3}))
+        self.assertEqual(client.alias_ops, [("create_alias", B2, TB2), ("create_alias", B3, TB3)])
+        self.assertEqual(sorted(client.collections), sorted([TB2, TB3]))             # 정식 이름 컬렉션 없음
+        self.assertIs(result["partial_publish"], False)
         self.assertIn("source_check", result)
         self.assertEqual(client.writes, [])                           # 정렬할 payload 없음
 
     def test_second_snapshot_failure_is_never_reported_as_success(self):
-        """B2 업로드 성공 후 B3 업로드 실패: 예외로 멈추고 Neo4j 적재·교차 검증으로 넘어가지 않는다 (부분 자산 보존)."""
+        """B2 업로드 성공 후 B3 업로드 실패: 예외로 멈추고 Neo4j 적재·교차 검증·공개로 넘어가지 않는다 (부분 자산 보존)."""
         client = R3Qdrant()
-        b3 = profiles.R3_COLLECTIONS["b3"]["collection"]
         with self.assertRaisesRegex(ValueError, "Snapshot upload failed"):
-            self.run_restore(client, apply=True, fail_upload=b3)
-        self.assertEqual(sorted(client.collections), [profiles.R3_COLLECTIONS["b2"]["collection"]])
-        self.assertEqual((self.calls["cross"], self.calls["slices"]), ([], []))
+            self.run_restore(client, apply=True, fail_upload=TB3)
+        self.assertEqual(sorted(client.collections), [TB2])
+        self.assertEqual((self.calls["cross"], self.calls["slices"], client.alias_ops), ([], [], []))
         with self.assertRaisesRegex(ValueError, "requires empty"):     # 재실행은 빈 DB가 아니어서 거부
             self.run_restore(client, apply=True)
 
     def test_cli_reports_partial_failure_as_failed(self):
         client = R3Qdrant()
-        b3 = profiles.R3_COLLECTIONS["b3"]["collection"]
         def failing(args):                                # main이 부르는 restore를 부분 실패 시나리오로 바꾼다
-            return self.run_restore(client, apply=True, fail_upload=b3)
+            return self.run_restore(client, apply=True, fail_upload=TB3)
         with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=failing):
             report = Path(folder) / "report.json"
             self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
@@ -373,29 +398,30 @@ class RestoreTests(unittest.TestCase):
         self.assertNotIn(SETTINGS["QDRANT_API_KEY"], json.dumps(output))
 
     def test_neo4j_load_failure_after_uploads_is_not_success(self):
+        client = R3Qdrant()
         with self.assertRaisesRegex(ValueError, "Neo4j restore verification failed"):
-            self.run_restore(R3Qdrant(), apply=True, load_result={"ok": False, "verification": {"ok": False}})
-        self.assertEqual(self.calls["cross"], [])
+            self.run_restore(client, apply=True, load_result={"ok": False, "verification": {"ok": False}})
+        self.assertEqual((self.calls["cross"], client.alias_ops, client.aliases), ([], [], {}))   # 공개 0회
 
     def test_verify_only_is_read_only_and_refuses_alignment_or_digest_drift(self):
         client = self.final_client()
-        self.assertEqual(self.run_restore(client, verify_only=True)["status"], "PASS")
-        self.assertEqual(client.writes, [])
+        result = self.run_restore(client, verify_only=True)
+        self.assertEqual((result["status"], result["aliases"]), ("PASS", {B2: TB2, B3: TB3}))
+        self.assertEqual((client.writes, client.alias_ops), ([], []))
         drift = self.final_client()
-        point = next(iter(drift.collections["exp_b3_qwen3emb06b_v140_v1"].values()))
+        point = next(iter(drift.collections[TB3].values()))
         point["payload"]["category"] = "sample_only_drift"
         with self.assertRaisesRegex(ValueError, "verify-only refuses"):
             self.run_restore(drift, verify_only=True)
         changed = self.final_client()
-        point = next(iter(changed.collections["exp_b2_qwen3emb06b_v140_v1"].values()))
+        point = next(iter(changed.collections[TB2].values()))
         point["vector"] = sample_vector(500)
         with self.assertRaisesRegex(ValueError, "vector digest"):
             self.run_restore(changed, verify_only=True)
-        self.assertEqual((drift.writes, changed.writes), ([], []))
+        self.assertEqual((drift.writes, changed.writes, drift.alias_ops, changed.alias_ops), ([], [], [], []))
 
     def test_cross_db_failure_on_either_collection_never_passes(self):
-        bad = {"exp_b3_qwen3emb06b_v140_v1": {"status": "MISMATCH", "failures": [{"x": 1}], "qdrant_points": 6,
-                                              "qdrant_count": 6}}
+        bad = {TB3: {"status": "MISMATCH", "failures": [{"x": 1}], "qdrant_points": 6, "qdrant_count": 6}}
         with self.assertRaisesRegex(ValueError, "Cross-DB validation failed"):
             self.run_restore(self.final_client(), verify_only=True, cross=bad)
 
@@ -423,6 +449,339 @@ class RestoreTests(unittest.TestCase):
             self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C2): 게이트 통과 후 번들 불일치 거부
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             self.run_restore(R3Qdrant(), pins=final_sample_pins())  # 2차 확정 모양: 게이트 통과 후 번들 불일치 거부
+
+
+def foreign_records():
+    """외부 작업이 만든 컬렉션 내용 (sample_only, 번들과 다른 벡터·payload)."""
+    return {"sample_only_foreign_1": {"payload": {"sample_only": "foreign"}, "vector": sample_vector(901)},
+            "sample_only_foreign_2": {"payload": {"sample_only": "foreign"}, "vector": sample_vector(902)}}
+
+
+class RacingQdrant(R3Qdrant):
+    """get_collections n번째 호출 직전에 외부 작업(inject[n])을 실행한다 — 검사 사이 끼어들기 흉내."""
+
+    def __init__(self, inject, collections=None):
+        super().__init__(collections)
+        self.inject, self.list_calls = inject, 0
+
+    def get_collections(self):
+        self.list_calls += 1
+        if self.list_calls in self.inject:
+            self.inject[self.list_calls](self)
+        return super().get_collections()
+
+
+class CollectionRaceTests(unittest.TestCase):
+    """#111 P1-3: 복원 중 외부 작업이 만든 컬렉션을 덮어쓰지 않고 PASS도 반환하지 않는다.
+
+    --apply의 get_collections 호출 순서: 1 require_empty · 2 임시 B2 직전 · 3 임시 B2 직후 · 4 임시 B3 직전 ·
+    5 임시 B3 직후 · 6 검증 전 · 7 공개 직전 · 8 공개 직후.
+    RestoreTests의 준비·실행 도우미만 빌려 쓴다 (상속하면 기존 테스트가 한 번 더 돈다).
+    """
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    final_client = RestoreTests.final_client
+
+    def assert_stopped_without_pass(self, uploads, client=None):
+        self.assertEqual([u[0] for u in self.calls["uploads"]], uploads)
+        self.assertEqual((self.calls["cross"], self.calls["slices"]), ([], []))    # Neo4j·교차 검증 단계 미진입
+        if client is not None:
+            self.assertEqual((client.alias_ops, client.aliases), ([], {}))          # 공개 0회
+
+    def test_external_b3_created_right_after_b2_upload_is_never_overwritten(self):
+        client, foreign = R3Qdrant(), foreign_records()
+        before = r2.vector_digest(foreign)
+
+        def create_b3(name, c):
+            if name == TB2:
+                c.collections[B3] = copy.deepcopy(foreign)
+        with self.assertRaisesRegex(ValueError, f"collection set mismatch after uploading {TB2}.*unexpected=\\['{B3}'\\]"):
+            self.run_restore(client, apply=True, after_post=create_b3)
+        self.assert_stopped_without_pass([TB2], client)                           # B3 업로드 0회
+        self.assertEqual(client.collections[B3], foreign)
+        self.assertEqual(r2.vector_digest(client.collections[B3]), before)
+        self.assertEqual(client.writes, [])
+
+    def test_external_b3_created_between_after_and_before_checks_is_refused_before_b3_upload(self):
+        foreign = foreign_records()
+        client = RacingQdrant({4: lambda c: c.collections.__setitem__(B3, copy.deepcopy(foreign))})
+        with self.assertRaisesRegex(ValueError, f"collection set mismatch before uploading {TB3}"):
+            self.run_restore(client, apply=True)
+        self.assert_stopped_without_pass([TB2], client)
+        self.assertEqual(client.collections[B3], foreign)
+        self.assertEqual(sorted(client.collections[TB2]), sorted(self.b.records["b2"]))  # 부분 자산 보존(삭제 없음)
+
+    def test_external_canonical_b3_created_inside_temp_upload_post_is_preserved_and_fails(self):
+        """(예전 잔여 위험 재현 테스트의 대체) 업로드가 임시 이름으로 가므로 POST 도중 생긴 정식 B3는 덮어써지지 않는다."""
+        client, foreign = R3Qdrant(), foreign_records()
+
+        def create_b3(name, c):
+            if name == TB3:
+                c.collections[B3] = copy.deepcopy(foreign)
+        with self.assertRaisesRegex(ValueError, f"collection set mismatch after uploading {TB3}.*unexpected=\\['{B3}'\\]"):
+            self.run_restore(client, apply=True, before_post=create_b3)
+        self.assert_stopped_without_pass([TB2, TB3], client)
+        self.assertEqual(client.collections[B3], foreign)                          # 외부 데이터 보존
+
+    def test_b3_existing_before_restore_is_refused_and_preserved(self):
+        for name in (B2, B3):
+            with self.subTest(existing=name):
+                self.calls = {"cross": [], "slices": [], "uploads": []}
+                foreign = foreign_records()
+                client = R3Qdrant({name: foreign})
+                with self.assertRaisesRegex(ValueError, "requires empty"):
+                    self.run_restore(client, apply=True)
+                self.assert_stopped_without_pass([], client)
+                self.assertEqual((sorted(client.collections), client.collections[name]), ([name], foreign))
+
+    def test_unexpected_other_collection_is_refused_at_every_check(self):
+        add_other = lambda c: c.collections.__setitem__(OTHER, foreign_records())  # noqa: E731
+        cases = (("before", TB2, RacingQdrant({2: add_other}), None, []),         # require_empty 직후·B2 업로드 전
+                 ("after", TB2, R3Qdrant(), TB2, [TB2]),
+                 ("after", TB3, R3Qdrant(), TB3, [TB2, TB3]))
+        for stage, target, client, after_name, uploads in cases:
+            with self.subTest(stage=stage, target=target):
+                self.calls = {"cross": [], "slices": [], "uploads": []}
+                hook = (lambda name, c, n=after_name: add_other(c) if name == n else None) if after_name else None
+                with self.assertRaisesRegex(ValueError, f"collection set mismatch {stage} uploading {target}"
+                                                        f".*unexpected=\\['{OTHER}'\\]"):
+                    self.run_restore(client, apply=True, after_post=hook)
+                self.assert_stopped_without_pass(uploads, client)
+                self.assertEqual(client.collections[OTHER], foreign_records())
+
+    def test_b2_point_count_change_stops_before_b3_upload(self):
+        def drop_point(name, c):
+            if name == TB2:
+                c.collections[TB2].pop(next(iter(c.collections[TB2])))
+        client = R3Qdrant()
+        with self.assertRaisesRegex(ValueError, f"point count changed before uploading {TB3}: {TB2}"):
+            self.run_restore(client, apply=True, after_post=drop_point)
+        self.assert_stopped_without_pass([TB2], client)
+
+    def test_other_collection_created_inside_upload_post_is_detected(self):
+        def add_other(name, c):
+            if name == TB3:
+                c.collections[OTHER] = foreign_records()
+        client = R3Qdrant()
+        with self.assertRaisesRegex(ValueError, f"collection set mismatch after uploading {TB3}"):
+            self.run_restore(client, apply=True, before_post=add_other)
+        self.assert_stopped_without_pass([TB2, TB3], client)
+
+    def test_cli_reports_external_collection_race_as_failed(self):
+        client = R3Qdrant()
+
+        def create_b3(name, c):
+            if name == TB2:
+                c.collections[B3] = foreign_records()
+
+        def racing(args):
+            return self.run_restore(client, apply=True, after_post=create_b3)
+        with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=racing):
+            report = Path(folder) / "report.json"
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
+            output = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual((output["status"], output["error_type"]), ("FAILED", "ValueError"))
+        self.assertIn("collection set mismatch after uploading", output["reason"])
+        self.assertIn("restore stopped; partial state preserved; inspect before retry", output["reason"])
+        self.assertNotIn("overwritten", output["reason"])          # 사실보다 강한 표현 금지
+        self.assertNotIn(SETTINGS["QDRANT_API_KEY"], json.dumps(output))
+        self.assertEqual(client.collections[B3], foreign_records())
+
+
+class TempCollectionTests(unittest.TestCase):
+    """임시 이름 생성·충돌·정식 이름 업로드 금지."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    assert_stopped_without_pass = CollectionRaceTests.assert_stopped_without_pass
+
+    def test_default_temp_names_are_random_128_bit_and_keep_the_canonical_prefix(self):
+        names = {r3.temp_collection_name(B2) for _ in range(20)}
+        self.assertEqual(len(names), 20)
+        for name in names:
+            match = r3.TEMP_NAME.fullmatch(name)
+            self.assertEqual(match["canonical"], B2)
+            self.assertEqual(len(name) - len(B2) - len(r3.TEMP_INFIX), 32)
+        for bad in ("A" * 32, "a" * 31, "../" + "a" * 29, ""):
+            with self.subTest(token=bad), self.assertRaises(ValueError):
+                r3.temp_collection_name(B2, bad)
+
+    def test_temp_names_pass_the_real_experiment_collection_guard(self):
+        """verify_full_index·verify_cross_db는 store 이름 보호(exp_ + 60자 이하)를 거친다. fake가 숨길 수 있어 실제 함수로 본다."""
+        for canonical in (B2, B3):
+            name = r3.temp_collection_name(canonical)
+            self.assertEqual(store.assert_experiment_collection(name), name)
+            self.assertLessEqual(len(name), 64)
+        self.assertNotIn(TB2, store.PROTECTED_COLLECTIONS)
+
+    def test_upload_to_public_name_is_refused_before_any_http_call(self):
+        calls = []
+        snapshot = Path(self.tmp.name) / "sample_only.snapshot"
+        snapshot.write_bytes(b"sample_only")
+        for name in (B2, B3, OTHER, B3 + r3.TEMP_INFIX + "z" * 32):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "non-temporary collection name"):
+                r3.upload_snapshot(SETTINGS, name, snapshot, "0" * 64, http_post=lambda *a, **k: calls.append(a))
+        self.assertEqual(calls, [])
+
+    def test_temp_name_collision_found_by_checks_is_refused_before_upload(self):
+        for call, target, uploads in ((2, TB2, []), (4, TB3, [TB2])):
+            with self.subTest(target=target):
+                self.calls = {"cross": [], "slices": [], "uploads": []}
+                foreign = foreign_records()
+                client = RacingQdrant({call: lambda c, t=target: c.collections.__setitem__(t, copy.deepcopy(foreign))})
+                with self.assertRaisesRegex(ValueError, f"collection set mismatch before uploading {target}"):
+                    self.run_restore(client, apply=True)
+                self.assert_stopped_without_pass(uploads, client)
+                self.assertEqual(client.collections[target], foreign)            # 충돌한 기존 데이터 불변
+
+    def test_invalid_token_is_refused_before_writes(self):
+        client = R3Qdrant()
+        with self.assertRaisesRegex(ValueError, "Invalid temporary collection token"):
+            self.run_restore(client, apply=True, tokens=("../" + "a" * 29, TOKEN_B3))
+        self.assert_stopped_without_pass([], client)
+
+    def test_known_defect_temp_name_created_inside_upload_post_is_overwritten(self):
+        """[알려진 결함 재현 — 보호 검증 아님] 직전 검사 뒤 서버 존재 확인 전에 같은 임시 이름이 생기면 덮어쓴다.
+
+        Qdrant 1.12.4 업로드 복구에 조건부 생성이 없어서다. 128비트 난수 이름이라 실행 밖에서 알기 어렵다는 확률적
+        완화만 있다. 이 테스트의 PASS는 결함이 여전히 존재함을 뜻하며 안전성 근거로 세지 않는다.
+        """
+        client, foreign = R3Qdrant(), foreign_records()
+
+        def create_temp(name, c):
+            if name == TB3:
+                c.collections[TB3] = copy.deepcopy(foreign)
+        result = self.run_restore(client, apply=True, before_post=create_temp)
+        self.assertEqual(result["status"], "PASS")                                 # 감지 못 함
+        self.assertNotIn("sample_only_foreign_1", client.collections[TB3])         # 외부 내용이 사라짐
+
+
+class AliasPublishTests(unittest.TestCase):
+    """정식 alias 공개: 검증 완료 전 공개 0회, 서버의 같은 이름 컬렉션 거부, 부분 공개, alias 잔여 위험."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    final_client = RestoreTests.final_client
+
+    def test_existing_public_alias_is_refused_by_precheck_and_unchanged(self):
+        dangling = R3Qdrant()
+        dangling.aliases = {B2: "sample_only_target"}
+        with self.assertRaisesRegex(ValueError, "requires no Qdrant aliases"):
+            self.run_restore(dangling, apply=True)
+        self.assertEqual((dangling.aliases, dangling.alias_ops, self.calls["uploads"]),
+                         ({B2: "sample_only_target"}, [], []))
+        with_target = R3Qdrant({"sample_only_target": foreign_records()})
+        with_target.aliases = {B3: "sample_only_target"}
+        with self.assertRaisesRegex(ValueError, "requires empty"):
+            self.run_restore(with_target, apply=True)
+        self.assertEqual((with_target.aliases, with_target.alias_ops), ({B3: "sample_only_target"}, []))
+        preflight = R3Qdrant()
+        preflight.aliases = {B3: "sample_only_target"}
+        with self.assertRaisesRegex(ValueError, "requires no Qdrant aliases"):
+            self.run_restore(preflight)                                              # preflight도 거부
+
+    def test_digest_mismatch_in_temp_collection_publishes_nothing(self):
+        def tamper(name, c):
+            if name == TB2:
+                next(iter(c.collections[TB2].values()))["vector"] = sample_vector(777)
+        client = R3Qdrant()
+        with self.assertRaisesRegex(ValueError, "vector digest differs"):
+            self.run_restore(client, apply=True, after_post=tamper)
+        self.assertEqual((client.alias_ops, client.aliases, self.calls["cross"]), ([], {}, []))
+
+    def test_neo4j_or_cross_db_failure_publishes_nothing(self):
+        cases = (dict(load_result={"ok": False, "verification": {"ok": False}}),
+                 dict(cross={TB3: {"status": "MISMATCH", "failures": [{"x": 1}], "qdrant_points": 6,
+                                   "qdrant_count": 6}}))
+        for kwargs in cases:
+            with self.subTest(case=sorted(kwargs)):
+                self.calls = {"cross": [], "slices": [], "uploads": []}
+                client = R3Qdrant()
+                with self.assertRaises(ValueError):
+                    self.run_restore(client, apply=True, **kwargs)
+                self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+                self.assertEqual(sorted(client.collections), sorted([TB2, TB3]))     # 임시 컬렉션 보존(삭제 없음)
+
+    def test_public_collection_created_just_before_publish_is_rejected_by_server_and_preserved(self):
+        """공개 직전 검사 뒤 정식 B3 컬렉션 생성 → 서버(fake도 같음)가 B3 alias 생성을 거부. 앞의 B2 alias는 남는다."""
+        client, foreign = R3Qdrant(), foreign_records()
+        client.alias_hook = lambda c: c.collections.__setitem__(B3, copy.deepcopy(foreign))
+        with self.assertRaises(r3.PublishError) as caught:
+            self.run_restore(client, apply=True)
+        self.assertEqual(client.collections[B3], foreign)                          # 외부 데이터 불변
+        self.assertTrue(caught.exception.partial_publish)
+        self.assertEqual(caught.exception.aliases, {B2: TB2})
+        self.assertEqual(client.aliases, {B2: TB2})                                # 부분 공개된 alias를 지우지 않음
+        self.assertEqual(sorted(client.collections), sorted([B3, TB2, TB3]))       # 임시 컬렉션도 보존
+
+    def test_partial_publish_is_reported_as_failed_by_cli(self):
+        client = R3Qdrant()
+        client.alias_hook = lambda c: c.collections.__setitem__(B3, foreign_records())
+
+        def partial(args):
+            return self.run_restore(client, apply=True)
+        with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=partial):
+            report = Path(folder) / "report.json"
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
+            output = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual((output["status"], output["error_type"]), ("FAILED", "PublishError"))
+        self.assertIs(output["partial_publish"], True)
+        self.assertEqual(output["aliases"], {B2: TB2})
+        self.assertIn("Alias publish failed", output["reason"])
+        self.assertNotIn(SETTINGS["QDRANT_API_KEY"], json.dumps(output))
+
+    def test_known_defect_public_alias_created_after_precheck_is_overwritten(self):
+        """[알려진 결함 재현 — 보호 검증 아님] 공개 직전 검사 뒤 외부가 정식 alias를 만들면 서버는 거부하지 않고 덮어쓴다.
+
+        (1) 외부 alias가 우리 임시 컬렉션을 가리키면 감지도 못 하고 PASS. (2) 외부 컬렉션을 가리키면 그 컬렉션 때문에
+        직후 검사가 FAILED를 내지만, 외부 alias 매핑은 이미 바뀐 뒤다. 두 경우 모두 alias 덮어쓰기는 막지 못한다.
+        이 테스트의 PASS는 결함이 여전히 존재함을 뜻하며 안전성 근거로 세지 않는다.
+        """
+        silent = R3Qdrant()
+        silent.alias_hook = lambda c: c.aliases.__setitem__(B3, TB2)
+        result = self.run_restore(silent, apply=True)
+        self.assertEqual(result["status"], "PASS")                                 # 감지 못 함
+        self.assertEqual(silent.aliases[B3], TB3)                                  # 외부 매핑(B3→TB2)이 사라짐
+        self.calls = {"cross": [], "slices": [], "uploads": []}
+        loud = R3Qdrant()
+
+        def external_alias(c):
+            c.collections["sample_only_target"] = foreign_records()
+            c.aliases[B3] = "sample_only_target"
+        loud.alias_hook = external_alias
+        with self.assertRaises(r3.PublishError) as caught:
+            self.run_restore(loud, apply=True)
+        self.assertFalse(caught.exception.partial_publish)
+        self.assertEqual(loud.aliases[B3], TB3)                                    # FAILED지만 외부 매핑은 이미 바뀜
+        self.assertEqual(loud.collections["sample_only_target"], foreign_records())  # Point 데이터는 남음
+
+    def test_verify_only_requires_exact_published_state(self):
+        def variant(change):
+            client = self.final_client()
+            change(client)
+            return client
+        cases = {
+            "direct_public_collections": R3Qdrant({B2: self.b.records["b2"], B3: self.b.records["b3"]}),
+            "temps_without_aliases": variant(lambda c: setattr(c, "aliases", {})),
+            "partial_alias": variant(lambda c: c.aliases.pop(B3)),
+            "swapped_alias": variant(lambda c: c.aliases.update({B2: TB3, B3: TB2})),
+            "extra_alias": variant(lambda c: c.aliases.update({"sample_only_alias": TB2})),
+            "extra_collection": variant(lambda c: c.collections.__setitem__(OTHER, {})),
+            "non_temp_target": variant(lambda c: (c.collections.__setitem__(OTHER, c.collections.pop(TB2)),
+                                                  c.aliases.update({B2: OTHER}))),
+        }
+        for name, client in cases.items():
+            with self.subTest(state=name), self.assertRaisesRegex(ValueError, "published state"):
+                self.run_restore(client, verify_only=True)
+            self.assertEqual((client.writes, client.alias_ops), ([], []))
+
+    def test_update_tool_still_refuses_a_published_database(self):
+        """update 도구는 build 전용: 임시 이름(r3가 아닌 컬렉션)과 alias가 있는 DB를 모두 거부한다 (도구 변경 없음)."""
+        from scripts import update_r3_collections as update
+        with self.assertRaises(update.UpdateError):
+            update.require_isolated_server(self.final_client())
+        canonical_with_alias = R3Qdrant({B2: self.b.records["b2"], B3: self.b.records["b3"]})
+        canonical_with_alias.aliases = {"sample_only_alias": B2}
+        with self.assertRaisesRegex(update.UpdateError, "별칭"):
+            update.require_isolated_server(canonical_with_alias)
 
 
 class CliTests(unittest.TestCase):

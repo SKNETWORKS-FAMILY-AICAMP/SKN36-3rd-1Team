@@ -10,12 +10,38 @@ r2 복원 도구(scripts/restore_final_v140.py, 컬렉션 1개)는 바꾸지 않
   2. check_repo_matches_source: --repo의 복원 도구·기준값 모듈·r2 복원 도구·manifest가 번들 source ZIP과 같은지
      (줄바꿈 차이만 허용), package의 Neo4j release_files = --repo manifest의 neo4j/* SHA-256
   3. 소스 릴리스: manifest LF SHA-256·릴리스 체크섬·문서 해시·컬렉션별 청크 수·그래프 건수 = R3_PINS
-  3. 대상 DB: loopback·자격 증명 없는 주소만. Qdrant 컬렉션 0개·Neo4j 노드/관계 0개일 때만 쓴다 (기존 데이터 삭제 없음)
-  4. --apply: 두 snapshot 업로드(checksum 동봉) → 컬렉션마다 차원·거리·Point 수·전체 벡터 digest·payload 정합성
-     → Neo4j load_graph(verify=True) → 컬렉션마다 verify_cross_db(Neo4j 교차) + verify_full_index(원문 슬라이스)
-  5. --verify-only: 쓰기 없이 4의 검증만 (payload 정렬이 필요하면 거부)
+  3. 대상 DB: loopback·자격 증명 없는 주소만. Qdrant 컬렉션 0개·alias 0개·Neo4j 노드/관계 0개일 때만 쓴다
+     (기존 데이터 삭제 없음)
+  4. --apply (임시 컬렉션 복원 + alias 공개, #111 P1-3):
+     a. 컬렉션마다 임시 이름 <정식>__tmp_<secrets.token_hex(16)>를 만든다. snapshot은 임시 이름에만 올린다
+        (upload_snapshot이 임시 이름 형식이 아니면 HTTP 호출 전에 거부 → 정식 이름 업로드 0회).
+     b. 업로드마다 직전·직후 컬렉션 집합·alias 매핑 재검사, 다음 업로드 전 이미 올린 임시 컬렉션 Point 수 확인
+     c. 임시 컬렉션마다 차원·거리·Point 수·전체 벡터 digest·payload 정렬과 protected digest
+     d. Neo4j load_graph(verify=True) → 임시 컬렉션마다 verify_cross_db + verify_full_index(원문 슬라이스)
+     e. c·d가 모두 통과한 뒤에만: 공개 직전 검사(정식 이름 컬렉션·alias 없음) → 한 요청으로 정식 alias 2개 생성
+        → 공개 직후 전체 매핑 검사 → alias 경유 Point 수·전체 벡터 digest 재확인 → PASS
+  5. --verify-only: 쓰기 없이 published 상태(임시 컬렉션 2개 + 정식 alias 2개가 정확히 짝)에서만 c·d·e 마지막 재확인
 
-실패 시 자동 재실행·삭제는 없다. 새 DB에 부분 자산이 남으며 새 프로젝트·새 볼륨에서 다시 시작한다.
+실패 시 자동 재실행·삭제·rollback은 없다. 새 DB에 부분 자산(임시 컬렉션, 경우에 따라 일부 alias)이 남으며
+새 프로젝트·새 볼륨에서 다시 시작한다.
+
+덮어쓰기 안전 경계 (#111 P1-3, Qdrant v1.12.4 서버 소스 기준 — 실서버 실행 검증은 아직 없음)
+  - Qdrant snapshot 업로드 복구는 같은 이름(또는 그 이름의 alias가 가리키는) 컬렉션이 있으면 덮어쓰고, 없으면 만든다.
+    "없을 때만 복원" 옵션은 없다. 그래서 정식 이름에는 snapshot을 절대 올리지 않는다.
+  - 정식 이름의 기존 "컬렉션"과의 충돌: alias 생성은 서버가 컬렉션 쓰기 잠금 안에서 같은 이름 컬렉션이 있으면
+    거부한다(update_aliases의 validate_collection_not_exists). 기존 컬렉션 데이터는 바뀌지 않고 이 도구는 FAILED.
+  - 정식 이름의 기존 "alias"와의 충돌 (해결되지 않은 위험): 서버의 alias 생성은 같은 이름 alias가 있으면 오류 없이
+    대상을 바꾼다(alias_mapping insert). 이 도구는 공개 직전에 alias가 없음을 확인할 뿐이므로, 그 검사와 alias 생성
+    요청 사이(요청 1회 왕복)에 외부 alias가 생기면 그 alias는 우리 임시 컬렉션으로 바뀌고 직후 검사도 통과한다.
+    Point 데이터는 지워지지 않지만 외부 alias 매핑은 사라진다. 현재 API로 완전히 막을 수 없다.
+  - 부분 공개: 서버는 alias 작업을 하나씩 적용·저장하므로(요청 전체 원자성 없음) B2만 공개되고 B3가 실패할 수 있다.
+    이 도구는 FAILED + partial_publish + 현재 alias 매핑을 보고하고 alias를 지우거나 바꾸지 않는다.
+  - 임시 이름의 잔여 TOCTOU: 직전 검사 뒤 업로드가 서버에서 존재를 확인하기 전(전송·해시·압축 해제 동안)에
+    누군가 같은 임시 이름을 만들면 덮어쓴다. 128비트 난수 이름이라 실행 밖에서 알 수 없지만, 서버가 막는 것이 아니라
+    확률로만 막는다. 서버 확인 뒤에 생기면 서버 생성이 AlreadyExists로 실패해 덮어쓰지 않는다.
+  - scripts/restore_r3_isolated.py의 전용 Compose 프로젝트·볼륨·포트·인증·Docker 소유 확인·fingerprint는 다른 쓰기
+    주체가 접근할 가능성을 낮출 뿐 잠금(배타 제어)이 아니다. 같은 전용 키를 가진 동시 작업은 막지 못한다.
+    이 스크립트를 래퍼 없이 직접 실행하면 그 보호도 없다.
 
 실행 (압축을 푼 r3 소스 트리에서):
     python scripts/restore_final_v140_r3.py --repo <소스> --bundle <번들 폴더>              # preflight
@@ -30,6 +56,7 @@ import argparse
 import json
 import os
 import re
+import secrets
 import sys
 import zipfile
 from pathlib import Path
@@ -44,6 +71,17 @@ UPLOAD_TIMEOUT_SECONDS = 300
 RESTORE_MEMBER = "restore_final_v140_r3.py"
 COMPOSE_MEMBER = "compose.yaml"
 FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
+TEMP_INFIX = "__tmp_"   # 임시 컬렉션: <정식 이름>__tmp_<32자리 hex> (26+6+32=64자 = store 실험 컬렉션 이름 상한)
+TEMP_TOKEN_BYTES = 16                           # secrets.token_hex(16) = 128비트
+TEMP_NAME = re.compile(r"^(?P<canonical>.+)" + re.escape(TEMP_INFIX) + r"[0-9a-f]{32}$")
+
+
+class PublishError(ValueError):
+    """alias 공개 단계 실패. 보고서에 partial_publish와 실패 시점의 alias 매핑을 남긴다 (alias 삭제·변경 없음)."""
+
+    def __init__(self, message: str, *, partial_publish: bool, aliases: dict[str, str]):
+        super().__init__(message)
+        self.partial_publish, self.aliases = partial_publish, dict(aliases)
 
 
 def _deps():
@@ -144,7 +182,20 @@ def read_settings(environ=None) -> dict[str, str]:
     return settings
 
 
+def temp_collection_name(canonical: str, token: str | None = None) -> str:
+    """정식 이름에서 이번 실행 전용 임시 이름을 만든다. token 기본값은 secrets.token_hex(16) (예측 불가)."""
+    token = secrets.token_hex(TEMP_TOKEN_BYTES) if token is None else token
+    name = f"{canonical}{TEMP_INFIX}{token}"
+    match = TEMP_NAME.fullmatch(name)
+    if not match or match.group("canonical") != canonical:
+        raise ValueError(f"Invalid temporary collection token for {canonical}")
+    return name
+
+
 def upload_snapshot(settings: dict[str, str], collection: str, snapshot: Path, sha256: str, http_post=None) -> None:
+    # 정식 이름(또는 임시 형식이 아닌 이름)에는 snapshot을 올리지 않는다: 업로드 복구는 같은 이름을 덮어쓰기 때문
+    if not TEMP_NAME.fullmatch(collection):
+        raise ValueError(f"Refusing snapshot upload to a non-temporary collection name: {collection}")
     if http_post is None:
         import requests
         http_post = requests.post
@@ -158,8 +209,93 @@ def upload_snapshot(settings: dict[str, str], collection: str, snapshot: Path, s
         raise ValueError(f"Snapshot upload failed: HTTP {status} ({collection})")
 
 
+def alias_mapping(client) -> dict[str, str]:
+    """서버 alias 매핑 {alias 이름: 실제 컬렉션 이름} (읽기 전용)."""
+    return {a.alias_name: a.collection_name for a in client.get_aliases().aliases}
+
+
+def require_collection_set(client, expected: set[str], stage: str, aliases: dict[str, str] | None = None) -> None:
+    """서버 컬렉션 집합 = expected, alias 매핑 = aliases(기본 없음)여야 한다. 다르면 ValueError (삭제·재시도 없음).
+
+    검사 시점의 상태만 본다. 이 검사와 다음 서버 요청 사이의 경쟁은 막지 못한다 (모듈 docstring "덮어쓰기 안전 경계").
+    """
+    aliases = {} if aliases is None else aliases
+    current = {c.name for c in client.get_collections().collections}
+    if current != expected:
+        raise ValueError(f"Qdrant collection set mismatch {stage}: unexpected={sorted(current - expected)}, "
+                         f"missing={sorted(expected - current)}; restore stopped; partial state preserved; "
+                         "inspect before retry")
+    mapping = alias_mapping(client)
+    if mapping != aliases:
+        raise ValueError(f"Qdrant alias mapping mismatch {stage}: current={dict(sorted(mapping.items()))}, "
+                         f"expected={dict(sorted(aliases.items()))}; restore stopped; partial state preserved; "
+                         "inspect before retry")
+
+
+def published_state(collections, aliases: dict[str, str], canonical: dict[str, str]) -> dict[str, str] | None:
+    """published 상태면 {키: 임시 컬렉션}, 아니면 None.
+
+    published = 실제 컬렉션이 정확히 임시 컬렉션 키마다 1개(<정식>__tmp_<32 hex>)이고,
+    alias 매핑이 정확히 {정식 이름: 그 임시 컬렉션}인 상태. 다른 컬렉션·alias가 하나라도 있으면 아니다.
+    """
+    physical = {key: aliases.get(name) for key, name in canonical.items()}
+    if any(value is None for value in physical.values()) or set(aliases) != set(canonical.values()):
+        return None
+    for key, temp in physical.items():
+        match = TEMP_NAME.fullmatch(temp)
+        if not match or match.group("canonical") != canonical[key]:
+            return None
+    if set(collections) != set(physical.values()) or len(set(physical.values())) != len(physical):
+        return None
+    return physical
+
+
+def publish_aliases(client, physical: dict[str, str], canonical: dict[str, str]) -> dict[str, str]:
+    """정식 alias를 한 요청으로 만든다. 공개 직전 검사는 호출한 쪽에서 끝낸 상태여야 한다.
+
+    서버 보장(v1.12.4 소스): 같은 이름 "컬렉션"이 있으면 create_alias를 거부한다(기존 데이터 불변).
+    보장 안 됨: 같은 이름 "alias"가 있으면 서버는 오류 없이 대상을 바꾼다 → 공개 직전 검사와 이 요청 사이에 생긴
+    외부 alias는 덮어써지고 감지되지 않는다. 작업은 하나씩 저장되므로 실패 시 앞의 alias만 남을 수 있다(부분 공개).
+    실패해도 alias를 지우거나 바꾸지 않는다.
+    """
+    from qdrant_client import models
+    expected = {canonical[key]: physical[key] for key in canonical}
+    operations = [models.CreateAliasOperation(create_alias=models.CreateAlias(collection_name=physical[key],
+                                                                              alias_name=canonical[key]))
+                  for key in canonical]
+    try:
+        client.update_collection_aliases(change_aliases_operations=operations)
+    except Exception as error:   # 서버 거부(같은 이름 컬렉션 등) 포함. 원문 응답은 싣지 않는다
+        mapping = alias_mapping(client)
+        ours = {name: target for name, target in mapping.items() if expected.get(name) == target}
+        raise PublishError(f"Alias publish failed ({type(error).__name__}); published {sorted(ours)} of "
+                           f"{sorted(expected)}; restore stopped; partial state preserved; inspect before retry",
+                           partial_publish=0 < len(ours) < len(expected), aliases=mapping) from None
+    return expected
+
+
+def verify_published_aliases(client, r2, physical: dict[str, str], canonical: dict[str, str],
+                             entries: dict[str, dict[str, Any]]) -> dict[str, str]:
+    """공개 직후(또는 verify-only): 전체 매핑이 정확한지, alias 경유 Point 수·전체 벡터 digest가 확정값과 같은지."""
+    expected = {canonical[key]: physical[key] for key in canonical}
+    collections = {c.name for c in client.get_collections().collections}
+    mapping = alias_mapping(client)
+    if collections != set(physical.values()) or mapping != expected:
+        ours = {name: target for name, target in mapping.items() if expected.get(name) == target}
+        raise PublishError(f"Published alias/collection state mismatch: collections={sorted(collections)}, "
+                           f"aliases={dict(sorted(mapping.items()))}; restore stopped; partial state preserved; "
+                           "inspect before retry", partial_publish=0 < len(ours) < len(expected), aliases=mapping)
+    for key, name in canonical.items():
+        if (client.count(name, exact=True).count != entries[key]["points"]
+                or r2.vector_digest(scan(client, name)) != entries[key]["vector_digest"]):
+            raise PublishError(f"Alias {name} does not serve the verified collection data; restore stopped; "
+                               "partial state preserved; inspect before retry", partial_publish=False, aliases=mapping)
+    return mapping
+
+
 def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] | None = None,
-            http_post=None, client_factory=None, driver_factory=None) -> dict[str, Any]:
+            http_post=None, client_factory=None, driver_factory=None, token_factory=None) -> dict[str, Any]:
+    """token_factory: 임시 이름 토큰 생성기 (기본 secrets.token_hex(16)). 테스트만 고정값을 넘긴다."""
     repo = Path(args.repo).resolve()
     if str(repo) not in sys.path:
         sys.path.insert(0, str(repo))
@@ -214,28 +350,53 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
     try:
         driver.verify_connectivity()
         runner = lg.Neo4jDriverRunner(driver)
+        canonical = {key: package["collections"][key]["collection"] for key in profiles.COLLECTION_KEYS}
+        entries = {key: package["collections"][key] for key in profiles.COLLECTION_KEYS}
         if not args.verify_only:
             r2.require_empty([c.name for c in client.get_collections().collections],
                              runner.read_rows(lg.QUERY_TOTAL_COUNTS)[0])
+            if alias_mapping(client):
+                raise ValueError("Restore requires no Qdrant aliases; existing aliases are never changed")
             if not args.apply:
                 return {"status": "PREFLIGHT_PASS_NO_WRITES", "counts": counts,
                         "snapshots": {k: package["collections"][k]["snapshot_sha256"] for k in snapshots}}
-            # 두 DB가 비어 있음을 확인한 뒤 첫 쓰기. 실패하면 NEW 자산만 남는다.
+            # 두 DB가 비어 있음을 확인한 뒤 첫 쓰기. snapshot은 이번 실행 전용 임시 이름에만 올린다 (정식 이름 0회).
+            # 업로드마다 직전·직후 컬렉션 집합·alias 재검사 + 이미 올린 임시 컬렉션 Point 수 확인.
+            # 직전 검사와 서버 존재 확인 사이의 임시 이름 경쟁은 확률로만 막는다 (모듈 docstring "덮어쓰기 안전 경계").
+            token_factory = token_factory or (lambda: secrets.token_hex(TEMP_TOKEN_BYTES))
+            physical = {key: temp_collection_name(canonical[key], token_factory()) for key in profiles.COLLECTION_KEYS}
+            if len(set(physical.values())) != len(physical):
+                raise ValueError("Temporary collection names must be distinct")
+            for name in physical.values():            # 검증 함수들(store 경유)이 받는 이름인지 쓰기 전에 확인 (64자 상한 등)
+                store.assert_experiment_collection(name)
+            restored: list[str] = []                    # 이 실행이 이미 올린 컬렉션 키 (순서대로)
             for key in profiles.COLLECTION_KEYS:
-                entry = package["collections"][key]
-                upload_snapshot(settings, entry["collection"], snapshots[key], entry["snapshot_sha256"], http_post)
-        names = sorted(c.name for c in client.get_collections().collections)
-        if names != sorted(package["collections"][k]["collection"] for k in profiles.COLLECTION_KEYS):
-            raise ValueError("Restored collections differ from the bundle")
+                entry, target = entries[key], physical[key]
+                done_names = {physical[k] for k in restored}
+                require_collection_set(client, done_names, f"before uploading {target}")   # 임시 이름 충돌도 여기서 거부
+                for done in restored:
+                    if client.count(physical[done], exact=True).count != entries[done]["points"]:
+                        raise ValueError(f"Restored collection point count changed before uploading {target}: "
+                                         f"{physical[done]}")
+                upload_snapshot(settings, target, snapshots[key], entry["snapshot_sha256"], http_post)
+                restored.append(key)
+                require_collection_set(client, done_names | {target}, f"after uploading {target}")
+            require_collection_set(client, set(physical.values()), "before verification")
+        else:
+            physical = published_state({c.name for c in client.get_collections().collections}, alias_mapping(client),
+                                       canonical)
+            if physical is None:
+                raise ValueError("verify-only requires the published state (two temporary collections and exactly "
+                                 "their two public aliases)")
         qdrant: dict[str, Any] = {}
         for key in profiles.COLLECTION_KEYS:
-            spec, entry = profiles.collection_spec(key), package["collections"][key]
-            info = client.get_collection(spec["collection"])
+            spec, entry, target = profiles.collection_spec(key), entries[key], physical[key]
+            info = client.get_collection(target)
             params = info.config.params.vectors
             if (params.size != spec["dimensions"] or str(params.distance).split(".")[-1].lower() != "cosine"
                     or info.points_count != entry["points"]):
                 raise ValueError(f"Collection size/distance/count mismatch: {key}")
-            records = scan(client, spec["collection"])
+            records = scan(client, target)
             expected = {}
             for chunk in chunks[key]:
                 old = records.get(chunk["point_id"], {}).get("payload", {})
@@ -252,13 +413,14 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             if args.verify_only and changes:
                 raise ValueError(f"Current payload needs alignment; verify-only refuses writes: {key}")
             for point_id, payload in changes:
-                client.set_payload(spec["collection"], payload=payload, points=[point_id], wait=True)
-            after = scan(client, spec["collection"]) if changes else records
+                client.set_payload(target, payload=payload, points=[point_id], wait=True)
+            after = scan(client, target) if changes else records
             remaining, _ = r2.alignment_plan(after, expected)
             if remaining or r2.protected_digest(after) != before:
                 raise ValueError(f"Payload alignment/invariance verification failed: {key}")
-            qdrant[key] = {"collection": spec["collection"], "points": len(after), "vector_digest": vectors,
-                           "metadata_points_updated": len(changes), "metadata_field_updates": field_counts}
+            qdrant[key] = {"collection": spec["collection"], "physical_collection": target, "points": len(after),
+                           "vector_digest": vectors, "metadata_points_updated": len(changes),
+                           "metadata_field_updates": field_counts}
         if args.verify_only:
             verification = lg.verify_loaded_graph(graph, runner)
             verification_source = "verify_loaded_graph"
@@ -272,16 +434,23 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             raise ValueError("Neo4j full verification failed")
         for key in profiles.COLLECTION_KEYS:
             spec = profiles.collection_spec(key)
-            links = hs.verify_cross_db(client=client, runner=runner, collection=spec["collection"])
+            links = hs.verify_cross_db(client=client, runner=runner, collection=physical[key])
             r2.require_cross_db_pass(links)
-            slices = fi.verify_full_index(spec["config"], client=client, chunks=chunks[key], documents=documents)
+            slices = fi.verify_full_index(spec["config"], client=client, chunks=chunks[key], documents=documents,
+                                          collection=physical[key])
             if slices.get("passed") is not True:
                 raise ValueError(f"verify_full_index failed: {key}")
             qdrant[key]["cross_db"] = {k: links[k] for k in ("status", "qdrant_points", "qdrant_count",
                                                              "all_points_read", "summary", "failures")}
             qdrant[key]["verify_full_index_passed"] = True
+        # 여기까지(임시 컬렉션 검증·Neo4j·Cross-DB·원문 슬라이스) 모두 통과한 뒤에만 정식 alias를 공개한다.
+        if not args.verify_only:
+            require_collection_set(client, set(physical.values()), "before publishing aliases")  # 정식 컬렉션·alias 없음
+            publish_aliases(client, physical, canonical)
+        aliases = verify_published_aliases(client, r2, physical, canonical, entries)
         return {"status": "PASS", "bundle": package["bundle"], "counts": counts, "collections": qdrant,
-                "source_check": source_check,
+                "source_check": source_check, "physical_collections": physical, "aliases": aliases,
+                "partial_publish": False,
                 "all_vectors_and_protected_payload_unchanged": True,
                 "graph_totals": runner.read_rows(lg.QUERY_TOTAL_COUNTS)[0],
                 "full_graph_properties_verified": verification["ok"], "graph_verification_source": verification_source,
@@ -310,6 +479,8 @@ def main(argv: list[str] | None = None) -> int:
                   "action": "Stop. Preserve partial NEW DB assets; never delete or overwrite existing data."}
         if isinstance(error, ValueError):
             result["reason"] = str(error)
+        if isinstance(error, PublishError):              # alias 공개 단계 실패: 부분 공개 여부·현재 매핑 기록
+            result["partial_publish"], result["aliases"] = error.partial_publish, error.aliases
     text = json.dumps(result, ensure_ascii=False, indent=2, default=str)
     if args.report:
         with args.report.open("x", encoding="utf-8") as stream:

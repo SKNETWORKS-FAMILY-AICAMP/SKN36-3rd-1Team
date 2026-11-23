@@ -90,22 +90,67 @@ def good_build_docker():
     return FakeDocker([build_container("b" * 64, "qdrant"), build_container("c" * 64, "neo4j")])
 
 
+class AliasConflict(RuntimeError):
+    """Qdrant가 alias 생성을 거부할 때(같은 이름 컬렉션 존재·대상 없음)의 대역."""
+
+
 class R3Qdrant(FakeQdrant):
-    """컬렉션 이름 → {point_id: {payload, vector}}. get_aliases·create_snapshot 지원."""
+    """컬렉션 이름 → {point_id: {payload, vector}}. get_aliases·create_snapshot·alias 변경 지원.
+
+    aliases: {alias: 실제 컬렉션} (예전 테스트처럼 이름 목록을 넣으면 대상 "x"로 본다).
+    alias 의미는 Qdrant v1.12.4 서버 소스(toc/collection_meta_ops.rs update_aliases, alias_mapping.rs)를 따른다:
+      - 작업을 순서대로 하나씩 적용·저장한다 (요청 전체 원자성 없음 → 중간 실패 시 앞의 alias가 남음)
+      - create_alias: 대상 컬렉션이 없거나, alias 이름과 같은 "컬렉션"이 있으면 거부
+      - 같은 이름 "alias"가 이미 있으면 오류 없이 대상을 바꾼다 (덮어쓰기)
+    조회(get_collection·scroll·retrieve·count·set_payload)는 서버처럼 alias를 실제 컬렉션으로 풀어 쓴다.
+    alias_hook(client): update_collection_aliases가 서버에서 처리되기 직전 외부 작업을 흉내 낸다.
+    """
 
     def __init__(self, collections=None, size=1024, version=profiles.QDRANT_VERSION):
         super().__init__({}, size=size, version=version)
         self.collections = {name: copy.deepcopy(points) for name, points in (collections or {}).items()}
-        self.aliases, self.snapshots = [], []
+        self.aliases, self.snapshots = {}, []
+        self.alias_ops, self.alias_hook = [], None
         self.snapshot_checksum = None          # create_snapshot이 돌려줄 checksum (기본 None = 서버가 값을 안 줌)
 
+    def alias_items(self):
+        return list(self.aliases.items()) if isinstance(self.aliases, dict) else [(a, "x") for a in self.aliases]
+
     def get_aliases(self):
-        return SimpleNamespace(aliases=[SimpleNamespace(alias_name=a, collection_name="x") for a in self.aliases])
+        return SimpleNamespace(aliases=[SimpleNamespace(alias_name=a, collection_name=c) for a, c in self.alias_items()])
+
+    def resolve(self, name):
+        return dict(self.alias_items()).get(name, name)
+
+    def update_collection_aliases(self, change_aliases_operations, **_):
+        if self.alias_hook:
+            self.alias_hook(self)
+        for operation in change_aliases_operations:
+            create = operation.create_alias
+            self.alias_ops.append(("create_alias", create.alias_name, create.collection_name))
+            if create.collection_name not in self.collections:
+                raise AliasConflict(f"sample_only: collection {create.collection_name} doesn't exist")
+            if create.alias_name in self.collections:
+                raise AliasConflict(f"sample_only: collection {create.alias_name} already exists")
+            self.aliases[create.alias_name] = create.collection_name      # 기존 alias는 덮어쓴다 (서버와 같음)
+        return True
+
+    def get_collection(self, name):
+        return super().get_collection(self.resolve(name))
+
+    def scroll(self, collection_name, *args, **kwargs):
+        return super().scroll(self.resolve(collection_name), *args, **kwargs)
+
+    def retrieve(self, collection_name, *args, **kwargs):
+        return super().retrieve(self.resolve(collection_name), *args, **kwargs)
+
+    def count(self, collection_name, *args, **kwargs):
+        return super().count(self.resolve(collection_name), *args, **kwargs)
 
     def set_payload(self, collection_name, payload, points, wait=True):
         self.writes.append(("set_payload", tuple(points)))
         for point_id in points:
-            self.collections[collection_name][point_id]["payload"].update(copy.deepcopy(payload))
+            self.collections[self.resolve(collection_name)][point_id]["payload"].update(copy.deepcopy(payload))
 
     def create_snapshot(self, collection_name, wait=True):
         self.writes.append(("create_snapshot", collection_name))
