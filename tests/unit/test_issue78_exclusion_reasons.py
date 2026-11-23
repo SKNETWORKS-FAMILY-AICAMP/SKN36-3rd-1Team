@@ -403,3 +403,162 @@ def test_issue78_composite_does_not_recalculate_conditions(monkeypatch):
     result = checker.check_eligibility({"age": 70}, _issue78_compound_age_policy())
     assert result["exclusion_reasons"]
     assert len(calls) == 2
+
+# ----- #78 P3: nested NOT, negative evidence, and De Morgan regressions -----
+
+
+def _issue78_nested_not_policy():
+    """NOT(AND(age>=75, NOT(age 80~85 exception)))."""
+    policy = _issue78_compound_age_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    conjunction = root["groups"][0]["groups"][0]
+    conjunction["conditions"] = [
+        {"type": "AGE", "name": "75세 이상", "operator": "BETWEEN", "value": "75~120"},
+    ]
+    conjunction["groups"] = [{
+        "group_id": "INNER_NOT_EXCEPTION",
+        "logic": "NOT",
+        "conditions": [{
+            "type": "AGE", "name": "80~85세 예외", "operator": "BETWEEN", "value": "80~85",
+        }],
+        "groups": [],
+    }]
+    return policy
+
+
+@pytest.mark.parametrize(
+    "age, status, excluded",
+    [
+        (74, checker.OK, False),
+        (75, checker.NO, True),
+        (79, checker.NO, True),
+        (80, checker.OK, False),
+        (82, checker.OK, False),
+        (85, checker.OK, False),
+        (86, checker.NO, True),
+        (120, checker.NO, True),
+        (None, checker.CHECK, False),
+    ],
+)
+def test_issue78_nested_not_exception_boundaries(age, status, excluded):
+    result = checker.check_eligibility({"age": age}, _issue78_nested_not_policy())
+    assert result["conditions"][-1]["status"] == status
+    reasons = result["exclusion_reasons"]
+    if excluded:
+        assert reasons is not None and len(reasons) == 1
+        assert reasons[0]["field"] == "age"
+        assert "복합 제외 조건" in reasons[0]["label"]
+        assert "75" in reasons[0]["reason"]
+        assert "80~85세 예외에 해당하지 않음" in reasons[0]["reason"]
+    else:
+        assert reasons is None
+
+
+def test_issue78_nested_not_inside_or_remains_a_single_composite_proof():
+    policy = _issue78_nested_not_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    compound = root["groups"][0]["groups"][0]
+    root["groups"][0]["groups"] = [{
+        "group_id": "EXCLUSION_OR", "logic": "OR", "conditions": [
+            {"type": "AGE", "name": "60~65세", "operator": "BETWEEN", "value": "60~65"},
+        ], "groups": [compound],
+    }]
+    for age, expected_composite in ((79, True), (82, False), (63, False)):
+        result = checker.check_eligibility({"age": age}, policy)
+        reasons = result["exclusion_reasons"]
+        if age == 82:
+            assert reasons is None
+        else:
+            assert reasons is not None and len(reasons) == 1
+            assert ("복합 제외 조건" in reasons[0]["label"]) is expected_composite
+
+
+def test_issue78_nested_not_or_false_requires_all_failed_leaves():
+    policy = _issue78_nested_not_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    inner = root["groups"][0]["groups"][0]["groups"][0]
+    inner["conditions"] = []
+    inner["groups"] = [{
+        "group_id": "EXCEPTIONS_OR", "logic": "OR", "conditions": [
+            {"type": "AGE", "name": "80~82세 예외", "operator": "BETWEEN", "value": "80~82"},
+            {"type": "AGE", "name": "83~85세 예외", "operator": "BETWEEN", "value": "83~85"},
+        ], "groups": [],
+    }]
+    excluded = checker.check_eligibility({"age": 79}, policy)
+    assert excluded["conditions"][-1]["status"] == checker.NO
+    assert excluded["exclusion_reasons"] is not None
+    assert len(excluded["exclusion_reasons"]) == 1
+    reason = excluded["exclusion_reasons"][0]["reason"]
+    assert "80~82세 예외에 해당하지 않음" in reason
+    assert "83~85세 예외에 해당하지 않음" in reason
+    assert checker.check_eligibility({"age": 84}, policy)["exclusion_reasons"] is None
+
+
+def test_issue78_nested_not_and_false_needs_one_failed_leaf():
+    policy = _issue78_nested_not_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    inner = root["groups"][0]["groups"][0]["groups"][0]
+    inner["conditions"] = []
+    inner["groups"] = [{
+        "group_id": "EXCEPTIONS_AND", "logic": "AND", "conditions": [
+            {"type": "AGE", "name": "80~85세 예외", "operator": "BETWEEN", "value": "80~85"},
+            {"type": "AGE", "name": "84~90세 예외", "operator": "BETWEEN", "value": "84~90"},
+        ], "groups": [],
+    }]
+    for age in (79, 82):
+        result = checker.check_eligibility({"age": age}, policy)
+        assert result["conditions"][-1]["status"] == checker.NO
+        assert result["exclusion_reasons"] is not None
+        assert len(result["exclusion_reasons"]) == 1
+    assert checker.check_eligibility({"age": 84}, policy)["exclusion_reasons"] is None
+
+
+def test_issue78_double_nested_not_recovers_positive_evidence():
+    policy = _issue78_nested_not_policy()
+    root = policy["graph"]["eligibility"]["condition_tree"][0]
+    inner = root["groups"][0]["groups"][0]["groups"][0]
+    condition = inner["conditions"][0]
+    inner["conditions"] = []
+    inner["groups"] = [{
+        "group_id": "SECOND_NOT", "logic": "NOT", "conditions": [condition], "groups": [],
+    }]
+    # NOT(AND(age>=75, NOT(NOT(80~85)))) => excluded at 82, not at 79.
+    result = checker.check_eligibility({"age": 82}, policy)
+    assert result["conditions"][-1]["status"] == checker.NO
+    assert result["exclusion_reasons"] is not None
+    assert len(result["exclusion_reasons"]) == 1
+    assert "80~85" in result["exclusion_reasons"][0]["reason"]
+    assert checker.check_eligibility({"age": 79}, policy)["exclusion_reasons"] is None
+
+
+@pytest.mark.parametrize("affected", [["age"], ["all"], ["exclusion"], []])
+def test_issue78_nested_not_quality_gate_stays_conservative(affected):
+    policy = _issue78_nested_not_policy()
+    policy["data_quality"] = {
+        "hold_auto_eligibility": True, "affected_attributes": affected,
+    }
+    result = checker.check_eligibility({"age": 79}, policy)
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_nested_not_unknown_exception_never_confirms_exclusion():
+    policy = _issue78_nested_not_policy()
+    inner = policy["graph"]["eligibility"]["condition_tree"][0]["groups"][0]["groups"][0]["groups"][0]
+    inner["conditions"][0]["operator"] = "UNSUPPORTED"
+    result = checker.check_eligibility({"age": 79}, policy)
+    assert result["conditions"][-1]["status"] == checker.CHECK
+    assert result["exclusion_reasons"] is None
+
+
+def test_issue78_nested_not_reuses_one_walk(monkeypatch):
+    calls = []
+    original = checker._condition
+
+    def counted(condition, profile):
+        calls.append(condition)
+        return original(condition, profile)
+
+    monkeypatch.setattr(checker, "_condition", counted)
+    result = checker.check_eligibility({"age": 79}, _issue78_nested_not_policy())
+    assert result["exclusion_reasons"] is not None
+    assert len(calls) == 2  # age >= 75 and one exception; no re-evaluation
