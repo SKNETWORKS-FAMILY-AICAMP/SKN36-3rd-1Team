@@ -32,6 +32,29 @@ def omit_outdated_line(text: str, line: str) -> str:
     return "".join(lines)
 
 
+def rewrite_line(text: str, item: dict) -> str:
+    """검색용 본문의 한 행을 교정 기록대로 바꾼다(document_line_rewrites, #107).
+
+    정부24 본문의 '- 신청기한: …' 같은 행은 수집 코드가 붙인 칸 이름 + 원문 값이다.
+    칸 이름에 무엇의 기한인지 적거나, 지난 예고 문구만 빼는 용도로만 쓴다.
+    - kept_text: 원문에서 그대로 남겨야 하는 값. 바꾸기 전·후 행에 모두 있어야 한다.
+    - dropped_text: 빼는 원문 문구(선택). 바꾸기 전 행에만 있고, 바꾼 행에는 없어야 한다.
+    """
+    line, replacement = item["line"], item["replacement"]
+    if item["kept_text"] not in line or item["kept_text"] not in replacement:
+        raise ValueError(f"행 교정은 원문 값을 그대로 남겨야 합니다: {item['document_id']}")
+    dropped = item.get("dropped_text")
+    if dropped and (dropped not in line or dropped in replacement):
+        raise ValueError(f"행 교정에서 뺄 문구를 확인하세요: {item['document_id']}")
+    lines = text.splitlines(keepends=True)
+    matches = [index for index, current in enumerate(lines) if current.rstrip("\r\n") == line]
+    if len(matches) != 1:
+        raise ValueError(f"교정할 행을 한 번만 찾을 수 있어야 합니다: {item['document_id']}")
+    ending = lines[matches[0]][len(line):]
+    lines[matches[0]] = replacement + ending
+    return "".join(lines)
+
+
 def omit_held_lines(text: str, lines: list[str]) -> str:
     """보류한 FAQ 행을 검색용 본문에서 뺀다. 행 사이 빈 줄은 하나만 남기고, 나머지 문장과 순서는 그대로 둔다."""
     for line in lines:

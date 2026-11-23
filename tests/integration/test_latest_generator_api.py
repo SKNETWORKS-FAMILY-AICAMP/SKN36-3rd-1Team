@@ -40,6 +40,8 @@ POLICIES = [
                            "income_followup": "check_notice"}),
 ]
 REQUEST = {"question": "청년 지원 정책은?", "profile": {"age": 25, "region": "서울", "income": 0}, "history": []}
+# 세종 행정인턴 정부24 본문의 신청기한 행(칸 이름 교정 후, #107 document_line_rewrites)
+DOCUMENT_SUBMISSION_LINE = "- 신청기한(최종선발자 21명 서류 제출, 일반 모집 신청기간 아님): 2026.06.24~2026.06.26"
 
 
 class FakeSession:
@@ -93,8 +95,8 @@ class LatestGeneratorApiTests(unittest.TestCase):
         self.assertIn("신청방법", official[0]["text"])
         self.assertNotIn("20261101 ~ 20261130", official[0]["text"])
 
-    def sejong_intern_prompt(self, document_order: list[str]) -> dict:
-        """세종시 청년 행정인턴(POL_GOV_059)의 실제 B2 청크를 검색 결과로 넣고, 생성기 입력을 돌려준다.
+    def sejong_intern_prompt(self, document_order: list[str], policy_id: str = "POL_GOV_059") -> dict:
+        """정책의 실제 B2 청크를 검색 결과로 넣고, 생성기 입력을 돌려준다(기본: 세종시 청년 행정인턴).
 
         검색 순위만 바꿔서 '모집 신청기간을 묻는 질문'과 '선발자 서류 제출을 묻는 질문'을 흉내 낸다.
         검색·LLM은 대체하지만 정책 노드·문서 제목·B2 청크는 후보 릴리스 그대로 쓴다.
@@ -104,7 +106,6 @@ class LatestGeneratorApiTests(unittest.TestCase):
 
         root = Path(__file__).resolve().parents[2]
         package = root / "data/releases/v1.4.0-candidate"
-        policy_id = "POL_GOV_059"
         node = next(row for row in map(json.loads, (package / "neo4j/nodes_policy.jsonl").read_bytes().splitlines())
                     if row["policy_id"] == policy_id)
         documents = [d for d in load_release_documents(package, root) if d["document_id"] in document_order]
@@ -133,8 +134,10 @@ class LatestGeneratorApiTests(unittest.TestCase):
         # 정정된 모집 신청기간(6.15~6.21)이 '모집접수' 공지 본문과 함께 생성기 입력에 들어간다.
         self.assertIn("2026년 하계 청년 행정인턴 모집접수(6.15~6.21)", notice["text"])
         self.assertIn("- 신청기간 : 2026. 6. 15.(월) ~ 2026. 6. 21.(일)", notice["text"])
-        # 같은 입력의 정부24 근거는 6.24~26이 '최종선발자' 서류 접수라는 문장을 함께 담고 있다.
-        self.assertIn("2026.06.24~2026.06.26", gov24["text"])
+        # 같은 입력의 정부24 근거는 6.24~26 날짜 바로 앞에 '최종선발자 서류 제출'이라고 적혀 있다.
+        # (날짜 줄만 인용해도 일반 모집 신청기간으로 읽히지 않게 칸 이름을 교정했다.)
+        self.assertIn(DOCUMENT_SUBMISSION_LINE, gov24["text"])
+        self.assertNotIn("- 신청기한: 2026.06.24~2026.06.26", gov24["text"])
         self.assertIn("최종선발자(21명)에 한하여 접수", gov24["text"])
         self.assertNotIn("2026.06.24", notice["text"])
 
@@ -142,8 +145,16 @@ class LatestGeneratorApiTests(unittest.TestCase):
         # 서류 제출 질문: 정부24 문서만 검색된 경우에도 원래 서류 접수 안내(6.24~26)는 지우지 않고 그대로 전달한다.
         official = self.sejong_intern_prompt(["DOC_GOV_059"])["official_evidence"]
         self.assertEqual(len(official), 1)
-        self.assertIn("2026.06.24~2026.06.26", official[0]["text"])
+        self.assertIn(DOCUMENT_SUBMISSION_LINE, official[0]["text"])
         self.assertIn("최종선발자(21명)에 한하여 접수", official[0]["text"])
+
+    def test_past_schedule_notice_does_not_reach_generator(self):
+        # 대전 중구 장학금(POL_GOV_033): 2026년 일정을 물어도 지난 '10월 초 게시 예정' 예고는 생성기에 가지 않고,
+        # 2025년 날짜는 '2025년 회차'로 표시된 채 남는다.
+        official = self.sejong_intern_prompt(["DOC_GOV_033"], policy_id="POL_GOV_033")["official_evidence"]
+        self.assertEqual(len(official), 1)
+        self.assertIn("- 신청기한(2025년 회차): 2025.10.24~2025.11.7.", official[0]["text"])
+        self.assertNotIn("10월 초 게시 예정", official[0]["text"])
 
     def test_profile_reception_reason_and_body_guidance_reach_http(self):
         response = self.ask(llm_output(

@@ -106,6 +106,17 @@ class ApplicationPeriodTests(unittest.TestCase):
                 self.assertEqual(policy["application_period"], " ~ ".join(period))
                 self.assertIn(_reception_status({"graph": {"policy": policy}}), {"closed", "open", "before"})
         self.assertTrue(policies["POL_YC_029"]["application_is_ongoing"])
+        # 자립수당의 상시 근거는 '상시 신청 가능'이 적힌 공식 안내 문서이고, 그 문장이 상담 청크에도 들어 있다.
+        corrections = dc.load_corrections()
+        self.assertIn("DOC_YC_029_SAHA_GUIDE_2026", corrections["application_ongoing"]["POL_YC_029"])
+        saha = [c["text"] for c in rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+                if c["document_id"] == "DOC_YC_029_SAHA_GUIDE_2026"]
+        self.assertTrue(any("상시 신청 가능" in text and "보호종료 5년 이내" in text for text in saha))
+        # 종료일 16시 마감인 정책은 날짜 단위 판정만으로 알 수 없으니 마감 시각을 메모로 남긴다.
+        for policy_id in ("POL_YC_035", "POL_YC_051"):
+            with self.subTest(policy_id=policy_id):
+                self.assertIn("16", policies[policy_id]["application_status_note"])
+                self.assertIn(policy_id, corrections["application_notes_with_dates"])
         # 출처 연결이 확정되지 않은 정책은 날짜를 넣지 않는다.
         for policy_id in ("POL_YC_012", "POL_YC_031"):
             with self.subTest(policy_id=policy_id):
@@ -159,14 +170,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 269)
-        self.assertEqual(report["chunks_checked_against_body"], 664)
+        self.assertEqual(report["body_hashes_checked"], 270)
+        self.assertEqual(report["chunks_checked_against_body"], 665)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1134)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2675)
-        self.assertEqual(len(chunks), 664)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1135)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2676)
+        self.assertEqual(len(chunks), 665)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
@@ -176,8 +187,10 @@ class CandidateIntegrityTests(unittest.TestCase):
         removed_groups = dc.removed_group_ids(corrections)
         period_edits = corrections["unverified_application_periods"]
         periods_by_policy = {item["policy_id"]: item for item in period_edits}
+        # 행 교정(document_line_rewrites, #107)도 검색용 본문을 따로 쓰는 문서다.
         changed_documents = {item["document_id"]: item
-                             for item in [*corrections["outdated_document_lines"], *period_edits]}
+                             for item in [*corrections["outdated_document_lines"], *period_edits,
+                                          *corrections["document_line_rewrites"]]}
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
             if name == "condition_group":
@@ -240,7 +253,11 @@ class CandidateIntegrityTests(unittest.TestCase):
             if row["policy_id"] in life_stage_policies:
                 row = {**row, "life_stages": life_stage_policies[row["policy_id"]]["after"]}
             correction = changed_documents.get(row["document_id"])
-            if correction:
+            if correction and "replacement" in correction:
+                # 행 교정: 선언된 행만 바뀌고 나머지 본문은 동결 인계본과 같아야 한다.
+                if correction["line"] in row["text"].splitlines():
+                    row = {**row, "text": dc.rewrite_line(row["text"], correction)}
+            elif correction:
                 line = correction["text"] if "text" in correction else f'- 신청기간: {correction["before"]}'
                 if line in row["text"]:
                     row = {**row, "text": dc.omit_outdated_line(row["text"], line)}
@@ -527,3 +544,36 @@ class DatabaseSafetyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DocumentLineRewriteTests(unittest.TestCase):
+    """#107(PR #113 리뷰): 정부24 '신청기한' 행의 칸 이름 교정과 지난 예고 제거."""
+
+    ITEM = {"document_id": "SAMPLE_ONLY", "line": "- 신청기한: 2025.10.24~2025.11.7. / ※ 2026년 일정 10월 초 게시 예정",
+            "replacement": "- 신청기한(2025년 회차): 2025.10.24~2025.11.7.",
+            "kept_text": "2025.10.24~2025.11.7.", "dropped_text": "※ 2026년 일정 10월 초 게시 예정"}
+
+    def test_rewrite_keeps_original_value_and_drops_only_declared_text(self):
+        text = "[신청기간 및 신청방법]\r\n" + self.ITEM["line"] + "\r\n- 신청방법: 방문"
+        result = dc.rewrite_line(text, self.ITEM)
+        self.assertEqual(result, "[신청기간 및 신청방법]\r\n" + self.ITEM["replacement"] + "\r\n- 신청방법: 방문")
+
+    def test_rewrite_rejects_changed_value_or_missing_line(self):
+        changed = {**self.ITEM, "replacement": "- 신청기한(2025년 회차): 2025.10.24~2025.11.8."}
+        with self.assertRaisesRegex(ValueError, "원문 값"):
+            dc.rewrite_line(self.ITEM["line"], changed)
+        kept_dropped = {**self.ITEM, "replacement": self.ITEM["line"]}
+        with self.assertRaisesRegex(ValueError, "뺄 문구"):
+            dc.rewrite_line(self.ITEM["line"], kept_dropped)
+        with self.assertRaisesRegex(ValueError, "한 번만"):
+            dc.rewrite_line("다른 행", self.ITEM)
+
+    def test_candidate_chunks_use_rewritten_lines(self):
+        chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        for item in dc.load_corrections()["document_line_rewrites"]:
+            with self.subTest(document_id=item["document_id"]):
+                texts = [c["text"] for c in chunks if c["document_id"] == item["document_id"]]
+                self.assertTrue(any(item["replacement"] in text.splitlines() for text in texts))
+                self.assertFalse(any(item["line"] in text.splitlines() for text in texts))
+                if item.get("dropped_text"):
+                    self.assertFalse(any(item["dropped_text"] in text for text in texts))
