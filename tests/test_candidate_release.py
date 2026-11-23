@@ -79,6 +79,30 @@ class ApplicationPeriodTests(unittest.TestCase):
         self.assertTrue(always["application_is_ongoing"])
         self.assertEqual(always["reception_status"], "apply_always")
 
+    def test_youth_policies_follow_checked_official_notices(self):
+        from backend.eligibility.checker import _reception_status
+
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        # 온통청년 API 신청기간이 비어 있던 정책 중 공식 공고로 신청기간을 확인한 5건(#107, 2026-11-23)
+        checked = {"POL_YC_014": ("2026-08-05", "2026-08-24"), "POL_YC_035": ("2026-03-30", "2026-05-29"),
+                   "POL_YC_039": ("2026-11-09", "2026-11-11"), "POL_YC_048": ("2026-01-12", "2026-01-23"),
+                   "POL_YC_051": ("2026-03-13", "2026-04-13")}
+        for policy_id, period in checked.items():
+            with self.subTest(policy_id=policy_id):
+                policy = policies[policy_id]
+                self.assertEqual((policy["application_start"], policy["application_end"]), period)
+                self.assertEqual(policy["application_period"], " ~ ".join(period))
+                self.assertIn(_reception_status({"graph": {"policy": policy}}), {"closed", "open", "before"})
+        self.assertTrue(policies["POL_YC_029"]["application_is_ongoing"])
+        # 출처 연결이 확정되지 않은 정책은 날짜를 넣지 않는다.
+        for policy_id in ("POL_YC_012", "POL_YC_031"):
+            with self.subTest(policy_id=policy_id):
+                self.assertNotIn("application_end", policies[policy_id])
+        # 2026년 회차를 확인했지만 정책 근거가 2025년인 정책은 날짜를 두고 메모로 남긴다.
+        for policy_id in ("POL_GOV_033", "POL_GOV_061"):
+            with self.subTest(policy_id=policy_id):
+                self.assertIn("2026", policies[policy_id]["application_status_note"])
+
     def test_fund_loans_are_ongoing_with_personal_deadline_note(self):
         from backend.eligibility.checker import _reception_status
 
