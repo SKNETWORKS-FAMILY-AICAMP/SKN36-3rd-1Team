@@ -113,12 +113,18 @@ def _is_applicant_age_request(text: str) -> bool:
     guardian's age the child's age. A policy age *criterion* is not a request.
     """
     match = re.search(
-        r"(?:보호자|신청자|신청인|본인|귀하)"
-        r"(?:\s*본인(?:의)?|[의가은는])?\s*"
+        r"(?:보호자|신청자|신청인|본인|귀하|(?:아이|자녀)를\s*돌보는\s*분)"
+        r"(?:께서는|께서|\s*본인(?:의)?|[의가은는])?\s*"
         r"(?:현재\s*)?(?:나이|연령|생년월일|몇\s*(?:살|세))",
         text,
     )
     if match is None:
+        return False
+    # '자녀/배우자 본인' refers to that family member, not the applicant.
+    if match.group().startswith("본인") and re.search(
+        r"(?:자녀|아이|아기|영유아|배우자|부모님?|가족|동거인)(?:의)?\s*$",
+        text[:match.start()],
+    ):
         return False
     tail = text[match.start():]
     if re.search(r"(?:나이|연령).{0,10}(?:기준|요건|조건|범위|제한)", tail):
@@ -127,6 +133,46 @@ def _is_applicant_age_request(text: str) -> bool:
         r"(?:알려|입력|말씀|몇\s*(?:살|세)|어떻게\s*되|"
         r"이신가요|이세요|인가요|입니까)",
         tail,
+    ))
+
+
+def _direct_profile_request_field(text: str) -> str | None:
+    """Find the input actually requested, rather than an earlier mention.
+
+    Only adjacent field/request phrases qualify; this must not span from
+    '아이 월령은 알고 있으니' to a later request for region or income.
+    """
+    patterns = {
+        "region": r"(?:거주\s*(?:지역|지)|지역|주소)",
+        "income": r"(?<!주거)(?:월\s*)?(?:소득|수입|급여)",
+        "child_age_months": (
+            r"(?:자녀|아이|아기|영유아)(?:의)?\s*"
+            r"(?:본인(?:의)?\s*)?(?:월령|나이|연령|개월\s*수)"
+        ),
+    }
+    requests = []
+    for field, subject in patterns.items():
+        for match in re.finditer(
+            subject + r"\s*(?:을|를|은|는|이|가)?\s*"
+            r"(?:알려|입력|말씀|몇|얼마|어디|어떻게\s*되)", text,
+        ):
+            if re.search(
+                r"(?:자녀|아이|아기|영유아|배우자|부모님?|가족|동거인)"
+                r"(?:의)?\s*(?:본인(?:의)?\s*)?(?:월\s*)?$",
+                text[:match.start()],
+            ):
+                continue
+            requests.append((match.start(), field))
+    return max(requests)[1] if requests else None
+
+
+def _is_child_age_policy_question(text: str) -> bool:
+    """Age thresholds and age-dependent benefits are policy questions."""
+    return _is_child_months_method_question(text) or bool(re.search(
+        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과)"
+        r".{0,30}(?:신청|지원|접수|이용|이어야|여야)|"
+        r"(?:월령|개월|자녀\s*나이).{0,30}(?:지원금|지원액|혜택|지원\s*내용)"
+        r".{0,25}(?:어떻게|차이|달라|다른)", text,
     ))
 
 
@@ -173,7 +219,9 @@ def _requests_profile_value(text: str, field: str) -> bool:
         if _is_applicant_age_request(text):
             return False
         # Asking HOW months are calculated is not asking for the child's age.
-        if _is_child_months_method_question(text):
+        if _is_child_age_policy_question(text):
+            return False
+        if _direct_profile_request_field(text) in {"region", "income"}:
             return False
         if _is_child_years_request(text):
             return True
@@ -549,17 +597,21 @@ def _personal_information_request(
         return "age"
 
     # Month-age calculation is a normal user-to-AI follow-up question.
-    if _is_child_months_method_question(text):
+    if _is_child_age_policy_question(text):
         return None
+
+    requested = _direct_profile_request_field(text)
+    if requested in {"region", "income"}:
+        if requested == "region" and _is_detail_region_request(
+            text, (profile or {}).get("region"),
+        ):
+            return "detail_region"
+        return requested
 
     # #39 REVIEW HARDENING: an infant's age is NEVER the applicant's age.
     # Until the API/React ask_info contract is ready, keep this as body-only
     # guidance. Do not send kind=ask_info(field='age') for a child-age query.
-    if _requests_profile_value(text, "child_age_months") or re.search(
-        r"(?:자녀|아이|아기|영유아).{0,30}(?:나이|연령|월령|개월)"
-        r".{0,30}(?:알려|입력|말씀)",
-        text,
-    ):
+    if _requests_profile_value(text, "child_age_months"):
         return "other"
 
     # '월 소득이 기준 금액보다 낮으신가요?'는 사용자 소득 확인이다.
@@ -778,7 +830,18 @@ def _is_redundant_request(
         return profile.get("age") is not None
 
     # Calculation/explanation questions are never redundant profile requests.
-    if _is_child_months_method_question(text):
+    if _is_child_age_policy_question(text):
+        return False
+
+    requested = _direct_profile_request_field(text)
+    if requested in {"region", "income"}:
+        value = profile.get(requested)
+        if requested == "region" and value and not _region_has_detail(value):
+            if _is_detail_region_request(text, value):
+                return False
+        return value is not None
+
+    if re.search(r"(?:배우자|부모님?|가족|동거인)(?:의)?\s*본인", text):
         return False
 
     #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로
@@ -1107,10 +1170,29 @@ def _validate_model_response(
             else None
         )
 
+        # Keep the explicit month field through final conversion, including
+        # subjectless requests. Clear wording for another field still wins.
+        if (
+            kind == "ask_info"
+            and field == "child_age_months"
+            and detected_field in {None, "other"}
+            and not _is_child_age_policy_question(text)
+            and not _is_policy_criteria_question(text)
+            and (
+                _requests_profile_value(text, "child_age_months")
+                or re.search(r"몇\s*개월|월령|자녀\s*나이", text)
+            )
+        ):
+            if profile is None or profile.get("child_age_months") is None:
+                body_requests.append(_info_request_to_answer(text, field))
+            continue
+
         # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
         # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
         if kind == "ask_info":
-            if detected_field in ALLOWED_FIELDS:
+            if _is_child_age_policy_question(text):
+                kind = "question"
+            elif detected_field in ALLOWED_FIELDS:
                 field = detected_field
             elif detected_field in {"detail_region", "other"}:
                 # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
