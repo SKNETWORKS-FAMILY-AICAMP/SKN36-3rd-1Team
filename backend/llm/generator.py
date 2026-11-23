@@ -106,12 +106,32 @@ def _region_has_detail(region: str) -> bool:
     )
 
 
+def _is_child_years_request(text: str) -> bool:
+    """'자녀는 몇 살인가요?'는 신청자 age가 아닌 자녀 월령 입력 요청이다.
+
+    '자녀는 몇 살까지 지원되나요?'와 정책의 연령 기준 질문은 포함하지 않는다.
+    """
+    if re.search(
+        r"(?:정책|공고|지원\s*대상|자격|요건|기준|조건|제한|범위)", text
+    ) and not re.search(r"(?:알려|입력|말씀)", text):
+        return False
+    return bool(re.search(
+        r"(?:자녀|아이|아기|영유아).{0,25}"
+        r"몇\s*(?:살|세)\s*"
+        r"(?:인가요|이세요|이신가요|입니까|이십니까|인지|인지요|"
+        r"되나요|일까요|이에요|입니까요)",
+        text,
+    ))
+
+
 def _requests_profile_value(text: str, field: str) -> bool:
     """후속 질문이 일반 사용자 입력값 자체를 묻는지 보수적으로 감지한다.
 
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
     if field == "child_age_months":
+        if _is_child_years_request(text):
+            return True
         # 명시적으로 자녀의 개인 월령을 요청하면 정책 관련 접두어가 있어도
         # 해당 입력 요청을 인식한다. 단, 정책 '월령 기준' 자체를 묻는 문장은 제외한다.
         if re.search(
@@ -605,13 +625,22 @@ def _info_request_to_answer(
     if "가구원" in text or field == "household_size":
         return "가구원 수를 알려 주세요."
 
-    if field == "child_age_months" or re.search(
+    # 기존 child_age/"자녀 나이" 안내 문구는 기존 API 및 테스트와의
+    # 하위 호환을 위해 그대로 둔다. 분류기가 field를 other로 바꾸기도 하므로
+    # 원래 필드뿐 아니라 문장도 확인한다. 명시된 child_age_months는 우선한다.
+    if field == "child_age" or (
+        field != "child_age_months"
+        and re.search(r"자녀\s*나이", text)
+    ):
+        return "자녀 나이를 알려 주세요."
+
+    if field == "child_age_months" or _is_child_years_request(text) or re.search(
         r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|개월)|"
         r"(?:아이|아기|영유아).{0,30}(?:나이|연령)", text
     ):
         return "자녀의 월령(개월 수)을 알려 주세요."
 
-    if "자녀" in text or field == "child_age":
+    if "자녀" in text:
         return "자녀 나이를 알려 주세요."
 
     if "혼인" in text or "결혼" in text:
@@ -693,7 +722,7 @@ def _is_redundant_request(
 
     #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로
     # 충족할 수 없다. child_age_months가 없으면 이 요청을 절대 지우지 않는다.
-    if re.search(
+    if _is_child_years_request(text) or re.search(
         r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|나이|연령|개월)",
         text,
     ):

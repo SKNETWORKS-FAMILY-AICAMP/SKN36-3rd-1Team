@@ -215,3 +215,101 @@ def test_issue39_policy_month_criteria_question_is_not_suppressed_by_new_guard()
     })
     assert not g._requests_profile_value(text, "child_age_months")
     assert not g._is_redundant_request(text, profile)
+
+
+# #39 / PR #112 final natural-language regression: years phrasing means child months.
+@pytest.mark.parametrize("text", [
+    "아기는 몇 살인가요?",
+    "자녀는 몇 살인가요?",
+    "자녀는 몇 세인가요?",
+    "아이가 몇 살인지 알려 주세요.",
+    "영유아는 몇 살입니까?",
+])
+def test_issue39_child_years_question_is_not_applicant_age(text):
+    missing = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": None,
+    })
+    assert g._requests_profile_value(text, "child_age_months")
+    assert g._personal_information_request(text, missing) == "other"
+    assert not g._is_redundant_request(text, missing)
+    assert g._info_request_to_answer(text, "other") == "자녀의 월령(개월 수)을 알려 주세요."
+
+    for kind in ("question", "ask_info"):
+        item = {"kind": kind, "text": text}
+        if kind == "ask_info":
+            item["field"] = "age"  # mistaken model output must never request applicant age
+        raw = {
+            "status": "info", "answer": "확인할 정보가 있습니다.",
+            "used_source_ids": [], "follow_up_questions": [item],
+        }
+        normalized = g._validate_model_response(raw, set(), missing)
+        assert normalized["follow_up_questions"] == []
+        assert "자녀의 월령(개월 수)을 알려 주세요." in normalized["answer"]
+
+    for months in (0, 24):
+        filled = {**missing, "child_age_months": months}
+        assert g._is_redundant_request(text, filled)
+        answer = g._remove_redundant_answer_requests(
+            "정보를 확인했습니다. " + text, filled
+        )
+        assert answer == "정보를 확인했습니다."
+        for kind in ("question", "ask_info"):
+            item = {"kind": kind, "text": text}
+            if kind == "ask_info":
+                item["field"] = "age"
+            raw = {
+                "status": "info", "answer": "정보를 확인했습니다.",
+                "used_source_ids": [], "follow_up_questions": [item],
+            }
+            normalized = g._validate_model_response(raw, set(), filled)
+            assert normalized["follow_up_questions"] == []
+            assert "알려 주세요" not in normalized["answer"]
+
+
+@pytest.mark.parametrize("text", [
+    "이 정책에서 자녀는 몇 살까지 지원되나요?",
+    "자녀는 몇 세 미만이어야 하나요?",
+    "이 정책의 자녀 나이 조건은 몇 살인가요?",
+])
+def test_issue39_child_years_criteria_question_remains_question(text):
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": 12,
+    })
+    assert not g._is_child_years_request(text)
+    assert not g._requests_profile_value(text, "child_age_months")
+    assert not g._is_redundant_request(text, profile)
+
+
+# #39: Retain old text contract while supporting new years/months phrasing.
+@pytest.mark.parametrize("text", [
+    "자녀 나이는 몇 세인가요?",
+    "자녀 나이는 몇 세인가요",
+])
+@pytest.mark.parametrize("kind, model_field", [
+    ("ask_info", "child_age"),
+    ("ask_info", "age"),
+    ("question", None),
+])
+def test_issue39_legacy_child_age_text_compatibility(text, kind, model_field):
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": None,
+    })
+    item = {"kind": kind, "text": text}
+    if model_field is not None:
+        item["field"] = model_field
+    raw = {
+        "status": "info", "answer": "확인이 필요합니다.",
+        "used_source_ids": [], "follow_up_questions": [item],
+    }
+    response = g._validate_model_response(raw, set(), profile)
+    assert response["follow_up_questions"] == []
+    assert "자녀 나이를 알려 주세요." in response["answer"]
+
+
+def test_issue39_explicit_child_age_months_keeps_month_unit():
+    assert g._info_request_to_answer(
+        "자녀 나이는 몇 세인가요?", "child_age_months"
+    ) == "자녀의 월령(개월 수)을 알려 주세요."
+    assert g._info_request_to_answer(
+        "아기는 몇 살인가요?", "other"
+    ) == "자녀의 월령(개월 수)을 알려 주세요."
