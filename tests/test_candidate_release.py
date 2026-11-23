@@ -67,6 +67,18 @@ class ApplicationPeriodTests(unittest.TestCase):
         self.assertTrue(ongoing["application_is_ongoing"])
         self.assertIn("예산 소진", ongoing["application_status_note"])
 
+    def test_recruitment_period_and_ongoing_label_follow_official_notice(self):
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        # 정부24의 2026.06.24~06.26은 최종선발자 서류 접수 기간이다. 모집 신청기간은 세종시 공고 기준(#107).
+        intern = policies["POL_GOV_059"]
+        self.assertEqual((intern["application_start"], intern["application_end"]), ("2026-06-15", "2026-06-21"))
+        self.assertIn("최종선발자 서류 접수", intern["application_status_note"])
+        self.assertTrue(intern["application_period"].startswith("2026.06.15~2026.06.21"))
+        # 정부24 '상시신청'인 정책의 저장 접수 상태 값이 상시 표시와 어긋나지 않는다.
+        always = policies["POL_STG_DGU_001"]
+        self.assertTrue(always["application_is_ongoing"])
+        self.assertEqual(always["reception_status"], "apply_always")
+
 
 class ApplicationUrlTests(unittest.TestCase):
     def test_missing_invalid_and_guidance_addresses_are_not_apply_links(self):
