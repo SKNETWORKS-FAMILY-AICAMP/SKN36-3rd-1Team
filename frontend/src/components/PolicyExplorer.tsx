@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { AskResponse } from '../api/types';
 import { catalogPolicies, type CatalogPolicy } from '../lib/policyCatalog';
 import { scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
@@ -12,10 +12,14 @@ import { loadPolicyCatalog, POLICY_API_URL } from '../api/policyCatalog';
 const PAGE_SIZE = 6;
 const comparisonPreview = import.meta.env.VITE_POLICY_COMPARISON_PREVIEW as string | undefined;
 const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
-export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap }: {
+export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;
+  /** 상담 화면이 보이는 중인지. false면 포커스·탭 복귀 갱신을 건너뛴다 */
+  active?: boolean;
 }) {
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const [catalog, setCatalog] = useState<CatalogPolicy[]>([]), [version, setVersion] = useState('');
   const [load, setLoad] = useState<'loading' | 'ready' | 'error'>('loading'), [attempt, setAttempt] = useState(0);
   const [tab, setTab] = useState<'all' | 'saved'>('all');
@@ -46,7 +50,8 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap }: {
       finally { pending = false; }
     }
     void refresh();
-    const visible = () => { if (!document.hidden) void refresh(); };
+    // 상담 화면이 숨겨진 동안(관계 지도·생애주기)은 창 포커스·탭 복귀로 목록을 다시 부르지 않는다
+    const visible = () => { if (!document.hidden && activeRef.current) void refresh(); };
     window.addEventListener('focus', visible); document.addEventListener('visibilitychange', visible);
     return () => { alive = false; controller.abort(); window.removeEventListener('focus', visible); document.removeEventListener('visibilitychange', visible); };
   }, [attempt, today]);

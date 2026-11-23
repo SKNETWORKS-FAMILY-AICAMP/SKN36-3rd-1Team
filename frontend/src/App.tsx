@@ -323,6 +323,7 @@ export default function App() {
       )}
       <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
         onOpenMap={() => { explorerScroll.current = window.scrollY; }}
+        active={onAskPage}
         onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
       </div>
 

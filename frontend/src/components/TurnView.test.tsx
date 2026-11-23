@@ -378,3 +378,17 @@ it('둘러보기 카드는 상태 미확인 문구를 한 번만 쓰고, 주 버
   expect(html).not.toContain('이 정책 물어보기');
   expect(html.indexOf('관계 지도')).toBeLessThan(html.indexOf('원문 보기'));
 });
+
+it('답변 본문이 없는 info 응답에서도 빠진 정보 요청을 모두 보여 준다', () => {
+  const response: AskResponse = {
+    status: 'info', answer: '', citations: [], policy_checks: [], checked_at: null, is_sample: false,
+    follow_up_questions: [
+      { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' },
+      { kind: 'ask_info', field: 'region', text: '거주 지역을 알려 주세요.' },
+      { kind: 'ask_info', field: 'income', text: '연 소득을 알려 주세요.' },
+    ],
+  };
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={() => {}} onRetry={() => {}} onDemoApply={() => {}} sampleMode={false} />);
+  for (const prompt of ['만 나이를 알려 주세요.', '거주 지역을 알려 주세요.', '연 소득을 알려 주세요.']) expect(html).toContain(prompt);
+});

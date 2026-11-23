@@ -163,7 +163,8 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
   }
   const blocks: ReactElement[] = [];
   const answerText = view.answerText ?? (r.status === 'info' ? r.answer.trim() : '');
-  const requestsToShow = answerText ? [...infoRequests] : [...infoRequests].slice(0, 1);
+  // 본문이 없어도 빠진 정보는 모두 보여 준다(하나만 보여 주면 나머지 필요한 정보를 알 수 없다)
+  const requestsToShow = [...infoRequests];
   if (answerText) blocks.push(<AnswerText key="a" text={answerText} sources={r.citations} />);
   if (requestsToShow.length > 0) {
     blocks.push(
