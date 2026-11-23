@@ -305,7 +305,7 @@ def build_candidate_release():
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_policies)}건 (+{len(new_policies)}건 증분)")
 
-    # (2) nodes_document.jsonl (기존 246건 + 신규 22건 = 268건)
+    # (2) nodes_document.jsonl (기존 246건 + 신규 23건 = 269건)
     print("\n[D-1.2] Document 노드 병합 및 4단계 검증 분류 적용...")
     documents = []
     with open(HANDOFF_DIR / "neo4j" / "nodes_document.jsonl", "r", encoding="utf-8") as f:

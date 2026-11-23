@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-23T17:22:11.044705+09:00",
+  "created_at": "2026-11-23T17:57:25.985385+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -34,7 +34,8 @@
     "DOC_STG_MOLIT_001_FAQ_2026",
     "DOC_STG_NTS_001_FAQ_2026",
     "DOC_STG_SEOUL_001_FAQ_2026",
-    "DOC_STG_SEOUL_001_INTRO_2026"
+    "DOC_STG_SEOUL_001_INTRO_2026",
+    "DOC_GOV_059_SEJONG_NOTICE_2026"
   ],
   "added_organization_ids": [
     "AGENCY_국세청_기획재정부",
@@ -162,9 +163,10 @@
     "aa4b50bc-5f1f-5d6c-a339-4e6c74495cc1",
     "d6d90b01-8913-5347-b77b-6a978dbfa99c",
     "edfb0fe8-4b13-5432-ae16-7b2b6674b2c3",
-    "8a059feb-ed6c-5be6-b827-ab6617c5d43c"
+    "8a059feb-ed6c-5be6-b827-ab6617c5d43c",
+    "97d0c286-71ee-5e10-9ab6-d2a7ae2e4aff"
   ],
-  "added_relationships_count": 95,
+  "added_relationships_count": 96,
   "updated_policy_properties": [
     {
       "policy_id": "POL_001",
@@ -1814,7 +1816,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "9e1923ca555f6b040a05ee2defea08ecaa1850c4106d17bea3597b746f3847ea",
+    "source_sha256": "a4d427fc7c36754e90682fd4270e72da770fbfda2f5296522f7ce33caee08291",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -10408,6 +10410,11 @@
       "source_id": "POL_STG_SEOUL_001",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_STG_SEOUL_001_INTRO_2026"
+    },
+    {
+      "source_id": "POL_GOV_059",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_GOV_059_SEJONG_NOTICE_2026"
     },
     {
       "source_id": "POL_STG_MOLIT_002",

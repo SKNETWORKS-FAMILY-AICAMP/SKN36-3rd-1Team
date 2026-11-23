@@ -72,8 +72,20 @@ class ApplicationPeriodTests(unittest.TestCase):
         # 정부24의 2026.06.24~06.26은 최종선발자 서류 접수 기간이다. 모집 신청기간은 세종시 공고 기준(#107).
         intern = policies["POL_GOV_059"]
         self.assertEqual((intern["application_start"], intern["application_end"]), ("2026-06-15", "2026-06-21"))
-        self.assertIn("최종선발자 서류 접수", intern["application_status_note"])
+        self.assertIn("최종선발자 21명의 서류 접수", intern["application_status_note"])
         self.assertTrue(intern["application_period"].startswith("2026.06.15~2026.06.21"))
+        # 정정한 날짜의 근거 문서가 후보에 있고, 정책과 SUPPORTED_BY로 이어지며, 청크 본문에 모집 신청기간이 있다.
+        notice_id = dc.load_corrections()["application_dates"]["POL_GOV_059"]["evidence_document_id"]
+        documents = {row["document_id"]: row for row in rows(PACKAGE / "neo4j/nodes_document.jsonl")}
+        self.assertEqual(documents[notice_id]["policy_id"], "POL_GOV_059")
+        edges = rows(PACKAGE / "neo4j/relationships.jsonl")
+        self.assertIn(("POL_GOV_059", "SUPPORTED_BY", notice_id),
+                      {(e["source_id"], e["relation"], e["target_id"]) for e in edges})
+        notice_chunks = [c["text"] for c in rows(PACKAGE / "qdrant/payload_chunks.jsonl") if c["document_id"] == notice_id]
+        self.assertTrue(any("2026. 6. 15.(월) ~ 2026. 6. 21.(일)" in text for text in notice_chunks))
+        # 정부24 원문(선발자 서류 접수 안내)은 지우지 않는다.
+        gov24 = [c["text"] for c in rows(PACKAGE / "qdrant/payload_chunks.jsonl") if c["document_id"] == "DOC_GOV_059"]
+        self.assertTrue(any("최종선발자(21명)에 한하여 접수" in text for text in gov24))
         # 정부24 '상시신청'인 정책의 저장 접수 상태 값이 상시 표시와 어긋나지 않는다.
         always = policies["POL_STG_DGU_001"]
         self.assertTrue(always["application_is_ongoing"])
@@ -147,14 +159,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 268)
-        self.assertEqual(report["chunks_checked_against_body"], 663)
+        self.assertEqual(report["body_hashes_checked"], 269)
+        self.assertEqual(report["chunks_checked_against_body"], 664)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1133)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2674)
-        self.assertEqual(len(chunks), 663)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1134)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2675)
+        self.assertEqual(len(chunks), 664)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
