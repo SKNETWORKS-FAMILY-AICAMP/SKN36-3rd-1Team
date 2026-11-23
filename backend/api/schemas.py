@@ -26,6 +26,7 @@ class AskRequest(BaseModel):
     profile: UserProfile
     history: list[ChatTurn]
     awaiting_field: str | None = None
+    selected_policy_id: Annotated[str, StringConstraints(pattern=r"^POL_[A-Z0-9_]+$", max_length=128)] | None = None
 
 
 class ConditionResult(BaseModel):
@@ -68,16 +69,69 @@ class OfficialRequirement(BaseModel):
     chunk_id: str | None = None
 
 
+class SourceExcerpt(BaseModel):
+    """같은 정책의 명시된 원문 블록 발췌. 완전한 제출 서류 목록이라고 보장하지 않는다."""
+    text: NonBlank
+    document_id: NonBlank
+    chunk_id: NonBlank
+    source_url: str
+
+
+class RequirementExcerpt(SourceExcerpt):
+    """[지원대상]·[선정기준] 원문 블록 발췌(#107). 검수된 공식 기준(official_requirements, #76)이 아니다."""
+    label: NonBlank
+
+
+class ApplicationSchedule(BaseModel):
+    evaluated_on: str
+    start_date: str | None
+    end_date: str | None
+    is_ongoing: bool
+    days_to_start: int | None
+    days_to_end: int | None
+
+
 class PolicyCheck(EligibilityOutput):
+    application_schedule: ApplicationSchedule | None = None
+    required_documents: list[SourceExcerpt] | None = None
     policy_name: str
     agency: str
     source_url: str
     official_apply_url: str | None
     contacts: list[Contact] | None = None
+    requirement_excerpts: list[RequirementExcerpt] | None = None
     # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. 아래 둘은 자리만 예약한 것으로,
     # Pipeline이 항상 None을 돌려준다 — 값을 채우는 구현은 각각 #78·#76-A에서 한다.
     exclusion_reasons: list[ExclusionReason] | None = None
     official_requirements: list[OfficialRequirement] | None = None
+
+
+class PolicySummary(BaseModel):
+    """개인 프로필·자격 판정이 없는 탐색 목록 한 건."""
+    policy_id: NonBlank
+    policy_name: NonBlank
+    agency: str
+    regions: list[str]
+    categories: list[str]
+    source_url: str
+    official_apply_url: str | None
+    reception_status: ReceptionStatus
+    application_schedule: ApplicationSchedule | None
+    required_documents: list[SourceExcerpt] | None = None
+    requirement_excerpts: list[RequirementExcerpt] | None = None
+
+
+class PolicyListResponse(BaseModel):
+    items: list[PolicySummary]
+    total: int
+    offset: int
+    limit: int
+    dataset_version: str
+    manifest_sha256: str
+    evaluated_on: str
+    source_kind: Literal["release_files"] = "release_files"
+    regions: list[str]
+    categories: list[str]
 
 
 class Citation(BaseModel):

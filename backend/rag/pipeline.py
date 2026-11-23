@@ -11,7 +11,8 @@ from pydantic import ValidationError
 from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from backend.eligibility.checker import certain_required_and_failure
+from backend.eligibility.checker import certain_required_and_failure, application_schedule
+from backend.rag.source_sections import application_details
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -166,6 +167,37 @@ def _collect_contacts(contexts) -> list[Contact]:
                     "source_url": context["url"] if valid_source_url(context["url"]) else None,
                 })
     return list(contacts.values())
+
+
+def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str | None) -> None:
+    """선택 정책은 지역 필터 없이 찾으므로 정책의 대상 지역(AVAILABLE_IN)과 입력 지역을 직접 대조한다.
+
+    v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 지역 관계로만 갖고 있어 Checker가 지역을 판정하지 않는다.
+    입력 지역이 대상 지역·전국에 없으면 확인 필요로 보류한다. 확정 불충족으로 단정하지 않는다.
+    """
+    regions = (policy.get("graph") or {}).get("regions") or []
+    names = {str(region.get("name")).strip() for region in regions
+             if isinstance(region, dict) and str(region.get("name") or "").strip()}
+    if not profile_region or not names or "전국" in names or profile_region in names:
+        return
+    conditions = check["conditions"]
+    region_rows = [row for row in conditions if row["field"].lower() == "region"]
+    if any(row["status"] == "ineligible" for row in region_rows):
+        return
+    mismatch = (f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
+                "거주 요건을 공식 공고에서 확인해 주세요.")
+    # 계약 §4.3: Checker가 needs_check로 준 사유는 바꾸지 않고, 확정 상태만 보류로 내리며 사유를 뒤에 덧붙인다.
+    eligible_rows = [row for row in region_rows if row["status"] == "eligible"]
+    for row in eligible_rows:
+        row["status"] = "needs_check"
+        row["reason"] += f" {mismatch}"
+    if not eligible_rows:
+        # 기존 지역 행이 없거나 needs_check뿐이면 그 사유는 그대로 두고 지역 불일치 행을 따로 앞에 둔다.
+        conditions.insert(0, {"field": "region", "label": "거주 지역", "status": "needs_check", "reason": mismatch})
+    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
+    if root is not None and root["status"] == "eligible":
+        root["status"] = "needs_check"
+        root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
 
 
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
@@ -526,7 +558,13 @@ def run_ask_pipeline(
     notice = {"kind": "warn", "title": "추가 확인 필요",
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
+    if request.selected_policy_id:
+        # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
+        filters = {"policy_id": request.selected_policy_id}
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
+    if request.selected_policy_id:
+        # 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
+        policies = [policy for policy in policies if policy["policy_id"] == request.selected_policy_id]
     # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
     ranked = rank_citable_contexts(policies)
     citable = {context["policy_id"] for context in ranked}
@@ -554,6 +592,8 @@ def run_ask_pipeline(
     checks = []
     for pid, selected in contexts_by_policy.items():
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
+        if request.selected_policy_id:
+            _hold_selected_policy_region(by_id[pid], check, profile["region"])
         contacts = _collect_contacts(selected)
         if not contacts:
             # 미채택 후보 청크에서만 찾았다 — 그 청크는 답변의 citations에 들어가지 않으므로,
@@ -563,6 +603,8 @@ def run_ask_pipeline(
                 for contact in _collect_contacts(candidates_by_policy.get(pid, ()))
             ]
         check["contacts"] = contacts or None
+        check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
+        check.update(application_details(selected))
         checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:
