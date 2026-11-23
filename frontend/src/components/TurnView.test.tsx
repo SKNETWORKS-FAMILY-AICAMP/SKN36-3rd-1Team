@@ -1,3 +1,4 @@
+import { kstDay } from '../lib/applicationSchedule';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
@@ -36,6 +37,7 @@ it('keeps reception and eligibility separate for each policy', () => {
     follow_up_questions: [], checked_at: null, is_sample: false,
     policy_checks: [
       { policy_id: 'A', policy_name: '정책 A', agency: '기관', reception_status: 'open',
+        application_schedule: { evaluated_on: kstDay(), start_date: null, end_date: null, is_ongoing: true, days_to_start: null, days_to_end: null },
         source_url: 'https://example.org/notice', official_apply_url: null,
         conditions: [{ field: 'age', label: '나이', status: 'needs_check', reason: '사용자의 만 나이가 입력되지 않았습니다.' }] },
       { policy_id: 'B', policy_name: '정책 B', agency: '기관', reception_status: 'unknown',
@@ -47,7 +49,7 @@ it('keeps reception and eligibility separate for each policy', () => {
   const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
     onFollowUp={noop} onRetry={noop} onDemoApply={noop} sampleMode={false} />);
   expect(html).toContain('접수 중</span>');
-  expect(html).toContain('모집 상태 미확인</span>');
+  expect(html).toContain('일정 확인 필요</span>');
   expect(html).toContain('만 나이를 알려 주세요.');
   expect(html).toContain('신청 자격은 공식 공고에서 확인해 주세요.');
   expect(html).toContain('href="https://example.org/notice"');
@@ -122,6 +124,7 @@ it.each([
     policy_checks: [{
       policy_id: 'POL_SAMPLE', policy_name: '가상 정책', agency: '가상 기관',
       reception_status: status, source_url: 'https://example.org/notice',
+      application_schedule: status === 'open' ? { evaluated_on: kstDay(), start_date: null, end_date: null, is_ongoing: true, days_to_start: null, days_to_end: null } : null,
       official_apply_url: 'https://example.org/apply', conditions: [],
     }],
   };
