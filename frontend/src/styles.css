@@ -625,6 +625,20 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .pd-ask:hover{background:var(--primary-soft)}
 /* 팝업 내용: 상자·뱃지·점선 없이 여백과 작은 제목으로만 나눈다 */
 .map-dialog-body .map-info{gap:22px}
+.map-dialog-body .map-info .pc-facts{gap:10px;--clamp-lines:3}
+.map-dialog-body .pc-facts>div{
+  grid-template-columns:minmax(0,1fr);
+  gap:6px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+.map-dialog-body .pc-facts dt{padding:0;font-size:14px;font-weight:700;color:var(--ink)}
+.map-dialog-body .pc-facts dd{max-height:none;overflow:visible;line-height:1.7;color:var(--ink-2);overflow-wrap:anywhere}
+.map-dialog-body .pc-facts .pd-more{margin-top:6px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.map-dialog-body .pd-dot{width:20px;height:20px}
+.map-dialog-body .pd-meta{padding-inline-end:40px}
 .pd-block{display:flex;flex-direction:column;gap:6px;width:100%;min-width:0}
 .pd-block h4{margin:0;font-size:12.5px;font-weight:400;color:var(--ink-3)}
 .pd-block h4 span{color:var(--primary)}
@@ -687,7 +701,6 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .schedule-empty{border:1px dashed var(--line);border-radius:18px;padding:24px;text-align:center;color:var(--ink-3);font-size:14px;background:var(--bg-2)}
 @media(max-width:900px){.schedule-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.schedule-grid{grid-template-columns:1fr}.schedule-sort{margin-left:0}}
-.catalog-ask { margin-top: 10px; width: 100%; }
 .calendar-note { flex-basis: 100%; color: var(--ink-3); }
 .schedule-tools input, .schedule-tools select { max-width: 100%; padding: 8px 10px; border-radius: 10px; background: var(--card, transparent); color: inherit; border: 1px solid var(--line, #8886); }
 .schedule-tools label { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -697,3 +710,38 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .policy-official h4, .policy-check-heading { font-size: 14px; margin: 12px 0 8px; }
 .policy-exclusions { color: var(--bad); font-size: 13px; padding-left: 20px; }
 .source-excerpt { white-space: pre-line; overflow-wrap: anywhere; }
+.catalog-ask { padding: 0 16px 12px; }
+.catalog-ask .btn { width: 100%; justify-content: center; }
+.schedule-empty .chip { display: block; margin: 10px auto 0; }
+.consultation-turn { scroll-margin-top: 96px; }
+#policy-explorer .ptop { position: relative; align-content: start; }
+#policy-explorer .ptop b { flex: 0 0 100%; padding-inline-end: 20px; line-height: 1.45; }
+#policy-explorer .pcard:not([open]) .ptop b {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  block-size: 2.9em;
+  overflow: hidden;
+}
+#policy-explorer .ptop::after { position: absolute; inset-block-start: 20px; inset-inline-end: 17px; }
+
+/* #114 가독성: 검색 우선 배치, 필터 한 묶음, 상태 미확인 배지는 눈에 덜 띄게 */
+.explorer-search { display: flex; flex-direction: column; gap: 6px; margin: 18px 0 12px; }
+.explorer-search label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.explorer-search input { width: 100%; padding: 12px 14px; font-size: 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: inherit; }
+.explorer-filters { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2); }
+.explorer-filters .schedule-tools { margin: 0; }
+.explorer-selects label { font-size: 13px; color: var(--ink-2); }
+.explorer-more { display: flex; margin: 16px auto 0; }
+@media (max-width: 600px) {
+  .explorer-selects { display: grid; grid-template-columns: 1fr 1fr; }
+  .explorer-selects label { flex-direction: column; align-items: stretch; gap: 4px; }
+  .explorer-selects select { width: 100%; }
+}
+.badge.badge-quiet { background: transparent; border: 1px dashed var(--line); color: var(--ink-3); font-weight: 400; }
+.saved-mark { color: var(--warn); }
+.calendar-link { display: inline; margin-inline-start: 8px; padding: 0; border: 0; background: none; color: var(--primary); font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.rows .why .calendar-note { display: block; font-size: 12px; }
+/* 하단 고정 질문바가 맨 아래 섹션(둘러보기)의 카드 버튼을 가리지 않게 여백을 옮긴다 */
+body.has-mini #board { padding-bottom: 48px; }
+body.has-mini #policy-explorer { padding-bottom: 180px; }

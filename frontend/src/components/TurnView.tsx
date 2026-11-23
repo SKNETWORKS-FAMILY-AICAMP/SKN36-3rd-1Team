@@ -10,7 +10,7 @@ import { LOADING_STAGES, policyQuestion } from '../config/request';
 import type { GraphIndex } from '../graph/graphModel';
 import { scheduleView, scheduledPolicies } from '../lib/applicationSchedule';
 import { useScheduleDay } from './ScheduleClock';
-import { PolicyPersonalActions } from './SavedPolicies';
+import { PolicyPersonalActions, useSavedPolicies } from './SavedPolicies';
 import { policyLifeStages } from '../graph/lifeStages';
 
 export type Turn =
@@ -57,7 +57,7 @@ export function TurnView({ turn, onFollowUp, onRetry, onDemoApply, sampleMode, o
         <div className="qtags">{turn.tags.map((t) => <span key={t.text}><Icon name={t.icon} className="ic" />{t.text}</span>)}</div>
       )}
       <div className={'acard' + (turn.state === 'loading' ? ' thinking' : '')}>
-        <BotHead sub="공식 원문 기반 답변" sample={r ? r.is_sample : sampleMode} />
+        <BotHead sub={turn.state === 'done' ? '공식 원문 기반 답변' : ''} sample={r ? r.is_sample : sampleMode} />
         <div className="abody">
           {turn.state === 'loading' && <Loading />}
           {turn.state === 'error' && (
@@ -78,7 +78,7 @@ function BotHead({ sub, sample }: { sub: string; sample?: boolean }) {
   return (
     <div className="ahead">
       <span className="bot"><MascotFace /></span>
-      <div><b>SSOK</b><small>{sub}</small></div>
+      <div><b>SSOK</b>{sub && <small>{sub}</small>}</div>
       {sample && <span className="badge b-warn">예시 응답</span>}
     </div>
   );
@@ -162,11 +162,14 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
     }
   }
   const blocks: ReactElement[] = [];
-  if (infoRequests.size > 0) {
+  const answerText = view.answerText ?? (r.status === 'info' ? r.answer.trim() : '');
+  const requestsToShow = answerText ? [...infoRequests] : [...infoRequests].slice(0, 1);
+  if (answerText) blocks.push(<AnswerText key="a" text={answerText} sources={r.citations} />);
+  if (requestsToShow.length > 0) {
     blocks.push(
       <Block key="info-requests" title="추가로 확인할 정보" icon="bulb">
         <div className="chips">
-          {[...infoRequests].map(([field, item]) => (
+          {requestsToShow.map(([field, item]) => (
             <button key={field} type="button" className="chip" onClick={(event) => onFollowUp(item, event.currentTarget)}>
               {item.text}
             </button>
@@ -175,18 +178,12 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
       </Block>,
     );
   }
-  if (view.answerText) blocks.push(<AnswerText key="a" text={view.answerText} sources={r.citations} />);
   if (r.status === 'info' && view.guide) {
     blocks.push(
       <NoticeBox key="g" kind={view.warning ? 'warn' : 'info'}
         icon={view.warning ? 'search' : 'info'} title={view.guide.title}
         text={view.warning?.text ?? '공식 원문에서 추가로 확인해 주세요.'} />,
     );
-    if (r.answer.trim()) {
-      blocks.push(
-        <AnswerText key="info-answer" text={r.answer} sources={r.citations} />,
-      );
-    }
   } else if (view.guide) {
     blocks.push(
       <NoticeBox key="g" kind={view.warning ? 'warn' : view.guide.kind}
@@ -352,11 +349,17 @@ function conditionReasonForDisplay(reason: string) {
   return detail === reason ? reason : [detail, OFFICIAL_ELIGIBILITY_NOTICE].filter(Boolean).join(' ');
 }
 
-export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy, sources = [] }: {
+export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy, sources = [], onOpenMap, askAsPrimary = false }: {
   p: PolicyCheck; group: string; period: string; stages: string[]; sample: boolean; onDemoApply: () => void;
   onAskPolicy?: Props['onAskPolicy'];
   sources?: Citation[];
+  /** 관계 지도로 넘어가기 직전에 부른다(돌아올 스크롤 위치 저장용) */
+  onOpenMap?: () => void;
+  /** 정책 둘러보기 카드: '내 조건으로 확인하기'를 주 버튼으로 크게 보여 준다 */
+  askAsPrimary?: boolean;
 }) {
+  const savedState = useSavedPolicies();
+  const isSaved = !sample && !!savedState?.saved.some(s => s.policy_id === p.policy_id);
   const unjudged = isUnjudgedOnly(p.conditions);
   const incomeNotices = new Set<string>();
   // 그룹 종합 결과 행(…해야 합니다(종합 결과))은 계산 과정이라 화면에서 뺀다.
@@ -396,9 +399,9 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   return (
     <details className="pcard" name={group}>
       <summary className="ptop">
-        <b>{p.policy_name}</b>
+        <b>{isSaved && <span className="saved-mark" aria-label="관심 정책">★ </span>}{p.policy_name}</b>
         {schedule.badge && <span className="schedule-countdown">{schedule.badge}</span>}
-        <span className={'badge ' + rcls}>{rlabel}{sample ? ' (예시)' : ''}</span>
+        <span className={'badge ' + rcls + (schedule.status === 'unknown' ? ' badge-quiet' : '')}>{rlabel}{sample ? ' (예시)' : ''}</span>
       </summary>
       <div className="policy-meta">
         {p.agency && <small>{p.agency}</small>}
@@ -407,7 +410,9 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
       <ul className="rows">
         <li>
           <span className="k">신청 기간</span>
-          <span className="why">{period || '공식 원문에서 확인해 주세요.'}</span>
+          {/* 제목 옆 배지와 같은 '일정 확인 필요'를 두 번 쓰지 않고, 어디서 확인할지만 안내한다 */}
+          <span className="why">{!period || period === rlabel ? '공식 원문에서 확인해 주세요.' : period}
+            <PolicyPersonalActions policy={p} sample={sample} show="calendar" /></span>
         </li>
         <li><span className="k">신청 기관</span><span className="why">{p.agency || '공식 공고에서 확인해 주세요.'}</span></li>
         {!p.required_documents?.length && <li><span className="k">필요 서류</span><span className="why">이 카드에는 확인된 서류 목록이 제공되지 않았어요.
@@ -430,6 +435,13 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
           );
         })}
       </ul>
+      {askAsPrimary && !sample && onAskPolicy && (
+        <div className="catalog-ask">
+          <button type="button" className="btn btn-p" onClick={(event) => onAskPolicy(policyQuestion(p.policy_name), event.currentTarget, p.policy_id)}>
+            내 조건으로 확인하기
+          </button>
+        </div>
+      )}
       {!!requirementRows.length && <section className="policy-official" aria-label="공식 자격기준">
         <h4>{p.official_requirements?.length ? '공식 자격기준' : '공식 자격기준 · 원문 발췌'}</h4><p className="policy-condition-note">원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.</p>
         <ul className="rows">{requirementRows.map((requirement, i) => {
@@ -482,20 +494,22 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
         </>
       )}
       <div className="pfoot">
-        <PolicyPersonalActions policy={p} sample={sample} />
         {/* 비교한 조건이 없는 카드에는 맞지 않는 안내라 숨긴다 */}
         {!unjudged && displayedConditions.length > 0 && <span className="note">조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요</span>}
-        {/* 예시 정책은 실제 데이터에 없어 질문·관계 지도로 연결하지 않는다 */}
-        {!sample && onAskPolicy && (
+        {/* 주요 행동(신청·질문)을 앞에, 저장·지도·원문은 뒤에 둔다. 예시 정책은 질문·관계 지도로 연결하지 않는다 */}
+        {canApply && (sample
+          ? <button type="button" className="btn btn-p" onClick={onDemoApply}>신청하기</button>
+          : <a className="btn btn-p" href={applyHref!} target="_blank" rel="noopener noreferrer">신청하기 ↗</a>)}
+        {!askAsPrimary && !sample && onAskPolicy && (
           <button type="button" className="btn btn-o" onClick={(event) => onAskPolicy(policyQuestion(p.policy_name), event.currentTarget, p.policy_id)}>
             이 정책 물어보기
           </button>
         )}
-        {!sample && <a className="btn btn-o" href={mapHref(p.policy_id)}>관계 지도</a>}
+        {!sample && <a className="btn btn-o" href={mapHref(p.policy_id)} onClick={(event) => {
+          if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) onOpenMap?.();
+        }}>관계 지도</a>}
         {sourceHref && <a className="btn btn-o" href={sourceHref} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>}
-        {canApply && (sample
-          ? <button type="button" className="btn btn-p" onClick={onDemoApply}>신청하기</button>
-          : <a className="btn btn-p" href={applyHref!} target="_blank" rel="noopener noreferrer">신청하기 ↗</a>)}
+        <PolicyPersonalActions policy={p} sample={sample} show="save" />
       </div>
     </details>
   );
