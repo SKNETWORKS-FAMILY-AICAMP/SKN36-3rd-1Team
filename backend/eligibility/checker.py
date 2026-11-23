@@ -115,7 +115,12 @@ def _field(condition: dict) -> str:
         and str(condition.get("unit") or "").strip() == "개월"
         and (
             condition_id.startswith("COND_CHILD_AGE_")
-            or any(term in name for term in ("자녀", "영아", "영유아", "아이", "아기"))
+            # Names must explicitly describe an age, not childcare service
+            # duration, benefit period, or another measurement in months.
+            or bool(re.search(
+                r"(?:자녀|영아|영유아|아이|아기)\s*(?:의\s*)?"
+                r"(?:월령|연령|나이)", name,
+            ))
             or (not condition_id and not name)
         )
     ):

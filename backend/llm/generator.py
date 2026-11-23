@@ -106,6 +106,45 @@ def _region_has_detail(region: str) -> bool:
     )
 
 
+def _is_applicant_age_request(text: str) -> bool:
+    """Only explicit requests for the guardian/applicant's OWN age.
+
+    The same sentence may mention '아이 돌봄', but that does not make the
+    guardian's age the child's age. A policy age *criterion* is not a request.
+    """
+    match = re.search(
+        r"(?:보호자|신청자|신청인|본인|귀하)"
+        r"(?:\s*본인(?:의)?|[의가은는])?\s*"
+        r"(?:현재\s*)?(?:나이|연령|생년월일|몇\s*(?:살|세))",
+        text,
+    )
+    if match is None:
+        return False
+    tail = text[match.start():]
+    if re.search(r"(?:나이|연령).{0,10}(?:기준|요건|조건|범위|제한)", tail):
+        return False
+    return bool(re.search(
+        r"(?:알려|입력|말씀|몇\s*(?:살|세)|어떻게\s*되|"
+        r"이신가요|이세요|인가요|입니까)",
+        tail,
+    ))
+
+
+def _is_child_months_method_question(text: str) -> bool:
+    """Questions about calculating month-age must survive deduplication."""
+    if not re.search(
+        r"(?:자녀|아이|아기|영아|영유아).{0,30}(?:월령|개월)",
+        text,
+    ):
+        return False
+    return bool(re.search(
+        r"(?:어떻게|어떤\s*(?:방식|방법)|언제부터).{0,25}"
+        r"(?:산정|계산|산출|구하|세나요|측정)|"
+        r"(?:산정|계산|산출|측정)\s*(?:방법|방식|기준|법)",
+        text,
+    ))
+
+
 def _is_child_years_request(text: str) -> bool:
     """'자녀는 몇 살인가요?'는 신청자 age가 아닌 자녀 월령 입력 요청이다.
 
@@ -130,6 +169,12 @@ def _requests_profile_value(text: str, field: str) -> bool:
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
     if field == "child_age_months":
+        # Explicit guardian/applicant age is never child_age_months.
+        if _is_applicant_age_request(text):
+            return False
+        # Asking HOW months are calculated is not asking for the child's age.
+        if _is_child_months_method_question(text):
+            return False
         if _is_child_years_request(text):
             return True
         # 명시적으로 자녀의 개인 월령을 요청하면 정책 관련 접두어가 있어도
@@ -499,6 +544,14 @@ def _personal_information_request(
     if _is_policy_criteria_question(text):
         return None
 
+    # A stated guardian/applicant subject takes precedence over '아이 돌봄'.
+    if _is_applicant_age_request(text):
+        return "age"
+
+    # Month-age calculation is a normal user-to-AI follow-up question.
+    if _is_child_months_method_question(text):
+        return None
+
     # #39 REVIEW HARDENING: an infant's age is NEVER the applicant's age.
     # Until the API/React ask_info contract is ready, keep this as body-only
     # guidance. Do not send kind=ask_info(field='age') for a child-age query.
@@ -718,6 +771,14 @@ def _is_redundant_request(
     profile: dict | None,
 ) -> bool:
     if profile is None:
+        return False
+
+    # Do not use child_age_months to suppress a guardian/applicant age request.
+    if _is_applicant_age_request(text):
+        return profile.get("age") is not None
+
+    # Calculation/explanation questions are never redundant profile requests.
+    if _is_child_months_method_question(text):
         return False
 
     #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로

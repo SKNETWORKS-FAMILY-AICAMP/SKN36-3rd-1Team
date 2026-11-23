@@ -313,3 +313,87 @@ def test_issue39_explicit_child_age_months_keeps_month_unit():
     assert g._info_request_to_answer(
         "아기는 몇 살인가요?", "other"
     ) == "자녀의 월령(개월 수)을 알려 주세요."
+
+
+# PR #112 review #2: an explicit guardian/applicant age is NOT a child age.
+@pytest.mark.parametrize("months", [None, 0])
+@pytest.mark.parametrize("text", [
+    "아이 돌봄 지원을 받으려면 보호자 나이를 알려 주세요.",
+    "신청자 본인의 나이를 알려 주세요.",
+])
+def test_review112_guardian_age_is_applicant_age(months, text):
+    profile = g._normalize_profile({
+        "age": None, "region": None, "income": None,
+        "child_age_months": months,
+    })
+    assert g._personal_information_request(text, profile) == "age"
+    assert not g._requests_profile_value(text, "child_age_months")
+    assert not g._is_redundant_request(text, profile)
+    raw = {
+        "status": "info", "answer": "신청자 나이를 확인합니다.",
+        "used_source_ids": [],
+        "follow_up_questions": [{
+            "kind": "ask_info", "field": "age", "text": text,
+        }],
+    }
+    result = g._validate_model_response(raw, set(), profile)
+    assert result["follow_up_questions"] == [
+        {"kind": "ask_info", "field": "age", "text": text}
+    ]
+    assert "자녀의 월령(개월 수)을 알려 주세요." not in result["answer"]
+
+
+def test_review112_known_applicant_age_not_confused_with_missing_child_age():
+    text = "아이 돌봄 지원을 받으려면 보호자 나이를 알려 주세요."
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None,
+        "child_age_months": None,
+    })
+    assert g._is_redundant_request(text, profile)
+    raw = {
+        "status": "info", "answer": "정보를 확인했습니다.",
+        "used_source_ids": [],
+        "follow_up_questions": [{"kind": "ask_info", "field": "age", "text": text}],
+    }
+    result = g._validate_model_response(raw, set(), profile)
+    assert result["follow_up_questions"] == []
+    assert "월령(개월 수)을 알려" not in result["answer"]
+
+
+# PR #112 review #3: method questions must remain follow-up questions.
+@pytest.mark.parametrize("text", [
+    "아기 월령은 어떻게 산정하나요?",
+    "자녀 월령은 어떻게 계산하나요?",
+    "아기 월령 계산 방법은 무엇인가요?",
+])
+def test_review112_child_months_calculation_method_question_kept(text):
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": 0,
+    })
+    assert g._is_child_months_method_question(text)
+    assert not g._requests_profile_value(text, "child_age_months")
+    assert not g._is_redundant_request(text, profile)
+    raw = {
+        "status": "info", "answer": "월령 기준을 확인합니다.",
+        "used_source_ids": [],
+        "follow_up_questions": [{"kind": "question", "text": text}],
+    }
+    result = g._validate_model_response(raw, set(), profile)
+    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+
+
+def test_review112_reasking_known_child_months_is_still_removed():
+    text = "아기는 몇 개월인가요?"
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": 0,
+    })
+    assert not g._is_child_months_method_question(text)
+    assert g._requests_profile_value(text, "child_age_months")
+    assert g._is_redundant_request(text, profile)
+    raw = {
+        "status": "info", "answer": "정보를 확인했습니다.",
+        "used_source_ids": [],
+        "follow_up_questions": [{"kind": "question", "text": text}],
+    }
+    result = g._validate_model_response(raw, set(), profile)
+    assert result["follow_up_questions"] == []

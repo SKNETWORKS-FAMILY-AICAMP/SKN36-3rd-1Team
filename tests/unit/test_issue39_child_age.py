@@ -209,3 +209,39 @@ def test_issue39_non_child_month_condition_with_unrelated_id_is_never_auto_grade
     assert not any(item["field"] == "children" for item in result["conditions"])
     assert any(item["field"] == "target" and item["status"] == checker.CHECK
                for item in result["conditions"])
+
+
+# PR #112 review #1: childcare usage period is not a child's month-age.
+@pytest.mark.parametrize("condition_id", [None, "COND_CHILDCARE_SERVICE_USAGE_24M"])
+def test_review112_service_usage_duration_is_not_child_month_age(condition_id):
+    policy = sample_child_age_policy("LTE")
+    condition = policy["graph"]["eligibility"]["condition_tree"][0]["conditions"][0]
+    condition["name"] = "자녀 돌봄 서비스 이용 기간 24개월 이하"
+    if condition_id is not None:
+        condition["condition_id"] = condition_id
+    result = checker.check_eligibility({"age": 30, "child_age_months": 23}, policy)
+    assert not any(row["field"] == "children" for row in result["conditions"])
+    assert any(row["field"] == "target" and row["status"] == checker.CHECK
+               for row in result["conditions"])
+
+
+@pytest.mark.parametrize("name", [
+    "자녀 월령", "대상 자녀 연령: 24개월 이하", "영아의 월령",
+])
+def test_review112_genuine_child_age_names_still_evaluate(name):
+    policy = sample_child_age_policy("LTE")
+    condition = policy["graph"]["eligibility"]["condition_tree"][0]["conditions"][0]
+    condition["name"] = name
+    result = checker.check_eligibility({"age": 30, "child_age_months": 23}, policy)
+    assert any(row["field"] == "children" and row["status"] == checker.OK
+               for row in result["conditions"])
+
+
+def test_review112_explicit_child_age_id_takes_priority():
+    policy = sample_child_age_policy("LTE")
+    condition = policy["graph"]["eligibility"]["condition_tree"][0]["conditions"][0]
+    condition["name"] = ""
+    condition["condition_id"] = "COND_CHILD_AGE_LE_24M"
+    result = checker.check_eligibility({"age": 30, "child_age_months": 24}, policy)
+    assert any(row["field"] == "children" and row["status"] == checker.OK
+               for row in result["conditions"])
