@@ -10,6 +10,7 @@
 > → **현재 상태:** 그 뒤 Neo4j 적재·교차 검증(§5.5.5), snapshot·최종 번들 생성, 독립 복원까지 모두 PASS했다(§5.7, 보고서 19·20·21).
 > **C2 커밋·최종 번들·독립 복원 완료 (2026-11-23):** C2는 `1c007e7`로 커밋됐다. 그 커밋을 source로 한 최종 번들 `rag-final-v140-r3-1c007e75d1c2.zip`(SHA-256 `a233264e…4eb5`)을 만들었고, 분리된 verify 환경(`issue105-r3-verify`)에서 preflight → `--apply` → `--verify-only`가 모두 PASS했다(§5.7, 보고서 19·20·21).
 > r3b build 쪽 Neo4j 적재·교차 검증(보고서 13~16)과 snapshot 생성(17·18) 기록은 §5.5.5에 있다. 남은 작업과 검증 한계는 §7에 있다.
+> **PR #111 리뷰 반영 (2026-11-23, P1-3 `756ed30`·P2-4 `4331650`):** 복원 도구가 임시 컬렉션 복원 + 검증 후 alias 공개, 최종 payload 검증으로 바뀌었다(§5.8). 위 최종 ZIP·독립 복원 PASS는 그 이전 도구의 보존 기록이며, 새 도구로 만든 ZIP과 실제 복원은 아직 없다. §5.7.3 PowerShell 경로 계산을 절대 경로 기준으로 고쳤다(P2-5).
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -381,18 +382,23 @@ python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --apply 
 python scripts/restore_r3_isolated.py --repo <소스> --bundle <번들> --verify-only
 ```
 
-`--apply` 하나로 다음이 끝까지 진행되고, 이어서 verify-only 재검증이 실행된다.
+`--apply` 하나로 다음이 끝까지 진행되고, 이어서 verify-only 재검증이 실행된다. 아래는 **현재 코드**(P1-3 `756ed30`·P2-4 `4331650`) 기준이다. §5.7.9의 완료 기록은 그 이전 도구(정식 이름에 직접 업로드)로 실행한 결과다(§5.8).
 
-1. 두 snapshot 업로드
-2. 컬렉션마다 차원·Point 수·전체 digest·payload 정합성 확인
+1. 두 snapshot을 **임시 컬렉션**(`<정식 이름>__tmp_<32자리 무작위 hex>`)에만 업로드 (정식 B2·B3 이름으로는 업로드하지 않음)
+2. 임시 컬렉션마다 차원·Point 수·전체 vector digest·payload 정렬과 protected digest·최종 payload 검증
 3. Neo4j `load_graph(verify=True)`
-4. 컬렉션마다 Neo4j 교차 검증(`verify_cross_db`)과 원문 슬라이스 검증(`verify_full_index`)
+4. 임시 컬렉션마다 Neo4j 교차 검증(`verify_cross_db`)과 원문 슬라이스 검증(`verify_full_index`)
+5. 1~4가 모두 통과한 뒤에만 정식 이름을 alias로 공개하고, alias 경유로 Point 수·vector digest·payload digest를 다시 확인
+
+자세한 구조·잔여 위험·검증 상태는 §5.8에 있다.
 
 Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차와 결과는 §5.7에 정리했다.
 
 ### 5.7 Issue #105 최종 번들 독립 복원 (#110 데이터 정정 반영, 2026-11-23)
 
 이 절은 **완료 기록**(§5.7.1, §5.7.9)과 **다시 수행할 때의 절차**(§5.7.3~5.7.8, §5.7.10)를 구분한다. 절차의 명령은 Windows PowerShell 5.1 기준이고, 이번 문서 작업에서는 실행하지 않았다.
+
+> **2026-11-23 P1-3·P2-4 반영 후 주의:** §5.7.1의 최종 ZIP과 §5.7.9의 PASS 기록은 `1c007e7` 시점 복원 도구(정식 이름 직접 업로드, 최종 payload digest 비교 없음)로 만든·실행한 **보존 기록**이다. 새 구조(임시 컬렉션 + alias 공개, 최종 payload 검증)를 담은 **새 ZIP은 아직 만들지 않았고, 새 도구로 실제 독립 복원도 실행하지 않았다**(§5.8). 래퍼는 번들 안의 복원 도구와 압축을 푼 소스 트리의 도구가 같은지 확인하므로, 기존 ZIP을 §5.7.3 절차로 풀어 실행하면 그 ZIP에 든 옛 도구가 실행된다. 새 번들을 만들면 §5.7.3~5.7.6의 ZIP 이름·SHA-256·source ZIP 이름·snapshot SHA-256을 새 값으로 바꿔야 한다.
 
 #### 5.7.1 최종 번들 구성과 체크섬 (완료 기록)
 
@@ -413,7 +419,10 @@ Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차�
 | `package.json` | schema 2, 컬렉션별 points·vector_digest·payload_digest·snapshot SHA·크기·벡터 출처, Neo4j `release_files` 15개 |
 | `SHA256SUMS` | 위 6개 파일의 SHA-256 |
 
-- `package.json`의 컬렉션 값: B2 vector `90d0f593…689d`·payload `0584dbbf…6bd0`, B3 vector `718046c3…7120`·payload `b4d6a9bc…d539` (R3_PINS 최종값과 같음)
+- `package.json`의 컬렉션 값: B2 vector `90d0f593…689d`·payload `0584dbbf…6bd0`, B3 vector `718046c3…7120`·payload `b4d6a9bc…d539`
+  - vector digest는 `R3_PINS` 최종값과 같다.
+  - payload digest는 `R3_PINS`에 **없다**(정정: 예전 문구 "R3_PINS 최종값과 같음"은 vector digest에만 해당한다). 번들 생성 도구가 build 서버 최종 상태에서 `digest([(point_id, payload)])`로 계산해 `package.json`에 기록한 값이며, P2-4 이후 복원 도구가 최종 payload 기준값으로 쓴다(§5.8).
+- **보존용 아티팩트:** 이 ZIP의 `restore_final_v140_r3.py`는 `1c007e7` 시점 도구다. P1-3(임시 컬렉션 + alias 공개)·P2-4(최종 payload 검증)가 들어 있지 않다. 이름·SHA-256·snapshot 값은 확정 기록이므로 바꾸지 않는다. 현재 코드를 반영한 새 ZIP은 아직 생성·검증되지 않았다.
 
 #### 5.7.2 build 환경과 verify 환경 분리
 
@@ -441,21 +450,32 @@ Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차�
   - 풀고 나서 `SHA256SUMS`의 목록·해시가 실제 파일과 정확히 같아야 한다.
   - 어느 단계든 실패하면 만든 폴더를 지우지 말고 그대로 둔 채 멈춘다. 자동으로 다시 실행하지 않는다(새 폴더 이름으로 사람이 다시 시작).
 - 필요 조건: Windows PowerShell 5.1, .NET Framework 4.7.2 이상(`ZipArchiveEntry.ExternalAttributes`로 링크를 판별한다)
+- **경로는 모두 절대 경로로 계산한다 (P2-5 수정).** PowerShell cmdlet(`Test-Path`·`Join-Path`·`Get-FileHash`)은 상대 경로를
+  PowerShell 현재 위치(`Set-Location`) 기준으로 풀지만, .NET 메서드(`[IO.Path]::GetFullPath`·`Directory.CreateDirectory`·
+  `ExtractToFile`)는 프로세스 작업 폴더(`[Environment]::CurrentDirectory`) 기준으로 푼다. `Set-Location`은 후자를 바꾸지 않는다.
+  예전 블록은 상대 경로 `$Destination`을 `GetFullPath`에 넘겨, "없음" 확인(`Test-Path`)과 실제 압축 해제 위치가 서로 다른
+  폴더가 될 수 있었다. 이제 `$repoRoot`(이 저장소의 절대 경로)에서 `$root`·`$bundle`·`$repo`를 계산하고, 함수도 절대 경로만 받는다.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-Set-Location 'C:\dev\project\SKN36-3rd-1Team'
-$zip     = '.cache\issue105-r3b\bundle-r3b-20261123-01\rag-final-v140-r3-1c007e75d1c2.zip'
+$repoRoot = 'C:\dev\project\SKN36-3rd-1Team'                              # 이 저장소 (모든 경로의 절대 기준점)
+Set-Location -LiteralPath $repoRoot                                         # 편의용. 아래 경로는 현재 위치와 무관하다
+$zip     = Join-Path $repoRoot '.cache\issue105-r3b\bundle-r3b-20261123-01\rag-final-v140-r3-1c007e75d1c2.zip'
 $zipSha  = 'a233264e2634256db45b82a7bcfe238dd1619c3a99492fc2b757a64887ca4eb5'
-$root    = '.cache\issue105-r3b\independent-restore-20261123-02'        # 새 이름 (기존 -01 폴더는 증거로 보존)
-$bundle  = Join-Path $root 'bundle'
-$repo    = Join-Path $root 'repo'
+$root    = Join-Path $repoRoot '.cache\issue105-r3b\independent-restore-20261123-02'   # 새 이름 (기존 -01 폴더는 증거로 보존)
+$bundle  = Join-Path $root 'bundle'                                         # 절대 경로 ($root 기준)
+$repo    = Join-Path $root 'repo'                                           # 절대 경로 ($root 기준)
+foreach ($p in $zip, $root, $bundle, $repo) {
+  if ($p -notmatch '^[A-Za-z]:\\') { throw "절대 경로가 아닙니다: $p → 중단" }
+}
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Expand-R3ZipSafely {
   param([Parameter(Mandatory = $true)][string]$ZipPath,
         [Parameter(Mandatory = $true)][string]$Destination,
         [switch]$FlatOnly)
+  # .NET 메서드에 넘기기 전에 절대 경로만 받는다 (현재 위치·프로세스 작업 폴더가 달라도 같은 폴더를 가리키게)
+  foreach ($p in $ZipPath, $Destination) { if ($p -notmatch '^[A-Za-z]:\\') { throw "절대 경로만 받습니다: $p → 중단" } }
   if (Test-Path -LiteralPath $Destination) { throw "이미 있음: $Destination → 중단 (덮어쓰기 금지)" }
   $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $ZipPath).Path)
   try {
@@ -472,7 +492,8 @@ function Expand-R3ZipSafely {
       if ($seen.ContainsKey($key)) { throw "중복 엔트리: $name" }
       $seen[$key] = $true
     }
-    $rootFull = [System.IO.Path]::GetFullPath($Destination)
+    $rootFull = [System.IO.Path]::GetFullPath($Destination)                 # 절대 경로 정규화만 (작업 폴더에 의존하지 않음)
+    if ($rootFull.TrimEnd('\') -ne $Destination.TrimEnd('\')) { throw "경로 정규화 결과가 다릅니다: $Destination → 중단" }
     [void][System.IO.Directory]::CreateDirectory($rootFull)                 # 위에서 없음을 확인한 새 폴더
     $prefix = $rootFull.TrimEnd('\') + '\'
     foreach ($entry in $archive.Entries) {
@@ -508,7 +529,8 @@ if (-not (Test-Path -LiteralPath (Join-Path $repo 'scripts\restore_r3_isolated.p
 
 - 래퍼는 `--repo`가 **자신이 들어 있는 소스 트리**인지 확인한다. 그래서 압축을 푼 `repo\scripts\restore_r3_isolated.py`를 실행하고 `--repo`에 그 `repo`를 넘긴다.
 - Python은 이 저장소의 `.venv\Scripts\python.exe`를 쓴다(소스 트리에는 `.venv`가 없음). 래퍼는 import와 데이터셋 경로를 자신의 소스 트리로 고정한다.
-- 아래 §5.7.4~5.7.8은 **같은 PowerShell 세션**에서 위 변수(`$root`, `$bundle`, `$repo`)를 이어서 쓴다.
+- 아래 §5.7.4~5.7.8은 **같은 PowerShell 세션**에서 위 변수(`$repoRoot`, `$root`, `$bundle`, `$repo`)를 이어서 쓴다. 모두 절대 경로이므로 중간에 `Set-Location`으로 위치를 바꿔도 같은 파일을 가리킨다. Python·docker에 넘기는 `--repo`·`--bundle`·`--report`·`-f`도 절대 경로가 된다.
+- §5.2~5.5의 한 줄 명령(`python scripts/...`, `docker compose -f docs/...`)은 **저장소 루트를 현재 위치로 둔 상태**를 전제로 한 기록이다. 외부 프로그램은 PowerShell 현재 위치를 작업 폴더로 받아 상대 경로를 푼다. 다른 위치에서 실행하려면 경로를 절대 경로로 바꾼다.
 
 #### 5.7.4 인증 환경 변수 (절차, 실제 값은 기록하지 않음)
 
@@ -523,8 +545,8 @@ function Read-R3Secret([string]$path) {
   $s = Import-Clixml -Path $path; $p = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)
   try { [Runtime.InteropServices.Marshal]::PtrToStringBSTR($p) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($p); $s.Dispose() }
 }
-$verifyKeyFile = '.cache\issue105-r3b\verify_qdrant_api_key.clixml'
-$verifyPwFile  = '.cache\issue105-r3b\verify_neo4j_password.clixml'
+$verifyKeyFile = Join-Path $repoRoot '.cache\issue105-r3b\verify_qdrant_api_key.clixml'   # 절대 경로 (§5.7.3의 $repoRoot)
+$verifyPwFile  = Join-Path $repoRoot '.cache\issue105-r3b\verify_neo4j_password.clixml'
 function Enter-R3VerifySecrets {
   # 현재 프로세스에만 설정한다. 값은 출력하지 않는다.
   foreach ($f in $verifyKeyFile, $verifyPwFile) { if (-not (Test-Path -LiteralPath $f)) { throw "인증 파일이 없습니다: $f → 중단" } }
@@ -598,9 +620,12 @@ try {
 - 래퍼도 기존 보고서 파일과 보존 폴더(#104 `.cache\issue105-r3`)를 거부한다.
 
 ```powershell
-$py        = '.\.venv\Scripts\python.exe'
+$py        = Join-Path $repoRoot '.venv\Scripts\python.exe'                # 절대 경로 (§5.7.3의 $repoRoot)
 $wrapper   = Join-Path $repo 'scripts\restore_r3_isolated.py'
-$runDir    = '.cache\issue105-r3b\verify-run-20261123-02'                  # 새 이름 (기존 보고서 폴더와 겹치지 않게)
+$runDir    = Join-Path $repoRoot '.cache\issue105-r3b\verify-run-20261123-02'   # 새 이름 (기존 보고서 폴더와 겹치지 않게)
+foreach ($p in $py, $wrapper, $runDir, $repo, $bundle) {
+  if ($p -notmatch '^[A-Za-z]:\\') { throw "절대 경로가 아닙니다: $p → 중단 (§5.7.3을 같은 세션에서 먼저 실행)" }
+}
 $preReport = Join-Path $runDir '01-verify-preflight.json'
 $appReport = Join-Path $runDir '02-verify-apply.json'
 $verReport = Join-Path $runDir '03-verify-only.json'
@@ -634,7 +659,9 @@ if ($pre.restore_preflight.snapshots.b2 -ne '834f17b6a0c18c265573ebc3da59a29473d
 #### 5.7.7 복원 `--apply` (절차, 1회만)
 
 - 직전 preflight 보고서(`$preReport`)의 fingerprint만 쓴다. 래퍼는 그 값과 현재 상태(Docker 식별 정보 + 서버 상태)가 같을 때만 쓴다.
-- 쓰기 순서: snapshot 2개 업로드 → 컬렉션 검증(차원·Point 수·전체 digest·payload) → Neo4j `load_graph(verify=True)` → 컬렉션마다 `verify_cross_db`와 `verify_full_index` → 이어서 읽기 전용 재검증(`post_verify`)
+- 쓰기 순서 (현재 도구): snapshot 2개를 임시 컬렉션에 업로드 → 임시 컬렉션 검증(차원·Point 수·전체 vector digest·payload 정렬·protected digest·최종 payload) → Neo4j `load_graph(verify=True)` → 임시 컬렉션마다 `verify_cross_db`와 `verify_full_index` → 정식 alias 공개 → alias 경유 재확인 → 이어서 읽기 전용 재검증(`post_verify`)
+  - §5.7.9의 기록(보고서 20)은 옛 도구의 순서다: 정식 이름에 snapshot 2개 업로드 → 컬렉션 검증 → Neo4j → 교차 검증 → 재검증 (alias 없음)
+  - 실패 보고서에 `partial_publish`·`aliases`가 있으면 alias 공개 단계에서 멈춘 것이다. alias를 지우거나 바꾸지 않고 그대로 보존한다(§5.8).
 - 실패하면 **다시 실행하지 않는다**(§5.7.10). 새 fingerprint를 발급받아 자동으로 재시도하지 않는다. 컨테이너·볼륨·보고서는 그대로 둔다.
 
 ```powershell
@@ -688,12 +715,56 @@ foreach ($key in 'b2', 'b3') {
 "verify-only fingerprint (복원 후): $($ver.fingerprint)"
 ```
 
+- **새 번들(P1-3·P2-4 도구)로 실행할 때만** 위 블록 뒤에 다음을 추가로 확인한다. 옛 ZIP(§5.7.1)의 도구는 이 필드를 만들지 않으므로 옛 ZIP에는 쓰지 않는다. 아직 실제 보고서로 실행한 적이 없는 절차다(fake JSON으로만 확인).
+- 필드 위치 (`restore_r3_isolated.py` `run("verify-only")` → `main()`): 보고서 최상위에 `status`·`mode`·`db_writes`·`servers`·`fingerprint`·`post_verify`가 있다. `servers.qdrant.state`·`servers.qdrant.aliases`는 래퍼의 서버 확인 결과, `post_verify`는 `restore_final_v140_r3.restore(verify_only)` 결과로 `collections`·`physical_collections`·`aliases`·`partial_publish`를 담는다. (실패 보고서에서는 `partial_publish`·`aliases`가 최상위에 붙는다.)
+- 없는 필드가 `$null`로 비교되어 통과하지 않도록 `Get-R3Required`로 존재·비어 있지 않음을 먼저 확인한다.
+
+```powershell
+function Get-R3Required($object, [string]$path) {
+  # 점(.)으로 구분한 경로의 필드가 실제로 있고 null·빈 문자열이 아닐 때만 값을 돌려준다
+  $value = $object
+  foreach ($name in $path -split '\.') {
+    if ($null -eq $value -or $null -eq $value.PSObject.Properties[$name]) { throw "보고서에 필드가 없습니다: $path → 중단" }
+    $value = $value.PSObject.Properties[$name].Value
+  }
+  if ($null -eq $value -or ($value -is [string] -and $value -eq '')) { throw "보고서 필드가 비어 있습니다: $path → 중단" }
+  return $value
+}
+$package = Get-Content -LiteralPath (Join-Path $bundle 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$canonical = @{ b2 = 'exp_b2_qwen3emb06b_v140_v1'; b3 = 'exp_b3_qwen3emb06b_v140_v1' }
+if ((Get-R3Required $ver 'servers.qdrant.state') -cne 'published') { throw "Qdrant 상태가 published가 아닙니다 → 중단" }
+$partial = Get-R3Required $ver 'post_verify.partial_publish'
+if ($partial -isnot [bool] -or $partial) { throw '부분 공개 상태이거나 partial_publish가 false가 아닙니다 → 중단 (alias를 지우거나 바꾸지 않는다)' }
+$want = @{}
+foreach ($key in 'b2', 'b3') {
+  $name = $canonical[$key]
+  if ((Get-R3Required $ver "post_verify.collections.$key.collection") -cne $name) { throw "$key 정식 컬렉션 이름이 다릅니다 → 중단" }
+  $temp = Get-R3Required $ver "post_verify.physical_collections.$key"
+  if ($temp -cnotmatch ('^' + [regex]::Escape($name) + '__tmp_[0-9a-f]{32}$')) { throw "$key 임시 컬렉션 이름 형식 오류: $temp → 중단" }
+  $want[$name] = $temp
+  $actual = Get-R3Required $ver "post_verify.collections.$key.payload_digest"
+  $expect = Get-R3Required $package "collections.$key.payload_digest"
+  if ($actual -cnotmatch '^[0-9a-f]{64}$' -or $actual -cne $expect) { throw "$key 최종 payload digest가 package.json과 다릅니다 → 중단" }
+}
+foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # 복원 도구·래퍼 양쪽의 alias 매핑이 정확히 2개
+  $map = Get-R3Required $ver $source
+  $names = @($map.PSObject.Properties | ForEach-Object { $_.Name })
+  if ($names.Count -ne $want.Count) { throw "$source alias 개수가 $($want.Count)개가 아닙니다 → 중단" }
+  foreach ($name in $want.Keys) {
+    if ((Get-R3Required $ver "$source.$name") -cne $want[$name]) { throw "$source 의 $name alias가 임시 컬렉션을 가리키지 않습니다 → 중단" }
+  }
+}
+'새 번들 전용 확인: PASS'
+```
+
 - 기대 결과는 이번 실행(§5.7.9)과 같다: B2 1233·B3 1320 Point, Neo4j 1133/2674, Cross-DB 검사 17,871개(B2 8,631 + B3 9,240) PASS, MISSING·MISMATCH·NOT_TESTED 0.
 - fingerprint는 복원 전(preflight, 빈 서버)과 복원 후(verify-only, complete)가 다르다. 서버 상태가 fingerprint에 들어가기 때문이다.
 
 #### 5.7.9 실제 검증 결과와 증거 (완료 기록, 2026-11-23)
 
 모든 보고서는 `.cache\issue105-r3b\`에 있다(Git 제외). 이 문서 작업에서는 보고서 원문만 다시 읽어 대조했고, 서버에는 접속하지 않았다.
+
+> 아래 결과는 §5.7.1 ZIP에 든 **옛 복원 도구**(`1c007e7`)로 얻은 것이다. 정식 이름 컬렉션 2개에 직접 복원했고(Qdrant 상태 `restored_collection`, alias 없음), 최종 payload digest 비교(P2-4)는 없었다. 현재 도구의 상태 이름(`published`·`not_published`)과 새 검증은 이 기록에 해당하지 않으며, 새 도구로는 아직 실행하지 않았다(§5.8).
 
 | 단계 | 보고서 | 확인된 값 |
 |---|---|---|
@@ -727,6 +798,40 @@ foreach ($key in 'b2', 'b3') {
   - #104 산출물 `.cache\issue105-r3\`, #91 r2 snapshot·ZIP, #31 B3 원본 snapshot
   - r3b build 볼륨과 `.cache\issue105-r3b\`의 계획·보고서·snapshot·번들
   - DPAPI 인증 파일, 기존 미추적 경로 11개
+
+### 5.8 P1-3·P2-4 복원 구조 (PR #111 리뷰 반영, 코드만 반영·실환경 미검증)
+
+커밋: P1-3 `756ed30`(임시 컬렉션 복원 + 검증 후 alias 공개), P2-4 `4331650`(최종 payload 검증). 대상: `scripts/restore_final_v140_r3.py`, `scripts/restore_r3_isolated.py`, `database/full_index.py`(검증 대상 컬렉션 이름 주입만).
+
+**복원 구조 (`--apply`)**
+- 정식 B2·B3 이름(`exp_b2_qwen3emb06b_v140_v1`, `exp_b3_qwen3emb06b_v140_v1`)으로는 snapshot을 업로드하지 않는다. `upload_snapshot`이 임시 이름 형식이 아니면 HTTP 호출 전에 거부한다.
+- 임시 컬렉션 이름: `<정식 이름>__tmp_<secrets.token_hex(16)>` (32자리 hex, 128비트, 실행마다 새로). 길이 64자 = `store` 실험 컬렉션 이름 상한이며, 쓰기 전에 그 이름 검사를 통과해야 한다.
+- 업로드마다 직전·직후에 컬렉션 집합과 alias 매핑을 다시 확인한다. 예상 밖 컬렉션·alias·임시 이름 충돌이 보이면 업로드하지 않고 멈춘다.
+- 임시 컬렉션 전체 검증·Neo4j·Cross-DB·원문 슬라이스가 모두 통과한 뒤에만, 공개 직전 검사(정식 이름 컬렉션·alias 없음)를 거쳐 한 요청으로 정식 alias 2개를 만든다. 공개 직후 전체 매핑과 alias 경유 Point 수·vector digest·payload digest를 다시 확인한다.
+- 복원 결과: 실제 컬렉션은 임시 이름 2개, 정식 이름은 그 임시 컬렉션을 가리키는 alias 2개. 백엔드는 정식 이름으로 조회한다(Qdrant가 alias를 실제 컬렉션으로 풀어 줌 — v1.12.4 소스 기준, 실서버 미확인).
+- `update_r3_collections.py`는 build 전용이며 alias가 있는 DB를 계속 거부한다(복원 DB는 갱신 대상이 아님).
+
+**`--verify-only`**
+- 쓰기 0회. Qdrant가 **published 상태**(임시 컬렉션 2개 + 정식 alias 2개가 정확히 짝)일 때만 진행한다. 래퍼도 Neo4j `complete` + Qdrant `published`일 때만 `servers.state=complete`로 보고 허용한다.
+- 정식 이름 컬렉션(옛 방식)·alias 없음·부분 alias·잘못된 대상·다른 컬렉션/alias가 있으면 거부한다.
+
+**최종 payload 검증 (P2-4)**
+- 기준 1: Point마다 payload dict 전체 = 소스 릴리스(`R3_PINS` manifest로 고정)에서 다시 만든 기대 payload. 예상 밖 필드 추가·필드 삭제·값 변경을 잡는다(`index_run_id`는 기대값을 레코드에서 가져오므로 기준 2로 잡는다).
+- 기준 2: 전체 payload digest = 번들 `package.json`의 컬렉션별 `payload_digest`. `R3_PINS`에는 payload digest가 없다. 번들에 값이 없거나 64자리 hex가 아니면 복원하지 않는다.
+- `--apply`: 의도된 정렬(`category`·`life_stages`)을 적용한 **뒤의 값**으로 두 기준을 검사한다. 예상 밖 필드는 지우지 않고 FAILED로 멈춘다.
+- `--verify-only`: 쓰기 없이 현재 값으로 검사한다(정렬이 필요하면 기존처럼 거부).
+- 기존 차원·거리·Point 수·vector digest(R3_PINS)·protected digest·Neo4j·Cross-DB·원문 슬라이스 검증은 그대로다.
+
+**남은 위험 (완전한 동시성 안전을 주장하지 않는다)**
+- **정식 alias TOCTOU 덮어쓰기:** Qdrant 1.12.4의 alias 생성은 같은 이름 "컬렉션"이 있으면 거부하지만, 같은 이름 "alias"가 있으면 오류 없이 대상을 바꾼다. 공개 직전 검사와 alias 생성 요청 사이(요청 1회 왕복)에 외부 alias가 생기면 그 매핑은 덮어써진다. 외부 alias가 우리 임시 컬렉션을 가리키면 감지도 못 하고 PASS가 난다. Point 데이터는 지워지지 않는다.
+- **B2/B3 부분 공개:** 서버가 alias 작업을 하나씩 저장하므로(요청 전체 원자성 없음) B2만 공개되고 B3가 실패할 수 있다. 이때 FAILED + `partial_publish: true` + 현재 alias 매핑을 보고하고, alias·임시 컬렉션을 지우거나 되돌리거나 재시도하지 않는다.
+- **임시 이름 TOCTOU:** 직전 검사 뒤 서버가 존재를 확인하기 전(전송·해시·압축 해제 동안)에 같은 임시 이름이 생기면 덮어쓴다. 128비트 난수라 확률로만 막는다.
+- **격리 환경은 잠금이 아니다:** 전용 프로젝트·포트·인증·Docker 소유 확인·fingerprint는 다른 쓰기 주체의 접근 가능성을 낮출 뿐이다. 같은 전용 키를 가진 동시 작업은 막지 못한다. 복원 중에는 그 검증 환경에서 다른 작업을 하지 않는다.
+- **payload 기준 2는 번들 안의 값이다:** 번들 전체(`package.json`·`SHA256SUMS`·snapshot)를 일관되게 바꾸면 기준 2는 속을 수 있다. 기준 1은 `index_run_id`를 뺀 나머지를 저장소 고정 릴리스로 막는다.
+
+**검증 상태 (실제로 한 것 / 아직 안 한 것)**
+- 실행함: fake/mock 단위 테스트만. HEAD `4331650`에서 r2·r3 관련 14개 파일 330 passed, 4 skipped(덤프 없음), 0 failed. 알려진 위험(alias TOCTOU, 임시 이름 TOCTOU)은 "결함 재현 테스트"로 따로 고정했으며 안전성 근거로 세지 않는다.
+- 실행 안 함: 새 도구로 실제 Qdrant·Neo4j 복원, alias 공개·거부의 실서버 동작, 64자 임시 이름 snapshot 복원, 백엔드 alias 조회, payload index 유지, 실제 snapshot payload와 기대 payload의 dict 전체 일치(다르면 안전 측 FAILED), 새 ZIP 생성·독립 복원.
 
 ## 6. r2 호환성과 데이터 PR 병합 시 주의
 
@@ -767,5 +872,12 @@ foreach ($key in 'b2', 'b3') {
   - verify 인증값의 실제 보관 위치는 보고서에 없다(§5.7.4는 권장 예시). 다음 실행 전에 확인이 필요하다.
   - 최종 ZIP과 보고서는 `.cache`(Git 제외)에만 있다. 팀 공유 위치와 보관 기간은 팀 결정 사항이다.
   - 번들 source commit은 `1c007e7`이다. 이 문서 갱신을 커밋하면 PR HEAD가 source commit보다 앞선다. 복원 계약의 비교 대상 파일(복원 도구·기준값 모듈·r2 복원 도구·manifest)은 바뀌지 않는다.
-  - dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.
+    → **정정 (P1-3·P2-4 이후):** 복원 도구(`scripts/restore_final_v140_r3.py`)가 `756ed30`·`4331650`에서 바뀌었다. 현재 저장소는 기존 ZIP의 source와 비교 대상 파일이 다르므로, 기존 ZIP은 그 ZIP에서 푼 소스 트리로만 복원된다(옛 도구 실행). 위 문장은 당시 기록으로 남긴다.
+- **P1-3·P2-4 이후 남은 작업 (2026-11-23):**
+  - 현재 커밋을 source로 한 새 snapshot 재사용 번들(ZIP) 생성과 SHA-256 기록 — 미실행
+  - 새 번들로 새 verify 프로젝트에서 preflight → `--apply` → `--verify-only`(§5.7.8의 새 번들 전용 확인 포함) — 미실행
+  - §5.8 "실행 안 함" 항목의 실서버 확인 — Docker 실행 승인 필요
+  - alias TOCTOU·부분 공개를 잔여 위험으로 수용할지 팀장 판단
+  - ~~dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.~~
+    → **처리 완료 (PR #111 리뷰 P1-1, 커밋 `3b0505b`, 현재 HEAD에 포함):** 테스트를 `test_issue79_incheon_age_evidence_verified`로 바꿔, 인천 연령 관계 2개가 공식 안내문(`DOC_STG_ICN_001_NOTICE_2026`) 근거로 `verified`인지 확인한다(`tests/unit/test_issue79_age_corrections_fullscan.py`). 옛 테스트 이름은 저장소에 남아 있지 않다.
   - verify 환경(`issue105-r3-verify`)은 복원 1회용이다. 컨테이너·볼륨을 유지할지 정리할지는 별도 승인 사항이다(삭제 명령은 이 문서에 넣지 않음).
