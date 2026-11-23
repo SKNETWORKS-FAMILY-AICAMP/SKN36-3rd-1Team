@@ -7,10 +7,11 @@ import { PolicyCard } from './TurnView';
 import { useSavedPolicies } from './SavedPolicies';
 import { useScheduleDay } from './ScheduleClock';
 import { loadPolicyCatalog, POLICY_API_URL } from '../api/policyCatalog';
+import { COMPARE_MAX, COMPARE_MIN } from '../lib/policyCompare';
+import { PolicyCompare } from './PolicyCompare';
 
 // 상담 화면이 너무 길어지지 않도록 처음엔 두 줄(데스크톱 3열 기준)만 보여 준다
 const PAGE_SIZE = 6;
-const comparisonPreview = import.meta.env.VITE_POLICY_COMPARISON_PREVIEW as string | undefined;
 const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
 export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
@@ -27,6 +28,9 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   const [filter, setFilter] = useState<ScheduleFilter>('all'), [sort, setSort] = useState<'deadline' | 'name'>('deadline');
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [evaluatedOn, setEvaluatedOn] = useState('');
+  // 정책 비교: 고르기 모드, 고른 정책 ID(고른 순서), 비교 화면 열림 여부
+  const [picking, setPicking] = useState(false), [picked, setPicked] = useState<string[]>([]), [comparing, setComparing] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const state = useSavedPolicies(), today = useScheduleDay(), group = useId();
   useEffect(() => {
     let alive = true, pending = false;
@@ -65,6 +69,10 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
         application_schedule: fresh.application_schedule, contacts: fresh.contacts } : row.policy };
     });
   }, [catalog, response]);
+  const compareInputs = useMemo(() => picked.flatMap(id => policies.find(row => row.policy.policy_id === id) ?? []), [picked, policies]);
+  const togglePick = (id: string) => setPicked(prev => prev.includes(id) ? prev.filter(x => x !== id) : prev.length >= COMPARE_MAX ? prev : [...prev, id]);
+  const stopPicking = () => { setPicking(false); setPicked([]); };
+  const openCompare = () => { setComparing(true); sectionRef.current?.scrollIntoView({ block: 'start' }); };
   const savedIds = new Set(state?.saved.map(p => p.policy_id));
   const catalogIds = new Set(catalog.map(row => row.policy.policy_id));
   const missingSaved = (state?.saved ?? []).filter(p => !catalogIds.has(p.policy_id));
@@ -75,7 +83,14 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
     && (!region || row.regions.includes(region)) && (!category || row.categories.includes(category))
     && normalize(`${row.policy.policy_name} ${row.policy.agency}`).includes(q)).map(row => row.policy), today, filter, sort);
   const soon = load === 'ready' && (!POLICY_API_URL || evaluatedOn === today) ? scheduledPolicies(policies.filter(row => savedIds.has(row.policy.policy_id)).map(row => row.policy), today, 'soon', 'deadline') : [];
-  return <section className="schedule-section" id="policy-explorer"><div className="wrap">
+  if (comparing && compareInputs.length >= COMPARE_MIN) {
+    return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
+      <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2></div>
+      <PolicyCompare inputs={compareInputs} onAsk={onAsk} onOpenMap={onOpenMap}
+        onBack={() => { setComparing(false); sectionRef.current?.scrollIntoView({ block: 'start' }); }} />
+    </div></section>;
+  }
+  return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
     <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
     {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 7일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); setFilter('soon'); setQuery(''); setRegion(''); setCategory(''); }}>마감 임박 정책 보기</button></div></div>}
     {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다 */}
@@ -87,7 +102,9 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
       <div className="schedule-tools" role="group" aria-label="정책 목록 범위">
         <button className="chip" type="button" aria-pressed={tab === 'all'} onClick={() => setTab('all')}>전체 정책 {catalog.length}</button>
         <button className="chip" type="button" aria-pressed={tab === 'saved'} onClick={() => setTab('saved')}>★ 관심 정책 {state?.saved.length ?? 0}</button>
-        {tab === 'saved' && comparisonPreview && <a className="btn btn-o" href={comparisonPreview}>내 조건으로 비교 (예시)</a>}
+        {!picking
+          ? <button className="btn btn-o compare-start" type="button" onClick={() => setPicking(true)}>비교할 정책 고르기</button>
+          : <button className="btn btn-o compare-start" type="button" onClick={stopPicking}>비교 고르기 취소</button>}
       </div>
       <div className="schedule-tools explorer-selects">
         <label>지역 <select value={region} onChange={e => setRegion(e.target.value)}><option value="">전체 지역</option>{options.regions.map(x => <option key={x}>{x}</option>)}</select></label>
@@ -103,8 +120,17 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
     {load === 'error' && <div role="alert">정책 목록을 불러오지 못했어요. <button className="chip" type="button" onClick={() => setAttempt(x => x + 1)}>다시 시도</button></div>}
     {load === 'ready' && <><p className="schedule-count" role="status">정책 {rows.length}개 · {Math.min(limit, rows.length)}개 표시</p>
       <div className="schedule-grid">{rows.slice(0, limit).map(({ policy, schedule }) => (
-        <PolicyCard key={policy.policy_id} p={policy} period={schedule.period} stages={[]} group={group}
-          sample={false} onDemoApply={onDemoApply} onAskPolicy={onAsk} onOpenMap={onOpenMap} askAsPrimary />
+        <div key={policy.policy_id} className={'explorer-item' + (picked.includes(policy.policy_id) ? ' picked' : '')}>
+          {/* 고르기 체크박스는 카드(펼침 영역) 밖에 둬서 누를 때 카드가 열리고 닫히지 않게 한다 */}
+          {picking && <label className="compare-pick">
+            <input type="checkbox" checked={picked.includes(policy.policy_id)}
+              disabled={!picked.includes(policy.policy_id) && picked.length >= COMPARE_MAX}
+              onChange={() => togglePick(policy.policy_id)} />
+            비교에 담기
+          </label>}
+          <PolicyCard p={policy} period={schedule.period} stages={[]} group={group}
+            sample={false} onDemoApply={onDemoApply} onAskPolicy={onAsk} onOpenMap={onOpenMap} askAsPrimary />
+        </div>
       ))}</div>
       {!rows.length && <div className="schedule-empty">
         {tab === 'saved' && !state?.saved.length ? '관심 있는 정책을 펼쳐 저장해 보세요.' : '선택한 조건에 해당하는 정책이 없어요. 일정 미확인 정책은 전체에서 볼 수 있어요.'}
@@ -114,6 +140,11 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
       </div>}
       {rows.length > limit && <button className="btn btn-o explorer-more" type="button" onClick={() => setLimit(x => x + PAGE_SIZE)}>정책 {Math.min(PAGE_SIZE, rows.length - limit)}개 더 보기</button>}
     </>}
+    {picking && <div className="compare-bar" role="region" aria-label="정책 비교 선택">
+      <span role="status"><b>{compareInputs.length}개 선택</b> · {COMPARE_MIN}~{COMPARE_MAX}개 비교 가능{compareInputs.length ? ` · ${compareInputs.map(row => row.policy.policy_name).join(', ')}` : ''}</span>
+      <button className="btn btn-p" type="button" disabled={compareInputs.length < COMPARE_MIN} onClick={openCompare}>정책 비교하기</button>
+      <button className="btn btn-o" type="button" onClick={stopPicking}>취소</button>
+    </div>}
     {tab === 'saved' && missingSaved.length > 0 && <div className="schedule-empty"><b>현재 목록에서 확인하지 못한 관심 정책</b><p>삭제 또는 목록 변경 여부를 확인할 수 없어 이전 일정은 표시하지 않아요.</p>{missingSaved.map(p => <div key={p.policy_id}>{p.policy_name} {safeHttpUrl(p.source_url) && <a href={safeHttpUrl(p.source_url)!} target="_blank" rel="noopener noreferrer">원문 확인</a>} <button type="button" className="chip" onClick={() => state?.toggle(p)}>저장 해제</button></div>)}</div>}
   </div></section>;
 }

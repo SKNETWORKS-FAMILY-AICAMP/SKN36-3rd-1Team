@@ -9,7 +9,6 @@ const output = await build({
   envDir: false,
   define: {
     'import.meta.env.VITE_ASK_API_URL': JSON.stringify(''),
-    'import.meta.env.VITE_POLICY_COMPARISON_PREVIEW': JSON.stringify('./ssok-saved-policy-compare.html'),
   },
   plugins: [react()],
   build: {
