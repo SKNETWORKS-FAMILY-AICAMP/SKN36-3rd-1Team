@@ -10,7 +10,8 @@
 > → **현재 상태:** 그 뒤 Neo4j 적재·교차 검증(§5.5.5), snapshot·최종 번들 생성, 독립 복원까지 모두 PASS했다(§5.7, 보고서 19·20·21).
 > **C2 커밋·최종 번들·독립 복원 완료 (2026-11-23):** C2는 `1c007e7`로 커밋됐다. 그 커밋을 source로 한 최종 번들 `rag-final-v140-r3-1c007e75d1c2.zip`(SHA-256 `a233264e…4eb5`)을 만들었고, 분리된 verify 환경(`issue105-r3-verify`)에서 preflight → `--apply` → `--verify-only`가 모두 PASS했다(§5.7, 보고서 19·20·21).
 > r3b build 쪽 Neo4j 적재·교차 검증(보고서 13~16)과 snapshot 생성(17·18) 기록은 §5.5.5에 있다. 남은 작업과 검증 한계는 §7에 있다.
-> **PR #111 리뷰 반영 (2026-11-23, P1-3 `756ed30`·P2-4 `4331650`):** 복원 도구가 임시 컬렉션 복원 + 검증 후 alias 공개, 최종 payload 검증으로 바뀌었다(§5.8). 위 최종 ZIP·독립 복원 PASS는 그 이전 도구의 보존 기록이며, 새 도구로 만든 ZIP과 실제 복원은 아직 없다. §5.7.3 PowerShell 경로 계산을 절대 경로 기준으로 고쳤다(P2-5).
+> **PR #111 리뷰 반영 (2026-11-23, P1-3 `756ed30`·P2-4 `4331650`):** 복원 도구가 임시 컬렉션 복원 + 검증 후 alias 공개, 최종 payload 검증으로 바뀌었다(§5.8). 위 최종 ZIP·독립 복원 PASS는 그 이전 도구의 보존 기록이며, 새 도구로 만든 ZIP과 실제 복원은 아직 없다 *(P1-3·P2-4 반영 직후 시점의 과거 기록 — 현재 상태는 바로 아래 갱신 줄)*. §5.7.3 PowerShell 경로 계산을 절대 경로 기준으로 고쳤다(P2-5).
+> → **갱신 (2026-11-23, 강의실 노트북):** 새 도구를 담은 번들 `rag-final-v140-r3-6d0450fd6c1d.zip`(SHA-256 `eb178f95…9554`, source `6d0450f`)을 만들고, 새 verify 환경에서 preflight → `--apply` → `--verify-only`(재시도 1회 포함)와 B2/B3 6개 표기 검색 검증까지 실행했다(§5.9). 기존 ZIP `…1c007e75d1c2.zip`의 기록은 그대로 보존한다.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -398,7 +399,9 @@ Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차�
 
 이 절은 **완료 기록**(§5.7.1, §5.7.9)과 **다시 수행할 때의 절차**(§5.7.3~5.7.8, §5.7.10)를 구분한다. 절차의 명령은 Windows PowerShell 5.1 기준이고, 이번 문서 작업에서는 실행하지 않았다.
 
-> **2026-11-23 P1-3·P2-4 반영 후 주의:** §5.7.1의 최종 ZIP과 §5.7.9의 PASS 기록은 `1c007e7` 시점 복원 도구(정식 이름 직접 업로드, 최종 payload digest 비교 없음)로 만든·실행한 **보존 기록**이다. 새 구조(임시 컬렉션 + alias 공개, 최종 payload 검증)를 담은 **새 ZIP은 아직 만들지 않았고, 새 도구로 실제 독립 복원도 실행하지 않았다**(§5.8). 래퍼는 번들 안의 복원 도구와 압축을 푼 소스 트리의 도구가 같은지 확인하므로, 기존 ZIP을 §5.7.3 절차로 풀어 실행하면 그 ZIP에 든 옛 도구가 실행된다. 새 번들을 만들면 §5.7.3~5.7.6의 ZIP 이름·SHA-256·source ZIP 이름·snapshot SHA-256을 새 값으로 바꿔야 한다.
+> **2026-11-23 P1-3·P2-4 반영 후 주의:** §5.7.1의 최종 ZIP과 §5.7.9의 PASS 기록은 `1c007e7` 시점 복원 도구(정식 이름 직접 업로드, 최종 payload digest 비교 없음)로 만든·실행한 **보존 기록**이다. 새 구조(임시 컬렉션 + alias 공개, 최종 payload 검증)를 담은 **새 ZIP은 아직 만들지 않았고, 새 도구로 실제 독립 복원도 실행하지 않았다**(§5.8) *(이 문단 작성 시점의 과거 기록 — 현재 상태는 아래 갱신 줄과 §5.9)*. 래퍼는 번들 안의 복원 도구와 압축을 푼 소스 트리의 도구가 같은지 확인하므로, 기존 ZIP을 §5.7.3 절차로 풀어 실행하면 그 ZIP에 든 옛 도구가 실행된다. 새 번들을 만들면 §5.7.3~5.7.6의 ZIP 이름·SHA-256·source ZIP 이름·snapshot SHA-256을 새 값으로 바꿔야 한다.
+>
+> → **갱신:** 새 ZIP 생성과 새 도구 독립 복원은 이후 실행했다. 사용한 값·결과는 §5.9에 따로 기록했다(아래 §5.7.1·§5.7.9의 옛 기록과 섞지 않음).
 
 #### 5.7.1 최종 번들 구성과 체크섬 (완료 기록)
 
@@ -422,7 +425,8 @@ Issue #105 최종 번들(#110 데이터 정정 반영)의 실제 실행 절차�
 - `package.json`의 컬렉션 값: B2 vector `90d0f593…689d`·payload `0584dbbf…6bd0`, B3 vector `718046c3…7120`·payload `b4d6a9bc…d539`
   - vector digest는 `R3_PINS` 최종값과 같다.
   - payload digest는 `R3_PINS`에 **없다**(정정: 예전 문구 "R3_PINS 최종값과 같음"은 vector digest에만 해당한다). 번들 생성 도구가 build 서버 최종 상태에서 `digest([(point_id, payload)])`로 계산해 `package.json`에 기록한 값이며, P2-4 이후 복원 도구가 최종 payload 기준값으로 쓴다(§5.8).
-- **보존용 아티팩트:** 이 ZIP의 `restore_final_v140_r3.py`는 `1c007e7` 시점 도구다. P1-3(임시 컬렉션 + alias 공개)·P2-4(최종 payload 검증)가 들어 있지 않다. 이름·SHA-256·snapshot 값은 확정 기록이므로 바꾸지 않는다. 현재 코드를 반영한 새 ZIP은 아직 생성·검증되지 않았다.
+- **보존용 아티팩트:** 이 ZIP의 `restore_final_v140_r3.py`는 `1c007e7` 시점 도구다. P1-3(임시 컬렉션 + alias 공개)·P2-4(최종 payload 검증)가 들어 있지 않다. 이름·SHA-256·snapshot 값은 확정 기록이므로 바꾸지 않는다. 현재 코드를 반영한 새 ZIP은 아직 생성·검증되지 않았다 *(작성 시점의 과거 기록)*.
+  → **갱신:** 새 ZIP `rag-final-v140-r3-6d0450fd6c1d.zip`은 이후 생성·독립 복원 검증했다(§5.9.1). 이 ZIP(`a233264e…4eb5`)은 새 번들의 snapshot 출처로만 읽었고 바꾸지 않았다.
 
 #### 5.7.2 build 환경과 verify 환경 분리
 
@@ -716,6 +720,7 @@ foreach ($key in 'b2', 'b3') {
 ```
 
 - **새 번들(P1-3·P2-4 도구)로 실행할 때만** 위 블록 뒤에 다음을 추가로 확인한다. 옛 ZIP(§5.7.1)의 도구는 이 필드를 만들지 않으므로 옛 ZIP에는 쓰지 않는다. 아직 실제 보고서로 실행한 적이 없는 절차다(fake JSON으로만 확인).
+  → **갱신:** §5.9의 실제 verify-only 보고서(`03-verify-only.json`)는 이 블록이 아니라 같은 조건(published, `partial_publish=false`, 임시 이름 형식, alias 2개 매핑, payload digest = `package.json`)을 포함한 Python 엄격 검증기(79개 검사)로 확인했다. 이 PowerShell 블록 자체를 실제 보고서에 실행한 기록은 아직 없다.
 - 필드 위치 (`restore_r3_isolated.py` `run("verify-only")` → `main()`): 보고서 최상위에 `status`·`mode`·`db_writes`·`servers`·`fingerprint`·`post_verify`가 있다. `servers.qdrant.state`·`servers.qdrant.aliases`는 래퍼의 서버 확인 결과, `post_verify`는 `restore_final_v140_r3.restore(verify_only)` 결과로 `collections`·`physical_collections`·`aliases`·`partial_publish`를 담는다. (실패 보고서에서는 `partial_publish`·`aliases`가 최상위에 붙는다.)
 - 없는 필드가 `$null`로 비교되어 통과하지 않도록 `Get-R3Required`로 존재·비어 있지 않음을 먼저 확인한다.
 
@@ -832,6 +837,117 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 **검증 상태 (실제로 한 것 / 아직 안 한 것)**
 - 실행함: fake/mock 단위 테스트만. HEAD `4331650`에서 r2·r3 관련 14개 파일 330 passed, 4 skipped(덤프 없음), 0 failed. 알려진 위험(alias TOCTOU, 임시 이름 TOCTOU)은 "결함 재현 테스트"로 따로 고정했으며 안전성 근거로 세지 않는다.
 - 실행 안 함: 새 도구로 실제 Qdrant·Neo4j 복원, alias 공개·거부의 실서버 동작, 64자 임시 이름 snapshot 복원, 백엔드 alias 조회, payload index 유지, 실제 snapshot payload와 기대 payload의 dict 전체 일치(다르면 안전 측 FAILED), 새 ZIP 생성·독립 복원.
+- → **갱신 (2026-11-23, §5.9에서 실서버로 확인):**
+  - 확인됨: 새 ZIP 생성·독립 복원, 새 도구로 실제 Qdrant·Neo4j 복원, 64자 임시 이름 snapshot 복원, alias **공개**(정식 이름 2개 → 임시 컬렉션 2개), 실제 payload와 기대 payload의 dict 전체 일치·전체 payload digest 일치, alias 경유 벡터 검색(`HybridSearchSession.search_policy_evidence`).
+  - 여전히 미확인: alias **거부** 동작(정식 이름 컬렉션이 이미 있을 때), payload index 유지, alias TOCTOU·부분 공개(실서버에서 재현하지 않음), 그래프 보강 검색·API·LLM·화면.
+
+### 5.9 신규 번들 실환경 독립 복원·검색 검증 (완료 기록, 2026-11-23, 강의실 노트북)
+
+이 절은 §5.7(옛 번들 `…1c007e75d1c2.zip`, 옛 도구)과 **다른 실행**의 기록이다. 모든 값은 아래 `.cache\issue105-r3c\`(Git 제외) 보고서를 다시 읽어 대조한 것이다. 인증값은 기록하지 않는다(DPAPI 파일 `.cache\issue105-r3c\secrets\` 2개, 값 미출력).
+
+#### 5.9.1 신규 번들
+
+| 항목 | 값 |
+|---|---|
+| ZIP | `.cache\issue105-r3c\bundle-6d0450fd6c1d-01\rag-final-v140-r3-6d0450fd6c1d.zip` |
+| 크기 / SHA-256 | 38,000,184 bytes / `eb178f9514a0533b0920463a3b20bb7bd884f2e2e6d1f156cf11bff1e09a9554` (= `.zip.sha256`, `.zip.report.json`의 `bundle_sha256`) |
+| source commit | `6d0450fd6c1d20d2499ac0e4482074e30d819c71` (커밋 파일 629개, source ZIP 엔트리 741개) |
+| 빌드 | 공식 `build_restore_bundle_r3.py --build`, 보고서 `status=BUILT`, 작업 트리 추적 변경 0 |
+| 복원 도구 | 번들·source 트리·커밋 blob 모두 SHA-256 `f5fc6903…57ca` (P1-3·P2-4 포함) |
+| `package.json` (압축 해제본) | SHA-256 `66cea9df…fcc8`, `collections`·`neo4j`·`release_counts`는 옛 번들과 동일, 다른 값은 `source_commit`·`source_archive`·`created_at`뿐 |
+
+- 이 Runbook 수정 커밋은 신규 ZIP의 source commit(`6d0450f`) **이후** 커밋이 된다. 복원 계약 비교 대상 파일(`SOURCE_IDENTITY_FILES`)은 이 문서 수정으로 바뀌지 않는다.
+
+#### 5.9.2 기존 snapshot 재사용과 파생 record (원본 서버 증거 아님)
+
+- snapshot은 새로 만들지 않았다. 옛 번들 ZIP(`a233264e…4eb5`, SHA256SUMS 6개·CRC 검증)에서 바이트 그대로 추출했다.
+  - B2 `b2-r3-v1.12.4.snapshot` 16,025,600 bytes, `834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89`
+  - B3 `b3-r3-v1.12.4.snapshot` 17,081,344 bytes, `91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8`
+- `create_snapshot()`이 build 서버에서 만든 **원본** `snapshot-record-<b2|b3>.json`이 이 노트북에 없어, 옛 번들 `package.json`(`fdd9937a…a512`)에서 공식 record 스키마의 13개 필드만 옮긴 **파생 record**를 썼다(공식 빌드 테스트가 쓰는 부분집합과 같은 형태).
+  - `snapshot-record-b2.json` `a1d50cba6fa240fc066dbb91a8e1e63ef8c794e1284fdf5d274c4441c6f96ad4`
+  - `snapshot-record-b3.json` `ffaa822c5e1454497400ad58170f3b90c80f4ca6791e46b3e42df050ab618fa3`
+  - 근거 기록: `.cache\issue105-r3c\bundle-6d0450fd6c1d-01\derived-record-provenance.json` (`c495c5405295ab6e33a53d42e86f538667f9713e6f0ad5e5d205e13e54d216b5`, `derived=true`, `original_server_evidence=false`, 번들 구성 파일 아님)
+- **신뢰성 차이**
+  - 원본 record에만 있던 서버 측 근거 10개는 만들지 않았다: `fingerprint`, `snapshot_integrity`(서버 checksum 대조), `server_snapshot_name`, `docker_project`, `plan_basis`, `verify_full_index_passed`, record별 `manifest_lf_sha256`, `snapshot_file`, 원본 `created_at`, `server_state_note`.
+  - 파생 값의 교차 확인 수준: `points`·`vector_digest`·`plan_sha256`은 `R3_PINS`와, snapshot SHA·크기는 실제 바이트와 대조됐다. `payload_digest`·`plan_counts`·`source`는 생성 시점에는 `package.json`에만 근거했다.
+  - `payload_digest`는 이후 실제 복원 데이터에서 다시 계산한 값과 일치했다(§5.9.4). `plan_counts`·`source`는 독립 재확인되지 않았다.
+  - 원본 record는 build PC의 `.cache\issue105-r3b\bundle-r3b-20261123-01\`에 있을 것으로 보이나 이 노트북에서 확인하지 못했다.
+
+#### 5.9.3 독립 복원 실행 이력 (verify 프로젝트 `issue105-r3-verify`)
+
+- 환경: Docker Engine 29.6.2, Compose 5.3.1, `compose up -d --pull never`(로컬 이미지 digest = 고정값, pull 없음). 컨테이너 qdrant `fa0e0b73409f`, neo4j `0207625f6fbe`(2026-11-23T07:42:43Z 기동). 기존 `issue91-r2-verify-20261119`·`playmate-issue153-*` 자산은 모든 단계 전후로 바뀌지 않았다.
+- 경로: 압축 해제 `.cache\issue105-r3c\independent-restore-6d0450fd6c1d-01\{bundle,repo}`, 보고서 `.cache\issue105-r3c\verify-run-6d0450fd6c1d-01\`
+
+| 단계 | 결과 | 보고서 SHA-256 |
+|---|---|---|
+| preflight (1회) | `status=PASS`, `db_writes=0`, `servers.state=empty`, `PREFLIGHT_PASS_NO_WRITES`, fingerprint `c12a1207e923f5ac8f08ac21b874e3759edc74057a4dc3d35908633962457e60` | `01-verify-preflight.json` `e84c0ca65a2c55ace0ece4458f44a4fc0d940c640701531f00a70cec61d64a49` |
+| `--apply` (1회, 종료 코드 0) | `status=PASS`, `restore_apply.status=PASS`, apply 내부 `post_verify.status=PASS`, `partial_publish=false`, `embedding_calls=0` | `02-verify-apply.json` `198602c9857bee064fa603863d0fd36f41836d9b1a5f5839a1dd2e0bfd543a25` |
+| 별도 `--verify-only` 1차 시도 | **중단(미완료).** 실행 스크립트를 `-Command "… *>&1 | Out-File"`로 감싸 Python stderr 경고(`Api key is used with an insecure connection`)가 PowerShell 종료 오류로 바뀌어, 래퍼가 초기 서버 확인 중 끊겼다. 보고서 없음. 중단 전후 서버 상태(컬렉션·alias·Point·전체 digest·Neo4j 건수)와 컨테이너는 같음을 읽기 전용으로 확인했다 | — |
+| 별도 `--verify-only` 2차 시도 (`-File` 방식, 종료 코드 0) | `status=PASS`, `mode=verify-only`, `db_writes=0`, `servers.state=complete`, `servers.qdrant.state=published`, 실행 전후 서버 상태 동일 | `03-verify-only.json` `b51d34377166862816486144d6a7b8121178f2df57b6727cc3cf0a571ff52cce` |
+
+- 보고서 검증은 Python 엄격 검증기(필드 누락·null·타입 오류를 실패로 처리, 정상/비정상 fake JSON 24종으로 자체 검증)로 했다: apply 128개·verify-only 79개 검사, 실패 0.
+  - 같은 apply 보고서를 처음 PowerShell 검사로 볼 때 `cross_db.failures=0` 4건이 FAIL로 나왔으나, 빈 배열을 감싸 반환한 검사 스크립트 오류였다(실제 `failures`는 길이 0 list).
+
+#### 5.9.4 실제 데이터 검증 값 (apply·verify-only 보고서와 읽기 전용 전체 scroll 재계산이 일치)
+
+| 항목 | B2 | B3 |
+|---|---|---|
+| 정식 alias → 임시 컬렉션 | `exp_b2_qwen3emb06b_v140_v1` → `…__tmp_fddc5cfe6518d0fc518c58258562d384` | `exp_b3_qwen3emb06b_v140_v1` → `…__tmp_3d650cc25caa7511158992e8b326fd3e` |
+| Points | 1233 | 1320 |
+| vector digest (= `R3_PINS`) | `90d0f59318c6…689d` | `718046c382cf…7120` |
+| payload digest (= `package.json`) | `0584dbbf81ee…6bd0` | `b4d6a9bc369c…d539` |
+| payload 정렬 갱신 | 0 | 0 |
+| 원문 슬라이스 (`verify_full_index_passed`) | true | true |
+| Cross-DB (7개 검사 × Point) | PASS 8,631 | PASS 9,240 |
+
+- Cross-DB 합계 17,871 PASS, MISSING·MISMATCH·NOT_TESTED 0, `failures=[]`, `all_points_read=true`
+- protected digest(`all_vectors_and_protected_payload_unchanged`) true
+- Neo4j 노드 1133, 관계 2674, `full_graph_properties_verified=true`
+- alias 2개 published, `partial_publish=false`, 복원 단계 `embedding_calls=0`
+
+#### 5.9.5 실제 검색 검증 — 모두의카드·K-패스 6개 표기 (2026-11-23T17:20:57+09:00)
+
+- 방법: 실제 `database/hybrid_search.py`의 `HybridSearchSession`(프로필 `b2_06b_v140`·`b3_06b_v140`, 정식 alias 이름)에 검증 서버 `127.0.0.1:56656`용 QdrantClient를 `client=`로 주입했다(공유 `.env` Qdrant 미사용). 필터 없음.
+- 임베딩: 로컬 Ollama(loopback) `qwen3-embedding:0.6b`, digest `ac6da0dfba84…`(기록값과 동일), Q8_0, 1024차원, 지시문 없음, `truncate=false`. **임베딩 호출 6회**(검색어당 1회, B2·B3가 같은 벡터를 캐시로 공유), **Qdrant 검색 24회**(6개 × B2/B3 × k=10·200). 질의 텍스트는 정규화하지 않았다.
+- 결과: **12개 조합 모두에서 `POL_STG_MOLIT_001`(모두의 카드(K-패스) (대중교통비 환급지원))이 1위.** 관심 정책 청크는 모든 조합에서 Top200 안에 전부 있었다(B2 46개, B3 52개). k=10과 k=200의 상위 10개는 순서·점수가 같았다. 결과 검사 51개, 실패 0.
+
+| 검색어 | B2 1위 점수 / Top10 관심 정책 청크 | B3 1위 점수 / Top10 관심 정책 청크 |
+|---|---|---|
+| 모두의카드 | 0.7039129 / 10 | 0.7039129 / 10 |
+| 모두의 카드 | 0.62388283 / 10 | 0.62388283 / 10 |
+| K-패스 | 0.6098848 / 10 | 0.63769066 / 9 |
+| k-패스 | 0.5696805 / 10 | 0.61113906 / 9 |
+| K패스 | 0.56001335 / 10 | 0.5876936 / 9 |
+| k패스 | 0.59807146 / 10 | 0.61697626 / 9 |
+
+- 1위 근거·출처 (`search-results.jsonl`의 실제 payload)
+  - 모두의카드·모두의 카드 (B2·B3): `DOC_STG_MOLIT_001_FAQ_2026` `…_FAQ_2026_C001` [1. Q: 2026년 4월 ~ 9월 상향되는 모두의카드 혜택 안내] "…안녕하세요. 모두의카드입니다.대중교통을 이용하시는 분들의 교통비 부담을 덜어드리기 위해…" — `https://korea-pass.kr/notice/faqList.do`. B2·B3 청크 본문이 같아(`content_hash 5d002a2d…`) 점수가 같다.
+  - K-패스 계열 4개 (B2): `DOC_STG_MOLIT_001_GOV24` `CHK_B2_…_GOV24_C002` [정부24 공공서비스 상세 — K-패스] "…신청방법 : K-패스 모바일 앱(App) 혹은 누리집(korea-pass.kr)을 통해 회원가입…"
+  - K-패스 계열 4개 (B3): `DOC_STG_MOLIT_001_GOV24` `CHK_B3_…_GOV24_C001` "[서비스명] K-패스 (서비스ID: 161300000104) [소관기관 / 서비스분야 / 지원유형] 국토교통부 광역교통경제과 / 생활안정 / 현금"
+  - K-패스 계열 출처: `https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104`
+- **B3 혼입 (Top10 안 다른 정책):** `POL_STG_EX_001` 고속도로 다자녀가구 통행료 할인(`CHK_B3_DOC_STG_EX_001_GOV24_C001`)이 K-패스 10위(0.54675907), k-패스 6위(0.53525734), K패스 **3위**(0.54951525), k패스 7위(0.5585586)에 들어왔다. B2 Top10에는 혼입이 없었다.
+- **검증 범위:** 이번 테스트는 관심 정책 1개(`POL_STG_MOLIT_001`)와 그 명칭 6개 표기만 대상으로 한 벡터 검색(`search_policy_evidence`, 필터 없음) 확인이다. 다른 정책·자연어 질문·지역/자격 조건 질의, 그래프 보강 검색, 답변 생성은 포함하지 않았으므로 **B2/B3 전체 검색 품질을 입증하지 않는다.**
+- 판정: 검색 품질 PASS/FAIL은 팀 기준이 정해지지 않아 **판정하지 않았다.** "관심 정책 1위"와 "B3 혼입"을 함께 기록한다. k=200은 진단용이다.
+- 실행 전후 서버 상태(컬렉션·alias·Point·전체 vector/payload digest·Neo4j 건수), 컨테이너, 기존 자산, 보고서 01~03 해시가 모두 같았다(쓰기 없음).
+- 증거 파일 `.cache\issue105-r3c\search-validation-6d0450fd6c1d-01\`
+
+| 파일 | SHA-256 |
+|---|---|
+| `search-run-metadata.json` | `6faa17bed526f35e0d8633a639a4394edcce41ddacfb5c023f4ffac2ebb55263` |
+| `search-results.jsonl` (2,520행) | `b85ab94de725efe9cf872e9065f93ecdb1a4f91f3bd2ef45974182ae15ee07e1` |
+| `search-summary.json` | `3fc341ce2c5c00bbb15fefe0dfafb0ab90c2e973ded92152bbe616586280bef0` |
+| `search-report.md` | `2eaad2330c71c7f8da919c5dfd84df74c9ae0337fd28a2b6947a1012a2166e81` |
+| `SHA256SUMS` | `f61d22751e9d547f47252ef9e23308649cea4a2e93d339975e33bd4eb8e3128b` |
+
+#### 5.9.6 이 실행 이후에도 남은 미검증
+
+- 그래프 보강 검색(`search_policy_context`), FastAPI → RAG → LLM → React E2E
+- 다른 PC에서 같은 번들로 독립 재현(이번은 강의실 노트북 1대)
+- alias 동시성 위험(공개 직전 검사와 alias 생성 사이 외부 alias 덮어쓰기, B2/B3 부분 공개) — 실서버에서 재현하지 않았고 해결되지도 않았다(§5.8)
+- alias **거부** 동작(정식 이름 컬렉션이 이미 있을 때), payload index 유지
+- 검색 품질 PASS/FAIL 기준 미확정, B3 혼입(`POL_STG_EX_001`) 검토
+- 파생 record의 `plan_counts`·`source` 독립 재확인(원본 record 확보 시)
+- verify 컨테이너·볼륨 유지/정리 여부(삭제 명령은 실행하지 않음), 커밋 `6d0450f` push 여부
 
 ## 6. r2 호환성과 데이터 PR 병합 시 주의
 
@@ -863,6 +979,7 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 - 여섯 표현(모두의카드·모두의 카드·K-패스·k-패스·K패스·k패스) 검색 테스트
   - B2·B3 프로필 각각 확인해야 한다.
   - 통과 기준과 별칭 정규화 여부는 팀 결정 사항이다.
+  - → **갱신 (2026-11-23):** 새 번들 verify 환경에서 1회 실행·기록했다(§5.9.5). 자동 테스트로 만들지는 않았고, 통과 기준과 별칭 정규화 여부는 여전히 팀 결정 사항이다.
 - `tests/integration/test_final_v140_smoke.py`의 r3 버전(두 컬렉션)
 - 팀원 설치 가이드의 r3 갱신
 - **최종 독립 복원 이후 남은 작업과 검증 한계 (2026-11-23)**
@@ -875,9 +992,13 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
     → **정정 (P1-3·P2-4 이후):** 복원 도구(`scripts/restore_final_v140_r3.py`)가 `756ed30`·`4331650`에서 바뀌었다. 현재 저장소는 기존 ZIP의 source와 비교 대상 파일이 다르므로, 기존 ZIP은 그 ZIP에서 푼 소스 트리로만 복원된다(옛 도구 실행). 위 문장은 당시 기록으로 남긴다.
 - **P1-3·P2-4 이후 남은 작업 (2026-11-23):**
   - 현재 커밋을 source로 한 새 snapshot 재사용 번들(ZIP) 생성과 SHA-256 기록 — 미실행
+    → **완료:** `rag-final-v140-r3-6d0450fd6c1d.zip` `eb178f95…9554` (파생 record 사용, §5.9.1~5.9.2)
   - 새 번들로 새 verify 프로젝트에서 preflight → `--apply` → `--verify-only`(§5.7.8의 새 번들 전용 확인 포함) — 미실행
+    → **완료:** 모두 PASS. verify-only 1차 시도는 실행 방식 오류로 중단, 2차 시도 PASS (§5.9.3). §5.7.8 PowerShell 블록 대신 Python 검증기로 같은 조건을 확인했다.
   - §5.8 "실행 안 함" 항목의 실서버 확인 — Docker 실행 승인 필요
-  - alias TOCTOU·부분 공개를 잔여 위험으로 수용할지 팀장 판단
+    → **일부 완료:** 복원·alias 공개·payload 일치·alias 경유 검색은 확인, alias 거부·payload index·동시성 위험은 미확인 (§5.8 갱신, §5.9.6)
+  - alias TOCTOU·부분 공개를 잔여 위험으로 수용할지 팀장 판단 (미결)
+  - 모두의카드·K-패스 6개 표기 검색 회귀: 12개 조합 관심 정책 1위, B3 혼입 4건 기록 — 품질 기준 미확정 (§5.9.5)
   - ~~dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.~~
     → **처리 완료 (PR #111 리뷰 P1-1, 커밋 `3b0505b`, 현재 HEAD에 포함):** 테스트를 `test_issue79_incheon_age_evidence_verified`로 바꿔, 인천 연령 관계 2개가 공식 안내문(`DOC_STG_ICN_001_NOTICE_2026`) 근거로 `verified`인지 확인한다(`tests/unit/test_issue79_age_corrections_fullscan.py`). 옛 테스트 이름은 저장소에 남아 있지 않다.
   - verify 환경(`issue105-r3-verify`)은 복원 1회용이다. 컨테이너·볼륨을 유지할지 정리할지는 별도 승인 사항이다(삭제 명령은 이 문서에 넣지 않음).
