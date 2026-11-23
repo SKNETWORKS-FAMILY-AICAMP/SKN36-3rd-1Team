@@ -276,7 +276,7 @@ def build_candidate_release():
                 "target_groups": clean_tg,
                 "eligibility": sp.get("eligibility_text") or sp["selection_rationale"],
                 "benefit": sp.get("benefit_text") or sp["category"],
-                "application_period": sp.get("application_period") or "상시 또는 공고 확인",
+                "application_period": sp.get("application_period") or dc.UNVERIFIED_APPLICATION_PERIOD,
                 "application_method": sp.get("application_method") or "온라인 신청",
                 # 신청 주소가 확인되지 않으면 null (출처 URL로 대신 채우지 않음 → UI '신청하기' 미노출)
                 "official_apply_url": sp.get("official_apply_url"),
@@ -304,6 +304,9 @@ def build_candidate_release():
     )
     dc.apply_policy_corrections(merged_policies, corrections)
     dc.apply_source_review(merged_policies, corrections)
+    # 수집 기본 문구가 "상시 신청"으로 읽히지 않도록 "미확인"으로 바꾼다(#107). 정책 노드 속성만 바뀐다.
+    default_period_policies = dc.replace_default_application_periods(merged_policies)
+    dc.check_stored_reception_status(merged_policies)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
         json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8", newline="\n",
@@ -679,6 +682,7 @@ def build_candidate_release():
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
             "unverified_application_periods": corrections.get("unverified_application_periods", []),
+            "default_application_periods_replaced": default_period_policies,
             "search_excerpts_updated": corrections.get("outdated_document_lines", []),
             "search_lines_held": corrections.get("held_document_lines", []),
             "held_line_dropped_chunks": held_dropped_chunks,

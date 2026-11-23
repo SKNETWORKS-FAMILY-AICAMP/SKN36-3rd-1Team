@@ -123,6 +123,7 @@ class LatestGeneratorApiTests(unittest.TestCase):
         self.policies[:] = [policy]
         response = self.ask(llm_output())
         self.assertEqual(response.status_code, 200, response.text)
+        self.last_response = response
         return self.prompts[-1]
 
     def test_sejong_recruitment_period_reaches_generator(self):
@@ -155,6 +156,17 @@ class LatestGeneratorApiTests(unittest.TestCase):
         self.assertEqual(len(official), 1)
         self.assertIn("- 신청기한(2025년 회차): 2025.10.24~2025.11.7.", official[0]["text"])
         self.assertNotIn("10월 초 게시 예정", official[0]["text"])
+
+    def test_unverified_period_is_not_sent_as_ongoing(self):
+        # 전북 임대보증금(POL_YC_001): 신청기간이 미확인인 정책(수집 기본 문구 교체 대상, #107)
+        prompt = self.sejong_intern_prompt(["DOC_YC_001"], policy_id="POL_YC_001")
+        body = self.last_response.json()
+        self.assertEqual(body["policy_checks"][0]["reception_status"], "unknown")
+        self.assertEqual([p["reception_status"] for p in prompt["policy_checks"]], ["unknown"])
+        sent = json.dumps(prompt, ensure_ascii=False)
+        # 생성기 입력에 수집 기본 문구나 상시 접수 표현이 들어가지 않는다.
+        for phrase in ("상시/공고참조", "상시/별도공고", "상시 또는 공고 확인", "상시 접수", "상시신청"):
+            self.assertNotIn(phrase, sent)
 
     def test_profile_reception_reason_and_body_guidance_reach_http(self):
         response = self.ask(llm_output(

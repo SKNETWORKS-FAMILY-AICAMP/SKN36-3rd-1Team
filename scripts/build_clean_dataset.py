@@ -1326,7 +1326,7 @@ def main() -> None:
             application_period=(
                 f"{parsed['application_start']} ~ {parsed['application_end']}"
                 if parsed["application_start"] and parsed["application_end"]
-                else (f"{parsed['application_start']} ~ 상시" if parsed["application_start"] else "상시/공고참조")
+                else (f"{parsed['application_start']} ~ 종료일 미기재" if parsed["application_start"] else "미확인")
             ),
             application_start=parsed["application_start"],
             application_end=parsed["application_end"],
@@ -1441,7 +1441,7 @@ def main() -> None:
             },
             eligibility_text=f"{item.get('지원대상', '')}\n{item.get('선정기준', '')}".strip(),
             benefit_text=item.get("지원내용", ""),
-            application_period=item.get("신청기한") or "상시/공고참조",
+            application_period=item.get("신청기한") or "미확인",
             application_start=None,
             application_end=None,
             application_method=item.get("신청방법") or "정부24 또는 관할 기관 신청",

@@ -67,6 +67,58 @@ class ApplicationPeriodTests(unittest.TestCase):
         self.assertTrue(ongoing["application_is_ongoing"])
         self.assertIn("예산 소진", ongoing["application_status_note"])
 
+    def test_collection_default_period_is_unverified_in_candidate(self):
+        from backend.eligibility.checker import _reception_status
+
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
+        replaced = set(delta["data_corrections"]["default_application_periods_replaced"])
+        # 복지로 98건 + 온통청년 21건. 이미 공식 일정으로 교정한 정책은 포함되지 않는다(#107).
+        self.assertEqual(len(replaced), 119)
+        self.assertEqual({pid.split("_")[1] for pid in replaced}, {"BOK", "YC"})
+        for policy in policies:
+            with self.subTest(policy_id=policy["policy_id"]):
+                self.assertNotIn(policy["application_period"], dc.COLLECTION_DEFAULT_PERIODS)
+                for default in dc.COLLECTION_DEFAULT_PERIODS:
+                    self.assertNotIn(default, policy["application_period"])
+                if policy["application_period"] == dc.UNVERIFIED_APPLICATION_PERIOD:
+                    # 날짜·상시 값이 없으므로 Checker는 접수 상태를 정하지 않는다.
+                    self.assertEqual(_reception_status({"graph": {"policy": policy}}), "unknown")
+        self.assertTrue(replaced <= {p["policy_id"] for p in policies
+                                     if p["application_period"] == dc.UNVERIFIED_APPLICATION_PERIOD})
+        # 새 정책(STG)에 원천 신청기간이 없을 때도 같은 값을 쓴다.
+        nts = next(p for p in policies if p["policy_id"] == "POL_STG_NTS_001")
+        self.assertEqual(nts["application_period"], dc.UNVERIFIED_APPLICATION_PERIOD)
+
+    def test_default_period_guard_stops_on_conflicting_values(self):
+        policies = [{"policy_id": "SAMPLE_ONLY_A", "application_period": "상시/공고참조"},
+                    {"policy_id": "SAMPLE_ONLY_B", "application_period": "상시신청", "application_is_ongoing": True}]
+        self.assertEqual(dc.replace_default_application_periods(policies), ["SAMPLE_ONLY_A"])
+        self.assertEqual(policies[0]["application_period"], "미확인")
+        self.assertEqual(policies[1]["application_period"], "상시신청")
+        for policy in ({"policy_id": "SAMPLE_ONLY_C", "application_period": "상시/공고참조", "application_start": "2026-01-01"},
+                       {"policy_id": "SAMPLE_ONLY_D", "application_period": "2026-01-01 ~ 상시"}):
+            with self.subTest(policy_id=policy["policy_id"]), self.assertRaises(ValueError):
+                dc.replace_default_application_periods([policy])
+        ongoing = [{"policy_id": "SAMPLE_ONLY_E", "application_period": "2026-01-01 ~ 상시", "application_is_ongoing": True}]
+        self.assertEqual(dc.replace_default_application_periods(ongoing), [])
+
+    def test_collectors_do_not_write_ongoing_like_default_period(self):
+        # 신청기간 칸이 비면 수집 단계부터 "미확인"을 쓴다. 사업기간을 신청기간으로 쓰지 않는다(#107).
+        result = normalize_gov24_record("SAMPLE_ONLY", {"서비스명": "가상 서비스(sample_only)", "신청기한": ""})
+        self.assertIn("- 신청기한: 미확인", result["text"])
+        self.assertNotIn("상시/별도공고", result["text"])
+
+    def test_stored_reception_status_matches_schedule(self):
+        policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
+        dc.check_stored_reception_status(policies)
+        stored = {p["policy_id"]: p["reception_status"] for p in policies if "reception_status" in p}
+        self.assertEqual(len(stored), 9)
+        for policy_id in ("POL_STG_MOHW_001", "POL_STG_NTS_001", "POL_STG_MOIS_001", "POL_STG_ICN_001"):
+            self.assertEqual(stored[policy_id], dc.STORED_RECEPTION_UNKNOWN)
+        with self.assertRaises(ValueError):
+            dc.check_stored_reception_status([{"policy_id": "SAMPLE_ONLY", "reception_status": "apply_always"}])
+
     def test_recruitment_period_and_ongoing_label_follow_official_notice(self):
         policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
         # 정부24의 2026.06.24~06.26은 최종선발자 서류 접수 기간이다. 모집 신청기간은 세종시 공고 기준(#107).
@@ -187,6 +239,7 @@ class CandidateIntegrityTests(unittest.TestCase):
         removed_groups = dc.removed_group_ids(corrections)
         period_edits = corrections["unverified_application_periods"]
         periods_by_policy = {item["policy_id"]: item for item in period_edits}
+        default_periods = set(delta["data_corrections"]["default_application_periods_replaced"])
         # 행 교정(document_line_rewrites, #107)도 검색용 본문을 따로 쓰는 문서다.
         changed_documents = {item["document_id"]: item
                              for item in [*corrections["outdated_document_lines"], *period_edits,
@@ -225,6 +278,11 @@ class CandidateIntegrityTests(unittest.TestCase):
                     if original[key] in periods_by_policy:
                         self.assertEqual(original["application_period"], periods_by_policy[original[key]]["before"])
                         self.assertEqual(current["application_period"], "미확인")
+                        current["application_period"] = original["application_period"]
+                    elif original[key] in default_periods:
+                        # 수집 기본 문구만 "미확인"으로 바뀌고 나머지 속성은 동결본과 같다(#107).
+                        self.assertIn(original["application_period"], dc.COLLECTION_DEFAULT_PERIODS)
+                        self.assertEqual(current["application_period"], dc.UNVERIFIED_APPLICATION_PERIOD)
                         current["application_period"] = original["application_period"]
                 if name == "policy" and original != current:
                     change = declared[original[key]]

@@ -369,7 +369,7 @@ def format_gov24_item_text(item: Dict[str, Any]) -> str:
         f"[지원대상]\n{target}" if target else "",
         f"[선정기준]\n{criteria}" if criteria else "",
         f"[지원내용]\n{benefit}" if benefit else "",
-        f"[신청기간 및 신청방법]\n- 신청기한: {apply_period or '상시/별도공고'}\n- 신청방법: {apply_method or '-'}\n- 접수기관: {reception_org or '-'}",
+        f"[신청기간 및 신청방법]\n- 신청기한: {apply_period or '미확인'}\n- 신청방법: {apply_method or '-'}\n- 접수기관: {reception_org or '-'}",
         f"[구비서류]\n{req_docs}" if req_docs else "",
         f"[근거법령]\n{laws}" if laws else "",
         f"[문의처] {contact}" if contact else "",
@@ -399,8 +399,6 @@ def format_youthcenter_item_text(item: Dict[str, Any]) -> str:
     add_aply = item.get("addAplyQlfcCndCn", "")
     ptcp_prp = item.get("ptcpPrpTrgtCn", "")
     aply_ymd = item.get("aplyYmd", "")
-    biz_bgng = item.get("bizPrdBgngYmd", "")
-    biz_end = item.get("bizPrdEndYmd", "")
     source_url = f"https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/{plcy_no}"
     aply_url = application_url_or_none(item.get("aplyUrlAddr"), source_url)
 
@@ -413,7 +411,7 @@ def format_youthcenter_item_text(item: Dict[str, Any]) -> str:
         f"[정책개요]\n{expln}" if expln else "",
         f"[지원내용]\n{sprt_cn}" if sprt_cn else "",
         f"[지원대상 및 자격요건]\n- 연령: {age_str}\n- 소득요건: {earn_etc or '별도 제한 없음/공고 참조'}\n- 추가자격요건: {add_aply or '-'}\n- 참여제한대상: {ptcp_prp or '-'}",
-        f"[신청기간 및 방법]\n- 신청기간: {aply_ymd or f'{biz_bgng} ~ {biz_end}'}\n- 신청절차: {aply_mtd or '-'}\n- 심사 및 발표: {srng_mtd or '-'}",
+        f"[신청기간 및 방법]\n- 신청기간: {aply_ymd or '미확인'}\n- 신청절차: {aply_mtd or '-'}\n- 심사 및 발표: {srng_mtd or '-'}",
         f"[제출서류]\n{sbmsn_dcmnt}" if sbmsn_dcmnt else "",
         f"[기타 유의사항]\n{etc_mttr}" if etc_mttr else "",
         f"[신청 URL] {aply_url}" if aply_url else "",

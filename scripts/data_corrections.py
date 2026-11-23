@@ -16,6 +16,14 @@ SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
 SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
                              for suffix in ("source_review", "source_note", "followup", "check_point")) + (
     "application_start", "application_end", "application_status_note", "application_is_ongoing")
+# 공식 신청기간이 확인되지 않은 정책의 application_period 값. 화면에서는 "신청 일정 확인 필요"로 보여 준다(#107).
+UNVERIFIED_APPLICATION_PERIOD = "미확인"
+# 수집 코드가 신청기간 칸이 비었을 때 넣던 기본 문구. 공식 원문이 아니라서 "상시 신청"으로 읽히면 안 된다.
+COLLECTION_DEFAULT_PERIODS = frozenset({"상시/공고참조", "상시 또는 공고 확인", "상시/별도공고"})
+# 저장된 reception_status는 현재 접수 상태가 아니라 일정 유형이다. Checker·화면은 이 값을 읽지 않는다.
+STORED_RECEPTION_ALWAYS = "apply_always"
+STORED_RECEPTION_PERIOD = "apply_period"
+STORED_RECEPTION_UNKNOWN = "reception_unknown"
 
 
 def load_corrections() -> dict:
@@ -177,6 +185,41 @@ def apply_source_review(policies: list, corrections: dict) -> None:
         if policy["policy_id"] in ongoing:
             assert "end" not in item, f"종료일과 상시 접수를 함께 쓸 수 없음: {policy['policy_id']}"
             policy["application_is_ongoing"] = True
+
+
+def replace_default_application_periods(policies: list) -> list[str]:
+    """수집 기본 문구("상시/공고참조" 등)를 "미확인"으로 바꾸고 바꾼 정책 ID를 돌려준다.
+
+    공식 일정으로 교정한 정책은 이미 다른 값이라 그대로 둔다. 기본 문구인데 날짜나 상시 값이 있으면
+    어느 쪽이 맞는지 알 수 없으므로 빌드를 멈춘다. 종료일 없이 "~ 상시"로 끝나는 값도 상시 근거가 없으면 멈춘다.
+    """
+    replaced = []
+    for policy in policies:
+        period = (policy.get("application_period") or "").strip()
+        if period in COLLECTION_DEFAULT_PERIODS:
+            if any(policy.get(key) for key in ("application_start", "application_end", "application_is_ongoing")):
+                raise ValueError(f"기본 신청기간 문구와 날짜·상시 값이 함께 있음: {policy['policy_id']}")
+            policy["application_period"] = UNVERIFIED_APPLICATION_PERIOD
+            replaced.append(policy["policy_id"])
+        elif period.endswith("~ 상시") and policy.get("application_is_ongoing") is not True:
+            raise ValueError(f"상시 근거 없이 '~ 상시'로 끝나는 신청기간: {policy['policy_id']}")
+    return replaced
+
+
+def check_stored_reception_status(policies: list) -> None:
+    """저장된 reception_status가 일정 값(상시·날짜)과 맞는지 확인한다. 맞지 않으면 빌드를 멈춘다."""
+    for policy in policies:
+        if "reception_status" not in policy:
+            continue
+        if policy.get("application_is_ongoing") is True:
+            expected = STORED_RECEPTION_ALWAYS
+        elif policy.get("application_start") or policy.get("application_end"):
+            expected = STORED_RECEPTION_PERIOD
+        else:
+            expected = STORED_RECEPTION_UNKNOWN
+        if policy["reception_status"] != expected:
+            raise ValueError(
+                f"저장 reception_status 불일치: {policy['policy_id']} {policy['reception_status']} (기대 {expected})")
 
 
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:
