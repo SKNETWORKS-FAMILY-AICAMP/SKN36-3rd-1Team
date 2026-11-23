@@ -396,6 +396,10 @@ def index_missing(client, plan: dict[str, Any], release: dict[str, Any], embedde
     if (result["written"] != len(missing) or not result["verification"]["passed"] or final["state"] != "complete"
             or final["reuse_vector_digest"] != plan["reuse_vector_digest"]):
         raise UpdateError(f"임베딩 후 검증 실패: state={final['state']}, written={result['written']}")
+    # 2차 확정(stage2)이면 전체 벡터 digest도 확정값과 같아야 한다. 1차 확정(stage1)에서는 아직 None이라 비교하지 않는다.
+    if pinned["vector_digest"] is not None and final["full_vector_digest"] != pinned["vector_digest"]:
+        raise UpdateError("임베딩 후 전체 vector_digest가 R3_PINS 확정값과 다릅니다 → INDEXED로 보고하지 않음 "
+                          f"(실제 {final['full_vector_digest'][:12]}…, 확정 {pinned['vector_digest'][:12]}…)")
     require_same_ownership(identity, docker)
     return {"status": "INDEXED", "written": result["written"], "embedded_texts": guarded.used["texts"],
             "run_info": result["run_info"], "verification": result["verification"], "state": final["state"],

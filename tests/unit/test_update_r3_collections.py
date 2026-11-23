@@ -370,6 +370,23 @@ class IndexTests(Case):
             return {"written": 3, "verification": {"passed": True}, "run_info": {}}
         return execute
 
+    def pins_with_digest(self, key, digest):
+        """self.pins에서 key 컬렉션의 최종 vector_digest만 바꾼 기준값 (None = stage1처럼 미확정)."""
+        pins = copy.deepcopy(self.pins)
+        pins["collections"][key]["vector_digest"] = digest
+        return pins
+
+    def index(self, key, pins, vector=40):
+        """갱신(apply)을 마친 새 fake 서버에서 index_missing을 실행한다. 새 Point 벡터는 sample_vector(vector)."""
+        client, plan = self.s.client(), self.plans[key]
+        self.apply(client, key)
+        with patch.object(fi, "execute_full_index", side_effect=self.fake_execute(key, {})):
+            result = update.index_missing(client, plan, self.s.release,
+                                          lambda texts: [sample_vector(vector)] * len(texts), True,
+                                          fingerprint(client, plan, self.s.release, self.docker), pins,
+                                          docker=self.docker)
+        return client, result
+
     def test_index_uses_the_verified_client_config_and_embedding_limit(self):
         for key in profiles.COLLECTION_KEYS:
             with self.subTest(key=key):
@@ -379,8 +396,8 @@ class IndexTests(Case):
                 with patch.object(fi, "execute_full_index", side_effect=self.fake_execute(key, seen)):
                     result = update.index_missing(client, plan, self.s.release,
                                                   lambda texts: [sample_vector(40)] * len(texts), True,
-                                                  fingerprint(client, plan, self.s.release, self.docker), self.pins,
-                                                  docker=self.docker)
+                                                  fingerprint(client, plan, self.s.release, self.docker),
+                                                  self.pins_with_digest(key, None), docker=self.docker)
                 self.assertIs(seen["client"], client)
                 self.assertEqual(seen["name"], profiles.R3_COLLECTIONS[key]["config"])
                 self.assertIs(seen["chunks"], self.s.release["collections"][key]["chunks"])
@@ -402,6 +419,51 @@ class IndexTests(Case):
         guarded = update.limited_embedder(lambda texts: self.fail("초과 요청이 전달되면 안 됨"), 2)
         with self.assertRaisesRegex(update.UpdateError, "예상 2개"):
             guarded(["a", "b", "c"])
+
+    def test_stage1_without_final_digest_still_indexes(self):
+        """E: 최종 vector_digest가 아직 미확정(stage1)이면 digest 비교 없이 기존처럼 INDEXED."""
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                _, result = self.index(key, self.pins_with_digest(key, None))
+                self.assertEqual((result["status"], result["state"]), ("INDEXED", "complete"))
+
+    def test_stage2_matching_final_digest_reports_indexed(self):
+        """A·D: 확정 digest와 실제 digest가 같으면 B2·B3 모두 INDEXED."""
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                _, first = self.index(key, self.pins_with_digest(key, None))   # 같은 입력의 실제 digest
+                _, result = self.index(key, self.pins_with_digest(key, first["full_vector_digest"]))
+                self.assertEqual(result["status"], "INDEXED")
+                self.assertEqual(result["full_vector_digest"], first["full_vector_digest"])
+
+    def test_stage2_mismatched_final_digest_fails_without_indexed(self):
+        """B·D·F: 확정 digest와 다르면 B2·B3 모두 UpdateError, INDEXED 결과를 돌려주지 않는다."""
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                with self.assertRaisesRegex(update.UpdateError, "vector_digest가 R3_PINS 확정값과 다릅니다"):
+                    self.index(key, self.pins_with_digest(key, "f" * 64))
+
+    def test_same_point_count_with_different_vectors_fails(self):
+        """C: Point 수·상태(complete)는 같아도 새 벡터 내용이 다르면 실패."""
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                expected_client, first = self.index(key, self.pins_with_digest(key, None), vector=40)
+                pins = self.pins_with_digest(key, first["full_vector_digest"])
+                with self.assertRaisesRegex(update.UpdateError, "vector_digest"):
+                    self.index(key, pins, vector=41)
+                # 실패한 서버 상태를 다시 만들어 Point 수가 같음을 확인 (내용만 다름)
+                other = self.s.client()
+                self.apply(other, key)
+                plan = self.plans[key]
+                with patch.object(fi, "execute_full_index", side_effect=self.fake_execute(key, {})):
+                    update.index_missing(other, plan, self.s.release,
+                                         lambda texts: [sample_vector(41)] * len(texts), True,
+                                         fingerprint(other, plan, self.s.release, self.docker),
+                                         self.pins_with_digest(key, None), docker=self.docker)
+                coll = self.s.collection(key)
+                self.assertEqual(len(other.collections[coll]), len(expected_client.collections[coll]))
+                self.assertNotEqual(update.inspect_state(other, plan, self.s.release)["full_vector_digest"],
+                                    first["full_vector_digest"])
 
 
 class CliTests(unittest.TestCase):
