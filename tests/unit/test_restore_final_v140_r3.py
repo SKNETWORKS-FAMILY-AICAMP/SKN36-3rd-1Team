@@ -87,6 +87,7 @@ class Bundle:
             (self.folder / spec["snapshot_member"]).write_bytes(data)
             collections[key] = {"collection": spec["collection"], "config": spec["config"], "dimensions": 1024,
                                 "points": 6, "vector_digest": self.pins["collections"][key]["vector_digest"],
+                                "payload_digest": r3.payload_digest(r2, self.records[key]),   # 최종 상태 기준값
                                 "snapshot": spec["snapshot_member"],
                                 "snapshot_sha256": hashlib.sha256(data).hexdigest()}
         return {"schema_version": 2, "bundle": profiles.BUNDLE_NAME, "manifest_lf_sha256": MANIFEST,
@@ -127,6 +128,7 @@ class RealPinBundleDigestTests(unittest.TestCase):
             collections[key] = {"collection": spec["collection"], "config": spec["config"],
                                 "dimensions": spec["dimensions"], "points": pinned["points"],
                                 "vector_digest": "0" * 64 if key == tamper else pinned["vector_digest"],
+                                "payload_digest": "1" * 64,              # sample_only (형식만 검사되는 경로)
                                 "snapshot": member, "snapshot_sha256": hashlib.sha256(members[member]).hexdigest()}
         package = {"schema_version": profiles.SCHEMA_VERSION, "bundle": profiles.BUNDLE_NAME,
                    "manifest_lf_sha256": pins["manifest_lf_sha256"], "release_counts": dict(pins["release_counts"]),
@@ -782,6 +784,111 @@ class AliasPublishTests(unittest.TestCase):
         canonical_with_alias.aliases = {"sample_only_alias": B2}
         with self.assertRaisesRegex(update.UpdateError, "별칭"):
             update.require_isolated_server(canonical_with_alias)
+
+
+class PayloadDigestTests(unittest.TestCase):
+    """#111 P2-4: 최종 전체 payload가 기준(릴리스에서 만든 기대 payload + 번들 payload_digest)과 다르면 PASS하지 않는다."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    final_client = RestoreTests.final_client
+
+    def bundle_digest(self, key):
+        return json.loads((self.b.folder / "package.json").read_text(encoding="utf-8"))["collections"][key]["payload_digest"]
+
+    def test_valid_payload_passes_apply_and_verify_only(self):
+        client = R3Qdrant()
+        applied = self.run_restore(client, apply=True)
+        self.assertEqual({k: v["payload_digest"] for k, v in applied["collections"].items()},
+                         {k: self.bundle_digest(k) for k in profiles.COLLECTION_KEYS})
+        self.calls = {"cross": [], "slices": [], "uploads": []}
+        verified = self.run_restore(client, verify_only=True)
+        self.assertEqual((applied["status"], verified["status"]), ("PASS", "PASS"))
+        self.assertEqual(client.writes, [])
+
+    def test_verify_only_refuses_any_payload_drift_in_either_collection_without_writing(self):
+        cases = {
+            "extra_field": (lambda p: p.__setitem__("sample_only_unexpected", "x"), "Final payload differs"),
+            "deleted_null_field": (lambda p: p.pop("page_start"), "Final payload differs"),
+            "deleted_field": (lambda p: p.pop("section_title"), "Unexpected protected payload difference"),
+            "changed_field": (lambda p: p.__setitem__("region", "sample_only_region"),
+                              "Unexpected protected payload difference"),
+            "changed_index_run_id": (lambda p: p.__setitem__("index_run_id", "RUN_SAMPLE_ONLY_OTHER"),
+                                     "payload digest differs from the bundle"),
+            "changed_alignment_field": (lambda p: p.__setitem__("category", "sample_only_old"), "verify-only refuses"),
+        }
+        for collection in (TB2, TB3):
+            for name, (change, message) in cases.items():
+                with self.subTest(collection=collection, drift=name):
+                    client = self.final_client()
+                    change(next(iter(client.collections[collection].values()))["payload"])
+                    with self.assertRaisesRegex(ValueError, message):
+                        self.run_restore(client, verify_only=True)
+                    self.assertEqual((client.writes, client.alias_ops), ([], []))      # verify-only 쓰기 0회
+
+    def test_intended_alignment_in_apply_is_verified_after_alignment(self):
+        """snapshot의 category가 옛 값이면 --apply가 의도된 정렬로 고치고, 고친 뒤 전체 digest가 기준과 같아야 PASS."""
+        def old_category(name, c):
+            if name == TB2:
+                next(iter(c.collections[TB2].values()))["payload"]["category"] = "sample_only_old_category"
+        client = R3Qdrant()
+        result = self.run_restore(client, apply=True, after_post=old_category)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual((result["collections"]["b2"]["metadata_points_updated"],
+                          result["collections"]["b3"]["metadata_points_updated"]), (1, 0))
+        self.assertEqual(result["collections"]["b2"]["payload_digest"], self.bundle_digest("b2"))
+        self.assertEqual(len(client.writes), 1)
+        self.calls = {"cross": [], "slices": [], "uploads": []}
+        self.assertEqual(self.run_restore(client, verify_only=True)["status"], "PASS")
+        self.assertEqual(len(client.writes), 1)                                     # verify-only는 더 쓰지 않음
+
+    def test_apply_with_unexpected_snapshot_payload_fails_before_publish_and_keeps_data(self):
+        def extra(name, c):
+            if name == TB3:
+                next(iter(c.collections[TB3].values()))["payload"]["sample_only_unexpected"] = "x"
+        client = R3Qdrant()
+        with self.assertRaisesRegex(ValueError, "Final payload differs.*b3.*sample_only_unexpected"):
+            self.run_restore(client, apply=True, after_post=extra)
+        self.assertEqual((client.alias_ops, client.aliases, self.calls["cross"]), ([], {}, []))
+        self.assertTrue(any("sample_only_unexpected" in r["payload"] for r in client.collections[TB3].values()))
+
+    def test_bundle_payload_digest_mismatch_fails_both_modes(self):
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                package = self.b.package()
+                package["collections"][key]["payload_digest"] = "f" * 64
+                self.b.write(package)
+                client = R3Qdrant()
+                with self.assertRaisesRegex(ValueError, f"payload digest differs from the bundle payload_digest: {key}"):
+                    self.run_restore(client, apply=True)
+                self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+                with self.assertRaisesRegex(ValueError, "payload digest differs"):
+                    self.run_restore(self.final_client(), verify_only=True)
+                self.b.write()
+
+    def test_missing_or_invalid_bundle_payload_digest_is_refused_before_writes(self):
+        for value in (None, "", "F" * 64, "0" * 63):
+            with self.subTest(value=value):
+                package = self.b.package()
+                if value is None:
+                    package["collections"]["b3"].pop("payload_digest")
+                else:
+                    package["collections"]["b3"]["payload_digest"] = value
+                self.b.write(package)
+                client = R3Qdrant()
+                with self.assertRaisesRegex(ValueError, "payload_digest missing or invalid: b3"):
+                    self.run_restore(client, apply=True)
+                self.assertEqual((self.calls["uploads"], client.writes), ([], []))
+        self.b.write()
+
+    def test_alias_path_payload_digest_is_checked(self):
+        client = self.final_client()
+        physical, canonical = {"b2": TB2, "b3": TB3}, {"b2": B2, "b3": B3}
+        entries = json.loads((self.b.folder / "package.json").read_text(encoding="utf-8"))["collections"]
+        self.assertEqual(r3.verify_published_aliases(client, r2, physical, canonical, entries), {B2: TB2, B3: TB3})
+        wrong = {**entries, "b3": {**entries["b3"], "payload_digest": "f" * 64}}
+        with self.assertRaises(r3.PublishError) as caught:
+            r3.verify_published_aliases(client, r2, physical, canonical, wrong)
+        self.assertFalse(caught.exception.partial_publish)
 
 
 class CliTests(unittest.TestCase):

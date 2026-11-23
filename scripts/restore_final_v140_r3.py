@@ -16,7 +16,8 @@ r2 복원 도구(scripts/restore_final_v140.py, 컬렉션 1개)는 바꾸지 않
      a. 컬렉션마다 임시 이름 <정식>__tmp_<secrets.token_hex(16)>를 만든다. snapshot은 임시 이름에만 올린다
         (upload_snapshot이 임시 이름 형식이 아니면 HTTP 호출 전에 거부 → 정식 이름 업로드 0회).
      b. 업로드마다 직전·직후 컬렉션 집합·alias 매핑 재검사, 다음 업로드 전 이미 올린 임시 컬렉션 Point 수 확인
-     c. 임시 컬렉션마다 차원·거리·Point 수·전체 벡터 digest·payload 정렬과 protected digest
+     c. 임시 컬렉션마다 차원·거리·Point 수·전체 벡터 digest·payload 정렬과 protected digest, 그리고 최종 payload
+        (Point마다 릴리스에서 다시 만든 기대 payload와 dict 전체 일치 + 전체 payload digest = 번들 payload_digest, P2-4)
      d. Neo4j load_graph(verify=True) → 임시 컬렉션마다 verify_cross_db + verify_full_index(원문 슬라이스)
      e. c·d가 모두 통과한 뒤에만: 공개 직전 검사(정식 이름 컬렉션·alias 없음) → 한 요청으로 정식 alias 2개 생성
         → 공개 직후 전체 매핑 검사 → alias 경유 Point 수·전체 벡터 digest 재확인 → PASS
@@ -71,6 +72,7 @@ UPLOAD_TIMEOUT_SECONDS = 300
 RESTORE_MEMBER = "restore_final_v140_r3.py"
 COMPOSE_MEMBER = "compose.yaml"
 FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
+SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 TEMP_INFIX = "__tmp_"   # 임시 컬렉션: <정식 이름>__tmp_<32자리 hex> (26+6+32=64자 = store 실험 컬렉션 이름 상한)
 TEMP_TOKEN_BYTES = 16                           # secrets.token_hex(16) = 128비트
 TEMP_NAME = re.compile(r"^(?P<canonical>.+)" + re.escape(TEMP_INFIX) + r"[0-9a-f]{32}$")
@@ -134,6 +136,10 @@ def check_bundle(folder, pins: dict[str, Any] | None = None) -> tuple[dict[str, 
                 or entry.get("vector_digest") != pinned["vector_digest"]
                 or entry.get("snapshot") != spec["snapshot_member"]):
             raise ValueError(f"Unexpected bundle collection/dimension/count/digest: {key}")
+        # 최종 전체 payload 기준값(#111 P2-4). R3_PINS에는 없고, 번들 생성 도구가 build 서버 최종 상태에서 계산해
+        # package.json에 기록한 값이다 (SHA256SUMS로 무결성 확인). 없거나 형식이 틀리면 복원하지 않는다.
+        if not isinstance(entry.get("payload_digest"), str) or not SHA256_HEX.match(entry["payload_digest"]):
+            raise ValueError(f"Bundle payload_digest missing or invalid: {key}")
         snapshot = (folder / entry["snapshot"]).resolve()
         if (snapshot not in verified or not snapshot.is_relative_to(folder)
                 or r2.file_sha(snapshot) != entry.get("snapshot_sha256")):
@@ -209,6 +215,33 @@ def upload_snapshot(settings: dict[str, str], collection: str, snapshot: Path, s
         raise ValueError(f"Snapshot upload failed: HTTP {status} ({collection})")
 
 
+def payload_digest(r2, records: dict[str, dict[str, Any]]) -> str:
+    """전체 payload digest = digest([(point_id, payload)]) (point_id 순). 번들 생성·갱신 도구와 같은 식이다."""
+    return r2.digest([(point_id, records[point_id]["payload"]) for point_id in sorted(records)])
+
+
+def require_final_payload(r2, records: dict[str, dict[str, Any]], expected: dict[str, dict[str, Any]],
+                          bundle_digest: str, key: str) -> str:
+    """최종 payload 검증 (#111 P2-4). 두 기준을 모두 통과해야 한다. 값 자체는 오류 메시지에 싣지 않는다.
+
+    1. Point마다 payload 전체 dict = 소스 릴리스(R3_PINS manifest로 고정)에서 다시 만든 기대 payload
+       → 예상 밖 필드 추가·필드 삭제(기대값이 None인 필드 포함)·값 변경을 잡는다. 단 index_run_id는 기대값을
+       레코드에서 가져오므로 이 기준만으로는 못 잡는다.
+    2. 전체 payload digest = 번들 package.json의 payload_digest(build 서버 최종 상태) → index_run_id까지 전부 잡는다.
+    """
+    differing = sorted(point_id for point_id in records if records[point_id]["payload"] != expected[point_id])
+    if differing:
+        first = records[differing[0]]["payload"]
+        wanted = expected[differing[0]]
+        fields = sorted(set(first) ^ set(wanted) | {f for f in set(first) & set(wanted) if first[f] != wanted[f]})
+        raise ValueError(f"Final payload differs from the release-derived payload: {key} ({len(differing)} points, "
+                         f"first {differing[0]} fields {fields})")
+    actual = payload_digest(r2, records)
+    if actual != bundle_digest:
+        raise ValueError(f"Full payload digest differs from the bundle payload_digest: {key}")
+    return actual
+
+
 def alias_mapping(client) -> dict[str, str]:
     """서버 alias 매핑 {alias 이름: 실제 컬렉션 이름} (읽기 전용)."""
     return {a.alias_name: a.collection_name for a in client.get_aliases().aliases}
@@ -276,7 +309,8 @@ def publish_aliases(client, physical: dict[str, str], canonical: dict[str, str])
 
 def verify_published_aliases(client, r2, physical: dict[str, str], canonical: dict[str, str],
                              entries: dict[str, dict[str, Any]]) -> dict[str, str]:
-    """공개 직후(또는 verify-only): 전체 매핑이 정확한지, alias 경유 Point 수·전체 벡터 digest가 확정값과 같은지."""
+    """공개 직후(또는 verify-only): 전체 매핑이 정확한지, alias 경유 Point 수·전체 벡터 digest·전체 payload digest가
+    기준값(R3_PINS vector_digest, 번들 payload_digest)과 같은지."""
     expected = {canonical[key]: physical[key] for key in canonical}
     collections = {c.name for c in client.get_collections().collections}
     mapping = alias_mapping(client)
@@ -286,8 +320,9 @@ def verify_published_aliases(client, r2, physical: dict[str, str], canonical: di
                            f"aliases={dict(sorted(mapping.items()))}; restore stopped; partial state preserved; "
                            "inspect before retry", partial_publish=0 < len(ours) < len(expected), aliases=mapping)
     for key, name in canonical.items():
-        if (client.count(name, exact=True).count != entries[key]["points"]
-                or r2.vector_digest(scan(client, name)) != entries[key]["vector_digest"]):
+        records = scan(client, name) if client.count(name, exact=True).count == entries[key]["points"] else None
+        if (records is None or r2.vector_digest(records) != entries[key]["vector_digest"]
+                or payload_digest(r2, records) != entries[key]["payload_digest"]):
             raise PublishError(f"Alias {name} does not serve the verified collection data; restore stopped; "
                                "partial state preserved; inspect before retry", partial_publish=False, aliases=mapping)
     return mapping
@@ -418,9 +453,11 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             remaining, _ = r2.alignment_plan(after, expected)
             if remaining or r2.protected_digest(after) != before:
                 raise ValueError(f"Payload alignment/invariance verification failed: {key}")
+            # 최종 payload: --apply는 의도된 정렬(category·life_stages) 뒤의 값, --verify-only는 쓰기 없이 현재 값
+            payloads = require_final_payload(r2, after, expected, entry["payload_digest"], key)
             qdrant[key] = {"collection": spec["collection"], "physical_collection": target, "points": len(after),
-                           "vector_digest": vectors, "metadata_points_updated": len(changes),
-                           "metadata_field_updates": field_counts}
+                           "vector_digest": vectors, "payload_digest": payloads,
+                           "metadata_points_updated": len(changes), "metadata_field_updates": field_counts}
         if args.verify_only:
             verification = lg.verify_loaded_graph(graph, runner)
             verification_source = "verify_loaded_graph"
