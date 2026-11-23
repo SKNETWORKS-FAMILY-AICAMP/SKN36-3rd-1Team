@@ -159,3 +159,59 @@ def test_issue39_child_months_reach_llm_prompt_without_mutating_profile(monkeypa
     assert captured[0]["user_profile"]["age"] == 30
     assert "debug" not in captured[0]["user_profile"]
     assert profile["child_age_months"] == 24  # no in-place mutation
+
+
+# PR #112 follow-up: applicant age must not suppress missing child-month request.
+@pytest.mark.parametrize("text", [
+    "자녀 나이는 몇 세인가요?",
+    "자녀 나이를 알려 주세요.",
+    "아기는 몇 개월인가요?",
+])
+def test_issue39_applicant_age_does_not_silence_missing_child_months(text):
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": None,
+    })
+    assert not g._is_redundant_request(text, profile)
+    for kind in ("ask_info", "question"):
+        item = {"kind": kind, "text": text}
+        if kind == "ask_info":
+            item["field"] = "age"  # incorrectly supplied by LLM
+        raw = {
+            "status": "info", "answer": "확인이 필요합니다.",
+            "used_source_ids": [], "follow_up_questions": [item],
+        }
+        result = g._validate_model_response(raw, set(), profile)
+        assert result["follow_up_questions"] == []
+        assert "자녀" in result["answer"]
+        assert "알려" in result["answer"]
+
+
+def test_issue39_missing_child_months_body_not_removed_by_applicant_age():
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": None,
+    })
+    answer = "조건 확인이 필요합니다. 자녀 나이를 알려 주세요."
+    result = g._remove_redundant_answer_requests(answer, profile)
+    assert "자녀 나이를 알려 주세요" in result
+
+
+def test_issue39_policy_prefix_still_deduplicates_explicit_child_request():
+    text = "이 정책 신청을 위해 자녀 월령을 알려 주세요."
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": 0,
+    })
+    assert g._requests_profile_value(text, "child_age_months")
+    assert g._is_redundant_request(text, profile)
+    answer = "신청 조건을 확인했습니다. " + text
+    result = g._remove_redundant_answer_requests(answer, profile)
+    assert "신청 조건을 확인했습니다" in result
+    assert "자녀 월령을 알려" not in result
+
+
+def test_issue39_policy_month_criteria_question_is_not_suppressed_by_new_guard():
+    text = "이 정책의 자녀 월령 기준은 몇 개월인가요?"
+    profile = g._normalize_profile({
+        "age": 30, "region": None, "income": None, "child_age_months": 24,
+    })
+    assert not g._requests_profile_value(text, "child_age_months")
+    assert not g._is_redundant_request(text, profile)

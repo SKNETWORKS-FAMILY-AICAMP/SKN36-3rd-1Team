@@ -112,6 +112,17 @@ def _requests_profile_value(text: str, field: str) -> bool:
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
     if field == "child_age_months":
+        # 명시적으로 자녀의 개인 월령을 요청하면 정책 관련 접두어가 있어도
+        # 해당 입력 요청을 인식한다. 단, 정책 '월령 기준' 자체를 묻는 문장은 제외한다.
+        if re.search(
+            r"(?:자녀|아이|아기|영유아).{0,25}"
+            r"(?:월령|나이|연령|개월\s*수).{0,30}(?:알려|입력|말씀)",
+            text,
+        ) and not re.search(
+            r"(?:월령|나이|연령|개월\s*수).{0,12}(?:기준|조건|요건|범위|제한)",
+            text,
+        ):
+            return True
         # 자녀 정책의 월령 기준 질문은 사용자에게 입력값을 요청하는 질문이 아니다.
         if re.search(r"(?:정책|공고|지원\s*대상|자격|요건|기준|조건)", text):
             return False
@@ -680,12 +691,16 @@ def _is_redundant_request(
     if profile is None:
         return False
 
-    # API ask_info 연결 전에도 이미 전달된 자녀 월령의 재요청은 제거한다.
-    if (
-        profile.get("child_age_months") is not None
-        and _requests_profile_value(text, "child_age_months")
+    #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로
+    # 충족할 수 없다. child_age_months가 없으면 이 요청을 절대 지우지 않는다.
+    if re.search(
+        r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|나이|연령|개월)",
+        text,
     ):
-        return True
+        return (
+            profile.get("child_age_months") is not None
+            and _requests_profile_value(text, "child_age_months")
+        )
 
     # '이 정책의 연령 기준은?' 같은 정책 질문은
     # 개인 정보 재요청이 아니다.
@@ -742,9 +757,14 @@ def _remove_redundant_answer_requests(
             len(sentence) <= 75
             and not CITATION_PATTERN.search(sentence)
             and _is_redundant_request(sentence, profile)
-            and not re.search(
-                r"(?:정책|공고|지원\s*대상|자격\s*기준)",
-                sentence,
+            and (
+                not re.search(
+                    r"(?:정책|공고|지원\s*대상|자격\s*기준)",
+                    sentence,
+                )
+                # '정책 신청을 위해 자녀 월령을 알려주세요'도 이미 알고 있으면 제거.
+                # '이 정책의 자녀 월령 기준은?' 같은 정책 질문은 유지한다.
+                or _requests_profile_value(sentence, "child_age_months")
             )
         ):
             removed = True
