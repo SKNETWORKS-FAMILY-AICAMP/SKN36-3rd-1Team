@@ -79,6 +79,19 @@ class ApplicationPeriodTests(unittest.TestCase):
         self.assertTrue(always["application_is_ongoing"])
         self.assertEqual(always["reception_status"], "apply_always")
 
+    def test_fund_loans_are_ongoing_with_personal_deadline_note(self):
+        from backend.eligibility.checker import _reception_status
+
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        # 주택도시기금 대출은 모집기간 없이 수탁은행에서 연중 취급한다. 개인별 신청 기한은 메모로 둔다(#107).
+        for policy_id in ("POL_003", "POL_004", "POL_006", "POL_007"):
+            with self.subTest(policy_id=policy_id):
+                loan = policies[policy_id]
+                self.assertTrue(loan["application_is_ongoing"])
+                self.assertFalse(loan.get("application_end"))
+                self.assertIn("개인별 기한", loan["application_status_note"])
+                self.assertEqual(_reception_status({"graph": {"policy": loan}}), "open")
+
 
 class ApplicationUrlTests(unittest.TestCase):
     def test_missing_invalid_and_guidance_addresses_are_not_apply_links(self):
@@ -312,7 +325,8 @@ class CandidateIntegrityTests(unittest.TestCase):
             self.assertIs(row["application_is_ongoing"], True, row["policy_id"])
             self.assertIn(row["application_period"], ("상시신청", "상시"), row["policy_id"])
             self.assertNotIn("application_end", row, row["policy_id"])
-        excluded = {"POL_002", "POL_GOV_003", "POL_003", "POL_004", "POL_006", "POL_007"}
+        # 주택도시기금 대출 4건(POL_003·004·006·007)은 2026-11-23 반석 결정으로 상시 접수에 포함했다(#107).
+        excluded = {"POL_002", "POL_GOV_003"}
         self.assertFalse(excluded & {row["policy_id"] for row in ongoing})
 
     def test_application_ongoing_rejects_unknown_policy_id(self):
