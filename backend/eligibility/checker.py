@@ -105,9 +105,19 @@ def _field(condition: dict) -> str:
     if kind == "INCOME":
         return "income"
 
+    # #39: Explicit non-child month conditions must not be evaluated using
+    # child_age_months. Older graph / mock conditions may lack both name and
+    # condition_id; preserve their established SPECIAL_TARGET + months contract.
+    condition_id = str(condition.get("condition_id") or "").strip()
+    name = str(condition.get("name") or "").strip()
     if (
         kind == "SPECIAL_TARGET"
         and str(condition.get("unit") or "").strip() == "개월"
+        and (
+            condition_id.startswith("COND_CHILD_AGE_")
+            or any(term in name for term in ("자녀", "영아", "영유아", "아이", "아기"))
+            or (not condition_id and not name)
+        )
     ):
         return "children"
 

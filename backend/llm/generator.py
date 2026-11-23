@@ -74,11 +74,21 @@ def _normalize_profile(profile: dict | None) -> dict | None:
     if not valid_income:
         income = None
 
-    return {
+    # 자녀 월령은 신청자 age(세)가 아닌 별도 개월 단위 값이다.
+    # Pydantic 계약과 같이 bool, float, 숫자 문자열은 입력값으로 인정하지 않는다.
+    child_age_months = profile.get("child_age_months")
+    if type(child_age_months) is not int or child_age_months < 0:
+        child_age_months = None
+
+    normalized = {
         "age": age,
         "region": region,
         "income": income,
     }
+    # 기존 API 요청은 키 자체가 없을 수 있다. 옛 Generator 계약도 보존한다.
+    if "child_age_months" in profile:
+        normalized["child_age_months"] = child_age_months
+    return normalized
 
 
 def _region_has_detail(region: str) -> bool:
@@ -101,6 +111,20 @@ def _requests_profile_value(text: str, field: str) -> bool:
 
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
+    if field == "child_age_months":
+        # 자녀 정책의 월령 기준 질문은 사용자에게 입력값을 요청하는 질문이 아니다.
+        if re.search(r"(?:정책|공고|지원\s*대상|자격|요건|기준|조건)", text):
+            return False
+        if re.search(r"몇\s*개월.{0,12}(?:미만|이하|이상|초과|이어야)", text):
+            return False
+        return bool(re.search(
+            r"(?:자녀|아이|아기|영유아).{0,25}"
+            r"(?:월령|나이|연령|몇\s*개월|개월\s*수).{0,30}"
+            r"(?:알려|입력|말씀|몇|되나요|인가요|이세요|입니까|인지|어떻게)|"
+            r"(?:자녀|아이|아기|영유아).{0,25}몇\s*개월",
+            text,
+        ))
+
     if field == "age":
         return bool(
             re.search(
@@ -444,6 +468,16 @@ def _personal_information_request(
     if _is_policy_criteria_question(text):
         return None
 
+    # #39 REVIEW HARDENING: an infant's age is NEVER the applicant's age.
+    # Until the API/React ask_info contract is ready, keep this as body-only
+    # guidance. Do not send kind=ask_info(field='age') for a child-age query.
+    if _requests_profile_value(text, "child_age_months") or re.search(
+        r"(?:자녀|아이|아기|영유아).{0,30}(?:나이|연령|월령|개월)"
+        r".{0,30}(?:알려|입력|말씀)",
+        text,
+    ):
+        return "other"
+
     # '월 소득이 기준 금액보다 낮으신가요?'는 사용자 소득 확인이다.
     # 다른 가족 구성원의 소득 비교는 본인 income 필드가 아니다.
     if _is_user_income_comparison(text):
@@ -560,6 +594,12 @@ def _info_request_to_answer(
     if "가구원" in text or field == "household_size":
         return "가구원 수를 알려 주세요."
 
+    if field == "child_age_months" or re.search(
+        r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|개월)|"
+        r"(?:아이|아기|영유아).{0,30}(?:나이|연령)", text
+    ):
+        return "자녀의 월령(개월 수)을 알려 주세요."
+
     if "자녀" in text or field == "child_age":
         return "자녀 나이를 알려 주세요."
 
@@ -639,6 +679,13 @@ def _is_redundant_request(
 ) -> bool:
     if profile is None:
         return False
+
+    # API ask_info 연결 전에도 이미 전달된 자녀 월령의 재요청은 제거한다.
+    if (
+        profile.get("child_age_months") is not None
+        and _requests_profile_value(text, "child_age_months")
+    ):
+        return True
 
     # '이 정책의 연령 기준은?' 같은 정책 질문은
     # 개인 정보 재요청이 아니다.
