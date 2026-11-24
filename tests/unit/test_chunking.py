@@ -258,10 +258,15 @@ class TestRealDocuments(unittest.TestCase):
         old_by_document = defaultdict(list)
         for chunk in hd.load_payload_chunks():
             old_by_document[chunk["document_id"]].append(chunk)
+        # 릴리스의 교정 본문(source_text)은 줄바꿈을 \n으로 읽는다. 원본 줄바꿈(\r)이 남은 청크와
+        # 비교할 수 있도록 양쪽 줄바꿈만 맞춘다(내용은 그대로 비교한다).
+        def same_newlines(text):
+            return text.replace("\r\n", "\n").replace("\r", "\n")
+
         for document_id, chunks in old_by_document.items():
             chunks.sort(key=lambda c: c["chunk_id"])
-            positions = ck.locate_chunks_in_document(self.documents_by_id[document_id]["text"],
-                                                     [c["text"] for c in chunks])
+            positions = ck.locate_chunks_in_document(same_newlines(self.documents_by_id[document_id]["text"]),
+                                                     [same_newlines(c["text"]) for c in chunks])
             with self.subTest(document=document_id):
                 self.assertNotIn(None, positions)
 
