@@ -133,6 +133,16 @@ def apply_source_review(policies: list, corrections: dict) -> None:
     assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
     assert ongoing <= known, f"상시 접수 교정 대상 정책 불일치: {sorted(ongoing - known)}"
     assert set(dates) & set(notes) <= set(corrections["application_notes_with_dates"]), "날짜와 확인 메모는 허용된 정책만 함께 쓴다"
+    policies_by_id = {policy["policy_id"]: policy for policy in policies}
+    for entry in corrections.get("unverified_application_periods", []):
+        policy_id = entry["policy_id"]
+        policy = policies_by_id.get(policy_id)
+        if (policy is None or policy.get("application_period") != entry["before"]
+                or policy_id in dates or policy_id in ongoing or policy_id not in notes):
+            raise ValueError(f"미확인 신청기간 교정 전 값·근거 불일치: {policy_id}")
+        policy["application_period"] = "미확인"
+        for key in ("application_start", "application_end", "application_is_ongoing"):
+            policy.pop(key, None)
     for policy in policies:
         item = dates.get(policy["policy_id"], {})
         if "start" in item:

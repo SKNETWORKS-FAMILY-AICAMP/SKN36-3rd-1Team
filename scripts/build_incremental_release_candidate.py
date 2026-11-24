@@ -49,29 +49,35 @@ def get_file_sha256(path: Path) -> str:
 def prepare_document_excerpts(documents: list[dict], corrections: dict) -> dict[str, str]:
     """보존된 본문을 검증하고, 옛 기준 행을 뺀 검색용 파일을 후보에 따로 기록한다."""
     omissions = corrections.get("outdated_document_lines", [])
-    if not omissions:
+    application_periods = corrections.get("unverified_application_periods", [])
+    edits = [*omissions, *application_periods]
+    if not edits:
         return {}
     by_id = {row["document_id"]: row for row in documents}
-    source_ids = {item["document_id"] for item in omissions}
+    source_ids = {item["document_id"] for item in edits}
     with (BASE_DIR / "data/processed/documents.jsonl").open(encoding="utf-8") as source:
         bodies = {row["document_id"]: row["text"] for row in map(json.loads, source)
                   if row["document_id"] in source_ids}
     updated = {}
-    for item in omissions:
+    for item in edits:
         doc_id = item["document_id"]
         document = by_id[doc_id]
         text = bodies[doc_id]
         expected = item["expected_content_hash"]
+        policy_id = item.get("policy_id")
+        replacement = item.get("superseded_by_document_id")
         if (document["content_hash"] != expected or hashlib.sha256(text.encode()).hexdigest() != expected
-                or item["superseded_by_document_id"] not in by_id or doc_id in updated):
-            raise ValueError(f"옛 안내 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
-        excerpt = dc.omit_outdated_line(text, item["text"]).replace("\r\n", "\n").replace("\r", "\n").strip()
+                or (policy_id is None and replacement not in by_id)
+                or (policy_id is not None and document["policy_id"] != policy_id) or doc_id in updated):
+            raise ValueError(f"검색 본문 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
+        line = item["text"] if policy_id is None else f'- 신청기간: {item["before"]}'
+        excerpt = dc.omit_outdated_line(text, line).replace("\r\n", "\n").replace("\r", "\n").strip()
         path = CANDIDATE_DIR / "source_text" / f"{doc_id}.txt"
         path.parent.mkdir(exist_ok=True)
         path.write_text(excerpt + "\n", encoding="utf-8", newline="\n")
         document["extracted_text_path"] = path.relative_to(BASE_DIR).as_posix()
         document["content_hash"] = hashlib.sha256(excerpt.encode()).hexdigest()
-        updated[doc_id] = item["text"]
+        updated[doc_id] = line
     return updated
 
 
@@ -659,6 +665,7 @@ def build_candidate_release():
             "added_condition_group_ids": [group["group_id"] for group in corrections["new_condition_groups"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
+            "unverified_application_periods": corrections.get("unverified_application_periods", []),
             "search_excerpts_updated": corrections.get("outdated_document_lines", []),
             "search_lines_held": corrections.get("held_document_lines", []),
             "held_line_dropped_chunks": held_dropped_chunks,
@@ -740,6 +747,7 @@ def build_candidate_release():
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
 - 예외로 `data_corrections_v1.4.0.json`의 `application_url_corrections` {len(corrections.get('application_url_corrections', []))}건은 화면을 직접 열어 확인한 교정이다(#18). 그중 {sum(1 for item in corrections.get('application_url_corrections', []) if item['after'])}건은 그 서비스 전용 신청 경로로 바꿨다(실제 신청·예약 단계까지 확인한 것은 {sum(1 for item in corrections.get('application_url_corrections', []) if item.get('verified_stage') in dc.VERIFIED_APPLICATION_STAGES)}건, 나머지는 신청 버튼까지 확인, 단계는 `verified_stage`). 나머지 교정은 누리집 첫 화면·로그인 뒤 전체 목록·빈 신청 목록·전화·방문·이메일 신청이라 비웠다. 현재 접수 가능 여부는 보증하지 않는다.
 - `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
+- 온통청년 신청기간 미확인 {len(corrections.get("unverified_application_periods", []))}건은 사업기간이 신청일로 전달되지 않도록 정책과 검색용 본문·청크를 교정했다(#107).
 - 공식 FAQ 안에서 서로 맞지 않거나 지난 기한이 남은 행 {len(corrections.get('held_document_lines', []))}건은 검색용 본문(`source_text/`)과 청크에서 보류했다(`held_document_lines`, `needs_review`). staging 추출본(원문)은 그대로이고, 보류 행만 있던 청크 {len(held_dropped_chunks)}개는 후보에서 뺐다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
