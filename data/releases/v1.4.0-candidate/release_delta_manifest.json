@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-22T16:47:18.752826+09:00",
+  "created_at": "2026-11-22T16:48:03.144768+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -1745,7 +1745,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "57a87043b96c02c84c2f31f8e91983f2e2142da3531ea62c389cf4ff7bd6ae88",
+    "source_sha256": "be78818203cbb3f6d365dcf4ef1dbdc6f6edb28a89e098f921eb75bc119747a2",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -8427,7 +8427,7 @@
       {
         "source_id": "POL_GOV_050",
         "relation": "REQUIRES_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_24M"
+        "target_id": "COND_CHILD_AGE_LE_24M"
       },
       {
         "source_id": "GRP_POL_GOV_002_ROOT",
@@ -8452,7 +8452,7 @@
       {
         "source_id": "GRP_POL_GOV_050_ROOT",
         "relation": "CONTAINS_CONDITION",
-        "target_id": "COND_CHILD_AGE_UNDER_24M"
+        "target_id": "COND_CHILD_AGE_LE_24M"
       },
       {
         "source_id": "GRP_POL_005_OR_EXCL",
@@ -9933,7 +9933,8 @@
       "COND_TARGET_AGE_6_64",
       "COND_TARGET_AGE_6_PLUS",
       "COND_CHILD_BIRTH_2013_2019",
-      "COND_AGE_15_40"
+      "COND_AGE_15_40",
+      "COND_CHILD_AGE_LE_24M"
     ],
     "added_condition_group_ids": [
       "GRP_POL_005_OR_EXCL",

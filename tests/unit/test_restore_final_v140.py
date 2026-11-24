@@ -141,7 +141,7 @@ class CrossDbAndHashGuards(unittest.TestCase):
 
     def test_snapshot_criteria_and_package_points_are_fixed(self):
         self.assertEqual((restore.SNAPSHOT_DIMENSIONS, restore.SNAPSHOT_POINTS), (1024, 1139))
-        self.assertEqual(restore.EXPECTED, (246, 262, 600, 1139, 1126, 2668, 211))
+        self.assertEqual(restore.EXPECTED, (246, 262, 600, 1139, 1127, 2668, 211))
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             (folder / "snapshot").write_bytes(b"sample_only")
@@ -197,7 +197,7 @@ class RestoreExecutionPaths(unittest.TestCase):
         package = {"manifest_lf_sha256": "sample_manifest", "snapshot_sha256": "sample_hash",
                    "vector_digest": restore.vector_digest(before)}
         graph = object()
-        validation = SimpleNamespace(ok=True, node_counts={"sample": 1126},
+        validation = SimpleNamespace(ok=True, node_counts={"sample": 1127},
                                      relationship_counts={"REQUIRES_CONDITION": 211, "sample": 2457})
         client, driver, runner = MagicMock(), MagicMock(), MagicMock()
         client.get_collections.return_value.collections = []
@@ -205,8 +205,8 @@ class RestoreExecutionPaths(unittest.TestCase):
             points_count=restore.SNAPSHOT_POINTS, config=SimpleNamespace(params=SimpleNamespace(
                 vectors=SimpleNamespace(size=restore.SNAPSHOT_DIMENSIONS, distance="Cosine"))))
         runner.read_rows.return_value = {"unused": True}  # replaced by contract-shaped rows below
-        runner.read_rows.side_effect = ([{"nodes": 1126, "relationships": 2668}],) if verify_only else (
-            [{"nodes": 0, "relationships": 0}], [{"nodes": 1126, "relationships": 2668}])
+        runner.read_rows.side_effect = ([{"nodes": 1127, "relationships": 2668}],) if verify_only else (
+            [{"nodes": 0, "relationships": 0}], [{"nodes": 1127, "relationships": 2668}])
         verification = {"ok": True, "node_properties": {"ok": True}, "relationship_properties": {"ok": True}}
         load_result = {"ok": True, "verification": verification}
         direct_result = verification
