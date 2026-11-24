@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-24T10:00:56.578594+09:00",
+  "created_at": "2026-11-24T16:15:28.784578+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -10,7 +10,16 @@
     "POL_STG_EX_001",
     "POL_STG_MOLIT_001",
     "POL_STG_SEOUL_001",
-    "POL_STG_ICN_001"
+    "POL_STG_ICN_001",
+    "POL_BOK_099",
+    "POL_BOK_100",
+    "POL_BOK_101",
+    "POL_BOK_102",
+    "POL_BOK_103",
+    "POL_BOK_104",
+    "POL_BOK_105",
+    "POL_BOK_106",
+    "POL_BOK_107"
   ],
   "added_document_ids": [
     "DOC_STG_001_LAW",
@@ -36,10 +45,26 @@
     "DOC_STG_SEOUL_001_FAQ_2026",
     "DOC_STG_SEOUL_001_INTRO_2026",
     "DOC_GOV_059_SEJONG_NOTICE_2026",
-    "DOC_YC_029_SAHA_GUIDE_2026"
+    "DOC_YC_029_SAHA_GUIDE_2026",
+    "DOC_BOK_099",
+    "DOC_BOK_100",
+    "DOC_BOK_101",
+    "DOC_BOK_102",
+    "DOC_BOK_103",
+    "DOC_BOK_104",
+    "DOC_BOK_105",
+    "DOC_BOK_106",
+    "DOC_BOK_107"
   ],
   "added_organization_ids": [
+    "AGENCY_고용노동부_고용서비스정책과",
+    "AGENCY_고용노동부_청년고용기획과",
+    "AGENCY_고용노동부_청년취업지원과",
+    "AGENCY_교육부_전문대학지원과",
+    "AGENCY_교육부_직업교육정책과",
     "AGENCY_국세청_기획재정부",
+    "AGENCY_금융위원회_서민금융과",
+    "AGENCY_금융위원회_청년정책과",
     "AGENCY_서울특별시_동대문구_가족정책과",
     "AGENCY_서울특별시_미래청년기획관_청년정책담당관",
     "AGENCY_인천광역시_서해구_기업일자리정책과",
@@ -56,7 +81,16 @@
     "GRP_POL_STG_EX_001_ROOT",
     "GRP_POL_STG_MOLIT_001_ROOT",
     "GRP_POL_STG_SEOUL_001_ROOT",
-    "GRP_POL_STG_ICN_001_ROOT"
+    "GRP_POL_STG_ICN_001_ROOT",
+    "GRP_POL_BOK_099_ROOT",
+    "GRP_POL_BOK_100_ROOT",
+    "GRP_POL_BOK_101_ROOT",
+    "GRP_POL_BOK_102_ROOT",
+    "GRP_POL_BOK_103_ROOT",
+    "GRP_POL_BOK_104_ROOT",
+    "GRP_POL_BOK_105_ROOT",
+    "GRP_POL_BOK_106_ROOT",
+    "GRP_POL_BOK_107_ROOT"
   ],
   "added_qdrant_point_ids": [
     "acbfebe9-f76f-5f5d-a13d-330bcb9b14e0",
@@ -166,9 +200,27 @@
     "edfb0fe8-4b13-5432-ae16-7b2b6674b2c3",
     "8a059feb-ed6c-5be6-b827-ab6617c5d43c",
     "97d0c286-71ee-5e10-9ab6-d2a7ae2e4aff",
-    "904fc904-39b5-530f-8209-d06cfb071e86"
+    "904fc904-39b5-530f-8209-d06cfb071e86",
+    "5da555b5-ad78-5f65-acb5-91f874c3cd27",
+    "c099cdf1-e413-550b-8c30-1af3b6bb13b1",
+    "364bbbc9-8424-5ff2-90ba-d8981a296a17",
+    "023b488e-a3ea-5b01-b2a1-7fb705bcda59",
+    "4beda47f-65de-572c-a37d-65aae16b2acf",
+    "7c86dbf8-7a0f-5e33-bb67-16b766af70e4",
+    "e1564d96-8b64-5c9e-8ac4-096284fe5d5b",
+    "38c4ef9c-bf03-553f-b0aa-5c880c6c8d44",
+    "9ddfd796-9df6-5c99-8cbd-634732616532",
+    "d7a67922-a289-5faa-afd0-59c3893a390a",
+    "2a1fad64-32d9-5f95-b824-7cb32fa1e614",
+    "69c13a2b-b968-53bb-80e4-aeb647dfb84f",
+    "850ae0d5-989c-56d3-ae85-02410b108cf7",
+    "16cb54ae-e0ac-5829-a5f0-1b88689846e0",
+    "c777d833-51d1-5e0e-a8d2-02320c62d2c5",
+    "ac4292be-49fa-5736-a1e5-d36e28fcca57",
+    "9ea075e9-11b5-5026-bc37-1cfe86e35d91",
+    "af8b9f9e-8775-51f2-973d-1e73576cf18c"
   ],
-  "added_relationships_count": 97,
+  "added_relationships_count": 173,
   "updated_policy_properties": [
     {
       "policy_id": "POL_001",
@@ -1818,7 +1870,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "897748613324245fca96a5c4ad2f0800736c4406f3c79442a5f447edf161c7d4",
+    "source_sha256": "d20d5610cdf0866ca56ceaba0cd2a2ed0c1af07873ca064f0d349d4de8978b34",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -10422,7 +10474,7 @@
       "DOC_STG_SEOUL_001_FAQ_2026_C11"
     ]
   },
-  "application_url_evidence_sha256": "96976115cd7f66eddde09af98b2b6e597677c179107e19f9fa5dacfad09902fc",
+  "application_url_evidence_sha256": "735cb82ff8246d3b16c696b8ccf15bdf898df2f5101ac55c0ddd208c25b35b0d",
   "exact_added_relationships": [
     {
       "source_id": "POL_001",
@@ -10543,6 +10595,51 @@
       "source_id": "POL_YC_029",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_YC_029_SAHA_GUIDE_2026"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_099"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_100"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_101"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_102"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_103"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_104"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_105"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_106"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_BOK_107"
     },
     {
       "source_id": "POL_STG_MOLIT_002",
@@ -10908,6 +11005,341 @@
       "source_id": "POL_STG_ICN_001",
       "relation": "HAS_ROOT_CONDITION_GROUP",
       "target_id": "GRP_POL_STG_ICN_001_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_고용노동부_고용서비스정책과"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "TARGETS",
+      "target_id": "GROUP_LOW_INCOME"
+    },
+    {
+      "source_id": "POL_BOK_099",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_099_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_교육부_청년장학지원과"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_BOK_100",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_100_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_금융위원회_서민금융과"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_HOUSING_FINANCE"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "TARGETS",
+      "target_id": "GROUP_LOW_INCOME"
+    },
+    {
+      "source_id": "POL_BOK_101",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_101_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_고용노동부_청년취업지원과"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "TARGETS",
+      "target_id": "GROUP_WORKER_BIZ"
+    },
+    {
+      "source_id": "POL_BOK_102",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_102_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_교육부_직업교육정책과"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청소년"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "TARGETS",
+      "target_id": "GROUP_CHILD_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_BOK_103",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_103_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_고용노동부_청년고용기획과"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "TARGETS",
+      "target_id": "GROUP_JOBSEEKER"
+    },
+    {
+      "source_id": "POL_BOK_104",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_104_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_금융위원회_청년정책과"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "TARGETS",
+      "target_id": "GROUP_WORKER_BIZ"
+    },
+    {
+      "source_id": "POL_BOK_105",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_105_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_교육부_전문대학지원과"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_106",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_106_ROOT"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "ADMINISTERED_BY",
+      "target_id": "AGENCY_교육부_청년장학지원과"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "HAS_CATEGORY",
+      "target_id": "CAT_YOUTH_JOB_ASSET"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "AVAILABLE_IN",
+      "target_id": "REGION_NATIONWIDE"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_청년"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "APPLIES_TO_LIFESTAGE",
+      "target_id": "LIFESTAGE_중장년"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "TARGETS",
+      "target_id": "GROUP_YOUTH"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "TARGETS",
+      "target_id": "GROUP_LOW_INCOME"
+    },
+    {
+      "source_id": "POL_BOK_107",
+      "relation": "HAS_ROOT_CONDITION_GROUP",
+      "target_id": "GRP_POL_BOK_107_ROOT"
     }
   ],
   "baseline_manifest_sha256": "9cdc54322b269bb245f9d0a99602171bf0937087ca57ee11432b5c778378bb85"

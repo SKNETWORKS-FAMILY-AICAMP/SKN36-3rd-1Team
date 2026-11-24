@@ -140,8 +140,8 @@ class TestCandidateGitInput(unittest.TestCase):
         graph = lg.read_graph_input(hd.DEFAULT_HANDOFF_DIR / "neo4j")
         report = lg.validate_graph_input(graph)
         self.assertTrue(report.ok, report.summary())
-        self.assertEqual(sum(report.node_counts.values()), 1135)
-        self.assertEqual(sum(report.relationship_counts.values()), 2676)
+        self.assertEqual(sum(report.node_counts.values()), 1169)
+        self.assertEqual(sum(report.relationship_counts.values()), 2752)
         for policy_id, condition_id in (("POL_GOV_011", "COND_AGE_12_24"),
                                         ("POL_GOV_016", "COND_AGE_19_120"),
                                         ("POL_GOV_023", "COND_AGE_6_64")):

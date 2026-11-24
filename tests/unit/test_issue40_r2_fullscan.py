@@ -33,8 +33,9 @@ def test_r2_all_189_unknown_policies_only_narrow_six():
         g["policy_id"] for g in groups.values()
         if str(g.get("logic") or "").upper() == "UNKNOWN"
     }
-    assert len(unknown_policies) == 189, (
-        f"UNKNOWN policy population changed: expected 189, got {len(unknown_policies)}"
+    # 복지로 2026 추가 정책 9건은 루트 UNKNOWN이라 189 → 198
+    assert len(unknown_policies) == 198, (
+        f"UNKNOWN policy population changed: expected 198, got {len(unknown_policies)}"
     )
 
     allowed = set()

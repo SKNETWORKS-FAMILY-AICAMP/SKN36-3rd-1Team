@@ -2460,6 +2460,96 @@
       "evidence_path": "data/staging/policies.jsonl",
       "evidence_sha256": "922537dd2cfa61731ca0c3e6ce88802d719634a135aea4705dbece04b0486273",
       "collected_at": "2026-11-06T21:19:05.938296"
+    },
+    "POL_BOK_099": {
+      "official_id": "WLF00001172",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00001172.txt",
+      "evidence_sha256": "98307785bde5734676a40e78799f313a29a5b65fc02546bd7849e55e2ec43901",
+      "collected_at": "2026-11-14T10:03:33+09:00"
+    },
+    "POL_BOK_100": {
+      "official_id": "WLF00006270",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006270",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006270.txt",
+      "evidence_sha256": "d6d579ac3c1232cd2138c835087963d9f25cd3658f1991496e8536908b9ba937",
+      "collected_at": "2026-11-13T10:01:46+09:00"
+    },
+    "POL_BOK_101": {
+      "official_id": "WLF00001076",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001076",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00001076.txt",
+      "evidence_sha256": "3413c1ddd00b48cab461b853ac4dfe1b9dbf20c220d787cfe0261ba4afb36c87",
+      "collected_at": "2026-11-13T10:03:01+09:00"
+    },
+    "POL_BOK_102": {
+      "official_id": "WLF00006215",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006215",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006215.txt",
+      "evidence_sha256": "53e4a14d96d4a124f110cb841bfaba6bddbbad32d02001f5634bb8f3be6afb5a",
+      "collected_at": "2026-11-14T10:02:28+09:00"
+    },
+    "POL_BOK_103": {
+      "official_id": "WLF00006236",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006236",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006236.txt",
+      "evidence_sha256": "70b94708059134daa20b0f0e07906587739cdb90a0a015c043068d96805e25b1",
+      "collected_at": "2026-11-14T10:03:20+09:00"
+    },
+    "POL_BOK_104": {
+      "official_id": "WLF00006249",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006249",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006249.txt",
+      "evidence_sha256": "180fe86dc08f60c7ebaf00a6b65a11e04b93befe389af1c26c27dc43382c3a2a",
+      "collected_at": "2026-11-14T10:01:25+09:00"
+    },
+    "POL_BOK_105": {
+      "official_id": "WLF00006266",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006266",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006266.txt",
+      "evidence_sha256": "267239919dab3b1233e70a1e8a11f72053ca358fc30baea11f913eecafd484a2",
+      "collected_at": "2026-11-12T10:34:02+09:00"
+    },
+    "POL_BOK_106": {
+      "official_id": "WLF00006316",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00006316",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006316.txt",
+      "evidence_sha256": "953ea941e33c2c98a0fdb1f0ea7da51b26883dfbcb6bc314f21defa218c21d1e",
+      "collected_at": "2026-11-12T10:34:21+09:00"
+    },
+    "POL_BOK_107": {
+      "official_id": "WLF00003277",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003277",
+      "application_url": null,
+      "reference_url": null,
+      "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
+      "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00003277.txt",
+      "evidence_sha256": "356231f988c38102a26e168def73a74e1c7fba9f7603da76d72a37993fd0ef45",
+      "collected_at": "2026-11-14T10:02:09+09:00"
     }
   }
 }

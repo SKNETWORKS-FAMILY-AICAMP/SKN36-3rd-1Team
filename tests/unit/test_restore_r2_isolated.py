@@ -115,7 +115,7 @@ class FakeRestore:
         if self.side_effect:
             self.side_effect(args)
         if args.verify_only:
-            return {"status": self.verify_status, "graph_totals": {"nodes": 1135, "relationships": 2676},
+            return {"status": self.verify_status, "graph_totals": {"nodes": 1169, "relationships": 2752},
                     "cross_db": {"status": "PASS", "qdrant_points": 1139}}
         if args.apply:
             return {"status": self.apply_status}
