@@ -1,5 +1,9 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
+> **2026-11-25 갱신 — 최신 dev(#113·#118, 249정책) 반영 준비 (코드만, 실행 안 함):** `R3_PINS`를 249정책 C0(pending, manifest `b3130722…`)로 바꾸고,
+> build 프로필을 새 격리 프로젝트 `issue105-r3d-build`(56766/56797)로, 벡터 원본(`R3_SOURCES`)을 r3b 최종 snapshot으로 바꿨다(§3·§4·§5.11).
+> r3b build와 그 산출물(`.cache\issue105-r3b\`)은 보존 자산이다. 아래 2026-11-23 r3b 기록은 #110(246정책) 기준이며 최신 릴리스가 아니다.
+
 > **2026-11-23 갱신 — Issue #105 r3b 재구축 준비 (#110 데이터 정정 반영):** build 프로필을 새 격리 프로젝트 `issue105-r3b-build`(56666/56697)로 바꿨다(§3).
 > 아래 2026-11-22 기록(#104 기준 build·snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`)은 보존 자산이며 #110 반영본이 아니다.
 > **C0 진입 (2026-11-23, #110 병합 `7aa5266`):** `R3_PINS`를 #110 릴리스 기준 pending으로 바꿨다(§5.5.2). manifest `29b57236…`·release_counts·points만 확정, 계획·임베딩 결과 값은 미확정.
@@ -90,12 +94,15 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 | 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 | 출력 폴더 |
 |---|---|---|---|---|---|
-| build (r3b, Issue #105 재구축용 — #110 데이터 정정 반영, 현재) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` |
+| build (r3d, 최신 dev #113·#118 249정책 재구축용 — 현재, **아직 생성 안 함**, §5.11) | `issue105-r3d-build` | 127.0.0.1:56766 | 127.0.0.1:56797 | `ISSUE105_R3D_BUILD_QDRANT_API_KEY`, `ISSUE105_R3D_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3d-build\` |
+| **보존** build-r3b (#110 기준 246정책 최종 상태, 대상 아님) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` (보존, 새 파일 금지. 최종 snapshot 2개는 `R3_SOURCES`로 읽기만) |
 | verify (r3d, PR #111 P1-A~E 코드용 — 현재, **아직 생성 안 함**) | `issue105-r3d-verify` | 127.0.0.1:56756 | 127.0.0.1:56787 | `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3D_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3d\` (권장 위치, §5.10.14) |
 | **보존** verify-6d0450f (§5.9 복원·검색 검증에 사용, 대상 아님) | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3c\` (보존, 새 파일 금지) |
 | **보존** build-104 (#104 기준, 대상 아님) | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3\` |
 
-- build 프로필은 2026-11-23에 r3b로 바꿨다(`R3_ENVIRONMENTS["build"]`, compose `issue105_r3b_build.compose.yaml`).
+- build 프로필은 2026-11-23에 r3b로, 2026-11-25에 r3d로 바꿨다(`R3_ENVIRONMENTS["build"]`, compose `issue105_r3d_build.compose.yaml`, 커밋 전 코드).
+  r3b build는 `PRESERVED_R3_ENVIRONMENTS["build-r3b"]`로 옮겨 그 포트·인증 변수·프로젝트를 거부 목록에 넣었고, `.cache\issue105-r3b\`를 보존 경로로 등록했다.
+  r3b compose 파일·컨테이너·볼륨·인증 파일·보고서·snapshot·번들은 바꾸지 않았다.
 - #104 build는 `PRESERVED_R3_ENVIRONMENTS["build-104"]`에 기록만 남긴다. 도구가 선택할 수 없고, 그 값에서 거부 목록이 만들어진다. 기존 compose(`issue105_r3_build.compose.yaml`)는 바꾸지 않았다.
 - #104 산출물(B2 1233 `d1fa3194…`·B3 1320 `a471e21f…` 컬렉션, Neo4j 1133/2674, snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`, 보고서 25~40, DPAPI 파일)은 그대로 보존한다.
   - 현재 도구로는 #104 build 서버에 접속할 수 없다. #104 상태는 ZIP과 verify 복원으로만 다시 확인한다.
@@ -103,11 +110,11 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 다음 접속·출력은 거부된다.
 
-- **포트:** 공유·r1·r2 포트(6333·7687·36333·56446·56487·56556·56587 등)와 보존 #104 build 포트(56646·56677) — `FOREIGN_PORTS`
-  - verify 래퍼는 여기에 현재 build(r3b) 포트까지 더해 거부한다.
-- **인증값:** 원본·공유·r2·보존 #104 build 인증값과 같은 값(`QDRANT_API_KEY`, `NEO4J_PASSWORD`, `ISSUE91_*`, `ISSUE105_R3_BUILD_*`) — `FOREIGN_SECRET_ENVS`
-- **Docker 소유:** build 프로필 프로젝트(`issue105-r3b-build`) 라벨과 그 프로젝트 볼륨만 인정한다. #104 프로젝트·볼륨(`issue105-r3-build_*`)의 컨테이너는 거부한다.
-- **출력 경로:** 보존 폴더 `.cache\issue105-r3\` 안에는 새 파일도 만들지 않는다. `is_preserved_output`이 CLI 인자 검사 단계에서 쓰기 전에 거부한다.
+- **포트:** 공유·r1·r2 포트(6333·7687·36333·56446·56487·56556·56587 등)와 보존 환경 포트(#104 build 56646·56677, r3b build 56666·56697, 이전 verify 56656·56687) — `FOREIGN_PORTS`
+  - verify 래퍼는 여기에 현재 build(r3d 56766·56797) 포트까지 더해 거부한다.
+- **인증값:** 원본·공유·r2·보존 환경 인증값과 같은 값(`QDRANT_API_KEY`, `NEO4J_PASSWORD`, `ISSUE91_*`, `ISSUE105_R3_BUILD_*`, `ISSUE105_R3B_BUILD_*`, `ISSUE105_R3_VERIFY_*`) — `FOREIGN_SECRET_ENVS`
+- **Docker 소유:** build 프로필 프로젝트(`issue105-r3d-build`) 라벨과 그 프로젝트 볼륨만 인정한다. #104·r3b 프로젝트·볼륨(`issue105-r3-build_*`, `issue105-r3b-build_*`)의 컨테이너는 거부한다.
+- **출력 경로:** 보존 폴더 `.cache\issue105-r3\`·`.cache\issue105-r3b\`·`.cache\issue105-r3c\` 안에는 새 파일도 만들지 않는다. `is_preserved_output`이 CLI 인자 검사 단계에서 쓰기 전에 거부한다.
   - 대상: `update_r3_collections`의 `--report`·`--write-plan`, `load_neo4j_r3_isolated --report`, `plan_r3_vector_reuse --report`, `restore_r3_isolated --report`, `build_restore_bundle_r3`의 `--out-dir`(함수 안에서도 다시 확인)
   - `--plan`·`--bundle` 읽기는 허용한다.
 - `environment()`는 build·verify 프로필이 보존·외부 자산과 프로젝트·포트·인증 변수가 겹치면 거부한다.
@@ -116,13 +123,22 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 ## 4. r3 원본 자산 (최신 릴리스 값 아님)
 
-| 컬렉션 | 원본 | snapshot SHA-256 | Point | vector digest |
-|---|---|---|---|---|
-| B2 | r2 snapshot (`.cache/issue91-r2-20261119/bundle-r2/b2-r2-v1.12.4.snapshot`) | `2e07c17a…0bca0` | 1,139 | `8577c3c8…da3d3` (r2 독립 복원으로 확인) |
-| B3 | #31 snapshot (`venv/issue31_20261109/exp_b3_qwen3emb06b_v140_v1.before.snapshot`) | `502b7b7e…4ad8` | 1,220 | `0a794e34…6371` (덤프·공유 DB scan 기준) |
+**현재 원본 (r3d, 2026-11-25부터): r3b 최종 snapshot** — `R3_SOURCES`
 
-B3 snapshot을 격리 서버에 복원했을 때의 digest는 **아직 미검증**이다.
-`update_r3_collections --restore-snapshot`이 복원 직후 이 값과 대조하고, 다르면 멈춘다.
+| 컬렉션 | 원본 (읽기만 함) | snapshot SHA-256 | Point | vector digest |
+|---|---|---|---|---|
+| B2 | `.cache/issue105-r3b/bundle-r3b-20261123-01/b2-r3-v1.12.4.snapshot` | `834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89` | 1,233 | `90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d` |
+| B3 | `.cache/issue105-r3b/bundle-r3b-20261123-01/b3-r3-v1.12.4.snapshot` | `91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8` | 1,320 | `718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120` |
+
+- 근거(2026-11-25 다시 확인): snapshot 파일 SHA-256 재계산 = `snapshot-record-{b2,b3}.json`의 값. Point·vector digest = 같은 record =
+  최종 dry-run `11-b2-final-dryrun.json`·`12-b3-final-dryrun.json`(state=complete, payload_pending 0) = #110 C2 `R3_PINS`의 최종값.
+  같은 snapshot이 든 번들의 독립 복원 `21-verify-only.json` PASS(전체 벡터·보호 payload 불변).
+- payload는 #110 릴리스(manifest `29b57236…`) 기준이다. 재사용 여부는 Point ID가 아니라 Point별 실제 임베딩 입력(본문·섹션명·정책명)과
+  모델·차원·입력 규칙으로 계획이 판정한다. 문서 해시만 바뀐 Point는 벡터 재사용 + payload 갱신이다.
+- `update_r3_collections --restore-snapshot`이 업로드 전 파일 SHA-256을, 복원 직후 Point 수·전체 vector digest를 이 값과 대조하고 다르면 멈춘다.
+
+**이전 원본 (r3b 구축 때, 기록만):** B2 r2 snapshot (`2e07c17a…0bca0`, 1,139, `8577c3c8…da3d3`),
+B3 #31 snapshot (`502b7b7e…4ad8`, 1,220, `0a794e34…6371`). r3d에서는 쓰지 않는다.
 
 ## 5. 최신 데이터 병합 후 절차
 
@@ -1209,7 +1225,7 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 | 이미지·자원 한도 | 이전 verify와 같음 (Qdrant 1.12.4 `241edb9d…`, Neo4j 5.26.32 community `42ef3ebf…`) |
 | 실행 잠금 | `%LOCALAPPDATA%\issue105-r3\locks\issue105-r3d-verify-56756.lock` (이전 verify와 다른 파일) |
 | 출력 위치 (권장) | `.cache\issue105-r3d\` — 도구 기본값이 아니므로 `--report`·`--out-dir`로 지정한다 |
-| 기준값 | 현재 `R3_PINS`(stage2, manifest `29b57236…`) 그대로. 환경마다 다른 기준값은 없다 |
+| 기준값 | 단일 `R3_PINS`. 2026-11-25부터 249정책 C0(pending, manifest `b3130722…`, §5.11) → C2 확정 전에는 이 환경에서 복원할 수 없다. 환경마다 다른 기준값은 없다 |
 
 - **보존·거부되는 이전 verify:** `PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]` — 포트 56656/56687, `ISSUE105_R3_VERIFY_*` 인증 변수, `issue105-r3-verify` 프로젝트는 r3 도구가 거부한다. `.cache\issue105-r3c\` 안에는 r3 도구가 새 파일을 만들지 않는다.
 - **기존 번들은 이 환경에 쓰지 않는다:** `eb178f95…` 번들은 복원 도구와 기준값 모듈이 현재 소스와 달라 래퍼가 거부한다. 이 환경에는 현재 소스로 만든 **새 번들**만 쓴다.
@@ -1220,7 +1236,70 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
   - §5.10 Write Freeze: 대상 포트 56756/56787, 잠금 파일은 위 표의 경로, 실행 기록은 `.cache\issue105-r3d\write-freeze-record-<번들 sha12>-01.md`(새 파일).
 - 이 절의 PowerShell 값 대입은 아직 실제로 실행하지 않았다.
 
-## 6. r2 호환성과 데이터 PR 병합 시 주의
+### 5.11 최신 dev(#113·#118, 249정책) 반영 — R3_PINS C0 전환과 r3d build 준비 (2026-11-25, 코드만 반영)
+
+> **상태:** 코드·compose·테스트만 바꿨다(커밋 전). Docker·Qdrant·Neo4j·Ollama 실행, snapshot 복원·생성, 계획 파일·번들 생성은 **하지 않았다.**
+> 아래 C1·C2 값과 실제 계획은 아직 없다.
+
+#### 5.11.1 기준 릴리스 (병합 `ce7266b`, 릴리스 파일에서 다시 계산)
+
+| 항목 | 값 |
+|---|---|
+| manifest LF SHA-256 | `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da` (PR #118 보고값과 같음) |
+| 정책 / 문서 / 릴리스 청크 | 249 / 273 / 672 |
+| B2 / B3 Point (full_index expected_chunks) | 1,249 / 1,338 |
+| Neo4j 노드 / 관계 / REQUIRES_CONDITION | 1,147 / 2,702 / 211 |
+
+#### 5.11.2 R3_PINS C0 (pending)
+
+- 확정: manifest, release_counts, 컬렉션별 points, remove_count 0(예상값 — 계획 값이 다르면 `validate_plan`이 거부).
+- 미확정(None): 컬렉션별 `reuse_count`·`embed_count`·`delete_count`·`reuse_vector_digest`·`plan_sha256`·`vector_digest`.
+- 단계 `R3_PIN_STAGE = "pending"` → 허용 쓰기는 `WRITES_WITHOUT_PINS`(원본 snapshot 복원, 새 계획·보고서 파일)뿐이다.
+  `--apply`·`--index`·Neo4j `--load`·`--cross-db`·`--create-snapshot`·`--build`·번들 복원은 기준값 게이트에서 거부된다.
+- #110 기준 C2 값(manifest `29b57236…`)은 이제 `R3_PINS`가 아니라 r3d 원본(§4)의 기록이다.
+
+#### 5.11.3 r3d build 환경 (설정만, 아직 생성 안 함)
+
+| 항목 | 값 |
+|---|---|
+| 프로필 | `R3_ENVIRONMENTS["build"]` |
+| Compose 프로젝트 / 파일 | `issue105-r3d-build` / `docs/development/issue105_r3d_build.compose.yaml` |
+| Qdrant / Bolt | `127.0.0.1:56766` / `127.0.0.1:56797` (127.0.0.1 바인딩만) |
+| 볼륨 | `issue105-r3d-build_qdrant_storage`, `issue105-r3d-build_neo4j_data`, `issue105-r3d-build_neo4j_logs` |
+| 인증 변수 | `ISSUE105_R3D_BUILD_QDRANT_API_KEY`, `ISSUE105_R3D_BUILD_NEO4J_PASSWORD` (#104·r3b build·verify·r2·공유 값 재사용 시 거부) |
+| 이미지·자원 한도 | r3b build와 같음 (Qdrant 1.12.4 `241edb9d…`, Neo4j 5.26.32 community `42ef3ebf…`, mem 1g/1280m, cpus 2) |
+| 출력 폴더 | `.cache\issue105-r3d-build\` (번들 기본값 `…\bundle-r3`) |
+
+- r3d verify(`issue105-r3d-verify`, 56756/56787, §5.10.14)는 그대로다. verify 래퍼는 r3d build 포트도 거부한다.
+
+#### 5.11.4 사전 추정 (고정값 아님)
+
+릴리스 파일만으로 계산한 오프라인 추정이다. #110 릴리스로 r3b와 같은 방식의 payload를 만들고 벡터 자리는 가짜 값으로 채운 뒤,
+현재 `plan_r3_vector_reuse.build_plan`(실제 R3_PINS C0)으로 분류했다. 실제 벡터가 아니므로 digest·plan SHA-256은 의미가 없다.
+**최종 고정은 r3d build 서버에 원본을 실제로 복원한 뒤의 서버 계획으로만 한다.**
+
+| | B2 | B3 |
+|---|---:|---:|
+| 원본 Point (r3b) | 1,233 | 1,320 |
+| 재사용 (그중 `content_hash`만 갱신: GOV_033 C001, GOV_059 C001·C002) | 1,229 (3) | 1,316 (3) |
+| 본문 변경 → 삭제 후 재임베딩 (GOV_033 C002~C004, GOV_059 C003) | 4 | 4 |
+| 신규 (#118 BOK_099·101·104, #113 SEJONG_NOTICE·SAHA_GUIDE) | 16 | 18 |
+| remove | 0 | 0 |
+| 목표 Point / 임베딩 합계 | 1,249 / 20 | 1,338 / 22 |
+
+#### 5.11.5 다음 실행 순서 (각 단계 별도 승인, 아직 실행 안 함)
+
+1. (승인) Docker Desktop 기동 → `docker compose -f docs/development/issue105_r3d_build.compose.yaml config --quiet` →
+   기존 `issue105-r3b-build`·`issue105-r3-verify` 컨테이너·볼륨 목록을 읽기 전용으로 기록 → `up -d` (새 인증값, 새 DPAPI 파일).
+2. 원본 snapshot 복원 (C0에서 허용, 컬렉션마다):
+   `python scripts/update_r3_collections.py --qdrant-url http://127.0.0.1:56766 --collection b2 --restore-snapshot --confirm-write --report .cache/issue105-r3d-build/01-b2-restore.json`
+   (기본 경로 = §4의 r3b snapshot, B3도 같은 순서)
+3. 서버 계획: `… --collection b2 --write-plan .cache/issue105-r3d-build/plan-b2.json --report …` (B3도). §5.11.4와 대조해 사람이 검토.
+4. 승인 후 C1 기록(points·reuse·embed·delete·remove·reuse_vector_digest·plan_sha256 = 서버 계획 값) → `R3_PIN_STAGE="stage1"`.
+5. `--apply` → `--index --ollama-url http://127.0.0.1:11434` (Ollama 모델 digest 수동 확인, 임베딩 B2 20·B3 22 예상) → 최종 dry-run.
+6. C2 기록(최종 vector_digest) → Neo4j `--load` → `--cross-db` → `--create-snapshot` → `--build` (출력 `.cache/issue105-r3d-build/`).
+7. 새 번들로 r3d verify 독립 복원(§5.10·§5.10.14, Write Freeze 포함).
+
 
 - **r2 도구 상수는 r2 값으로 유지해야 한다.** `restore_final_v140.py`의 `SNAPSHOT_POINTS`·`EXPECTED`와 seed·update·load·build의 고정값이 여기에 해당한다.
 - 데이터 브랜치 tip(`bc7763d`)의 변경을 그대로 병합하면 안 된다.

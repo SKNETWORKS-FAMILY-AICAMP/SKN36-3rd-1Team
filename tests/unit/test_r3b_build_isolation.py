@@ -1,11 +1,14 @@
-"""Issue #105/#110: r3b build 프로필과 #104 보존 자산 격리 테스트 (DB·Docker·네트워크 접속 없음).
+"""Issue #105/#110/#113·#118: build 프로필(r3d)과 보존 자산(#104 build·r3b build) 격리 테스트 (DB·Docker·네트워크 접속 없음).
 
-#104 기준 r3 build(issue105-r3-build, 56646/56677, ISSUE105_R3_BUILD_* 인증, .cache/issue105-r3)는 보존 자산이다.
-r3 도구는 r3b build(issue105-r3b-build, 56666/56697, ISSUE105_R3B_BUILD_* 인증, .cache/issue105-r3b)만 대상으로 한다.
+#104 기준 r3 build(issue105-r3-build, 56646/56677, ISSUE105_R3_BUILD_* 인증, .cache/issue105-r3)와
+#110 기준 r3b build(issue105-r3b-build, 56666/56697, ISSUE105_R3B_BUILD_* 인증, .cache/issue105-r3b)는 보존 자산이다.
+r3 도구는 r3d build(issue105-r3d-build, 56766/56797, ISSUE105_R3D_BUILD_* 인증, .cache/issue105-r3d-build)만 대상으로 한다.
+r3b 출력 폴더의 최종 snapshot은 R3_SOURCES로 읽기만 하며, 그 폴더에 새 파일을 만들지 않는다.
 출력 경로 거부를 실제로 실행하는 테스트는 보존 폴더 설정을 임시 폴더로 바꿔서 확인한다 → 거부가 깨져도 실제
 .cache/issue105-r3에는 아무것도 생기지 않는다.
 """
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -26,6 +29,10 @@ from scripts import restore_r3_isolated as wrap  # noqa: E402
 from scripts import update_r3_collections as update  # noqa: E402
 
 ROOT = Path(profiles.PROJECT_ROOT)
+R3D = {"project": "issue105-r3d-build", "compose": "docs/development/issue105_r3d_build.compose.yaml",
+       "qdrant_port": 56766, "bolt_port": 56797, "qdrant_key_env": "ISSUE105_R3D_BUILD_QDRANT_API_KEY",
+       "neo4j_password_env": "ISSUE105_R3D_BUILD_NEO4J_PASSWORD", "out_dir": ".cache/issue105-r3d-build"}
+# 보존 자산 기록 (현재 build 아님)
 R3B = {"project": "issue105-r3b-build", "compose": "docs/development/issue105_r3b_build.compose.yaml",
        "qdrant_port": 56666, "bolt_port": 56697, "qdrant_key_env": "ISSUE105_R3B_BUILD_QDRANT_API_KEY",
        "neo4j_password_env": "ISSUE105_R3B_BUILD_NEO4J_PASSWORD", "out_dir": ".cache/issue105-r3b"}
@@ -33,6 +40,8 @@ OLD = {"project": "issue105-r3-build", "qdrant_port": 56646, "bolt_port": 56677,
        "qdrant_key_env": "ISSUE105_R3_BUILD_QDRANT_API_KEY", "neo4j_password_env": "ISSUE105_R3_BUILD_NEO4J_PASSWORD"}
 OLD_VOLUMES = {"qdrant": ["issue105-r3-build_qdrant_storage"],
                "neo4j": ["issue105-r3-build_neo4j_data", "issue105-r3-build_neo4j_logs"]}
+R3B_VOLUMES = {"qdrant": ["issue105-r3b-build_qdrant_storage"],
+               "neo4j": ["issue105-r3b-build_neo4j_data", "issue105-r3b-build_neo4j_logs"]}
 
 
 class TempPreserved:
@@ -56,20 +65,33 @@ class TempPreserved:
 
 
 class ProfileValuesTests(unittest.TestCase):
-    def test_r3b_build_profile_final_values(self):
-        self.assertEqual(profiles.environment("build"), R3B)
+    def test_r3d_build_profile_values(self):
+        self.assertEqual(profiles.environment("build"), R3D)
         self.assertEqual((update.BUILD_PROJECT, update.ISOLATED_QDRANT_PORT, update.API_KEY_ENV),
-                         (R3B["project"], 56666, R3B["qdrant_key_env"]))
-        self.assertEqual((neo.ISOLATED_BOLT_PORT, neo.PASSWORD_ENV), (56697, R3B["neo4j_password_env"]))
+                         (R3D["project"], 56766, R3D["qdrant_key_env"]))
+        self.assertEqual((neo.ISOLATED_BOLT_PORT, neo.PASSWORD_ENV), (56797, R3D["neo4j_password_env"]))
         verify = profiles.environment("verify")
         self.assertEqual((verify["project"], verify["qdrant_port"], verify["bolt_port"]), ("issue105-r3d-verify", 56756, 56787))
 
-    def test_r3b_services_own_only_r3b_volumes(self):
+    def test_r3d_services_own_only_r3d_volumes(self):
         services = profiles.services_for("build")
         volumes = set().union(*(s["volumes"] for s in services.values()))
-        self.assertEqual(volumes, {"issue105-r3b-build_qdrant_storage", "issue105-r3b-build_neo4j_data",
-                                   "issue105-r3b-build_neo4j_logs"})
+        self.assertEqual(volumes, {"issue105-r3d-build_qdrant_storage", "issue105-r3d-build_neo4j_data",
+                                   "issue105-r3d-build_neo4j_logs"})
+        self.assertEqual({s["port"] for s in services.values()}, {56766, 56797})
+        self.assertEqual({s["image"] for s in services.values()}, {profiles.QDRANT_IMAGE, profiles.NEO4J_IMAGE})
         self.assertFalse(volumes & set().union(*map(set, OLD_VOLUMES.values())))
+        self.assertFalse(volumes & set().union(*map(set, R3B_VOLUMES.values())))
+
+    def test_preserved_r3b_ports_secrets_project_and_output_are_denied(self):
+        self.assertEqual(profiles.PRESERVED_R3_ENVIRONMENTS["build-r3b"], R3B)
+        self.assertTrue({56666, 56697} <= profiles.FOREIGN_PORTS)
+        self.assertTrue({R3B["qdrant_key_env"], R3B["neo4j_password_env"]} <= set(profiles.FOREIGN_SECRET_ENVS))
+        self.assertIn(R3B["project"], profiles.FOREIGN_PROJECTS)
+        self.assertNotIn("build-r3b", profiles.R3_ENVIRONMENTS)
+        with self.assertRaises(profiles.ProfileError):                          # 보존 항목은 도구가 고를 수 없다
+            profiles.environment("build-r3b")
+        self.assertTrue(profiles.is_preserved_output(ROOT / R3B["out_dir"] / "new-report.json"))
 
     def test_preserved_104_ports_secrets_and_project_are_denied(self):
         self.assertEqual({k: profiles.PRESERVED_R3_ENVIRONMENTS["build-104"][k] for k in OLD}, OLD)
@@ -84,8 +106,11 @@ class ProfileValuesTests(unittest.TestCase):
 
     def test_environment_refuses_a_profile_that_overlaps_preserved_assets(self):
         for field, value in (("qdrant_port", 56646), ("bolt_port", 56677), ("project", OLD["project"]),
-                             ("qdrant_key_env", OLD["qdrant_key_env"]), ("neo4j_password_env", OLD["neo4j_password_env"])):
-            with self.subTest(field=field), patch.dict(profiles.R3_ENVIRONMENTS, {"build": {**R3B, field: value}}):
+                             ("qdrant_key_env", OLD["qdrant_key_env"]), ("neo4j_password_env", OLD["neo4j_password_env"]),
+                             ("qdrant_port", 56666), ("bolt_port", 56697), ("project", R3B["project"]),
+                             ("qdrant_key_env", R3B["qdrant_key_env"]), ("neo4j_password_env", R3B["neo4j_password_env"])):
+            with self.subTest(field=field, value=value), \
+                    patch.dict(profiles.R3_ENVIRONMENTS, {"build": {**R3D, field: value}}):
                 with self.assertRaisesRegex(profiles.ProfileError, "보존"):
                     profiles.environment("build")
 
@@ -94,10 +119,34 @@ class ProfileValuesTests(unittest.TestCase):
         self.assertIn("name: issue105-r3-build\n", text.replace("\r\n", "\n"))
         for needle in ('"127.0.0.1:56646:6333"', '"127.0.0.1:56677:7687"', OLD["qdrant_key_env"], OLD["neo4j_password_env"]):
             self.assertIn(needle, text)
-        new = (ROOT / R3B["compose"]).read_text(encoding="utf-8")
-        body = "\n".join(line for line in new.splitlines() if not line.lstrip().startswith("#"))
+        r3b = (ROOT / R3B["compose"]).read_text(encoding="utf-8")
+        self.assertIn("name: issue105-r3b-build\n", r3b.replace("\r\n", "\n"))           # 보존 r3b compose는 그대로
+        for needle in ('"127.0.0.1:56666:6333"', '"127.0.0.1:56697:7687"', R3B["qdrant_key_env"], R3B["neo4j_password_env"]):
+            self.assertIn(needle, r3b)
+        body = "\n".join(line for line in r3b.splitlines() if not line.lstrip().startswith("#"))
         for needle in ("56646", "56677", "ISSUE105_R3_BUILD_", "issue105-r3-build"):
             self.assertNotIn(needle, body)                       # r3b compose 본문은 #104 값을 쓰지 않는다
+
+    def test_r3d_compose_follows_the_verified_build_layout(self):
+        """새 r3d compose: 이름·loopback 포트·전용 인증 변수만 다르고 이미지 digest·볼륨 키·자원 제한은 r3b와 같다."""
+        text = (ROOT / R3D["compose"]).read_text(encoding="utf-8").replace("\r\n", "\n")
+        body = "\n".join(line for line in text.splitlines() if not line.lstrip().startswith("#"))
+        self.assertTrue(body.startswith("name: issue105-r3d-build\n"))
+        for needle in ('"127.0.0.1:56766:6333"', '"127.0.0.1:56797:7687"',
+                       "${" + R3D["qdrant_key_env"] + ":?", "neo4j/${" + R3D["neo4j_password_env"] + ":?",
+                       profiles.QDRANT_IMAGE, profiles.NEO4J_IMAGE):
+            self.assertIn(needle, body)
+        for needle in ("56646", "56677", "56666", "56697", "56656", "56687", "56756", "56787", "ISSUE105_R3_BUILD_",
+                       "ISSUE105_R3B_BUILD_", "ISSUE105_R3_VERIFY_", "ISSUE105_R3D_VERIFY_", "0.0.0.0", "container_name",
+                       "external", "down -v"):
+            self.assertNotIn(needle, body)
+        self.assertEqual(len(re.findall(r'^\s+- "127\.0\.0\.1:\d+:\d+"$', body, re.M)), 2)   # 게시 포트 2개, 모두 loopback
+        self.assertEqual(len(re.findall(r'^\s+- "[^"]*:\d+:\d+"$', body, re.M)), 2)
+        r3b = (ROOT / R3B["compose"]).read_text(encoding="utf-8").replace("\r\n", "\n")
+        r3b_body = "\n".join(line for line in r3b.splitlines() if not line.lstrip().startswith("#"))
+        normalized = (r3b_body.replace("issue105-r3b-build", "issue105-r3d-build").replace("56666", "56766")
+                      .replace("56697", "56797").replace("ISSUE105_R3B_BUILD_", "ISSUE105_R3D_BUILD_"))
+        self.assertEqual(body, normalized)                       # 나머지(이미지·볼륨 키·mem·cpus·restart)는 r3b와 같다
 
 
 class OutputPathTests(unittest.TestCase):
@@ -110,22 +159,29 @@ class OutputPathTests(unittest.TestCase):
                 with self.assertRaises(profiles.ProfileError):
                     profiles.require_output_path(path)
         self.assertEqual(profiles.is_preserved_output(str(preserved / "X.JSON").upper()), os.name == "nt")
-        for path in (ROOT / ".cache" / "issue105-r3b" / "x.json", ROOT / ".cache" / "issue105-r3-other" / "x.json",
-                     ROOT / ".cache" / "issue105-r3b", bundle.DEFAULT_OUT_DIR):
+        for path in (ROOT / ".cache" / "issue105-r3b", ROOT / ".cache" / "issue105-r3b" / "x.json",
+                     ROOT / ".cache" / "issue105-r3b" / "bundle-r3" / "b2-r3-v1.12.4.snapshot"):
+            with self.subTest(path=str(path)):                   # r3b 출력 폴더도 보존 (새 파일 금지)
+                self.assertTrue(profiles.is_preserved_output(path))
+                with self.assertRaises(profiles.ProfileError):
+                    profiles.require_output_path(path)
+        for path in (ROOT / ".cache" / "issue105-r3d-build" / "x.json", ROOT / ".cache" / "issue105-r3-other" / "x.json",
+                     ROOT / ".cache" / "issue105-r3d-build", ROOT / ".cache" / "issue105-r3bb" / "x.json",
+                     bundle.DEFAULT_OUT_DIR):
             with self.subTest(path=str(path)):
                 self.assertFalse(profiles.is_preserved_output(path))
                 self.assertEqual(profiles.require_output_path(path), path)
 
-    def test_default_bundle_output_is_the_r3b_folder(self):
-        self.assertEqual(bundle.DEFAULT_OUT_DIR, ROOT / ".cache" / "issue105-r3b" / "bundle-r3")
+    def test_default_bundle_output_is_the_r3d_build_folder(self):
+        self.assertEqual(bundle.DEFAULT_OUT_DIR, ROOT / ".cache" / "issue105-r3d-build" / "bundle-r3")
 
 
 def docker_with(qdrant_project=None, neo4j_project=None, qdrant_volumes=None, neo4j_volumes=None, ports=None):
     ports = ports or {}
     return FakeDocker([
-        build_container("b" * 64, "qdrant", project=qdrant_project or R3B["project"], volumes=qdrant_volumes,
+        build_container("b" * 64, "qdrant", project=qdrant_project or R3D["project"], volumes=qdrant_volumes,
                         port=ports.get("qdrant")),
-        build_container("c" * 64, "neo4j", project=neo4j_project or R3B["project"], volumes=neo4j_volumes,
+        build_container("c" * 64, "neo4j", project=neo4j_project or R3D["project"], volumes=neo4j_volumes,
                         port=ports.get("neo4j"))])
 
 
@@ -137,27 +193,35 @@ DOCKER_CASES = {
                                         qdrant_volumes=OLD_VOLUMES["qdrant"], neo4j_volumes=OLD_VOLUMES["neo4j"],
                                         ports={"qdrant": 56646, "neo4j": 56677}),
     "mixed_qdrant_from_104": dict(qdrant_project=OLD["project"], qdrant_volumes=OLD_VOLUMES["qdrant"]),
+    "r3b_project_on_r3d_ports": dict(qdrant_project=R3B["project"], neo4j_project=R3B["project"],
+                                     qdrant_volumes=R3B_VOLUMES["qdrant"], neo4j_volumes=R3B_VOLUMES["neo4j"]),
+    "r3d_label_with_r3b_volumes": dict(qdrant_volumes=R3B_VOLUMES["qdrant"], neo4j_volumes=R3B_VOLUMES["neo4j"]),
+    "r3b_containers_on_r3b_ports": dict(qdrant_project=R3B["project"], neo4j_project=R3B["project"],
+                                        qdrant_volumes=R3B_VOLUMES["qdrant"], neo4j_volumes=R3B_VOLUMES["neo4j"],
+                                        ports={"qdrant": 56666, "neo4j": 56697}),
 }
 
 
 class UpdateToolTests(unittest.TestCase):
     URL = f"http://127.0.0.1:{update.ISOLATED_QDRANT_PORT}"
 
-    def test_only_r3b_qdrant_port_and_never_104_or_verify(self):
+    def test_only_r3d_qdrant_port_and_never_104_r3b_or_verify(self):
+        self.assertEqual(self.URL, "http://127.0.0.1:56766")
         self.assertEqual(update.require_isolated_url(self.URL), self.URL)
-        for url in ("http://127.0.0.1:56646", "http://127.0.0.1:56677", "http://127.0.0.1:56656", "http://localhost:56646"):
+        for url in ("http://127.0.0.1:56646", "http://127.0.0.1:56677", "http://127.0.0.1:56656", "http://localhost:56646",
+                    "http://127.0.0.1:56666", "http://127.0.0.1:56697", "http://127.0.0.1:56756"):
             with self.subTest(url=url), self.assertRaises((update.UpdateError, ValueError)):
                 update.require_isolated_url(url)
 
-    def test_104_secret_values_are_not_reused(self):
+    def test_104_and_r3b_secret_values_are_not_reused(self):
         value = "sample_only_same_value"
-        for old in (OLD["qdrant_key_env"], OLD["neo4j_password_env"]):
+        for old in (OLD["qdrant_key_env"], OLD["neo4j_password_env"], R3B["qdrant_key_env"], R3B["neo4j_password_env"]):
             with self.subTest(old=old), self.assertRaisesRegex(update.UpdateError, "재사용"):
                 update.read_secret(update.API_KEY_ENV, {update.API_KEY_ENV: value, old: value})
         self.assertEqual(update.read_secret(update.API_KEY_ENV, {update.API_KEY_ENV: value, OLD["qdrant_key_env"]: "other"}),
                          value)
 
-    def test_104_containers_or_volumes_are_never_taken_as_r3b(self):
+    def test_104_or_r3b_containers_or_volumes_are_never_taken_as_r3d(self):
         self.assertEqual(set(update.require_build_ownership(good_build_docker())), {"qdrant", "neo4j"})
         for name, kwargs in DOCKER_CASES.items():
             with self.subTest(case=name), self.assertRaisesRegex(update.UpdateError, "Docker 소유"):
@@ -176,13 +240,15 @@ class UpdateToolTests(unittest.TestCase):
 class Neo4jToolTests(unittest.TestCase):
     URL = f"bolt://127.0.0.1:{neo.ISOLATED_BOLT_PORT}"
 
-    def test_only_r3b_bolt_port_and_never_104_or_verify(self):
+    def test_only_r3d_bolt_port_and_never_104_r3b_or_verify(self):
+        self.assertEqual(self.URL, "bolt://127.0.0.1:56797")
         self.assertEqual(neo.require_isolated_bolt_url(self.URL), self.URL)
-        for url in ("bolt://127.0.0.1:56677", "bolt://127.0.0.1:56646", "bolt://127.0.0.1:56687"):
+        for url in ("bolt://127.0.0.1:56677", "bolt://127.0.0.1:56646", "bolt://127.0.0.1:56687", "bolt://127.0.0.1:56697",
+                    "bolt://127.0.0.1:56787"):
             with self.subTest(url=url), self.assertRaises((neo.Neo4jR3Error, ValueError)):
                 neo.require_isolated_bolt_url(url)
 
-    def test_104_containers_or_volumes_are_refused(self):
+    def test_104_or_r3b_containers_or_volumes_are_refused(self):
         for name, kwargs in DOCKER_CASES.items():
             with self.subTest(case=name), self.assertRaisesRegex(neo.Neo4jR3Error, "Docker 소유"):
                 neo.ownership(docker_with(**kwargs))
@@ -214,7 +280,7 @@ class BundleToolTests(unittest.TestCase):
             before = preserved.listing()
             for argv in (["--build", "--confirm-write", "--source-commit", "0" * 40],
                          ["--create-snapshot", "--confirm-write", "--collection", "b2", "--plan", "sample_only.json",
-                          "--qdrant-url", "http://127.0.0.1:56666", "--expect-fingerprint", "0" * 64]):
+                          "--qdrant-url", "http://127.0.0.1:56766", "--expect-fingerprint", "0" * 64]):
                 with self.subTest(mode=argv[0]), self.assertRaises(SystemExit):
                     bundle.main([*argv, "--out-dir", str(preserved.path / "bundle-r3")])
             self.assertEqual(preserved.listing(), before)
@@ -299,12 +365,15 @@ class NewVerifyProfileTests(unittest.TestCase):
         self.assertNotEqual(new, old)
         self.assertEqual(new.parent, old.parent)                                 # 같은 잠금 폴더, 다른 파일
 
-    def test_existing_r3_pins_apply_unchanged_to_the_new_verify_profile(self):
-        pins = profiles.require_finalized()                                      # 환경과 무관한 단일 기준값
+    def test_single_r3_pins_apply_to_the_new_verify_profile(self):
+        """verify 환경도 환경과 무관한 단일 R3_PINS를 쓴다. 현재 C0(249정책)라 최종 확정(C2) 전에는 verify 복원이 불가능하다."""
+        pins = profiles.R3_PINS
         self.assertEqual((profiles.pin_stage(), pins["manifest_lf_sha256"][:8],
                           pins["collections"]["b2"]["points"], pins["collections"]["b3"]["points"],
                           pins["release_counts"]["neo4j_nodes"], pins["release_counts"]["neo4j_relationships"]),
-                         ("stage2", "29b57236", 1233, 1320, 1133, 2674))
+                         ("pending", "b3130722", 1249, 1338, 1147, 2702))
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+            profiles.require_finalized()
         self.assertEqual(bundle.VERIFY_COMPOSE, NEW_VERIFY["compose"])           # 새 번들의 compose.yaml 원본
 
     def test_bundle_package_labels_the_profile_compose(self):
@@ -320,17 +389,20 @@ class NewVerifyProfileTests(unittest.TestCase):
 class RestoreWrapperTests(unittest.TestCase):
     def test_build_and_104_ports_are_denied_for_verify(self):
         # 이전 verify(56656/56687, 보존 verify-6d0450f)도 거부 대상에 들어간다. 현재 verify(56756/56787)만 허용.
-        self.assertTrue({56646, 56677, 56666, 56697, 56656, 56687} <= wrap.DENIED_PORTS)
+        # 현재 build(r3d 56766/56797)·보존 r3b build(56666/56697)도 verify에서는 거부된다.
+        self.assertTrue({56646, 56677, 56666, 56697, 56656, 56687, 56766, 56797} <= wrap.DENIED_PORTS)
         self.assertFalse({56756, 56787} & wrap.DENIED_PORTS)
         for qdrant, bolt in (("http://127.0.0.1:56646", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56677"),
                              ("http://127.0.0.1:56666", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56697"),
-                             ("http://127.0.0.1:56656", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56687")):
+                             ("http://127.0.0.1:56656", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56687"),
+                             ("http://127.0.0.1:56766", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56797")):
             with self.subTest(qdrant=qdrant, bolt=bolt), self.assertRaises((wrap.IsolationError, ValueError)):
                 wrap.require_target_urls(qdrant, bolt)
 
-    def test_verify_secrets_never_reuse_104_or_r3b_build_values(self):
+    def test_verify_secrets_never_reuse_104_r3b_or_r3d_build_values(self):
         values = {wrap.QDRANT_KEY_ENV: "sample_only_verify_key", wrap.NEO4J_PASSWORD_ENV: "sample_only_verify_pw"}
-        for other in (OLD["qdrant_key_env"], OLD["neo4j_password_env"], R3B["qdrant_key_env"], R3B["neo4j_password_env"]):
+        for other in (OLD["qdrant_key_env"], OLD["neo4j_password_env"], R3B["qdrant_key_env"], R3B["neo4j_password_env"],
+                      R3D["qdrant_key_env"], R3D["neo4j_password_env"]):
             with self.subTest(other=other), self.assertRaisesRegex(wrap.IsolationError, "재사용"):
                 wrap.read_secrets({**values, other: values[wrap.NEO4J_PASSWORD_ENV]})
 

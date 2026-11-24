@@ -6,9 +6,9 @@
 - 1차 확정(stage1_pins, 최종 vector_digest 두 칸만 None): 갱신 단계(--apply·--index·Neo4j --load)만 기준값 게이트를
   통과하고(그 뒤 계획·fingerprint·소유 확인이 계속 지킨다), snapshot·번들·번들 복원·교차 검증은 계속 거부된다.
 - 2차 확정(final_sample_pins, 미확정 0개): 모든 단계가 기준값 게이트를 통과하고, 다른 릴리스·잘못된 값은 다음 검사에서 멈춘다.
-- 실제 R3_PINS(C2 stage2, #110 반영 r3b 최종 dry-run 2026-11-23): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고,
-  모든 쓰기 진입점이 기준값 게이트를 통과한 뒤 다음 검사(계획·manifest·digest·Docker)에서 멈춘다
-  (바꿔 끼우지 않고 실제 값으로 확인, 실제 쓰기 0).
+- 실제 R3_PINS(C0 pending, 최신 dev #113·#118 249정책 2026-11-25): 선언 단계(R3_PIN_STAGE)와 계산 단계(pin_stage)가 같고,
+  그 단계에서 허용되지 않은 쓰기 진입점이 모두 쓰기 전에 거부된다 (바꿔 끼우지 않고 실제 값으로 확인, 실제 쓰기 0).
+  확정값 CLI 경로(--apply·--index의 계획 검사, Neo4j --load·--cross-db의 게이트 통과)는 final_sample_pins로 확인한다.
 DB·Docker·Ollama 접속 없음 (sample_only 테스트 더블).
 """
 import hashlib
@@ -246,34 +246,8 @@ class FinalPinTests(Base):
             planner_mod.load_release(bad)
 
 
-class RealFinalPinTests(Base):
-    """실제 R3_PINS (바꿔 끼우지 않음). #110 반영 C2: 미확정 0. 기준값 게이트 통과 ≠ 무조건 허용 — 다음 검사가 계속 지킨다."""
-
-    def test_declared_stage_matches_the_values_and_nothing_is_missing(self):
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage2", "stage2"))
-        self.assertEqual(profiles.missing_pins(), [])
-
-    def test_every_entry_passes_the_pin_gate_and_later_guards_stop_foreign_input(self):
-        never = AssertionError("쓰기·외부 호출 금지")
-        runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
-        with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never), \
-                patch.object(r2w, "run_docker", side_effect=never):
-            update_stage, full = self.entries(folder, runner, never)
-            expected = {"update --apply": (planner.PlanError, "r3 고정값과 다릅니다"),
-                        "update --index": (planner.PlanError, "r3 고정값과 다릅니다"),
-                        "neo4j --load": (neo4j_r3.Neo4jR3Error, "r3 고정값")}
-            for name, call in update_stage.items():
-                with self.subTest(entry=name), self.assertRaisesRegex(*expected[name]):
-                    call()
-            for name, call in full.items():
-                with self.subTest(entry=name), patch.dict(os.environ, {}):
-                    with self.assertRaisesRegex(*self.expected_entry_errors()[name]):
-                        call()
-            self.assertEqual(list(Path(folder).iterdir()), [])
-        self.assertEqual(self.client.writes, [])
-
     def test_cli_apply_and_index_stop_at_the_plan_check_before_docker_or_writes(self):
-        """다른(sample_only) 릴리스 계획은 실제 최종 확정값과 맞지 않아 Docker·쓰기 전에 PlanError로 멈춘다."""
+        """확정값(final_sample_pins)이어도 다른(sample_only) 릴리스 계획은 Docker·쓰기 전에 PlanError로 멈춘다."""
         from database import embedding as em
         with tempfile.TemporaryDirectory() as folder, \
                 patch.object(r2w, "run_docker", side_effect=AssertionError("Docker 호출 금지")), \
@@ -294,7 +268,7 @@ class RealFinalPinTests(Base):
         self.assertEqual(self.client.writes, [])
 
     def test_cli_neo4j_load_and_cross_db_pass_the_pin_gate_and_stop_at_the_connection(self):
-        """실제 최종 확정값은 Neo4j 적재·교차 검증 기준값 게이트를 통과한다 → 접속 단계에서 막아 쓰기 0을 확인한다."""
+        """확정값(final_sample_pins)은 Neo4j 적재·교차 검증 기준값 게이트를 통과한다 → 접속 단계에서 막아 쓰기 0을 확인한다."""
         url = f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}"
         with tempfile.TemporaryDirectory() as folder, \
                 patch("neo4j.GraphDatabase.driver", side_effect=AssertionError("접속 금지")) as driver:
@@ -307,16 +281,52 @@ class RealFinalPinTests(Base):
                     self.assertEqual((code, output["error_type"]), (1, "AssertionError"))
         self.assertTrue(driver.called)
 
-    def test_real_final_pins_reject_foreign_sample_plan_and_wrong_manifest(self):
-        """sample 계획은 실제 points부터 다르므로 거부된다. 개별 digest 변조 검증을 대신하지 않는다."""
-        plan = self.s.plan("b2")
-        for field, value in (("plan_sha256", "0" * 64), ("reuse_vector_digest", "0" * 64)):
-            with self.subTest(field=field):
-                bad = profiles.r3_pins()
-                bad["collections"]["b2"][field] = value
-                self.assertNotEqual(bad, profiles.R3_PINS)
-                with self.assertRaises(planner.PlanError):      # sample 계획은 실제 값과 다르다 (points 1233 ≠ 6)
-                    planner.validate_plan(plan, self.s.release, bad, self.s.sources, require_pins=True)
+
+class RealC0PinTests(Base):
+    """실제 R3_PINS (바꿔 끼우지 않음). 최신 dev(249정책) C0: manifest·건수·points만 확정, 계획·결과 값은 미확정."""
+
+    PLAN_FIELDS = ("vector_digest", "reuse_count", "reuse_vector_digest", "embed_count", "delete_count", "plan_sha256")
+
+    def test_declared_stage_matches_the_values_and_only_plan_results_are_missing(self):
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
+        self.assertEqual(sorted(profiles.missing_pins()),
+                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in self.PLAN_FIELDS))
+        self.assertEqual(set(profiles.STAGE_ALLOWED_WRITES[profiles.pin_stage()]), set(profiles.WRITES_WITHOUT_PINS))
+
+    def test_every_pin_requiring_write_is_refused_before_writing_with_real_pins(self):
+        never = AssertionError("쓰기·외부 호출 금지")
+        runner = SimpleNamespace(read_rows=lambda *a, **k: (_ for _ in ()).throw(never))
+        with tempfile.TemporaryDirectory() as folder, patch.object(fi, "execute_full_index", side_effect=never),                 patch.object(r2w, "run_docker", side_effect=never):
+            update_stage, full = self.entries(folder, runner, never)
+            for name, call in {**update_stage, **full}.items():
+                with self.subTest(entry=name), patch.dict(os.environ, {}),                         self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+                    call()
+            self.assertEqual(list(Path(folder).iterdir()), [])
+        self.assertEqual(self.client.writes, [])
+
+    def test_cli_apply_index_load_and_cross_db_stop_before_docker_or_connections(self):
+        with tempfile.TemporaryDirectory() as folder,                 patch.object(r2w, "run_docker", side_effect=AssertionError("Docker 호출 금지")),                 patch.object(update, "make_isolated_client", side_effect=AssertionError("접속 금지")),                 patch.dict(os.environ, ENV):
+            plan_path = Path(folder) / "plan.json"
+            plan_path.write_text(json.dumps(self.plan), encoding="utf-8")
+            for mode in (["--apply"], ["--index", "--ollama-url", "http://127.0.0.1:11434"]):
+                with self.subTest(mode=mode[0]):
+                    report = Path(folder) / f"report{mode[0]}.json"
+                    code = update.main(["--qdrant-url", URL, "--collection", "b2", "--plan", str(plan_path), *mode,
+                                        "--confirm-write", "--expect-fingerprint", "0" * 64, "--report", str(report)])
+                    output = json.loads(report.read_text(encoding="utf-8"))
+                    self.assertEqual((code, output["error_type"]), (1, "ProfileError"))
+            url = f"bolt://127.0.0.1:{neo4j_r3.ISOLATED_BOLT_PORT}"
+            with patch("neo4j.GraphDatabase.driver", side_effect=AssertionError("접속 금지")) as driver:
+                for name, extra in (("load", ["--load", "--confirm-write", "--expect-fingerprint", "0" * 64]),
+                                    ("cross-db", ["--cross-db", "--qdrant-url", URL])):
+                    with self.subTest(mode=name):
+                        report = Path(folder) / f"neo4j-{name}.json"
+                        code = neo4j_r3.main(["--neo4j-url", url, *extra, "--report", str(report)])
+                        output = json.loads(report.read_text(encoding="utf-8"))
+                        self.assertEqual((code, output["error_type"]), (1, "ProfileError"))
+                self.assertFalse(driver.called)
+
+    def test_real_c0_pins_reject_a_wrong_manifest(self):
         bad = profiles.r3_pins()
         bad["manifest_lf_sha256"] = "0" * 64
         with self.assertRaisesRegex(planner.PlanError, "manifest"):

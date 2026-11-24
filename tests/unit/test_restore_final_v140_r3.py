@@ -112,11 +112,15 @@ class Bundle:
 
 
 class RealPinBundleDigestTests(unittest.TestCase):
-    """실제 R3_PINS(C2 stage2)로 만든 최소 번들(sample_only 바이트)에서 Point 수는 그대로 두고 vector_digest만 바꾸면
-    해당 컬렉션에서 거부된다. B2·B3 각각 확인한다 (계획 대조가 아니라 번들 메타데이터 대조 경로)."""
+    """현재 릴리스 기준 확정 모양(final_sample_pins: 실제 R3_PINS의 manifest·건수·points + sample_only 계획·digest)으로 만든
+    최소 번들(sample_only 바이트)에서 Point 수는 그대로 두고 vector_digest만 바꾸면 해당 컬렉션에서 거부된다.
+    B2·B3 각각 확인한다 (계획 대조가 아니라 번들 메타데이터 대조 경로). 실제 R3_PINS(C0 pending)는 같은 번들을 게이트에서 거부한다."""
+
+    def setUp(self):
+        self.pins = final_sample_pins()
 
     def build(self, folder: Path, tamper: str | None = None) -> None:
-        pins = profiles.R3_PINS
+        pins = self.pins
         commit = "c" * 40
         members = {profiles.R3_COLLECTIONS[k]["snapshot_member"]: f"sample_only {k} snapshot".encode()
                    for k in profiles.COLLECTION_KEYS}
@@ -141,19 +145,26 @@ class RealPinBundleDigestTests(unittest.TestCase):
         (folder / "SHA256SUMS").write_text("".join(f"{hashlib.sha256(data).hexdigest()}  {name}\n"
                                                    for name, data in sorted(members.items())), encoding="utf-8")
 
-    def test_real_final_pins_accept_matching_metadata_and_refuse_digest_only_change(self):
-        self.assertEqual(profiles.pin_stage(), "stage2")
+    def test_final_shape_pins_accept_matching_metadata_and_refuse_digest_only_change(self):
+        self.assertEqual(profiles.pin_stage(self.pins), "stage2")
         with tempfile.TemporaryDirectory() as folder:
             self.build(Path(folder))
-            package, snapshots = r3.check_bundle(folder)                 # 실제 최종 핀과 같은 메타데이터는 통과
+            package, snapshots = r3.check_bundle(folder, self.pins)      # 확정 핀과 같은 메타데이터는 통과
             self.assertEqual(set(snapshots), set(profiles.COLLECTION_KEYS))
         for key in profiles.COLLECTION_KEYS:
             with self.subTest(tampered=key), tempfile.TemporaryDirectory() as folder:
                 self.build(Path(folder), tamper=key)
                 points = json.loads((Path(folder) / "package.json").read_text(encoding="utf-8"))["collections"][key]["points"]
-                self.assertEqual(points, profiles.R3_PINS["collections"][key]["points"])   # Point 수는 같다
+                self.assertEqual(points, profiles.R3_PINS["collections"][key]["points"])   # Point 수는 실제 핀과 같다
                 with self.assertRaisesRegex(ValueError, rf"count/digest: {key}"):
-                    r3.check_bundle(folder)
+                    r3.check_bundle(folder, self.pins)
+
+    def test_real_c0_pins_refuse_the_same_bundle_at_the_gate(self):
+        self.assertEqual(profiles.pin_stage(), "pending")
+        with tempfile.TemporaryDirectory() as folder:
+            self.build(Path(folder))
+            with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+                r3.check_bundle(folder)
 
 
 class CheckBundleTests(unittest.TestCase):
@@ -180,9 +191,9 @@ class CheckBundleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             r3.check_bundle(self.b.folder, final_sample_pins())
 
-    def test_real_final_pins_pass_the_gate_and_reject_a_foreign_manifest(self):
-        """실제 R3_PINS(C2 final)는 기준값 게이트를 통과하고, sample_only 번들의 manifest가 달라 거부된다."""
-        with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
+    def test_real_c0_pins_refuse_every_bundle_at_the_gate(self):
+        """실제 R3_PINS(C0 pending)는 계획·digest가 미확정이라 번들 내용을 보기 전에 기준값 게이트에서 거부한다."""
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
             r3.check_bundle(self.b.folder)
 
     def test_r2_package_and_wrong_contents_are_refused(self):
@@ -463,8 +474,8 @@ class RestoreTests(unittest.TestCase):
         for pins in (pending_pins(), stage1_pins()):
             with self.assertRaises(profiles.ProfileError):
                 self.run_restore(R3Qdrant(), pins=pins)
-        with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
-            self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C2): 게이트 통과 후 번들 불일치 거부
+        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+            self.run_restore(R3Qdrant(), pins=None)                # 실제 R3_PINS(C0 pending): 기준값 게이트에서 거부
         with self.assertRaisesRegex(ValueError, "manifest/counts differ"):
             self.run_restore(R3Qdrant(), pins=final_sample_pins())  # 2차 확정 모양: 게이트 통과 후 번들 불일치 거부
 

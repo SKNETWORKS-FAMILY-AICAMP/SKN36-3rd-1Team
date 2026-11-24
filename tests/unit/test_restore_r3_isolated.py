@@ -286,13 +286,12 @@ class RunTests(unittest.TestCase):
         tool.write_bytes(crlf)                                         # 줄바꿈만 다른 같은 도구는 허용
         self.b.write_sums()
         self.assertEqual(self.run_mode("preflight", restore_fn=FakeRestore())["db_writes"], 0)
-        for pins in (pending_pins(), stage1_pins()):                  # 미확정·1차 상태는 거부
-            with self.subTest(pins=profiles.pin_stage(pins)), self.assertRaises(profiles.ProfileError):
+        for pins in (pending_pins(), stage1_pins(), None):           # 미확정·1차·실제 C0(pending) 상태는 거부
+            with self.subTest(pins="real" if pins is None else profiles.pin_stage(pins)), \
+                    self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
                 wrap.check_source_and_bundle(wrap.ROOT, self.b.folder, pins)
-        for pins in (None, final_sample_pins()):                      # 실제 C2·2차 모양: 게이트 통과 후 번들 불일치
-            with self.subTest(pins="real" if pins is None else "final_sample"), \
-                    self.assertRaisesRegex(ValueError, "manifest/counts differ"):
-                wrap.check_source_and_bundle(wrap.ROOT, self.b.folder, pins)
+        with self.subTest(pins="final_sample"), self.assertRaisesRegex(ValueError, "manifest/counts differ"):
+            wrap.check_source_and_bundle(wrap.ROOT, self.b.folder, final_sample_pins())   # 2차 모양: 게이트 통과 후 번들 불일치
 
     def test_source_archive_must_match_repo(self):
         self.b.write_source({profiles.PROFILE_SCRIPT: b"# sample_only other pins\n"})

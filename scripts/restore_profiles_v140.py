@@ -4,8 +4,10 @@ r2(#91)와 r3(#105)의 기대값·manifest·vector digest·snapshot 정보를 �
 
 - R2: #91에서 실제로 검증을 마친 값(동결). 기존 r2 도구(restore_final_v140·seed·update·load·build·restore_r2_isolated)의
   상수는 그대로 두고, 이 표의 값과 같은지는 tests/unit/test_restore_profiles_v140.py가 확인한다.
-- R3: B2·B3 두 컬렉션 + Neo4j. #110 반영 릴리스(manifest 29b57236…, 2026-11-23 병합 7aa5266) 기준 C2(stage2) 단계다. 미확정 값 0개.
-  #104 기준(manifest 2e22d2a7…)으로 1·2차 확정했던 값은 보존 자산 기록이며 Runbook §5.5에 남겼다.
+- R3: B2·B3 두 컬렉션 + Neo4j. 최신 dev(#113·#118, 249정책) 병합 릴리스(manifest b3130722…, 2026-11-25 병합 ce7266b)
+  기준 C0(pending) 단계다. 계획·임베딩 결과 값은 아직 미확정이다.
+  #110 기준(manifest 29b57236…) C0~C2 확정값과 #104 기준(manifest 2e22d2a7…) 1·2차 확정값은 보존 자산 기록이며
+  Runbook §5.5·§5.11에 남겼다.
   단계(R3_PIN_STAGE, pin_stage()로 실제 값과 대조): pending → stage1(최종 vector_digest 두 칸만 None) → stage2(None 0).
   None이 하나라도 있으면 require_finalized()가 거부한다. R3_PINS 미확정 상태에서
     허용되는 쓰기 (WRITES_WITHOUT_PINS): build 격리 Qdrant에 원본 snapshot 복원(update_r3_collections --restore-snapshot,
@@ -15,8 +17,9 @@ r2(#91)와 r3(#105)의 기대값·manifest·vector digest·snapshot 정보를 �
   병합 후 build 서버에서 만든 계획(basis=server_snapshot)과 proposed_pins를 검토하고, 승인된 값만 R3_PINS에 옮겨 적는다.
   #31 덤프로 만든 계획(basis=dump_preview)은 사전 검토용이며 고정값·쓰기에 쓰지 않는다. 계산값을 자동으로 고정하지 않는다.
 - R3의 원본(source) 값은 이미 있는 자산의 사실이다(최신 릴리스 값이 아님).
-  B2 = r2 snapshot(#91 독립 복원으로 digest 확인), B3 = #31 snapshot(덤프·공유 DB scan digest와 같다고 기록,
-  snapshot 자체를 격리 서버에 복원한 digest는 아직 미검증 → update_r3_collections가 복원 직후 대조한다).
+  249정책 재구축(r3d)부터 B2·B3 모두 r3b 최종 snapshot(#110 기준 246정책 릴리스의 완료 상태)이 원본이다.
+  벡터만 재사용 후보이며, 재사용 여부는 Point별 실제 임베딩 입력·모델·차원·입력 규칙으로 판정한다(plan_r3_vector_reuse).
+  이전 원본(B2 = r2 snapshot 8577c3c8…, B3 = #31 snapshot 0a794e34…)은 r3b 구축에 쓴 기록이다(Runbook §5.11).
 """
 from __future__ import annotations
 
@@ -69,51 +72,50 @@ R2_PROFILE: dict[str, Any] = {
 # ---------------------------------------------------------------------------
 # r3 (#105) — 원본 자산(사실)과 최신 릴리스 기준(병합 후 확정)
 # ---------------------------------------------------------------------------
+# r3d 원본 = r3b 최종 snapshot (2026-11-25 확인). 근거(로컬, Git 제외 .cache/issue105-r3b/, 읽기만 함):
+#   - snapshot 파일 SHA-256: 파일을 다시 계산한 값 = bundle-r3b-20261123-01/snapshot-record-{b2,b3}.json의 snapshot_sha256
+#   - points·vector_digest: snapshot record = 최종 dry-run 11-b2-final-dryrun.json·12-b3-final-dryrun.json(state=complete,
+#     payload_pending 0)의 full_vector_digest = #110 C2 R3_PINS의 vector_digest
+#   - 같은 snapshot을 담은 번들의 독립 복원 verify-only(21-verify-only.json) PASS, 전체 벡터·보호 payload 불변
+#   payload는 #110(manifest 29b57236…) 기준이다. 최신 릴리스와의 차이는 계획(재사용·삭제 후 재임베딩·신규)이 판정한다.
 R3_SOURCES: dict[str, dict[str, Any]] = {
-    "b2": {"label": "r2 snapshot (#91)",
-           "default_path": ".cache/issue91-r2-20261119/bundle-r2/b2-r2-v1.12.4.snapshot",
-           "snapshot_sha256": R2_PROFILE["collections"]["b2"]["snapshot_sha256"],
-           "points": 1139, "vector_digest": R2_PROFILE["collections"]["b2"]["vector_digest"],
-           "digest_basis": "#91 독립 복원(issue91-r2-verify-20261119)에서 snapshot 복원 후 scan으로 확인"},
-    "b3": {"label": "B3 snapshot (#31 before)",
-           "default_path": "venv/issue31_20261109/exp_b3_qwen3emb06b_v140_v1.before.snapshot",
-           "snapshot_sha256": "502b7b7e1b923183a2992a5450e63470d2da5238317d9883f07382cdbb584ad8",
-           "points": 1220, "vector_digest": "0a794e34a91f4314b6e469d6375177ac745b8b00e5ce3d4f0c2bc2f50d726371",
-           "digest_basis": "#31 before/after 덤프와 공유·pr29 서버 scan의 digest. snapshot 자체의 격리 복원은 미검증"},
+    "b2": {"label": "r3b final snapshot (#110, B2)",
+           "default_path": ".cache/issue105-r3b/bundle-r3b-20261123-01/b2-r3-v1.12.4.snapshot",
+           "snapshot_sha256": "834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89",
+           "points": 1233, "vector_digest": "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d",
+           "digest_basis": "r3b build 최종 dry-run(state=complete)·snapshot record·verify-only 독립 복원 PASS (#110 C2)"},
+    "b3": {"label": "r3b final snapshot (#110, B3)",
+           "default_path": ".cache/issue105-r3b/bundle-r3b-20261123-01/b3-r3-v1.12.4.snapshot",
+           "snapshot_sha256": "91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8",
+           "points": 1320, "vector_digest": "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120",
+           "digest_basis": "r3b build 최종 dry-run(state=complete)·snapshot record·verify-only 독립 복원 PASS (#110 C2)"},
 }
 
 # r3 기준값. None = 미확정 (require_finalized가 거부한다). 값은 dry-run의 proposed_pins를 검토해 옮겨 적는다.
-# C0 (2026-11-23, #110 반영 7aa5266): 릴리스 파일에서 직접 다시 계산해 확인한 값만 적었다.
-#   manifest LF SHA-256·release_counts·컬렉션별 points(B2·B3 청킹 결과 수). load_release()가 이 값과 다르면 거부한다.
-# C1 (2026-11-23, 1931ca8 기준): r3b build 서버(issue105-r3b-build)에 원본 snapshot(B2 r2 8577c3c8…·B3 #31 0a794e34…)을
-#   복원한 뒤 만든 서버 계획(basis=server_snapshot)의 검증값. 계획 파일(로컬, Git 제외): .cache/issue105-r3b/plan-b2.json
-#   (SHA-256 65e530d7…), plan-b3.json (8e7d6258…), 보고서 03-b2-plan.json·04-b3-plan.json의 proposed_pins와 같다.
-#   remove_count는 두 계획 모두 0(C0 예상과 같음).
-# C2 (2026-11-23, 43729a7 기준): r3b 서버에서 apply(B2 삭제 14·B3 23)·index(B2 108·B3 123) 완료 후, 쓰기와 별도로 서버를
-#   다시 읽은 최종 dry-run(.cache/issue105-r3b/11-b2-final-dryrun.json·12-b3-final-dryrun.json)의 전체 vector_digest.
-#   state=complete, payload_pending 0, 삭제·누락·문제 0, 재사용 부분 digest = 고정값이며, index 보고서(07·10)와 proposed_final_pins가
-#   같은 값이다. 이로써 미확정 0 → snapshot·번들·번들 복원·교차 검증의 기준값 게이트가 열린다(다른 검사는 그대로).
-# #104 기준 1·2차 확정값(manifest 2e22d2a7…, B2 d1fa3194…, B3 a471e21f…)은 보존 기록이다 → Runbook §5.5.
+# C0 (2026-11-25, 최신 dev #113·#118 병합 ce7266b, 249정책): 릴리스 파일에서 직접 다시 계산해 확인한 값만 적었다.
+#   manifest LF SHA-256·release_counts·컬렉션별 points(B2·B3 청킹 결과 수 = full_index expected_chunks).
+#   load_release()가 이 값과 다르면 거부한다.
+#   계획·임베딩 결과에서만 정해지는 값(reuse·embed·delete·plan_sha256·reuse_vector_digest·vector_digest)은 None이다.
+#   remove_count 0은 "원본에만 있고 삭제 대상도 아닌 Point 0개"라는 예상이며, 계획의 값이 다르면 validate_plan이 거부한다.
+#   (사전 오프라인 추정: B2 재사용 1229·삭제 후 재임베딩 4·신규 16, B3 1316·4·18 — 고정값 아님, 서버 계획으로만 확정)
+# 다음: C1 = r3d build 서버(issue105-r3d-build)에 R3_SOURCES(r3b 최종 snapshot)를 복원한 뒤 만든 서버 계획의 검증값,
+#       C2 = apply·index 완료 후 최종 dry-run의 전체 vector_digest. 계산값을 자동으로 고정하지 않는다.
+# 보존 기록 (현재 값 아님): #110 기준 C0~C2(manifest 29b57236…, B2 90d0f593…·B3 718046c3…) → Runbook §5.5.2~5.5.3,
+#   #104 기준 1·2차(manifest 2e22d2a7…, B2 d1fa3194…, B3 a471e21f…) → Runbook §5.5.
 R3_PINS: dict[str, Any] = {
-    "manifest_lf_sha256": "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7",
-    "release_counts": {"policies": 246, "documents": 268, "release_chunks": 663, "neo4j_nodes": 1133,
-                       "neo4j_relationships": 2674, "requires_condition": 211},
+    "manifest_lf_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "release_counts": {"policies": 249, "documents": 273, "release_chunks": 672, "neo4j_nodes": 1147,
+                       "neo4j_relationships": 2702, "requires_condition": 211},
     "collections": {
-        "b2": {"points": 1233, "vector_digest": "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d",
-               "reuse_count": 1125,
-               "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
-               "embed_count": 108, "delete_count": 14, "remove_count": 0,
-               "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738"},
-        "b3": {"points": 1320, "vector_digest": "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120",
-               "reuse_count": 1197,
-               "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
-               "embed_count": 123, "delete_count": 23, "remove_count": 0,
-               "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d"},
+        "b2": {"points": 1249, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
+               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
+        "b3": {"points": 1338, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
+               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
     },
 }
 # 선언한 단계. pin_stage()가 R3_PINS에서 계산한 단계와 같아야 한다(테스트가 확인) → 값만 바꾸고 단계를 잊는 실수를 막는다.
 # 단계 이름: pending(C0) / stage1(C1) / stage2(C2, 최종 digest까지 확정).
-R3_PIN_STAGE = "stage2"
+R3_PIN_STAGE = "pending"
 
 R3_COLLECTIONS: dict[str, dict[str, Any]] = {
     "b2": {"config": "A_B2_V140", "collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2",
@@ -127,14 +129,15 @@ COLLECTION_KEYS = tuple(R3_COLLECTIONS)
 
 # 격리 Docker 프로젝트. build = 갱신·적재·snapshot 생성용, verify = 번들 독립 복원 검증용.
 # 포트는 r2·공유·이전 작업 포트와 겹치지 않아야 한다(테스트가 확인).
-# build는 #110 반영 재구축용 r3b 프로젝트다 (2026-11-23). #104 기준 build(issue105-r3-build)는 아래
-# PRESERVED_R3_ENVIRONMENTS에 기록만 남기고, 그 포트·인증 변수는 FOREIGN_*로 거부한다(r3 도구가 접속하지 않음).
+# build는 최신 dev(249정책) 반영 재구축용 r3d 프로젝트다 (2026-11-25). r3b build(issue105-r3b-build, #110 기준 246정책
+# 최종 상태)와 #104 기준 build(issue105-r3-build)는 아래 PRESERVED_R3_ENVIRONMENTS에 기록만 남기고, 그 포트·인증 변수·프로젝트는
+# FOREIGN_*로 거부한다(r3 도구가 접속하지 않음). r3b 출력 폴더의 원본 snapshot은 R3_SOURCES로 읽기만 한다.
 R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
-    "build": {"project": "issue105-r3b-build", "compose": "docs/development/issue105_r3b_build.compose.yaml",
-              "qdrant_port": 56666, "bolt_port": 56697,
-              "qdrant_key_env": "ISSUE105_R3B_BUILD_QDRANT_API_KEY",
-              "neo4j_password_env": "ISSUE105_R3B_BUILD_NEO4J_PASSWORD",
-              "out_dir": ".cache/issue105-r3b"},
+    "build": {"project": "issue105-r3d-build", "compose": "docs/development/issue105_r3d_build.compose.yaml",
+              "qdrant_port": 56766, "bolt_port": 56797,
+              "qdrant_key_env": "ISSUE105_R3D_BUILD_QDRANT_API_KEY",
+              "neo4j_password_env": "ISSUE105_R3D_BUILD_NEO4J_PASSWORD",
+              "out_dir": ".cache/issue105-r3d-build"},
     # verify는 PR #111(P1-A~E) 코드로 새로 만드는 독립 복원 검증 환경이다 (2026-11-24). 이전 verify(issue105-r3-verify)는
     # §5.9 복원에 이미 쓴 DB라 아래 PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]로 옮겨 보존·거부한다.
     # out_dir는 이 환경의 새 보고서·번들을 둘 권장 위치를 기록한다(도구 기본값을 바꾸지 않음 — CLI의 --report·--out-dir로 지정).
@@ -144,9 +147,17 @@ R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
                "neo4j_password_env": "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD",
                "out_dir": ".cache/issue105-r3d"},
 }
-# 보존 자산(읽기·쓰기 모두 대상 아님): #104 기준 r3 build. B2 1233(d1fa3194…)·B3 1320(a471e21f…)·Neo4j 1133/2674,
+# 보존 자산(DB 접속·쓰기 대상 아님): #104 기준 r3 build. B2 1233(d1fa3194…)·B3 1320(a471e21f…)·Neo4j 1133/2674,
 # snapshot·ZIP·보고서는 .cache/issue105-r3/에 있다. 이 표는 기록과 거부 목록 생성용이며 도구가 선택할 수 없다.
 PRESERVED_R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
+    # r3b build (#110 기준 246정책 최종 상태, B2 1233·B3 1320·Neo4j 1133/2674, 2026-11-23). 컨테이너·볼륨·인증 파일과
+    # .cache/issue105-r3b의 계획·보고서·snapshot·번들은 보존한다. 그 폴더에 새 파일을 만들지 않으며, 원본 snapshot 두 개는
+    # R3_SOURCES.default_path로 읽기만 한다 (update_r3_collections --restore-snapshot이 SHA-256을 먼저 대조).
+    "build-r3b": {"project": "issue105-r3b-build", "compose": "docs/development/issue105_r3b_build.compose.yaml",
+                  "qdrant_port": 56666, "bolt_port": 56697,
+                  "qdrant_key_env": "ISSUE105_R3B_BUILD_QDRANT_API_KEY",
+                  "neo4j_password_env": "ISSUE105_R3B_BUILD_NEO4J_PASSWORD",
+                  "out_dir": ".cache/issue105-r3b"},
     "build-104": {"project": "issue105-r3-build", "compose": "docs/development/issue105_r3_build.compose.yaml",
                   "qdrant_port": 56646, "bolt_port": 56677,
                   "qdrant_key_env": "ISSUE105_R3_BUILD_QDRANT_API_KEY",
@@ -304,7 +315,8 @@ def is_preserved_output(path) -> bool:
 def require_output_path(path, what: str = "출력 경로"):
     """r3 도구의 새 파일(보고서·계획·snapshot·번들)을 보존 자산 폴더 안에 만들지 않는다. CLI 인자 검사 단계에서 호출한다."""
     if path is not None and is_preserved_output(path):
-        raise ProfileError(f"{what}가 보존 자산 폴더(#104 r3) 안입니다 → 새 파일도 만들지 않음 (.cache/issue105-r3b/ 사용)")
+        raise ProfileError(f"{what}가 보존 자산 폴더(#104 r3·r3b·이전 verify) 안입니다 → 새 파일도 만들지 않음 "
+                           f"({R3_ENVIRONMENTS['build']['out_dir']}/ 사용)")
     return path
 
 

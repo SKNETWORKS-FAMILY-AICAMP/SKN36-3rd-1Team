@@ -364,14 +364,14 @@ def write_new_json(path: Path, value: Any) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="r3 B2·B3 벡터 재사용 계획 (읽기 전용)")
-    parser.add_argument("--b2-dump", type=Path, help="B2 원본 덤프 JSON (r2 snapshot과 같은 digest여야 함)")
-    parser.add_argument("--b3-dump", type=Path, help="B3 원본 덤프 JSON (#31 snapshot과 같은 digest여야 함)")
+    parser.add_argument("--b2-dump", type=Path, help="B2 원본 덤프 JSON (R3_SOURCES b2와 같은 digest여야 함)")
+    parser.add_argument("--b3-dump", type=Path, help="B3 원본 덤프 JSON (R3_SOURCES b3와 같은 digest여야 함)")
     parser.add_argument("--report", type=Path, help="결과를 저장할 새 JSON 경로 (이미 있으면 거부)")
     args = parser.parse_args(argv)
     if args.report and args.report.exists():
         parser.error("이미 있는 보고서는 덮어쓰지 않습니다")
     if args.report and profiles.is_preserved_output(args.report):
-        parser.error("보존 자산 폴더(#104 r3, .cache/issue105-r3) 안에는 새 파일도 만들지 않습니다")
+        parser.error("보존 자산 폴더(#104 r3·r3b·이전 verify) 안에는 새 파일도 만들지 않습니다")
     try:
         release = load_release()
         plans = {}

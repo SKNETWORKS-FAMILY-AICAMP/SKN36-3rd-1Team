@@ -4,7 +4,8 @@
 - Sample: B2·B3 각각 A 동일, B 메타데이터 변경, C 문서 해시 변경(핵심 payload), D 본문 변경(삭제),
   R 정책명 변경(삭제), E 신규. 원본 Point는 실행 ID 2개(RUN_OLD·RUN_OTHER)를 섞어 실행 정보 보존을 확인한다.
 - pins_for(): 계획에서 만든 "확정된" R3_PINS 모양 (테스트 안에서만 쓰는 sample_only 값)
-- build_container()·good_build_docker(): issue105-r3-build 프로젝트 Docker 소유 확인용 FakeDocker (docker ps·inspect만 응답)
+- build_container()·good_build_docker(): 현재 build 프로필 프로젝트(issue105-r3d-build) Docker 소유 확인용 FakeDocker
+  (docker ps·inspect만 응답)
 """
 from __future__ import annotations
 
@@ -71,11 +72,12 @@ def pending_pins():
     return pins
 
 
-# final_sample_pins()의 계획·결과 값 (sample_only). reuse + embed = points, reuse + delete = 원본 snapshot Point 수.
+# final_sample_pins()의 계획·결과 값 (sample_only — 실제 계획값이 아님, 서버 계획 전까지 실제 값은 모른다).
+# reuse + embed = points(R3_PINS: B2 1249·B3 1338), reuse + delete = 원본 snapshot Point 수(R3_SOURCES: B2 1233·B3 1320).
 SAMPLE_PLAN_VALUES = {
-    "b2": {"reuse_count": 1125, "embed_count": 108, "delete_count": 14, "vector_digest": "1" * 64,
+    "b2": {"reuse_count": 1200, "embed_count": 49, "delete_count": 33, "vector_digest": "1" * 64,
            "reuse_vector_digest": "2" * 64, "plan_sha256": "3" * 64},
-    "b3": {"reuse_count": 1197, "embed_count": 123, "delete_count": 23, "vector_digest": "4" * 64,
+    "b3": {"reuse_count": 1300, "embed_count": 38, "delete_count": 20, "vector_digest": "4" * 64,
            "reuse_vector_digest": "5" * 64, "plan_sha256": "6" * 64},
 }
 

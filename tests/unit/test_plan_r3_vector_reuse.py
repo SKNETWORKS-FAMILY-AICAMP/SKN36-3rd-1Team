@@ -19,8 +19,13 @@ from database import full_index as fi, handoff_data as hd  # noqa: E402
 from scripts import plan_r3_vector_reuse as planner  # noqa: E402
 from scripts import restore_profiles_v140 as profiles  # noqa: E402
 
-B3_DUMP = Path(__file__).resolve().parents[2] / profiles.R3_SOURCES["b3"]["default_path"].replace(
-    ".before.snapshot", ".after.json")
+# #31 B3 덤프(로컬, Git 제외)와 그 원본 기록. r3b 구축(#110) 때의 B3 원본이었고, 지금 R3_SOURCES(r3b 최종 snapshot)는 아니다.
+# 덤프 사전 검토(dump_preview) 경로가 실제 릴리스·실제 덤프에서 일관된지 확인하는 데만 쓴다 (sources를 명시해 넘긴다).
+B3_DUMP = Path(__file__).resolve().parents[2] / "venv/issue31_20261109/exp_b3_qwen3emb06b_v140_v1.after.json"
+ISSUE31_B3_SOURCE = {"b3": {"label": "B3 snapshot (#31 before, r3b 구축 때의 원본 기록)", "points": 1220,
+                            "vector_digest": "0a794e34a91f4314b6e469d6375177ac745b8b00e5ce3d4f0c2bc2f50d726371",
+                            "snapshot_sha256": "502b7b7e1b923183a2992a5450e63470d2da5238317d9883f07382cdbb584ad8",
+                            "default_path": "venv/issue31_20261109/exp_b3_qwen3emb06b_v140_v1.before.snapshot"}}
 
 
 class ClassifyTests(unittest.TestCase):
@@ -101,7 +106,7 @@ class ClassifyTests(unittest.TestCase):
         with self.assertRaisesRegex(planner.PlanError, "원본이 기록된 자산"):
             planner.build_plan("b3", records, s.release, s.sources, basis=profiles.PLAN_BASIS_SERVER)
         with self.assertRaisesRegex(planner.PlanError, "원본이 기록된 자산"):
-            planner.check_source("b2", s.records["b2"])            # 실제 R3_SOURCES(r2 snapshot)와 다르다
+            planner.check_source("b2", s.records["b2"])            # 실제 R3_SOURCES(r3b 최종 snapshot)와 다르다
 
 
 class ValidatePlanTests(unittest.TestCase):
@@ -124,13 +129,15 @@ class ValidatePlanTests(unittest.TestCase):
             planner.validate_plan(self.plans["b2"], self.s.release, stage1_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
-    def test_real_final_pins_pass_the_gate_and_compare_the_pinned_plan_values(self):
-        """실제 R3_PINS(C2 final): 최종·갱신 단계 검증 모두 기준값 게이트를 통과한 뒤 계획 값(points 등)을 대조해
-        다른(sample_only) 계획을 거부한다."""
+    def test_real_c0_pins_block_write_validation_and_still_compare_the_fixed_values(self):
+        """실제 R3_PINS(C0 pending): 쓰기용 검증(최종·갱신 단계 모두)은 기준값 게이트에서 거부되고,
+        dry-run 검증도 이미 확정된 값(points 1249 등)을 대조해 다른(sample_only) 계획을 거부한다."""
         for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
-            with self.subTest(deferred=bool(deferred)), self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):
+            with self.subTest(deferred=bool(deferred)), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
                 planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
                                       require_pins=True, deferred=deferred)
+        with self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):
+            planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources)
 
     def test_finalized_pins_must_match_the_plan(self):
         pins = self.s.pins_for(self.plans)
@@ -237,9 +244,10 @@ class RealReleaseTests(unittest.TestCase):
     def test_real_b3_dump_plan_is_consistent_without_db_or_embedding(self):
         before = planner.restore.file_sha(B3_DUMP)
         with patch.object(planner.em, "make_ollama_embedder", side_effect=AssertionError("임베딩 금지")):
-            plan = planner.build_plan("b3", planner.load_dump(B3_DUMP), self.release,
+            plan = planner.build_plan("b3", planner.load_dump(B3_DUMP), self.release, ISSUE31_B3_SOURCE,
                                       basis=profiles.PLAN_BASIS_PREVIEW)
-        self.assertEqual(plan["source"]["vector_digest"], profiles.R3_SOURCES["b3"]["vector_digest"])
+        self.assertEqual(plan["source"]["vector_digest"], ISSUE31_B3_SOURCE["b3"]["vector_digest"])
+        self.assertNotEqual(plan["source"]["vector_digest"], profiles.R3_SOURCES["b3"]["vector_digest"])  # r3d 원본 아님
         self.assertEqual(plan["counts"]["reuse"] + plan["counts"]["embed"], plan["target_points"])
         self.assertEqual(plan["counts"]["remove"], 0)
         self.assertEqual(planner.restore.file_sha(B3_DUMP), before)

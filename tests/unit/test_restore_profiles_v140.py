@@ -1,8 +1,9 @@
 """Issue #105 복원 기준값(scripts/restore_profiles_v140.py)과 r3 Compose 정적 검사.
 
 - R2 표가 #91 r2 도구의 실제 상수와 같은지 (r2 기준을 한곳에서 읽어도 값이 갈라지지 않게)
-- R3 기준값은 2차 확정(미확정 0개) 상태이고 그 값이 현재 릴리스와 같은지, 그리고 1차 확정·전부 미확정 상태의
-  게이트 동작이 fixture(stage1_pins·pending_pins)로 계속 검증되는지
+- R3 기준값은 최신 dev(249정책) 기준 C0(pending) 상태이고 확정된 칸(manifest·건수·points)이 현재 릴리스와 같은지,
+  그리고 1차·2차 확정·전부 미확정 상태의 게이트 동작이 fixture(stage1_pins·final_sample_pins·pending_pins)로 계속 검증되는지
+- R3 원본(R3_SOURCES)이 r3b 최종 snapshot의 기록값(#110 C2 최종 digest)과 같은지
 - r3 격리 포트·프로젝트·인증 변수가 공유·r1·r2 자산과 겹치지 않는지
 """
 import re
@@ -42,7 +43,7 @@ class R2ProfileTests(unittest.TestCase):
 
 
 class R3PinTests(unittest.TestCase):
-    """단계별 검증: 전부 미확정(pending_pins) / 1차(stage1_pins) / 2차(final_sample_pins) + 실제 R3_PINS(C2, #110 반영)."""
+    """단계별 검증: 전부 미확정(pending_pins) / 1차(stage1_pins) / 2차(final_sample_pins) + 실제 R3_PINS(C0, 249정책)."""
 
     PLAN_FIELDS = ("vector_digest", "reuse_count", "reuse_vector_digest", "embed_count", "delete_count", "plan_sha256")
 
@@ -70,29 +71,34 @@ class R3PinTests(unittest.TestCase):
                   if pins["collections"][k]["vector_digest"] is not None]
         self.assertEqual(len(set(finals)), len(finals))                            # 컬렉션마다 다른 값
 
-    def test_real_r3_pins_are_final_for_the_110_release(self):
-        """C2(stage2): r3b 최종 dry-run의 vector_digest까지 확정, 미확정 0 → 모든 기준값 게이트 통과."""
+    def test_real_r3_pins_are_c0_pending_for_the_249_release(self):
+        """C0(pending): 릴리스 파일에서 확인한 manifest·건수·points만 확정. 확정 쓰기는 기준값 게이트에서 모두 거부된다."""
         pins = profiles.R3_PINS
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage2", "stage2"))
-        self.assertEqual(pins["manifest_lf_sha256"], "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7")
-        self.assertEqual(pins["release_counts"], {"policies": 246, "documents": 268, "release_chunks": 663,
-                                                  "neo4j_nodes": 1133, "neo4j_relationships": 2674,
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
+        self.assertEqual(pins["manifest_lf_sha256"], "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da")
+        self.assertEqual(pins["release_counts"], {"policies": 249, "documents": 273, "release_chunks": 672,
+                                                  "neo4j_nodes": 1147, "neo4j_relationships": 2702,
                                                   "requires_condition": 211})
-        plan = {"b2": {"points": 1233, "reuse_count": 1125, "embed_count": 108, "delete_count": 14, "remove_count": 0,
-                       "reuse_vector_digest": "5e914b9e6b2e2ee7a6ab76fc20f8bb60d6d6da50c5f43a8a30da0600582afa7b",
-                       "plan_sha256": "80aed3995440140d8a2711365eadb45bc3c6c2c5e3c17e2db778c287f2ee7738",
-                       "vector_digest": "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d"},
-                "b3": {"points": 1320, "reuse_count": 1197, "embed_count": 123, "delete_count": 23, "remove_count": 0,
-                       "reuse_vector_digest": "d926c898a3e8ec044703d7fc989ee8fa128aaa3d3b994191d9140e5a5bb24cce",
-                       "plan_sha256": "787d6cd3981fc8364a5ace4853ebf5810df334045fbc1d290055ca8f95f3f02d",
-                       "vector_digest": "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120"}}
-        for key in profiles.COLLECTION_KEYS:
-            self.assertEqual(pins["collections"][key], plan[key])
-        self.assertEqual(profiles.missing_pins(), [])
-        self.assertTrue(profiles.is_finalized())
-        self.assertIs(profiles.require_finalized(), pins)
-        self.assertIs(profiles.require_finalized(deferred=profiles.UPDATE_STAGE_DEFERRED_PINS), pins)
-        self.assert_well_formed(pins)            # 최종 ≠ 재사용 부분 ≠ 원본 digest, 합계 일관성
+        self.assertEqual({k: pins["collections"][k]["points"] for k in profiles.COLLECTION_KEYS}, {"b2": 1249, "b3": 1338})
+        self.assertEqual({k: pins["collections"][k]["remove_count"] for k in profiles.COLLECTION_KEYS}, {"b2": 0, "b3": 0})
+        self.assertEqual(sorted(profiles.missing_pins()),
+                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in self.PLAN_FIELDS))
+        self.assertFalse(profiles.is_finalized())
+        for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
+            with self.subTest(deferred=deferred), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+                profiles.require_finalized(deferred=deferred)
+        self.assert_well_formed(pins)
+
+    def test_110_c2_final_values_are_kept_only_as_the_r3b_source_record(self):
+        """#110 C2 최종 vector_digest·Point 수는 이제 R3_PINS가 아니라 r3d의 원본(r3b 최종 snapshot) 기록이다."""
+        expected = {"b2": (1233, "90d0f59318c6a7fb0a084bd1d1242a793cfd6ae6a4d04fb3145933ff5e17689d"),
+                    "b3": (1320, "718046c382cffb43afbc5dd1866ac9c84fc8b25dc293f4bd2d4ac7e32bbd7120")}
+        for key, (points, digest) in expected.items():
+            source = profiles.R3_SOURCES[key]
+            self.assertEqual((source["points"], source["vector_digest"]), (points, digest), key)
+            self.assertNotIn(digest, {profiles.R3_PINS["collections"][k]["vector_digest"] for k in profiles.COLLECTION_KEYS})
+        self.assertNotEqual(profiles.R3_PINS["manifest_lf_sha256"],
+                            "29b57236c36587233a90c8f159d2e98388bd96e427cccdac102462626f79a6b7")   # #110 릴리스가 아님
 
     def test_declared_stage_must_match_the_values(self):
         """단계 상수와 실제 값이 어긋나면(값만 바꾸고 단계를 잊음) 실패해야 한다."""
@@ -175,13 +181,25 @@ class R3PinTests(unittest.TestCase):
         with self.assertRaises(profiles.ProfileError):
             profiles.collection_spec("b4")
 
-    def test_r3_sources_are_the_existing_assets(self):
-        b2 = profiles.R2_PROFILE["collections"]["b2"]
-        self.assertEqual((profiles.R3_SOURCES["b2"]["snapshot_sha256"], profiles.R3_SOURCES["b2"]["vector_digest"]),
-                         (b2["snapshot_sha256"], b2["vector_digest"]))
-        self.assertNotEqual(profiles.R3_SOURCES["b3"]["snapshot_sha256"], b2["snapshot_sha256"])
+    def test_r3_sources_are_the_existing_r3b_final_snapshots(self):
+        """r3d 원본 = r3b 최종 snapshot (전체 SHA-256은 파일 재계산·snapshot record와 대조해 기록한 값)."""
+        expected = {"b2": ("834f17b6a0c18c265573ebc3da59a29473d5fa0242001cca3d0c2749fa98ba89",
+                           ".cache/issue105-r3b/bundle-r3b-20261123-01/b2-r3-v1.12.4.snapshot"),
+                    "b3": ("91311f2d2f8a23369d302cee865b282c38b651b579aaca0d8f3bc95faf333ff8",
+                           ".cache/issue105-r3b/bundle-r3b-20261123-01/b3-r3-v1.12.4.snapshot")}
+        r2 = profiles.R2_PROFILE["collections"]["b2"]
+        for key, (sha, path) in expected.items():
+            source = profiles.R3_SOURCES[key]
+            self.assertEqual((source["snapshot_sha256"], source["default_path"]), (sha, path), key)
+            self.assertRegex(source["vector_digest"], r"^[0-9a-f]{64}$")
+            self.assertNotEqual(source["snapshot_sha256"], r2["snapshot_sha256"], key)     # r2 snapshot이 아님
+            self.assertNotEqual(source["vector_digest"], r2["vector_digest"], key)
+            # 원본은 보존 자산(r3b) 폴더 안에 있다 → 도구는 읽기만 하고 같은 폴더에 새 파일을 만들 수 없다
+            self.assertTrue(profiles.is_preserved_output(ROOT / path), key)
+        self.assertNotEqual(profiles.R3_SOURCES["b2"]["snapshot_sha256"], profiles.R3_SOURCES["b3"]["snapshot_sha256"])
+        # 새 snapshot 이름(R3_COLLECTIONS)은 r2 이름을 재사용하지 않는다
         members = {spec["snapshot_member"] for spec in profiles.R3_COLLECTIONS.values()}
-        self.assertNotIn(b2["snapshot_member"], members)         # r2 snapshot 이름을 재사용하지 않는다
+        self.assertNotIn(r2["snapshot_member"], members)
 
 
 class IsolationTests(unittest.TestCase):
