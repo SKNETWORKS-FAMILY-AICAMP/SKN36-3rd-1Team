@@ -115,7 +115,7 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
 
       {/* 단계를 바꾸면 펼친 분야를 닫는다 (key로 새로 그림) */}
       <div role="search" className="life-panel">
-        <label htmlFor="life-policy-search">정책 검색 · {selected.name}</label>
+        <label htmlFor="life-policy-search">{selected.name} 단계에서 검색</label>
         <input id="life-policy-search" className="map-search" type="search" value={query}
           placeholder="정책명, 기관, 지역" onChange={(event) => setQuery(event.target.value)} />
       </div>

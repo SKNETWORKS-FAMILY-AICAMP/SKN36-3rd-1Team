@@ -41,7 +41,8 @@ export function SavedPoliciesProvider({ children }: { children: ReactNode }) {
   }
   return <SavedContext.Provider value={{ saved, toggle, error }}>{children}</SavedContext.Provider>;
 }
-export function PolicyPersonalActions({ policy, sample = false }: { policy: PolicyCheck; sample?: boolean }) {
+/** show로 저장 버튼과 캘린더 버튼을 카드의 서로 다른 자리에 나눠 그릴 수 있다 */
+export function PolicyPersonalActions({ policy, sample = false, show = 'all' }: { policy: PolicyCheck; sample?: boolean; show?: 'all' | 'save' | 'calendar' }) {
   const state = useSavedPolicies();
   const today = useScheduleDay();
   const [error, setError] = useState('');
@@ -58,8 +59,9 @@ export function PolicyPersonalActions({ policy, sample = false }: { policy: Poli
       const fileUrl = url; window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000); setError('');
     } catch { if (url) URL.revokeObjectURL(url); setError('캘린더 파일을 만들지 못했어요. 다시 시도해 주세요.'); }
   }
-  return <>{state && <button type="button" className="btn btn-o" aria-pressed={saved} onClick={() => state.toggle(policy)}>{saved ? '★ 저장 해제' : '☆ 관심 정책 저장'}</button>}
-    {calendar && <button type="button" className="btn btn-o" onClick={download}>캘린더에 추가</button>}
-    {calendar && <small className="calendar-note">종일 일정 · 알림은 캘린더 설정에 따라요</small>}
+  const showSave = show !== 'calendar', showCalendar = show !== 'save' && !!calendar;
+  return <>{showSave && state && <button type="button" className="btn btn-o" aria-pressed={saved} onClick={() => state.toggle(policy)}>{saved ? '★ 저장 해제' : '☆ 관심 정책 저장'}</button>}
+    {showCalendar && <button type="button" className={show === 'calendar' ? 'calendar-link' : 'btn btn-o'} onClick={download}>캘린더에 추가</button>}
+    {showCalendar && <small className="calendar-note">종일 일정 · 알림은 캘린더 설정에 따라요</small>}
     {error && <span role="alert">{error}</span>}</>;
 }

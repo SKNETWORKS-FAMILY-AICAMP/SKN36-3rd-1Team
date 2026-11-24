@@ -28,6 +28,8 @@ node_modules/
 frontend/dist/
 frontend/build/
 frontend/.next/
+# data/samples/ssok-policy-preview.config.mjs가 만드는 단일 HTML 미리보기(빌드 산출물)
+data/samples/ssok-full-preview.html
 frontend/.vite/
 
 # ===== DB 로컬 저장 파일 =====

@@ -1,5 +1,5 @@
 import {
-  useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
+  useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
 } from 'react';
 import {
   CENTER_LABEL_MAX, CHAT_MATCH_LIMIT, DRAG_CLICK_TOLERANCE, POLICY_LIST_META_FIELDS, POLICY_META_FIELDS, ungroupedLabel, KIND_LABEL, KIND_ORDER, LIFE_STAGES, LOGIC_LABEL, MAP_ENTER_STAGGER_S, NODE_LABEL_MAX, POLICY_SEARCH_LIMIT,
@@ -84,12 +84,8 @@ export default function PolicyMap({ policyId, recent, reduceMotion, onAsk }: {
         ? <PolicyGraph key={policy.id} data={state.data} policy={policy} search={<PolicySearch {...searchProps} />} reduceMotion={reduceMotion} onAsk={onAsk} />
         : (
           <>
-            <div className="map-empty">
-              <Icon name="search" />
-              <b>{policyId ? '이 정책을 데이터에서 찾지 못했어요' : '정책을 골라 주세요'}</b>
-              <span>정책을 고르면 기관·지역·대상·근거 문서·자격 조건이 어떻게 연결돼 있는지 보여 드려요.</span>
-              <PolicySearch {...searchProps} open />
-            </div>
+            {policyId && <p role="status">이 정책을 데이터에서 찾지 못했어요. 다른 정책을 검색해 주세요.</p>}
+            <PolicySearch {...searchProps} open />
           </>
         )}
     </MapShell>
@@ -114,7 +110,6 @@ function MapShell({ data, children }: { data?: GraphDataset; children: ReactNode
       <div className="wrap">
         <div className="board-h">
           <h2>정책 <span>관계 지도</span></h2>
-          <p>정책의 지원 대상, 담당 기관, 관련 문서를 살펴보세요</p>
         </div>
         {/* 데이터가 덜 받아졌거나 섞였을 때만 위에서 알린다. 평소 버전·건수는 맨 아래 작은 글씨 */}
         {mismatch && <p className="map-meta"><span className="badge b-warn">일부 정책 정보가 빠져 있을 수 있어요</span></p>}
@@ -141,12 +136,13 @@ function PolicySearch({ data, query, onQuery, currentId, open }: {
   data: GraphDataset; query: string; onQuery: (v: string) => void; currentId: string | null; open?: boolean;
 }) {
   const show = open || query.trim() !== '';
-  const results = useMemo(() => (show ? searchPolicies(data.index, query, POLICY_SEARCH_LIMIT) : []), [data, query, show]);
+  const limit = open && !query.trim() ? 5 : POLICY_SEARCH_LIMIT;
+  const results = useMemo(() => (show ? searchPolicies(data.index, query, limit) : []), [data, query, show, limit]);
   return (
     <div className={'map-find' + (open ? ' static' : '')} role="search">
       <input className="map-search" value={query} onChange={(e) => onQuery(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Escape') onQuery(''); }}
-        placeholder="다른 정책 찾기 (이름·지역·분야)" aria-label="정책 찾기" />
+        placeholder={open ? '정책명·지역·분야 검색' : '다른 정책 찾기 (이름·지역·분야)'} aria-label="정책 찾기" />
       {show && (
         <div className="map-find-pop">
           <ul className="map-list">
@@ -499,24 +495,38 @@ function PolicyFacts({ policy }: { policy: GraphNode }) {
   if (rows.length === 0) return null;
   return (
     <dl className="pc-facts">
-      {rows.map(([label, text]) => <div key={label}><dt>{label}</dt><dd><Clamp text={text} /></dd></div>)}
+      {rows.map(([label, text]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd><Clamp label={label} text={label === '신청 기간'
+            ? text.replace(/(?<!\d)(\d{4})-?(0[1-9]|1[0-2])-?(0[1-9]|[12]\d|3[01])(?!\d)/g, '$1.$2.$3')
+            : text} /></dd>
+        </div>
+      ))}
     </dl>
   );
 }
 
 /** 긴 글은 몇 줄(CSS --clamp-lines)만 보여 주고, 실제로 넘칠 때만 '더 보기'를 단다 */
-function Clamp({ text }: { text: string }) {
+function Clamp({ label, text }: { label: string; text: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
+  const textId = useId();
   const [open, setOpen] = useState(false);
   const [long, setLong] = useState(false);
   useLayoutEffect(() => {
     const el = ref.current;
-    if (el && !open) setLong(el.scrollHeight > el.clientHeight + 1);
+    if (!el || open) return;
+    const measure = () => setLong(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [text, open]);
   return (
     <>
-      <p ref={ref} className={'clamp' + (open ? ' open' : '')}>{text}</p>
-      {long && <button type="button" className="pd-more" onClick={() => setOpen((v) => !v)} aria-expanded={open}>{open ? '접기' : '더 보기'}</button>}
+      <p id={textId} ref={ref} className={'clamp' + (open ? ' open' : '')}>{text}</p>
+      {long && <button type="button" className="pd-more" onClick={() => setOpen((v) => !v)}
+        aria-expanded={open} aria-controls={textId}>{label} {open ? '접기' : '더 보기'}</button>}
     </>
   );
 }
