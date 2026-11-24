@@ -178,18 +178,20 @@ class ApplicationPeriodTests(unittest.TestCase):
             with self.subTest(policy_id=policy_id):
                 self.assertIn("2026", policies[policy_id]["application_status_note"])
 
-    def test_fund_loans_are_ongoing_with_personal_deadline_note(self):
+    def test_fund_loans_are_unverified_with_personal_deadline_note(self):
         from backend.eligibility.checker import _reception_status
 
         policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
-        # 주택도시기금 대출은 모집기간 없이 수탁은행에서 연중 취급한다. 개인별 신청 기한은 메모로 둔다(#107).
+        # 주택도시기금 상품 안내·자주하는질문에 연중 신청 근거가 없어 상시로 두지 않는다(2026-11-24, #107).
+        # 개인별 신청 기한은 상시 여부와 별도로 메모에 남긴다.
         for policy_id in ("POL_003", "POL_004", "POL_006", "POL_007"):
             with self.subTest(policy_id=policy_id):
                 loan = policies[policy_id]
-                self.assertTrue(loan["application_is_ongoing"])
+                self.assertEqual(loan["application_period"], dc.UNVERIFIED_APPLICATION_PERIOD)
+                self.assertNotIn("application_is_ongoing", loan)
                 self.assertFalse(loan.get("application_end"))
                 self.assertIn("개인별 기한", loan["application_status_note"])
-                self.assertEqual(_reception_status({"graph": {"policy": loan}}), "open")
+                self.assertEqual(_reception_status({"graph": {"policy": loan}}), "unknown")
 
 
 class ApplicationUrlTests(unittest.TestCase):
@@ -436,8 +438,8 @@ class CandidateIntegrityTests(unittest.TestCase):
             self.assertIs(row["application_is_ongoing"], True, row["policy_id"])
             self.assertIn(row["application_period"], ("상시신청", "상시"), row["policy_id"])
             self.assertNotIn("application_end", row, row["policy_id"])
-        # 주택도시기금 대출 4건(POL_003·004·006·007)은 2026-11-23 반석 결정으로 상시 접수에 포함했다(#107).
-        excluded = {"POL_002", "POL_GOV_003"}
+        # 주택도시기금 대출 4건은 연중 신청 근거가 없어 2026-11-24에 상시에서 뺐다(#107).
+        excluded = {"POL_002", "POL_GOV_003", "POL_003", "POL_004", "POL_006", "POL_007"}
         self.assertFalse(excluded & {row["policy_id"] for row in ongoing})
 
     def test_application_ongoing_rejects_unknown_policy_id(self):
