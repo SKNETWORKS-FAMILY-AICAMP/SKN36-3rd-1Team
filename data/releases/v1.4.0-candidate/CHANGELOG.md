@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
-- **최종 검증 일시**: 2026-11-18 22:58:47 KST
+- **최종 검증 일시**: 2026-11-22 16:47:18 KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -48,8 +48,9 @@
 
 ## 1-2. 기존 정책의 신청 주소 교정
 
-- 기존 정책 219건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
+- 기존 정책 235건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
+- 예외로 `data_corrections_v1.4.0.json`의 `application_url_corrections` 19건은 화면을 직접 열어 확인한 교정이다(#18). 그중 4건은 그 서비스 전용 신청 경로로 바꿨다(실제 신청·예약 단계까지 확인한 것은 3건, 나머지는 신청 버튼까지 확인, 단계는 `verified_stage`). 나머지 교정은 누리집 첫 화면·로그인 뒤 전체 목록·빈 신청 목록·전화·방문·이메일 신청이라 비웠다. 현재 접수 가능 여부는 보증하지 않는다.
 - `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
