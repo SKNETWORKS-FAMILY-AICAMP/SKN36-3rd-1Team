@@ -113,7 +113,8 @@ class ApplicationPeriodTests(unittest.TestCase):
         policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
         dc.check_stored_reception_status(policies)
         stored = {p["policy_id"]: p["reception_status"] for p in policies if "reception_status" in p}
-        self.assertEqual(len(stored), 9)
+        # 신규 정책 12건(STG 9 + 복지로 2026 3)에 저장값이 있다.
+        self.assertEqual(len(stored), 12)
         for policy_id in ("POL_STG_MOHW_001", "POL_STG_NTS_001", "POL_STG_MOIS_001", "POL_STG_ICN_001"):
             self.assertEqual(stored[policy_id], dc.STORED_RECEPTION_UNKNOWN)
         with self.assertRaises(ValueError):
@@ -194,6 +195,78 @@ class ApplicationPeriodTests(unittest.TestCase):
                 self.assertEqual(_reception_status({"graph": {"policy": loan}}), "unknown")
 
 
+BOKJIRO_2026 = ROOT / "data/staging/bokjiro_2026"
+
+
+class Bokjiro2026PolicyTests(unittest.TestCase):
+    """복지로 2026 검수 결과에서 고른 신규 정책 3건(조장 결정)과 인계 자료(handoff)를 확인한다."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.selection = json.loads((BOKJIRO_2026 / "selection.json").read_text(encoding="utf-8"))["policies"]
+        cls.targets = {row["target_id"]: row for row in rows(BOKJIRO_2026 / "handoff/targets.jsonl")}
+        cls.review_rows = rows(BOKJIRO_2026 / "handoff/review_rows.jsonl")
+        cls.policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        cls.documents = {row["document_id"]: row for row in rows(PACKAGE / "neo4j/nodes_document.jsonl")}
+        cls.chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        cls.relationships = rows(PACKAGE / "neo4j/relationships.jsonl")
+
+    def test_handoff_counts_match_manifest(self):
+        manifest = json.loads((BOKJIRO_2026 / "handoff/manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["counts"]["targets"], len(self.targets))
+        self.assertEqual(manifest["counts"]["rows"], len(self.review_rows))
+        self.assertEqual(manifest["counts"]["targets_all_rows_ok"],
+                         sum(t["review_status"] == "OK" for t in self.targets.values()))
+        for target in self.targets.values():
+            with self.subTest(target=target["target_id"]):
+                text = (ROOT / target["source_text_path"]).read_text(encoding="utf-8").strip()
+                self.assertEqual(hashlib.sha256(text.encode("utf-8")).hexdigest(), target["source_text_sha256"])
+
+    def test_selected_policies_are_fully_reviewed_and_not_duplicates(self):
+        self.assertEqual(len(self.selection), 3)
+        existing_official_ids = [p["official_id"] for p in self.policies.values()]
+        self.assertEqual(len(existing_official_ids), len(set(existing_official_ids)))
+        for item in self.selection:
+            target = self.targets[item["target_id"]]
+            with self.subTest(policy_id=item["policy_id"]):
+                self.assertEqual(target["review_status"], "OK")
+                target_rows = [r for r in self.review_rows if r["target_id"] == item["target_id"]]
+                self.assertTrue(target_rows)
+                self.assertTrue(all(r["review_status"] == "OK" for r in target_rows))
+                self.assertEqual(target["name_overlap_policy_ids"], [])
+
+    def test_selected_policies_are_in_candidate_without_guessed_values(self):
+        from backend.eligibility.checker import _reception_status
+
+        groups = {row["group_id"]: row for row in rows(PACKAGE / "neo4j/nodes_condition_group.jsonl")}
+        for item in self.selection:
+            policy = self.policies[item["policy_id"]]
+            target = self.targets[item["target_id"]]
+            document_id = item["policy_id"].replace("POL_", "DOC_")
+            with self.subTest(policy_id=item["policy_id"]):
+                self.assertEqual(policy["official_id"], target["servId"])
+                self.assertEqual(policy["policy_name"], target["policy_name"])
+                for key in ("eligibility", "benefit", "application_method", "agency", "source_url"):
+                    self.assertTrue(policy[key], key)
+                # 복지로 XML에 신청 주소·신청기간이 없다. 지어내지 않는다.
+                self.assertIsNone(policy["official_apply_url"])
+                self.assertEqual(policy["application_period"], dc.UNVERIFIED_APPLICATION_PERIOD)
+                self.assertNotIn("application_is_ongoing", policy)
+                self.assertEqual(_reception_status({"graph": {"policy": policy}}), "unknown")
+                self.assertEqual(groups[f"GRP_{item['policy_id']}_ROOT"]["logic"], "UNKNOWN")
+                document = self.documents[document_id]
+                self.assertEqual(document["content_hash"], target["source_text_sha256"])
+                self.assertEqual(document["extracted_text_path"], target["source_text_path"])
+                self.assertIn(("SUPPORTED_BY", document_id),
+                              {(r["relation"], r["target_id"]) for r in self.relationships
+                               if r["source_id"] == item["policy_id"]})
+                policy_chunks = [c for c in self.chunks if c["policy_id"] == item["policy_id"]]
+                self.assertTrue(policy_chunks)
+                body = (ROOT / target["source_text_path"]).read_text(encoding="utf-8")
+                for chunk in policy_chunks:
+                    self.assertIn(chunk["text"], body)
+
+
 class ApplicationUrlTests(unittest.TestCase):
     def test_missing_invalid_and_guidance_addresses_are_not_apply_links(self):
         for value in [None, "", "www.example.org", "javascript:alert(1)", "https://user@example.org", "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?id=1"]:
@@ -224,14 +297,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 270)
-        self.assertEqual(report["chunks_checked_against_body"], 665)
+        self.assertEqual(report["body_hashes_checked"], 273)
+        self.assertEqual(report["chunks_checked_against_body"], 672)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1135)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2676)
-        self.assertEqual(len(chunks), 665)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1147)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2702)
+        self.assertEqual(len(chunks), 672)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))

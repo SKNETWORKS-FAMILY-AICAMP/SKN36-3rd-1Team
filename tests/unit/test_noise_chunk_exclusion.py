@@ -33,7 +33,7 @@ from database.chunking import make_point_id  # noqa: E402
 V140_DIR = hd.DEFAULT_HANDOFF_DIR            # data/releases/v1.4.0-candidate (승인 릴리스)
 V132_DIR = hd.LEGACY_HANDOFF_DIR             # data/handoff (v1.3.2)
 DATASETS = {
-    hd.RELEASE_V140_VERSION: (V140_DIR, 665, 638),
+    hd.RELEASE_V140_VERSION: (V140_DIR, 672, 645),
     "1.3.2": (V132_DIR, 557, 530),
 }
 NOISE_IDS = sorted(hd.REVIEWED_NOISE_CHUNKS)
@@ -245,7 +245,7 @@ class TestServicePathsUnchanged(unittest.TestCase):
 
     def test_b2_service_chunks_unchanged(self):
         self.assertEqual(self.out["version"], hd.RELEASE_V140_VERSION)
-        self.assertEqual(self.out["b2"], 1235)
+        self.assertEqual(self.out["b2"], 1249)
         self.assertFalse(self.out["b2_has_reviewed_ids"])
 
     def test_search_profile_unchanged(self):
@@ -257,7 +257,7 @@ class TestServicePathsUnchanged(unittest.TestCase):
                                                       PROJECT_ROOT / "scripts" / "restore_final_v140.py")
         restore = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(restore)
-        self.assertEqual(restore.EXPECTED[2], 665)
+        self.assertEqual(restore.EXPECTED[2], 672)
         self.assertEqual(self.out["raw_chunks"], restore.EXPECTED[2])
 
 

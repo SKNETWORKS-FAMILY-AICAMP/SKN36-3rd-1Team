@@ -16,16 +16,16 @@ class EmbeddingABTests(unittest.TestCase):
             docs = ev.hd.load_documents(verify_hash=True)
             metadata = ev.hd.load_payload_metadata()
             chunks = [ev.fi.build_config_chunks(name, docs)[0] for name in ev.AB_CONFIGS]
-            self.assertEqual(len(chunks[0]), 1235)
+            self.assertEqual(len(chunks[0]), 1249)
             self.assertEqual(chunks[0], chunks[1])
-            self.assertEqual(len({c["point_id"] for c in chunks[1]}), 1235)
+            self.assertEqual(len({c["point_id"] for c in chunks[1]}), 1249)
             inputs = [[ev.em.build_embedding_text(c, ev.store.metadata_for_chunk(metadata, c),
                        ev.fi.EMBEDDING_INPUT_RULE) for c in batch] for batch in chunks]
             self.assertEqual(inputs[0], inputs[1])
             config = ev.fi.get_config("A_B2_4B_V140")
             self.assertEqual(ev.fi.config_model(config), ("qwen3-embedding:4b", 2560))
             self.assertEqual(config["collection"], "exp_b2_qwen3emb4b_v140_v1")
-            self.assertEqual(config["expected_chunks"], 1235)
+            self.assertEqual(config["expected_chunks"], 1249)
 
     def test_real_frozen_questions_transfer_and_denominator(self):
         cases, audit = ev.load_cases(ev.hd.load_documents(verify_hash=True), v0_only=True)
