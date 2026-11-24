@@ -5,6 +5,7 @@
 """
 
 from copy import deepcopy
+from pathlib import Path
 import json
 import unittest
 from unittest.mock import patch
@@ -73,6 +74,24 @@ class LatestGeneratorApiTests(unittest.TestCase):
 
         with patch.object(generator, "_call_openai", side_effect=fake_openai), TestClient(self.app) as client:
             return client.post("/api/ask", json=request)
+
+    def test_corrected_application_period_does_not_reach_official_evidence(self):
+        package = Path(__file__).resolve().parents[2] / "data/releases/v1.4.0-candidate"
+        policy_id = "POL_YC_005"
+        policies = map(json.loads, (package / "neo4j/nodes_policy.jsonl").read_bytes().splitlines())
+        node = next(row for row in policies if row["policy_id"] == policy_id)
+        chunks = map(json.loads, (package / "qdrant/payload_chunks.jsonl").read_bytes().splitlines())
+        evidence = next(row for row in chunks if row["chunk_id"] == "DOC_YC_005_C01")
+        policy = sample_policy(policy_id, 1, node)
+        policy["evidence"] = [{**evidence, "rank": 1}]
+        self.policies[:] = [policy]
+        response = self.ask(llm_output())
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["policy_checks"][0]["reception_status"], "unknown")
+        official = self.prompts[0]["official_evidence"]
+        self.assertEqual(official[0]["policy_id"], policy_id)
+        self.assertIn("신청방법", official[0]["text"])
+        self.assertNotIn("20261101 ~ 20261130", official[0]["text"])
 
     def test_profile_reception_reason_and_body_guidance_reach_http(self):
         response = self.ask(llm_output(

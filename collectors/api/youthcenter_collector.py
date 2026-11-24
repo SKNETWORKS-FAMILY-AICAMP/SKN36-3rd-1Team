@@ -236,8 +236,7 @@ def normalize_youthcenter_item(
 
     # 7. 신청 및 접수 정보
     aply_ymd = (item.get("aplyYmd") or "").strip()
-    biz_bgng = (item.get("bizPrdBgngYmd") or "").strip()
-    biz_end = (item.get("bizPrdEndYmd") or "").strip()
+    application_period = aply_ymd or "미확인"
     aply_method = (item.get("plcyAplyMthdCn") or item.get("plcyAplyMtdCn") or "").strip()
     sbmsn_dcmnt = (item.get("sbmsnDcmntCn") or "").strip()
     add_aply = (item.get("addAplyQlfcCndCn") or "").strip()
@@ -265,7 +264,7 @@ def normalize_youthcenter_item(
         f"- 특화요건: " + (", ".join(sbiz_labels) if sbiz_labels else "-"),
         f"[추가 신청자격조건]\n{add_aply}" if add_aply else "",
         f"[참여 제한대상]\n{ptcp_prp}" if ptcp_prp else "",
-        f"[신청기간 및 신청방법]\n- 신청기간: {aply_ymd or f'{biz_bgng} ~ {biz_end}'}\n- 신청방법: {aply_method or '공고문 참조'}",
+        f"[신청기간 및 신청방법]\n- 신청기간: {application_period}\n- 신청방법: {aply_method or '공고문 참조'}",
         f"[제출서류]\n{sbmsn_dcmnt}" if sbmsn_dcmnt else "",
         f"[신청 URL] {aply_url}" if aply_url else "",
         f"[출처 URL] {source_url}",
@@ -322,7 +321,7 @@ def normalize_youthcenter_item(
             "region_review_status": region_review_status,
             "needs_human_review": any("검토대상" in s for s in [age_review_status, income_review_status, marriage_review_status, region_review_status]),
         },
-        "application_period": aply_ymd or f"{biz_bgng} ~ {biz_end}".strip(" ~") or "상시/공고참조",
+        "application_period": application_period,
         "aplyYmd": aply_ymd,
         "application_method": aply_method or "온라인/방문 신청",
         "plcyAplyMthdCn": aply_method,

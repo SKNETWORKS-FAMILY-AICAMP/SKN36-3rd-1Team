@@ -30,6 +30,44 @@ def rows(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+class ApplicationPeriodTests(unittest.TestCase):
+    def test_youth_application_period_uses_only_source_application_field(self):
+        codes = load_code_definitions()
+        for source, expected in (("", "미확인"), ("20261101 ~ 20261110", "20261101 ~ 20261110"),
+                                 ("상시신청", "상시신청")):
+            with self.subTest(source=source):
+                item = {"plcyNo": "SAMPLE_ONLY", "aplyYmd": source,
+                        "bizPrdBgngYmd": "20260101", "bizPrdEndYmd": "20261231"}
+                result = normalize_youthcenter_item(item, codes)
+                self.assertEqual(result["application_period"], expected)
+                self.assertIn(f"- 신청기간: {expected}", result["text"])
+                self.assertNotIn("20260101 ~ 20261231", result["text"])
+
+    def test_unverified_period_is_absent_in_candidate_evidence(self):
+        from backend.eligibility.checker import _reception_status
+
+        policies = {row["policy_id"]: row for row in rows(PACKAGE / "neo4j/nodes_policy.jsonl")}
+        documents = {row["document_id"]: row for row in rows(PACKAGE / "neo4j/nodes_document.jsonl")}
+        chunks = rows(PACKAGE / "qdrant/payload_chunks.jsonl")
+        corrections = dc.load_corrections()["unverified_application_periods"]
+        self.assertEqual(len(corrections), 12)
+        for item in corrections:
+            with self.subTest(policy_id=item["policy_id"]):
+                policy = policies[item["policy_id"]]
+                self.assertEqual(policy["application_period"], "미확인")
+                self.assertEqual(_reception_status({"graph": {"policy": policy}}), "unknown")
+                document = documents[item["document_id"]]
+                excerpt = (ROOT / document["extracted_text_path"]).read_text(encoding="utf-8").strip()
+                self.assertEqual(hashlib.sha256(excerpt.encode()).hexdigest(), document["content_hash"])
+                evidence = [row["text"] for row in chunks if row["document_id"] == document["document_id"]]
+                self.assertTrue(evidence)
+                for text in [excerpt, *evidence]:
+                    self.assertNotIn(f'- 신청기간: {item["before"]}', text)
+        ongoing = policies["POL_STG_MOLIT_002"]
+        self.assertTrue(ongoing["application_is_ongoing"])
+        self.assertIn("예산 소진", ongoing["application_status_note"])
+
+
 class ApplicationUrlTests(unittest.TestCase):
     def test_missing_invalid_and_guidance_addresses_are_not_apply_links(self):
         for value in [None, "", "www.example.org", "javascript:alert(1)", "https://user@example.org", "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?id=1"]:
@@ -60,14 +98,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 262)
-        self.assertEqual(report["chunks_checked_against_body"], 600)
+        self.assertEqual(report["body_hashes_checked"], 268)
+        self.assertEqual(report["chunks_checked_against_body"], 663)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1127)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2668)
-        self.assertEqual(len(chunks), 600)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1133)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2674)
+        self.assertEqual(len(chunks), 663)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))
@@ -75,7 +113,10 @@ class CandidateIntegrityTests(unittest.TestCase):
         actual_changes = set()
         corrections = dc.load_corrections()
         removed_groups = dc.removed_group_ids(corrections)
-        changed_documents = {item["document_id"]: item for item in corrections["outdated_document_lines"]}
+        period_edits = corrections["unverified_application_periods"]
+        periods_by_policy = {item["policy_id"]: item for item in period_edits}
+        changed_documents = {item["document_id"]: item
+                             for item in [*corrections["outdated_document_lines"], *period_edits]}
         for _, (name, key) in NODE_CONFIG.items():
             old = rows(ROOT / "data/handoff/neo4j" / f"nodes_{name}.jsonl")
             if name == "condition_group":
@@ -87,8 +128,12 @@ class CandidateIntegrityTests(unittest.TestCase):
                 # 원문 대조 교정(설명 문구·지역)은 선언 파일을 그대로 적용한 값과 같아야 한다
                 corrected_ids = {item["policy_id"] for group in ("text_corrections", "region_corrections", "life_stage_corrections")
                                  for item in corrections[group]}
+                # 동결 v1.3.2에 없는 신규 정책(POL_STG_*)의 설명 문구 교정(예: 모두의카드 정책명)은 빼고 적용한다
+                old_policy_ids = {row[key] for row in old}
                 dc.apply_policy_corrections([row for row in old if row["policy_id"] in corrected_ids],
-                                            {**corrections, "category_corrections": []})
+                                            {**corrections, "category_corrections": [], "text_corrections": [
+                                                item for item in corrections["text_corrections"]
+                                                if item["policy_id"] in old_policy_ids]})
             new = {row[key]: row for row in rows(PACKAGE / "neo4j" / f"nodes_{name}.jsonl")}
             for original in old:
                 if name == "condition_group" and original[key] in removed_groups:
@@ -103,6 +148,10 @@ class CandidateIntegrityTests(unittest.TestCase):
                 if name == "policy":
                     for field in dc.SOURCE_REVIEW_FIELDS:
                         current.pop(field, None)
+                    if original[key] in periods_by_policy:
+                        self.assertEqual(original["application_period"], periods_by_policy[original[key]]["before"])
+                        self.assertEqual(current["application_period"], "미확인")
+                        current["application_period"] = original["application_period"]
                 if name == "policy" and original != current:
                     change = declared[original[key]]
                     self.assertEqual(change["before"], original["official_apply_url"])
@@ -130,8 +179,10 @@ class CandidateIntegrityTests(unittest.TestCase):
             if row["policy_id"] in life_stage_policies:
                 row = {**row, "life_stages": life_stage_policies[row["policy_id"]]["after"]}
             correction = changed_documents.get(row["document_id"])
-            if correction and correction["text"] in row["text"]:
-                row = {**row, "text": dc.omit_outdated_line(row["text"], correction["text"])}
+            if correction:
+                line = correction["text"] if "text" in correction else f'- 신청기간: {correction["before"]}'
+                if line in row["text"]:
+                    row = {**row, "text": dc.omit_outdated_line(row["text"], line)}
             self.assertIn(json.dumps(row, sort_keys=True), new_chunks)
 
     def test_after_school_birth_dates_use_the_current_guide(self):

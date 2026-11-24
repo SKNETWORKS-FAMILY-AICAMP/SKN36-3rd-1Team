@@ -1,22 +1,22 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-22T16:48:03.266638+09:00",
+  "created_at": "2026-11-22T23:43:03.120695+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
     "total_policies": 246,
-    "total_documents": 262,
-    "total_chunks": 600,
-    "total_graph_nodes": 1127,
-    "total_graph_edges": 2668,
+    "total_documents": 268,
+    "total_chunks": 663,
+    "total_graph_nodes": 1133,
+    "total_graph_edges": 2674,
     "referential_integrity": "100% PASS (Broken References = 0)",
     "qdrant_point_id_standard": "RFC 4122 UUIDv5 (Deterministic)",
     "delta_from_baseline": {
       "policies_added": 9,
-      "documents_added": 16,
-      "chunks_added": 43,
-      "relationships_added": 89,
+      "documents_added": 22,
+      "chunks_added": 106,
+      "relationships_added": 95,
       "organizations_added": 7,
       "condition_groups_added": 9
     },
@@ -30,13 +30,13 @@
       "record_count": 0
     },
     "CHANGELOG.md": {
-      "size_bytes": 6734,
-      "sha256": "0dd98248c4339be119570d197d12d1c7589bf1e19ccef2f207b5d6748d2569d8",
+      "size_bytes": 7183,
+      "sha256": "2b3a34f56e267158400f90d138d622a2cbda62d1e082c46ca7d347d1d959e613",
       "record_count": 0
     },
     "release_delta_manifest.json": {
-      "size_bytes": 324627,
-      "sha256": "0880fab6b06067201ccc1ed5953236be484b4db6a8ad32c1c807c8cf90022d07",
+      "size_bytes": 337556,
+      "sha256": "be31b140dbf4e88494d589fe4182cfbe6bcd9a543281df759f8af9a1c0f224fa",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -55,14 +55,14 @@
       "record_count": 5
     },
     "neo4j/nodes_condition_group.jsonl": {
-      "size_bytes": 86325,
-      "sha256": "8bc54647b9846ebc926bdce169d18c10811106b9fdfd83cf7f1904da4438ce9d",
+      "size_bytes": 86343,
+      "sha256": "56812090983acbc2f4910a247f68cad929c557bfb90b15e726d9aaafb5c4f475",
       "record_count": 351
     },
     "neo4j/nodes_document.jsonl": {
-      "size_bytes": 128556,
-      "sha256": "ddbe5d8d1f249afae5642d6b59a7d52d45a0a8745a159b1fdefd3e28eab87ae9",
-      "record_count": 262
+      "size_bytes": 134875,
+      "sha256": "87093d3a6dbad1da767abe15464c63fee2f3fda43b81c832e5bead663465458b",
+      "record_count": 268
     },
     "neo4j/nodes_eligibility_condition.jsonl": {
       "size_bytes": 35213,
@@ -80,8 +80,8 @@
       "record_count": 123
     },
     "neo4j/nodes_policy.jsonl": {
-      "size_bytes": 501056,
-      "sha256": "a26e0d33adb9aa4983c8b7102b455b7ec5a3418f26116486ccb5c2a00b03c8de",
+      "size_bytes": 504174,
+      "sha256": "0fe480f7d49b7ba38bc4a253dc3cdc71c3bb58c644cd3e35184c5f714b993dd4",
       "record_count": 246
     },
     "neo4j/nodes_region.jsonl": {
@@ -95,9 +95,9 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 678668,
-      "sha256": "b4192a148a342dc37858eca065fd8d93f9b4de9b208c3ae773ec92c3973bba31",
-      "record_count": 2668
+      "size_bytes": 680419,
+      "sha256": "9549f5b9d4b1c738d1d0db75ae15f986a5216db1102314d46552da437c984bb4",
+      "record_count": 2674
     },
     "neo4j/schema_constraints.cypher": {
       "size_bytes": 1208,
@@ -120,13 +120,78 @@
       "record_count": 0
     },
     "qdrant/payload_chunks.jsonl": {
-      "size_bytes": 1334513,
-      "sha256": "cab6131982cfb8f5ace6b663fa121a45422b9754d229f16a4f6e54c12134326c",
-      "record_count": 600
+      "size_bytes": 1493978,
+      "sha256": "7e43c9ed447894e2b5511606bee9948977108525a3c7b9435d0ad51253c2a01d",
+      "record_count": 663
     },
     "source_text/DOC_BOK_054.txt": {
       "size_bytes": 3111,
       "sha256": "503641c42ac7eb62bf61f63324a700b3815a4860f25935b922908937802287a4",
+      "record_count": 0
+    },
+    "source_text/DOC_STG_SEOUL_001_FAQ_2026.txt": {
+      "size_bytes": 20588,
+      "sha256": "9bff19f3a0521d103db6ce445aa81212361378a8fd01eb170ff9d2183f91dc09",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_005.txt": {
+      "size_bytes": 1349,
+      "sha256": "57368a461897eb7c00a1c53634dcfd8c7e73e912596622f41d2007ad1e165c74",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_017.txt": {
+      "size_bytes": 1581,
+      "sha256": "0a41e03c811ce56a54f664229d8a8d713bec3f43ec25a2f9ac315ce356075608",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_020.txt": {
+      "size_bytes": 1561,
+      "sha256": "637a747e1a8bc64290497a4f82a79612f5cbb36a7e836f9183d47e30a5fe073d",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_021.txt": {
+      "size_bytes": 1381,
+      "sha256": "64ce887b32bace30718bedff69979404290d92d2b0b39ab000af3aebb3e4f062",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_022.txt": {
+      "size_bytes": 1120,
+      "sha256": "74c38dbab854b16a09bf2298bd9a971fe5c075b792deaed908ed36a081f034aa",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_024.txt": {
+      "size_bytes": 1221,
+      "sha256": "396af633e1327a21728a13756d7cb7921caf4e04074aec4035a850bd979e5ac3",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_027.txt": {
+      "size_bytes": 1657,
+      "sha256": "d47c763bf1196207b1dd70e130dedd588078e3238d1f6e23dc34a58e49f453b4",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_028.txt": {
+      "size_bytes": 1306,
+      "sha256": "29c451b033133b23aa6d26fec4f6c798b6323d0515c105f6e7f5b762e8cdc501",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_041.txt": {
+      "size_bytes": 1480,
+      "sha256": "17f9fb08e1a451425e911a2d4de521a3bf116f09f42548e83f067c0e3b9b1ae6",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_045.txt": {
+      "size_bytes": 1578,
+      "sha256": "47117d2e56732f5d25af56690747fda6c168b20218ced883d6eae5467d96f875",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_063.txt": {
+      "size_bytes": 1123,
+      "sha256": "07e4c2a01b493db08200ddcd6859ea5cc7ce4e3438ca0b577671ecc5f567cc01",
+      "record_count": 0
+    },
+    "source_text/DOC_YC_064.txt": {
+      "size_bytes": 1068,
+      "sha256": "c8cf7ca9fb61ecde28ff7e0f9161ba8f41f638b108b1fc00b867521cf9fc8936",
       "record_count": 0
     }
   }

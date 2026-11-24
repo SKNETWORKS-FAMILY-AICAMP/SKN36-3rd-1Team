@@ -32,6 +32,15 @@ def omit_outdated_line(text: str, line: str) -> str:
     return "".join(lines)
 
 
+def omit_held_lines(text: str, lines: list[str]) -> str:
+    """보류한 FAQ 행을 검색용 본문에서 뺀다. 행 사이 빈 줄은 하나만 남기고, 나머지 문장과 순서는 그대로 둔다."""
+    for line in lines:
+        text = omit_outdated_line(text, line)
+    while "\n\n\n" in text:
+        text = text.replace("\n\n\n", "\n\n")
+    return text.strip()
+
+
 def apply_policy_corrections(policies: list, corrections: dict) -> None:
     """정책 노드의 설명 문구와 지역 문자열을 교정한다."""
     by_id = {policy["policy_id"]: policy for policy in policies}
@@ -124,6 +133,16 @@ def apply_source_review(policies: list, corrections: dict) -> None:
     assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
     assert ongoing <= known, f"상시 접수 교정 대상 정책 불일치: {sorted(ongoing - known)}"
     assert set(dates) & set(notes) <= set(corrections["application_notes_with_dates"]), "날짜와 확인 메모는 허용된 정책만 함께 쓴다"
+    policies_by_id = {policy["policy_id"]: policy for policy in policies}
+    for entry in corrections.get("unverified_application_periods", []):
+        policy_id = entry["policy_id"]
+        policy = policies_by_id.get(policy_id)
+        if (policy is None or policy.get("application_period") != entry["before"]
+                or policy_id in dates or policy_id in ongoing or policy_id not in notes):
+            raise ValueError(f"미확인 신청기간 교정 전 값·근거 불일치: {policy_id}")
+        policy["application_period"] = "미확인"
+        for key in ("application_start", "application_end", "application_is_ongoing"):
+            policy.pop(key, None)
     for policy in policies:
         item = dates.get(policy["policy_id"], {})
         if "start" in item:
@@ -142,15 +161,19 @@ def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) ->
     by_id = {policy["policy_id"]: policy for policy in policies}
     category_policies = {item["policy_id"] for item in corrections["category_corrections"]}
     align = set(corrections["chunk_life_stage_alignment_policies"])
+    # 정책명을 교정한 정책은 청크의 policy_name도 맞춘다. 임베딩 입력의 정책명 줄이 청크 메타데이터에서 오기 때문이다.
+    align_names = set(corrections.get("chunk_policy_name_alignment_policies", []))
     changed = 0
     for chunk in chunks:
         policy = by_id[chunk["policy_id"]]
-        before = (chunk["category"], chunk["life_stages"])
+        before = (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
         if chunk["policy_id"] in category_policies:
             chunk["category"] = policy["category"]
         if chunk["policy_id"] in align:
             chunk["life_stages"] = list(policy["life_stages"])
-        changed += before != (chunk["category"], chunk["life_stages"])
+        if chunk["policy_id"] in align_names:
+            chunk["policy_name"] = policy["policy_name"]
+        changed += before != (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
     return changed
 
 

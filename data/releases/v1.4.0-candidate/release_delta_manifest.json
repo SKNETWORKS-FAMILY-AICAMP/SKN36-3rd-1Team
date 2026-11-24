@@ -1,6 +1,6 @@
 {
   "release_version": "1.4.0-candidate",
-  "created_at": "2026-11-22T16:48:03.144768+09:00",
+  "created_at": "2026-11-22T23:43:03.074749+09:00",
   "added_policy_ids": [
     "POL_STG_MOLIT_002",
     "POL_STG_MOHW_001",
@@ -28,7 +28,13 @@
     "DOC_STG_MOLIT_001_GOV24",
     "DOC_STG_ICN_001_GOV24",
     "DOC_STG_SEOUL_001_YC",
-    "DOC_BOK_031_MOE_2026"
+    "DOC_BOK_031_MOE_2026",
+    "DOC_GOV_006_MOF_NOTICE_2024",
+    "DOC_STG_ICN_001_NOTICE_2026",
+    "DOC_STG_MOLIT_001_FAQ_2026",
+    "DOC_STG_NTS_001_FAQ_2026",
+    "DOC_STG_SEOUL_001_FAQ_2026",
+    "DOC_STG_SEOUL_001_INTRO_2026"
   ],
   "added_organization_ids": [
     "AGENCY_국세청_기획재정부",
@@ -93,9 +99,72 @@
     "6e91bec8-e310-5383-bed1-7d1fee1f9d92",
     "e2714b83-1fd2-53e4-8bd4-926ed8a1a319",
     "ea5cb5e9-0d11-52d3-985f-f92828e021f8",
-    "18e2893e-8b45-5f14-bdee-2a19088b0f32"
+    "18e2893e-8b45-5f14-bdee-2a19088b0f32",
+    "1efaad59-1eeb-54ad-a137-211d00e22406",
+    "d072baf2-9cde-58a8-87bb-807d41e34f9c",
+    "7e796008-eaba-5080-bd6f-8553bac5dd53",
+    "e53b411d-0e00-566e-9f13-4b714bd17ea2",
+    "7d424d81-baaa-5a5e-9499-57788699f218",
+    "13e35722-b10d-57ba-97df-a905d354023d",
+    "a3849816-5fa6-5c4f-8a88-2b87ab760af3",
+    "70b0737c-3580-5cc9-8e77-03a0bfa01f80",
+    "2ddd9e39-fb84-5494-98af-32bddc8cf88a",
+    "c44211b0-9cbb-542d-8723-ba9352ea880a",
+    "6a0753d0-8ce1-513b-9a21-fe8e130ed34a",
+    "2876f006-492c-5455-8880-94b1ef829929",
+    "8fd264b3-bb29-577c-939f-1a6faa2f3f1e",
+    "1654c8bd-4bfb-5bc8-abcf-bf06d332dfc8",
+    "e1b695e7-2040-53fb-a2e1-ca2aab8ac6b2",
+    "64622251-18c4-5a3f-ae78-09d3987feb38",
+    "30f510eb-6603-5e43-85cb-388f9070ef74",
+    "7143057e-dab3-50b0-8c7e-71d84de80fd1",
+    "b42c3120-ceef-58f4-a1cb-199739e4a045",
+    "413169c4-fab9-58f3-9be1-c4e7d155c69a",
+    "84f52774-fa48-5e92-9444-4b5f5b683ca4",
+    "f9a80800-270a-5399-b929-7d27aa4f863e",
+    "dc85193f-811f-5eec-8798-6d3234e1d4cd",
+    "90aa346f-55a5-5ab1-ba70-6bdd71f7eade",
+    "ad0b3958-d00b-5783-85f7-c26ddcb9f29e",
+    "995995e6-c73c-509d-8e32-f300aa62f426",
+    "514046b9-6a91-5bd4-b58e-e72ccd769663",
+    "5991653f-dfa4-53df-b816-95e9bcd124db",
+    "22582ee6-630a-5cde-a12b-abd77d9330ec",
+    "a518b3f2-fa51-5029-8469-dd117145038c",
+    "b1f95f7a-36e2-5577-9edf-f8523d25ab4b",
+    "d5327a3d-1e50-5bfd-903e-12c75612942c",
+    "0c07a012-7b6f-5479-843c-84c63d4a98c0",
+    "864c20c2-25a3-558f-b8e7-fb456cd7ffc1",
+    "13b375fb-69ce-5b91-ad64-2158e429452c",
+    "d7a2be4c-1bb8-5e92-9e67-bafec62f8190",
+    "46d0084f-71e6-5196-82a6-88e6a8040126",
+    "7cc5f4d6-3595-5020-8cea-11ca04e37fb5",
+    "dab7030d-113e-5f42-9260-7adef203c525",
+    "378b1559-750e-5d4e-846d-3a185b1acf75",
+    "fe8a0cec-5de2-50e2-8042-52ff0fbe2e4d",
+    "a2adab6c-89a0-525d-a5dc-38598f3903a6",
+    "75a09ada-82e2-51e6-98bb-f3995c41e3aa",
+    "c586f180-812e-5c66-9d81-d6a97c198d9e",
+    "13dced10-a386-5a1e-b28f-0d0a44ab8185",
+    "d9e49f10-f9cd-5fbe-82cf-14d056e3cb9a",
+    "98914efa-c45a-5342-ad66-67a5d245744d",
+    "ddff5ae8-f649-5fe2-8e1c-d600f3f9f818",
+    "71b016fd-5d53-52aa-b6ae-a4b1312b2e8d",
+    "ace7e8cc-0b34-526c-a090-fe0a8ad63715",
+    "7c4a7549-a8bc-55c4-b2bb-20800af4b687",
+    "6f9828f9-2a71-59ff-943c-4370d30ac915",
+    "6c426cd7-31c0-58d0-82cd-5db09852f5e6",
+    "4dd20a19-1105-5668-a2a9-bc78a4ec0bb0",
+    "88bf3edd-75c4-5e49-a64f-7a8a1f630561",
+    "60c88498-4bec-58e9-9d6d-20ca4c3ae1a4",
+    "2dd97e23-6118-5848-8d2c-cfc423361a6e",
+    "fd4dca65-a9b8-5405-8c0b-92c3cf57192f",
+    "8e81729c-c1f0-5e38-9f0c-ef61a96353e3",
+    "aa4b50bc-5f1f-5d6c-a339-4e6c74495cc1",
+    "d6d90b01-8913-5347-b77b-6a978dbfa99c",
+    "edfb0fe8-4b13-5432-ae16-7b2b6674b2c3",
+    "8a059feb-ed6c-5be6-b827-ab6617c5d43c"
   ],
-  "added_relationships_count": 89,
+  "added_relationships_count": 95,
   "updated_policy_properties": [
     {
       "policy_id": "POL_001",
@@ -1745,7 +1814,7 @@
   ],
   "data_corrections": {
     "source": "data/metadata/data_corrections_v1.4.0.json",
-    "source_sha256": "be78818203cbb3f6d365dcf4ef1dbdc6f6edb28a89e098f921eb75bc119747a2",
+    "source_sha256": "85a6d71b48c21efcdb1dcf177b9f551edf8d826e627ac8f339836ffb00997e51",
     "removed_relationships": [
       {
         "source_id": "POL_001",
@@ -9880,7 +9949,7 @@
         "target_id": "LIFESTAGE_중장년"
       }
     ],
-    "taxonomy_corrected_chunks": 89,
+    "taxonomy_corrected_chunks": 114,
     "added_condition_ids": [
       "COND_AGE_12_24",
       "COND_AGE_6_64",
@@ -10120,6 +10189,80 @@
       "GRP_POL_YC_002_OR_SP"
     ],
     "region_corrected_chunks": 9,
+    "unverified_application_periods": [
+      {
+        "policy_id": "POL_YC_005",
+        "document_id": "DOC_YC_005",
+        "before": "20261101 ~ 20261130",
+        "expected_content_hash": "06130a7d1af406c661f45712fbaf3133753ac280f076b064aaad398a7c233e84"
+      },
+      {
+        "policy_id": "POL_YC_017",
+        "document_id": "DOC_YC_017",
+        "before": "20260302 ~ 20261231",
+        "expected_content_hash": "88b5433807386757b692f6a48b91a7f6f619a557c50c1949d31de4a1fae28fda"
+      },
+      {
+        "policy_id": "POL_YC_020",
+        "document_id": "DOC_YC_020",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "70e661ec0d4d097ca0f645e5349da775e9e800be724bb47dbe73f381abe7a814"
+      },
+      {
+        "policy_id": "POL_YC_021",
+        "document_id": "DOC_YC_021",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "3cf673234720b8a359e743e8861accfad8b227f2f04e8899a6acda067e134132"
+      },
+      {
+        "policy_id": "POL_YC_022",
+        "document_id": "DOC_YC_022",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "e4ea8072b8a3e6350b19eda8abe10e19b25d9fe06f80ab8d3406071d46607768"
+      },
+      {
+        "policy_id": "POL_YC_024",
+        "document_id": "DOC_YC_024",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "fa36fba5830e27804a02ffe11e5d07317c993ff4fd858eacb60ed5962683ae26"
+      },
+      {
+        "policy_id": "POL_YC_027",
+        "document_id": "DOC_YC_027",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "42bf5ffa6e8cdda248c56352c018848a0622be1891a68e30833c69dea18875fb"
+      },
+      {
+        "policy_id": "POL_YC_028",
+        "document_id": "DOC_YC_028",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "9a5c8a1c4f01a4ec73fc7db33f40e1ce0bb51cbb1a52fac0249418e826bce130"
+      },
+      {
+        "policy_id": "POL_YC_041",
+        "document_id": "DOC_YC_041",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "47aaec5c1b1712a1d6bf8fa3af6e1f0236efa24df4fdfb9f0fa77a139ca06c0e"
+      },
+      {
+        "policy_id": "POL_YC_045",
+        "document_id": "DOC_YC_045",
+        "before": "20260301 ~ 20270228",
+        "expected_content_hash": "fbd0348569d135993413ff3bcd58aaa8cd9d936a3ed87ee23c28755a5db8ea0e"
+      },
+      {
+        "policy_id": "POL_YC_063",
+        "document_id": "DOC_YC_063",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "4cf4927453dc36a5526402263a1d37b99ed669aa89c6879fa0571de3dd06c85d"
+      },
+      {
+        "policy_id": "POL_YC_064",
+        "document_id": "DOC_YC_064",
+        "before": "20260101 ~ 20261231",
+        "expected_content_hash": "ce7ec3f4779835fab5c011437752e540626ee403c14b8145e3b12cf03ed4e064"
+      }
+    ],
     "search_excerpts_updated": [
       {
         "document_id": "DOC_BOK_054",
@@ -10127,6 +10270,31 @@
         "text": "취학아동(방과후보육료) : '18. 01. 01. ~ '12. 12. 31.까지의 출생 아동",
         "superseded_by_document_id": "DOC_BOK_031_MOE_2026"
       }
+    ],
+    "search_lines_held": [
+      {
+        "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+        "expected_content_hash": "ab00724e704f6a708e19838592feda46a8bffaf080579d2012351d416ac5333a",
+        "faq_item": "신청단계 FAQ — 어떤 사람이 신청할 수 있나요?",
+        "text": "신청 자격 | 어떤 사람이 신청할 수 있나요? | ○ 청년수당 신청자격요건 (아래 요건에 모두 해당해야 함) ① 서울시 거주 만 19세 이상~34세 이하* 미취업 청년 중 최종학력 졸업(수료·중퇴·제적)** 미취업 청년 * 졸업일 기준 : 2026년 5월 전 졸업자 또는 졸업예정자 ※ 졸업예정자 : 졸업요건 학점 이수 완료자 ※ 수료일이 5월 전(4월까지)으로 확인 되는 자 * 방송통신대학교·사이버대학·학점은행제에 재학 중인 경우는 이전 최종 학력(고등학교 또는 대학교) 졸업일로 신청 가능 * 만 19세~34세 : 공고월 기준 : 2026.5월 공고기준, 1991년 5월~2007년 5월 출생자만 해당 - 단, 제대군인의 경우 최대 3년 이내 지원 상한연령 가산 [지원 대상] 1년 미만 복무: 만 35세까지(1990. 5. 1. 이후 출생부터) / 1년 이상 ~ 2년 미만 복무: 만 36세까지(1989. 5. 1. 이후 출생부터) / 2년 이상 복무: 만 37세까지(1988. 5. 1. 이후 출생부터) ② 신청일 기준 주민등록상 주소지가 서울시인 미취업 청년 ○ 신청 제외 대상 (아래 요건 중 하나 이상에 해당할 경우 신청 제외) ① 서울 청년수당 사업 참여 이력이 있는 청년 ② 대학 재학생·휴학생 ※ 단, 졸업예정자의 경우 졸업요건 학점 이수를 증명하는 '졸업예정증명서' 또는 '재학증명서와 성적증명서' 증빙시 신청 가능(서류를 통해 졸업요건 학점 이수완료가 확인되어야 함, 학교마다 졸업요건 학점이 다르므로 서류를 통해 졸업학점 이수가 미확인시 서류검증에서 탈락 될 수 있음.) ※ 방송통신대, 사이버대, 학점은행제 재학생 중 이전 최종학력 졸업자는 신청 가능(이전 단계의 최종 학력 졸업을 증명) ③ 주 30시간 이하 또는 3개월 이하의 단기근로자(취업자)* * 근로계약서 등 증빙자료 제출 필요 ④ 서울시 청년수당 사업 동일기간 내 정부 및 지자체 유사사업 참여자 (2026년 5월 1일부터 사업 참여 종료일까지) - 국민취업지원제도(1유형, 2유형), 서울시 청년월세지원 사업, 희망두배청년통장 사업 등 중복참여자 ⑤ 기초생활수급자(생계·의료·주거·교육 수급자) 및 차상위계층 ⑥ 실업급여 사업(신청 시점부터 사업 참여 종료일까지) ⑦ 중위소득 150% 초과 가구 청년 (공고월 전월(4월) 기준 건강보험료로 산정) * 본인이 납부하고 있으면 본인납입 건보료 기준, 본인이 피부양자로 돼 있으면 부양자(세대주) 납입 건보료 기준",
+        "status": "needs_review",
+        "reason": "'신청 제외 대상 ③'에 '주 30시간 이하 또는 3개월 이하의 단기근로자(취업자)'가 있으나, 같은 FAQ의 단기근로자 질문·준비서류 항목과 공식 소개 탭(DOC_STG_SEOUL_001_INTRO_2026)은 '주30시간 이하 또는 3개월 이하 단기근로자 신청 가능(근로시간 증빙 제출 시만 인정)'이라고 안내한다. FAQ 원문은 고치지 않고 이 항목 전체를 답변 근거에서 보류한다. 기준은 소개 탭이다(팀 결정 2026-11-21).",
+        "evidence": "청년몽땅정보통 청년수당 FAQ(신청단계) 2026-11-21 재확인: 두 문구가 그대로 있음. 같은 화면의 소개 탭(tabKind=100) 2026-11-21 확인: '기타요건: 미취업자만 신청가능 단, 주30시간 이하 또는 3개월 이하 단기근로자 신청 가능'.",
+        "superseded_by_document_id": "DOC_STG_SEOUL_001_INTRO_2026"
+      },
+      {
+        "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+        "expected_content_hash": "ab00724e704f6a708e19838592feda46a8bffaf080579d2012351d416ac5333a",
+        "faq_item": "사업기간 이행사항 FAQ — 사용한 현금사용 소명은 어떻게 하면 되나요?",
+        "text": "현금사용 | 사용한 현금사용 소명은 어떻게 하면 되나요? | ○ 청년수당은 전용 체크카드를 사용해야 하여 현금사용(계좌이체)은 원칙적으로 불가하며, 아래의 일부 한정된 항목에 한하여 허용됨 ① 주거 관련 : 전·월세비, 주거 관리비, 주거 관련 대출 ② 생활·공과금 관련 : 전기·가스·수도요금, 통신비, 건강보험료 ③ 교육 관련 : 학자금대출, 자격증·시험 응시료, 해외 생성형 AI 프로그램 이용 ○ 위 항목에 한하여 현금을 사용하는 경우, 매월 자기성장기록서 제출 시 현금사용 내역 및 증빙자료를 제출해야 하며, 추후 자료에 대한 모니터링 및 보완 요청 등의 조치가 있을 수 있으니 관련 자료는 2025.12.31.까지 보관 필요 - 전·월세비 : 전·월세 관련 계약서 + 이체내역서 - 전기·가스·수도요금, 건강보험료, 통신비 : 납부고지서 + 이체내역서 - 주거 관련 대출, 학자금대출 납부 : 대출 계약서류 + 이체내역서 - 자격증·시험 응시료 : 수험표 및 응시서류 + 이체내역서 - 해외 생성형 AI 프로그램 구매 : 거래명세서 또는 영수증 + 이체내역서",
+        "status": "needs_review",
+        "reason": "2026년 사업 FAQ에 '관련 자료는 2025.12.31.까지 보관 필요'가 남아 있으나, 공식 소개 탭(DOC_STG_SEOUL_001_INTRO_2026)은 '개별적으로도 증빙자료를 2026.12.31.까지 보관 바람'이라고 안내한다. FAQ 원문은 고치지 않고 이 항목 전체를 답변 근거에서 보류한다. 기준은 소개 탭이다(팀 결정 2026-11-21).",
+        "evidence": "청년몽땅정보통 청년수당 FAQ(사업기간 이행사항) 2026-11-21 재확인: '2025.12.31.까지 보관 필요' 그대로 있음. 같은 화면의 소개 탭(tabKind=100) 2026-11-21 확인: '2026.12.31.까지 보관 바람'.",
+        "superseded_by_document_id": "DOC_STG_SEOUL_001_INTRO_2026"
+      }
+    ],
+    "held_line_dropped_chunks": [
+      "DOC_STG_SEOUL_001_FAQ_2026_C11"
     ]
   },
   "application_url_evidence_sha256": "96976115cd7f66eddde09af98b2b6e597677c179107e19f9fa5dacfad09902fc",
@@ -10210,6 +10378,36 @@
       "source_id": "POL_BOK_031",
       "relation": "SUPPORTED_BY",
       "target_id": "DOC_BOK_031_MOE_2026"
+    },
+    {
+      "source_id": "POL_GOV_006",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_GOV_006_MOF_NOTICE_2024"
+    },
+    {
+      "source_id": "POL_STG_ICN_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_ICN_001_NOTICE_2026"
+    },
+    {
+      "source_id": "POL_STG_MOLIT_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+      "source_id": "POL_STG_NTS_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_NTS_001_FAQ_2026"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_FAQ_2026"
+    },
+    {
+      "source_id": "POL_STG_SEOUL_001",
+      "relation": "SUPPORTED_BY",
+      "target_id": "DOC_STG_SEOUL_001_INTRO_2026"
     },
     {
       "source_id": "POL_STG_MOLIT_002",
