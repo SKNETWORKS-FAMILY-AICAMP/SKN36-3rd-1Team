@@ -212,34 +212,36 @@ class ApprovedReleaseTests(unittest.TestCase):
     def test_release_files_unchanged_and_manifest_matches(self):
         self.assertEqual(self.before, self.after)
         # 릴리스 파일 수: #104에서 검색용 본문 source_text/DOC_STG_SEOUL_001_FAQ_2026.txt 추가(22 → 23),
-        # #110에서 신청 근거의 사업기간을 뺀 온통청년 본문 source_text/DOC_YC_*.txt 12개 추가(23 → 35)
-        self.assertEqual(len(self.before), 35)
+        # #110에서 신청 근거의 사업기간을 뺀 온통청년 본문 source_text/DOC_YC_*.txt 12개 추가(23 → 35),
+        # #113에서 신청 일정 근거 본문 source_text/DOC_GOV_033.txt·DOC_GOV_059.txt 2개 추가(35 → 37)
+        self.assertEqual(len(self.before), 37)
         added_110 = {f"source_text/DOC_YC_{n}.txt" for n in ("005", "017", "020", "021", "022", "024", "027", "028",
                                                                "041", "045", "063", "064")}
         self.assertTrue(added_110 <= set(self.before))
+        self.assertTrue({"source_text/DOC_GOV_033.txt", "source_text/DOC_GOV_059.txt"} <= set(self.before))
         self.assertEqual(self.out["manifest_bad"], [])
 
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 268, 663, 1133, 2674])
+        self.assertEqual(self.out["expected"], [249, 273, 672, 1147, 2702])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
-        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (268, 268))
+        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (273, 273))
         self.assertTrue(self.out["documents_equal_nodes"])
         self.assertEqual(self.out["hash_mismatch"], 0)
 
     def test_metadata_per_document_preserved(self):
-        self.assertEqual(self.out["metadata_documents"], 268)
+        self.assertEqual(self.out["metadata_documents"], 273)
         self.assertTrue(self.out["metadata_keyed_by_document"])
         self.assertTrue(self.out["metadata_preserved"])
-        # 정책 단위로 합치면 충돌하는 8개 정책: 문서별 값이 그대로 남아 있어야 한다
+        # 정책 단위로 합치면 충돌하는 10개 정책: 문서별 값이 그대로 남아 있어야 한다
         self.assertEqual(self.out["policy_level_conflicts_kept"],
-                         ["POL_001", "POL_BOK_031", "POL_GOV_006", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_MOLIT_001", "POL_STG_SEOUL_001"])
+                         ["POL_001", "POL_BOK_031", "POL_GOV_006", "POL_GOV_059", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_MOLIT_001", "POL_STG_SEOUL_001", "POL_YC_029"])
 
     def test_b2_b3_chunks_and_payloads(self):
-        for name, expected in (("A_B2_V140", 1233), ("B_B3_V140", 1320)):
+        for name, expected in (("A_B2_V140", 1249), ("B_B3_V140", 1338)):
             plan = self.out[name]
             with self.subTest(config=name):
                 self.assertEqual((plan["chunks"], plan["expected"]), (expected, expected))
@@ -248,7 +250,7 @@ class ApprovedReleaseTests(unittest.TestCase):
                 self.assertEqual(plan["restore_mismatch"], 0)
                 self.assertEqual((plan["missing_documents"], plan["missing_policies"]), ([], []))
                 self.assertEqual(plan["policies_covered"], plan["policies_total"])
-                self.assertEqual(plan["policies_total"], 246)
+                self.assertEqual(plan["policies_total"], 249)
                 self.assertEqual(plan["missing_payload_fields"], [])
                 self.assertEqual(plan["wrong_payload_metadata"], 0)
 
@@ -262,7 +264,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_neo4j_graph_input(self):
         self.assertTrue(self.out["graph_ok"])
-        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1133, 2674))
+        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1147, 2702))
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):

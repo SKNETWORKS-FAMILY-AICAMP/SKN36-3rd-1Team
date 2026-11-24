@@ -33,7 +33,7 @@ from database.chunking import make_point_id  # noqa: E402
 V140_DIR = hd.DEFAULT_HANDOFF_DIR            # data/releases/v1.4.0-candidate (승인 릴리스)
 V132_DIR = hd.LEGACY_HANDOFF_DIR             # data/handoff (v1.3.2)
 DATASETS = {
-    hd.RELEASE_V140_VERSION: (V140_DIR, 663, 636),
+    hd.RELEASE_V140_VERSION: (V140_DIR, 672, 645),
     "1.3.2": (V132_DIR, 557, 530),
 }
 NOISE_IDS = sorted(hd.REVIEWED_NOISE_CHUNKS)
@@ -250,7 +250,7 @@ class TestServicePathsUnchanged(unittest.TestCase):
 
     def test_b2_service_chunks_unchanged(self):
         self.assertEqual(self.out["version"], hd.RELEASE_V140_VERSION)
-        self.assertEqual(self.out["b2"], 1233)
+        self.assertEqual(self.out["b2"], 1249)
         self.assertFalse(self.out["b2_has_reviewed_ids"])
 
     def test_search_profile_unchanged(self):
@@ -260,11 +260,11 @@ class TestServicePathsUnchanged(unittest.TestCase):
     def test_raw_and_selected_chunks_match_latest_release_manifest(self):
         manifest = json.loads((V140_DIR / "manifest.json").read_text(encoding="utf-8"))
         total = manifest["summary"]["total_chunks"]
-        self.assertEqual(total, 663)
+        self.assertEqual(total, 672)
         self.assertEqual(manifest["files"]["qdrant/payload_chunks.jsonl"]["record_count"], total)
         self.assertEqual(self.out["raw_chunks"], total)                                   # 원본은 줄이지 않는다
         self.assertEqual(self.out["selected_chunks"], total - len(hd.REVIEWED_NOISE_CHUNKS))   # 검토된 노이즈만 제외
-        self.assertEqual(self.out["selected_chunks"], 636)
+        self.assertEqual(self.out["selected_chunks"], 645)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSOK · 관심 정책 비교</title>
+  <link rel="stylesheet" href="../../frontend/src/styles.css">
+  <style>
+    main.wrap { max-width: 920px; padding-block: 32px; }
+    [hidden] { display: none !important; }
+    .heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+    .note { color: var(--ink-2); margin-block: 8px 18px; }
+    .cards { display: grid; gap: 10px; }
+    .choice { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+    .choice:has(input:not([hidden])) { cursor: pointer; }
+    .choice:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+    .choice input { flex: none; width: 18px; height: 18px; accent-color: var(--primary); }
+    .choice small { display: block; color: var(--ink-2); }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 16px; }
+    button:disabled { opacity: .55; cursor: default; }
+    .actions .chip[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; background: var(--card); }
+    table.three-policies { min-width: 540px; }
+    th, td { padding: 12px 10px; border: 1px solid var(--line); text-align: start; vertical-align: top; overflow-wrap: anywhere; }
+    th:first-child { width: 23%; }
+    th { background: var(--bg-2); }
+    .check-row td { background: var(--primary-soft); }
+    .check-row strong { display: block; margin-bottom: 4px; color: var(--primary); }
+    .summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+    .summary li + li { border-inline-start: 1px solid var(--line); padding-inline-start: 8px; }
+    .status-label { border-radius: 10px; padding: 4px 9px; background: var(--bg-2); }
+    .status-label { display: inline-block; font-size: .9em; font-weight: 700; }
+    .met { background: var(--ok-bg); }
+    .missing, .unverified { background: var(--warn-bg); }
+    .unmet { background: var(--bad-bg); }
+    .different td { box-shadow: inset 0 3px var(--primary); }
+    .condition-detail { display: block; margin-top: 4px; }
+    .checklist { list-style: none; padding: 0; margin: 0; }
+    .checklist li + li { margin-top: 12px; }
+    .checklist label { display: flex; align-items: start; gap: 6px; cursor: pointer; }
+    .checklist input { flex: none; margin-top: .35em; accent-color: var(--primary); }
+    .policy-actions { display: grid; justify-items: start; gap: 6px; }
+    .policy-actions .btn { height: auto; min-height: 36px; padding: 6px 10px; white-space: normal; text-align: start; }
+    dialog { width: min(460px, calc(100% - 24px)); max-height: 85vh; margin: auto; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--ink); }
+    dialog::backdrop { background: #0006; }
+    dialog p { margin-block: 10px; }
+    @media (max-width: 480px) { th, td { padding: 8px 6px; font-size: 13px; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>정책 둘러보기</h1>
+    <p class="note">정책 조건·지원금·신청 일정은 임의로 만든 시연용 예시입니다.</p>
+    <div class="heading" id="list-heading">
+      <h2>관심 정책 3</h2>
+      <button class="btn btn-o" id="start" type="button">비교하기</button>
+    </div>
+    <section id="list" aria-label="관심 정책 목록">
+      <div class="cards"></div>
+      <div class="actions" id="selection" hidden>
+        <span id="count" role="status"></span>
+        <button class="btn btn-p" id="compare" type="button" disabled>내 조건으로 비교</button>
+        <button class="btn btn-o" id="cancel" type="button">취소</button>
+      </div>
+    </section>
+    <section id="results" aria-labelledby="result-title" hidden>
+      <div class="actions">
+        <button class="btn btn-o" id="back" type="button">← 목록으로</button>
+        <h3 id="result-title" tabindex="-1">내 조건으로 비교</h3>
+      </div>
+      <p class="note">예시 내 조건 · 만 28세 · 서울 거주 · 소득 미입력 · 2026.10.15 이사 · 현재 미취업</p>
+      <ul id="summary" class="summary" aria-label="조건 비교 요약"></ul>
+      <div class="actions" role="group" aria-label="비교표 보기 방식">
+        <button class="chip" id="differences" type="button" aria-pressed="true">차이점만 보기</button>
+        <button class="chip" id="all" type="button" aria-pressed="false">전체 항목 보기</button>
+        <span id="view-status" role="status"></span>
+      </div>
+      <div class="table-scroll" role="region" aria-label="정책 비교표" tabindex="0">
+        <table aria-labelledby="result-title"></table>
+      </div>
+      <p class="note">체크는 확인한 항목을 표시하는 메모예요.</p>
+    </section>
+    <dialog id="policy-dialog" aria-labelledby="dialog-title">
+      <h3 id="dialog-title"></h3>
+      <div id="dialog-content"></div>
+      <form method="dialog"><button class="btn btn-o" type="submit">닫기</button></form>
+    </dialog>
+  </main>
+  <script>
+    const minPolicies = 2;
+    const maxPolicies = 3;
+    const statusLabels = { met: '충족 확인', missing: '미입력', unverified: '공식 근거 미확인', unmet: '조건 불충족' };
+    const scheduleLabels = { fixed: '공식 마감 시각 예시', personal: '개인별 신청 기한 예시', unknown: '일정 미확인' };
+    const commonConditions = {
+      age: { status: 'met', detail: '만 28세 · 예시 기준 만 19~34세' },
+      region: { status: 'met', detail: '서울 거주 · 예시 기준 서울 거주자' },
+    };
+    const policies = [
+      {
+        name: '청년 월세 지원 예시',
+        benefit: '월 최대 20만 원 · 6개월',
+        conditions: { ...commonConditions, income: { status: 'missing', detail: '내 소득을 입력하고 공고의 소득 기준과 비교할 항목이에요.' } },
+        schedule: { kind: 'fixed', detail: '2026.11.30 16:00 마감' },
+      },
+      {
+        name: '청년 이사비 지원 예시',
+        benefit: '이사비 최대 30만 원 · 1회',
+        conditions: { ...commonConditions, move: { status: 'met', detail: '이사일 2026.10.15 · 예시 기준 2026년 하반기 이사' } },
+        schedule: { kind: 'personal', detail: '공고의 기준일과 본인에게 적용되는 기한을 확인할 항목이에요.' },
+      },
+      {
+        name: '청년 주거 상담 예시',
+        benefit: '주거 상담 1회',
+        conditions: {
+          ...commonConditions,
+          employment: { status: 'unmet', detail: '현재 미취업 · 이 가상 정책은 재직자를 대상으로 해요.' },
+          documents: { status: 'unverified', detail: '추가 증빙 요건은 공고 근거를 확인할 항목이에요.' },
+        },
+        schedule: { kind: 'unknown', detail: '확인된 접수 일정이 없는 상황이에요.' },
+      },
+    ];
+    const conditionFields = [['age', '연령'], ['region', '지역'], ['income', '소득'], ['move', '이사일'], ['employment', '재직 여부'], ['documents', '증빙 요건']];
+    const checkedItems = new Set();
+    let chosen = [];
+    let differencesOnly = false;
+    const get = id => document.getElementById(id);
+    const list = get('list');
+    const results = get('results');
+    const selection = get('selection');
+    const compare = get('compare');
+    const start = get('start');
+    const cards = list.querySelector('.cards');
+    const inputs = policies.map(policy => {
+      const card = document.createElement('label');
+      card.className = 'choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.hidden = true;
+      const text = document.createElement('span');
+      const title = document.createElement('strong');
+      title.textContent = policy.name;
+      const schedule = document.createElement('small');
+      schedule.textContent = policy.schedule.kind === 'fixed' ? policy.schedule.detail : scheduleLabels[policy.schedule.kind];
+      text.append(title, schedule);
+      card.append(input, text);
+      cards.append(card);
+      return input;
+    });
+
+    function updateSelection() {
+      const count = inputs.filter(input => input.checked).length;
+      get('count').textContent = count + '개 선택 · 2~3개 비교 가능';
+      for (const input of inputs) input.disabled = count >= maxPolicies && !input.checked;
+      compare.disabled = count < minPolicies || count > maxPolicies;
+    }
+
+    for (const input of inputs) input.addEventListener('change', updateSelection);
+    start.addEventListener('click', () => {
+      start.hidden = true;
+      selection.hidden = false;
+      for (const input of inputs) input.hidden = false;
+      updateSelection();
+      inputs[0].focus();
+    });
+    get('cancel').addEventListener('click', () => {
+      for (const input of inputs) {
+        input.checked = false;
+        input.hidden = true;
+      }
+      selection.hidden = true;
+      start.hidden = false;
+      start.focus();
+    });
+    function element(tag, text, className = '') {
+      const node = document.createElement(tag);
+      node.textContent = text;
+      node.className = className;
+      return node;
+    }
+
+    function statusBadge(condition) {
+      return element('span', statusLabels[condition.status], 'status-label ' + condition.status);
+    }
+
+    function policyStatus(policy) {
+      const conditions = Object.values(policy.conditions);
+      if (conditions.some(condition => condition.status === 'unmet')) return 'unmet';
+      return conditions.every(condition => condition.status === 'met') ? 'met' : 'pending';
+    }
+
+    function renderSummary() {
+      const counts = { met: 0, pending: 0, unmet: 0 };
+      for (const policy of chosen) counts[policyStatus(policy)]++;
+      get('summary').replaceChildren(
+        element('li', '비교 정책 ' + chosen.length + '개'),
+        element('li', '조건 충족 ' + counts.met + '개', 'met'),
+        element('li', '추가 확인 필요 ' + counts.pending + '개', 'missing'),
+        element('li', '조건 불충족 ' + counts.unmet + '개', 'unmet'),
+      );
+    }
+
+    function openPolicyDialog(policy, consultation) {
+      get('dialog-title').textContent = policy.name;
+      const content = get('dialog-content');
+      content.replaceChildren();
+      if (consultation) {
+        content.append(
+          element('p', '상담 질문 예시'),
+          element('p', '“' + policy.name + '에서 내 조건으로 더 확인할 항목은 무엇인가요?”'),
+          element('p', '시연용 질문입니다. 상담 앱으로 전송되지 않습니다.'),
+        );
+      } else {
+        for (const [key, label] of conditionFields) {
+          const condition = policy.conditions[key];
+          if (condition) content.append(element('p', label + ' · ' + statusLabels[condition.status] + ' · ' + condition.detail));
+        }
+        content.append(element('p', policy.benefit), element('p', scheduleLabels[policy.schedule.kind] + ' · ' + policy.schedule.detail));
+        const actions = element('div', '', 'actions');
+        const ask = element('button', '이 정책 상담하기 (시연)', 'btn btn-o');
+        ask.type = 'button';
+        ask.addEventListener('click', () => openPolicyDialog(policy, true));
+        const official = element('a', '공식 사이트 · 정부24 ↗', 'btn btn-o');
+        official.href = 'https://www.gov.kr/';
+        official.target = '_blank';
+        official.rel = 'noopener noreferrer';
+        actions.append(ask, official);
+        content.append(actions, element('small', '가상 정책의 개별 공고는 없습니다.'));
+      }
+      const dialog = get('policy-dialog');
+      if (!dialog.open) dialog.showModal();
+      else dialog.querySelector('form button').focus();
+    }
+
+    function renderActions(cell, policy) {
+      const actions = element('div', '', 'policy-actions');
+      const button = element('button', '상세 보기', 'btn btn-o');
+      button.type = 'button';
+      button.addEventListener('click', () => openPolicyDialog(policy, false));
+      actions.append(button);
+      cell.append(actions);
+    }
+
+    function renderChecklist(cell, policy) {
+      const checklist = element('ul', '', 'checklist');
+      for (const [key, label] of conditionFields) {
+        const condition = policy.conditions[key];
+        if (!condition || condition.status === 'met') continue;
+        const item = element('li', '');
+        const choice = element('label', '');
+        const checkbox = element('input', '');
+        const itemId = policy.name + ':' + key;
+        checkbox.type = 'checkbox';
+        checkbox.checked = checkedItems.has(itemId);
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) checkedItems.add(itemId);
+          else checkedItems.delete(itemId);
+        });
+        const text = element('span', '');
+        text.append(element('strong', label), statusBadge(condition));
+        choice.append(checkbox, text);
+        item.append(choice);
+        checklist.append(item);
+      }
+      cell.append(checklist.children.length ? checklist : element('span', '추가 확인할 조건 없음'));
+    }
+
+    function renderTable() {
+      const table = results.querySelector('table');
+      table.classList.toggle('three-policies', chosen.length === maxPolicies);
+      table.replaceChildren();
+      const header = table.createTHead().insertRow();
+      for (const title of ['비교 항목', ...chosen.map(policy => policy.name)]) {
+        const cell = document.createElement('th');
+        cell.scope = 'col';
+        cell.textContent = title;
+        header.append(cell);
+      }
+      const body = table.createTBody();
+      let commonRows = 0;
+      function addRow(label, values, renderCell, className = '') {
+        const differ = values && values.some(value => JSON.stringify(value) !== JSON.stringify(values[0]));
+        if (values && !differ) commonRows++;
+        const row = body.insertRow();
+        row.hidden = Boolean(differencesOnly && values && !differ);
+        row.className = className || (differencesOnly && differ ? 'different' : '');
+        const heading = element('th', label);
+        heading.scope = 'row';
+        row.append(heading);
+        chosen.forEach((policy, index) => renderCell(row.insertCell(), values?.[index], policy));
+      }
+      for (const [key, label] of conditionFields) {
+        const conditions = chosen.map(policy => policy.conditions[key]);
+        if (!conditions.some(Boolean)) continue;
+        addRow(label, conditions, (cell, condition) => {
+          if (condition) cell.append(differencesOnly ? document.createTextNode(statusLabels[condition.status]) : statusBadge(condition));
+          else cell.textContent = '예시 조건 없음';
+        });
+      }
+      addRow('다음 확인', null, (cell, _, policy) => renderChecklist(cell, policy), 'check-row');
+      addRow('혜택', chosen.map(policy => policy.benefit), (cell, benefit) => { cell.textContent = benefit; });
+      addRow('신청 일정', chosen.map(policy => policy.schedule), (cell, schedule) => {
+        cell.append(element('strong', scheduleLabels[schedule.kind]), element('p', schedule.detail, 'condition-detail'));
+      });
+      addRow('정책 정보', null, (cell, _, policy) => renderActions(cell, policy));
+      get('all').setAttribute('aria-pressed', String(!differencesOnly));
+      get('differences').setAttribute('aria-pressed', String(differencesOnly));
+      get('view-status').textContent = differencesOnly ? '공통 항목 ' + commonRows + '개 접음' : '';
+    }
+
+    get('all').addEventListener('click', () => { differencesOnly = false; renderTable(); });
+    get('differences').addEventListener('click', () => { differencesOnly = true; renderTable(); });
+    compare.addEventListener('click', () => {
+      chosen = policies.filter((_, index) => inputs[index].checked);
+      if (chosen.length < minPolicies || chosen.length > maxPolicies) return;
+      differencesOnly = true;
+      renderSummary();
+      renderTable();
+      list.hidden = true;
+      get('list-heading').hidden = true;
+      results.hidden = false;
+      get('result-title').focus();
+    });
+    get('back').addEventListener('click', () => {
+      results.hidden = true;
+      list.hidden = false;
+      get('list-heading').hidden = false;
+      compare.focus();
+    });
+  </script>
+</body>
+</html>

@@ -165,7 +165,7 @@ class TestRealDocuments(unittest.TestCase):
 
     def test_all_api_documents_use_field_boundaries(self):
         api_reports = [r for r in self.reports if r["source_type"] == "api"]
-        self.assertEqual(len(api_reports), 232)
+        self.assertEqual(len(api_reports), 235)  # 복지로 2026 추가 3건 포함
         self.assertTrue(all(r["boundary_method"] == "api_field" for r in api_reports))
 
     def test_text_equals_original_slice(self):
@@ -258,10 +258,15 @@ class TestRealDocuments(unittest.TestCase):
         old_by_document = defaultdict(list)
         for chunk in hd.load_payload_chunks():
             old_by_document[chunk["document_id"]].append(chunk)
+        # 릴리스의 교정 본문(source_text)은 줄바꿈을 \n으로 읽는다. 원본 줄바꿈(\r)이 남은 청크와
+        # 비교할 수 있도록 양쪽 줄바꿈만 맞춘다(내용은 그대로 비교한다).
+        def same_newlines(text):
+            return text.replace("\r\n", "\n").replace("\r", "\n")
+
         for document_id, chunks in old_by_document.items():
             chunks.sort(key=lambda c: c["chunk_id"])
-            positions = ck.locate_chunks_in_document(self.documents_by_id[document_id]["text"],
-                                                     [c["text"] for c in chunks])
+            positions = ck.locate_chunks_in_document(same_newlines(self.documents_by_id[document_id]["text"]),
+                                                     [same_newlines(c["text"]) for c in chunks])
             with self.subTest(document=document_id):
                 self.assertNotIn(None, positions)
 
@@ -445,7 +450,7 @@ class TestB2RealDocuments(unittest.TestCase):
                         self.assertTrue(value)
                         self.assertIn(value, document["text"])
             found_urls += len(values.get("출처 URL", []))
-        self.assertEqual(found_urls, 232)
+        self.assertEqual(found_urls, 235)
 
 
 # ---------------------------------------------------------------------------

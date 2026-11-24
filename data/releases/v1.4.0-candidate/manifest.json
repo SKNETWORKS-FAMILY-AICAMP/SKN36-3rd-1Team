@@ -1,42 +1,42 @@
 {
   "manifest_version": "1.4.0-candidate",
   "release_status": "CANDIDATE / PENDING_DB_REVIEW",
-  "created_at": "2026-11-22T23:43:03.120695+09:00",
+  "created_at": "2026-11-24T21:15:03.705068+09:00",
   "baseline_version": "1.3.2-verified",
   "author": "LifePolicy AI Data Engineering Team",
   "summary": {
-    "total_policies": 246,
-    "total_documents": 268,
-    "total_chunks": 663,
-    "total_graph_nodes": 1133,
-    "total_graph_edges": 2674,
+    "total_policies": 249,
+    "total_documents": 273,
+    "total_chunks": 672,
+    "total_graph_nodes": 1147,
+    "total_graph_edges": 2702,
     "referential_integrity": "100% PASS (Broken References = 0)",
     "qdrant_point_id_standard": "RFC 4122 UUIDv5 (Deterministic)",
     "delta_from_baseline": {
-      "policies_added": 9,
-      "documents_added": 22,
-      "chunks_added": 106,
-      "relationships_added": 95,
-      "organizations_added": 7,
-      "condition_groups_added": 9
+      "policies_added": 12,
+      "documents_added": 27,
+      "chunks_added": 115,
+      "relationships_added": 123,
+      "organizations_added": 10,
+      "condition_groups_added": 12
     },
     "policies_with_application_url_updates": 235,
     "db_review_status": "PENDING_APPROVAL_FROM_MINHYEOK_JU"
   },
   "files": {
     "application_url_review.json": {
-      "size_bytes": 124326,
-      "sha256": "158576a94d328852f3ba9a042c984510fffeee79ee6b1adeb6aa7102025be2f2",
+      "size_bytes": 125682,
+      "sha256": "ab7d83e42e8552a0f58faff173f6754aef4a9f98fd52f3542dcfa7cfca496c88",
       "record_count": 0
     },
     "CHANGELOG.md": {
-      "size_bytes": 7183,
-      "sha256": "2b3a34f56e267158400f90d138d622a2cbda62d1e082c46ca7d347d1d959e613",
+      "size_bytes": 7579,
+      "sha256": "95e4086da61b1c51ad4daf98f1c283e181411db17e4161d270d693950a54dddf",
       "record_count": 0
     },
     "release_delta_manifest.json": {
-      "size_bytes": 337556,
-      "sha256": "be31b140dbf4e88494d589fe4182cfbe6bcd9a543281df759f8af9a1c0f224fa",
+      "size_bytes": 344383,
+      "sha256": "94746b48b2ede8b99fca97d1637e399963109936c9598f2899cf872ba435da66",
       "record_count": 0
     },
     "neo4j/cypher_ddl.cypher": {
@@ -55,14 +55,14 @@
       "record_count": 5
     },
     "neo4j/nodes_condition_group.jsonl": {
-      "size_bytes": 86343,
-      "sha256": "56812090983acbc2f4910a247f68cad929c557bfb90b15e726d9aaafb5c4f475",
-      "record_count": 351
+      "size_bytes": 87103,
+      "sha256": "620085d4426c8bd94887e9f0e9350589c4e6be61bff67cad621d0b3dc75332c5",
+      "record_count": 354
     },
     "neo4j/nodes_document.jsonl": {
-      "size_bytes": 134875,
-      "sha256": "87093d3a6dbad1da767abe15464c63fee2f3fda43b81c832e5bead663465458b",
-      "record_count": 268
+      "size_bytes": 139294,
+      "sha256": "c2bac8312aeb637ca75f44faf09dbf0d1781a49854c4cc610b14446b4dc5bf8b",
+      "record_count": 273
     },
     "neo4j/nodes_eligibility_condition.jsonl": {
       "size_bytes": 35213,
@@ -75,14 +75,14 @@
       "record_count": 6
     },
     "neo4j/nodes_organization.jsonl": {
-      "size_bytes": 17611,
-      "sha256": "80cbf7a67bd8710c9439e246883739832377b1fc796d77f21421b5bf5078b4d2",
-      "record_count": 123
+      "size_bytes": 18049,
+      "sha256": "a1944d933ca936c41f2fbd7621fc6171660788430123630c4ff0992ed70e7ff9",
+      "record_count": 126
     },
     "neo4j/nodes_policy.jsonl": {
-      "size_bytes": 504174,
-      "sha256": "0fe480f7d49b7ba38bc4a253dc3cdc71c3bb58c644cd3e35184c5f714b993dd4",
-      "record_count": 246
+      "size_bytes": 515569,
+      "sha256": "e9232812d9d3c2dc69fbbbd9e263f6e64062d6be759022d1eb0c3f78d760d7ad",
+      "record_count": 249
     },
     "neo4j/nodes_region.jsonl": {
       "size_bytes": 1054,
@@ -95,9 +95,9 @@
       "record_count": 11
     },
     "neo4j/relationships.jsonl": {
-      "size_bytes": 680419,
-      "sha256": "9549f5b9d4b1c738d1d0db75ae15f986a5216db1102314d46552da437c984bb4",
-      "record_count": 2674
+      "size_bytes": 687962,
+      "sha256": "8dc315c6b142f3188d186d64dbfff2ef1137234c22a3bee7d2a1d9a408c42889",
+      "record_count": 2702
     },
     "neo4j/schema_constraints.cypher": {
       "size_bytes": 1208,
@@ -120,13 +120,23 @@
       "record_count": 0
     },
     "qdrant/payload_chunks.jsonl": {
-      "size_bytes": 1493978,
-      "sha256": "7e43c9ed447894e2b5511606bee9948977108525a3c7b9435d0ad51253c2a01d",
-      "record_count": 663
+      "size_bytes": 1513292,
+      "sha256": "c3ae62e4d51c36734925fd641ddec284b7a889bff71d76286e02b4c7ceed2cfb",
+      "record_count": 672
     },
     "source_text/DOC_BOK_054.txt": {
       "size_bytes": 3111,
       "sha256": "503641c42ac7eb62bf61f63324a700b3815a4860f25935b922908937802287a4",
+      "record_count": 0
+    },
+    "source_text/DOC_GOV_033.txt": {
+      "size_bytes": 1572,
+      "sha256": "5b4af7ccca6e734b430e6f0fa2085b83437268451906f0381f8e07a03f6ddb60",
+      "record_count": 0
+    },
+    "source_text/DOC_GOV_059.txt": {
+      "size_bytes": 1795,
+      "sha256": "4990d1ecfc5f8bb7a4bb0f10ed5e8478512ab191eb25a569a5c3ccfb8fec24c2",
       "record_count": 0
     },
     "source_text/DOC_STG_SEOUL_001_FAQ_2026.txt": {
