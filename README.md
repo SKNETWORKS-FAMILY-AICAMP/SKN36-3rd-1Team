@@ -153,12 +153,17 @@ npm run dev
 
 `SEARCH_BACKEND_UNAVAILABLE`(503)·`LLM_UNAVAILABLE`(502) 오류가 나면 Docker 컨테이너의 실제 포트 매핑이 `.env`와 다르거나(로컬 Docker 환경마다 달라질 수 있습니다), Qdrant 인증키가 안 맞거나, DB는 연결됐지만 데이터가 비어 있거나, OpenAI 키가 무효화된 경우가 흔합니다. 연결 성공과 실제 데이터 적재는 별개로 확인하세요. 오류별 확인 순서는 [DB 복원 가이드의 "문제 해결"](docs/development/ISSUE43_RESTORE_GUIDE.md#문제-해결-연결인증-오류)을 참고하세요.
 
+### 정책 상세보기 · Django SSR (#120, 선택)
+
+정책 카드의 `정책 상세보기 ↗`는 Django(`web_ssr/`)가 서버에서 렌더링한 페이지를 엽니다. Django는 FastAPI `GET /api/policies`만 호출하며 DB에 직접 접속하지 않습니다. `web_ssr/requirements.txt`(Django 5.2 LTS)를 설치하고 FastAPI를 띄운 상태에서 `python web_ssr/manage.py runserver 127.0.0.1:8001`로 실행합니다. 카드 링크는 `frontend/.env.local`의 `VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:8001/policies/`로 켜고, 비워 두면 숨겨집니다. 자세한 설정·테스트는 [web_ssr/README.md](web_ssr/README.md)를 참고하세요.
+
 ### 주요 코드와 개발 문서
 
 | 위치                                       | 내용                               |
 | ------------------------------------------ | ---------------------------------- |
 | [frontend/](frontend/)                      | 상담하기, 생애주기, 정책 관계 지도 |
 | [backend/](backend/)                        | FastAPI, RAG, 조건 확인, 답변 생성 |
+| [web_ssr/](web_ssr/)                        | 정책 상세보기 Django SSR (#120)    |
 | [database/](database/)                      | Neo4j·Qdrant 연동 및 결합 검색    |
 | [data/](data/) · [collectors/](collectors/) | 데이터 릴리스, 수집 및 전처리      |
 | [tests/](tests/) · [scripts/](scripts/)     | 테스트, 데이터 검증 및 적재 도구   |

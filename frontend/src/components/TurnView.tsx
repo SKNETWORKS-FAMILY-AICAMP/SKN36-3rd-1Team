@@ -4,7 +4,7 @@ import { hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
-import { lifeHref, mapHref } from '../lib/route';
+import { lifeHref, mapHref, policyDetailHref } from '../lib/route';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
 import { LOADING_STAGES, policyQuestion } from '../config/request';
 import type { GraphIndex } from '../graph/graphModel';
@@ -396,6 +396,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   const rlabel = schedule.label;
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
+  const detailHref = sample ? null : policyDetailHref(p.policy_id);
   // 검수된 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.
   const requirementRows: { label: string; value: string; document_id?: string | null; chunk_id?: string | null; source_url?: string | null }[] =
     p.official_requirements?.length ? p.official_requirements
@@ -515,6 +516,9 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
             이 정책 물어보기
           </button>
         )}
+        {/* Django 정책 상세(SSR). 예시 정책은 실제 데이터가 없어 연결하지 않는다. 상담 기록을 지키려고 새 탭으로 연다 */}
+        {detailHref && <a className="btn btn-o" href={detailHref} target="_blank" rel="noopener noreferrer"
+          aria-label={`${p.policy_name} 정책 상세보기 (새 탭)`}>정책 상세보기 ↗</a>}
         {!sample && <a className="btn btn-o" href={mapHref(p.policy_id)} onClick={(event) => {
           if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) onOpenMap?.();
         }}>관계 지도</a>}
