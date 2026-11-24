@@ -261,14 +261,8 @@
 {"group_id": "GRP_POL_STG_SEOUL_001_ROOT", "policy_id": "POL_STG_SEOUL_001", "logic": "UNKNOWN", "is_root": true, "description": "서울특별시 청년수당 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_STG_ICN_001_ROOT", "policy_id": "POL_STG_ICN_001", "logic": "AND", "is_root": true, "description": "중소기업 재직청년 복지공유제 지원 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_099_ROOT", "policy_id": "POL_BOK_099", "logic": "UNKNOWN", "is_root": true, "description": "취업취약계층 고용지원 사업 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_100_ROOT", "policy_id": "POL_BOK_100", "logic": "UNKNOWN", "is_root": true, "description": "중소기업 취업연계 장학사업 (희망사다리 I유형) 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_101_ROOT", "policy_id": "POL_BOK_101", "logic": "UNKNOWN", "is_root": true, "description": "서민금융 활성화 지원(햇살론youth 보증사업) 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_102_ROOT", "policy_id": "POL_BOK_102", "logic": "UNKNOWN", "is_root": true, "description": "청년내일채움공제 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_103_ROOT", "policy_id": "POL_BOK_103", "logic": "UNKNOWN", "is_root": true, "description": "고교 취업연계 장려금 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_BOK_104_ROOT", "policy_id": "POL_BOK_104", "logic": "UNKNOWN", "is_root": true, "description": "해외취업 지원 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_105_ROOT", "policy_id": "POL_BOK_105", "logic": "UNKNOWN", "is_root": true, "description": "청년미래적금 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_106_ROOT", "policy_id": "POL_BOK_106", "logic": "UNKNOWN", "is_root": true, "description": "전문기술인재장학금 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
-{"group_id": "GRP_POL_BOK_107_ROOT", "policy_id": "POL_BOK_107", "logic": "UNKNOWN", "is_root": true, "description": "취업 후 상환 학자금대출 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_005_OR_EXCL", "policy_id": "POL_005", "logic": "OR", "is_root": false, "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외"}
 {"group_id": "GRP_POL_YC_024_REST", "policy_id": "POL_YC_024", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}
 {"group_id": "GRP_POL_YC_047_REST", "policy_id": "POL_YC_047", "logic": "UNKNOWN", "is_root": false, "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)"}

@@ -22,6 +22,8 @@ if str(BASE_DIR) not in sys.path:
 from scripts.build_clean_dataset import iter_document_chunks  # noqa: E402
 
 EVIDENCE_PATH = BASE_DIR / "data/metadata/application_url_evidence_v1.4.0.json"
+# 기존 복지로 정책은 POL_BOK_001~098. 이 묶음은 099부터 쓴다(보류한 정책의 번호도 비워 둔다).
+FIRST_BATCH_NUMBER = 99
 BATCH_DIR = BASE_DIR / "data/staging/bokjiro_2026"
 HANDOFF_DIR = BATCH_DIR / "handoff"
 REQUIRED_POLICY_FIELDS = ("policy_id", "official_id", "policy_name", "category", "agency", "regions",
@@ -177,6 +179,12 @@ def record_application_url_evidence(policies: list[dict], targets: dict) -> None
     """
     by_target = {policy["review_target_id"]: policy for policy in policies}
     evidence = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+    # 선택에서 빠진 이 묶음의 정책(POL_BOK_099 이후) 증거는 지운다. 후보에 없는 정책의 증거가 남지 않게 한다.
+    selected = {policy["policy_id"] for policy in policies}
+    for policy_id in list(evidence["policies"]):
+        if (policy_id.startswith("POL_BOK_") and policy_id[8:].isdigit() and int(policy_id[8:]) >= FIRST_BATCH_NUMBER
+                and policy_id not in selected):
+            del evidence["policies"][policy_id]
     for target_id, policy in by_target.items():
         target = targets[target_id]
         text_path = BASE_DIR / target["source_text_path"]

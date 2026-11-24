@@ -113,8 +113,8 @@ class ApplicationPeriodTests(unittest.TestCase):
         policies = rows(PACKAGE / "neo4j/nodes_policy.jsonl")
         dc.check_stored_reception_status(policies)
         stored = {p["policy_id"]: p["reception_status"] for p in policies if "reception_status" in p}
-        # 신규 정책 18건(STG 9 + 복지로 2026 9)에 저장값이 있다.
-        self.assertEqual(len(stored), 18)
+        # 신규 정책 12건(STG 9 + 복지로 2026 3)에 저장값이 있다.
+        self.assertEqual(len(stored), 12)
         for policy_id in ("POL_STG_MOHW_001", "POL_STG_NTS_001", "POL_STG_MOIS_001", "POL_STG_ICN_001"):
             self.assertEqual(stored[policy_id], dc.STORED_RECEPTION_UNKNOWN)
         with self.assertRaises(ValueError):
@@ -199,7 +199,7 @@ BOKJIRO_2026 = ROOT / "data/staging/bokjiro_2026"
 
 
 class Bokjiro2026PolicyTests(unittest.TestCase):
-    """복지로 2026 검수 결과에서 고른 신규 정책 9건과 인계 자료(handoff)를 확인한다."""
+    """복지로 2026 검수 결과에서 고른 신규 정책 3건(조장 결정)과 인계 자료(handoff)를 확인한다."""
 
     @classmethod
     def setUpClass(cls):
@@ -223,7 +223,7 @@ class Bokjiro2026PolicyTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(text.encode("utf-8")).hexdigest(), target["source_text_sha256"])
 
     def test_selected_policies_are_fully_reviewed_and_not_duplicates(self):
-        self.assertEqual(len(self.selection), 9)
+        self.assertEqual(len(self.selection), 3)
         existing_official_ids = [p["official_id"] for p in self.policies.values()]
         self.assertEqual(len(existing_official_ids), len(set(existing_official_ids)))
         for item in self.selection:
@@ -297,14 +297,14 @@ class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["body_hashes_checked"], 279)
-        self.assertEqual(report["chunks_checked_against_body"], 683)
+        self.assertEqual(report["body_hashes_checked"], 273)
+        self.assertEqual(report["chunks_checked_against_body"], 672)
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
-        self.assertEqual(report["counts"]["total_graph_nodes"], 1169)
-        self.assertEqual(report["counts"]["total_graph_edges"], 2752)
-        self.assertEqual(len(chunks), 683)
+        self.assertEqual(report["counts"]["total_graph_nodes"], 1147)
+        self.assertEqual(report["counts"]["total_graph_edges"], 2702)
+        self.assertEqual(len(chunks), 672)
 
     def test_only_declared_baseline_policy_property_changed(self):
         delta = json.loads((PACKAGE / "release_delta_manifest.json").read_text(encoding="utf-8"))

@@ -2527,16 +2527,6 @@
     "live_application_page_verified": false
   },
   {
-    "policy_id": "POL_BOK_100",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006270.txt",
-    "evidence_sha256": "d6d579ac3c1232cd2138c835087963d9f25cd3658f1991496e8536908b9ba937",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
     "policy_id": "POL_BOK_101",
     "original_url": null,
     "official_apply_url": null,
@@ -2547,62 +2537,12 @@
     "live_application_page_verified": false
   },
   {
-    "policy_id": "POL_BOK_102",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006215.txt",
-    "evidence_sha256": "53e4a14d96d4a124f110cb841bfaba6bddbbad32d02001f5634bb8f3be6afb5a",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
-    "policy_id": "POL_BOK_103",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006236.txt",
-    "evidence_sha256": "70b94708059134daa20b0f0e07906587739cdb90a0a015c043068d96805e25b1",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
     "policy_id": "POL_BOK_104",
     "original_url": null,
     "official_apply_url": null,
     "reason": "missing_application_url",
     "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006249.txt",
     "evidence_sha256": "180fe86dc08f60c7ebaf00a6b65a11e04b93befe389af1c26c27dc43382c3a2a",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
-    "policy_id": "POL_BOK_105",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006266.txt",
-    "evidence_sha256": "267239919dab3b1233e70a1e8a11f72053ca358fc30baea11f913eecafd484a2",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
-    "policy_id": "POL_BOK_106",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00006316.txt",
-    "evidence_sha256": "953ea941e33c2c98a0fdb1f0ea7da51b26883dfbcb6bc314f21defa218c21d1e",
-    "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
-    "live_application_page_verified": false
-  },
-  {
-    "policy_id": "POL_BOK_107",
-    "original_url": null,
-    "official_apply_url": null,
-    "reason": "missing_application_url",
-    "evidence_path": "data/staging/bokjiro_2026/handoff/source_text/WLF00003277.txt",
-    "evidence_sha256": "356231f988c38102a26e168def73a74e1c7fba9f7603da76d72a37993fd0ef45",
     "evidence_field": "applmetList.servSeDetailLink(복지로 상세 XML, 링크 없음)",
     "live_application_page_verified": false
   }

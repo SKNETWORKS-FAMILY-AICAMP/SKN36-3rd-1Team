@@ -165,7 +165,7 @@ class TestRealDocuments(unittest.TestCase):
 
     def test_all_api_documents_use_field_boundaries(self):
         api_reports = [r for r in self.reports if r["source_type"] == "api"]
-        self.assertEqual(len(api_reports), 241)  # 복지로 2026 추가 9건 포함
+        self.assertEqual(len(api_reports), 235)  # 복지로 2026 추가 3건 포함
         self.assertTrue(all(r["boundary_method"] == "api_field" for r in api_reports))
 
     def test_text_equals_original_slice(self):
@@ -450,7 +450,7 @@ class TestB2RealDocuments(unittest.TestCase):
                         self.assertTrue(value)
                         self.assertIn(value, document["text"])
             found_urls += len(values.get("출처 URL", []))
-        self.assertEqual(found_urls, 241)
+        self.assertEqual(found_urls, 235)
 
 
 # ---------------------------------------------------------------------------

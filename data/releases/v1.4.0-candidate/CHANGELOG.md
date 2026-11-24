@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
-- **최종 검증 일시**: 2026-11-24 16:15:28 KST
+- **최종 검증 일시**: 2026-11-24 21:15:03 KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -12,33 +12,33 @@
 
 | 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |
 | :--- | ---: | ---: | ---: |
-| 정책 (`Policy`) | 237 | 255 | +18 |
-| 근거 문서 (`Document`) | 246 | 279 | +33 |
-| • 신규 문서 `verified_official_api` | - | 17 | +17 |
+| 정책 (`Policy`) | 237 | 249 | +12 |
+| 근거 문서 (`Document`) | 246 | 273 | +27 |
+| • 신규 문서 `verified_official_api` | - | 11 | +11 |
 | • 신규 문서 `verified_official_raw` | - | 4 | +4 |
 | • 신규 문서 `verified_official_text` | - | 12 | +12 |
-| 벡터 청크 (`Chunk`) | 557 | 683 | +126 |
-| 그래프 노드 (전체) | 1034 | 1169 | +135 |
-| • Organization | 116 | 130 | +14 |
-| • ConditionGroup | 343 | 360 | +18 (루트 UNKNOWN) |
-| 그래프 관계 (전체) | 3615 | 2752 | +173 |
-| • ADMINISTERED_BY | 237 | 255 | +18 |
-| • APPLIES_TO_LIFESTAGE | 419 | 449 | +30 |
-| • AVAILABLE_IN | 238 | 256 | +18 |
+| 벡터 청크 (`Chunk`) | 557 | 672 | +115 |
+| 그래프 노드 (전체) | 1034 | 1147 | +113 |
+| • Organization | 116 | 126 | +10 |
+| • ConditionGroup | 343 | 354 | +12 (루트 UNKNOWN) |
+| 그래프 관계 (전체) | 3615 | 2702 | +123 |
+| • ADMINISTERED_BY | 237 | 249 | +12 |
+| • APPLIES_TO_LIFESTAGE | 419 | 441 | +22 |
+| • AVAILABLE_IN | 238 | 250 | +12 |
 | • CONTAINS_CONDITION | 735 | 224 | +-511 |
 | • CONTAINS_GROUP | 106 | 105 | +-1 |
-| • HAS_CATEGORY | 237 | 255 | +18 |
-| • HAS_ROOT_CONDITION_GROUP | 237 | 255 | +18 |
+| • HAS_CATEGORY | 237 | 249 | +12 |
+| • HAS_ROOT_CONDITION_GROUP | 237 | 249 | +12 |
 | • REQUIRES_CONDITION | 735 | 211 | +-524 |
-| • SUPPORTED_BY | 246 | 279 | +33 |
-| • TARGETS | 424 | 462 | +38 |
+| • SUPPORTED_BY | 246 | 273 | +27 |
+| • TARGETS | 424 | 450 | +26 |
 
 ## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)
 
 - 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).
 - 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.
 - 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.
-- 복지로 2026 추가 정책 9건(`POL_BOK_099`~)은 복지로 상세 XML(기준연도 2026)을 근거 문서로 넣었다(`verified_official_api`). 선정과 검수 근거: `data/staging/bokjiro_2026/selection.json`, `handoff/`(검수표 v8 전 행 OK), `docs/data/reports/bokjiro_2026_youth_policies_review.md`. 신청 주소는 XML에 없어 비웠고 신청기간은 `미확인`이다.
+- 복지로 2026 추가 정책 3건(`POL_BOK_099`~)은 복지로 상세 XML(기준연도 2026)을 근거 문서로 넣었다(`verified_official_api`). 선정과 검수 근거: `data/staging/bokjiro_2026/selection.json`, `handoff/`(검수표 v8 전 행 OK), `docs/data/reports/bokjiro_2026_youth_policies_review.md`. 신청 주소는 XML에 없어 비웠고 신청기간은 `미확인`이다.
 
 ## 1-2. 원문 대조 교정 (2026-11-09)
 
@@ -75,7 +75,7 @@
 ---
 
 ## 3. 신규 정책 루트 조건 그룹(`HAS_ROOT_CONDITION_GROUP`) 보완
-- 신규 정책 18건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_<policy_id>_ROOT` 노드 18개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
+- 신규 정책 12건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_<policy_id>_ROOT` 노드 12개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
 - 임의의 가상 조건을 만들지 않고 `logic: "UNKNOWN"`으로 처리하여 자격 판정 시 시스템 안전성을 확보함.
 
 ---

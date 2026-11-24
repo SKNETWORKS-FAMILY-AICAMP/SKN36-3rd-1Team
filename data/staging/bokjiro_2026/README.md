@@ -5,7 +5,7 @@
 
 | 파일 | 내용 | 후보 빌드가 읽나 |
 | --- | --- | --- |
-| `selection.json` | 후보 데이터에 넣을 정책(현재 9건)과 분류·신청처 | 간접(아래 스크립트) |
+| `selection.json` | 후보 데이터에 넣을 정책(현재 3건)과 분류·신청처, 보류 6건(`deferred`) | 간접(아래 스크립트) |
 | `policies.jsonl`, `documents.jsonl`, `payload_chunks.jsonl` | `scripts/stage_bokjiro_2026_policies.py`가 만든 빌드 입력 | 읽음 |
 | `handoff/targets.jsonl` | 361건 기본 정보·검수 판정·원본 해시·이름 중복 후보 | 읽지 않음 |
 | `handoff/review_rows.jsonl` | 검수표 1,300행(표 A 신청 경로, B 보충 선정기준, C 기타 정량 조건)과 행별 판정 | 읽지 않음 |
@@ -18,7 +18,7 @@
 ## 정책을 더 넣을 때
 
 1. 팀이 선별 기준을 정한다(조직 전용·사업 종료·내용 부족 제외, 건수).
-2. `selection.json`에 정책을 추가한다(`policy_id`는 `POL_BOK_108`부터, 분류·생애단계·대상집단·신청처).
+2. `selection.json`에 정책을 추가한다(분류·생애단계·대상집단·신청처). 보류 6건은 `deferred`의 번호를 그대로 쓰고, 새 정책은 `POL_BOK_108`부터 쓴다.
 3. `python scripts/stage_bokjiro_2026_policies.py`
    - 검수 행이 모두 OK가 아니거나, 기존 정책과 이름 중복 후보이거나, 조직 대상 의심인데 확인 사유(`org_suspect_reviewed`)가 없으면 멈춘다.
 4. `python scripts/build_incremental_release_candidate.py`
