@@ -1,0 +1,160 @@
+{
+  "workflow_status": "Expected: latest-data reload scheduled but not performed; user confirmed current DB snapshot is intentional.",
+  "code_merge_judgment": "Can merge code to dev; no dependency on new DB schema/fields/collection. Latest-data model evaluation remains separate.",
+  "next_owner": "민혁님 재적재 후 최신 데이터·검색 DB 일치 확인 및 실제 mini 평가",
+  "manifest": {
+    "evaluation": "49246d1bda0624f6a10d19b252713f6ffb69375e07321fa615f594a44c698389",
+    "pr_dev": "d48ef11b599466b394bef15e275be26b24be9dfde1e74771c86b8e3d384acf50"
+  },
+  "equivalent": false,
+  "profile": {
+    "name": "b2_06b_v140",
+    "index_config": "A_B2_V140",
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "embedding_dim": 1024,
+    "distance": "Cosine",
+    "embedding_input_rule": "policy_section_body_v2",
+    "query_template_name": "none",
+    "query_template": null
+  },
+  "qdrant": {
+    "evaluation": {
+      "state": "complete",
+      "existing_points": 1138,
+      "missing": 0,
+      "reasons": []
+    },
+    "pr_dev": {
+      "state": "conflict",
+      "existing_points": 1138,
+      "missing": 1,
+      "reasons": [
+        "payload 불일치 5개 (예: [{'point_id': '51273d15-dac7-58e2-8e1c-c27f5e5dad86', 'fields': ['char_start', 'char_end', 'content_hash', 'text']}, {'point_id': '5ed6279a-8add-5157-87f4-3341944495ab', 'fields': ['char_end', 'content_hash', 'text']}])"
+      ]
+    },
+    "version_claim": "Exact payload identity/body comparison; no vector recomputation"
+  },
+  "neo4j": {
+    "evaluation": {
+      "ok": true,
+      "totals": {
+        "nodes": 1004,
+        "relationships": 2431
+      },
+      "totals_ok": true,
+      "count_mismatches": {}
+    },
+    "pr_dev": {
+      "ok": false,
+      "totals": {
+        "nodes": 1004,
+        "relationships": 2431
+      },
+      "totals_ok": false,
+      "count_mismatches": {
+        "node:Document": {
+          "expected": 262,
+          "actual": 261
+        },
+        "node:ConditionGroup": {
+          "expected": 351,
+          "actual": 265
+        },
+        "node:EligibilityCondition": {
+          "expected": 104,
+          "actual": 69
+        },
+        "rel:SUPPORTED_BY": {
+          "expected": 262,
+          "actual": 261
+        },
+        "rel:REQUIRES_CONDITION": {
+          "expected": 211,
+          "actual": 136
+        },
+        "rel:CONTAINS_GROUP": {
+          "expected": 105,
+          "actual": 19
+        },
+        "rel:CONTAINS_CONDITION": {
+          "expected": 224,
+          "actual": 149
+        }
+      }
+    }
+  },
+  "node_deltas": {
+    "Policy": {
+      "added": 0,
+      "removed": 0,
+      "changed": 21
+    },
+    "Document": {
+      "added": 1,
+      "removed": 0,
+      "changed": 1
+    },
+    "Organization": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "Region": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "Category": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "LifeStage": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "TargetGroup": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "ConditionGroup": {
+      "added": 88,
+      "removed": 2,
+      "changed": 75
+    },
+    "EligibilityCondition": {
+      "added": 35,
+      "removed": 0,
+      "changed": 0
+    }
+  },
+  "relationship_deltas": {
+    "added": 268,
+    "removed": 31,
+    "changed": 1
+  },
+  "release_payload_chunks": {
+    "added": [
+      "DOC_BOK_031_MOE_2026_P305_C01"
+    ],
+    "removed": [],
+    "changed": {
+      "DOC_BOK_054_C01": [
+        "text"
+      ]
+    }
+  },
+  "tests": {
+    "passed": 305,
+    "subtests_passed": 129,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "saved_model_output_replays": 18,
+  "new_paid_calls": 0,
+  "new_model_cost_usd": 0
+}

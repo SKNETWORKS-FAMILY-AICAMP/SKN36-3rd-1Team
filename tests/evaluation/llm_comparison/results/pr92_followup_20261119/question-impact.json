@@ -1,0 +1,151 @@
+[
+  {
+    "question_id": "RQ027",
+    "policies": [
+      {
+        "policy_id": "POL_BOK_047",
+        "policy_name": "주거급여(맞춤형 급여)",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 1,
+        "added_tree_nodes": [],
+        "removed_tree_nodes": [],
+        "changed_nodes": [],
+        "added_tree_relationships": 0,
+        "removed_tree_relationships": 0
+      },
+      {
+        "policy_id": "POL_BOK_034",
+        "policy_name": "기초연금",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 3,
+        "added_tree_nodes": [
+          "COND_AGE_65_120",
+          "GRP_POL_BOK_034_REST"
+        ],
+        "removed_tree_nodes": [],
+        "changed_nodes": [
+          "GRP_POL_BOK_034_ROOT"
+        ],
+        "added_tree_relationships": 3,
+        "removed_tree_relationships": 0
+      },
+      {
+        "policy_id": "POL_BOK_054",
+        "policy_name": "영유아보육료 지원",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 3,
+        "added_tree_nodes": [
+          "COND_CHILD_AGE_0_97M",
+          "GRP_POL_BOK_054_REST"
+        ],
+        "removed_tree_nodes": [],
+        "changed_nodes": [
+          "GRP_POL_BOK_054_ROOT"
+        ],
+        "added_tree_relationships": 3,
+        "removed_tree_relationships": 0
+      }
+    ]
+  },
+  {
+    "question_id": "RQ031",
+    "policies": [
+      {
+        "policy_id": "POL_GOV_006",
+        "policy_name": "수산자원보호 직접지불제",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 1,
+        "added_tree_nodes": [],
+        "removed_tree_nodes": [],
+        "changed_nodes": [],
+        "added_tree_relationships": 0,
+        "removed_tree_relationships": 0
+      }
+    ]
+  },
+  {
+    "question_id": "RQ036",
+    "policies": [
+      {
+        "policy_id": "POL_010",
+        "policy_name": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 3,
+        "added_tree_nodes": [
+          "COND_AGE_15_69",
+          "GRP_POL_010_REST"
+        ],
+        "removed_tree_nodes": [],
+        "changed_nodes": [
+          "GRP_POL_010_ROOT"
+        ],
+        "added_tree_relationships": 3,
+        "removed_tree_relationships": 0
+      },
+      {
+        "policy_id": "POL_002",
+        "policy_name": "기금대출 신혼부부 소득요건 합리화 개정 규정",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 1,
+        "added_tree_nodes": [],
+        "removed_tree_nodes": [],
+        "changed_nodes": [],
+        "added_tree_relationships": 0,
+        "removed_tree_relationships": 0
+      }
+    ]
+  },
+  {
+    "question_id": "RQ040",
+    "policies": [
+      {
+        "policy_id": "POL_005",
+        "policy_name": "고용24 국민내일배움카드",
+        "old_condition_tree_nodes": 16,
+        "new_condition_tree_nodes": 16,
+        "added_tree_nodes": [],
+        "removed_tree_nodes": [],
+        "changed_nodes": [],
+        "added_tree_relationships": 0,
+        "removed_tree_relationships": 0
+      }
+    ]
+  },
+  {
+    "question_id": "RQ042",
+    "policies": [
+      {
+        "policy_id": "POL_YC_035",
+        "policy_name": "청년월세 지원",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 3,
+        "added_tree_nodes": [
+          "COND_AGE_19_34",
+          "GRP_POL_YC_035_REST"
+        ],
+        "removed_tree_nodes": [],
+        "changed_nodes": [
+          "GRP_POL_YC_035_ROOT"
+        ],
+        "added_tree_relationships": 3,
+        "removed_tree_relationships": 0
+      },
+      {
+        "policy_id": "POL_009",
+        "policy_name": "국토교통부 청년월세 한시 특별지원",
+        "old_condition_tree_nodes": 1,
+        "new_condition_tree_nodes": 3,
+        "added_tree_nodes": [
+          "COND_AGE_19_34",
+          "GRP_POL_009_REST"
+        ],
+        "removed_tree_nodes": [],
+        "changed_nodes": [
+          "GRP_POL_009_ROOT"
+        ],
+        "added_tree_relationships": 3,
+        "removed_tree_relationships": 0
+      }
+    ]
+  }
+]

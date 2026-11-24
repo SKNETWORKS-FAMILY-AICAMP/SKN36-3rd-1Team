@@ -58,6 +58,66 @@ class MissingAgeNoticeApiTests(unittest.TestCase):
         api_conditions = response.json()["policy_checks"][0]["conditions"]
         return api_conditions, llm_conditions
 
+    def test_issue79_age_boundaries_reach_api_and_llm(self):
+        """#79: 양쪽 연령 경계와 누락값이 API·LLM에서 일치해야 한다."""
+        policy = sample_policy(
+            "ISSUE79_AGE",
+            "신청자 지원 연령: 만 18~29세",
+            [AGE_18_29],
+        )
+
+        cases = [
+            (17, "ineligible"),
+            (18, "eligible"),
+            (19, "eligible"),
+            (28, "eligible"),
+            (29, "eligible"),
+            (30, "ineligible"),
+            (None, "needs_check"),
+        ]
+
+        for age, expected in cases:
+            with self.subTest(age=age):
+                api, llm = self.ask(policy, age=age)
+
+                self.assertEqual(
+                    [status for status, _ in self.rows(api, "age")],
+                    [expected],
+                )
+                self.assertEqual(
+                    [status for status, _ in self.rows(llm, "age")],
+                    [expected],
+                )
+
+                self.assertNotIn(
+                    NOTICE,
+                    [item["reason"] for item in api],
+                )
+
+    def test_issue79_child_months_are_not_applicant_age(self):
+        """#79/#39: 자녀 월령을 신청자 연령으로 판정하지 않는다."""
+        policy = sample_policy(
+            "ISSUE79_CHILD",
+            "지원 대상: 만 24개월 미만 자녀",
+            [CHILD_UNDER_24M],
+        )
+
+        for age in (18, 40, None):
+            with self.subTest(applicant_age=age):
+                api, llm = self.ask(policy, age=age)
+
+                self.assertEqual(self.rows(api, "age"), [])
+                self.assertEqual(self.rows(llm, "age"), [])
+
+                self.assertEqual(
+                    [status for status, _ in self.rows(api, "children")],
+                    ["needs_check"],
+                )
+                self.assertNotIn(
+                    NOTICE,
+                    [item["reason"] for item in api],
+                )
+
     @staticmethod
     def rows(conditions, field):
         return [(c["status"], c["reason"]) for c in conditions if c["field"] == field]

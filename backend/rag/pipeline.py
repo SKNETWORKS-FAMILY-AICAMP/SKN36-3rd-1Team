@@ -11,6 +11,13 @@ from pydantic import ValidationError
 from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
+from backend.eligibility.checker import certain_required_and_failure, application_schedule
+from backend.rag.source_sections import application_details
+from database.unknown_group_scope import (
+    can_preserve_scoped_failed_root,
+    normalize_quality_affected_attributes,
+    scoped_income_quality_attributes,
+)
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
@@ -162,6 +169,37 @@ def _collect_contacts(contexts) -> list[Contact]:
     return list(contacts.values())
 
 
+def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str | None) -> None:
+    """선택 정책은 지역 필터 없이 찾으므로 정책의 대상 지역(AVAILABLE_IN)과 입력 지역을 직접 대조한다.
+
+    v1.4.0 데이터는 지역 제한을 조건 트리(REGION)가 아니라 지역 관계로만 갖고 있어 Checker가 지역을 판정하지 않는다.
+    입력 지역이 대상 지역·전국에 없으면 확인 필요로 보류한다. 확정 불충족으로 단정하지 않는다.
+    """
+    regions = (policy.get("graph") or {}).get("regions") or []
+    names = {str(region.get("name")).strip() for region in regions
+             if isinstance(region, dict) and str(region.get("name") or "").strip()}
+    if not profile_region or not names or "전국" in names or profile_region in names:
+        return
+    conditions = check["conditions"]
+    region_rows = [row for row in conditions if row["field"].lower() == "region"]
+    if any(row["status"] == "ineligible" for row in region_rows):
+        return
+    mismatch = (f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
+                "거주 요건을 공식 공고에서 확인해 주세요.")
+    # 계약 §4.3: Checker가 needs_check로 준 사유는 바꾸지 않고, 확정 상태만 보류로 내리며 사유를 뒤에 덧붙인다.
+    eligible_rows = [row for row in region_rows if row["status"] == "eligible"]
+    for row in eligible_rows:
+        row["status"] = "needs_check"
+        row["reason"] += f" {mismatch}"
+    if not eligible_rows:
+        # 기존 지역 행이 없거나 needs_check뿐이면 그 사유는 그대로 두고 지역 불일치 행을 따로 앞에 둔다.
+        conditions.insert(0, {"field": "region", "label": "거주 지역", "status": "needs_check", "reason": mismatch})
+    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
+    if root is not None and root["status"] == "eligible":
+        root["status"] = "needs_check"
+        root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
+
+
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
     try:
         result = EligibilityOutput.model_validate(raw)
@@ -174,21 +212,54 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     graph_policy = graph.get("policy") or {}
     structure = graph.get("eligibility") or {}
     quality = policy.get("data_quality") or {}
-    affected = set(quality.get("affected_attributes") or [])
-    # 검색이 반환하는 그룹 ID와 구조 오류만으로는 영향받는 필드를 확정할 수 없다.
+    scoped_unknown = scoped_income_quality_attributes(structure, quality)
+    if scoped_unknown is not None:
+        affected = scoped_unknown
+    else:
+        summary = quality.get("affected_attributes")
+        affected = (
+            normalize_quality_affected_attributes(summary)
+            if summary or quality.get("hold_auto_eligibility")
+            else set()
+        )
+    # 구조 오류나 범위를 확인할 수 없는 UNKNOWN은 기존과 같이 전체 보류.
     hold_all = (
         not graph or policy.get("graph_status") == "MISSING_IN_GRAPH"
         or bool(affected - SCOPED_CONDITION_FIELDS)
         or (quality.get("hold_auto_eligibility") and not affected)
         or any(isinstance(warning, dict) and warning.get("blocks_auto_eligibility") and not warning.get("affects")
                for warning in quality.get("warnings", []))
-        or structure.get("unknown_logic_groups") or structure.get("structure_issues")
+        or (structure.get("unknown_logic_groups") and scoped_unknown is None)
+        or structure.get("structure_issues")
     )
     conditions = [condition.model_dump() for condition in result.conditions]
-    for condition in conditions:
+    root_index = next(
+        (i for i in range(len(conditions) - 1, -1, -1)
+         if conditions[i]["field"].lower() == "eligibility"),
+        None,
+    )
+    # At this boundary `raw` is only schema-validated, not proof-validated.
+    # Recheck an unaffected direct AND failure before preserving the root.
+    preserve_root = (
+        root_index is not None
+        and not hold_all
+        and scoped_unknown is not None
+        and can_preserve_scoped_failed_root(
+            structure, scoped_unknown, affected,
+            root_status=conditions[root_index]["status"],
+            has_certain_required_failure=certain_required_and_failure(
+                structure, profile, affected,
+            ),
+            hold_all=bool(hold_all),
+        )
+    )
+    for index, condition in enumerate(conditions):
         field = condition["field"].lower()
         # Checker가 이미 보류한 조건의 사유(원문 확인 결과·공고 확인 항목 등)는 그대로 둔다.
         if condition["status"] == "needs_check":
+            continue
+        # Same strict safety gate as Checker; never preserve unrelated groups.
+        if preserve_root and index == root_index:
             continue
         # 보류 원인별로 사유를 다르게 적는다. 입력 누락을 데이터 오류로 안내하지 않는다.
         # 범위가 있는 경고라도 미확인 필드가 그 범위 밖이라고 단정할 수 없다.
@@ -487,7 +558,13 @@ def run_ask_pipeline(
     notice = {"kind": "warn", "title": "추가 확인 필요",
               "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
     filters = {"region": profile["region"]} if profile["region"] else None
+    if request.selected_policy_id:
+        # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
+        filters = {"policy_id": request.selected_policy_id}
     policies = search_fn(request.question, filters=filters, k=10)["policies"]
+    if request.selected_policy_id:
+        # 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
+        policies = [policy for policy in policies if policy["policy_id"] == request.selected_policy_id]
     # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
     ranked = rank_citable_contexts(policies)
     citable = {context["policy_id"] for context in ranked}
@@ -515,6 +592,8 @@ def run_ask_pipeline(
     checks = []
     for pid, selected in contexts_by_policy.items():
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
+        if request.selected_policy_id:
+            _hold_selected_policy_region(by_id[pid], check, profile["region"])
         contacts = _collect_contacts(selected)
         if not contacts:
             # 미채택 후보 청크에서만 찾았다 — 그 청크는 답변의 citations에 들어가지 않으므로,
@@ -524,6 +603,8 @@ def run_ask_pipeline(
                 for contact in _collect_contacts(candidates_by_policy.get(pid, ()))
             ]
         check["contacts"] = contacts or None
+        check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
+        check.update(application_details(selected))
         checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:

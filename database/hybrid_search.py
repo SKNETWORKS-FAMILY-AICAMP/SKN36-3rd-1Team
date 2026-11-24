@@ -38,6 +38,7 @@ from database import region_search as rs
 from database.chunking import make_point_id
 from database.neo4j import load_graph as lg
 from database.qdrant import store
+from database.unknown_group_scope import income_only_unknown_under_and
 
 # ---------------------------------------------------------------------------
 # 1. 설정값
@@ -912,8 +913,13 @@ def assess_policy_data_quality(context: dict[str, Any] | None,
     unknown_groups = sorted(set(eligibility.get("unknown_logic_groups") or []) |
                             {g["group_id"] for g in all_groups if g.get("logic") == "UNKNOWN" and g.get("group_id")})
     if unknown_groups:
+        # Narrow only when every UNKNOWN is an income-only descendant of AND.
+        # The income predicate itself is never automatically verified.
+        # Consumer validates this `affects` field together with full warnings
+        # and the original tree; it is not just a presentation annotation.
+        scope = ["income"] if income_only_unknown_under_and(eligibility) else ["all"]
         warnings.append({"code": QUALITY_UNKNOWN_CONDITION, "level": "caution",
-                         "group_ids": unknown_groups,
+                         "group_ids": unknown_groups, "affects": scope,
                          "message": DATA_QUALITY_NOTES["unknown"]})
     for group in all_groups:
         if group.get("logic") == "AND" and not group.get("conditions") and not group.get("groups"):
