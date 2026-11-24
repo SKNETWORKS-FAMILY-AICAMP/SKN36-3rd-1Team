@@ -50,7 +50,9 @@ def prepare_document_excerpts(documents: list[dict], corrections: dict) -> dict[
     """보존된 본문을 검증하고, 옛 기준 행을 뺀 검색용 파일을 후보에 따로 기록한다."""
     omissions = corrections.get("outdated_document_lines", [])
     application_periods = corrections.get("unverified_application_periods", [])
-    edits = [*omissions, *application_periods]
+    # 행 전체를 빼지 않고 칸 이름만 바꾸거나 지난 예고 문구만 빼는 교정(#107). 행 단위로 기록한다.
+    rewrites = corrections.get("document_line_rewrites", [])
+    edits = [*omissions, *application_periods, *rewrites]
     if not edits:
         return {}
     by_id = {row["document_id"]: row for row in documents}
@@ -70,8 +72,14 @@ def prepare_document_excerpts(documents: list[dict], corrections: dict) -> dict[
                 or (policy_id is None and replacement not in by_id)
                 or (policy_id is not None and document["policy_id"] != policy_id) or doc_id in updated):
             raise ValueError(f"검색 본문 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
-        line = item["text"] if policy_id is None else f'- 신청기간: {item["before"]}'
-        excerpt = dc.omit_outdated_line(text, line).replace("\r\n", "\n").replace("\r", "\n").strip()
+        if "replacement" in item:
+            # 행 교정: 청크에도 같은 행 교정을 적용하도록 교정 기록 자체를 넘긴다.
+            line = item
+            excerpt = dc.rewrite_line(text, item)
+        else:
+            line = item["text"] if policy_id is None else f'- 신청기간: {item["before"]}'
+            excerpt = dc.omit_outdated_line(text, line)
+        excerpt = excerpt.replace("\r\n", "\n").replace("\r", "\n").strip()
         path = CANDIDATE_DIR / "source_text" / f"{doc_id}.txt"
         path.parent.mkdir(exist_ok=True)
         path.write_text(excerpt + "\n", encoding="utf-8", newline="\n")
@@ -268,7 +276,7 @@ def build_candidate_release():
                 "target_groups": clean_tg,
                 "eligibility": sp.get("eligibility_text") or sp["selection_rationale"],
                 "benefit": sp.get("benefit_text") or sp["category"],
-                "application_period": sp.get("application_period") or "상시 또는 공고 확인",
+                "application_period": sp.get("application_period") or dc.UNVERIFIED_APPLICATION_PERIOD,
                 "application_method": sp.get("application_method") or "온라인 신청",
                 # 신청 주소가 확인되지 않으면 null (출처 URL로 대신 채우지 않음 → UI '신청하기' 미노출)
                 "official_apply_url": sp.get("official_apply_url"),
@@ -296,6 +304,9 @@ def build_candidate_release():
     )
     dc.apply_policy_corrections(merged_policies, corrections)
     dc.apply_source_review(merged_policies, corrections)
+    # 수집 기본 문구가 "상시 신청"으로 읽히지 않도록 "미확인"으로 바꾼다(#107). 정책 노드 속성만 바뀐다.
+    default_period_policies = dc.replace_default_application_periods(merged_policies)
+    dc.check_stored_reception_status(merged_policies)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
         json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8", newline="\n",
@@ -305,7 +316,7 @@ def build_candidate_release():
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_policies)}건 (+{len(new_policies)}건 증분)")
 
-    # (2) nodes_document.jsonl (기존 246건 + 신규 22건 = 268건)
+    # (2) nodes_document.jsonl (기존 246건 + 신규 24건 = 270건)
     print("\n[D-1.2] Document 노드 병합 및 4단계 검증 분류 적용...")
     documents = []
     with open(HANDOFF_DIR / "neo4j" / "nodes_document.jsonl", "r", encoding="utf-8") as f:
@@ -572,7 +583,12 @@ def build_candidate_release():
     changed_excerpts = set()
     for chunk in merged_chunks:
         line = outdated_lines.get(chunk["document_id"])
-        if line and line in chunk["text"]:
+        if isinstance(line, dict):
+            # 행 교정(document_line_rewrites): 그 행이 들어 있는 청크에서만 바꾼다.
+            if line["line"] in chunk["text"].splitlines():
+                chunk["text"] = dc.rewrite_line(chunk["text"], line)
+                changed_excerpts.add(chunk["document_id"])
+        elif line and line in chunk["text"]:
             chunk["text"] = dc.omit_outdated_line(chunk["text"], line)
             changed_excerpts.add(chunk["document_id"])
     if changed_excerpts != set(outdated_lines):
@@ -666,6 +682,7 @@ def build_candidate_release():
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
             "unverified_application_periods": corrections.get("unverified_application_periods", []),
+            "default_application_periods_replaced": default_period_policies,
             "search_excerpts_updated": corrections.get("outdated_document_lines", []),
             "search_lines_held": corrections.get("held_document_lines", []),
             "held_line_dropped_chunks": held_dropped_chunks,

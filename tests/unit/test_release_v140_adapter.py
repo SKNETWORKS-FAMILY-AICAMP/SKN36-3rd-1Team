@@ -218,24 +218,24 @@ class ApprovedReleaseTests(unittest.TestCase):
     def test_release_selected_with_manifest_counts(self):
         self.assertTrue(self.out["is_release"])
         self.assertEqual(self.out["version"], "1.4.0-candidate")
-        self.assertEqual(self.out["expected"], [246, 268, 663, 1133, 2674])
+        self.assertEqual(self.out["expected"], [246, 270, 665, 1135, 2676])
         self.assertEqual(self.out["configs"], ["A_B2_V140", "B_B3_V140", "A_B2_4B_V140"])
 
     def test_all_documents_linked_with_matching_hash(self):
-        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (268, 268))
+        self.assertEqual((self.out["documents"], self.out["unique_documents"]), (270, 270))
         self.assertTrue(self.out["documents_equal_nodes"])
         self.assertEqual(self.out["hash_mismatch"], 0)
 
     def test_metadata_per_document_preserved(self):
-        self.assertEqual(self.out["metadata_documents"], 268)
+        self.assertEqual(self.out["metadata_documents"], 270)
         self.assertTrue(self.out["metadata_keyed_by_document"])
         self.assertTrue(self.out["metadata_preserved"])
-        # 정책 단위로 합치면 충돌하는 8개 정책: 문서별 값이 그대로 남아 있어야 한다
+        # 정책 단위로 합치면 충돌하는 10개 정책: 문서별 값이 그대로 남아 있어야 한다
         self.assertEqual(self.out["policy_level_conflicts_kept"],
-                         ["POL_001", "POL_BOK_031", "POL_GOV_006", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_MOLIT_001", "POL_STG_SEOUL_001"])
+                         ["POL_001", "POL_BOK_031", "POL_GOV_006", "POL_GOV_059", "POL_STG_EX_001", "POL_STG_ICN_001", "POL_STG_MOIS_001", "POL_STG_MOLIT_001", "POL_STG_SEOUL_001", "POL_YC_029"])
 
     def test_b2_b3_chunks_and_payloads(self):
-        for name, expected in (("A_B2_V140", 1233), ("B_B3_V140", 1320)):
+        for name, expected in (("A_B2_V140", 1235), ("B_B3_V140", 1324)):
             plan = self.out[name]
             with self.subTest(config=name):
                 self.assertEqual((plan["chunks"], plan["expected"]), (expected, expected))
@@ -258,7 +258,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_neo4j_graph_input(self):
         self.assertTrue(self.out["graph_ok"])
-        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1133, 2674))
+        self.assertEqual((self.out["graph_nodes"], self.out["graph_relationships"]), (1135, 2676))
 
 
 class DefaultDatasetRegressionTests(unittest.TestCase):
