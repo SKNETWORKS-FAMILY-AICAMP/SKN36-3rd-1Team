@@ -24,7 +24,35 @@ from database.chunking import make_point_id  # noqa: E402
 from database.qdrant import store  # noqa: E402
 from scripts import plan_r3_vector_reuse as planner  # noqa: E402
 from scripts import restore_final_v140 as restore  # noqa: E402
+from scripts import restore_final_v140_r3 as restore_r3  # noqa: E402
 from scripts import restore_profiles_v140 as profiles  # noqa: E402
+
+
+class GuardRefused(RuntimeError):
+    """ArmedTestGuard가 fail_at 단계에서 던지는 거부 (sample_only)."""
+
+
+class ArmedTestGuard(restore_r3.WriteGuard):
+    """테스트 전용 쓰기 허가 (sample_only). 격리 래퍼가 검사를 통과한 뒤 만드는 허가를 흉내 낸다 (#111 P1-A).
+
+    check 호출마다 단계 이름을 calls에, (단계, 기대값 사본)을 expectations에 기록한다 (#111 P1-B).
+    fail_at: 이 단계(접두어 일치)에서 GuardRefused를 던진다. on_check(guard, stage, expected): 기록 직후 부른다
+    (guard 상태 변경 등 시나리오용). events: 같은 리스트를 쓰기 기록과 공유하면 호출 순서를 함께 볼 수 있다."""
+
+    def __init__(self, run_id: str = "c" * 32, *, fail_at: str | None = None, on_check=None, events=None):
+        self.run_id, self.armed, self.calls, self.expectations = run_id, True, [], []
+        self.fail_at, self.on_check, self.events = fail_at, on_check, events
+
+    def check(self, stage, expected):
+        self.calls.append(stage)
+        self.expectations.append((stage, copy.deepcopy(expected)))
+        if self.events is not None:
+            self.events.append(("guard", stage))
+        if self.on_check:
+            self.on_check(self, stage, expected)
+        if self.fail_at and stage.startswith(self.fail_at):
+            raise GuardRefused(f"sample_only guard refused {stage}")
+
 
 RUN_OLD = {"embedding_model": profiles.EMBEDDING_MODEL, "embedding_dim": 1024,
            "embedding_input_rule": fi.EMBEDDING_INPUT_RULE, "index_run_id": "RUN_SAMPLE_ONLY_OLD"}
@@ -90,6 +118,18 @@ def good_build_docker():
     return FakeDocker([build_container("b" * 64, "qdrant"), build_container("c" * 64, "neo4j")])
 
 
+DEFAULT_SCHEMA = object()          # R3Qdrant.payload_schemas 기본(정상 스키마) 표시
+MISSING_SCHEMA = object()          # get_collection 결과에 payload_schema 속성이 없음
+
+
+def keyword_payload_schema(points=0, fields=None, data_type=None):
+    """설치된 qdrant-client 모델로 만든 payload_schema (sample_only). 기본: store.PAYLOAD_INDEX_FIELDS 8개 모두 KEYWORD."""
+    from qdrant_client.http import models
+    data_type = models.PayloadSchemaType.KEYWORD if data_type is None else data_type
+    return {field: models.PayloadIndexInfo(data_type=data_type, points=points)
+            for field in (store.PAYLOAD_INDEX_FIELDS if fields is None else fields)}
+
+
 class AliasConflict(RuntimeError):
     """Qdrant가 alias 생성을 거부할 때(같은 이름 컬렉션 존재·대상 없음)의 대역."""
 
@@ -111,6 +151,7 @@ class R3Qdrant(FakeQdrant):
         self.collections = {name: copy.deepcopy(points) for name, points in (collections or {}).items()}
         self.aliases, self.snapshots = {}, []
         self.alias_ops, self.alias_hook = [], None
+        self.payload_schemas = {}              # 실제 컬렉션 이름 → payload_schema 대체값 (#111 P1-E)
         self.snapshot_checksum = None          # create_snapshot이 돌려줄 checksum (기본 None = 서버가 값을 안 줌)
 
     def alias_items(self):
@@ -136,7 +177,23 @@ class R3Qdrant(FakeQdrant):
         return True
 
     def get_collection(self, name):
-        return super().get_collection(self.resolve(name))
+        """#111 P1-E: payload_schema는 기본으로 설치된 qdrant-client 모델 그대로의 정상 스키마
+        (store.PAYLOAD_INDEX_FIELDS 8개 × PayloadIndexInfo(KEYWORD)). payload_schemas[실제 이름]으로 바꿔 끼운다:
+        값이 callable이면 호출 결과(예외를 던지면 조회 실패), MISSING_SCHEMA면 속성 없음, 그 밖은 그 값."""
+        real = self.resolve(name)
+        info = super().get_collection(real)
+        override = self.payload_schemas.get(real, DEFAULT_SCHEMA)
+        if override is DEFAULT_SCHEMA:
+            info.payload_schema = keyword_payload_schema(len(self.collections[real]))
+        elif override is not MISSING_SCHEMA:
+            info.payload_schema = override(real) if callable(override) else copy.deepcopy(override)
+        return info
+
+    def create_payload_index(self, *args, **kwargs):        # 호출되면 기록만 (복원 경로에서는 0회여야 함)
+        self.writes.append(("create_payload_index", args, tuple(sorted(kwargs))))
+
+    def delete_payload_index(self, *args, **kwargs):
+        self.writes.append(("delete_payload_index", args, tuple(sorted(kwargs))))
 
     def scroll(self, collection_name, *args, **kwargs):
         return super().scroll(self.resolve(collection_name), *args, **kwargs)

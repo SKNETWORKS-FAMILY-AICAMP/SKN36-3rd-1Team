@@ -46,20 +46,22 @@ r2 복원 도구(scripts/restore_final_v140.py, 컬렉션 1개)는 바꾸지 않
 
 실행 (압축을 푼 r3 소스 트리에서):
     python scripts/restore_final_v140_r3.py --repo <소스> --bundle <번들 폴더>              # preflight
-    python scripts/restore_final_v140_r3.py --repo <소스> --bundle <번들 폴더> --apply
     python scripts/restore_final_v140_r3.py --repo <소스> --bundle <번들 폴더> --verify-only
+    (--apply는 직접 실행하면 종료 코드 2로 거부된다. 쓰기는 scripts/restore_r3_isolated.py --apply로만 한다 — #111 P1-A)
 접속 정보는 QDRANT_URL·QDRANT_API_KEY·NEO4J_URI·NEO4J_USER·NEO4J_PASSWORD 환경 변수로 받는다.
 격리 검증 환경에서는 scripts/restore_r3_isolated.py가 고정 주소·전용 인증으로 settings를 직접 넘긴다.
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import re
 import secrets
 import sys
 import zipfile
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -78,12 +80,105 @@ TEMP_TOKEN_BYTES = 16                           # secrets.token_hex(16) = 128비
 TEMP_NAME = re.compile(r"^(?P<canonical>.+)" + re.escape(TEMP_INFIX) + r"[0-9a-f]{32}$")
 
 
+RUN_ID = re.compile(r"^[0-9a-f]{32}$")
+ALIGNABLE_FIELDS = frozenset({"category", "life_stages"})   # 정렬로 바꿀 수 있는 필드 (r2 alignment_plan·protected_digest와 같음)
+
+
+def project_alignment(records: dict[str, dict[str, Any]], changes) -> dict[str, dict[str, Any]]:
+    """정렬 쓰기(set_payload = 최상위 키 병합) 뒤의 예상 레코드 (#111 P1-B 보완). 서버에는 쓰지 않는다.
+
+    변경은 ALIGNABLE_FIELDS 안에서만, 있는 Point에만 허용한다. 어긋나면 ValueError.
+    이 결과의 전체 payload를 번들 기준(release 기대 payload + package.json payload_digest)과 비교하면
+    정렬 전에 정렬 허용 필드 밖의 모든 차이(예상 밖 필드 추가·삭제·값 변경·index_run_id)를 잡을 수 있다.
+    """
+    projected = {point_id: {"payload": dict(record["payload"]), "vector": record["vector"]}
+                 for point_id, record in records.items()}
+    for point_id, changed in changes:
+        if not set(changed) <= ALIGNABLE_FIELDS:
+            raise ValueError(f"Alignment may change only {sorted(ALIGNABLE_FIELDS)}: {point_id}")
+        if point_id not in projected:
+            raise ValueError(f"Alignment target point is missing: {point_id}")
+        projected[point_id]["payload"].update(copy.deepcopy(changed))
+    return projected
+
+
+class WriteGuard:
+    """쓰기 허가 객체의 기본 클래스 (#111 P1-A). 이 클래스 자체는 쓰기 허가가 아니다.
+
+    --apply는 이 클래스를 상속하고 armed=True·run_id(32자리 소문자 hex)·호출 가능한 check를 가진 객체가 있을 때만
+    진행한다. 허가 객체는 격리 래퍼(scripts/restore_r3_isolated.py)가 자신의 검사(고정 주소·전용 인증·Docker 소유·
+    fingerprint)를 통과한 뒤에만 만든다.
+    보안 경계가 아니다: 같은 Python 프로세스에서 일부러 하위 클래스를 만들거나 함수를 바꿔 끼우면 우회할 수 있다.
+    목적은 CLI 직접 --apply와 허가 객체를 빠뜨린 실수 호출을 DB 접속 전에 막는 것이다.
+    restore()는 쓰기(B2·B3 업로드, payload 정렬, Neo4j 적재, alias 공개) 직전마다 guard_write로 다시 검증하고
+    check(stage, expected)를 부른다 (#111 P1-B). check는 거부할 때 예외를 던져야 한다.
+    """
+
+    armed = False
+    run_id = ""
+
+    def check(self, stage: str, expected: dict[str, Any]) -> None:
+        raise NotImplementedError("WriteGuard.check must be implemented by the isolated wrapper")
+
+
+def require_write_guard(write_guard) -> None:
+    """--apply 허가 객체 검증. 하나라도 어긋나면 ValueError (DB 접속·쓰기 전에 호출한다)."""
+    if write_guard is None:
+        raise ValueError("--apply requires a write_guard from scripts/restore_r3_isolated.py; refused before any DB access")
+    if not isinstance(write_guard, WriteGuard) or type(write_guard) is WriteGuard:
+        raise ValueError("Invalid write_guard (must be an isolated-wrapper subclass of WriteGuard); refused before any DB access")
+    if getattr(write_guard, "armed", False) is not True:
+        raise ValueError("write_guard is not armed; refused before any DB access")
+    run_id = getattr(write_guard, "run_id", None)
+    if not isinstance(run_id, str) or not RUN_ID.fullmatch(run_id):     # match+$는 끝 줄바꿈을 허용한다
+        raise ValueError("write_guard run_id must be 32 lowercase hex characters; refused before any DB access")
+    if not callable(getattr(write_guard, "check", None)):
+        raise ValueError("write_guard.check is not callable; refused before any DB access")
+
+
+def stage_expectation(physical: dict[str, str], entries: dict[str, dict[str, Any]], keys, *, payload_keys=(),
+                      protected: dict[str, str] | None = None, neo4j_totals: dict[str, int] | None = None,
+                      first: bool = False, alignment: dict[str, Any] | None = None) -> dict[str, Any]:
+    """단계별 쓰기 직전 기대 상태 (#111 P1-B). 이름은 모두 실제(임시) 컬렉션 이름이다.
+
+    collections: 서버 컬렉션 집합(정렬) / aliases: alias 매핑(공개 전이라 항상 비어 있음) /
+    points·vector_digests: keys 컬렉션의 Point 수·전체 벡터 digest(번들 = R3_PINS) /
+    payload_digests: payload_keys 컬렉션의 전체 payload digest(번들 package.json) /
+    protected_digests: 정렬 전 protected digest(정렬 허용 필드 category·life_stages 밖은 불변) /
+    neo4j_totals: Neo4j 노드·관계 수 / require_preflight_fingerprint: 첫 쓰기 직전에만 preflight fingerprint 재확인
+    alignment {key: changes} (정렬 직전에만): alignment_changes = 실제 컬렉션 이름 → 이번에 쓸 변경 목록,
+    projected_payload_digests = 그 변경을 지금 서버 payload에 적용한 결과의 전체 payload digest가 같아야 할 값
+    (번들 package.json payload_digest). 서버에서 읽은 값이 아니라 번들 값이 기준이다.
+    """
+    alignment = alignment or {}
+    return {"collections": sorted(physical[k] for k in keys), "aliases": {},
+            "alignment_changes": {physical[k]: [[point_id, dict(changed)] for point_id, changed in changes]
+                                  for k, changes in alignment.items()},
+            "projected_payload_digests": {physical[k]: entries[k]["payload_digest"] for k in alignment},
+            "points": {physical[k]: entries[k]["points"] for k in keys},
+            "vector_digests": {physical[k]: entries[k]["vector_digest"] for k in keys},
+            "payload_digests": {physical[k]: entries[k]["payload_digest"] for k in payload_keys},
+            "protected_digests": dict(protected or {}),
+            "neo4j_totals": dict(neo4j_totals or {"nodes": 0, "relationships": 0}),
+            "require_preflight_fingerprint": first}
+
+
+def guard_write(write_guard, run_id: str, stage: str, expected: dict[str, Any]) -> None:
+    """쓰기 직전 검사 (#111 P1-B): 허가 객체 재검증(armed·run_id 형식) + 실행 시작 때 run_id와 같은지 + check.
+    하나라도 실패하면 예외로 멈추고 바로 뒤의 쓰기는 호출되지 않는다. check~쓰기 사이의 경쟁(TOCTOU)은 막지 못한다."""
+    require_write_guard(write_guard)
+    if write_guard.run_id != run_id:
+        raise ValueError(f"write_guard run_id changed during the run; refused {stage}")
+    write_guard.check(stage, expected)
+
+
 class PublishError(ValueError):
     """alias 공개 단계 실패. 보고서에 partial_publish와 실패 시점의 alias 매핑을 남긴다 (alias 삭제·변경 없음)."""
 
-    def __init__(self, message: str, *, partial_publish: bool, aliases: dict[str, str]):
+    def __init__(self, message: str, *, partial_publish: bool | None, aliases: dict[str, str] | None):
         super().__init__(message)
-        self.partial_publish, self.aliases = partial_publish, dict(aliases)
+        # None = alias 상태를 읽지 못함 (정상·비어 있음으로 기록하지 않는다, #111 P1-D)
+        self.partial_publish, self.aliases = partial_publish, (None if aliases is None else dict(aliases))
 
 
 def _deps():
@@ -299,7 +394,12 @@ def publish_aliases(client, physical: dict[str, str], canonical: dict[str, str])
     try:
         client.update_collection_aliases(change_aliases_operations=operations)
     except Exception as error:   # 서버 거부(같은 이름 컬렉션 등) 포함. 원문 응답은 싣지 않는다
-        mapping = alias_mapping(client)
+        try:
+            mapping = alias_mapping(client)
+        except Exception as lookup:      # alias 조회도 실패: 공개 여부를 모른다 → None (부분 공개 아님으로 쓰지 않음)
+            raise PublishError(f"Alias publish failed ({type(error).__name__}); alias state could not be read "
+                               f"({type(lookup).__name__}); restore stopped; partial state preserved; inspect before "
+                               "retry", partial_publish=None, aliases=None) from None
         ours = {name: target for name, target in mapping.items() if expected.get(name) == target}
         raise PublishError(f"Alias publish failed ({type(error).__name__}); published {sorted(ours)} of "
                            f"{sorted(expected)}; restore stopped; partial state preserved; inspect before retry",
@@ -328,9 +428,113 @@ def verify_published_aliases(client, r2, physical: dict[str, str], canonical: di
     return mapping
 
 
+EXPECTED_INDEX_TYPE = "keyword"     # store.ensure_collection이 PAYLOAD_INDEX_FIELDS를 KEYWORD로 만든다
+
+
+class PayloadIndexError(ValueError):
+    """필수 payload 인덱스 검증 실패 (#111 P1-E). report에 컬렉션별·필드별 결과를 담는다 (인덱스 생성·삭제 없음)."""
+
+    def __init__(self, message: str, *, report: dict[str, Any]):
+        super().__init__(message)
+        self.report = report
+
+
+def normalize_index_type(info) -> str | None:
+    """payload_schema 값 하나에서 인덱스 타입 문자열을 꺼낸다. 해석할 수 없으면 None (→ 검증 실패).
+
+    qdrant-client 1.12.2 계약: CollectionInfo.payload_schema = Dict[str, PayloadIndexInfo],
+    PayloadIndexInfo.data_type = PayloadSchemaType(str, Enum) — KEYWORD.value == "keyword".
+    REST 응답을 그대로 담은 dict({"data_type": "keyword", ...})와 문자열 값도 받는다. 대소문자 변환 등 추정은 하지 않는다.
+    """
+    data_type = info.get("data_type") if isinstance(info, dict) else getattr(info, "data_type", None)
+    if isinstance(data_type, Enum):
+        data_type = data_type.value
+    return data_type if isinstance(data_type, str) else None
+
+
+def inspect_payload_indexes(client, name: str, key: str, stage: str) -> dict[str, Any]:
+    """컬렉션(또는 alias) name의 필수 payload 인덱스를 읽기만 해서 결과를 만든다 (#111 P1-E). 예외를 던지지 않는다.
+
+    기준 필드는 store.PAYLOAD_INDEX_FIELDS(8개), 기대 타입은 keyword. 조회 예외·payload_schema 없음·dict 아님은
+    UNAVAILABLE(PASS 아님). 빈 dict는 8개 모두 missing. 기준 밖의 추가 인덱스는 extra_fields로 기록만 한다.
+    """
+    from database.qdrant import store
+    result: dict[str, Any] = {"key": key, "collection": name, "stage": stage, "expected_type": EXPECTED_INDEX_TYPE}
+    try:
+        schema = getattr(client.get_collection(name), "payload_schema", None)
+    except Exception as error:                     # 원문 메시지는 싣지 않는다 (인증값 노출 방지)
+        return {**result, "status": "UNAVAILABLE", "error_type": type(error).__name__, "indexes": [],
+                "missing_fields": list(store.PAYLOAD_INDEX_FIELDS), "invalid_types": {}, "extra_fields": []}
+    if not isinstance(schema, dict):
+        return {**result, "status": "UNAVAILABLE", "error_type": f"payload_schema:{type(schema).__name__}",
+                "indexes": [], "missing_fields": list(store.PAYLOAD_INDEX_FIELDS), "invalid_types": {},
+                "extra_fields": []}
+    indexes, missing, invalid = [], [], {}
+    for field in store.PAYLOAD_INDEX_FIELDS:
+        exists = field in schema
+        actual = normalize_index_type(schema[field]) if exists else None
+        if not exists:
+            status = "missing"
+            missing.append(field)
+        elif actual == EXPECTED_INDEX_TYPE:
+            status = "ok"
+        else:
+            status = "invalid_type"
+            actual = actual if actual is not None else f"unrecognized:{type(schema[field]).__name__}"
+            invalid[field] = actual
+        indexes.append({"collection": name, "field": field, "expected_type": EXPECTED_INDEX_TYPE,
+                        "actual_type": actual, "exists": exists, "verification_status": status})
+    return {**result, "status": "FAILED" if missing or invalid else "PASS", "indexes": indexes,
+            "missing_fields": missing, "invalid_types": invalid,
+            "extra_fields": sorted(str(name) for name in set(schema) - set(store.PAYLOAD_INDEX_FIELDS))}
+
+
+def require_payload_indexes(client, names: dict[str, str], stage: str) -> dict[str, dict[str, Any]]:
+    """names {키: 컬렉션 또는 alias 이름} 모두 필수 인덱스 8개가 keyword여야 한다. 하나라도 아니면 PayloadIndexError
+    (모든 컬렉션 결과를 담음). 인덱스를 만들거나 지우지 않는다."""
+    reports = {key: inspect_payload_indexes(client, name, key, stage) for key, name in names.items()}
+    failed = sorted(key for key, report in reports.items() if report["status"] != "PASS")
+    if failed:
+        detail = "; ".join(f"{key}: status={reports[key]['status']} missing={reports[key]['missing_fields']} "
+                           f"invalid={sorted(reports[key]['invalid_types'])}" for key in failed)
+        raise PayloadIndexError(f"Payload index verification failed {stage}: {detail}; restore stopped; "
+                                "partial state preserved; inspect before retry",
+                                report={"stage": stage, "failed": failed, "collections": reports})
+    return reports
+
+
+def new_progress() -> dict[str, Any]:
+    """restore() 진행 기록 (#111 P1-D). 실패 보고서가 '어디까지 갔는지'를 남기는 참고 정보다.
+    실제 남은 상태(컬렉션·alias·Neo4j 건수)는 이 기록이 아니라 실패 직후 서버 재조회로 판단한다."""
+    return {"stage": "pre_write_checks", "physical_collections": None, "uploads_completed": [],
+            "payload_alignment_writes": {}, "neo4j_load_returned": False}
+
+
 def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] | None = None,
-            http_post=None, client_factory=None, driver_factory=None, token_factory=None) -> dict[str, Any]:
-    """token_factory: 임시 이름 토큰 생성기 (기본 secrets.token_hex(16)). 테스트만 고정값을 넘긴다."""
+            http_post=None, client_factory=None, driver_factory=None, token_factory=None,
+            write_guard=None) -> dict[str, Any]:
+    """token_factory: 임시 이름 토큰 생성기 (기본 secrets.token_hex(16)). 테스트만 고정값을 넘긴다.
+    write_guard: --apply일 때 필수 (WriteGuard 하위 클래스, 격리 래퍼가 만든다). 없거나 어긋나면 번들·DB를 건드리기
+    전에 거부한다. preflight·verify-only(읽기 전용)는 쓰지 않으므로 받지 않아도 된다.
+    실패하면 예외의 종류·메시지는 그대로 두고 진행 기록을 error.restore_progress로 붙여 다시 던진다 (#111 P1-D).
+    자동 롤백·삭제·재시도는 없다."""
+    progress = new_progress()
+    try:
+        return _restore(args, settings, pins, http_post, client_factory, driver_factory, token_factory, write_guard,
+                        progress)
+    except Exception as error:
+        try:
+            error.restore_progress = copy.deepcopy(progress)
+        except AttributeError:                       # 속성을 붙일 수 없는 예외는 그대로 전파 (보고서에 진행 기록 없음)
+            pass
+        raise
+
+
+def _restore(args, settings, pins, http_post, client_factory, driver_factory, token_factory, write_guard,
+             progress: dict[str, Any]) -> dict[str, Any]:
+    if args.apply:
+        require_write_guard(write_guard)
+    guard_run_id = write_guard.run_id if args.apply else None      # 쓰기 직전마다 이 값과 같은지 다시 본다 (P1-B)
     repo = Path(args.repo).resolve()
     if str(repo) not in sys.path:
         sys.path.insert(0, str(repo))
@@ -402,10 +606,12 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             physical = {key: temp_collection_name(canonical[key], token_factory()) for key in profiles.COLLECTION_KEYS}
             if len(set(physical.values())) != len(physical):
                 raise ValueError("Temporary collection names must be distinct")
+            progress["physical_collections"] = dict(physical)      # 이 실행의 임시 이름 (실패 보고서 분류 기준)
             for name in physical.values():            # 검증 함수들(store 경유)이 받는 이름인지 쓰기 전에 확인 (64자 상한 등)
                 store.assert_experiment_collection(name)
             restored: list[str] = []                    # 이 실행이 이미 올린 컬렉션 키 (순서대로)
             for key in profiles.COLLECTION_KEYS:
+                progress["stage"] = f"qdrant_upload:{key}"
                 entry, target = entries[key], physical[key]
                 done_names = {physical[k] for k in restored}
                 require_collection_set(client, done_names, f"before uploading {target}")   # 임시 이름 충돌도 여기서 거부
@@ -413,8 +619,11 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
                     if client.count(physical[done], exact=True).count != entries[done]["points"]:
                         raise ValueError(f"Restored collection point count changed before uploading {target}: "
                                          f"{physical[done]}")
+                guard_write(write_guard, guard_run_id, f"before_qdrant_upload:{key}",
+                            stage_expectation(physical, entries, restored, first=not restored))
                 upload_snapshot(settings, target, snapshots[key], entry["snapshot_sha256"], http_post)
                 restored.append(key)
+                progress["uploads_completed"].append(key)
                 require_collection_set(client, done_names | {target}, f"after uploading {target}")
             require_collection_set(client, set(physical.values()), "before verification")
         else:
@@ -424,7 +633,10 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
                 raise ValueError("verify-only requires the published state (two temporary collections and exactly "
                                  "their two public aliases)")
         qdrant: dict[str, Any] = {}
+        payload_indexes: dict[str, Any] = {}           # 단계 → {키: 인덱스 검증 결과} (#111 P1-E)
+        protected: dict[str, str] = {}                 # 실제 컬렉션 이름 → 정렬 전 protected digest (guard 기대값)
         for key in profiles.COLLECTION_KEYS:
+            progress["stage"] = f"collection_verification:{key}"
             spec, entry, target = profiles.collection_spec(key), entries[key], physical[key]
             info = client.get_collection(target)
             params = info.config.params.vectors
@@ -447,8 +659,18 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
                 raise ValueError(f"Full vector digest differs from verified source: {key}")
             if args.verify_only and changes:
                 raise ValueError(f"Current payload needs alignment; verify-only refuses writes: {key}")
+            # 쓰기 전에 번들 기준 확인 (#111 P1-B 보완): 정렬을 적용했다고 가정한 payload가 Point마다 릴리스 기대 payload와
+            # 같고(예상 밖 필드 추가·삭제·값 변경) 전체 digest가 번들 payload_digest와 같아야(index_run_id 포함) 정렬한다.
+            require_final_payload(r2, project_alignment(records, changes), expected, entry["payload_digest"], key)
+            protected[target] = before
+            if changes:                                       # 정렬할 것이 있을 때만 쓰기 → 그때만 검사
+                progress["stage"] = f"payload_alignment:{key}"
+                guard_write(write_guard, guard_run_id, f"before_payload_alignment:{key}",
+                            stage_expectation(physical, entries, profiles.COLLECTION_KEYS, payload_keys=list(qdrant),
+                                              protected=protected, alignment={key: changes}))
             for point_id, payload in changes:
                 client.set_payload(target, payload=payload, points=[point_id], wait=True)
+                progress["payload_alignment_writes"][key] = progress["payload_alignment_writes"].get(key, 0) + 1
             after = scan(client, target) if changes else records
             remaining, _ = r2.alignment_plan(after, expected)
             if remaining or r2.protected_digest(after) != before:
@@ -462,13 +684,19 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             verification = lg.verify_loaded_graph(graph, runner)
             verification_source = "verify_loaded_graph"
         else:
+            progress["stage"] = "neo4j_load"
+            guard_write(write_guard, guard_run_id, "before_neo4j_load",
+                        stage_expectation(physical, entries, profiles.COLLECTION_KEYS,
+                                          payload_keys=profiles.COLLECTION_KEYS, protected=protected))
             load_result = lg.load_graph(graph, runner, batch_size=128, verify=True)
+            progress["neo4j_load_returned"] = True
             if load_result.get("ok") is not True:
                 raise ValueError("Neo4j restore verification failed")
             verification = load_result.get("verification")
             verification_source = "load_graph.verification"
         if not isinstance(verification, dict) or verification.get("ok") is not True:
             raise ValueError("Neo4j full verification failed")
+        progress["stage"] = "cross_db_verification"
         for key in profiles.COLLECTION_KEYS:
             spec = profiles.collection_spec(key)
             links = hs.verify_cross_db(client=client, runner=runner, collection=physical[key])
@@ -482,11 +710,25 @@ def restore(args, settings: dict[str, str] | None = None, pins: dict[str, Any] |
             qdrant[key]["verify_full_index_passed"] = True
         # 여기까지(임시 컬렉션 검증·Neo4j·Cross-DB·원문 슬라이스) 모두 통과한 뒤에만 정식 alias를 공개한다.
         if not args.verify_only:
+            progress["stage"] = "alias_publish"
             require_collection_set(client, set(physical.values()), "before publishing aliases")  # 정식 컬렉션·alias 없음
+            # #111 P1-E: 임시 컬렉션 B2·B3 각 필수 인덱스 8개 keyword. 실패하면 공개 요청 0회. guard는 이 뒤, 쓰기 바로 앞.
+            payload_indexes["before_alias_publish"] = require_payload_indexes(client, physical, "before_alias_publish")
+            guard_write(write_guard, guard_run_id, "before_alias_publish",
+                        stage_expectation(physical, entries, profiles.COLLECTION_KEYS,
+                                          payload_keys=profiles.COLLECTION_KEYS, protected=protected,
+                                          neo4j_totals={"nodes": counts["neo4j_nodes"],
+                                                        "relationships": counts["neo4j_relationships"]}))
             publish_aliases(client, physical, canonical)
+        progress["stage"] = "published_alias_verification"
         aliases = verify_published_aliases(client, r2, physical, canonical, entries)
+        # #111 P1-E: 공개 직후(apply)·verify-only 모두 정식 alias 경유로 다시 확인. 실패해도 alias를 되돌리지 않는다.
+        progress["stage"] = "published_payload_index_verification"
+        stage = "verify_only" if args.verify_only else "after_alias_publish"
+        payload_indexes[stage] = require_payload_indexes(client, canonical, stage)
         return {"status": "PASS", "bundle": package["bundle"], "counts": counts, "collections": qdrant,
                 "source_check": source_check, "physical_collections": physical, "aliases": aliases,
+                "payload_indexes": payload_indexes,
                 "partial_publish": False,
                 "all_vectors_and_protected_payload_unchanged": True,
                 "graph_totals": runner.read_rows(lg.QUERY_TOTAL_COUNTS)[0],
@@ -506,6 +748,11 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--verify-only", action="store_true")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
+    if args.apply:
+        # 쓰기는 격리 래퍼로만 한다 (#111 P1-A). 여기서는 번들·DB에 접근하지 않고 종료 코드 2로 끝난다.
+        parser.error("direct --apply is refused. Writes run only through the isolated wrapper: "
+                     "python scripts/restore_r3_isolated.py --repo <source> --bundle <bundle> --apply "
+                     "--confirm-write --expect-fingerprint <preflight fingerprint>")
     if args.report and args.report.exists():
         parser.error("Existing report will not be overwritten")
     try:

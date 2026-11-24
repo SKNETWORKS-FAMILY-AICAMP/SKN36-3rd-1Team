@@ -12,6 +12,7 @@
 > r3b build 쪽 Neo4j 적재·교차 검증(보고서 13~16)과 snapshot 생성(17·18) 기록은 §5.5.5에 있다. 남은 작업과 검증 한계는 §7에 있다.
 > **PR #111 리뷰 반영 (2026-11-23, P1-3 `756ed30`·P2-4 `4331650`):** 복원 도구가 임시 컬렉션 복원 + 검증 후 alias 공개, 최종 payload 검증으로 바뀌었다(§5.8). 위 최종 ZIP·독립 복원 PASS는 그 이전 도구의 보존 기록이며, 새 도구로 만든 ZIP과 실제 복원은 아직 없다 *(P1-3·P2-4 반영 직후 시점의 과거 기록 — 현재 상태는 바로 아래 갱신 줄)*. §5.7.3 PowerShell 경로 계산을 절대 경로 기준으로 고쳤다(P2-5).
 > → **갱신 (2026-11-23, 강의실 노트북):** 새 도구를 담은 번들 `rag-final-v140-r3-6d0450fd6c1d.zip`(SHA-256 `eb178f95…9554`, source `6d0450f`)을 만들고, 새 verify 환경에서 preflight → `--apply` → `--verify-only`(재시도 1회 포함)와 B2/B3 6개 표기 검색 검증까지 실행했다(§5.9). 기존 ZIP `…1c007e75d1c2.zip`의 기록은 그대로 보존한다.
+> **PR #111 추가 리뷰 반영 (2026-11-24, 커밋 전 코드):** 본체 직접 `--apply` 거부(P1-A), 단계별 쓰기 guard(P1-B), OS 실행 잠금(P1-C), 실패 상태 재조회 보고(P1-D), payload 인덱스 검증(P1-E)을 코드·단위 테스트로 반영했다(§5.8 추가 절). 동시성은 운영 통제(Write Freeze, §5.10)로 승인됐다. 이 코드로 만든 번들·실제 복원은 아직 없고, 기존 번들 `eb178f95…`는 복원 도구가 현재 소스와 달라 현재 래퍼에서 거부된다.
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -47,6 +48,12 @@
 
 코드 기준: `restore_profiles_v140.WRITES_WITHOUT_PINS`·`WRITES_REQUIRING_PINS`. 테스트: `tests/unit/test_r3_write_gates.py`.
 
+> **정정 (PR #111 P1-A 이후, 커밋 전 코드):** 위 표 마지막 행의 `restore_final_v140_r3 --apply` 거부 사유(`ProfileError`)는 P1-A 이전 동작이다.
+> - 지금은 `R3_PINS` 상태와 관계없이 **항상** 거부된다. 인자 검사 단계에서 `parser.error`로 끝나 **종료 코드 2**이며, 보고서 파일을 만들지 않고 번들·DB에 접근하지 않는다. 오류 메시지는 래퍼 사용법(`restore_r3_isolated.py … --apply --confirm-write --expect-fingerprint …`)을 안내한다.
+> - 같은 Python 프로세스에서 `restore()`를 `apply=True`로 직접 불러도, 래퍼가 만든 쓰기 허가 객체(`write_guard`, `WriteGuard` 하위 클래스·`armed=True`·32자리 hex `run_id`)가 없으면 번들·DB 접근 전에 `ValueError`로 멈춘다. 보안 경계는 아니다(의도적인 하위 클래스·함수 교체는 막지 못함).
+> - 본체의 preflight·`--verify-only`(읽기 전용)는 그대로 실행된다. `restore_r3_isolated --apply`는 지금도 기준값이 미확정이면 `ProfileError`로 거부된다.
+> - 테스트: `test_restore_final_v140_r3.DirectApplyGuardTests`.
+
 ## 1. 목적과 범위
 
 - r2(#91)는 Qdrant B2 컬렉션 1개와 Neo4j를 복원한다. r3는 **B2·B3 두 컬렉션 + Neo4j**를 함께 복원한다.
@@ -69,7 +76,7 @@
 | `scripts/load_neo4j_r3_isolated.py` | build Neo4j 적재·검증(r2 함수 재사용) + B2·B3 각각 `verify_cross_db`·`verify_full_index` | build Neo4j |
 | `scripts/build_restore_bundle_r3.py` | 컬렉션별 snapshot 생성·내려받기 → r3 ZIP 생성·재검증 | build Qdrant(snapshot 파일), 출력 폴더 |
 | `scripts/restore_final_v140_r3.py` | r3 번들 복원 본체(package schema 2). 번들 구성·메타데이터·`--repo`↔source ZIP 대조 후 빈 DB에만 쓰기 | 대상 DB |
-| `scripts/restore_r3_isolated.py` | verify 프로젝트 보호 래퍼(Docker 소유·인증·fingerprint). 고정 주소를 settings로 직접 넘김(환경 변수 덮어쓰기 없음) | verify DB |
+| `scripts/restore_r3_isolated.py` | verify 프로젝트 보호 래퍼(Docker 소유·인증·fingerprint). 고정 주소를 settings로 직접 넘김(환경 변수 덮어쓰기 없음). PR #111 이후(커밋 전): apply 실행 잠금·쓰기 허가 객체·실패 상태 재조회(§5.8 추가 절) | verify DB |
 
 build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue105-r3-build` Docker 소유**를 확인한다.
 - 확인 항목: 프로젝트 라벨, 서비스, 이미지 digest, 127.0.0.1 바인딩, 프로젝트 전용 볼륨
@@ -84,13 +91,15 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 | 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 | 출력 폴더 |
 |---|---|---|---|---|---|
 | build (r3b, Issue #105 재구축용 — #110 데이터 정정 반영, 현재) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` |
-| verify | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | (보고서만) |
+| verify (r3d, PR #111 P1-A~E 코드용 — 현재, **아직 생성 안 함**) | `issue105-r3d-verify` | 127.0.0.1:56756 | 127.0.0.1:56787 | `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3D_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3d\` (권장 위치, §5.10.14) |
+| **보존** verify-6d0450f (§5.9 복원·검색 검증에 사용, 대상 아님) | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3c\` (보존, 새 파일 금지) |
 | **보존** build-104 (#104 기준, 대상 아님) | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3\` |
 
 - build 프로필은 2026-11-23에 r3b로 바꿨다(`R3_ENVIRONMENTS["build"]`, compose `issue105_r3b_build.compose.yaml`).
 - #104 build는 `PRESERVED_R3_ENVIRONMENTS["build-104"]`에 기록만 남긴다. 도구가 선택할 수 없고, 그 값에서 거부 목록이 만들어진다. 기존 compose(`issue105_r3_build.compose.yaml`)는 바꾸지 않았다.
 - #104 산출물(B2 1233 `d1fa3194…`·B3 1320 `a471e21f…` 컬렉션, Neo4j 1133/2674, snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`, 보고서 25~40, DPAPI 파일)은 그대로 보존한다.
   - 현재 도구로는 #104 build 서버에 접속할 수 없다. #104 상태는 ZIP과 verify 복원으로만 다시 확인한다.
+- verify 프로필은 2026-11-24에 r3d(`issue105-r3d-verify`, compose `issue105_r3d_verify.compose.yaml`)로 바꿨다(커밋 전 코드). 이전 verify(`issue105-r3-verify`)는 `PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]`로 옮겨 그 포트·인증 변수·프로젝트를 거부 목록에 넣었고, 출력 폴더 `.cache\issue105-r3c\`(§5.9 번들·보고서·검색 증거)를 보존 경로로 등록했다. 이전 compose 파일·컨테이너·볼륨·인증 파일은 바꾸지 않았다. 새 환경은 아직 만들지 않았다(§5.10.14).
 
 다음 접속·출력은 거부된다.
 
@@ -541,6 +550,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $repo 'scripts\restore_r3_isolated.p
 - verify 전용 값 두 개를 새로 만들어 DPAPI(`Export-Clixml`, 현재 Windows 사용자만 복호화 가능)로 저장한다. build·#104·r2·공유 값과 같으면 래퍼가 거부한다.
 - 이번 실행에서 verify 인증값을 어디에 보관했는지는 보고서에 남지 않았다. 아래 경로는 권장 예시다.
 - 값을 화면·로그·보고서에 출력하지 않는다.
+- 현재 래퍼(PR #111 이후, 커밋 전)는 공백·제어 문자가 섞인 인증값을 **변수 이름만 밝히고** 거부한다. 아래 `New-R3Secret`(32바이트 Base64)은 이 조건을 만족한다. 이미 만든 인증 파일의 값은 이 문서 작업에서 읽지 않았다.
 - **환경 변수는 단계마다 `try { Enter-R3VerifySecrets; … } finally { Exit-R3VerifySecrets }` 안에서만 설정한다.** 어느 단계에서 오류가 나도 `finally`가 현재 PowerShell 프로세스에서 두 값을 지운다(§5.7.5~§5.7.8의 각 블록). 인증 파일은 지우지 않는다.
 
 ```powershell
@@ -665,7 +675,13 @@ if ($pre.restore_preflight.snapshots.b2 -ne '834f17b6a0c18c265573ebc3da59a29473d
 - 직전 preflight 보고서(`$preReport`)의 fingerprint만 쓴다. 래퍼는 그 값과 현재 상태(Docker 식별 정보 + 서버 상태)가 같을 때만 쓴다.
 - 쓰기 순서 (현재 도구): snapshot 2개를 임시 컬렉션에 업로드 → 임시 컬렉션 검증(차원·Point 수·전체 vector digest·payload 정렬·protected digest·최종 payload) → Neo4j `load_graph(verify=True)` → 임시 컬렉션마다 `verify_cross_db`와 `verify_full_index` → 정식 alias 공개 → alias 경유 재확인 → 이어서 읽기 전용 재검증(`post_verify`)
   - §5.7.9의 기록(보고서 20)은 옛 도구의 순서다: 정식 이름에 snapshot 2개 업로드 → 컬렉션 검증 → Neo4j → 교차 검증 → 재검증 (alias 없음)
+  - PR #111 이후 코드(커밋 전)는 위 순서에 더해, 각 쓰기(업로드·payload 정렬·Neo4j 적재·alias 공개) 바로 앞에서 쓰기 guard를 확인하고, alias 공개 직전(임시 컬렉션)·직후(정식 alias)에 payload 인덱스 8개를 검사한다. apply는 DB 접속 전에 실행 잠금을 얻는다(§5.8 추가 절).
   - 실패 보고서에 `partial_publish`·`aliases`가 있으면 alias 공개 단계에서 멈춘 것이다. alias를 지우거나 바꾸지 않고 그대로 보존한다(§5.8).
+    → **정정 (PR #111 P1-D 이후, 커밋 전 코드):** 위 문장은 P1-D 이전 보고서 기준이다. 지금은 apply가 쓰기를 시작한 뒤 어느 단계에서 실패하든, 래퍼가 잠금을 쥔 채 실제 상태를 다시 읽어 보고서 최상위에 다음을 붙인다: `run_id`, `failed_stage`, `physical_collections`, `aliases`(재조회한 실제 매핑), `alias_classification`, `partial_publish`, `publish_state`, `published_aliases`, `collection_classification`, `neo4j_totals`, `neo4j_data_present`, `load_progress`, `unavailable`(필드 뜻과 해석은 §5.10.8).
+    - 따라서 `partial_publish`·`aliases`가 있다는 것만으로 공개 단계 실패라고 판단하지 않는다. **`failed_stage`**(예: `restore:alias_publish`, `restore:cross_db_verification`, `post_apply_verify_only`)를 본다.
+    - **`null`의 뜻:** 그 항목을 조회하지 못했다(모름). 비어 있음·정상·"부분 공개 아님"으로 읽지 않는다. 원인은 `unavailable`(항목 → 예외 종류 이름) 또는 `inspection_error`(재조회 자체 실패)에 있다. `partial_publish=null`·`publish_state=unknown`은 alias 상태를 읽지 못했다는 뜻이다. `physical_collections=null`은 임시 이름을 만들기 전, 즉 쓰기 전 단계의 실패다.
+    - `PublishError`가 실패 순간 읽은 값은 `partial_publish_at_failure`·`aliases_at_failure`로, 인덱스 검증 실패는 `payload_index_report`로 따로 남는다. `reason`의 알려진 인증값은 `[REDACTED]`로 가려진다.
+    - 쓰기 전에 거부된 실패(잠금 실패 `RunLockError`, fingerprint 불일치, 빈 서버 아님, Docker 상태 조회 실패 등)에는 재조회 항목이 붙지 않는다(남은 쓰기 결과가 없음).
 - 실패하면 **다시 실행하지 않는다**(§5.7.10). 새 fingerprint를 발급받아 자동으로 재시도하지 않는다. 컨테이너·볼륨·보고서는 그대로 둔다.
 
 ```powershell
@@ -762,6 +778,37 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 '새 번들 전용 확인: PASS'
 ```
 
+- **payload 인덱스 확인 (PR #111 P1-E 코드가 든 새 번들 전용):** 이 코드 이전 도구(위 옛 ZIP·`eb178f95…` 번들)는 `payload_indexes`를 만들지 않으므로 이 블록을 쓰지 않는다. 실제 보고서로 실행한 적이 없는 절차다(단위 테스트의 보고서 형식 기준).
+  - 기준: 컬렉션마다 `database/qdrant/store.py`의 `PAYLOAD_INDEX_FIELDS` 8개가 모두 `keyword`. 추가 인덱스는 `extra_fields`에 기록만 하고 실패로 보지 않는다.
+  - 위치: apply 보고서 `restore_apply.payload_indexes.before_alias_publish`(임시 컬렉션)·`after_alias_publish`(정식 alias), apply 보고서 `post_verify.payload_indexes.verify_only`, 별도 verify-only 보고서 `post_verify.payload_indexes.verify_only`(정식 alias). 각 값은 `{b2: …, b3: …}`이고 컬렉션마다 `status`(`PASS`/`FAILED`/`UNAVAILABLE`), `collection`, `indexes`(필드별 `collection`·`field`·`expected_type`·`actual_type`·`exists`·`verification_status`), `missing_fields`, `invalid_types`, `extra_fields`가 있다.
+  - 인덱스가 없거나 타입이 다르거나 조회하지 못하면 도구가 `PayloadIndexError`로 FAILED를 내고(공개 직전이면 alias 공개 0회, 공개 뒤면 alias를 되돌리지 않음), 보고서에 `payload_index_report`가 붙는다. 아래 블록은 PASS 보고서가 이 조건을 실제로 담고 있는지 사람이 다시 확인하는 용도다.
+
+```powershell
+$indexFields = 'policy_id', 'document_id', 'chunk_id', 'chunking_version', 'category', 'region', 'life_stages', 'verification_status'  # = store.PAYLOAD_INDEX_FIELDS (순서 포함)
+function Assert-R3PayloadIndexes($report, [string]$path, [hashtable]$expectedNames) {
+  foreach ($key in 'b2', 'b3') {
+    $r = Get-R3Required $report "$path.$key"
+    if ((Get-R3Required $r 'status') -cne 'PASS') { throw "$path.$key 인덱스 검증이 PASS가 아닙니다 → 중단" }
+    if ((Get-R3Required $r 'collection') -cne $expectedNames[$key]) { throw "$path.$key 검사 대상 이름이 다릅니다 → 중단" }
+    $entries = @((Get-R3Required $r 'indexes'))
+    if ($entries.Count -ne $indexFields.Count) { throw "$path.$key 인덱스 항목이 $($indexFields.Count)개가 아닙니다 → 중단" }
+    for ($i = 0; $i -lt $indexFields.Count; $i++) {
+      $e = $entries[$i]
+      if ($e.field -cne $indexFields[$i] -or $e.expected_type -cne 'keyword' -or $e.actual_type -cne 'keyword' `
+          -or $e.exists -ne $true -or $e.verification_status -cne 'ok') { throw "$path.$key 필드 $($indexFields[$i]) 인덱스가 keyword가 아닙니다 → 중단" }
+    }
+    if (@($r.missing_fields).Count -ne 0 -or @($r.invalid_types.PSObject.Properties).Count -ne 0) { throw "$path.$key 누락·잘못된 타입이 있습니다 → 중단" }
+  }
+}
+$app = Read-R3Report $appReport
+$temps = @{ b2 = (Get-R3Required $app 'restore_apply.physical_collections.b2'); b3 = (Get-R3Required $app 'restore_apply.physical_collections.b3') }
+Assert-R3PayloadIndexes $app 'restore_apply.payload_indexes.before_alias_publish' $temps      # 공개 직전: 임시 컬렉션
+Assert-R3PayloadIndexes $app 'restore_apply.payload_indexes.after_alias_publish' $canonical  # 공개 직후: 정식 alias
+Assert-R3PayloadIndexes $app 'post_verify.payload_indexes.verify_only' $canonical            # apply 안의 재검증
+Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonical            # 별도 verify-only
+'payload 인덱스 확인: PASS (B2·B3 각 8개 keyword)'
+```
+
 - 기대 결과는 이번 실행(§5.7.9)과 같다: B2 1233·B3 1320 Point, Neo4j 1133/2674, Cross-DB 검사 17,871개(B2 8,631 + B3 9,240) PASS, MISSING·MISMATCH·NOT_TESTED 0.
 - fingerprint는 복원 전(preflight, 빈 서버)과 복원 후(verify-only, complete)가 다르다. 서버 상태가 fingerprint에 들어가기 때문이다.
 
@@ -832,6 +879,7 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 - **B2/B3 부분 공개:** 서버가 alias 작업을 하나씩 저장하므로(요청 전체 원자성 없음) B2만 공개되고 B3가 실패할 수 있다. 이때 FAILED + `partial_publish: true` + 현재 alias 매핑을 보고하고, alias·임시 컬렉션을 지우거나 되돌리거나 재시도하지 않는다.
 - **임시 이름 TOCTOU:** 직전 검사 뒤 서버가 존재를 확인하기 전(전송·해시·압축 해제 동안)에 같은 임시 이름이 생기면 덮어쓴다. 128비트 난수라 확률로만 막는다.
 - **격리 환경은 잠금이 아니다:** 전용 프로젝트·포트·인증·Docker 소유 확인·fingerprint는 다른 쓰기 주체의 접근 가능성을 낮출 뿐이다. 같은 전용 키를 가진 동시 작업은 막지 못한다. 복원 중에는 그 검증 환경에서 다른 작업을 하지 않는다.
+  → **정정 (PR #111 P1-C 이후, 커밋 전 코드):** 같은 PC·같은 Windows 사용자에서 이 래퍼의 `--apply`끼리는 OS 실행 잠금(`RunLock`)이 직렬화한다. 두 번째 실행은 DB 접속 전에 `RunLockError`로 거부되고, 각 쓰기 직전 guard가 잠금 보유를 다시 확인한다. 잠금을 따르지 않는 쓰기(다른 프로그램·직접 REST 호출·다른 사용자·Docker 관리 작업)는 **여전히 막지 못한다.** 이 부분은 리뷰어가 승인한 운영 통제(Write Freeze)로 다룬다(보호 범위·한계 §5.10.6, 중단 목록 §5.10.3).
 - **payload 기준 2는 번들 안의 값이다:** 번들 전체(`package.json`·`SHA256SUMS`·snapshot)를 일관되게 바꾸면 기준 2는 속을 수 있다. 기준 1은 `index_run_id`를 뺀 나머지를 저장소 고정 릴리스로 막는다.
 
 **검증 상태 (실제로 한 것 / 아직 안 한 것)**
@@ -840,6 +888,19 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 - → **갱신 (2026-11-23, §5.9에서 실서버로 확인):**
   - 확인됨: 새 ZIP 생성·독립 복원, 새 도구로 실제 Qdrant·Neo4j 복원, 64자 임시 이름 snapshot 복원, alias **공개**(정식 이름 2개 → 임시 컬렉션 2개), 실제 payload와 기대 payload의 dict 전체 일치·전체 payload digest 일치, alias 경유 벡터 검색(`HybridSearchSession.search_policy_evidence`).
   - 여전히 미확인: alias **거부** 동작(정식 이름 컬렉션이 이미 있을 때), payload index 유지, alias TOCTOU·부분 공개(실서버에서 재현하지 않음), 그래프 보강 검색·API·LLM·화면.
+
+**PR #111 추가 리뷰 반영 구조 (P1-A~E·C-1·C-2, 2026-11-24, 커밋 전 코드·실환경 미검증)**
+
+위 복원 구조·`--verify-only`·최종 payload 검증은 그대로 유효하다. 다음이 더해졌다. 운영 절차는 §5.10에 있다.
+- **P1-A 직접 `--apply` 거부:** §1.1 정정 참고.
+- **P1-B 단계별 쓰기 guard:** 쓰기 4종(B2·B3 업로드, payload 정렬, Neo4j 적재, alias 공개) 바로 앞에서 다시 확인한다. 쓰기 허가 객체(`armed`·`run_id`), 실행 잠금 보유, Docker 컨테이너 ID·시작 시각, 첫 쓰기 직전 preflight fingerprint, 그리고 새 연결로 다시 읽은 서버 상태(컬렉션·alias·Point 수·벡터/payload/protected digest·Neo4j 건수)가 기대와 같아야 한다. 하나라도 다르면 그 쓰기와 이후 쓰기를 하지 않는다. guard 확인과 쓰기 사이의 변경(TOCTOU)은 막지 못한다.
+- **정렬 전 번들 기준 확인:** payload 정렬(`category`·`life_stages`)을 쓰기 전에, 정렬을 적용했다고 가정한 payload가 Point마다 릴리스 기대 payload와 같고 전체 digest가 `package.json` `payload_digest`와 같은지 확인한다. 정렬 허용 필드 밖의 차이(예상 밖 필드·`index_run_id` 변경 등)가 있으면 `set_payload` 0회로 FAILED.
+- **P1-C 실행 잠금:** 위 "격리 환경은 잠금이 아니다" 정정과 §5.10.6.
+- **P1-D 실패 상태 재조회:** §5.7.7 정정과 §5.10.8. 자동 삭제·rollback·재시도는 계속 없다.
+- **P1-E payload 인덱스:** `store.PAYLOAD_INDEX_FIELDS` 8개가 모두 `keyword`인지 alias 공개 직전(임시 컬렉션, guard 바로 앞)·공개 직후·`--verify-only`(정식 alias 경유)에 확인한다. 실패하면 공개 직전은 alias 공개 0회, 공개 뒤는 FAILED이고 alias를 되돌리지 않는다. 인덱스를 만들거나 지우지 않는다. 결과 확인은 §5.7.8.
+  - 위 "여전히 미확인"의 payload index 유지는 이제 코드가 검사하지만, **실서버에서의 결과는 아직 미확인**이다(설치 qdrant-client 1.12.2 모델 기준으로만 확인).
+- **인증값·오류 보고:** 공백·제어 문자가 섞인 인증값은 거부한다(§5.7.4). FAILED 보고서 `reason`의 알려진 인증값은 `[REDACTED]`로 가린다. Docker 실행 자체가 실패하면 원본 메시지 없이 오류 종류만 담은 `IsolationError`로 보고한다(C-2). 서버 상태 확인 중 Neo4j 연결 생성이 실패해도 먼저 연 Qdrant 연결을 닫는다(C-1).
+- 검증: fake·mock 단위 테스트와 결함 주입만 했다(§5.10.13).
 
 ### 5.9 신규 번들 실환경 독립 복원·검색 검증 (완료 기록, 2026-11-23, 강의실 노트북)
 
@@ -949,6 +1010,216 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
 - 파생 record의 `plan_counts`·`source` 독립 재확인(원본 record 확보 시)
 - verify 컨테이너·볼륨 유지/정리 여부(삭제 명령은 실행하지 않음), 커밋 `6d0450f` push 여부
 
+### 5.10 Qdrant Write Freeze 운영 절차 및 부분 공개 장애 대응
+
+> PR #111 리뷰 P1(동시성)에 대해 리뷰어가 승인한 **운영 통제(A 방식)** 절차다 (2026-11-24 작성).
+> 이 절은 **사람이 지키는 운영 절차**다. 외부 쓰기를 기술적으로 강제 차단하지 않는다. 기술적으로 막는 것은 이 복원 래퍼끼리의 중복 apply(로컬 OS 잠금)뿐이다(§5.10.6).
+> 대상 코드는 P1-A~E·C-1·C-2 반영본(커밋 전)이다. 이 코드가 든 **새 번들로 실제 복원한 기록은 아직 없다**(§5.10.13). 기존 번들(`eb178f95…`)은 복원 도구가 현재 소스와 달라 새 래퍼에서 거부된다.
+
+#### 5.10.1 적용 환경과 보호 대상
+
+- 적용: `scripts/restore_r3_isolated.py --apply`가 쓰는 **verify 프로젝트 1개**. 현재 프로필은 `issue105-r3-verify`(Qdrant `127.0.0.1:56656`, Bolt `127.0.0.1:56687`)다.
+  - 이 프로젝트는 §5.9에서 이미 복원에 썼으므로 빈 서버가 아니다. 래퍼는 빈 서버에만 apply하므로 다음 실행은 새 프로젝트·볼륨에서 한다(§5.10.12).
+  - → **갱신 (2026-11-24, 커밋 전 코드):** 현재 verify 프로필은 `issue105-r3d-verify`(Qdrant `127.0.0.1:56756`, Bolt `127.0.0.1:56787`)다. 이 절차의 대상은 그 새 환경이고, `issue105-r3-verify`는 보존 대상(쓰기 금지)이다. 값과 경로는 §5.10.14.
+- 보호 대상 (이 프로젝트 안)
+  - Qdrant 임시 컬렉션 `<정식 이름>__tmp_<32 hex>` 2개와 정식 alias 2개(`exp_b2_qwen3emb06b_v140_v1`, `exp_b3_qwen3emb06b_v140_v1`)
+  - Neo4j 그래프(노드·관계)
+  - 같은 서버에 있을 수 있는 **다른 작업의 컬렉션·alias**(이번 실행의 것이 아님 — §5.10.10)
+- 적용하지 않음: build 프로젝트(`issue105-r3b-build`), r2 verify, 공유 `.env` Qdrant(6333) 등. 래퍼는 고정 주소만 쓰고 이 포트들을 거부한다(§3).
+- verify 컨테이너는 `127.0.0.1`에만 바인딩된다(래퍼가 Docker 소유 확인에서 검사). 따라서 이 Qdrant에 쓸 수 있는 주체는 **이 PC의 프로세스와 Docker 관리 작업**이다. 다른 PC에서는 직접 접속할 수 없다.
+
+#### 5.10.2 역할
+
+| 역할 | 담당 | 하는 일 |
+|---|---|---|
+| 작업 책임자 | 복원 실행자 (DB·Hybrid search 담당) | 동결 공지·중단 확인·기록, preflight → apply → verify-only 실행, 실패 보고서 보존 |
+| 승인자 | PR #111 리뷰어(팀장) | 동결 시작·apply 실행 승인, 실패 시 후속 조치(새 환경 재검증·정리) 결정 |
+| 중단 대상 작업 담당자 | 아래 목록의 작업을 하는 팀원 | 중단 응답, 동결 해제 전까지 재개하지 않음 |
+
+- 작업 책임자와 승인자는 같은 사람이 아니어야 한다. 실행 기록(§5.10.4)에 두 사람의 확인을 남긴다.
+
+#### 5.10.3 동결 중 중단할 Qdrant 쓰기 작업 (확인 목록)
+
+| # | 쓰기 주체 | verify Qdrant에 쓸 수 있는 경우 | 기술적 차단 |
+|---|---|---|---|
+| 1 | 다른 터미널·다른 사용자의 `restore_r3_isolated.py --apply` | 같은 PC·같은 사용자면 OS 잠금으로 거부. **다른 Windows 사용자는 잠금 경로가 달라 막히지 않음** | 같은 사용자만 (§5.10.6) |
+| 2 | `restore_final_v140_r3.py` 직접 실행 | `--apply`는 종료 코드 2로 거부. preflight·verify-only는 읽기만 | 있음 (P1-A) |
+| 3 | build 도구(`update_r3_collections`·`load_neo4j_r3_isolated`·`build_restore_bundle_r3`) | build 프로필·build Docker 소유만 인정하므로 verify에 쓰지 않음. 코드를 바꾸거나 환경 변수를 섞어 실행하면 예외 | 프로필 기준 |
+| 4 | 인덱싱·임베딩 스크립트(`database/full_index.py` 등 `QDRANT_URL`을 읽는 도구) | `QDRANT_URL`·키를 verify 값으로 설정하고 실행하면 쓸 수 있음 | **없음** |
+| 5 | 백엔드·검색 서비스·노트북·실험 스크립트 | verify 주소·키로 연결하면 쓸 수 있음(대부분 읽기지만 컬렉션·인덱스 생성 코드가 있으면 쓰기) | **없음** |
+| 6 | Qdrant REST 직접 호출(curl·브라우저·대시보드) | verify 키를 알면 alias·컬렉션 변경 가능 | **없음** |
+| 7 | Docker 관리 작업(`compose restart/down`, 볼륨 작업) | 컨테이너가 바뀌면 guard가 다음 쓰기 전에 거부(컨테이너 ID·시작 시각)하지만, 이미 쓴 상태는 되돌리지 않음 | 감지만 (P1-B) |
+
+- 4~7은 **사람의 중단 확인으로만** 막는다.
+
+#### 5.10.4 복원 전 중단 확인과 기록 (preflight 전에 모두 끝낸다)
+
+1. 작업 책임자가 팀 채널에 동결을 공지한다: 대상 프로젝트·포트, 시작 예정 시각, 중단할 작업(§5.10.3 4~7), 예상 종료 조건(§5.10.11).
+2. §5.10.3의 각 작업 담당자에게서 "중단했고 동결 해제 전까지 재개하지 않는다"는 응답을 받는다.
+3. 이 PC에서 읽기 전용으로 확인한다 (인증값을 쓰지 않는 명령만).
+   ```powershell
+   $qdrantPort = 56656; $boltPort = 56687                                  # 새 환경이면 그 프로필의 포트
+   # verify 포트에 연결된 이 PC의 프로세스 (Docker 프록시 자신은 제외하고 사람이 판단)
+   Get-NetTCPConnection -RemotePort $qdrantPort, $boltPort -State Established -ErrorAction SilentlyContinue |
+     Select-Object LocalPort, RemotePort, OwningProcess, @{n='Process'; e={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName}}
+   # 이 복원 도구의 다른 실행이 잠금을 쥐고 있는지 (파일이 있어도 보유가 아닐 수 있음 — §5.10.6)
+   $lock = Join-Path $env:LOCALAPPDATA "issue105-r3\locks\<project>-$qdrantPort.lock"   # <project>는 verify 프로필 이름
+   if (Test-Path -LiteralPath $lock) { "잠금 파일 있음(보유 여부는 apply가 판정): $lock" }
+   ```
+   - 연결된 프로세스가 있으면 무엇인지 확인하고, 복원 도구가 아닌 쓰기 주체면 중단시킨다.
+4. 실행 기록을 **새 파일**로 남긴다(예: `.cache\<작업 폴더>\write-freeze-record.md`, Git 제외, 덮어쓰기 금지). 인증값·환경 변수 값은 적지 않는다.
+
+   | 항목 | 기록 |
+   |---|---|
+   | 대상 프로젝트·포트·번들 SHA-256 | |
+   | 동결 공지 시각·채널 | |
+   | §5.10.3 항목별 중단 응답(담당·시각) / 해당 없음 사유 | |
+   | 3번 읽기 전용 확인 결과(연결 프로세스 목록, 잠금 파일 유무) | |
+   | 작업 책임자 확인 / 승인자 승인(시각) | |
+   | preflight·apply·verify-only 보고서 경로·SHA-256, apply의 `run_lock.owner.run_id` | |
+   | 동결 해제 시각·조건(§5.10.11) | |
+
+#### 5.10.5 확인할 수 없으면 apply하지 않는다
+
+- 다음 중 하나라도 해당하면 **apply를 실행하지 않는다**(preflight·읽기 전용 확인은 해도 된다):
+  - §5.10.3의 어느 항목이든 중단 응답을 받지 못했거나 담당자를 알 수 없다.
+  - 3번 확인에서 정체를 알 수 없는 프로세스가 verify 포트에 연결돼 있다.
+  - 승인자 승인이 없다.
+  - 동결 공지 이후 다른 작업이 재개됐다는 사실을 알게 됐다.
+- 이때는 실행 기록에 "확인 불가 → apply 안 함"과 사유를 남기고 승인자에게 보고한다.
+
+#### 5.10.6 동결 유지 범위와 OS 실행 잠금의 보호 범위·한계
+
+- **동결 기간:** 첫 preflight 직전부터 별도 `--verify-only`(§5.7.8) 보고서 확인이 끝날 때까지. 검색 검증(§5.9.5 같은 작업)을 이어서 하면 그것까지 포함한다. apply 하나만이 아니다.
+- **OS 실행 잠금 (P1-C, `RunLock`):**
+  - `--apply`는 DB에 처음 접속하기 전에 `%LOCALAPPDATA%\issue105-r3\locks\<project>-<qdrant_port>.lock`의 0번 바이트를 비차단 배타 잠금으로 잡고, 사후 verify-only까지 끝난 뒤 `finally`에서 푼다(파일은 남김).
+  - 이미 다른 실행이 쥐고 있으면 기다리지 않고 바로 거부한다. DB 접속 0, 쓰기 0, 보고서에 `RunLockError`와 보유자 정보(run_id·PID·시작 시각·프로젝트·포트·컨테이너 ID)가 남는다. 같은 프로세스의 두 번째 획득도 거부한다.
+  - 각 쓰기(업로드·정렬·Neo4j 적재·alias 공개) 직전 guard가 잠금을 아직 쥐고 있는지 다시 확인한다. 잃었으면 그 쓰기와 이후 쓰기를 하지 않는다.
+  - 보유자가 비정상 종료하면 OS가 잠금을 푼다(Windows 문서상 해제가 지연될 수 있음). 이 PC에서 강제 종료 뒤 재획득을 테스트로 확인했다.
+  - **잠금 파일이 있다 ≠ 잠금을 쥐고 있다.** 파일을 지우거나 고쳐서 "풀려고" 하지 않는다. 보유 여부는 다음 apply가 OS 잠금으로 판정한다.
+  - 보유자 PID는 실제 잠금을 쥔 Python 프로세스(`os.getpid()`)다. venv의 `python.exe`는 실행기라 작업 관리자의 다른 PID일 수 있다. 다른 사람의 프로세스는 종료하지 않는다.
+- **잠금이 막지 못하는 것:** preflight·verify-only(읽기 전용이라 잠그지 않음), 다른 Windows 사용자·다른 경로의 실행, §5.10.3의 4~7(잠금을 따르지 않는 쓰기), 같은 프로세스 안의 의도적 우회. 보안 경계가 아니다.
+- 이미 쓴 서버에서 두 번째 apply는 잠금이 풀린 뒤에도 거부된다: 래퍼는 빈 서버(`servers.state=empty`)와 직전 preflight fingerprint가 모두 맞을 때만 쓴다.
+
+#### 5.10.7 외부 쓰기 주체가 잠금을 따르지 않을 때의 잔여 위험
+
+동결이 지켜지지 않으면 아래 위험이 남는다. 도구는 일부를 **감지**할 뿐 막지 못하며, 감지하면 FAILED로 멈춘다.
+
+| 위험 | 도구의 동작 |
+|---|---|
+| guard 확인과 실제 쓰기 사이의 변경(TOCTOU) | 막지 못함. 다음 단계 guard·공개 직후 검증에서 감지되면 FAILED |
+| 공개 직전 검사와 alias 생성 사이에 같은 이름 alias 생성 | Qdrant가 오류 없이 대상을 바꾼다 → **외부 alias 매핑이 덮어써지고 감지되지 않을 수 있다**(Point 데이터는 지워지지 않음, §5.8) |
+| 같은 이름 정식 컬렉션 생성 | Qdrant가 alias 생성을 거부 → FAILED(부분 공개일 수 있음) |
+| 임시 이름 충돌(업로드 중) | 128비트 난수 이름이라 확률로만 막음 |
+| 인덱스 변경(공개 직전 검사 뒤) | 공개 직후 정식 alias 경유 인덱스 검사(P1-E)에서 FAILED, alias는 되돌리지 않음 |
+
+#### 5.10.8 B2/B3 부분 공개는 FAILED
+
+- alias 공개는 B2 → B3 순서로 하나씩 저장된다(요청 전체 원자성 없음). 하나만 공개되면 **FAILED**이며 성공으로 보고하지 않는다.
+- 래퍼는 apply가 쓰기를 시작한 뒤 실패하면, **잠금을 쥔 채로** 실제 남은 상태를 새 연결로 다시 읽어 FAILED 보고서에 붙인다(P1-D). 쓰기·삭제는 하지 않는다.
+- FAILED 보고서에서 볼 항목:
+
+  | 항목 | 뜻 |
+  |---|---|
+  | `status=FAILED`, `error_type`, `reason` | 실패와 이유. `reason`의 알려진 인증값은 `[REDACTED]`로 가린다 |
+  | `run_id`, `failed_stage` | 이번 실행 ID(잠금 소유자 정보와 같은 값), 실패 단계(예: `restore:alias_publish`) |
+  | `physical_collections` | 이번 실행의 임시 컬렉션 이름 (`null`이면 쓰기 전 실패) |
+  | `aliases` | **재조회한 실제** alias 매핑 |
+  | `alias_classification` | 정식 alias마다 `ours`(이번 실행의 그 키 임시 컬렉션) / `absent` / `foreign_target`(다른 대상), 정식 이름이 아닌 alias는 `unexpected` |
+  | `partial_publish`, `publish_state`, `published_aliases` | `publish_state`: `complete`/`partial`/`none`/`unknown`. `partial_publish=true`는 이번 실행의 정식 alias가 일부만 있다는 뜻 |
+  | `collection_classification` | `ours_temp`/`canonical_name`/`other_temp`/`unexpected`, `ours_absent` |
+  | `neo4j_totals`, `neo4j_data_present`, `load_progress` | Neo4j 적재 여부(부분 공개와 별개의 "부분 적재" 정보) |
+  | `unavailable`, `inspection_error` | 조회하지 못한 항목과 예외 종류. **이 값이 있으면 그 항목은 모름이다(비어 있음·정상 아님)** |
+  | `partial_publish_at_failure`, `aliases_at_failure` | 실패 순간 본체가 읽은 값(재조회 값과 다를 수 있음) |
+  | `payload_index_report` | 인덱스 검증 실패 시 컬렉션·필드별 결과 |
+
+- **해석 주의:** `publish_state=none`은 "이번 실행의 alias가 0개"라는 뜻이다. **외부 alias가 없다는 뜻이 아니다.** 반드시 `alias_classification`의 `foreign_target`·`unexpected`와 `aliases`를 함께 본다. `unknown`·`null`은 조회 실패다.
+
+#### 5.10.9 실제 alias 매핑과 이번 실행의 기대 매핑 비교 (읽기 전용)
+
+- 기대 매핑 = `{ exp_b2_qwen3emb06b_v140_v1: physical_collections.b2, exp_b3_qwen3emb06b_v140_v1: physical_collections.b3 }`
+- 보고서의 `aliases`와 지금 서버의 매핑을 다시 읽어 비교한다. 아래는 조회(GET)만 한다. 키는 §5.7.4 함수로 현재 프로세스에만 넣고 출력하지 않는다.
+  ```powershell
+  $qdrantPort = 56656                                                      # 대상 프로필의 Qdrant 포트
+  # 새 프로필(§5.10.12)이면 §5.7.4 함수의 인증 변수 이름·파일 경로도 그 프로필 값으로 바꿔 쓴다
+  $fail = Get-Content -LiteralPath $appReport -Raw -Encoding UTF8 | ConvertFrom-Json
+  $expected = @{ 'exp_b2_qwen3emb06b_v140_v1' = $fail.physical_collections.b2; 'exp_b3_qwen3emb06b_v140_v1' = $fail.physical_collections.b3 }
+  try {
+    Enter-R3VerifySecrets
+    $headers = @{ 'api-key' = $env:ISSUE105_R3_VERIFY_QDRANT_API_KEY }
+    $live = (Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$qdrantPort/aliases" -Headers $headers).result.aliases
+    $collections = (Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$qdrantPort/collections" -Headers $headers).result.collections.name
+  } finally {
+    Exit-R3VerifySecrets
+    Remove-Variable headers -ErrorAction SilentlyContinue
+  }
+  foreach ($a in $live) {
+    $class = if (-not $expected.ContainsKey($a.alias_name)) { 'unexpected' } elseif ($a.collection_name -ceq $expected[$a.alias_name]) { 'ours' } else { 'foreign_target' }
+    "{0} -> {1} : {2}" -f $a.alias_name, $a.collection_name, $class
+  }
+  foreach ($name in $expected.Keys) { if (-not ($live | Where-Object { $_.alias_name -ceq $name })) { "$name : absent" } }
+  "collections: $($collections -join ', ')"
+  ```
+- 보고서와 지금 상태가 다르면(재조회 뒤에 또 바뀜) 동결이 지켜지지 않은 것이다. 두 결과를 모두 실행 기록에 남기고 승인자에게 보고한다.
+
+#### 5.10.10 자동 삭제·rollback·재실행 금지, 기존 데이터·다른 작업 매핑 보호
+
+- 도구는 실패해도 alias·컬렉션·인덱스·Neo4j 데이터를 지우거나 되돌리거나 다시 시도하지 않는다. 사람도 이 절차 안에서는 하지 않는다.
+  - 쓰지 않는 작업: alias 삭제·변경(DeleteAlias·CreateAlias·rename), 컬렉션 삭제, `create_payload_index`·`delete_payload_index`, Neo4j `DELETE`·`DETACH DELETE`·`DROP`, `down -v`, `docker volume rm`, `docker system prune`
+  - 같은 apply를 다시 실행하지 않는다. 새 fingerprint를 받아 재시도하지 않는다(§5.7.10).
+- 이유: Qdrant alias에는 CAS(조건부 변경)가 없다. "우리 것"이라고 판단해 지운 alias가 그 사이 다른 작업의 매핑일 수 있다. 데이터 보존을 우선한다.
+- `foreign_target`·`unexpected` alias와 `other_temp`·`unexpected` 컬렉션은 **이번 실행의 것이 아니다.** 손대지 않고 기록만 한다. `ours`·`ours_temp`도 승인자 결정 전에는 손대지 않는다.
+
+#### 5.10.11 동결 해제 조건
+
+| 결과 | 해제 조건 |
+|---|---|
+| 성공 | apply 보고서 `status=PASS`(내부 `post_verify` PASS 포함, `partial_publish=false`, `payload_indexes`의 공개 직전·직후 B2·B3 각 8개 keyword PASS, `run_lock` 기록) → 별도 `--verify-only` PASS(§5.7.8, 인덱스 `verify_only` PASS) → 보고서 SHA-256 기록 → 실행 기록에 해제 시각을 적고 공지 |
+| 실패 (어느 단계든) | FAILED 보고서 보존 → §5.10.9 비교 결과 기록 → 승인자 보고. 실패한 프로젝트는 **증거로 보존하고 더 쓰지 않는다**(동결 해제 뒤에도 이 프로젝트에 쓰는 작업 금지). 다른 작업 재개는 승인자가 해제를 공지한 뒤에만 |
+| apply 미실행 (§5.10.5) | 실행 기록에 사유를 남기고 공지로 해제 |
+
+#### 5.10.12 새 프로젝트·볼륨에서 재검증
+
+- 실패한 환경이나 이미 쓴 환경(현재 `issue105-r3-verify`)에서는 다시 apply하지 않는다. 래퍼도 빈 서버가 아니면 거부한다.
+- 순서 (각 단계 별도 승인):
+  1. 새 verify 프로필 결정: 새 프로젝트 이름·포트·인증 변수(계획안: `issue105-r3d-verify`, 56756/56787, `ISSUE105_R3D_VERIFY_*`). `R3_ENVIRONMENTS["verify"]`·compose 변경은 코드 변경이며 별도 승인·리뷰 대상이다. 잠금 경로는 `<project>-<qdrant_port>`라 새 프로필이면 자동으로 달라진다.
+     → **갱신 (2026-11-24):** 프로필·compose를 코드에 반영했다(커밋 전, §5.10.14). 2번부터는 아직 실행하지 않았다.
+  2. 새 DPAPI 인증 파일(§5.7.4, 기존 값과 다른 새 값)
+  3. 충돌 검사와 기동(§5.7.5, 새 프로젝트 이름·포트로)
+  4. 이 절의 동결 공지·확인·기록(§5.10.4) → preflight(§5.7.6) → apply(§5.7.7) → verify-only(§5.7.8)
+- 이전 환경·보고서는 그대로 보존한다. 정리(삭제)는 이 절차에 넣지 않으며 별도 승인 사항이다.
+
+#### 5.10.13 검증 상태
+
+- 확인됨 (fake·mock 단위 테스트, 실제 DB·Docker 없음): 같은 잠금 경로의 두 번째 apply 거부(같은 프로세스·별도 Python 프로세스), 잠금 실패 시 DB 접속·쓰기 0, 보유 프로세스 강제 종료 뒤 재획득, 예외 시 잠금 해제, 부분 공개 FAILED·분류·재조회, 실패 후 삭제·재시도 0, 실패 보고서의 인증값 가림, 인덱스 검증, 이미 쓴(빈 서버 아닌) 대상의 apply 거부(복원 호출·쓰기 0), 쓰기 시작 뒤 일반 예외의 CLI `FAILED`·종료 코드 1·재조회 진단 유지. (PR #111 P1-A~E·C-1·C-2 테스트, r2/r3 회귀 437 passed)
+- 미확인 (실환경): 실제 `%LOCALAPPDATA%` 잠금 파일과 두 터미널 동시 실행, 실제 부분 공개 장애(의도적으로 재현하지 않음), 이 절의 PowerShell 블록 실제 실행, 새 번들로 새 환경 복원(리뷰 요구 5 — 최종 번들 확정 뒤 별도 검증).
+- 운영 통제의 효과(다른 작업이 실제로 멈췄는지)는 도구가 증명하지 못한다. 실행 기록(§5.10.4)이 근거다.
+
+#### 5.10.14 새 독립 verify 환경 `issue105-r3d-verify` (설정만 반영, 아직 생성·실행 안 함)
+
+> 2026-11-24 기준: 코드(`scripts/restore_profiles_v140.py`)와 compose 파일만 반영했다(커밋 전). **컨테이너·볼륨·인증 파일·보고서·번들은 아직 없고, preflight·apply·verify-only도 실행하지 않았다.** 이 환경의 복원 결과는 기록된 것이 없다.
+
+| 항목 | 값 |
+|---|---|
+| 프로필 | `R3_ENVIRONMENTS["verify"]` |
+| Compose 프로젝트 / 파일 | `issue105-r3d-verify` / `docs/development/issue105_r3d_verify.compose.yaml` (새 번들의 `compose.yaml`로 들어감) |
+| Qdrant / Bolt | `127.0.0.1:56756` / `127.0.0.1:56787` (127.0.0.1 바인딩만) |
+| 볼륨 | `issue105-r3d-verify_qdrant_storage`, `issue105-r3d-verify_neo4j_data`, `issue105-r3d-verify_neo4j_logs` |
+| 인증 변수 | `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3D_VERIFY_NEO4J_PASSWORD` (이전 verify·build·r2·공유 값 재사용 시 거부) |
+| 이미지·자원 한도 | 이전 verify와 같음 (Qdrant 1.12.4 `241edb9d…`, Neo4j 5.26.32 community `42ef3ebf…`) |
+| 실행 잠금 | `%LOCALAPPDATA%\issue105-r3\locks\issue105-r3d-verify-56756.lock` (이전 verify와 다른 파일) |
+| 출력 위치 (권장) | `.cache\issue105-r3d\` — 도구 기본값이 아니므로 `--report`·`--out-dir`로 지정한다 |
+| 기준값 | 현재 `R3_PINS`(stage2, manifest `29b57236…`) 그대로. 환경마다 다른 기준값은 없다 |
+
+- **보존·거부되는 이전 verify:** `PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]` — 포트 56656/56687, `ISSUE105_R3_VERIFY_*` 인증 변수, `issue105-r3-verify` 프로젝트는 r3 도구가 거부한다. `.cache\issue105-r3c\` 안에는 r3 도구가 새 파일을 만들지 않는다.
+- **기존 번들은 이 환경에 쓰지 않는다:** `eb178f95…` 번들은 복원 도구와 기준값 모듈이 현재 소스와 달라 래퍼가 거부한다. 이 환경에는 현재 소스로 만든 **새 번들**만 쓴다.
+- **실행 경로 연결 (실행 시 이 값으로 바꿔 쓴다, 각 단계 별도 승인)**
+  - §5.7.4 인증 파일·함수: 새 파일(예: `.cache\issue105-r3d\secrets\verify_qdrant_api_key.clixml`, `…\verify_neo4j_password.clixml`)을 새 값으로 만들고, `Enter-/Exit-R3VerifySecrets`가 설정·삭제하는 변수 이름을 `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`·`ISSUE105_R3D_VERIFY_NEO4J_PASSWORD`로 바꾼다. 이전 인증 파일은 읽지도 바꾸지도 않는다.
+  - §5.7.5 충돌 검사·기동: `$project = 'issue105-r3d-verify'; $ports = 56756, 56787`, `$compose`는 새 번들의 `compose.yaml`. 실행 전후로 `issue105-r3-verify` 컨테이너·볼륨 목록이 바뀌지 않았는지 읽기 전용으로 기록한다.
+  - §5.7.6~§5.7.8 보고서: `$runDir = Join-Path $repoRoot '.cache\issue105-r3d\verify-run-<번들 sha12>-01'`(새 폴더, 덮어쓰기 금지). §5.7.8의 인덱스 확인 블록까지 실행한다.
+  - §5.10 Write Freeze: 대상 포트 56756/56787, 잠금 파일은 위 표의 경로, 실행 기록은 `.cache\issue105-r3d\write-freeze-record-<번들 sha12>-01.md`(새 파일).
+- 이 절의 PowerShell 값 대입은 아직 실제로 실행하지 않았다.
+
 ## 6. r2 호환성과 데이터 PR 병합 시 주의
 
 - **r2 도구 상수는 r2 값으로 유지해야 한다.** `restore_final_v140.py`의 `SNAPSHOT_POINTS`·`EXPECTED`와 seed·update·load·build의 고정값이 여기에 해당한다.
@@ -998,6 +1269,7 @@ foreach ($source in 'post_verify.aliases', 'servers.qdrant.aliases') {      # �
   - §5.8 "실행 안 함" 항목의 실서버 확인 — Docker 실행 승인 필요
     → **일부 완료:** 복원·alias 공개·payload 일치·alias 경유 검색은 확인, alias 거부·payload index·동시성 위험은 미확인 (§5.8 갱신, §5.9.6)
   - alias TOCTOU·부분 공개를 잔여 위험으로 수용할지 팀장 판단 (미결)
+    → **갱신 (2026-11-24):** PR #111 리뷰어가 운영 통제(A 방식)로 진행을 승인했다. 절차는 §5.10이다. 기술적으로 해결된 것은 아니며 §5.8 남은 위험은 그대로다.
   - 모두의카드·K-패스 6개 표기 검색 회귀: 12개 조합 관심 정책 1위, B3 혼입 4건 기록 — 품질 기준 미확정 (§5.9.5)
   - ~~dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.~~
     → **처리 완료 (PR #111 리뷰 P1-1, 커밋 `3b0505b`, 현재 HEAD에 포함):** 테스트를 `test_issue79_incheon_age_evidence_verified`로 바꿔, 인천 연령 관계 2개가 공식 안내문(`DOC_STG_ICN_001_NOTICE_2026`) 근거로 `verified`인지 확인한다(`tests/unit/test_issue79_age_corrections_fullscan.py`). 옛 테스트 이름은 저장소에 남아 있지 않다.

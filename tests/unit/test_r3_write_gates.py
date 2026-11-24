@@ -24,7 +24,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import (R3Qdrant, Sample, final_sample_pins, good_build_docker, pending_pins,  # noqa: E402
+from r3_fixtures import (ArmedTestGuard, R3Qdrant, Sample, final_sample_pins, good_build_docker, pending_pins,  # noqa: E402
                          stage1_pins)
 
 from database import full_index as fi  # noqa: E402
@@ -59,9 +59,10 @@ class Base(unittest.TestCase):
                 expected_fingerprint="x", environ=ENV, docker=self.docker),
             "bundle --build": lambda: bundle.build_bundle({}, "0" * 40, Path(folder), confirm_write=True),
             "restore check_bundle": lambda: restore_r3.check_bundle(folder),
+            # 허가 객체 검사(P1-A, 별도 테스트)를 통과시킨 뒤의 기준값·번들 게이트를 확인한다
             "restore --apply": lambda: restore_r3.restore(
                 Namespace(repo=wrap.ROOT, bundle=Path(folder), apply=True, verify_only=False),
-                client_factory=lambda s: never, driver_factory=lambda s: never),
+                client_factory=lambda s: never, driver_factory=lambda s: never, write_guard=ArmedTestGuard()),
             "wrapper --apply": lambda: wrap.check_source_and_bundle(wrap.ROOT, Path(folder)),
         }
         update_stage = {

@@ -20,8 +20,8 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from r3_fixtures import (MANIFEST, RUN_OLD, R3Qdrant, Sample, final_sample_pins, pending_pins,  # noqa: E402
-                         sample_vector, stage1_pins)
+from r3_fixtures import (MANIFEST, MISSING_SCHEMA, RUN_OLD, ArmedTestGuard, GuardRefused, R3Qdrant,  # noqa: E402
+                         Sample, final_sample_pins, keyword_payload_schema, pending_pins, sample_vector, stage1_pins)
 
 from database import full_index as fi, handoff_data as hd, hybrid_search as hs  # noqa: E402
 from database.neo4j import load_graph as lg  # noqa: E402
@@ -29,6 +29,7 @@ from database.qdrant import store  # noqa: E402
 from scripts import restore_final_v140 as r2  # noqa: E402
 from scripts import restore_final_v140_r3 as r3  # noqa: E402
 from scripts import restore_profiles_v140 as profiles  # noqa: E402
+from scripts import restore_r3_isolated as wrap  # noqa: E402  (P1-B: 실제 IsolatedWriteGuard.check를 본체와 함께 검증)
 
 ROOT = Path(__file__).resolve().parents[2]
 SETTINGS = {"QDRANT_URL": "http://127.0.0.1:56656", "QDRANT_API_KEY": "sample_only_key",
@@ -283,10 +284,11 @@ class RestoreTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.b = Bundle(Path(self.tmp.name))
         self.calls = {"cross": [], "slices": [], "uploads": []}
+        self.events = []          # guard·쓰기 호출 순서 (#111 P1-B): ("guard", stage) / ("write", 이름)
 
     def run_restore(self, client, *, apply=False, verify_only=False, totals=None, cross=None, settings=SETTINGS,
                     pins="default", fail_upload=None, load_result=None, before_post=None, after_post=None,
-                    tokens=(TOKEN_B2, TOKEN_B3)):
+                    tokens=(TOKEN_B2, TOKEN_B3), write_guard="default"):
         """before_post(name, client): POST가 서버에서 처리되기 직전(검사 이후) 외부 작업을 흉내 낸다.
         after_post(name, client): 업로드가 끝난 직후, 복원 도구의 다음 검사 전에 외부 작업을 흉내 낸다.
         tokens: 임시 이름 토큰 (테스트만 고정값. 실제 기본값은 secrets.token_hex(16))."""
@@ -309,6 +311,7 @@ class RestoreTests(unittest.TestCase):
         def post(url, params, headers, files, timeout):
             name = url.split("/collections/")[1].split("/")[0]
             self.calls["uploads"].append((name, params["checksum"], params["priority"]))
+            self.events.append(("write", f"upload:{name}"))
             match = r3.TEMP_NAME.fullmatch(name)
             if match is None:                                      # 정식 이름 업로드는 HTTP까지 오면 안 된다
                 raise AssertionError(f"snapshot upload to non-temporary name: {name}")
@@ -326,6 +329,14 @@ class RestoreTests(unittest.TestCase):
 
         validation = SimpleNamespace(ok=True, node_counts={"sample": 10},
                                      relationship_counts={"REQUIRES_CONDITION": 1, "sample": 11})
+
+        def load_graph(*_args, **_kwargs):                   # 호출을 기록하는 것 말고는 예전 return_value와 같다
+            self.events.append(("write", "load_graph"))
+            hook = getattr(self, "on_load_graph", None)      # 적재 중 외부 변경 시나리오 (P1-B 테스트만 설정)
+            if hook:
+                hook()
+            return load_result or {"ok": True, "verification": {"ok": True}}
+
         with ExitStack() as stack:
             stack.enter_context(patch.dict(os.environ, {}))
             for target, name, value in (
@@ -333,9 +344,9 @@ class RestoreTests(unittest.TestCase):
                     (hd, "load_documents", s.documents), (hd, "load_payload_metadata", s.metadata),
                     (hd, "load_payload_chunks", [None] * 6), (lg, "read_graph_input", object()),
                     (lg, "validate_graph_input", validation), (lg, "Neo4jDriverRunner", runner),
-                    (lg, "load_graph", load_result or {"ok": True, "verification": {"ok": True}}),
                     (lg, "verify_loaded_graph", {"ok": True})):
                 stack.enter_context(patch.object(target, name, return_value=value))
+            stack.enter_context(patch.object(lg, "load_graph", side_effect=load_graph))
             stack.enter_context(patch.object(fi, "build_config_chunks",
                                              side_effect=lambda name, documents: (chunks_by_config[name], {})))
             stack.enter_context(patch.object(hs, "verify_cross_db", side_effect=cross_db))
@@ -345,7 +356,10 @@ class RestoreTests(unittest.TestCase):
                                     http_post=post, client_factory=lambda st: client,
                                     driver_factory=lambda st: SimpleNamespace(verify_connectivity=lambda: None,
                                                                               close=lambda: None),
-                                    token_factory=iter(tokens).__next__)
+                                    token_factory=iter(tokens).__next__,
+                                    # apply는 격리 래퍼가 만드는 허가 객체를 흉내 낸 테스트 guard (P1-A). preflight·verify-only는 없음
+                                    write_guard=(ArmedTestGuard(events=self.events) if apply else None)
+                                    if isinstance(write_guard, str) and write_guard == "default" else write_guard)
 
     def final_client(self):
         """published 상태: 임시 컬렉션 2개 + 정식 alias 2개 (C안 복원 결과)."""
@@ -393,7 +407,9 @@ class RestoreTests(unittest.TestCase):
             return self.run_restore(client, apply=True, fail_upload=TB3)
         with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=failing):
             report = Path(folder) / "report.json"
-            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
+            # 직접 --apply는 이제 종료 코드 2로 거부된다(P1-A, DirectApplyGuardTests). 실패 보고 경로는 모드와 같은 코드라
+            # 시나리오는 그대로 두고 CLI 인자만 --verify-only로 둔다 (restore는 시나리오 함수로 바꿔 끼움).
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--verify-only", "--report", str(report)]), 1)
             output = json.loads(report.read_text(encoding="utf-8"))
         self.assertEqual(output["status"], "FAILED")
         self.assertIn("Snapshot upload failed", output["reason"])
@@ -580,7 +596,9 @@ class CollectionRaceTests(unittest.TestCase):
             return self.run_restore(client, apply=True, after_post=create_b3)
         with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=racing):
             report = Path(folder) / "report.json"
-            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
+            # 직접 --apply는 이제 종료 코드 2로 거부된다(P1-A, DirectApplyGuardTests). 실패 보고 경로는 모드와 같은 코드라
+            # 시나리오는 그대로 두고 CLI 인자만 --verify-only로 둔다 (restore는 시나리오 함수로 바꿔 끼움).
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--verify-only", "--report", str(report)]), 1)
             output = json.loads(report.read_text(encoding="utf-8"))
         self.assertEqual((output["status"], output["error_type"]), ("FAILED", "ValueError"))
         self.assertIn("collection set mismatch after uploading", output["reason"])
@@ -722,7 +740,9 @@ class AliasPublishTests(unittest.TestCase):
             return self.run_restore(client, apply=True)
         with tempfile.TemporaryDirectory() as folder, patch.object(r3, "restore", side_effect=partial):
             report = Path(folder) / "report.json"
-            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)]), 1)
+            # 직접 --apply는 이제 종료 코드 2로 거부된다(P1-A, DirectApplyGuardTests). 실패 보고 경로는 모드와 같은 코드라
+            # 시나리오는 그대로 두고 CLI 인자만 --verify-only로 둔다 (restore는 시나리오 함수로 바꿔 끼움).
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--verify-only", "--report", str(report)]), 1)
             output = json.loads(report.read_text(encoding="utf-8"))
         self.assertEqual((output["status"], output["error_type"]), ("FAILED", "PublishError"))
         self.assertIs(output["partial_publish"], True)
@@ -889,6 +909,1009 @@ class PayloadDigestTests(unittest.TestCase):
         with self.assertRaises(r3.PublishError) as caught:
             r3.verify_published_aliases(client, r2, physical, canonical, wrong)
         self.assertFalse(caught.exception.partial_publish)
+
+
+class DirectApplyGuardTests(unittest.TestCase):
+    """#111 P1-A: 본체 직접 --apply 차단과 write_guard 필수 검증 (T-A1~A4). 거부는 번들·DB 접근 전에 일어나야 한다."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+
+    def test_a1_cli_direct_apply_exits_2_without_any_access(self):
+        import io
+        from contextlib import redirect_stderr
+        import neo4j
+        import qdrant_client
+        import requests
+        never = AssertionError("no access allowed")
+        stderr = io.StringIO()
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.object(r3, "restore", side_effect=never) as restore_mock, \
+                patch.object(r3, "check_bundle", side_effect=never) as bundle_mock, \
+                patch.object(qdrant_client, "QdrantClient", side_effect=never) as qdrant_mock, \
+                patch.object(neo4j.GraphDatabase, "driver", side_effect=never) as driver_mock, \
+                patch.object(requests, "post", side_effect=never) as post_mock, \
+                patch.dict(os.environ, {"QDRANT_URL": "http://127.0.0.1:56656", "QDRANT_API_KEY": "sample_only_key",
+                                        "NEO4J_URI": "bolt://127.0.0.1:56687", "NEO4J_USER": "neo4j",
+                                        "NEO4J_PASSWORD": "sample_only_pw"}), redirect_stderr(stderr):
+            report = Path(folder) / "report.json"
+            with self.assertRaises(SystemExit) as caught:
+                r3.main(["--bundle", str(self.b.folder), "--apply", "--report", str(report)])
+            self.assertFalse(report.exists())                                   # 보고서도 만들지 않는다
+        self.assertEqual(caught.exception.code, 2)
+        for mock in (restore_mock, bundle_mock, qdrant_mock, driver_mock, post_mock):
+            self.assertEqual(mock.call_count, 0)
+        self.assertIn("scripts/restore_r3_isolated.py", stderr.getvalue())
+        self.assertIn("direct --apply is refused", stderr.getvalue())
+        self.assertNotIn("sample_only_key", stderr.getvalue())
+
+    def bad_guards(self):
+        class Unarmed(r3.WriteGuard):
+            run_id = "c" * 32
+
+            def check(self, stage, expected):
+                pass
+
+        class NotCallable(r3.WriteGuard):
+            armed, run_id, check = True, "c" * 32, 1
+
+        class TruthyArmed(r3.WriteGuard):
+            armed, run_id = 1, "c" * 32          # True가 아니라 1 → armed is True 아님
+
+            def check(self, stage, expected):
+                pass
+
+        duck = SimpleNamespace(armed=True, run_id="c" * 32, check=lambda stage, expected: None)  # 상속 안 한 같은 모양
+        cases = {"none": (None, "requires a write_guard"), "base_class": (r3.WriteGuard(), "Invalid write_guard"),
+                 "duck_typed": (duck, "Invalid write_guard"), "unarmed": (Unarmed(), "not armed"),
+                 "truthy_armed": (TruthyArmed(), "not armed"), "check_not_callable": (NotCallable(), "not callable")}
+        for label, run_id in (("empty", ""), ("upper", "C" * 32), ("short", "c" * 31), ("long", "c" * 33),
+                              ("non_hex", "g" * 32), ("not_str", 12345), ("none", None)):
+            cases[f"run_id_{label}"] = (ArmedTestGuard(run_id), "run_id must be 32 lowercase hex")
+        return cases
+
+    def test_a2_a3_invalid_write_guard_is_refused_before_bundle_or_db(self):
+        for name, (guard, message) in self.bad_guards().items():
+            with self.subTest(guard=name):
+                calls = []
+                record = lambda tag: (lambda *a, **k: calls.append(tag))  # noqa: E731
+                with patch.object(r3, "check_bundle", side_effect=lambda *a, **k: calls.append("check_bundle")):
+                    with self.assertRaisesRegex(ValueError, message):
+                        ORIGINAL_RESTORE(Namespace(repo=ROOT, bundle=self.b.folder, apply=True, verify_only=False),
+                                         settings=SETTINGS, pins=self.b.pins, http_post=record("http_post"),
+                                         client_factory=record("client"), driver_factory=record("driver"),
+                                         write_guard=guard)
+                self.assertEqual(calls, [])                                     # 번들·HTTP·Qdrant·Neo4j 접근 0
+
+    def test_a2_run_id_with_surrounding_whitespace_is_refused_before_any_access(self):
+        """P1-A 보완: run_id 앞뒤 줄바꿈·공백은 32자리 hex가 아니다 (RUN_ID.match + $ 는 끝 '\\n'을 허용했다)."""
+        import neo4j
+        import qdrant_client
+        import requests
+        valid = "c" * 32
+        bad = {"trailing_lf": valid + "\n", "trailing_space": valid + " ", "trailing_crlf": valid + "\r\n",
+               "leading_lf": "\n" + valid}
+        for name, run_id in bad.items():
+            with self.subTest(run_id=name):
+                calls = []
+                record = lambda tag: (lambda *a, **k: calls.append(tag))  # noqa: E731
+                client = R3Qdrant()
+                with patch.object(r3, "check_bundle", side_effect=lambda *a, **k: calls.append("check_bundle")), \
+                        patch.object(qdrant_client, "QdrantClient", side_effect=record("QdrantClient")), \
+                        patch.object(neo4j.GraphDatabase, "driver", side_effect=record("GraphDatabase.driver")), \
+                        patch.object(requests, "post", side_effect=record("requests.post")):
+                    with self.assertRaisesRegex(ValueError, "run_id must be 32 lowercase hex"):
+                        ORIGINAL_RESTORE(Namespace(repo=ROOT, bundle=self.b.folder, apply=True, verify_only=False),
+                                         settings=SETTINGS, pins=self.b.pins, http_post=record("http_post"),
+                                         client_factory=record("client_factory"),
+                                         driver_factory=record("driver_factory"),
+                                         write_guard=ArmedTestGuard(run_id))
+                self.assertEqual(calls, [])                                     # 번들·Qdrant·Neo4j·HTTP 0
+                self.assertEqual((client.writes, client.alias_ops), ([], []))  # DB 쓰기 0
+        r3.require_write_guard(ArmedTestGuard(valid))                         # 정상 32자리 소문자 hex는 통과
+
+    def test_a2_valid_guard_is_accepted_and_checked_before_each_write(self):
+        guard = ArmedTestGuard()
+        client = R3Qdrant()
+        result = self.run_restore(client, apply=True, write_guard=guard)
+        self.assertEqual(result["status"], "PASS")
+        # P1-B: 정렬할 payload가 없는 정상 복원은 쓰기 4종(업로드 2·Neo4j 적재·alias 공개) 직전마다 정확히 1회씩
+        self.assertEqual(guard.calls, ["before_qdrant_upload:b2", "before_qdrant_upload:b3", "before_neo4j_load",
+                                       "before_alias_publish"])
+
+    def test_a4_preflight_and_verify_only_need_no_guard(self):
+        preflight_client = R3Qdrant()
+        self.assertEqual(self.run_restore(preflight_client, write_guard=None)["status"], "PREFLIGHT_PASS_NO_WRITES")
+        self.assertEqual((preflight_client.writes, self.calls["uploads"]), ([], []))
+        published = RestoreTests.final_client(self)
+        self.assertEqual(self.run_restore(published, verify_only=True, write_guard=None)["status"], "PASS")
+        self.assertEqual((published.writes, published.alias_ops), ([], []))
+
+    def test_a4_cli_preflight_and_verify_only_still_call_restore(self):
+        seen = []
+
+        def fake(args):
+            seen.append((args.apply, args.verify_only))
+            return {"status": "PREFLIGHT_PASS_NO_WRITES" if not args.verify_only else "PASS"}
+        with patch.object(r3, "restore", side_effect=fake):
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder)]), 0)
+            self.assertEqual(r3.main(["--bundle", str(self.b.folder), "--verify-only"]), 0)
+        self.assertEqual(seen, [(False, False), (False, True)])
+
+
+PREFLIGHT_FP = "e" * 64
+IDENTITY = {"qdrant": {"id": "q" * 64, "started_at": "2026-11-22T00:00:00Z"},
+            "neo4j": {"id": "n" * 64, "started_at": "2026-11-22T00:00:00Z"}}
+ALIGNED_ORDER = [("guard", "before_qdrant_upload:b2"), ("write", f"upload:{TB2}"),
+                 ("guard", "before_qdrant_upload:b3"), ("write", f"upload:{TB3}"),
+                 ("guard", "before_payload_alignment:b2"), ("write", "set_payload"),
+                 ("guard", "before_payload_alignment:b3"), ("write", "set_payload"),
+                 ("guard", "before_neo4j_load"), ("write", "load_graph"),
+                 ("guard", "before_alias_publish"), ("write", "alias_publish")]
+
+
+class StubContext:
+    """IsolatedWriteGuard가 쓰는 Context의 대역 (sample_only). Qdrant는 복원 중인 R3Qdrant 그대로,
+    Neo4j 노드·관계 수는 load_graph 호출 여부(events)로 정한다. identity·neo4j_override를 바꿔 외부 변경을 흉내 낸다."""
+
+    def __init__(self, client, test):
+        self.values = {"qdrant": "sample_only_key", "neo4j": "sample_only_pw"}
+        self.client, self.test = client, test
+        self.identity_value, self.neo4j_override = copy.deepcopy(IDENTITY), None
+        self.calls = []
+        self.runner_factory = lambda driver: SimpleNamespace(read_rows=self.read_rows)
+
+    def identity(self):
+        self.calls.append("identity")
+        return copy.deepcopy(self.identity_value)
+
+    def snapshot(self):
+        self.calls.append("snapshot")
+        return self.identity(), {}, PREFLIGHT_FP
+
+    def qdrant_factory(self, values):
+        self.calls.append("qdrant")
+        return self.client
+
+    def neo4j_factory(self, password):
+        self.calls.append("neo4j")
+        return SimpleNamespace(close=lambda: None)
+
+    def read_rows(self, query, parameters=None):
+        assert query == lg.QUERY_TOTAL_COUNTS, query
+        if self.neo4j_override is not None:
+            return [dict(self.neo4j_override)]
+        loaded = ("write", "load_graph") in self.test.events
+        return [{"nodes": 10, "relationships": 12} if loaded else {"nodes": 0, "relationships": 0}]
+
+
+class StageWriteGuardTests(unittest.TestCase):
+    """#111 P1-B (T-B1~B8): 쓰기 5종(B2·B3 업로드, payload 정렬, Neo4j 적재, alias 공개) 직전마다 guard를 부르고,
+    거부되면 그 쓰기와 이후 쓰기가 0회인지 본다. 실제 IsolatedWriteGuard.check도 본체와 함께(StubContext) 검증한다."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    final_client = RestoreTests.final_client
+
+    def instrument(self, client):
+        """set_payload·alias 공개 호출을 events에 기록한다 (동작은 R3Qdrant 그대로). 같은 client에 두 번 걸지 않는다."""
+        if getattr(client, "_instrumented", False):
+            return client
+        client._instrumented = True
+        original = client.set_payload
+
+        def set_payload(*args, **kwargs):
+            self.events.append(("write", "set_payload"))
+            hook = getattr(self, "on_set_payload", None)
+            if hook:
+                hook(client, args, kwargs)
+            return original(*args, **kwargs)
+        client.set_payload = set_payload
+        client.alias_hook = lambda c: self.events.append(("write", "alias_publish"))
+        return client
+
+    @staticmethod
+    def old_category(name, c):
+        """두 임시 컬렉션 모두 Point 1개의 category를 옛 값으로 → 컬렉션마다 의도된 정렬 1회."""
+        next(iter(c.collections[name].values()))["payload"]["category"] = "sample_only_old_category"
+
+    def run_aligned(self, guard, client=None, after_post=None):
+        client = self.instrument(client or R3Qdrant())
+
+        def hooks(name, c):
+            self.old_category(name, c)
+            if after_post:
+                after_post(name, c)
+        return client, self.run_restore(client, apply=True, after_post=hooks, write_guard=guard)
+
+    def isolated_guard(self, client, *, lock_checker=lambda: True, fingerprint=PREFLIGHT_FP):
+        ctx = StubContext(client, self)
+        guard = wrap.IsolatedWriteGuard("d" * 32, ctx=ctx, identity=copy.deepcopy(IDENTITY),
+                                        preflight_fingerprint=fingerprint, lock_checker=lock_checker)
+        return ctx, guard
+
+    def writes(self):
+        return [name for kind, name in self.events if kind == "write"]
+
+    def package(self):
+        return json.loads((self.b.folder / "package.json").read_text(encoding="utf-8"))["collections"]
+
+    def assert_guard_right_before(self, write, stages):
+        guard = ArmedTestGuard(events=self.events)
+        _, result = self.run_aligned(guard)
+        self.assertEqual(result["status"], "PASS")
+        positions = [i for i, event in enumerate(self.events) if event == ("write", write)]
+        self.assertEqual(len(positions), len(stages))
+        for position, stage in zip(positions, stages):
+            self.assertEqual(self.events[position - 1], ("guard", stage))       # 바로 앞 = 그 단계 guard
+
+    # T-B1~B5: 각 쓰기 바로 앞에 해당 단계 guard
+    def test_b1_guard_right_before_b2_upload(self):
+        self.assert_guard_right_before(f"upload:{TB2}", ["before_qdrant_upload:b2"])
+
+    def test_b2_guard_right_before_b3_upload(self):
+        self.assert_guard_right_before(f"upload:{TB3}", ["before_qdrant_upload:b3"])
+
+    def test_b3_guard_right_before_payload_alignment(self):
+        self.assert_guard_right_before("set_payload", ["before_payload_alignment:b2", "before_payload_alignment:b3"])
+
+    def test_b4_guard_right_before_neo4j_load(self):
+        self.assert_guard_right_before("load_graph", ["before_neo4j_load"])
+
+    def test_b5_guard_right_before_alias_publish(self):
+        self.assert_guard_right_before("alias_publish", ["before_alias_publish"])
+
+    # T-B8 (순서·횟수·기대값)
+    def test_b8_guard_order_count_and_expected_states(self):
+        guard = ArmedTestGuard(events=self.events)
+        self.run_aligned(guard)
+        self.assertEqual(self.events, ALIGNED_ORDER)                         # 정렬이 있는 복원: guard 6회
+        pkg = self.package()
+        expected = dict(guard.expectations)
+        self.assertEqual(len(guard.expectations), 6)
+        empty = {"collections": [], "aliases": {}, "alignment_changes": {}, "projected_payload_digests": {},
+                 "points": {}, "vector_digests": {}, "payload_digests": {},
+                 "protected_digests": {}, "neo4j_totals": {"nodes": 0, "relationships": 0},
+                 "require_preflight_fingerprint": True}
+        self.assertEqual(expected["before_qdrant_upload:b2"], empty)
+        b3 = expected["before_qdrant_upload:b3"]
+        self.assertEqual((b3["collections"], b3["points"], b3["vector_digests"], b3["payload_digests"],
+                          b3["require_preflight_fingerprint"]),
+                         ([TB2], {TB2: pkg["b2"]["points"]}, {TB2: pkg["b2"]["vector_digest"]}, {}, False))
+        both_points = {TB2: pkg["b2"]["points"], TB3: pkg["b3"]["points"]}
+        both_vectors = {TB2: pkg["b2"]["vector_digest"], TB3: pkg["b3"]["vector_digest"]}
+        both_payloads = {TB2: pkg["b2"]["payload_digest"], TB3: pkg["b3"]["payload_digest"]}
+        for stage, payloads, protected in (("before_payload_alignment:b2", {}, [TB2]),
+                                           ("before_payload_alignment:b3", {TB2: both_payloads[TB2]}, [TB2, TB3]),
+                                           ("before_neo4j_load", both_payloads, [TB2, TB3]),
+                                           ("before_alias_publish", both_payloads, [TB2, TB3])):
+            with self.subTest(stage=stage):
+                value = expected[stage]
+                self.assertEqual((value["collections"], value["aliases"], value["points"], value["vector_digests"],
+                                  value["payload_digests"], sorted(value["protected_digests"]),
+                                  value["require_preflight_fingerprint"]),
+                                 ([TB2, TB3], {}, both_points, both_vectors, payloads, protected, False))
+                totals = {"nodes": 10, "relationships": 12} if stage == "before_alias_publish" else \
+                    {"nodes": 0, "relationships": 0}
+                self.assertEqual(value["neo4j_totals"], totals)
+                # 정렬 직전에만: 이번 컬렉션의 변경 목록(category만, Point 1개)과 정렬 후 기대 digest = 번들 payload_digest
+                aligning = {"before_payload_alignment:b2": TB2, "before_payload_alignment:b3": TB3}.get(stage)
+                if aligning:
+                    key = "b2" if aligning == TB2 else "b3"
+                    self.assertEqual(value["projected_payload_digests"], {aligning: pkg[key]["payload_digest"]})
+                    self.assertEqual(list(value["alignment_changes"]), [aligning])
+                    self.assertEqual([sorted(changed) for _, changed in value["alignment_changes"][aligning]],
+                                     [["category"]])
+                else:
+                    self.assertEqual((value["alignment_changes"], value["projected_payload_digests"]), ({}, {}))
+        # 정렬할 것이 없으면 정렬 guard도 없다 (쓰기 4종 직전 4회)
+        self.events.clear()
+        plain = ArmedTestGuard(events=self.events)
+        self.run_restore(self.instrument(R3Qdrant()), apply=True, write_guard=plain)
+        self.assertEqual(plain.calls, ["before_qdrant_upload:b2", "before_qdrant_upload:b3", "before_neo4j_load",
+                                       "before_alias_publish"])
+        self.assertEqual(self.writes(), [f"upload:{TB2}", f"upload:{TB3}", "load_graph", "alias_publish"])
+
+    def test_b8_real_isolated_guard_accepts_the_true_state_at_every_stage(self):
+        """기대값이 실제(대역) 서버 상태와 맞는지: 실제 IsolatedWriteGuard.check로 정렬 포함 전체 복원이 PASS."""
+        client = R3Qdrant()
+        ctx, guard = self.isolated_guard(client)
+        client, result = self.run_aligned(guard, client=client)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(self.writes(), [name for kind, name in ALIGNED_ORDER if kind == "write"])
+        self.assertEqual(ctx.calls.count("snapshot"), 1)                    # fingerprint 재확인은 첫 쓰기 직전 1회
+        self.assertEqual(ctx.calls.count("qdrant"), 6)                      # 단계마다 새로 읽기
+
+    # T-B7(일부)·요구 7: 단계마다 거부되면 그 쓰기와 이후 쓰기 0회
+    def test_b7_rejection_at_each_stage_means_zero_following_writes(self):
+        written_before = {"before_qdrant_upload:b2": [], "before_qdrant_upload:b3": [f"upload:{TB2}"],
+                          "before_payload_alignment:b2": [f"upload:{TB2}", f"upload:{TB3}"],
+                          "before_payload_alignment:b3": [f"upload:{TB2}", f"upload:{TB3}", "set_payload"],
+                          "before_neo4j_load": [f"upload:{TB2}", f"upload:{TB3}", "set_payload", "set_payload"],
+                          "before_alias_publish": [f"upload:{TB2}", f"upload:{TB3}", "set_payload", "set_payload",
+                                                   "load_graph"]}
+        for stage, writes in written_before.items():
+            with self.subTest(stage=stage):
+                self.events.clear()
+                self.calls = {"cross": [], "slices": [], "uploads": []}
+                guard = ArmedTestGuard(fail_at=stage, events=self.events)
+                with self.assertRaises(GuardRefused):
+                    client, _ = self.run_aligned(guard)
+                self.assertEqual(self.events[-1], ("guard", stage))           # 거부 뒤 아무 쓰기도 없음
+                self.assertEqual(self.writes(), writes)
+                self.assertEqual(guard.calls[-1], stage)
+
+    def test_b7_real_guard_rejections_leave_db_unchanged_after_the_check(self):
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client, fingerprint="0" * 64)          # 첫 쓰기 직전 fingerprint 불일치
+        with self.assertRaisesRegex(wrap.IsolationError, "fingerprint"):
+            self.run_aligned(guard, client=client)
+        self.assertEqual((self.writes(), client.collections, client.writes, client.alias_ops), ([], {}, [], []))
+
+    # T-B6: 컨테이너 ID·시작 시각 변경
+    def test_b6_container_identity_change_is_refused_before_the_next_write(self):
+        for field, value in (("started_at", "2026-11-22T01:00:00Z"), ("id", "x" * 64)):
+            for service in ("qdrant", "neo4j"):
+                with self.subTest(service=service, field=field):
+                    self.events.clear()
+                    client = R3Qdrant()
+                    ctx, guard = self.isolated_guard(client)
+
+                    def change(name, c, ctx=ctx, service=service, field=field, value=value):
+                        if name == TB2:
+                            ctx.identity_value[service][field] = value
+                    with self.assertRaisesRegex(wrap.IsolationError, "컨테이너 식별"):
+                        self.run_aligned(guard, client=client, after_post=change)
+                    self.assertEqual(self.writes(), [f"upload:{TB2}"])        # B3 업로드·이후 쓰기 0
+                    self.assertEqual((sorted(client.collections), client.writes, client.alias_ops), ([TB2], [], []))
+
+    # T-B7: Qdrant 상태 불일치 (본체 자체 검사가 못 보는 변경을 guard가 잡는다)
+    def test_b7_qdrant_state_mismatch_is_refused_at_each_stage(self):
+        def vector_change(target):
+            def change(name, c):
+                if name == target:
+                    next(iter(c.collections[target].values()))["vector"] = sample_vector(777)
+            return change
+        # 1) B2 업로드 뒤 B2 벡터 변경 → B3 업로드 직전 거부 (Point 수는 같아 본체 검사는 통과)
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client)
+        with self.assertRaisesRegex(wrap.IsolationError, r"vector_digests.*before_qdrant_upload:b3"):
+            self.run_aligned(guard, client=client, after_post=vector_change(TB2))
+        self.assertEqual(self.writes(), [f"upload:{TB2}"])
+        # 2) B3 업로드 뒤 B3 벡터 변경 → B2 정렬 직전 거부 (본체는 B3를 아직 검증하지 않은 시점)
+        self.events.clear()
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client)
+        with self.assertRaisesRegex(wrap.IsolationError, r"vector_digests.*before_payload_alignment:b2"):
+            self.run_aligned(guard, client=client, after_post=vector_change(TB3))
+        self.assertEqual((self.writes(), client.writes), ([f"upload:{TB2}", f"upload:{TB3}"], []))
+        # 3) B3 정렬 중 B2 보호 필드 변경 → Neo4j 적재 직전 거부 (본체는 B2를 다시 읽지 않음)
+        self.events.clear()
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client)
+
+        def touch_b2(c, args, kwargs):
+            if args and args[0] == TB3:
+                next(iter(c.collections[TB2].values()))["payload"]["region"] = "sample_only_region"
+        self.on_set_payload = touch_b2
+        self.addCleanup(lambda: setattr(self, "on_set_payload", None))
+        with self.assertRaisesRegex(wrap.IsolationError, r"payload_digests.*protected_digests.*before_neo4j_load"):
+            self.run_aligned(guard, client=client)
+        self.on_set_payload = None
+        self.assertNotIn("load_graph", self.writes())
+        self.assertEqual(client.alias_ops, [])
+        # 4) Neo4j 적재 중 B3 payload 변경 → alias 공개 직전 거부 (본체의 공개 직전 검사는 컬렉션·alias만 본다)
+        self.events.clear()
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client)
+
+        def touch_b3():
+            next(iter(client.collections[TB3].values()))["payload"]["region"] = "sample_only_region"
+        self.on_load_graph = touch_b3
+        self.addCleanup(lambda: setattr(self, "on_load_graph", None))
+        with self.assertRaisesRegex(wrap.IsolationError, r"payload_digests.*before_alias_publish"):
+            self.run_aligned(guard, client=client)
+        self.on_load_graph = None
+        self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+        self.assertNotIn("alias_publish", self.writes())
+
+    # T-B7: Neo4j 상태 불일치
+    def test_b7_neo4j_state_mismatch_is_refused(self):
+        # 1) B2 업로드 뒤 외부가 Neo4j에 노드를 만듦 → B3 업로드 직전 거부
+        client = R3Qdrant()
+        ctx, guard = self.isolated_guard(client)
+
+        def external_nodes(name, c):
+            if name == TB2:
+                ctx.neo4j_override = {"nodes": 5, "relationships": 0}
+        with self.assertRaisesRegex(wrap.IsolationError, r"neo4j_totals.*before_qdrant_upload:b3"):
+            self.run_aligned(guard, client=client, after_post=external_nodes)
+        self.assertEqual(self.writes(), [f"upload:{TB2}"])
+        # 2) 적재 뒤 관계 수가 기대(12)와 다름 → alias 공개 직전 거부
+        self.events.clear()
+        client = R3Qdrant()
+        ctx, guard = self.isolated_guard(client)
+        self.on_load_graph = lambda: setattr(ctx, "neo4j_override", {"nodes": 10, "relationships": 11})
+        self.addCleanup(lambda: setattr(self, "on_load_graph", None))
+        with self.assertRaisesRegex(wrap.IsolationError, r"neo4j_totals.*before_alias_publish"):
+            self.run_aligned(guard, client=client)
+        self.on_load_graph = None
+        self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+
+    # 요구 11·12: armed·run_id 변경
+    def test_armed_change_during_run_is_refused_before_the_next_write(self):
+        for label, value in (("false", False), ("truthy_int", 1), ("none", None)):
+            for guard_type in ("test", "isolated"):
+                with self.subTest(armed=label, guard=guard_type):
+                    self.events.clear()
+                    client = R3Qdrant()
+                    guard = ArmedTestGuard(events=self.events) if guard_type == "test" else \
+                        self.isolated_guard(client)[1]
+
+                    def disarm(name, c, guard=guard, value=value):
+                        if name == TB2:
+                            guard.armed = value
+                    with self.assertRaisesRegex(ValueError, "not armed"):
+                        self.run_aligned(guard, client=client, after_post=disarm)
+                    self.assertEqual(self.writes(), [f"upload:{TB2}"])
+
+    def test_run_id_change_during_run_is_refused_before_the_next_write(self):
+        for label, value, message in (("other_valid", "f" * 32, "run_id changed"),
+                                      ("invalid", "F" * 32, "run_id must be 32 lowercase hex"),
+                                      ("trailing_lf", "d" * 32 + "\n", "run_id must be 32 lowercase hex")):
+            for guard_type in ("test", "isolated"):
+                with self.subTest(run_id=label, guard=guard_type):
+                    self.events.clear()
+                    client = R3Qdrant()
+                    guard = ArmedTestGuard("d" * 32, events=self.events) if guard_type == "test" else \
+                        self.isolated_guard(client)[1]
+
+                    def change(name, c, guard=guard, value=value):
+                        if name == TB2:
+                            guard.run_id = value
+                    with self.assertRaisesRegex(ValueError, message):
+                        self.run_aligned(guard, client=client, after_post=change)
+                    self.assertEqual(self.writes(), [f"upload:{TB2}"])
+
+    # 요구 13: lock_checker 없음·False·예외 (실제 guard + 본체)
+    def test_lock_checker_missing_false_or_raising_is_refused(self):
+        def boom():
+            raise OSError("sample_only lock lost")
+        for label, checker in (("missing", None), ("false", lambda: False), ("raises", boom),
+                               ("truthy_not_true", lambda: 1), ("none_result", lambda: None)):
+            with self.subTest(lock_checker=label):
+                self.events.clear()
+                client = R3Qdrant()
+                ctx, guard = self.isolated_guard(client, lock_checker=checker)
+                with self.assertRaisesRegex(wrap.IsolationError, "잠금"):
+                    self.run_aligned(guard, client=client)
+                self.assertEqual((self.writes(), client.collections, client.alias_ops), ([], {}, []))
+                self.assertEqual(ctx.calls, [])                              # 잠금 거부는 서버 조회보다 먼저
+        # 처음엔 보유, B2 업로드 뒤 잃음 → B3 업로드 직전 거부
+        self.events.clear()
+        held = iter([True])
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client, lock_checker=lambda: next(held, False))
+        with self.assertRaisesRegex(wrap.IsolationError, "잠금"):
+            self.run_aligned(guard, client=client)
+        self.assertEqual(self.writes(), [f"upload:{TB2}"])
+
+    # P1-B 보완: 정렬 전 번들 기준 검증 (기준 = 릴리스 기대 payload + 번들 payload_digest, 서버에서 읽은 값 아님)
+    def set_payload_targets(self, client):
+        return [points for op, points in client.writes if op == "set_payload"]
+
+    def test_unexpected_field_or_index_run_id_after_upload_is_refused_before_any_alignment_write(self):
+        """업로드 뒤·정렬 전에 생긴 정렬 허용 필드 밖 차이: 정렬 쓰기(set_payload) 0회, Neo4j 적재·공개 0회.
+        (보완 전에는 같은 컬렉션에 정렬할 category 차이가 있으면 set_payload가 먼저 1회 실행됐다)"""
+        def extra_field(payload):
+            payload["sample_only_unexpected"] = "x"
+
+        def other_run_id(payload):
+            payload["index_run_id"] = "RUN_SAMPLE_ONLY_OTHER_AFTER_UPLOAD"
+        cases = {"extra_field": (extra_field, "Final payload differs from the release-derived payload: {key} "
+                                              r"\(1 points, .*sample_only_unexpected"),
+                 "index_run_id": (other_run_id, "Full payload digest differs from the bundle payload_digest: {key}$")}
+        for target, key, written in ((TB2, "b2", [f"upload:{TB2}", f"upload:{TB3}"]),
+                                     (TB3, "b3", [f"upload:{TB2}", f"upload:{TB3}", "set_payload"])):
+            for name, (change, message) in cases.items():
+                with self.subTest(collection=key, change=name):
+                    self.events.clear()
+                    client = self.instrument(R3Qdrant())
+                    guard = ArmedTestGuard(events=self.events)
+
+                    def tamper(uploaded, c, target=target, change=change):
+                        if uploaded == target:              # 정렬할 category 차이(Point 첫 번째)와 같은 컬렉션
+                            change(list(c.collections[target].values())[-1]["payload"])
+                    with self.assertRaisesRegex(ValueError, message.format(key=key)):
+                        self.run_aligned(guard, client=client, after_post=tamper)
+                    self.assertEqual(self.writes(), written)                       # 이 컬렉션 정렬 쓰기 0회
+                    self.assertEqual(len(self.set_payload_targets(client)), 0 if key == "b2" else 1)
+                    self.assertNotIn(f"before_payload_alignment:{key}", guard.calls)
+                    self.assertNotIn("load_graph", self.writes())
+                    self.assertNotIn("alias_publish", self.writes())
+
+    def test_allowed_category_and_life_stages_difference_is_aligned_with_the_real_guard(self):
+        def both_fields(name, c):
+            payload = list(c.collections[name].values())[-1]["payload"]
+            payload["category"], payload["life_stages"] = "sample_only_old", ["sample_only_old_stage"]
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client)
+        client, result = self.run_aligned(guard, client=client, after_post=both_fields)
+        self.assertEqual(result["status"], "PASS")
+        pkg = self.package()
+        for key in profiles.COLLECTION_KEYS:
+            with self.subTest(key=key):
+                self.assertEqual(result["collections"][key]["metadata_points_updated"], 2)   # 첫 Point category + 끝 Point
+                self.assertEqual(result["collections"][key]["metadata_field_updates"],
+                                 {"category": 2, "life_stages": 1})
+                self.assertEqual(result["collections"][key]["payload_digest"], pkg[key]["payload_digest"])
+        self.assertEqual(len(self.set_payload_targets(client)), 4)
+        self.assertEqual(result["aliases"], {B2: TB2, B3: TB3})
+
+    def tamper_at_lock_call(self, call_number, change):
+        """실제 guard의 n번째 check 안(잠금 확인 시점 = 본체 scan 뒤, guard 서버 조회 전)에 외부 변경을 흉내 낸다.
+        정렬 포함 복원의 check 순서: 1 B2 업로드, 2 B3 업로드, 3 B2 정렬, 4 B3 정렬, 5 Neo4j 적재, 6 alias 공개."""
+        calls = []
+
+        def checker():
+            calls.append(1)
+            if len(calls) == call_number:
+                change()
+            return True
+        return checker
+
+    def test_real_guard_refuses_before_payload_alignment_b2_and_b3(self):
+        def extra_field(payload):
+            payload["sample_only_unexpected"] = "x"
+
+        def other_run_id(payload):
+            payload["index_run_id"] = "RUN_SAMPLE_ONLY_OTHER_AT_GUARD"
+
+        def wrong_category(payload):                 # 정렬 계획에 없는 Point의 category → 보호 digest로는 못 잡는다
+            payload["category"] = "sample_only_tampered"
+        cases = {"extra_field": (extra_field, r"'protected_digests', 'projected_payload_digests'"),
+                 "index_run_id": (other_run_id, r"'protected_digests', 'projected_payload_digests'"),
+                 "unplanned_category": (wrong_category, r"\['projected_payload_digests'\]")}
+        for target, key, call_number, written in ((TB2, "b2", 3, [f"upload:{TB2}", f"upload:{TB3}"]),
+                                                  (TB3, "b3", 4, [f"upload:{TB2}", f"upload:{TB3}", "set_payload"])):
+            for name, (change, mismatch) in cases.items():
+                with self.subTest(stage=f"before_payload_alignment:{key}", change=name):
+                    self.events.clear()
+                    client = self.instrument(R3Qdrant())
+                    checker = self.tamper_at_lock_call(
+                        call_number,
+                        lambda client=client, target=target, change=change:
+                            change(list(client.collections[target].values())[-1]["payload"]))
+                    _, guard = self.isolated_guard(client, lock_checker=checker)
+                    with self.assertRaisesRegex(wrap.IsolationError,
+                                                f"{mismatch}.*before_payload_alignment:{key}"):
+                        self.run_aligned(guard, client=client)
+                    self.assertEqual(self.writes(), written)            # 이 정렬 쓰기·Neo4j 적재·공개 0회
+                    self.assertEqual(len(self.set_payload_targets(client)), 0 if key == "b2" else 1)
+                    self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+
+    def test_lock_lost_right_before_alias_publish_is_refused(self):
+        calls = []
+
+        def checker():
+            calls.append(1)
+            return len(calls) < 6                    # 6번째 check = alias 공개 직전에 잠금 상실
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client, lock_checker=checker)
+        with self.assertRaisesRegex(wrap.IsolationError, r"잠금.*before_alias_publish"):
+            self.run_aligned(guard, client=client)
+        self.assertEqual(len(calls), 6)
+        self.assertEqual(self.writes()[-1], "load_graph")                     # 적재까지는 진행, 공개는 0회
+        self.assertEqual((client.alias_ops, client.aliases), ([], {}))
+
+    def test_real_run_lock_release_mid_run_stops_the_next_write(self):
+        """P1-C T-C8: 실제 RunLock.is_held를 guard에 연결. 보유 중엔 진행, B2 업로드 뒤 해제되면 B3 업로드 직전 거부."""
+        lock = wrap.RunLock(Path(self.tmp.name) / "locks" / "run.lock", {"run_id": "d" * 32})
+        self.addCleanup(lock.release)
+        lock.acquire()
+        client = R3Qdrant()
+        _, guard = self.isolated_guard(client, lock_checker=lock.is_held)
+
+        def release_after_b2(name, c):
+            if name == TB2:
+                lock.release()
+        with self.assertRaisesRegex(wrap.IsolationError, r"실행 잠금을 보유하고 있지 않습니다.*before_qdrant_upload:b3"):
+            self.run_aligned(guard, client=client, after_post=release_after_b2)
+        self.assertEqual(self.writes(), [f"upload:{TB2}"])                   # B3 업로드·정렬·적재·공개 0회
+        self.assertEqual((sorted(client.collections), client.writes, client.alias_ops), ([TB2], [], []))
+
+    # 요구 14: preflight·verify-only는 guard를 부르지 않고 그대로 동작
+    def test_preflight_and_verify_only_never_call_the_guard(self):
+        guard = ArmedTestGuard(fail_at="before", events=self.events)
+        client = R3Qdrant()
+        self.assertEqual(self.run_restore(client, write_guard=guard)["status"], "PREFLIGHT_PASS_NO_WRITES")
+        published = self.final_client()
+        self.assertEqual(self.run_restore(published, verify_only=True, write_guard=guard)["status"], "PASS")
+        self.assertEqual((guard.calls, self.events), ([], []))
+        self.assertEqual((client.writes, published.writes, published.alias_ops), ([], [], []))
+
+
+class FailureStateTests(unittest.TestCase):
+    """#111 P1-D (T-D1~D4): 실제 본체 restore를 fake DB에서 실패시키고, 래퍼의 inspect_failure_state가 남은 상태를
+    읽기 전용으로 재조회·분류하는지 본다. 부분 공개(alias)와 부분 적재(컬렉션·Neo4j)를 따로 본다."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+
+    def fail_restore(self, client, error_type=ValueError, message="", **kwargs):
+        self.update_calls = 0
+        original = client.update_collection_aliases
+
+        def counted(**kw):
+            self.update_calls += 1
+            return original(**kw)
+        client.update_collection_aliases = counted
+        with self.assertRaisesRegex(error_type, message) as caught:
+            self.run_restore(client, apply=True, **kwargs)
+        error = caught.exception
+        progress = error.restore_progress
+        report = wrap.inspect_failure_state(StubContext(client, self), "d" * 32, progress,
+                                            f"restore:{progress['stage']}")
+        return error, report
+
+    def assert_untouched_after_failure(self, client, before):
+        """자동 롤백·삭제·재시도 없음: 컬렉션·alias가 실패 시점 그대로, 공개 요청은 1회 이하."""
+        self.assertEqual((sorted(client.collections), dict(client.aliases)), before)
+        self.assertLessEqual(self.update_calls, 1)
+        self.assertFalse([op for op, *_ in client.writes if op not in ("set_payload",)])
+
+    def test_d1_only_b2_published_when_b3_public_collection_appears(self):
+        client = R3Qdrant()
+        client.alias_hook = lambda c: c.collections.__setitem__(B3, {})     # 공개 요청 처리 직전 외부 정식 이름 컬렉션
+        error, report = self.fail_restore(client, r3.PublishError, "Alias publish failed")
+        self.assertIs(error.partial_publish, True)
+        self.assertEqual((report["partial_publish"], report["publish_state"], report["published_aliases"]),
+                         (True, "partial", [B2]))
+        self.assertEqual(report["alias_classification"], {B2: {"target": TB2, "class": "ours"},
+                                                          B3: {"target": None, "class": "absent"}})
+        self.assertEqual(report["collection_classification"],
+                         {"collections": {B3: "canonical_name", TB2: "ours_temp", TB3: "ours_temp"}, "ours_absent": []})
+        self.assertEqual((report["failed_stage"], report["run_id"], report["physical_collections"]),
+                         ("restore:alias_publish", "d" * 32, {"b2": TB2, "b3": TB3}))
+        self.assertEqual((report["neo4j_totals"], report["neo4j_data_present"]),
+                         ({"nodes": 10, "relationships": 12}, True))
+        self.assertEqual(report["load_progress"], {"uploads_completed": ["b2", "b3"], "payload_alignment_writes": {},
+                                                   "neo4j_load_returned": True})
+        self.assertEqual((report["aliases"], report["unavailable"]), ({B2: TB2}, {}))
+        self.assert_untouched_after_failure(client, (sorted([B3, TB2, TB3]), {B2: TB2}))
+
+    def test_d1_only_b3_published_after_external_b2_alias_removal(self):
+        client = R3Qdrant()
+        original = client.update_collection_aliases
+
+        def publish_then_lose_b2(**kw):
+            result = original(**kw)
+            client.aliases.pop(B2)                                         # 공개 직후 외부가 B2 alias 삭제
+            return result
+        client.update_collection_aliases = publish_then_lose_b2
+        _, report = self.fail_restore(client, r3.PublishError, "Published alias/collection state mismatch")
+        self.assertEqual((report["partial_publish"], report["publish_state"], report["published_aliases"]),
+                         (True, "partial", [B3]))
+        self.assertEqual(report["alias_classification"][B2]["class"], "absent")
+        self.assertEqual(report["alias_classification"][B3], {"target": TB3, "class": "ours"})
+        self.assertEqual(report["failed_stage"], "restore:published_alias_verification")
+        self.assert_untouched_after_failure(client, (sorted([TB2, TB3]), {B3: TB3}))
+
+    def test_d4_alias_pointing_to_an_unexpected_collection(self):
+        for label, foreign in (("one_foreign", (B2,)), ("both_foreign", (B2, B3))):
+            with self.subTest(case=label):
+                self.events.clear()
+                client = R3Qdrant()
+                original = client.update_collection_aliases
+
+                def publish_then_redirect(foreign=foreign, client=client, original=original, **kw):
+                    result = original(**kw)
+                    client.collections[OTHER] = {}
+                    for name in foreign:
+                        client.aliases[name] = OTHER                         # 외부가 정식 alias를 다른 컬렉션으로
+                    client.aliases["sample_only_extra_alias"] = TB2          # 정식 이름이 아닌 외부 alias
+                    return result
+                client.update_collection_aliases = publish_then_redirect
+                _, report = self.fail_restore(client, r3.PublishError, "state mismatch")
+                for name in foreign:
+                    self.assertEqual(report["alias_classification"][name], {"target": OTHER, "class": "foreign_target"})
+                self.assertEqual(report["alias_classification"]["sample_only_extra_alias"],
+                                 {"target": TB2, "class": "unexpected"})
+                self.assertEqual(report["collection_classification"]["collections"][OTHER], "unexpected")
+                expected = (True, "partial") if label == "one_foreign" else (False, "none")
+                self.assertEqual((report["partial_publish"], report["publish_state"]), expected)
+                self.assertEqual(client.aliases[foreign[0]], OTHER)          # 외부 매핑을 되돌리지 않음
+
+    def test_d2_alias_state_unreadable_is_unknown_not_empty(self):
+        client = R3Qdrant()
+        bad = {TB3: {"status": "MISMATCH", "failures": [{"x": 1}], "qdrant_points": 6, "qdrant_count": 6}}
+        with self.assertRaisesRegex(ValueError, "Cross-DB validation failed") as caught:
+            self.run_restore(client, apply=True, cross=bad)
+        client.get_aliases = lambda: (_ for _ in ()).throw(RuntimeError(SETTINGS["QDRANT_API_KEY"]))
+        progress = caught.exception.restore_progress
+        report = wrap.inspect_failure_state(StubContext(client, self), "d" * 32, progress,
+                                            f"restore:{progress['stage']}")
+        self.assertEqual((report["partial_publish"], report["publish_state"], report["published_aliases"],
+                          report["aliases"], report["alias_classification"]), (None, "unknown", None, None, None))
+        self.assertEqual(report["unavailable"], {"qdrant_aliases": "RuntimeError"})
+        self.assertEqual(sorted(report["collection_classification"]["collections"]), [TB2, TB3])   # 다른 항목은 계속
+        self.assertNotIn(SETTINGS["QDRANT_API_KEY"], json.dumps(report))                          # 예외 메시지 미기록
+
+    def test_d2_publish_failure_with_unreadable_aliases_reports_unknown(self):
+        client = R3Qdrant()
+        client.alias_hook = lambda c: setattr(c, "get_aliases", lambda: (_ for _ in ()).throw(OSError("x")))
+
+        def refuse(**kw):
+            client.alias_hook(client)
+            raise RuntimeError("sample_only publish refused")
+        client.update_collection_aliases = refuse
+        with self.assertRaises(r3.PublishError) as caught:
+            self.run_restore(client, apply=True)
+        self.assertIsNone(caught.exception.partial_publish)                  # 모름 → None (False로 쓰지 않음)
+        self.assertIsNone(caught.exception.aliases)
+        self.assertIn("alias state could not be read (OSError)", str(caught.exception))
+
+    def test_d_loaded_before_publish_is_not_partial_publish(self):
+        client = R3Qdrant()
+        bad = {TB3: {"status": "MISMATCH", "failures": [{"x": 1}], "qdrant_points": 6, "qdrant_count": 6}}
+        _, report = self.fail_restore(client, ValueError, "Cross-DB validation failed", cross=bad)
+        self.assertEqual((report["partial_publish"], report["publish_state"], report["aliases"]), (False, "none", {}))
+        self.assertEqual(report["alias_classification"], {B2: {"target": None, "class": "absent"},
+                                                          B3: {"target": None, "class": "absent"}})
+        self.assertEqual((report["neo4j_totals"], report["neo4j_data_present"]),     # 적재는 됨 (부분 적재 ≠ 부분 공개)
+                         ({"nodes": 10, "relationships": 12}, True))
+        self.assertEqual(report["failed_stage"], "restore:cross_db_verification")
+        self.assertEqual(report["load_progress"]["neo4j_load_returned"], True)
+        self.assertEqual(self.update_calls, 0)                                       # 공개 요청 0회
+        self.assert_untouched_after_failure(client, (sorted([TB2, TB3]), {}))
+
+    def test_d_upload_failure_reports_partial_load_only(self):
+        client = R3Qdrant()
+        _, report = self.fail_restore(client, ValueError, "Snapshot upload failed", fail_upload=TB3)
+        self.assertEqual(report["failed_stage"], "restore:qdrant_upload:b3")
+        self.assertEqual(report["collection_classification"], {"collections": {TB2: "ours_temp"}, "ours_absent": [TB3]})
+        self.assertEqual((report["neo4j_totals"], report["neo4j_data_present"], report["partial_publish"]),
+                         ({"nodes": 0, "relationships": 0}, False, False))
+        self.assertEqual(report["load_progress"]["uploads_completed"], ["b2"])
+        self.assert_untouched_after_failure(client, ([TB2], {}))
+
+    def test_d_failure_before_any_write_has_no_physical_names(self):
+        client = R3Qdrant({OTHER: {}})                                     # 빈 DB가 아니어서 쓰기 전에 거부
+        _, report = self.fail_restore(client, ValueError, "requires empty")
+        self.assertIsNone(report["physical_collections"])
+        self.assertEqual(report["collection_classification"]["collections"], {OTHER: "unexpected"})
+        self.assertEqual(report["failed_stage"], "restore:pre_write_checks")
+
+
+INDEX_FIELDS = store.PAYLOAD_INDEX_FIELDS            # 검증 기준은 store의 상수 그대로 (새로 정의하지 않음)
+
+
+class PayloadIndexTests(unittest.TestCase):
+    """#111 P1-E (T-E1~E14): 필수 payload 인덱스 8개(keyword)를 공개 직전(임시 컬렉션)·공개 직후·verify-only(정식 alias)
+    에서 검증. 실패하면 PASS 아님, 공개 직전 실패는 공개 0회, 공개 뒤 실패는 alias 유지, 인덱스 생성·삭제 0회."""
+    setUp = RestoreTests.setUp
+    run_restore = RestoreTests.run_restore
+    final_client = RestoreTests.final_client
+
+    def instrument(self, client):
+        """get_collection 읽기·공개 요청을 events에 기록하고 공개 요청 횟수를 센다."""
+        self.update_calls = 0
+        original_get, original_update = client.get_collection, client.update_collection_aliases
+
+        def get_collection(name):
+            self.events.append(("read", f"get_collection:{name}"))
+            return original_get(name)
+
+        def update(**kw):
+            self.update_calls += 1
+            self.events.append(("write", "alias_publish"))
+            return original_update(**kw)
+        client.get_collection, client.update_collection_aliases = get_collection, update
+        return client
+
+    def assert_no_index_writes(self, *clients):
+        for client in clients:
+            self.assertFalse([w for w in client.writes if w[0] in ("create_payload_index", "delete_payload_index")])
+
+    def expected_entries(self, name, actual="keyword", status="ok", exists=True):
+        return [{"collection": name, "field": field, "expected_type": "keyword", "actual_type": actual,
+                 "exists": exists, "verification_status": status} for field in INDEX_FIELDS]
+
+    # T-E1·E9·E11·E12: 정상 → 공개 직전(임시)·공개 직후(정식 alias) 각 8×2 PASS, 필드별 형식
+    def test_e1_e9_e11_valid_indexes_pass_before_and_after_publish(self):
+        client = self.instrument(R3Qdrant())
+        guard = ArmedTestGuard(events=self.events)
+        result = self.run_restore(client, apply=True, write_guard=guard)
+        self.assertEqual(result["status"], "PASS")
+        indexes = result["payload_indexes"]
+        self.assertEqual(list(indexes), ["before_alias_publish", "after_alias_publish"])
+        for stage, names in (("before_alias_publish", {"b2": TB2, "b3": TB3}),
+                             ("after_alias_publish", {"b2": B2, "b3": B3})):
+            for key, name in names.items():
+                with self.subTest(stage=stage, key=key):
+                    report = indexes[stage][key]
+                    self.assertEqual((report["status"], report["collection"], report["stage"], report["missing_fields"],
+                                      report["invalid_types"], report["extra_fields"]),
+                                     ("PASS", name, stage, [], {}, []))
+                    self.assertEqual(report["indexes"], self.expected_entries(name))       # T-E11 형식
+        self.assert_no_index_writes(client)                                                  # T-E12
+
+    def test_e7_index_check_runs_before_the_publish_guard_and_write(self):
+        client = self.instrument(R3Qdrant())
+        self.run_restore(client, apply=True, write_guard=ArmedTestGuard(events=self.events))
+        tail = self.events[-6:]
+        self.assertEqual(tail, [("read", f"get_collection:{TB2}"), ("read", f"get_collection:{TB3}"),
+                                ("guard", "before_alias_publish"), ("write", "alias_publish"),
+                                ("read", f"get_collection:{B2}"), ("read", f"get_collection:{B3}")])
+
+    def fail_before_publish(self, schemas):
+        client = self.instrument(R3Qdrant())
+        client.payload_schemas.update(schemas)
+        guard = ArmedTestGuard(events=self.events)
+        with self.assertRaises(r3.PayloadIndexError) as caught:
+            self.run_restore(client, apply=True, write_guard=guard)
+        # T-E7: 공개 0회, 공개 guard도 부르지 않음, alias 없음, 인덱스 생성·삭제 0
+        self.assertEqual((self.update_calls, client.alias_ops, client.aliases), (0, [], {}))
+        self.assertNotIn("before_alias_publish", guard.calls)
+        self.assertIn(("write", "load_graph"), self.events)                       # 적재까지 진행 → 부분 적재 상태
+        self.assertEqual(caught.exception.restore_progress["stage"], "alias_publish")
+        self.assert_no_index_writes(client)
+        return caught.exception.report
+
+    def test_e2_each_missing_field_fails_before_publish(self):
+        for field in INDEX_FIELDS:
+            with self.subTest(field=field):
+                self.events.clear()
+                others = [f for f in INDEX_FIELDS if f != field]
+                report = self.fail_before_publish({TB2: keyword_payload_schema(6, fields=others)})
+                b2 = report["collections"]["b2"]
+                self.assertEqual((report["stage"], report["failed"], b2["status"], b2["missing_fields"],
+                                  b2["invalid_types"]), ("before_alias_publish", ["b2"], "FAILED", [field], {}))
+                entry = next(e for e in b2["indexes"] if e["field"] == field)
+                self.assertEqual(entry, {"collection": TB2, "field": field, "expected_type": "keyword",
+                                         "actual_type": None, "exists": False, "verification_status": "missing"})
+
+    def test_e3_each_wrong_type_fails_before_publish(self):
+        from qdrant_client.http import models
+        for field in INDEX_FIELDS:
+            with self.subTest(field=field):
+                self.events.clear()
+                schema = keyword_payload_schema(6)
+                schema[field] = models.PayloadIndexInfo(data_type=models.PayloadSchemaType.TEXT, points=6)
+                report = self.fail_before_publish({TB3: schema})
+                b3 = report["collections"]["b3"]
+                self.assertEqual((report["failed"], b3["missing_fields"], b3["invalid_types"]), (["b3"], [], {field: "text"}))
+                entry = next(e for e in b3["indexes"] if e["field"] == field)
+                self.assertEqual((entry["actual_type"], entry["exists"], entry["verification_status"]),
+                                 ("text", True, "invalid_type"))
+
+    def test_e4_e5_only_one_collection_failing_is_reported_alone(self):
+        for key, name in (("b2", TB2), ("b3", TB3)):
+            with self.subTest(failing=key):
+                self.events.clear()
+                report = self.fail_before_publish({name: keyword_payload_schema(6, fields=INDEX_FIELDS[1:])})
+                other = "b3" if key == "b2" else "b2"
+                self.assertEqual(report["failed"], [key])
+                self.assertEqual((report["collections"][key]["status"], report["collections"][other]["status"]),
+                                 ("FAILED", "PASS"))
+
+    def test_e6_missing_none_empty_unreadable_or_unrecognized_schema_never_passes(self):
+        calls = []
+
+        def unreadable(name):          # 첫 조회(본체의 차원·Point 수 검증)는 정상, 인덱스 확인 조회에서 실패
+            calls.append(name)
+            if len(calls) == 1:
+                return keyword_payload_schema(6)
+            raise RuntimeError(f"sample_only {SETTINGS['QDRANT_API_KEY']}")
+        cases = {
+            "none": (None, "UNAVAILABLE", "payload_schema:NoneType"),
+            "empty_dict": ({}, "FAILED", None),
+            "no_attribute": (MISSING_SCHEMA, "UNAVAILABLE", "payload_schema:NoneType"),
+            "lookup_error": (unreadable, "UNAVAILABLE", "RuntimeError"),
+            "not_a_dict": ([("policy_id", "keyword")], "UNAVAILABLE", "payload_schema:list"),
+            "unrecognized_values": ({field: 42 for field in INDEX_FIELDS}, "FAILED", None),
+        }
+        for label, (schema, status, error_type) in cases.items():
+            with self.subTest(schema=label):
+                self.events.clear()
+                report = self.fail_before_publish({TB2: schema})
+                b2 = report["collections"]["b2"]
+                self.assertEqual(b2["status"], status)
+                self.assertEqual(b2.get("error_type"), error_type)
+                if label == "empty_dict":
+                    self.assertEqual(b2["missing_fields"], list(INDEX_FIELDS))
+                if label == "unrecognized_values":
+                    self.assertEqual(b2["invalid_types"], {field: "unrecognized:int" for field in INDEX_FIELDS})
+                self.assertFalse(SETTINGS["QDRANT_API_KEY"] in json.dumps(report))
+
+    def test_e8_failure_right_after_publish_keeps_the_aliases(self):
+        client = self.instrument(R3Qdrant())
+        publish = client.update_collection_aliases
+
+        def publish_then_lose_index(**kw):
+            result = publish(**kw)
+            client.payload_schemas[TB3] = keyword_payload_schema(6, fields=[f for f in INDEX_FIELDS if f != "region"])
+            return result
+        client.update_collection_aliases = publish_then_lose_index
+        with self.assertRaises(r3.PayloadIndexError) as caught:
+            self.run_restore(client, apply=True)
+        error = caught.exception
+        self.assertEqual((error.report["stage"], error.report["failed"]), ("after_alias_publish", ["b3"]))
+        self.assertEqual((error.report["collections"]["b3"]["collection"],
+                          error.report["collections"]["b3"]["missing_fields"]), (B3, ["region"]))
+        self.assertEqual(error.restore_progress["stage"], "published_payload_index_verification")
+        self.assertEqual((client.aliases, self.update_calls), ({B2: TB2, B3: TB3}, 1))    # alias 유지, 추가 요청 0
+        self.assertEqual(sorted(client.collections), sorted([TB2, TB3]))
+        report = wrap.inspect_failure_state(StubContext(client, self), "d" * 32, error.restore_progress,
+                                            "restore:published_payload_index_verification")
+        self.assertEqual((report["publish_state"], report["partial_publish"]), ("complete", False))   # P1-D 유지
+        self.assert_no_index_writes(client)
+
+    def test_e10_verify_only_fails_without_writes_and_passes_when_valid(self):
+        from qdrant_client.http import models
+        ok = self.final_client()
+        result = self.run_restore(ok, verify_only=True)
+        self.assertEqual(list(result["payload_indexes"]), ["verify_only"])
+        self.assertEqual({k: (v["status"], v["collection"]) for k, v in result["payload_indexes"]["verify_only"].items()},
+                         {"b2": ("PASS", B2), "b3": ("PASS", B3)})
+        for label, schema in (("missing", keyword_payload_schema(6, fields=INDEX_FIELDS[:-1])),
+                              ("wrong_type", keyword_payload_schema(6, data_type=models.PayloadSchemaType.INTEGER))):
+            with self.subTest(case=label):
+                client = self.final_client()
+                client.payload_schemas[TB2] = schema
+                with self.assertRaises(r3.PayloadIndexError) as caught:
+                    self.run_restore(client, verify_only=True)
+                self.assertEqual((caught.exception.report["stage"], caught.exception.report["failed"]),
+                                 ("verify_only", ["b2"]))
+                self.assertEqual((client.writes, client.alias_ops), ([], []))               # 쓰기 0
+        self.assert_no_index_writes(ok)
+
+    def test_extra_indexes_are_recorded_but_not_required_or_rejected(self):
+        client = R3Qdrant()
+        schema = keyword_payload_schema(6)
+        schema.update(keyword_payload_schema(6, fields=["sample_only_extra"]))
+        client.payload_schemas[TB2] = schema
+        result = self.run_restore(client, apply=True)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["payload_indexes"]["before_alias_publish"]["b2"]["extra_fields"], ["sample_only_extra"])
+
+    def test_e13_index_type_normalization(self):
+        from qdrant_client.http import models
+        keyword_forms = {"enum": models.PayloadIndexInfo(data_type=models.PayloadSchemaType.KEYWORD, points=1),
+                         "string_coerced_by_model": models.PayloadIndexInfo(data_type="keyword", points=1),
+                         "rest_dict": {"data_type": "keyword", "points": 1},
+                         "plain_object_with_string": SimpleNamespace(data_type="keyword"),
+                         "with_keyword_params": models.PayloadIndexInfo.model_validate(
+                             {"data_type": "keyword", "params": {"type": "keyword", "is_tenant": False}, "points": 1})}
+        for label, value in keyword_forms.items():
+            with self.subTest(form=label):
+                self.assertEqual(r3.normalize_index_type(value), "keyword")
+        self.assertEqual(r3.normalize_index_type(models.PayloadIndexInfo(data_type=models.PayloadSchemaType.TEXT,
+                                                                         points=1)), "text")
+        for label, value in {"upper_string": SimpleNamespace(data_type="KEYWORD"),
+                             "enum_repr_string": SimpleNamespace(data_type="PayloadSchemaType.KEYWORD")}.items():
+            with self.subTest(not_keyword=label):
+                self.assertNotEqual(r3.normalize_index_type(value), "keyword")       # 추정 정규화 없음
+        for label, value in {"int": 42, "none": None, "no_data_type": SimpleNamespace(points=1),
+                             "data_type_int": {"data_type": 1}, "bare_string": "keyword"}.items():
+            with self.subTest(unrecognized=label):
+                self.assertIsNone(r3.normalize_index_type(value))
+
+    def test_e14_installed_qdrant_client_payload_schema_contract(self):
+        """설치된 qdrant-client의 실제 반환 모델 계약 (추측하지 않고 소스·모델로 확인)."""
+        import importlib.metadata
+        import typing
+        from qdrant_client.http import models
+        self.assertTrue(importlib.metadata.version("qdrant-client").startswith("1.12."))
+        annotation = models.CollectionInfo.model_fields["payload_schema"].annotation
+        self.assertEqual(typing.get_origin(annotation), dict)
+        key_type, value_type = typing.get_args(annotation)
+        self.assertIs(key_type, str)
+        self.assertIs(value_type, models.PayloadIndexInfo)
+        self.assertIs(models.PayloadIndexInfo.model_fields["data_type"].annotation, models.PayloadSchemaType)
+        self.assertTrue(issubclass(models.PayloadSchemaType, str))
+        self.assertEqual(models.PayloadSchemaType.KEYWORD.value, "keyword")
+        parsed = models.PayloadIndexInfo.model_validate({"data_type": "keyword", "points": 1233})   # REST JSON 모양
+        self.assertIs(parsed.data_type, models.PayloadSchemaType.KEYWORD)
+        self.assertEqual(r3.normalize_index_type(parsed), "keyword")
+        self.assertIsInstance(next(iter(keyword_payload_schema(1).values())), models.PayloadIndexInfo)  # fixture도 같은 모델
 
 
 class CliTests(unittest.TestCase):
