@@ -62,7 +62,7 @@ class ProfileValuesTests(unittest.TestCase):
                          (R3B["project"], 56666, R3B["qdrant_key_env"]))
         self.assertEqual((neo.ISOLATED_BOLT_PORT, neo.PASSWORD_ENV), (56697, R3B["neo4j_password_env"]))
         verify = profiles.environment("verify")
-        self.assertEqual((verify["project"], verify["qdrant_port"], verify["bolt_port"]), ("issue105-r3-verify", 56656, 56687))
+        self.assertEqual((verify["project"], verify["qdrant_port"], verify["bolt_port"]), ("issue105-r3d-verify", 56756, 56787))
 
     def test_r3b_services_own_only_r3b_volumes(self):
         services = profiles.services_for("build")
@@ -226,12 +226,105 @@ class BundleToolTests(unittest.TestCase):
             self.assertEqual((output["writes"], preserved.listing()), (0, before))
 
 
+OLD_VERIFY = {"project": "issue105-r3-verify", "compose": "docs/development/issue105_r3_verify.compose.yaml",
+              "qdrant_port": 56656, "bolt_port": 56687, "qdrant_key_env": "ISSUE105_R3_VERIFY_QDRANT_API_KEY",
+              "neo4j_password_env": "ISSUE105_R3_VERIFY_NEO4J_PASSWORD", "out_dir": ".cache/issue105-r3c"}
+NEW_VERIFY = {"project": "issue105-r3d-verify", "compose": "docs/development/issue105_r3d_verify.compose.yaml",
+              "qdrant_port": 56756, "bolt_port": 56787, "qdrant_key_env": "ISSUE105_R3D_VERIFY_QDRANT_API_KEY",
+              "neo4j_password_env": "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD", "out_dir": ".cache/issue105-r3d"}
+
+
+class NewVerifyProfileTests(unittest.TestCase):
+    """PR #111 새 독립 verify 환경(issue105-r3d-verify)과 이전 verify(issue105-r3-verify) 보존·거부 (Docker·DB 접속 없음)."""
+
+    def test_new_verify_profile_values_and_wrapper_constants(self):
+        self.assertEqual(profiles.environment("verify"), NEW_VERIFY)
+        self.assertEqual((wrap.PROJECT, wrap.QDRANT_URL, wrap.NEO4J_URI, wrap.QDRANT_KEY_ENV, wrap.NEO4J_PASSWORD_ENV),
+                         (NEW_VERIFY["project"], "http://127.0.0.1:56756", "bolt://127.0.0.1:56787",
+                          NEW_VERIFY["qdrant_key_env"], NEW_VERIFY["neo4j_password_env"]))
+        wrap.require_target_urls()                                              # 새 주소는 허용
+        services = profiles.services_for("verify")
+        self.assertEqual({s["port"] for s in services.values()}, {56756, 56787})
+        volumes = set().union(*(s["volumes"] for s in services.values()))
+        self.assertEqual(volumes, {"issue105-r3d-verify_qdrant_storage", "issue105-r3d-verify_neo4j_data",
+                                   "issue105-r3d-verify_neo4j_logs"})
+        self.assertFalse(volumes & {f"{OLD_VERIFY['project']}_{v}" for v in ("qdrant_storage", "neo4j_data", "neo4j_logs")})
+
+    def test_old_verify_is_preserved_denied_and_not_selectable(self):
+        self.assertEqual(profiles.PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"], OLD_VERIFY)
+        self.assertTrue({56656, 56687} <= profiles.FOREIGN_PORTS)
+        self.assertTrue({OLD_VERIFY["qdrant_key_env"], OLD_VERIFY["neo4j_password_env"]} <= set(profiles.FOREIGN_SECRET_ENVS))
+        self.assertIn(OLD_VERIFY["project"], profiles.FOREIGN_PROJECTS)
+        with self.assertRaises(profiles.ProfileError):                          # 보존 항목은 도구가 고를 수 없다
+            profiles.environment("verify-6d0450f")
+        self.assertNotIn("verify-6d0450f", profiles.R3_ENVIRONMENTS)
+        for qdrant, bolt in (("http://127.0.0.1:56656", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56687")):
+            with self.subTest(qdrant=qdrant, bolt=bolt), self.assertRaises((wrap.IsolationError, ValueError)):
+                wrap.require_target_urls(qdrant, bolt)
+        values = {wrap.QDRANT_KEY_ENV: "sample_only_r3d_key", wrap.NEO4J_PASSWORD_ENV: "sample_only_r3d_pw"}
+        for old_env in (OLD_VERIFY["qdrant_key_env"], OLD_VERIFY["neo4j_password_env"]):
+            with self.subTest(reused=old_env), self.assertRaisesRegex(wrap.IsolationError, "재사용"):
+                wrap.read_secrets({**values, old_env: values[wrap.NEO4J_PASSWORD_ENV]})
+        # 이전 verify 프로젝트 라벨의 컨테이너는 새 포트에 있어도 Docker 소유 확인에서 거부
+        old_containers = [build_container("q" * 64, "qdrant", project=OLD_VERIFY["project"], port=56756),
+                          build_container("n" * 64, "neo4j", project=OLD_VERIFY["project"], port=56787)]
+        with self.assertRaises(wrap.IsolationError):
+            wrap.r2w.verify_docker_ownership(FakeDocker(old_containers), project=wrap.PROJECT, services=wrap.SERVICES)
+
+    def test_old_verify_output_folder_is_preserved_and_new_folder_is_not(self):
+        r3c = ROOT / ".cache" / "issue105-r3c"
+        self.assertTrue(profiles.is_preserved_output(r3c))                       # 경로 계산만 (파일을 읽거나 만들지 않음)
+        self.assertTrue(profiles.is_preserved_output(r3c / "verify-run-new" / "report.json"))
+        self.assertFalse(profiles.is_preserved_output(ROOT / ".cache" / "issue105-r3d" / "verify-run-01" / "report.json"))
+        self.assertFalse(profiles.is_preserved_output(ROOT / ".cache" / "issue105-r3c-other" / "x.json"))  # 접두어만 같은 폴더
+        with self.assertRaises(profiles.ProfileError):
+            profiles.require_output_path(r3c / "bundle-new", "번들 출력")
+
+    def test_wrapper_cli_refuses_reports_in_the_preserved_verify_folder(self):
+        with tempfile.TemporaryDirectory() as folder:
+            preserved = Path(folder) / "preserved-r3c"
+            preserved.mkdir()
+            (preserved / "existing.json").write_bytes(b"{}")
+            with patch.dict(profiles.PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"], {"out_dir": str(preserved)}):
+                with self.assertRaises(SystemExit):
+                    wrap.main(["--bundle", str(preserved), "--report", str(preserved / "new.json")])
+            self.assertEqual(sorted(p.name for p in preserved.iterdir()), ["existing.json"])   # 새 파일 없음
+
+    def test_new_lock_path_differs_from_the_old_verify_environment(self):
+        environ = {"LOCALAPPDATA": r"C:\sample_only\AppData\Local", "XDG_STATE_HOME": "/sample_only/state"}
+        new = wrap.default_lock_path(environ=environ)
+        old = wrap.default_lock_path(OLD_VERIFY["project"], OLD_VERIFY["qdrant_port"], environ=environ)
+        self.assertEqual(new.name, "issue105-r3d-verify-56756.lock")
+        self.assertEqual(old.name, "issue105-r3-verify-56656.lock")
+        self.assertNotEqual(new, old)
+        self.assertEqual(new.parent, old.parent)                                 # 같은 잠금 폴더, 다른 파일
+
+    def test_existing_r3_pins_apply_unchanged_to_the_new_verify_profile(self):
+        pins = profiles.require_finalized()                                      # 환경과 무관한 단일 기준값
+        self.assertEqual((profiles.pin_stage(), pins["manifest_lf_sha256"][:8],
+                          pins["collections"]["b2"]["points"], pins["collections"]["b3"]["points"],
+                          pins["release_counts"]["neo4j_nodes"], pins["release_counts"]["neo4j_relationships"]),
+                         ("stage2", "29b57236", 1233, 1320, 1133, 2674))
+        self.assertEqual(bundle.VERIFY_COMPOSE, NEW_VERIFY["compose"])           # 새 번들의 compose.yaml 원본
+
+    def test_bundle_package_labels_the_profile_compose(self):
+        record = {"points": 1, "vector_digest": "1" * 64, "payload_digest": "2" * 64, "snapshot_sha256": "3" * 64,
+                  "snapshot_size_bytes": 1, "qdrant_version": "1.12.4", "source": "sample_only", "plan_sha256": "4" * 64,
+                  "plan_counts": {}}
+        package = bundle.build_package({key: dict(record) for key in profiles.COLLECTION_KEYS},
+                                       {"manifest_lf_sha256": "5" * 64, "commit": "6" * 40}, "source-666666666666.zip",
+                                       {}, profiles.r3_pins())
+        self.assertEqual(package["compose"], "compose.yaml (issue105_r3d_verify.compose.yaml)")   # 프로필 기준 표시
+
+
 class RestoreWrapperTests(unittest.TestCase):
     def test_build_and_104_ports_are_denied_for_verify(self):
-        self.assertTrue({56646, 56677, 56666, 56697} <= wrap.DENIED_PORTS)
-        self.assertFalse({56656, 56687} & wrap.DENIED_PORTS)
+        # 이전 verify(56656/56687, 보존 verify-6d0450f)도 거부 대상에 들어간다. 현재 verify(56756/56787)만 허용.
+        self.assertTrue({56646, 56677, 56666, 56697, 56656, 56687} <= wrap.DENIED_PORTS)
+        self.assertFalse({56756, 56787} & wrap.DENIED_PORTS)
         for qdrant, bolt in (("http://127.0.0.1:56646", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56677"),
-                             ("http://127.0.0.1:56666", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56697")):
+                             ("http://127.0.0.1:56666", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56697"),
+                             ("http://127.0.0.1:56656", wrap.NEO4J_URI), (wrap.QDRANT_URL, "bolt://127.0.0.1:56687")):
             with self.subTest(qdrant=qdrant, bolt=bolt), self.assertRaises((wrap.IsolationError, ValueError)):
                 wrap.require_target_urls(qdrant, bolt)
 

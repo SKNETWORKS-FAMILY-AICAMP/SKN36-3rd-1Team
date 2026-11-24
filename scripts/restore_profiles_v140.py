@@ -135,10 +135,14 @@ R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
               "qdrant_key_env": "ISSUE105_R3B_BUILD_QDRANT_API_KEY",
               "neo4j_password_env": "ISSUE105_R3B_BUILD_NEO4J_PASSWORD",
               "out_dir": ".cache/issue105-r3b"},
-    "verify": {"project": "issue105-r3-verify", "compose": "docs/development/issue105_r3_verify.compose.yaml",
-               "qdrant_port": 56656, "bolt_port": 56687,
-               "qdrant_key_env": "ISSUE105_R3_VERIFY_QDRANT_API_KEY",
-               "neo4j_password_env": "ISSUE105_R3_VERIFY_NEO4J_PASSWORD"},
+    # verify는 PR #111(P1-A~E) 코드로 새로 만드는 독립 복원 검증 환경이다 (2026-11-24). 이전 verify(issue105-r3-verify)는
+    # §5.9 복원에 이미 쓴 DB라 아래 PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]로 옮겨 보존·거부한다.
+    # out_dir는 이 환경의 새 보고서·번들을 둘 권장 위치를 기록한다(도구 기본값을 바꾸지 않음 — CLI의 --report·--out-dir로 지정).
+    "verify": {"project": "issue105-r3d-verify", "compose": "docs/development/issue105_r3d_verify.compose.yaml",
+               "qdrant_port": 56756, "bolt_port": 56787,
+               "qdrant_key_env": "ISSUE105_R3D_VERIFY_QDRANT_API_KEY",
+               "neo4j_password_env": "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD",
+               "out_dir": ".cache/issue105-r3d"},
 }
 # 보존 자산(읽기·쓰기 모두 대상 아님): #104 기준 r3 build. B2 1233(d1fa3194…)·B3 1320(a471e21f…)·Neo4j 1133/2674,
 # snapshot·ZIP·보고서는 .cache/issue105-r3/에 있다. 이 표는 기록과 거부 목록 생성용이며 도구가 선택할 수 없다.
@@ -148,6 +152,13 @@ PRESERVED_R3_ENVIRONMENTS: dict[str, dict[str, Any]] = {
                   "qdrant_key_env": "ISSUE105_R3_BUILD_QDRANT_API_KEY",
                   "neo4j_password_env": "ISSUE105_R3_BUILD_NEO4J_PASSWORD",
                   "out_dir": ".cache/issue105-r3"},
+    # 이전 verify (번들 rag-final-v140-r3-6d0450fd6c1d.zip 독립 복원·검색 검증에 쓴 DB, Runbook §5.9). 컨테이너·볼륨·
+    # 인증 파일과 .cache/issue105-r3c의 번들·보고서·검색 증거는 보존한다. out_dir를 두어 그 폴더에 새 파일을 만들지 않는다.
+    "verify-6d0450f": {"project": "issue105-r3-verify", "compose": "docs/development/issue105_r3_verify.compose.yaml",
+                       "qdrant_port": 56656, "bolt_port": 56687,
+                       "qdrant_key_env": "ISSUE105_R3_VERIFY_QDRANT_API_KEY",
+                       "neo4j_password_env": "ISSUE105_R3_VERIFY_NEO4J_PASSWORD",
+                       "out_dir": ".cache/issue105-r3c"},
 }
 # 원본·공유·r1·r2·이전 실험·보존 r3 DB 포트. r3 도구는 이 포트로는 절대 접속하지 않는다.
 FOREIGN_PORTS = frozenset({6333, 6334, 16333, 36333, 46333, 46335, 46336, 56336, 56339, 56446, 56556,
@@ -176,6 +187,9 @@ PLAN_BASIS_PREVIEW = "dump_preview"
 
 WRITES_WITHOUT_PINS = ("update_r3_collections --restore-snapshot", "--write-plan (새 로컬 계획 파일)",
                        "--report (새 로컬 보고서 파일)")
+# 기준값 게이트(R3_PINS 단계) 기준의 분류 목록이다. 실제 실행 가능 여부를 뜻하지 않는다.
+# "restore_final_v140_r3 --apply"(본체 직접 apply)는 PR #111 P1-A 이후 R3_PINS 단계와 관계없이 CLI에서 항상 거부된다
+# (종료 코드 2). 본체의 쓰기는 "restore_r3_isolated --apply"(래퍼가 쓰기 허가 객체를 넘김) 경로로만 실행된다.
 WRITES_REQUIRING_PINS = ("update_r3_collections --apply", "update_r3_collections --index",
                          "load_neo4j_r3_isolated --load/--resume", "build_restore_bundle_r3 --create-snapshot",
                          "build_restore_bundle_r3 --build", "restore_final_v140_r3 --apply",

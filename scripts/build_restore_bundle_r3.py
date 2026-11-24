@@ -328,7 +328,7 @@ def build_package(records: dict[str, dict[str, Any]], source: dict[str, Any], so
             "release_counts": dict(pins["release_counts"]), "collections": collections,
             "neo4j": {"version": f"{profiles.NEO4J_VERSION} {profiles.NEO4J_EDITION}", "image": profiles.NEO4J_IMAGE,
                       "data": "source ZIP의 data/releases/v1.4.0-candidate/neo4j/*", "release_files": neo4j_files},
-            "restore_tool": RESTORE_MEMBER, "compose": "compose.yaml (issue105_r3_verify.compose.yaml)",
+            "restore_tool": RESTORE_MEMBER, "compose": f"compose.yaml ({Path(VERIFY_COMPOSE).name})",  # 프로필의 verify compose
             "source_commit": source["commit"], "source_archive": source_member,
             "source_note": "git archive <source_commit> 그대로. 미커밋·미추적 작업 파일은 포함되지 않는다",
             "created_at": datetime.now().astimezone().isoformat(timespec="seconds")}
