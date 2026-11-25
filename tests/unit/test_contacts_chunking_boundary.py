@@ -2,23 +2,38 @@
 
 750자 고정창 청킹이 [문의처] 블록(기관·전화번호 목록) 중간을 자르면 PolicyCheck.contacts가
 반쪽짜리 번호를 돌려준다. DOC_GOV_029(문의처 2건)·DOC_GOV_048(문의처 32건)에서 실제로
-재현됐던 잘림을, 실제 원본 JSON(data/raw/gov24/items/*.json)으로 다시 검증한다.
+재현됐던 잘림을, 실제 문서 본문으로 다시 검증한다.
+
+실제 본문은 Git에 커밋된 data/processed/documents.jsonl에서 읽는다(#116). 원본 JSON
+(data/raw/gov24/items/*.json)은 .gitignore 대상이라 새 clone에 없고, 이 파일의 content는
+원본에 format_gov24_item_text를 적용한 결과와 같다(2026-11-25, 두 문서 모두 본문·청크 결과 일치 확인).
 """
 
+import hashlib
 import json
 import unittest
 from pathlib import Path
 
-from collectors.preprocessing.normalize import format_gov24_item_text
 from scripts.build_clean_dataset import iter_document_chunks
 
-RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw" / "gov24" / "items"
+DOCUMENTS_PATH = Path(__file__).resolve().parents[2] / "data" / "processed" / "documents.jsonl"
 
 
-def _raw_item_required(name: str):
-    """data/raw/**는 .gitignore 대상이라 새 clone에는 원본이 없다(#116). 없으면 이유를 밝혀 건너뛴다."""
-    return unittest.skipUnless((RAW_DIR / name).is_file(),
-                               f"NOT_RUN: 원본 data/raw/gov24/items/{name}이 이 PC에 없음(.gitignore 대상)")
+def _document_content(document_id: str, raw_name: str) -> str:
+    """커밋된 문서 본문. 원본 파일·content_hash가 기대와 다르면 테스트 전제가 깨진 것이므로 바로 실패한다."""
+    with open(DOCUMENTS_PATH, encoding="utf-8") as f:
+        for line in f:
+            document = json.loads(line)
+            if document.get("document_id") == document_id:
+                break
+        else:
+            raise AssertionError(f"{DOCUMENTS_PATH.name}에 {document_id}가 없음")
+    if document["local_raw_path"] != f"data/raw/gov24/items/{raw_name}":
+        raise AssertionError(f"{document_id} 원본 경로가 다름: {document['local_raw_path']}")
+    content = document["content"]
+    if hashlib.sha256(content.encode("utf-8")).hexdigest() != document["content_hash"]:
+        raise AssertionError(f"{document_id} content_hash 불일치")
+    return content
 
 
 def _naive_chunks(text: str, size: int, overlap: int) -> list[str]:
@@ -75,22 +90,18 @@ class ContactBoundaryPreservedTests(unittest.TestCase):
         for first, second in zip(pieces, pieces[1:]):
             self.assertIn(first[-80:][-40:], second[:120])  # 수정 전엔 겹치는 내용이 전혀 없었다
 
-    @_raw_item_required("359000000104.json")
     def test_doc_gov_029_contacts_no_longer_truncated(self):
-        with open(RAW_DIR / "359000000104.json", encoding="utf-8") as f:
-            item = json.load(f)
-        pieces = [p for p in iter_document_chunks(format_gov24_item_text(item), 750, 80) if len(p) >= 50]
+        text = _document_content("DOC_GOV_029", "359000000104.json")
+        pieces = [p for p in iter_document_chunks(text, 750, 80) if len(p) >= 50]
         self.assertEqual(len(pieces), 2)
         self.assertIn(
             "[문의처] 동구(청소년수련관)청소년방과후아카데미/062-233-7224||동구(청소년문화의집)청소년방과후 아카데미/062-251-1318",
             pieces[1],
         )
 
-    @_raw_item_required("449000000108.json")
     def test_doc_gov_048_contacts_no_longer_truncated(self):
-        with open(RAW_DIR / "449000000108.json", encoding="utf-8") as f:
-            item = json.load(f)
-        pieces = [p for p in iter_document_chunks(format_gov24_item_text(item), 750, 80) if len(p) >= 50]
+        text = _document_content("DOC_GOV_048", "449000000108.json")
+        pieces = [p for p in iter_document_chunks(text, 750, 80) if len(p) >= 50]
         self.assertEqual(len(pieces), 3)
         contact_piece = pieces[1]
         self.assertIn("여성가족과/041-521-5374", contact_piece)
