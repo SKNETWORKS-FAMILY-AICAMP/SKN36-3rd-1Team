@@ -3,6 +3,7 @@ import type { AskResponse } from '../api/types';
 import { catalogPolicies, type CatalogPolicy } from '../lib/policyCatalog';
 import { scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
 import { safeHttpUrl } from '../lib/validate';
+import { policySearchKey } from '../lib/policySearch';
 import { PolicyCard } from './TurnView';
 import { useSavedPolicies } from './SavedPolicies';
 import { useScheduleDay } from './ScheduleClock';
@@ -94,11 +95,11 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   const catalogIds = new Set(catalog.map(row => row.policy.policy_id));
   const missingSaved = (state?.saved ?? []).filter(p => !catalogIds.has(p.policy_id));
   const options = useMemo(() => ({ regions: [...new Set(catalog.flatMap(r => r.regions))].sort(), categories: [...new Set(catalog.flatMap(r => r.categories))].sort() }), [catalog]);
-  const normalize = (text: string) => text.toLocaleLowerCase().replace(/\s/g, '').replace(/k-패스/g, 'k패스');
-  const q = normalize(query);
+  // 검색어는 한 번만 정규화하고, 정책마다 '정책명 기관명'에 같은 규칙을 적용한다(#103 K-패스·K패스)
+  const q = policySearchKey(query);
   const rows = scheduledPolicies(policies.filter(row => (tab !== 'saved' || savedIds.has(row.policy.policy_id))
     && (!region || row.regions.includes(region)) && (!category || row.categories.includes(category))
-    && normalize(`${row.policy.policy_name} ${row.policy.agency}`).includes(q)).map(row => row.policy), today, filter, sort);
+    && policySearchKey(`${row.policy.policy_name} ${row.policy.agency}`).includes(q)).map(row => row.policy), today, filter, sort);
   const soon = load === 'ready' && (!POLICY_API_URL || evaluatedOn === today) ? scheduledPolicies(policies.filter(row => savedIds.has(row.policy.policy_id)).map(row => row.policy), today, 'soon', 'deadline') : [];
   if (comparing && compareInputs.length >= COMPARE_MIN) {
     return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
