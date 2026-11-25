@@ -13,7 +13,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _load_local_env(path: Path) -> None:
-    """web_ssr/.env의 KEY=VALUE 줄을 읽는다. 이미 설정된 OS 환경 변수는 덮어쓰지 않는다."""
+    """web_ssr/.env의 KEY=VALUE 줄을 읽는다. 이미 설정된 OS 환경 변수는 덮어쓰지 않는다.
+
+    값이 빈 줄(`SSR_FASTAPI_BASE_URL=`)은 건너뛰어 아래의 기본값을 쓴다.
+    .env.example을 그대로 복사해도 빈 문자열이 기본값을 덮어쓰지 않게 하기 위해서다.
+    """
     if not path.is_file():
         return
     for raw in path.read_text(encoding="utf-8-sig").splitlines():
@@ -22,7 +26,7 @@ def _load_local_env(path: Path) -> None:
             continue
         key, value = line.split("=", 1)
         key, value = key.strip(), value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
+        if key and value and key not in os.environ:
             os.environ[key] = value
 
 

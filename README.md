@@ -155,7 +155,49 @@ npm run dev
 
 ### 정책 상세보기 · Django SSR (#120, 선택)
 
-정책 카드의 `정책 상세보기 ↗`는 Django(`web_ssr/`)가 서버에서 렌더링한 페이지를 엽니다. Django는 FastAPI `GET /api/policies`만 호출하며 DB에 직접 접속하지 않습니다. `web_ssr/requirements.txt`(Django 5.2 LTS)를 설치하고 FastAPI를 띄운 상태에서 `python web_ssr/manage.py runserver 127.0.0.1:8001`로 실행합니다. 카드 링크는 `frontend/.env.local`의 `VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:8001/policies/`로 켜고, 비워 두면 숨겨집니다. 자세한 설정·테스트는 [web_ssr/README.md](web_ssr/README.md)를 참고하세요.
+정책 카드의 `정책 상세보기 ↗`는 Django(`web_ssr/`)가 서버에서 렌더링한 페이지를 엽니다. Django는 FastAPI `GET /api/policies`만 호출하며 DB에 직접 접속하지 않습니다. 아래 명령은 모두 저장소 루트에서 실행합니다.
+
+1. Django 의존성(Django 5.2 LTS)을 설치합니다.
+
+   ```powershell
+   python -m pip install -r web_ssr/requirements.txt
+   ```
+2. Django 설정 파일을 만듭니다. 이미 `web_ssr/.env`가 있으면 덮어쓰지 않고 그대로 둡니다.
+
+   ```powershell
+   if (-not (Test-Path web_ssr/.env)) { Copy-Item web_ssr/.env.example web_ssr/.env }
+   ```
+3. `web_ssr/.env`에서 다음 세 값을 확인합니다. `DJANGO_DEBUG`는 로컬 개발이면 `true`로 바꿉니다(비워 두면 `false`라 `DJANGO_SECRET_KEY`가 없을 때 실행되지 않습니다). `true`는 로컬 개발용이며 운영에서는 쓰지 않습니다. `SSR_FASTAPI_BASE_URL`·`SSR_REACT_BASE_URL`은 비워 두면 각각 `http://127.0.0.1:8000`, `http://127.0.0.1:5173/`을 씁니다. 같은 줄에 `#` 주석을 붙이지 마세요. Django는 저장소 루트 `.env`를 읽지 않으며, `web_ssr/.env`도 커밋하지 않습니다.
+
+   ```env
+   DJANGO_DEBUG=true
+   SSR_FASTAPI_BASE_URL=http://127.0.0.1:8000
+   SSR_REACT_BASE_URL=http://127.0.0.1:5173/
+   ```
+4. FastAPI를 실행합니다. 정책 목록 API는 릴리스 파일만 읽으므로 DB 없이도 응답합니다.
+
+   ```powershell
+   python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000
+   ```
+5. 새 터미널에서 Django를 실행하고 <http://127.0.0.1:8001/policies/POL_010/>을 엽니다.
+
+   ```powershell
+   python web_ssr/manage.py runserver 127.0.0.1:8001
+   ```
+6. `frontend/.env.local`에 상세보기 주소를 추가합니다. 비워 두면 카드에 링크가 보이지 않습니다. 정책 목록도 FastAPI에서 받으려면 `VITE_POLICY_API_URL=http://127.0.0.1:8000/api/policies`를 함께 넣습니다.
+
+   ```env
+   VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:8001/policies/
+   ```
+7. 새 터미널에서 React를 실행하고(위 실행 방법과 같음) 정책 카드를 펼쳐 `정책 상세보기 ↗`를 누릅니다.
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+   ```
+
+자세한 설정·테스트는 [web_ssr/README.md](web_ssr/README.md)를 참고하세요.
 
 ### 주요 코드와 개발 문서
 
