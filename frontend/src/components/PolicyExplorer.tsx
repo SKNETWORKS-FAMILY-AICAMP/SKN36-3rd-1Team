@@ -21,7 +21,7 @@ export function explorerPhase(load: 'loading' | 'ready' | 'error', loadedOnce: b
   if (load === 'loading' && !loadedOnce) return 'loading';
   return 'list';
 }
-const filters: [ScheduleFilter, string][] =[['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
+const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
 export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;

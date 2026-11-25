@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 # React(frontend/src/lib/applicationSchedule.ts receptionLabels, TurnView RECEPTION_LABEL)와 같은 문구·색.
 RECEPTION_LABELS = {"before": "접수 예정", "open": "접수 중", "closed": "접수 마감", "unknown": "모집 상태 미확인"}
 RECEPTION_BADGE = {"before": "b-muted", "open": "b-ok", "closed": "b-bad", "unknown": "b-muted"}
+# React 상세 링크(frontend/src/lib/route.ts DETAIL_THEME_PARAM)가 붙이는 테마 쿼리. 이 값일 때만 다크로 연다.
+THEME_QUERY_PARAM = "theme"
+DARK_THEME, LIGHT_THEME = "dark", "light"
 
 
 def _days_between(start: str, end: str) -> int:
@@ -88,7 +91,7 @@ def page_theme(request: HttpRequest) -> str:
 
     React 테마는 버튼으로 고른 값(브라우저 저장소)이라 다른 서버인 Django가 직접 읽을 수 없다.
     """
-    return "dark" if request.GET.get("theme") == "dark" else "light"
+    return DARK_THEME if request.GET.get(THEME_QUERY_PARAM) == DARK_THEME else LIGHT_THEME
 
 
 def _error(request: HttpRequest, status: int) -> HttpResponse:

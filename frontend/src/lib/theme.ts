@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-export function currentTheme(): Theme {
+function currentTheme(): Theme {
   return typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 

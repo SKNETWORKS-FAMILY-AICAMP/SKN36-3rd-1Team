@@ -50,7 +50,7 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
   initialDetails?: Map<string, PolicyDetail>;
 }) {
   const today = useScheduleDay(), theme = useTheme();
-  const [details,setDetails] = useState<Map<string, PolicyDetail>>(initialDetails ?? new Map());
+  const [details, setDetails] = useState<Map<string, PolicyDetail>>(initialDetails ?? new Map());
   const [detailState, setDetailState] = useState<'loading' | 'ready' | 'error'>(initialDetails ? 'ready' : 'loading');
   const [differencesOnly, setDifferencesOnly] = useState(true);
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -158,7 +158,7 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
                   {/* 다른 카드와 같은 Django 정책 상세(SSR). 새 탭으로 열어 비교 화면과 체크 표시를 지킨다 */}
                   {detailHref && <a className="btn btn-o" href={detailHref} target="_blank" rel="noopener noreferrer"
                     aria-label={`${policy.policy_name} 정책 상세보기 (새 탭)`}>정책 상세보기 ↗</a>}
-                  {source &&<a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">공식 공고 ↗</a>}
+                  {source && <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">공식 공고 ↗</a>}
                 </div>
               </div>
             </li>

@@ -37,6 +37,9 @@ export const askHref = '#/';
 export const mapHref = (policyId?: string | null) => (policyId ? `#/map?policy=${encodeURIComponent(policyId)}` : '#/map');
 export const lifeHref = (stage?: string | null) => (stage ? `#/life?stage=${encodeURIComponent(stage)}` : '#/life');
 
+/** Django 상세가 테마를 받는 쿼리 이름. web_ssr/policies/views.py THEME_QUERY_PARAM과 같아야 한다 */
+export const DETAIL_THEME_PARAM = 'theme';
+
 /** 서버 정책 ID 규칙(backend/api/schemas.py selected_policy_id, web_ssr converters.py)과 같다 */
 const DETAIL_POLICY_ID = /^POL_[A-Z0-9_]{1,124}$/;
 
@@ -55,7 +58,7 @@ export function policyDetailHref(policyId: string, base = import.meta.env.VITE_P
     if (!['http:', 'https:'].includes(root.protocol) || root.username || root.password || root.search || root.hash) return null;
     if (!root.pathname.endsWith('/')) root.pathname += '/';
     const href = new URL(`${encodeURIComponent(policyId)}/`, root);
-    if (theme === 'dark') href.searchParams.set('theme', 'dark');
+    if (theme !== 'light') href.searchParams.set(DETAIL_THEME_PARAM, theme);
     return href.href;
   } catch {
     return null;
