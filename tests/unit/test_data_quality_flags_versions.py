@@ -167,6 +167,7 @@ def test_cache_reflects_file_manifest_and_dataset_changes():
     {"manifest": SHA_B},                       # 다른 manifest 기준 보고서 (현재 manifest로 덮어쓰지 않음)
     {"official_source_checked": True},
     {"s10_rule": None},                        # Phase 1 규칙 보고서 (관련 조건 보유 정책 S10 누락)
+    {"s10_rule": "S10_v2_unmodeled_incomplete_review"},   # v2 보고서 (그래프 추가 연령 범위를 consistent로 분류 가능)
 ])
 def test_build_flags_rejects_report_from_other_data(kwargs):
     with dataset(V140), pytest.raises(dqf.FlagBuildError):
@@ -311,6 +312,16 @@ def test_s10_children_scope_holds_child_condition_but_not_age():
     rows = _rows([AGE, CHILD], ["marriage", "children"])
     assert ("children", "needs_check") in rows
     assert ("age", "eligible") in rows                                 # 정상 조건 불필요 보류 없음
+
+
+def test_s10_review_child_age_reaches_checker_hold():
+    # v3에서 review가 된 자녀 연령(예: 그래프에만 추가 연령 범위) → children 보호 → 자녀 행 needs_check, 나이 행은 유지
+    finding = s10_finding([], review=["children"], marriage=False, related=CHILD_REL)
+    with dataset(V140):
+        entry = dqf.build_flags(report([finding]), "0" * 64)["flags_by_policy"]["POL_SAMPLE"][0]
+    assert entry["affects"] == ["children"]
+    rows = _rows([AGE, CHILD], entry["affects"])
+    assert ("children", "needs_check") in rows and ("age", "eligible") in rows
 
 
 def test_s10_narrowed_scope_equals_legacy_when_no_child_condition():

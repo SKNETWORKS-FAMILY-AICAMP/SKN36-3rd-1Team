@@ -105,6 +105,57 @@ def test_matching_child_months_without_details_is_consistent(sc):
     assert result["classification"] == "consistent"
 
 
+def test_single_exact_child_age_is_consistent(sc):
+    # 1. 단일 연령 완전 일치 (sample_only)
+    result = assess(sc, "children", "24개월 미만 자녀를 양육하는 가구", [child("COND_CHILD_A", "LT", "24")])
+    assert (result["classification"], result["child_age_check"]) == ("consistent", "single_exact")
+
+
+def test_extra_graph_child_range_is_review(sc):
+    # 2. 원문 LT 24 / 그래프 LT 24 + BETWEEN 36~60 (v2는 부분집합이라 consistent였음)
+    result = assess(sc, "children", "24개월 미만 자녀를 양육하는 가구",
+                    [child("COND_CHILD_A", "LT", "24"), child("COND_CHILD_B", "BETWEEN", "36~60")])
+    assert (result["classification"], result["child_age_check"]) == ("review", "mismatch")
+
+
+def test_missing_graph_child_range_is_review(sc):
+    # 3. 원문 LT 24 + BETWEEN 36~60 / 그래프 LT 24
+    result = assess(sc, "children", "24개월 미만 자녀 또는 36~60개월 자녀를 양육하는 가구",
+                    [child("COND_CHILD_A", "LT", "24")])
+    assert set(result["text_child_ages"]) == {("LT", "24"), ("BETWEEN", "36~60")}
+    assert (result["classification"], result["child_age_check"]) == ("review", "mismatch")
+
+
+def test_partial_boundary_mismatch_in_multiple_ages_is_review(sc):
+    # 4. 복수 조건 중 LT/LTE 경계 불일치
+    result = assess(sc, "children", "24개월 미만 자녀 또는 36~60개월 자녀를 양육하는 가구",
+                    [child("COND_CHILD_A", "LTE", "24"), child("COND_CHILD_B", "BETWEEN", "36~60")])
+    assert (result["classification"], result["child_age_check"]) == ("review", "mismatch")
+
+
+def test_multiple_distinct_ages_exact_set_is_review(sc):
+    # 5. 서로 다른 복수 연령 조건 집합이 같아도 AND/OR 동등성 미검증 → review
+    result = assess(sc, "children", "24개월 미만 자녀 또는 36~60개월 자녀를 양육하는 가구",
+                    [child("COND_CHILD_A", "LT", "24"), child("COND_CHILD_B", "BETWEEN", "36~60")])
+    assert (result["classification"], result["child_age_check"]) == ("review", "multiple_conditions")
+
+
+def test_repeated_same_age_is_not_multiple_conditions(sc):
+    # 6. 같은 연령 표현 반복(24개월 미만·2세 미만) + 그래프의 같은 조건 중복 → 단일 조건으로 본다
+    result = assess(sc, "children", "24개월 미만 자녀를 양육하는 가구\n대상: 2세 미만 자녀, 24개월 미만 자녀",
+                    [child("COND_CHILD_A", "LT", "24"), child("COND_CHILD_A_DUP", "LT", "24")])
+    assert result["text_child_ages"] == [("LT", "24")]
+    assert (result["classification"], result["child_age_check"]) == ("consistent", "single_exact")
+
+
+def test_detail_rules_still_take_priority_over_age_match(sc):
+    # 7. 연령이 단일 완전 일치여도 세부 요건 누락·연령 예외는 기존대로 incomplete
+    count = assess(sc, "children", "24개월 미만 자녀 2명 이상 양육 가구", [child("COND_CHILD_A", "LT", "24")])
+    exception = assess(sc, "children", "24개월 미만 자녀 (단, 미숙아는 예외)", [child("COND_CHILD_A", "LT", "24")])
+    assert (count["classification"], exception["classification"]) == ("incomplete", "incomplete")
+    assert "child_count" in count["missing_details"] and "age_exception" in exception["missing_details"]
+
+
 def test_mismatched_child_months_is_review(sc):
     result = assess(sc, "children", "24개월 미만 자녀를 양육하는 가구", [child("COND_CHILD_AGE_LE_24M", "LTE", "24")])
     assert result["classification"] == "review"

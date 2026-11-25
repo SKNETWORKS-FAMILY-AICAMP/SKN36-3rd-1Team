@@ -85,7 +85,7 @@ CHILD_RELATED_IDS = {"COND_HH_다자녀가구", "COND_HH_한부모가정_조손�
 MARRIAGE_CONDITION = re.compile(r"혼인|신혼|결혼|미혼|부부")
 
 # S10 v2: 측면(혼인·자녀)별 분류. data_quality_flags.S10_RULE과 같아야 한다.
-S10_RULE = "S10_v2_unmodeled_incomplete_review"
+S10_RULE = "S10_v3_single_exact_child_age"
 S10_DIMENSIONS = ("marriage", "children")
 # 자격 요건 문장으로 볼 근거 (policy.eligibility 줄은 항상 요건 문장). 그 밖의 키워드 줄은 '단순 언급'
 REQUIREMENT_LINE = re.compile(r"대상|자격|요건|조건|신청|지원\s?기준|해당|가구|이하|이상|미만|초과|이내|거주|둔\s|양육")
@@ -133,6 +133,11 @@ RULE_CHANGES = [
      "reason": ("이전 규칙(Phase 1)은 관련 그래프 조건이 하나라도 있으면 충분성을 보지 않고 제외해 finding 자체가 누락됨 "
                 "(관련 조건 보유 20개 정책 중 17개). 관련 조건 존재만으로 충분한 모델링으로 보지 않는다. "
                 "우선순위·서류·증빙 문구는 필수 요건으로 단정하지 않고 non_requirement_mentions로만 기록")},
+    {"check": "S10", "change": (f"{S10_RULE}: consistent는 원문·그래프 자녀 연령 집합이 완전히 같고 서로 다른 연령 조건이 "
+                                "1개일 때만(child_age_check=single_exact). 그래프에만 있는 연령 범위(mismatch)나 서로 다른 "
+                                "연령 조건 여러 개(multiple_conditions)는 review. 같은 표현 반복·같은 조건 중복은 하나로 셈"),
+     "reason": ("v2는 원문 연령 ⊆ 그래프 연령(부분집합)이면 consistent로 보아, 그래프에 원문에 없는 추가 연령 범위가 있어도 "
+                "S10 보호가 빠질 수 있었음. 복수 연령 조건의 AND/OR 논리 동등성은 검증하지 않으므로 보수적으로 review")},
 ]
 
 
@@ -261,12 +266,29 @@ def assess_s10_dimension(name: str, sources: list[tuple[str, str]], positive: di
         result["classification"] = "incomplete"
     elif covered:
         result["classification"] = "review"            # 다른 그래프 조건과 겹침: 정의 일치 미확인
-    elif (name == "children" and result["text_child_ages"]
-          and set(result["text_child_ages"]) <= set(result["graph_child_ages"])):
+    elif name == "children" and child_age_check(result) == "single_exact":
         result["classification"] = "consistent"
     else:
         result["classification"] = "review"
+    if name == "children":
+        result["child_age_check"] = child_age_check(result)
     return result
+
+
+def child_age_check(result: dict) -> str:
+    """
+    원문·그래프 자녀 연령 비교 (값은 (연산자, 개월) 집합 → 같은 표현 반복·같은 조건 중복은 하나로 센다).
+    - single_exact: 서로 다른 연령 조건이 원문·그래프 모두 1개이고 같음 → consistent 가능
+    - multiple_conditions: 집합은 같지만 서로 다른 연령 조건이 2개 이상. AND/OR 결합의 동등성은
+      검증하지 않으므로 consistent로 보지 않는다 (review)
+    - mismatch / no_text_age: 집합이 다르거나(그래프에만 있는 범위 포함) 원문 연령이 없음 → review
+    """
+    text_ages, graph_ages = set(result["text_child_ages"]), set(result["graph_child_ages"])
+    if not text_ages:
+        return "no_text_age"
+    if text_ages != graph_ages:
+        return "mismatch"
+    return "single_exact" if len(text_ages) == 1 else "multiple_conditions"
 
 
 def load_dataset():

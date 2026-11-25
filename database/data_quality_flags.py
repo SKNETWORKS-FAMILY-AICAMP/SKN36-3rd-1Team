@@ -91,7 +91,8 @@ CHECK_RULES: dict[str, dict[str, Any]] = {
 S10_CHECK = "S10_MARRIAGE_CHILD_NOT_MODELED"
 S10_DIMENSIONS = ("marriage", "children")
 # v1.4.0 보고서가 따라야 하는 S10 규칙 (neo4j_semantic_check.S10_RULE과 같아야 한다)
-S10_RULE = "S10_v2_unmodeled_incomplete_review"
+# v3: 자녀 연령은 단일 조건 완전 일치일 때만 consistent. 이전 규칙(v2 등) 보고서는 _validate_report가 거부한다
+S10_RULE = "S10_v3_single_exact_child_age"
 S10_CLASS_KEYS = {"unmodeled_dimensions": "unmodeled", "incomplete_dimensions": "incomplete",
                   "review_dimensions": "review"}
 S10_UNFLAGGED = {"consistent", "no_text"}

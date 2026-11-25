@@ -3,8 +3,8 @@
   "data_version": "1.4.0-candidate",
   "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
   "source_report": "docs/development/experiments/neo4j_semantic_20261106/neo4j_semantic_check_v1_4_0.json",
-  "source_report_sha256": "62f379aa5d07e3c03f64d8aafb3413964689465366cd96ca7f47b23857ead11c",
-  "created_from_report_at": "2026-11-25T19:07:16+09:00",
+  "source_report_sha256": "694771bc9ccad90183d817cd46968c2b005f96ac9b77d16cae11256964ff5459",
+  "created_from_report_at": "2026-11-25T20:32:45+09:00",
   "disclaimer": "자동 점검(키워드·인계 속성 대조)으로 찾은 의심 후보다. 확정된 정책 오류가 아니며 공식 원문(정부 공고)과 대조하지 않았다. keyword_detected 항목은 오탐 가능성이 있다. 인계 속성은 문서(document_id)별 값이며, 속성 부재(attribute_absent)는 '제한 없음'이 아니다. 목록에 없는 정책도 문제가 없다는 뜻이 아니다.",
   "official_source_checked": false,
   "policies": 206,
@@ -204,7 +204,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -670,7 +671,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -1091,7 +1093,8 @@
                   "156"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -1233,7 +1236,8 @@
                   "24"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -1400,7 +1404,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -1535,7 +1540,8 @@
                   "24"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -1628,7 +1634,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -1823,7 +1830,8 @@
                   "36~97"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -1980,7 +1988,8 @@
                   "156"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -2165,7 +2174,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -2586,7 +2596,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -2835,7 +2846,8 @@
                   "2013-12-31~2019-01-01"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -3009,7 +3021,8 @@
                   "37"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -3086,7 +3099,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "review"
+              "classification": "review",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -3202,7 +3216,8 @@
                   "108"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -3323,7 +3338,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -3640,7 +3656,8 @@
                   "216"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -3731,7 +3748,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -4085,7 +4103,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -4196,7 +4215,8 @@
                   "0~97"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -4330,7 +4350,8 @@
                   "24~85"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -4545,7 +4566,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -4634,7 +4656,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -4786,7 +4809,8 @@
                   "216"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -4994,7 +5018,8 @@
                   "144"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -5130,7 +5155,8 @@
                   "156"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -5272,7 +5298,8 @@
                   "156"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -5454,7 +5481,8 @@
                   "24"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -5625,7 +5653,8 @@
                   "24"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -5711,7 +5740,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -5954,7 +5984,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -6482,7 +6513,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -6872,7 +6904,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -6981,7 +7014,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -7080,7 +7114,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -7322,7 +7357,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -7412,7 +7448,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -7598,7 +7635,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -7690,7 +7728,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -7830,7 +7869,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -7952,7 +7992,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -8162,7 +8203,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -8275,7 +8317,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -8392,7 +8435,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -8539,7 +8583,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "review"
+              "classification": "review",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -8636,7 +8681,8 @@
                   "24"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -8802,7 +8848,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -9003,7 +9050,8 @@
                 ]
               ],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "mismatch"
             }
           },
           "graph_related_conditions": {
@@ -9232,7 +9280,8 @@
                   "228"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -9550,7 +9599,8 @@
                   "216"
                 ]
               ],
-              "classification": "incomplete"
+              "classification": "incomplete",
+              "child_age_check": "single_exact"
             }
           },
           "graph_related_conditions": {
@@ -9664,7 +9714,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
@@ -10052,7 +10103,8 @@
               "non_requirement_mentions": [],
               "text_child_ages": [],
               "graph_child_ages": [],
-              "classification": "unmodeled"
+              "classification": "unmodeled",
+              "child_age_check": "no_text_age"
             }
           },
           "graph_related_conditions": {
