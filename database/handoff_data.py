@@ -473,6 +473,18 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def manifest_checksum_match(raw: bytes, expected: str) -> str | None:
+    """manifest 해시와 일치하는 첫 바이트 형식을 raw → lf → crlf 순서로 반환한다."""
+    if _sha256(raw) == expected:
+        return "raw"
+    lf = raw.replace(b"\r\n", b"\n")
+    if _sha256(lf) == expected:
+        return "lf"
+    if _sha256(lf.replace(b"\n", b"\r\n")) == expected:
+        return "crlf"
+    return None
+
+
 def verify_manifest_checksums() -> list[dict[str, Any]]:
     """
     manifest.json의 SHA-256과 실제 파일을 비교한다.
@@ -487,14 +499,7 @@ def verify_manifest_checksums() -> list[dict[str, Any]]:
     results = []
     for relative_path, info in manifest["files"].items():
         raw_bytes = (HANDOFF_DIR / relative_path).read_bytes()
-        lf_bytes = raw_bytes.replace(b"\r\n", b"\n")
-        crlf_bytes = lf_bytes.replace(b"\n", b"\r\n")
-
-        matched_as = None
-        for name, candidate in (("raw", raw_bytes), ("lf", lf_bytes), ("crlf", crlf_bytes)):
-            if _sha256(candidate) == info["sha256"]:
-                matched_as = name
-                break
+        matched_as = manifest_checksum_match(raw_bytes, info["sha256"])
 
         results.append({"file": relative_path, "matched": matched_as is not None, "matched_as": matched_as})
     return results

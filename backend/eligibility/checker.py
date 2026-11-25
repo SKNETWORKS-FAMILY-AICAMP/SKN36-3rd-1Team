@@ -762,7 +762,7 @@ def _source_review_conditions(
     return results
 
 
-def _reception_status(policy: dict) -> str:
+def _reception_status(policy: dict, *, evaluated_on: date | None = None) -> str:
     """공식 날짜 및 상시 접수 여부로 신청 상태를 판정한다.
 
     날짜는 Hybrid 검색 결과의 graph.policy에서 읽는다.
@@ -822,7 +822,7 @@ def _reception_status(policy: dict) -> str:
     if ongoing_value is True and finish is not None:
         return "unknown"
 
-    today = datetime.now(KST).date()
+    today = evaluated_on if evaluated_on is not None else datetime.now(KST).date()
 
     if begin is not None and today < begin:
         return "before"
@@ -841,12 +841,14 @@ def _reception_status(policy: dict) -> str:
 
 
 
-def application_schedule(policy: dict, reception_status: str) -> dict | None:
+def application_schedule(policy: dict, reception_status: str, *, evaluated_on: date | None = None) -> dict | None:
     """기존 접수 판정과 일치하는 구조화 날짜만 화면에 전달한다. 판정 규칙은 변경하지 않는다."""
-    if reception_status == "unknown" or _reception_status(policy) != reception_status:
+    if reception_status == "unknown":
+        return None
+    today = evaluated_on if evaluated_on is not None else datetime.now(KST).date()
+    if _reception_status(policy, evaluated_on=today) != reception_status:
         return None
     node = (policy.get("graph") or {}).get("policy") or {}
-    today = datetime.now(KST).date()
     start = (node.get("application_start") or "").strip() or None
     end = (node.get("application_end") or "").strip() or None
     return {"evaluated_on": today.isoformat(), "start_date": start, "end_date": end,
