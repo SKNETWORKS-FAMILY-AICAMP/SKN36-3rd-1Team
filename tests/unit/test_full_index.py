@@ -22,6 +22,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from database import full_index as fi  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 SMALL_DOCUMENTS = ("DOC_NHUF_003", "DOC_YC_003", "DOC_GOV_048")
 
@@ -37,6 +39,7 @@ def fake_embedder(texts):
     return [[((len(text) + index) % 7 + 1) / 10.0 for index in range(fi.EMBEDDING_DIM)] for text in texts]
 
 
+@legacy_dataset_only
 class TestConfigs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -91,6 +94,7 @@ class TestConfigs(unittest.TestCase):
                 fi.get_config("X_PROTECTED")
 
 
+@legacy_dataset_only
 class TestWriteSafety(unittest.TestCase):
     def setUp(self):
         self.client = store.get_client(location=":memory:")
@@ -177,6 +181,7 @@ class TestWriteSafety(unittest.TestCase):
         self.assertEqual(store.count_points(self.client, self.collection), count)
 
 
+@legacy_dataset_only
 class Test4BConfigSafety(unittest.TestCase):
     """4B 구성(2560차원): 차원·모델이 다른 데이터와 섞이지 않는지 (메모리 Qdrant, 가짜 2560차원 벡터)"""
 

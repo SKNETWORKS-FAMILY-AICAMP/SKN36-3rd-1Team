@@ -24,6 +24,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from database import chunking as ck  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only, release_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 ALLOWED_EXCLUDED_REASONS = {"page_marker", "metadata_field:출처 URL", "metadata_field:최종수정일시"}
 ALLOWED_METHODS = {"api_field", "pdf_heading", "html_heading", "length_fallback"}
@@ -163,6 +165,7 @@ class TestRealDocuments(unittest.TestCase):
                 if report["boundary_method"] == "length_fallback":
                     self.assertTrue(report["fallback_reason"])
 
+    @release_dataset_only
     def test_all_api_documents_use_field_boundaries(self):
         api_reports = [r for r in self.reports if r["source_type"] == "api"]
         self.assertEqual(len(api_reports), 235)  # 복지로 2026 추가 3건 포함
@@ -197,6 +200,7 @@ class TestRealDocuments(unittest.TestCase):
                     self.assertEqual(previous["section_title"], current["section_title"])
                     self.assertEqual(previous["char_end"] - current["char_start"], current["overlap_prev_chars"])
 
+    @legacy_dataset_only
     def test_excluded_spans_have_allowed_reasons(self):
         reasons = {span["reason"] for report in self.reports for span in report["excluded_spans"]}
         self.assertLessEqual(reasons, ALLOWED_EXCLUDED_REASONS)
@@ -253,6 +257,7 @@ class TestRealDocuments(unittest.TestCase):
         again, _ = ck.chunk_documents(self.documents)
         self.assertEqual(again, self.chunks)
 
+    @legacy_dataset_only
     def test_old_chunks_can_be_located_for_comparison(self):
         # A안 비교를 위해 기존 557건의 원문 위치를 모두 찾을 수 있어야 한다.
         old_by_document = defaultdict(list)
@@ -439,6 +444,7 @@ class TestB2RealDocuments(unittest.TestCase):
         again, _ = ck.chunk_documents(self.documents, strategy="B2")
         self.assertEqual(again, self.b2_chunks)
 
+    @release_dataset_only
     def test_excluded_metadata_is_traceable(self):
         # 본문에서 뺀 [출처 URL]·[최종수정일시]도 원문 위치로 되찾을 수 있어야 한다.
         found_urls = 0
@@ -667,6 +673,7 @@ class TestStructureRealDocuments(unittest.TestCase):
         cls.documents = hd.load_documents()
         cls.analyses = [ck.analyze_structure(document) for document in cls.documents]
 
+    @legacy_dataset_only
     def test_b1_b2_outputs_unchanged(self):
         self.assertEqual(_output_sha256(*ck.chunk_documents(self.documents)), B1_OUTPUT_SHA256)
         self.assertEqual(_output_sha256(*ck.chunk_documents(self.documents, strategy="B2")), B2_OUTPUT_SHA256)

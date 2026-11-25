@@ -29,6 +29,8 @@ from database import hybrid_search as hs  # noqa: E402
 from database import retrieval_run as rr  # noqa: E402
 from database.chunking import make_point_id  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 
 def setUpModule():
@@ -62,6 +64,7 @@ A, B = "b2_06b_baseline", "b2_4b_instruct"
 
 
 class TestProfileDefinitions(unittest.TestCase):
+    @legacy_dataset_only
     def test_profiles_match_index_configs_and_evaluated_instruction(self):
         a, b = hs.resolve_search_profile(A), hs.resolve_search_profile(B)
         self.assertEqual((a["collection"], a["embedding_model"], a["embedding_dim"], a["query_template"]),
@@ -89,6 +92,7 @@ class TestProfileSearch(unittest.TestCase):
         memory_collection(self.client, "exp_b2_qwen3emb06b_full_v1", 1024)
         memory_collection(self.client, "exp_b2_qwen3emb4b_full_v1", 2560)
 
+    @legacy_dataset_only
     def test_default_call_uses_baseline_profile(self):
         result = hs.search_policy_evidence("가상 질문", client=self.client,
                                            embedder=make_embedder("qwen3-embedding:0.6b", 1024))
@@ -98,6 +102,7 @@ class TestProfileSearch(unittest.TestCase):
         self.assertEqual(result["collection"], "exp_b2_qwen3emb06b_full_v1")
         self.assertEqual(result["query_embedding_model"], "qwen3-embedding:0.6b")
 
+    @legacy_dataset_only
     def test_4b_profile_forces_instruction(self):
         calls = []
         result = hs.search_policy_evidence("가상 질문", client=self.client, profile=B,
@@ -109,6 +114,7 @@ class TestProfileSearch(unittest.TestCase):
             hs.search_policy_evidence("가상 질문", client=self.client, profile=B, query_template=None,
                                       embedder=make_embedder("qwen3-embedding:4b", 2560))
 
+    @legacy_dataset_only
     def test_embedder_contract_cannot_be_bypassed(self):
         for embedder in (make_embedder("qwen3-embedding:4b", 2560, declare=False),       # 표시 없음
                          make_embedder("qwen3-embedding:0.6b", 1024),                     # 다른 모델
@@ -117,6 +123,7 @@ class TestProfileSearch(unittest.TestCase):
                     self.assertRaises(hs.SearchProfileError):
                 hs.search_policy_evidence("가상 질문", client=self.client, profile=B, embedder=embedder)
 
+    @legacy_dataset_only
     def test_lying_embedder_stopped_before_search(self):
         liar = make_embedder("qwen3-embedding:4b", 2560, actual_dim=1024)              # 표시는 맞지만 실제 1024
         with mock.patch.object(hs.store, "search_chunks", wraps=hs.store.search_chunks) as spy:
@@ -124,6 +131,7 @@ class TestProfileSearch(unittest.TestCase):
                 hs.search_policy_evidence("가상 질문", client=self.client, profile=B, embedder=liar)
             self.assertEqual(spy.call_count, 0)
 
+    @legacy_dataset_only
     def test_collection_dimension_mismatch_stops_before_embedding(self):
         client = store.get_client(location=":memory:")
         memory_collection(client, "exp_b2_qwen3emb4b_full_v1", 1024)                   # 4B 이름인데 1024차원
@@ -133,6 +141,7 @@ class TestProfileSearch(unittest.TestCase):
                                       embedder=make_embedder("qwen3-embedding:4b", 2560, calls=calls))
         self.assertEqual(calls, [])
 
+    @legacy_dataset_only
     def test_custom_collection_mode_keeps_old_contract(self):
         result = hs.search_policy_evidence("가상 질문", client=self.client, collection="exp_b2_qwen3emb06b_full_v1",
                                            embedder=make_embedder("x", 1024, declare=False))
@@ -142,12 +151,14 @@ class TestProfileSearch(unittest.TestCase):
             hs.search_policy_evidence("가상 질문", client=self.client, collection="exp_b2_qwen3emb4b_full_v1",
                                       embedder=make_embedder("x", 1024, declare=False))
 
+    @legacy_dataset_only
     def test_same_profile_is_reproducible(self):
         first = hs.search_policy_evidence("가상 질문", client=self.client, embedder=make_embedder("qwen3-embedding:0.6b", 1024))
         second = hs.search_policy_evidence("가상 질문", client=self.client, embedder=make_embedder("qwen3-embedding:0.6b", 1024))
         self.assertEqual([h["chunk_id"] for h in first["hits"]], [h["chunk_id"] for h in second["hits"]])
         self.assertEqual(first["search_profile"], second["search_profile"])
 
+    @legacy_dataset_only
     def test_make_ollama_embedder_declares_model_and_dim(self):
         embedder = hs.em.make_ollama_embedder(model="qwen3-embedding:4b", expected_dim=2560)
         self.assertEqual((embedder.embedding_model, embedder.embedding_dim), ("qwen3-embedding:4b", 2560))
@@ -215,6 +226,7 @@ class TestQualityWarnings(unittest.TestCase):
         self.assertLessEqual({hs.QUALITY_HOMELESS_PROMOTED, hs.QUALITY_REVIEW_STATUS_OVERCLAIM}, codes)
 
 
+@legacy_dataset_only
 class TestStaticFlagsFile(unittest.TestCase):
     def tearDown(self):
         dqf._CACHE.clear()
