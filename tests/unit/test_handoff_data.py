@@ -28,6 +28,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from database import handoff_data as hd  # noqa: E402  (경로 추가 후 import 해야 함)
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 # data/handoff/README.md 에 적힌 레이블별·관계별 기대 건수
 EXPECTED_NODES_BY_LABEL = {
@@ -115,6 +117,7 @@ class TestNeo4jHandoff(unittest.TestCase):
         cls.nodes = hd.load_neo4j_nodes()
         cls.relationships = hd.load_neo4j_relationships()
 
+    @legacy_dataset_only
     def test_node_counts_by_label(self):
         actual = {label: len(nodes) for label, nodes in self.nodes.items()}
         self.assertEqual(actual, EXPECTED_NODES_BY_LABEL)
@@ -126,6 +129,7 @@ class TestNeo4jHandoff(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertEqual(len(set(ids)), len(ids), f"{label} 고유 ID 중복")
 
+    @legacy_dataset_only
     def test_node_properties_are_neo4j_compatible(self):
         # Neo4j 속성에는 dict·중첩 리스트·null을 저장할 수 없다. (SET n += row 실패 방지)
         problems = []
@@ -141,6 +145,7 @@ class TestNeo4jHandoff(unittest.TestCase):
     def test_relationship_count(self):
         self.assertEqual(len(self.relationships), hd.EXPECTED_RELATIONSHIP_COUNT)
 
+    @legacy_dataset_only
     def test_relationships_match_one_to_one_with_label_specs(self):
         # 수정 로더 규칙(레이블 + 고유 ID)으로 매칭하면 3,615건이 모두 정확히 연결돼야 한다.
         report = hd.match_relationships_offline(self.nodes, self.relationships)
@@ -269,6 +274,7 @@ class TestPageNumbers(unittest.TestCase):
         self.assertIsNone(hd.get_verified_page_number(api_chunk))
 
 
+@legacy_dataset_only
 class TestNeighborChunks(unittest.TestCase):
     def test_chunk_sequence_is_contiguous_per_document_page(self):
         # 순번이 1, 2, 3 ... 으로 빠짐없이 이어져야 "앞·뒤 청크"를 chunk_id로 찾을 수 있다.

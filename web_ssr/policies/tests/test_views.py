@@ -101,6 +101,26 @@ class PolicyDetailViewTests(SimpleTestCase):
                 self.assertNotIn("fastapi.internal.test", body)
                 self.assertNotIn("Traceback", body)
 
+    def test_theme_follows_react_link_and_defaults_to_light(self):
+        """React 상세 링크의 ?theme=dark만 다크로 받고, 나머지 값은 기본 라이트로 둔다(#122)."""
+        cases = {"": "light", "?theme=dark": "dark", "?theme=light": "light",
+                 "?theme=DARK": "light", "?theme=%22%3E%3Cscript%3E": "light"}
+        for query, theme in cases.items():
+            with self.subTest(query), patch_get(response(make_page([make_item()]))):
+                res = self.client.get(f"/policies/POL_TEST_001/{query}")
+                self.assertEqual(res.status_code, 200)
+                body = res.content.decode()
+                self.assertIn(f'<html lang="ko" data-theme="{theme}">', body)
+                self.assertNotIn("<script>", body.split("</head>")[0])
+
+    def test_error_pages_keep_dark_theme(self):
+        with patch_get(response(make_page([make_item()]))):
+            res = self.client.get("/policies/POL_NOT_EXIST/?theme=dark")
+        self.assertContains(res, 'data-theme="dark"', status_code=404)
+        with self.assertLogs("policies.views", "WARNING"), patch_get(TIMEOUT):
+            res = self.client.get("/policies/POL_TEST_001/?theme=dark")
+        self.assertContains(res, 'data-theme="dark"', status_code=503)
+
     def test_only_get_is_allowed(self):
         with patch_get() as get:
             self.assertEqual(self.client.post("/policies/POL_TEST_001/").status_code, 405)

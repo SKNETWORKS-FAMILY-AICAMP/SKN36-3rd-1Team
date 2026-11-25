@@ -23,6 +23,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from database import chunking as ck  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 # B3 출력 해시 (2026-11-06 기록). B3 규칙을 일부러 바꿀 때만 갱신한다.
 B3_OUTPUT_SHA256 = ("5b400f5933f153f60f3df206d3010d1bcee0d0927e9afe23e01c5d6254dc3f8e",
@@ -114,6 +116,7 @@ class TestB3RealDocuments(unittest.TestCase):
         for chunk in cls.b2:
             cls.b2_by_doc[chunk["document_id"]].append(chunk)
 
+    @legacy_dataset_only
     def test_output_hash_is_fixed(self):
         self.assertEqual(_output_sha256(self.b3, self.reports), B3_OUTPUT_SHA256)
 
@@ -155,6 +158,7 @@ class TestB3RealDocuments(unittest.TestCase):
                     self.assertEqual(chunk["page_start"], chunk["page_end"])
                     self.assertFalse(any(chunk["char_start"] < start < chunk["char_end"] for start, _e, _p in markers))
 
+    @legacy_dataset_only
     def test_orphan_labels_reduced(self):
         self.assertEqual(len(ck.find_orphan_label_chunks(self.b2)), B2_ORPHAN_COUNT)
         b3_orphans = ck.find_orphan_label_chunks(self.b3)

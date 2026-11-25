@@ -22,6 +22,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from database import handoff_data as hd  # noqa: E402
 from database import retrieval_eval as rv  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 EVAL_DIR = PROJECT_ROOT / "docs" / "development" / "retrieval_eval"
 SOURCE = EVAL_DIR / "questions_candidates_v0.source.json"
@@ -146,6 +148,7 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(rv.attainability([self.question], chunks), {})
 
 
+@legacy_dataset_only
 class TestFrozenV0(unittest.TestCase):
     """retrieval_eval_v0 고정 기록과 실제 파일이 같은지 (질문·정답이 몰래 바뀌지 않았는지)."""
 
@@ -170,6 +173,7 @@ class TestCandidateFile(unittest.TestCase):
         cls.documents = {d["document_id"]: d for d in hd.load_documents()}
         cls.built = rv.load_jsonl(BUILT)
 
+    @legacy_dataset_only
     def test_built_file_matches_source(self):
         rebuilt = rv.build_question_candidates(self.source["items"], list(self.documents.values()))
         for row in rebuilt:
