@@ -29,6 +29,41 @@ def test_dates_reuse_checker_status(dates,status,remaining):
         assert s.days_to_end==remaining
         assert s.evaluated_on=="2026-11-22"
 
+@pytest.mark.parametrize(
+    "instant, expected_date, expected_status, days_to_start, days_to_end",
+    [
+        ("2026-11-21T14:59:59+00:00", "2026-11-21", "before", 1, 2),
+        ("2026-11-21T15:00:00+00:00", "2026-11-22", "open", 0, 1),
+        ("2026-11-23T14:59:59+00:00", "2026-11-23", "open", -1, 0),
+        ("2026-11-23T15:00:00+00:00", "2026-11-24", "closed", -2, -1),
+    ],
+)
+def test_schedule_crosses_kst_midnight(
+    instant, expected_date, expected_status, days_to_start, days_to_end,
+):
+    utc_instant = datetime.fromisoformat(instant)
+
+    class BoundaryClock:
+        @classmethod
+        def now(cls, tz=None):
+            if tz is None:
+                return utc_instant.replace(tzinfo=None)
+            return utc_instant.astimezone(tz)
+
+    item = policy(application_start="2026-11-22", application_end="2026-11-23")
+    with patch.object(checker, "datetime", BoundaryClock):
+        status = checker._reception_status(item)
+        assert status == expected_status
+        schedule = ApplicationSchedule.model_validate(checker.application_schedule(item, status))
+
+    assert schedule.evaluated_on == expected_date
+    assert schedule.start_date == "2026-11-22"
+    assert schedule.end_date == "2026-11-23"
+    assert schedule.is_ongoing is False
+    assert schedule.days_to_start == days_to_start
+    assert schedule.days_to_end == days_to_end
+
+
 @pytest.mark.parametrize("dates", [{},
     {"application_period":"예산 소진 시까지"},
     {"application_start":"2026-02-30","application_end":"2026-12-01"},
