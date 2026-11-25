@@ -40,6 +40,7 @@ npm run dev
 |---|---|
 | `npm run dev` | 개발 서버 실행 |
 | `npm test` | 단위 테스트 (Vitest): 나이 검증·링크 검사·조건 읽기·예시 응답 판정·답변 상태별 표시·오류 문구·화면 주소·관계 지도 그래프(가상 그래프 + 실제 팀 데이터 건수 확인) |
+| | 대부분은 Node에서 HTML 문자열로 그려 확인합니다. 클릭·탭 복귀처럼 실제 화면 동작이 필요한 테스트만 파일 첫 줄에 `// @vitest-environment jsdom`을 적어 개발 의존성 `jsdom`의 가상 브라우저에서 실행합니다(예: `PolicyExplorer.dom.test.tsx`, 목록을 다시 불러와도 펼친 카드 유지) |
 | `npm run typecheck` | 타입 검사 |
 | `npm run build` | 타입 검사 후 `dist/`에 빌드 |
 | `npm run preview` | 빌드 결과 미리 보기 |

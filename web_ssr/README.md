@@ -13,7 +13,7 @@ React 화면·FastAPI(검색·AI 상담·Checker·RAG·LLM)·Neo4j·Qdrant는 �
 | URL Routing | `config/urls.py`, `policies/urls.py`, `policies/converters.py` | `/policies/<policy_id>/`만 받는다. ID 규칙 `^POL_[A-Z0-9_]+$`(최대 128자, FastAPI `selected_policy_id`와 같음). 형식이 틀리면 View 실행 전 404 |
 | View | `policies/views.py` `policy_detail()` | GET만 허용. 서비스 결과로 200 / 404 / 503 화면을 고른다 |
 | Service | `policies/services.py` `fetch_policy()` | FastAPI `GET /api/policies`를 `limit=500, offset=…`으로 끝까지 받아 **`policy_id`가 완전히 같은 1건**만 고른다. 정책명 검색(`q`)은 쓰지 않는다 |
-| Template | `templates/policies/detail.html` (`base.html`, `error.html`) | 정책명·기관·접수 상태·신청 기간·자격 원문·제출서류·공식 링크를 HTML로 채운다(자동 이스케이프 유지) |
+| Template | `templates/policies/detail.html` (`base.html`, `error.html`) | 정책명·기관·접수 상태·신청 기간·자격 원문·제출서류·공식 링크를 HTML로 채운다(자동 이스케이프 유지). 테마는 `<html data-theme>`에 서버가 넣는다 |
 | JS | `static/policies/detail.js` | 제출서류 더보기/접기만. JS가 없으면 서류가 모두 펼쳐진 채 보인다 |
 
 ## 데이터와 안전 규칙
@@ -23,6 +23,7 @@ React 화면·FastAPI(검색·AI 상담·Checker·RAG·LLM)·Neo4j·Qdrant는 �
 - 정책 없음 → 404. 연결 실패·타임아웃·5xx·JSON 오류·필수 필드(`policy_id`·`policy_name`·`reception_status`) 오류 → 503. 사용자 화면에는 내부 주소나 예외를 보여 주지 않는다.
 - 링크는 http/https이고 계정 정보가 없는 주소만 쓴다. 값이 없는 항목은 만들어 채우지 않고 "공식 원문에서 확인"으로 안내한다.
 - 접수 상태·일정은 FastAPI가 계산한 값을 React와 같은 규칙으로 보여 준다(일정 기준일이 오늘이 아니거나 상태와 어긋나면 날짜를 단정하지 않음). **접수 중 ≠ 내가 신청 가능**. 개인 자격 판정(Checker)은 React 상담에서 한다.
+- 화면 테마(#122): 선택 쿼리 `?theme=dark`일 때만 다크(`views.page_theme()`). 값이 없거나 다른 값이면 라이트다. React의 테마는 브라우저 저장소에 있어 다른 서버인 Django가 읽을 수 없으므로, React 상세 링크가 현재 테마를 이 쿼리로 넘긴다. 상세·404·503 화면 모두 같고, JS 없이도 적용된다. 다크 색은 `frontend/src/styles.css`의 `:root[data-theme="dark"]` 토큰과 같게 맞춘다.
 - DB·로그인·Admin·세션을 쓰지 않는다. 정책 목록은 메모리에 짧게 캐시한다(기본 60초, 한국 날짜가 바뀌면 새로 받음).
 - 저장소 루트 `.env`(API 키)를 읽지 않는다. `web_ssr/.env` 또는 OS 환경 변수만 읽는다.
 
