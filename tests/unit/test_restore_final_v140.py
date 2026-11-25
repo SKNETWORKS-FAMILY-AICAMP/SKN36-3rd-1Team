@@ -141,7 +141,7 @@ class CrossDbAndHashGuards(unittest.TestCase):
 
     def test_snapshot_criteria_and_package_points_are_fixed(self):
         self.assertEqual((restore.SNAPSHOT_DIMENSIONS, restore.SNAPSHOT_POINTS), (1024, 1139))
-        self.assertEqual(restore.EXPECTED, (249, 273, 672, 1139, 1147, 2702, 211))
+        self.assertEqual(restore.EXPECTED, (246, 262, 600, 1139, 1126, 2668, 211))
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             (folder / "snapshot").write_bytes(b"sample_only")
@@ -168,9 +168,9 @@ class RestoreExecutionPaths(unittest.TestCase):
         from database import handoff_data as hd, full_index as fi, hybrid_search as hs
         from database.neo4j import load_graph as lg
         from database.qdrant import store
-        documents = [{"document_id": f"DOC_SAMPLE_{i}", "policy_id": f"POL_SAMPLE_{i % 249}",
+        documents = [{"document_id": f"DOC_SAMPLE_{i}", "policy_id": f"POL_SAMPLE_{i % 246}",
                       "content_hash": hashlib.sha256(f"sample_only_{i}".encode()).hexdigest()}
-                     for i in range(273)]
+                     for i in range(262)]
         chunks = [{"point_id": f"sample_only_{i}", "document_id": documents[i % len(documents)]["document_id"]}
                   for i in range(restore.SNAPSHOT_POINTS)]
         hashes = {d["document_id"]: d["content_hash"] for d in documents}
@@ -197,7 +197,7 @@ class RestoreExecutionPaths(unittest.TestCase):
         package = {"manifest_lf_sha256": "sample_manifest", "snapshot_sha256": "sample_hash",
                    "vector_digest": restore.vector_digest(before)}
         graph = object()
-        validation = SimpleNamespace(ok=True, node_counts={"sample": 1147},
+        validation = SimpleNamespace(ok=True, node_counts={"sample": 1126},
                                      relationship_counts={"REQUIRES_CONDITION": 211, "sample": 2457})
         client, driver, runner = MagicMock(), MagicMock(), MagicMock()
         client.get_collections.return_value.collections = []
@@ -205,8 +205,8 @@ class RestoreExecutionPaths(unittest.TestCase):
             points_count=restore.SNAPSHOT_POINTS, config=SimpleNamespace(params=SimpleNamespace(
                 vectors=SimpleNamespace(size=restore.SNAPSHOT_DIMENSIONS, distance="Cosine"))))
         runner.read_rows.return_value = {"unused": True}  # replaced by contract-shaped rows below
-        runner.read_rows.side_effect = ([{"nodes": 1147, "relationships": 2702}],) if verify_only else (
-            [{"nodes": 0, "relationships": 0}], [{"nodes": 1147, "relationships": 2702}])
+        runner.read_rows.side_effect = ([{"nodes": 1126, "relationships": 2668}],) if verify_only else (
+            [{"nodes": 0, "relationships": 0}], [{"nodes": 1126, "relationships": 2668}])
         verification = {"ok": True, "node_properties": {"ok": True}, "relationship_properties": {"ok": True}}
         load_result = {"ok": True, "verification": verification}
         direct_result = verification
@@ -237,7 +237,7 @@ class RestoreExecutionPaths(unittest.TestCase):
         replace(hd, "verify_manifest_checksums", return_value=[])
         replace(hd, "load_documents", return_value=documents)
         replace(hd, "load_payload_metadata", return_value={})
-        replace(hd, "load_payload_chunks", return_value=[None] * 672)
+        replace(hd, "load_payload_chunks", return_value=[None] * 600)
         replace(fi, "manifest_sha256", return_value="sample_manifest")
         replace(fi, "build_config_chunks", return_value=(chunks, {}))
         replace(lg, "read_graph_input", return_value=graph)

@@ -211,8 +211,14 @@ class ApprovedReleaseTests(unittest.TestCase):
 
     def test_release_files_unchanged_and_manifest_matches(self):
         self.assertEqual(self.before, self.after)
-        # 릴리스 파일 수: #104에서 검색용 본문 source_text/DOC_STG_SEOUL_001_FAQ_2026.txt 추가(22 → 23)
-        self.assertEqual(len(self.before), 23)
+        # 릴리스 파일 수: #104에서 검색용 본문 source_text/DOC_STG_SEOUL_001_FAQ_2026.txt 추가(22 → 23),
+        # #110에서 신청 근거의 사업기간을 뺀 온통청년 본문 source_text/DOC_YC_*.txt 12개 추가(23 → 35),
+        # #113에서 신청 일정 근거 본문 source_text/DOC_GOV_033.txt·DOC_GOV_059.txt 2개 추가(35 → 37)
+        self.assertEqual(len(self.before), 37)
+        added_110 = {f"source_text/DOC_YC_{n}.txt" for n in ("005", "017", "020", "021", "022", "024", "027", "028",
+                                                               "041", "045", "063", "064")}
+        self.assertTrue(added_110 <= set(self.before))
+        self.assertTrue({"source_text/DOC_GOV_033.txt", "source_text/DOC_GOV_059.txt"} <= set(self.before))
         self.assertEqual(self.out["manifest_bad"], [])
 
     def test_release_selected_with_manifest_counts(self):

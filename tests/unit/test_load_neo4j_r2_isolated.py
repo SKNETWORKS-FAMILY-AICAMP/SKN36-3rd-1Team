@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from r2_release_gate import r2_release_only  # noqa: E402  (r2 실데이터 테스트는 r2 릴리스에서만)
 from test_neo4j_loader import FakeGraphRunner  # noqa: E402
 from test_update_b2_from_snapshot import FakeQdrant  # noqa: E402
 
@@ -143,10 +144,11 @@ class GuardTests(unittest.TestCase):
                 r2.server_info(runner)
 
 
+@r2_release_only
 class ReferenceTests(unittest.TestCase):
     def test_latest_release_counts_match_pinned_expectation(self):
         ref = Reference.get()
-        self.assertEqual(ref["counts"], (249, 273, 672, 1139, 1147, 2702, 211))
+        self.assertEqual(ref["counts"], (246, 262, 600, 1139, 1126, 2668, 211))
         self.assertEqual(ref["counts"], tuple(restore.EXPECTED))
         self.assertTrue(ref["validation"]["ok"])
         self.assertEqual(ref["manifest_lf_sha256"], seed.MANIFEST_LF_SHA256)
@@ -167,6 +169,7 @@ class ReferenceTests(unittest.TestCase):
                 r2.load_reference()
 
 
+@r2_release_only
 class LoadTests(unittest.TestCase):
     def setUp(self):
         self.ref = Reference.get()
@@ -175,7 +178,7 @@ class LoadTests(unittest.TestCase):
     def test_dry_run_on_empty_db_has_no_writes(self):
         output = r2.dry_run(self.runner, self.ref)
         self.assertEqual((output["state"], output["totals"], output["db_writes"]), ("empty", {"nodes": 0, "relationships": 0}, 0))
-        self.assertEqual(output["expected_totals"], {"nodes": 1147, "relationships": 2702})
+        self.assertEqual(output["expected_totals"], {"nodes": 1126, "relationships": 2668})
         self.assertRegex(output["fingerprint"], r"^[0-9a-f]{64}$")
         self.assertEqual(self.runner.writes(), [])
 
@@ -191,9 +194,9 @@ class LoadTests(unittest.TestCase):
     def test_load_writes_full_graph_into_the_verified_runner(self):
         result = r2.load(self.runner, self.ref, True, fingerprint(self.runner, self.ref))
         self.assertEqual(result["status"], "LOADED")
-        self.assertEqual(result["totals"], {"nodes": 1147, "relationships": 2702})
+        self.assertEqual(result["totals"], {"nodes": 1126, "relationships": 2668})
         self.assertTrue(result["verification_ok"])
-        self.assertEqual((len(self.runner.nodes), len(self.runner.relationships)), (1147, 2702))
+        self.assertEqual((len(self.runner.nodes), len(self.runner.relationships)), (1126, 2668))
         self.assertEqual(sum(1 for r in self.runner.relationships if r[0] == "REQUIRES_CONDITION"), 211)
         self.assertEqual(r2.verify(self.runner, self.ref)["ok"], True)
         complete = r2.dry_run(self.runner, self.ref)
@@ -236,9 +239,10 @@ class LoadTests(unittest.TestCase):
         with self.assertRaisesRegex(r2.Neo4jR2Error, "empty"):             # 빈 DB에는 resume 불가
             r2.load(FakeNeo4j(), self.ref, True, fingerprint(FakeNeo4j(), self.ref), resume=True)
         result = r2.load(runner, self.ref, True, partial["fingerprint"], resume=True)
-        self.assertEqual((result["status"], result["totals"]), ("LOADED", {"nodes": 1147, "relationships": 2702}))
+        self.assertEqual((result["status"], result["totals"]), ("LOADED", {"nodes": 1126, "relationships": 2668}))
 
 
+@r2_release_only
 class CrossDbTests(unittest.TestCase):
     """실제 B2 청크 1,139개 payload를 담은 FakeQdrant + 적재된 FakeNeo4j로 교차 검증 (벡터는 sample_only)."""
 
@@ -310,6 +314,7 @@ class CliTests(unittest.TestCase):
                 with self.subTest(url=url):
                     self.assertEqual(r2.main(["--neo4j-url", url]), 1)
 
+    @r2_release_only
     def test_dry_run_cli_uses_one_verified_driver_for_the_runner(self):
         from neo4j.exceptions import AuthError
         good = SimpleNamespace(verify_connectivity=lambda: None, close=lambda: None)

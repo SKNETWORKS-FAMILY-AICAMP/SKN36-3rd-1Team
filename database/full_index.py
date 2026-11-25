@@ -345,21 +345,27 @@ def execute_full_index(name: str, *, client, embedder, documents: list[dict[str,
             "upsert_seconds": round(upsert_seconds, 3), "verification": verification}
 
 
-def verify_full_index(name: str, *, client, chunks: list[dict[str, Any]], documents: list[dict[str, Any]]) -> dict[str, Any]:
-    """적재 결과 검증 (읽기 전용): 건수·id 집합·payload(원문 슬라이스·위치·해시·모델·규칙)·문서/정책 포함."""
+def verify_full_index(name: str, *, client, chunks: list[dict[str, Any]], documents: list[dict[str, Any]],
+                      collection: str | None = None) -> dict[str, Any]:
+    """적재 결과 검증 (읽기 전용): 건수·id 집합·payload(원문 슬라이스·위치·해시·모델·규칙)·문서/정책 포함.
+
+    collection: 검증할 실제 컬렉션 이름. 기본(None)은 구성의 정식 이름이다. r3 복원은 alias 공개 전에
+    임시 컬렉션을 넘긴다. 이름만 바뀌고 검증 항목·통과 기준은 같다.
+    """
     config = get_config(name)
+    target = config["collection"] if collection is None else collection
     content_hashes = {document["document_id"]: document["content_hash"] for document in documents}
     by_id = documents_by_id(documents)
     model, dim = config_model(config)
-    inspection = inspect_collection(client, config["collection"], chunks, content_hashes, model, dim)
-    payloads = _retrieve_payloads(client, config["collection"], [chunk["point_id"] for chunk in chunks])
+    inspection = inspect_collection(client, target, chunks, content_hashes, model, dim)
+    payloads = _retrieve_payloads(client, target, [chunk["point_id"] for chunk in chunks])
     slice_mismatch = sum(1 for payload in payloads.values()
                          if by_id[payload["document_id"]]["text"][payload["char_start"]:payload["char_end"]] != payload.get("text"))
     documents_present = {payload["document_id"] for payload in payloads.values()}
     policies_present = {payload["policy_id"] for payload in payloads.values()}
-    count = store.count_points(client, config["collection"])
+    count = store.count_points(client, target)
     result = {"state": inspection["state"], "count": count, "expected": len(chunks),
-              "id_set_equal": store.list_point_ids(client, config["collection"]) == {c["point_id"] for c in chunks},
+              "id_set_equal": store.list_point_ids(client, target) == {c["point_id"] for c in chunks},
               "payload_slice_mismatch": slice_mismatch,
               "missing_documents": sorted({d["document_id"] for d in documents} - documents_present),
               "missing_policies": sorted({d["policy_id"] for d in documents} - policies_present),

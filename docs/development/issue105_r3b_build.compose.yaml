@@ -1,0 +1,43 @@
+# Issue #105 r3b 갱신·적재·snapshot 생성 전용 (Qdrant + Neo4j) — #110 반영 재구축용. NEW project/volumes only.
+# - #104 기준 r3 build(issue105-r3-build, 56646/56677)·원본 #91(issue91-r2-*)·r2 검증·r3 verify·공유 DB와 별도 프로젝트다.
+#   #104 build는 보존 자산이며 r3 도구가 그 포트·인증 변수를 거부한다(restore_profiles_v140.PRESERVED_R3_ENVIRONMENTS).
+#   볼륨 이름: issue105-r3b-build_qdrant_storage / _neo4j_data / _neo4j_logs (external·container_name·바인드 마운트 없음)
+# - 인증은 이 프로젝트 전용 변수만 쓴다: ISSUE105_R3B_BUILD_QDRANT_API_KEY, ISSUE105_R3B_BUILD_NEO4J_PASSWORD.
+#   scripts/update_r3_collections.py·load_neo4j_r3_isolated.py·build_restore_bundle_r3.py가 같은 변수만 읽는다.
+# - 이미지: Qdrant 1.12.4 / Neo4j Community 5.26.32 (r2·r3와 같은 digest). 포트: Qdrant 127.0.0.1:56666, Bolt 127.0.0.1:56697.
+# - 출력(계획·보고서·snapshot·번들)은 .cache/issue105-r3b/ 아래에만 만든다.
+# - 정리에 `down -v`를 쓰지 않는다. 실패한 볼륨은 보존하고 새 프로젝트 이름으로 다시 시작한다.
+# - 이 파일은 승인 전까지 실행하지 않는다 (docker compose config --quiet 로 문법만 확인).
+name: issue105-r3b-build
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4@sha256:241edb9d7778327516ef218f8c74e1bd61b5ea42cd4f193cb8d0896199705636
+    ports:
+      - "127.0.0.1:56666:6333"
+    environment:
+      QDRANT__SERVICE__API_KEY: ${ISSUE105_R3B_BUILD_QDRANT_API_KEY:?Set ISSUE105_R3B_BUILD_QDRANT_API_KEY in this PowerShell session}
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    mem_limit: 1g
+    cpus: 2
+    restart: "no"
+  neo4j:
+    image: neo4j:5.26-community@sha256:42ef3ebfd671ebd01fdebb6dcbe80cf7b45eef2aa3d346ef4132f7ef31e67d2f
+    ports:
+      - "127.0.0.1:56697:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${ISSUE105_R3B_BUILD_NEO4J_PASSWORD:?Set ISSUE105_R3B_BUILD_NEO4J_PASSWORD in this PowerShell session}
+      NEO4J_server_memory_heap_initial__size: 128m
+      NEO4J_server_memory_heap_max__size: 256m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    mem_limit: 1280m
+    cpus: 2
+    restart: "no"
+volumes:
+  qdrant_storage:
+  neo4j_data:
+  neo4j_logs:

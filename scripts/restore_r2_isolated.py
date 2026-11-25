@@ -139,22 +139,25 @@ def inspect_containers(ids: list[str], docker: Callable[[list[str]], str]) -> li
     return json.loads(docker(["inspect", *ids])) if ids else []
 
 
-def verify_docker_ownership(docker: Callable[[list[str]], str] = run_docker) -> dict[str, Any]:
-    """두 포트에 게시된 컨테이너와 프로젝트 컨테이너가 정확히 기대한 두 개인지 확인하고 식별 정보를 돌려준다."""
+def verify_docker_ownership(docker: Callable[[list[str]], str] = run_docker, *, project: str = PROJECT,
+                            services: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
+    """두 포트에 게시된 컨테이너와 프로젝트 컨테이너가 정확히 기대한 두 개인지 확인하고 식별 정보를 돌려준다.
+    project·services 기본값은 r2 검증 프로젝트다 (r3 래퍼는 자기 프로젝트 값을 넘긴다)."""
+    services = SERVICES if services is None else services
     project_ids = sorted(docker(["ps", "-a", "-q", "--no-trunc", "--filter",
-                                 f"label=com.docker.compose.project={PROJECT}"]).split())
+                                 f"label=com.docker.compose.project={project}"]).split())
     identity: dict[str, Any] = {}
     seen: set[str] = set()
-    for service, spec in SERVICES.items():
+    for service, spec in services.items():
         ids = sorted(docker(["ps", "-a", "-q", "--no-trunc", "--filter", f"publish={spec['port']}"]).split())
         containers = inspect_containers(ids, docker)
         if len(containers) != 1:
             raise IsolationError(f"{spec['port']} 포트에 게시된 컨테이너가 {len(containers)}개입니다 (정확히 1개여야 함)")
         item = containers[0]
         labels = (item.get("Config") or {}).get("Labels") or {}
-        if (labels.get("com.docker.compose.project") != PROJECT
+        if (labels.get("com.docker.compose.project") != project
                 or labels.get("com.docker.compose.service") != service):
-            raise IsolationError(f"{spec['port']} 포트의 컨테이너가 {PROJECT}의 {service} 서비스가 아닙니다")
+            raise IsolationError(f"{spec['port']} 포트의 컨테이너가 {project}의 {service} 서비스가 아닙니다")
         state = item.get("State") or {}
         if not state.get("Running"):
             raise IsolationError(f"{service} 컨테이너가 실행 중이 아닙니다")
@@ -172,7 +175,7 @@ def verify_docker_ownership(docker: Callable[[list[str]], str] = run_docker) -> 
         identity[service] = {"id": item.get("Id"), "image": item.get("Image"), "started_at": state.get("StartedAt"),
                              "volumes": sorted(names)}
     if set(project_ids) != seen:
-        raise IsolationError(f"{PROJECT} 프로젝트 컨테이너가 기대한 2개와 다릅니다 ({len(project_ids)}개)")
+        raise IsolationError(f"{project} 프로젝트 컨테이너가 기대한 2개와 다릅니다 ({len(project_ids)}개)")
     return identity
 
 
@@ -195,11 +198,11 @@ def make_neo4j_driver(password: str):
     return driver
 
 
-def check_qdrant_auth(http_get=None) -> int:
+def check_qdrant_auth(http_get=None, *, url: str = QDRANT_URL) -> int:
     if http_get is None:
         import requests
         http_get = requests.get
-    status = getattr(http_get(f"{QDRANT_URL}/collections", timeout=5), "status_code", None)
+    status = getattr(http_get(f"{url}/collections", timeout=5), "status_code", None)
     if status != 401:
         raise IsolationError(f"키 없는 Qdrant 요청이 401이 아닙니다 (HTTP {status})")
     return status
@@ -216,9 +219,11 @@ def check_neo4j_auth(driver_factory=None) -> bool:
     raise IsolationError("틀린 비밀번호로 Neo4j에 접속됨 (인증 꺼짐)")
 
 
-def inspect_servers(qdrant_client, neo4j_runner, graph) -> dict[str, Any]:
-    """Qdrant·Neo4j 버전, 이름, 데이터 상태 (읽기 전용)."""
+def inspect_servers(qdrant_client, neo4j_runner, graph, *, expected_collections=None) -> dict[str, Any]:
+    """Qdrant·Neo4j 버전, 이름, 데이터 상태 (읽기 전용).
+    expected_collections 기본값은 r2 컬렉션 하나다 (r3 래퍼는 B2·B3 두 이름을 넘긴다)."""
     from database.neo4j import load_graph as lg
+    expected_collections = sorted(expected_collections or [restore.COLLECTION])
     version = getattr(qdrant_client.info(), "version", None)
     if version != EXPECTED_QDRANT_VERSION:
         raise IsolationError(f"Qdrant {version} ≠ {EXPECTED_QDRANT_VERSION}")
@@ -237,7 +242,7 @@ def inspect_servers(qdrant_client, neo4j_runner, graph) -> dict[str, Any]:
     graph_state = neo4j_graph_state(graph, neo4j_runner)
     if not collections and not aliases:
         qdrant_state = "empty"
-    elif collections == [restore.COLLECTION] and not aliases:
+    elif collections == expected_collections and not aliases:
         qdrant_state = "restored_collection"
     else:
         qdrant_state = "foreign_collections"
