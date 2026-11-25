@@ -79,7 +79,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   const catalogIds = new Set(catalog.map(row => row.policy.policy_id));
   const missingSaved = (state?.saved ?? []).filter(p => !catalogIds.has(p.policy_id));
   const options = useMemo(() => ({ regions: [...new Set(catalog.flatMap(r => r.regions))].sort(), categories: [...new Set(catalog.flatMap(r => r.categories))].sort() }), [catalog]);
-  const normalize = (text: string) => text.toLocaleLowerCase().replace(/\s/g, '');
+  const normalize = (text: string) => text.toLocaleLowerCase().replace(/\s/g, '').replace(/k-패스/g, 'k패스');
   const q = normalize(query);
   const rows = scheduledPolicies(policies.filter(row => (tab !== 'saved' || savedIds.has(row.policy.policy_id))
     && (!region || row.regions.includes(region)) && (!category || row.categories.includes(category))
