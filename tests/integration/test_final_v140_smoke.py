@@ -84,8 +84,11 @@ class FinalV140Smoke(unittest.TestCase):
         self.assertFalse(policy.get("application_end"))
         self.assertTrue(policy["application_status_note"])
         # test_hybrid_profiles_smoke.py:122~124는 동결 레거시 정적 경고 기대값이다.
-        # 최신 릴리스에는 이 정적 플래그 묶음을 적용하지 않는다.
-        self.assertEqual(self.results["POL_GOV_006"]["static_quality_flags"]["status"], "not_applicable")
+        # 최신 릴리스에는 이 레거시 정적 플래그 묶음을 적용하지 않는다.
+        # Issue #102: 대신 v1.4.0 전용 목록이 적용된다 (목록 파일 생성 후 실행).
+        static = self.results["POL_GOV_006"]["static_quality_flags"]
+        self.assertEqual((static["status"], static["file"], static["data_version"]),
+                         ("applied", "neo4j_semantic_flags_v1_4_0.json", "1.4.0-candidate"))
 
     def test_gov011_corrected_age(self):
         rows = self.runner.read_rows(
