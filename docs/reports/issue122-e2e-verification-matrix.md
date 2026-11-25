@@ -127,8 +127,8 @@
 
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
-| 09-1 | 새 worktree, `.env` 없음, `python -m pytest tests/unit -q -rf` | PR #127 병합 후: **실패 0**. skip은 `NOT_APPLICABLE`(데이터셋 가드)·`NOT_RUN`(원본 없음) 사유만 | 테스트 출력 + skip 사유 목록 | PR #127 브랜치(e5da79c) 기준 1941 passed, 82 skipped, 실패 0. 병합 전 dev(66321e7)는 55 failed + 20 errors(subtest 실패 포함 64개 테스트) | |
-| 09-2 | 같은 worktree, `LIFEPOLICY_DATASET_DIR=data/handoff`, `tests/README.md` 2번 명령(v1.3.2 legacy 파일 10개) | 09-1에서 건너뛴 v1.3.2 테스트가 통과. **실패 0** | 테스트 출력 | PR #127 브랜치 기준 239 passed, 2 skipped, 실패 0. 병합 전 dev는 2 failed(v1.4.0 기대값 테스트) | |
+| 09-1 | 새 worktree, `.env` 없음, `python -m pytest tests/unit -q -rf` | PR #127 병합 후: **실패 0**. skip은 사유가 붙은 것만(`NOT_APPLICABLE` 데이터셋·r2 릴리스 가드, `NOT_RUN` 로컬 B2·B3 덤프 없음 등) | 테스트 출력 + skip 사유 목록 | PR #127 브랜치(7341f45, `data/raw` 없음) 기준 1943 passed, 80 skipped, 실패 0. contacts 경계 테스트(DOC_GOV_029·048)는 커밋된 본문을 읽어 skip 없이 실행. 병합 전 dev(66321e7)는 55 failed + 20 errors(subtest 실패 포함 64개 테스트) | |
+| 09-2 | 같은 worktree, `LIFEPOLICY_DATASET_DIR=data/handoff`, `tests/README.md` 2번 명령(v1.3.2 legacy 파일 10개) | 09-1에서 건너뛴 v1.3.2 테스트가 통과. **실패 0** | 테스트 출력 | PR #127 브랜치(7341f45) 기준 239 passed, 2 skipped, 실패 0. 병합 전 dev는 2 failed(v1.4.0 기대값 테스트) | |
 | 09-3 | `cd frontend && npm test` · `npm run build` | React 테스트 전부 통과(R119 기준 174건), 타입 검사·빌드 통과 | 테스트 출력 | **기존 증빙** R119·R125 PASS | |
 
 ## 4. 최종 회차 실행 순서
