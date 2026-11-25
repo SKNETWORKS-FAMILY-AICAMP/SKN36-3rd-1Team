@@ -21,7 +21,7 @@
 | R121 | [PR #121](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/121) · [ssr120-merge-verification](../development/ssr120-merge-verification/) | PR #121 병합 전 통합본 |
 | R124 | [issue120-122-django-ssr-followup.md](issue120-122-django-ssr-followup.md) (이 검증표와 같은 [PR #124](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/124)) | `6b4fdc9` |
 | R123 | [issue75-browser-regression-20261125.md](issue75-browser-regression-20261125.md) · #75 브라우저 회귀 중간 검증표 (PR #123에서 이 PR로 옮김) | `e853282` |
-| R125 | [PR #125](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/125) (열림) · K-패스 목록 검색 별칭 | `1f43e62` |
+| R125 | [PR #125](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/125) (열림) · K-패스 목록 검색 별칭(공백·붙임표 무시, 회귀 테스트 6건) | `dde7f31` |
 | R112 | [PR #112](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/112) (열림) · 자녀 월령 Checker·Generator | `dabc7de` |
 
 ## 2. 선행 조건 상태
@@ -30,12 +30,12 @@
 
 | 선행 | 상태 | 최종 검증에 주는 영향 |
 | --- | --- | --- |
-| #105 최신 DB 번들 | 종료. r3d 독립 복원 PASS | 번들 기준은 확정. **팀 공유 환경의 FastAPI가 이 번들 DB에 붙는지는 미확인** (R124의 503) |
+| #105 최신 DB 번들 | 종료. r3d 독립 복원 PASS | 번들 기준은 확정. 2026-11-25에 FastAPI를 r3d verify DB에 붙여 상담 200 확인(E2E-01-3). 루트 `.env`는 옛 포트라 그대로는 503 |
 | #102 품질 플래그 | 열림 | E2E-05-4 BLOCKED |
 | #39 자녀 월령 | 열림, PR #112 리뷰 중 | E2E-04-3 BLOCKED |
 | #76 공식 자격기준 | 열림 (#76-A 미구현) | `official_requirements`는 계약상 `null` 유지가 기대 결과 |
 | #78 제외 사유 | 종료. Checker 로직만 구현, Pipeline·API 연결은 후속 (ask_contract §8.3) | `exclusion_reasons`는 API에서 `null`. 연결 작업 이슈 번호 확인 필요 |
-| #103 K-패스·FAQ·세종 | 열림, PR #125 리뷰 중(목록 검색만) | 상담 검색·FAQ·세종 항목 BLOCKED |
+| #103 K-패스·FAQ·세종 | 열림, PR #125 리뷰 중(목록 검색) | 데이터(명칭·FAQ 3건·세종 신청 주소 비움)는 R3D에 반영. 상담 검색·FAQ·세종 상담은 2026-11-25 확인(E2E-05-2·05-3·05-5) |
 | #107 신청 일정 | 열림, 관련 PR #109·#110·#113·#118·#119 병합 | 일정 회귀 테스트·브라우저 증빙 있음 |
 | #120 / PR #121 Django SSR | 종료·병합 | 1차 검증 R124. 실패 2건 후속 |
 | #90 인천 연령 근거 | 열림 | E2E-05-5는 `needs_review` 유지가 기대 결과 |
@@ -49,23 +49,23 @@
 | --- | --- | --- | --- | --- | --- |
 | 01-1 | `GET /api/policies` (필터 없음) | HTTP 200, 정책 249건, `dataset_version=1.4.0-candidate`, manifest가 §1 값과 같음 | 응답 JSON의 `total`·`dataset_version`·manifest 필드 발췌, 실행 커밋 | **기존 증빙** R119·R124 (HTTP 200, 249건, manifest 일치) | |
 | 01-2 | 복원 번들 `--verify-only` (읽기 전용) | PASS, Qdrant B2 1,249·B3 1,338, Neo4j 1,147·2,702, 교차 검증 통과 | `--verify-only` 보고서 JSON의 결과·건수 | **기존 증빙** RUNBOOK §5.12 (r3d verify 환경). 팀 공유 환경은 미확인 | |
-| 01-3 | 상담용 FastAPI가 실제로 연결한 Neo4j·Qdrant 주소·컬렉션 | 01-2와 같은 DB·컬렉션. 다른 DB(빈 기본 컨테이너 등)를 보지 않음 | `/health` 응답과 서버 시작 로그(비밀값 제외) | **미실행** | |
+| 01-3 | 상담용 FastAPI가 실제로 연결한 Neo4j·Qdrant 주소·컬렉션 | 01-2와 같은 DB·컬렉션. 다른 DB(빈 기본 컨테이너 등)를 보지 않음 | `/health` 응답과 서버 시작 로그(비밀값 제외) | **PASS** (2026-11-25) r3d verify DB(Qdrant 56756·Neo4j 56787, alias `exp_b2_qwen3emb06b_v140_v1`)에 연결해 상담 11건 200. 루트 `.env`는 옛 포트(17687·16333)라 그대로 띄우면 503 → 아래 주의 참고. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
 
 ### E2E-02 실제 Neo4j/Qdrant 검색 → Checker → Pipeline → FastAPI
 
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
-| 02-1 | `POST /api/ask` 일반 상담 (가상 프로필, 질문 1건) | HTTP 200, `policy_checks` 1건 이상, 각 `policy_id`가 249개 목록에 있음 | 요청·응답 JSON (프로필은 가상값) | **기존 증빙** R119 (HTTP 200). R124 환경은 503 | |
-| 02-2 | `POST /api/ask` + `selected_policy_id=POL_YC_007` | HTTP 200, 첫 정책이 `POL_YC_007`, 다른 정책 혼입 없음 | 요청·응답 JSON | R119 선택 상담 200 · **R124 FAIL** (503 `SEARCH_BACKEND_UNAVAILABLE`) | |
+| 02-1 | `POST /api/ask` 일반 상담 (가상 프로필, 질문 1건) | HTTP 200, `policy_checks` 1건 이상, 각 `policy_id`가 249개 목록에 있음 | 요청·응답 JSON (프로필은 가상값) | **PASS** (2026-11-25) 일반 상담 9건 모두 200, 정책 ID 모두 249개 목록 안. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
+| 02-2 | `POST /api/ask` + `selected_policy_id=POL_YC_007` | HTTP 200, 첫 정책이 `POL_YC_007`, 다른 정책 혼입 없음 | 요청·응답 JSON | **PASS** (2026-11-25) R124와 같은 질문으로 200, `policy_checks`=`POL_YC_007` 1건, 근거 `DOC_YC_007`만. `POL_YC_065` 선택 상담도 같은 결과. R124의 503은 `.env` 주소 문제였다. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
 | 02-3 | 02-1을 같은 입력으로 2회 | 검색·생성 각 1회 호출, 정책 ID 목록 동일 | 서버 로그 또는 단위 테스트 결과 | **기존 증빙** R119 (모의 검색·생성기로 각 1회 호출 확인). 실DB 반복은 미실행 | |
 
-> 02-2의 503은 검색 연결 문제로 보고 있다(R124). 원인 확인 담당은 R124에 적힌 대로 나지인 → 필요하면 DB 담당. 해결 전까지 02·03·04·05·07-3은 BLOCKED로 둔다.
+> **503 원인(2026-11-25 확인):** 루트 `.env`의 `NEO4J_URI`·`QDRANT_URL`이 이 PC에 없는 옛 포트(17687·16333)를 가리켰다. 코드 문제는 아니다. r3d verify DB 주소와 런북 §3의 인증 파일(`.cache\issue105-r3d\secrets\`, DPAPI)을 그 프로세스 환경 변수로만 넣고 `--env-file <루트 .env>`로 띄우면 연결된다(백엔드는 이미 있는 환경 변수를 덮어쓰지 않는다). 요청 본문에는 `history: []`가 필요하다(없으면 422). 아래 BLOCKED 중 연결만 기다리던 항목은 이 방법으로 다시 실행한다.
 
 ### E2E-03 LLM 답변·자격 판정·정책 ID·문서/청크 출처 정합성
 
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
-| 03-1 | 02-1·02-2 응답 | 답변의 인용 번호마다 `citations`에 같은 번호가 있고, 그 `policy_id`·`document_id`·`chunk_id`가 같은 정책의 문서·청크임 | 인용 번호 ↔ citation ↔ Neo4j `Policy-Document-Chunk` 대조표 | **BLOCKED** (02-2) | |
+| 03-1 | 02-1·02-2 응답 | 답변의 인용 번호마다 `citations`에 같은 번호가 있고, 그 `policy_id`·`document_id`·`chunk_id`가 같은 정책의 문서·청크임 | 인용 번호 ↔ citation ↔ Neo4j `Policy-Document-Chunk` 대조표 | **PASS(문서 단위)** 11건 모두 인용 번호가 `citations` 범위 안이고, 근거 `document_id`가 릴리스 `nodes_document`에서 답한 정책의 문서다. `citations`에는 계약상 `chunk_id`가 없어 청크 단위 대조는 하지 않았다. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
 | 03-2 | 같은 응답 | 카드의 판정(`eligible`·`ineligible`·`needs_check`)이 Checker 결과와 같고, 답변 문장이 판정과 반대로 말하지 않음 | 응답의 `policy_checks[].status` ↔ 답변 문장 발췌 | **BLOCKED** | |
 | 03-3 | 같은 응답 | `source_url`·`retrieved_at`·`content_hash`가 manifest 원문 값과 같음 | citation 1건 이상 원문 파일 대조 | **BLOCKED** | |
 | 03-4 | 화면 | React 카드의 정책명·출처 링크가 응답과 같음 | 브라우저 스크린샷 + 응답 JSON | **기존 증빙** R119 (공식 근거·추가 확인 필요 판정 반영 확인) | |
@@ -85,10 +85,10 @@
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
 | 05-1 | 홈 목록 검색창에 PR #125의 6종 표기 | 6종 모두 `POL_STG_MOLIT_001` 표시 | 표기별 결과 스크린샷 또는 DOM 기록 | R123 FAIL(재현) → **R125에서 PASS** (PR 열림, 병합 후 재확인) | |
-| 05-2 | 상담 질문에 같은 6종 표기 | 검색 결과·카드에 `POL_STG_MOLIT_001`, 정책명은 공식 명칭 | 응답 JSON | **BLOCKED** (#103 상담 검색 범위 + 02-2) | |
-| 05-3 | #103의 FAQ 3건 관련 질문 | 추가된 FAQ 청크가 근거로 인용되거나, '제외'로 결정된 FAQ는 인용되지 않음 | FAQ별 반영 결과 기록 ↔ citation `chunk_id` | **BLOCKED** (#103 FAQ 미반영) | |
+| 05-2 | 상담 질문에 같은 6종 표기 | 검색 결과·카드에 `POL_STG_MOLIT_001`, 정책명은 공식 명칭 | 응답 JSON | **PASS** (2026-11-25) "○○ 신청 방법 알려줘" 6종 모두 `POL_STG_MOLIT_001` 1건, 정책명 '모두의 카드(K-패스) (대중교통비 환급지원)'. 근거: 모두의카드 2종은 `DOC_STG_MOLIT_001_FAQ_2026`, K패스 계열 4종은 `DOC_STG_MOLIT_001_GOV24`. 상담 검색 별칭 표 없이도 찾았다. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
+| 05-3 | #103의 FAQ 3건 관련 질문 | 추가된 FAQ 청크가 근거로 인용되거나, '제외'로 결정된 FAQ는 인용되지 않음 | FAQ별 반영 결과 기록 ↔ citation `chunk_id` | **PASS(문서 단위)** FAQ 3건은 데이터·R3D 번들에 반영돼 있다(`faq_review_notes`, 문서 노드 3개, 청크 25·19·13). 질문별 근거: 모두의 카드 한시 기간 → `DOC_STG_MOLIT_001_FAQ_2026`(2026-04-01~09-30), 2011년 이전 취업자 감면 → `DOC_STG_NTS_001_FAQ_2026`(불가), 서울 청년수당 공고 위치 → `DOC_STG_SEOUL_001_FAQ_2026`(청년몽땅정보통). 답변 내용이 FAQ 원문과 같다. 청크 단위 대조는 03-1과 같은 이유로 하지 않았다. [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
 | 05-4 | #102의 보류 누락 37개 중 예시 (POL_GOV_008·POL_GOV_011·POL_GOV_016·POL_005) | 해당 항목이 '확인 필요'로 표시되고 '충족'으로 보이지 않음 | 응답 JSON의 조건별 판정 | **BLOCKED** (#102 미반영) | |
-| 05-5 | POL_YC_065 (세종 위원회) 목록·상세·상담 | 정책 유지, '신청하기' 버튼 없음, '위원회별 청년위원 모집 일정은 공식 공고 확인 필요' 안내 | 목록·상세 스크린샷 | 신청 버튼 미노출은 **기존 증빙** R119. 안내 문구는 **BLOCKED** (#103) | |
+| 05-5 | POL_YC_065 (세종 위원회) 목록·상세·상담 | 정책 유지, '신청하기' 버튼 없음, '위원회별 청년위원 모집 일정은 공식 공고 확인 필요' 안내 | 목록·상세 스크린샷 | 신청 버튼 미노출은 **기존 증빙** R119. 상담은 **PASS(참고 1건)** 선택 상담 200, `official_apply_url=null`·`reception_status=unknown`·일정 없음. 답변은 "신청 방법은 공고문 참조, 모집 일정은 원문에 없어 확인되지 않음". 다만 "신청 URL은 세종시 홈페이지로 제시" 문장이 섞여 있어 신청 주소를 비운 의도와 다르게 읽힐 수 있다(팀 판단). [issue122-r3d-ask-20261125.json](issue122-r3d-ask-20261125.json) | |
 | 05-6 | POL_STG_ICN_001 (인천 서구) 상담, 가상 나이 19·38·40 | #90 반영 전: 연령 조건 `needs_review`, 확정 판정 안 함. 반영 후: 근거 문서가 사업안내서이고 출처가 카드에 표시 | 응답 JSON + citation `document_id` | **미실행** (02 해결 필요) | |
 
 ### E2E-06 FastAPI GET /api/policies 및 POST /api/ask
@@ -96,7 +96,7 @@
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
 | 06-1 | `GET /api/policies` 필터·정렬 조합 (지역·분야·접수 상태, 마감 임박순·이름순) | HTTP 200, 필터가 전체 249건 기준으로 동작, 검색·LLM 호출 없음 | `tests/integration/test_policy_catalog_api.py` 결과 + 응답 샘플 1건 | **기존 증빙** R119 (16건 통과). R124에서는 이 테스트가 출력 없이 멈춰 중단 | |
-| 06-2 | `POST /api/ask` 계약 필드 (`selected_policy_id`, `policy_checks[].application_schedule`·`required_documents`·`requirement_excerpts`·`contacts`) | ask_contract v1.5 §8.3 형식과 일치, 없는 값은 `null` | 응답 JSON ↔ 계약 문서 대조 | **BLOCKED** (02-2) | |
+| 06-2 | `POST /api/ask` 계약 필드 (`selected_policy_id`, `policy_checks[].application_schedule`·`required_documents`·`requirement_excerpts`·`contacts`) | ask_contract v1.5 §8.3 형식과 일치, 없는 값은 `null` | 응답 JSON ↔ 계약 문서 대조 | **일부 확인** `POL_YC_007` 응답의 `policy_checks` 필드 13개(`agency`·`application_schedule`·`conditions`·`contacts`·`exclusion_reasons`·`official_apply_url`·`official_requirements`·`policy_id`·`policy_name`·`reception_status`·`required_documents`·`requirement_excerpts`·`source_url`)가 모두 있다. 값 형식의 계약 대조는 **미실행** | |
 | 06-3 | `POST /api/ask` 잘못된 요청 (필수값 누락·형식 오류) | 422, 입력값 미노출 | 응답 JSON | **미실행** | |
 
 ### E2E-07 Django SSR 정책 상세보기와 React 카드 새 탭
