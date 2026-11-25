@@ -10,11 +10,10 @@ import logging
 import re
 from dataclasses import dataclass
 from concurrent.futures import Future
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from threading import Lock
 from urllib.parse import urlsplit
-from zoneinfo import ZoneInfo
 
 import requests
 from django.conf import settings
@@ -24,7 +23,7 @@ from .converters import is_policy_id
 
 logger = logging.getLogger(__name__)
 
-KST = ZoneInfo("Asia/Seoul")
+KST = timezone(timedelta(hours=9))
 PAGE_SIZE = 500  # FastAPI limit 최대값(main.py Query(le=500))
 MAX_PAGES = 50  # 응답 이상으로 끝나지 않는 반복을 막는다
 RECEPTION_STATUSES = frozenset({"before", "open", "closed", "unknown"})

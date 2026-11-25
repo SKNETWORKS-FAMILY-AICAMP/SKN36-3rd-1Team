@@ -17,7 +17,7 @@ RUN_ID = "RUN_ISSUE41_RUNPOD"
 
 
 def source_data():
-    if hd.dataset_version() != "1.4.0-candidate" or any(not r["matched"] for r in hd.verify_manifest_checksums()):
+    if hd.dataset_version() != hd.RELEASE_V140_VERSION or any(not r["matched"] for r in hd.verify_manifest_checksums()):
         raise ValueError("Local release checksum/version mismatch")
     docs = hd.load_documents(verify_hash=True)
     chunks = fi.build_config_chunks(er.CONFIG, docs)[0]
@@ -65,7 +65,7 @@ def export_package(client, folder):
     folder.mkdir(parents=True)
     with (folder / "inputs.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows: stream.write(json.dumps(row, ensure_ascii=False) + "\n")
-    manifest = {"schema": 1, "dataset": "1.4.0-candidate", "model": worker.MODEL,
+    manifest = {"schema": 1, "dataset": hd.RELEASE_V140_VERSION, "model": worker.MODEL,
         "model_digest": worker.MODEL_DIGEST, "dimension": worker.DIM, "input_rule": worker.RULE,
         "count": worker.COUNT, "total_points": er.POINTS, "existing_ids": sorted(records),
         "existing_records_digest": er.digest(records), "manifest_sha256": fi.manifest_sha256(),

@@ -14,12 +14,14 @@ pytest가 설치되어 있다면 아래도 동일하게 동작한다.
 5) 비정상 청크 27건 선택 제외, 페이지 번호 규칙, 인접 청크 조회 가능 여부
 """
 
+import hashlib
 import re
 import sys
 import unittest
 import uuid
 from collections import Counter, defaultdict
 from pathlib import Path
+from unittest.mock import patch
 
 # 프로젝트 루트를 import 경로에 추가한다.
 # (tests/ 폴더에 __init__.py가 없어서, 그대로 두면 database 모듈을 찾지 못할 수 있다.)
@@ -66,6 +68,19 @@ CHUNK_ID_CONTRACT = re.compile(r"^(DOC_[A-Za-z0-9_]+_(P[0-9]+_)?C[0-9]+|CHK_[A-Z
 
 
 class TestManifest(unittest.TestCase):
+    def test_checksum_match_preserves_line_ending_order_and_stops_on_match(self):
+        lf = b"sample_only\n"
+        crlf = b"sample_only\r\n"
+        for raw, expected_bytes, matched_as, hash_calls in (
+            (lf, lf, "raw", 1),
+            (crlf, lf, "lf", 2),
+            (lf, crlf, "crlf", 3),
+            (lf, b"different_bytes", None, 3),
+        ):
+            with self.subTest(matched_as=matched_as), patch.object(hd, "_sha256", wraps=hd._sha256) as sha256:
+                self.assertEqual(hd.manifest_checksum_match(raw, hashlib.sha256(expected_bytes).hexdigest()), matched_as)
+                self.assertEqual(sha256.call_count, hash_calls)
+
     def test_all_files_match_manifest_checksum(self):
         results = hd.verify_manifest_checksums()
         failed = [r["file"] for r in results if not r["matched"]]
