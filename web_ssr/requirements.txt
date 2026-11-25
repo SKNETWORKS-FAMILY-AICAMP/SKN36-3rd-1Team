@@ -1,0 +1,5 @@
+# SSOK 정책 상세 SSR(Django) 의존성. 저장소 루트 requirements.txt와 별도로 설치한다.
+# Django 5.2 LTS (Python 3.10~3.13 지원, 보안 지원 2028-04까지). 검증: Python 3.12 / Django 5.2.19
+Django==5.2.19
+# FastAPI 서버→서버 호출용. 루트 requirements.txt와 같은 범위
+requests>=2.31.0
