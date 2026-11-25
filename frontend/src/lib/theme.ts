@@ -10,11 +10,21 @@ export function currentTheme(): Theme {
   return typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
+// 정책 카드마다 감시자를 따로 만들지 않도록 <html> 감시자 하나를 함께 쓴다
+const listeners = new Set<() => void>();
+let observer: MutationObserver | null = null;
+
 const subscribe = (onChange: () => void) => {
   if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') return () => {};
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  return () => observer.disconnect();
+  listeners.add(onChange);
+  if (!observer) {
+    observer = new MutationObserver(() => listeners.forEach(listener => listener()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+  return () => {
+    listeners.delete(onChange);
+    if (!listeners.size) { observer?.disconnect(); observer = null; }
+  };
 };
 
 /** 테마 버튼을 누르면 다시 그려서 링크 주소도 바로 바뀐다. 서버 렌더링(테스트)에서는 라이트 */

@@ -8,6 +8,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { LIFE_STAGES } from '../config/graph';
+import type { Theme } from './theme';
 
 export type Route =
   | { page: 'ask' }
@@ -47,7 +48,7 @@ const DETAIL_POLICY_ID = /^POL_[A-Z0-9_]{1,124}$/;
  * 다크 테마면 ?theme=dark를 붙여 상세 페이지도 같은 테마로 연다. 라이트는 기본값이라 붙이지 않는다.
  */
 export function policyDetailHref(policyId: string, base = import.meta.env.VITE_POLICY_DETAIL_BASE_URL as string | undefined,
-  theme: 'light' | 'dark' = 'light'): string | null {
+  theme: Theme = 'light'): string | null {
   if (!base?.trim() || !DETAIL_POLICY_ID.test(policyId)) return null;
   try {
     const root = new URL(base.trim());
