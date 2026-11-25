@@ -210,16 +210,16 @@ class ReferenceAndLoadTests(unittest.TestCase):
             r3.cross_check(qdrant, runner, self.ref, pins=final_sample_pins())
         self.assertEqual(qdrant.writes, [])
 
-    def test_real_c0_pins_refuse_load_and_cross_check_before_any_write(self):
-        """실제 R3_PINS(C0 pending, 249정책): 계획·digest가 미확정이라 Neo4j 적재와 교차 검증이 기준값 게이트에서 거부된다.
-        게이트 통과 뒤의 digest 비교는 위 test_final_shape_pins_*(final_sample_pins)가 확인한다."""
+    def test_real_final_pins_pass_load_and_cross_check_gates_then_compare_digests(self):
+        """실제 R3_PINS(C2 stage2, 249정책): Neo4j 적재(테스트 더블 FakeNeo4j에만)와 교차 검증 모두 기준값 게이트를 통과하고,
+        교차 검증은 그 다음 단계에서 sample_only 벡터가 실제 고정 Point 수·digest와 달라 거부된다."""
         runner = FakeNeo4j()
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-            r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), docker=self.docker)
+        result = r3.load(runner, self.ref, True, fingerprint(runner, self.ref, self.docker), docker=self.docker)
+        self.assertEqual(result["status"], "LOADED")
         qdrant = R3Qdrant({profiles.R3_COLLECTIONS[k]["collection"]: self.points[k] for k in profiles.COLLECTION_KEYS})
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+        with self.assertRaisesRegex(r3.Neo4jR3Error, "b2 Point .*r3 고정값과 다릅니다"):
             r3.cross_check(qdrant, runner, self.ref)
-        self.assertEqual((runner.writes(), qdrant.writes), ([], []))
+        self.assertEqual(qdrant.writes, [])
 
     def test_load_stops_before_writing_without_build_ownership(self):
         runner = FakeNeo4j()

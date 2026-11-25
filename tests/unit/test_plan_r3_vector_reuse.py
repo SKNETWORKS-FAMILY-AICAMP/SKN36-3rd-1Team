@@ -129,11 +129,12 @@ class ValidatePlanTests(unittest.TestCase):
             planner.validate_plan(self.plans["b2"], self.s.release, stage1_pins(), self.s.sources,
                                   require_pins=True, deferred=profiles.UPDATE_STAGE_DEFERRED_PINS)
 
-    def test_real_c0_pins_block_write_validation_and_still_compare_the_fixed_values(self):
-        """실제 R3_PINS(C0 pending): 쓰기용 검증(최종·갱신 단계 모두)은 기준값 게이트에서 거부되고,
-        dry-run 검증도 이미 확정된 값(points 1249 등)을 대조해 다른(sample_only) 계획을 거부한다."""
+    def test_real_final_pins_pass_the_gate_and_still_compare_the_fixed_values(self):
+        """실제 R3_PINS(C2 stage2, 미확정 0): 쓰기용 검증(최종·갱신 단계 모두)이 기준값 게이트를 통과한 뒤,
+        확정된 계획 값(points·reuse·plan_sha256 등)과 달라 다른(sample_only) 계획을 거부한다. dry-run 검증도 같은 값을 대조한다."""
         for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
-            with self.subTest(deferred=bool(deferred)), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
+            with self.subTest(deferred=bool(deferred)), \
+                    self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다.*plan_sha256"):
                 planner.validate_plan(self.plans["b2"], self.s.release, profiles.r3_pins(), self.s.sources,
                                       require_pins=True, deferred=deferred)
         with self.assertRaisesRegex(planner.PlanError, "r3 고정값과 다릅니다"):

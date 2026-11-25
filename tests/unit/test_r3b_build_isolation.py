@@ -366,14 +366,13 @@ class NewVerifyProfileTests(unittest.TestCase):
         self.assertEqual(new.parent, old.parent)                                 # 같은 잠금 폴더, 다른 파일
 
     def test_single_r3_pins_apply_to_the_new_verify_profile(self):
-        """verify 환경도 환경과 무관한 단일 R3_PINS를 쓴다. 현재 C0(249정책)라 최종 확정(C2) 전에는 verify 복원이 불가능하다."""
+        """verify 환경도 환경과 무관한 단일 R3_PINS를 쓴다. 현재 C2(249정책, 미확정 0)라 verify 복원의 기준값 게이트가 열린다."""
         pins = profiles.R3_PINS
         self.assertEqual((profiles.pin_stage(), pins["manifest_lf_sha256"][:8],
                           pins["collections"]["b2"]["points"], pins["collections"]["b3"]["points"],
                           pins["release_counts"]["neo4j_nodes"], pins["release_counts"]["neo4j_relationships"]),
-                         ("pending", "b3130722", 1249, 1338, 1147, 2702))
-        with self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-            profiles.require_finalized()
+                         ("stage2", "b3130722", 1249, 1338, 1147, 2702))
+        self.assertIs(profiles.require_finalized(), profiles.R3_PINS)
         self.assertEqual(bundle.VERIFY_COMPOSE, NEW_VERIFY["compose"])           # 새 번들의 compose.yaml 원본
 
     def test_bundle_package_labels_the_profile_compose(self):

@@ -71,22 +71,35 @@ class R3PinTests(unittest.TestCase):
                   if pins["collections"][k]["vector_digest"] is not None]
         self.assertEqual(len(set(finals)), len(finals))                            # 컬렉션마다 다른 값
 
-    def test_real_r3_pins_are_c0_pending_for_the_249_release(self):
-        """C0(pending): 릴리스 파일에서 확인한 manifest·건수·points만 확정. 확정 쓰기는 기준값 게이트에서 모두 거부된다."""
+    def test_real_r3_pins_are_c2_stage2_for_the_249_release(self):
+        """C2(stage2): C1 계획 값에 더해 r3d build --index 뒤(state=complete) 최종 전체 vector_digest까지 확정. 미확정 0."""
         pins = profiles.R3_PINS
-        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("pending", "pending"))
+        self.assertEqual((profiles.R3_PIN_STAGE, profiles.pin_stage()), ("stage2", "stage2"))
         self.assertEqual(pins["manifest_lf_sha256"], "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da")
         self.assertEqual(pins["release_counts"], {"policies": 249, "documents": 273, "release_chunks": 672,
                                                   "neo4j_nodes": 1147, "neo4j_relationships": 2702,
                                                   "requires_condition": 211})
         self.assertEqual({k: pins["collections"][k]["points"] for k in profiles.COLLECTION_KEYS}, {"b2": 1249, "b3": 1338})
         self.assertEqual({k: pins["collections"][k]["remove_count"] for k in profiles.COLLECTION_KEYS}, {"b2": 0, "b3": 0})
-        self.assertEqual(sorted(profiles.missing_pins()),
-                         sorted(f"collections.{k}.{f}" for k in profiles.COLLECTION_KEYS for f in self.PLAN_FIELDS))
-        self.assertFalse(profiles.is_finalized())
-        for deferred in ((), profiles.UPDATE_STAGE_DEFERRED_PINS):
-            with self.subTest(deferred=deferred), self.assertRaisesRegex(profiles.ProfileError, "확정되지 않았습니다"):
-                profiles.require_finalized(deferred=deferred)
+        plan_values = {k: {f: pins["collections"][k][f] for f in ("reuse_count", "embed_count", "delete_count",
+                                                                  "reuse_vector_digest", "plan_sha256")}
+                       for k in profiles.COLLECTION_KEYS}
+        self.assertEqual(plan_values, {
+            "b2": {"reuse_count": 1229, "embed_count": 20, "delete_count": 4,
+                   "reuse_vector_digest": "ec0a272725b360e73617d5b7c14aeac61f9350a9307a33af4b8e20d249306094",
+                   "plan_sha256": "16dc4a3ee31d62416bd59d10fe3bf2b47a160d1dc4eef9ff2fb5580454a1b994"},
+            "b3": {"reuse_count": 1316, "embed_count": 22, "delete_count": 4,
+                   "reuse_vector_digest": "40e2eb411da501ea5411fd8df52093092e8445f1f648cd5a3b7cae70ac924de2",
+                   "plan_sha256": "164f6b12cd8d4400a9665624e68eb672c36463b5cc522ca6174d7214382fffa8"}})
+        for key in profiles.COLLECTION_KEYS:                       # reuse + embed = 목표 Point 수
+            c = pins["collections"][key]
+            self.assertEqual(c["reuse_count"] + c["embed_count"], c["points"])
+        self.assertEqual({k: pins["collections"][k]["vector_digest"] for k in profiles.COLLECTION_KEYS}, {
+            "b2": "7a39e5c9e6c6a7181c0827abcee0bf026160de3dd8dc7facd68b5df7861a1ab4",
+            "b3": "d3ed4140122a9a8f815ee7eb01b0aad7c57119eb7a96c139179ed30427c5237b"})   # C2 최종 digest
+        self.assertEqual(profiles.missing_pins(), [])
+        self.assertTrue(profiles.is_finalized())
+        self.assertIs(profiles.require_finalized(), profiles.R3_PINS)
         self.assert_well_formed(pins)
 
     def test_110_c2_final_values_are_kept_only_as_the_r3b_source_record(self):

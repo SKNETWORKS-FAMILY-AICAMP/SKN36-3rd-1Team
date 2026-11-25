@@ -566,11 +566,12 @@ if (-not (Test-Path -LiteralPath (Join-Path $repo 'scripts\restore_r3_isolated.p
 - verify 전용 값 두 개를 새로 만들어 DPAPI(`Export-Clixml`, 현재 Windows 사용자만 복호화 가능)로 저장한다. build·#104·r2·공유 값과 같으면 래퍼가 거부한다.
 - 이번 실행에서 verify 인증값을 어디에 보관했는지는 보고서에 남지 않았다. 아래 경로는 권장 예시다.
 - 값을 화면·로그·보고서에 출력하지 않는다.
-- 현재 래퍼(PR #111 이후, 커밋 전)는 공백·제어 문자가 섞인 인증값을 **변수 이름만 밝히고** 거부한다. 아래 `New-R3Secret`(32바이트 Base64)은 이 조건을 만족한다. 이미 만든 인증 파일의 값은 이 문서 작업에서 읽지 않았다.
+- 현재 래퍼(PR #111 이후, 커밋 전)는 공백·제어 문자가 섞인 인증값을 **변수 이름만 밝히고** 거부한다. 아래 `New-R3Secret`(32바이트 → 소문자 hex 64자)은 이 조건을 만족한다. 이미 만든 인증 파일의 값은 이 문서 작업에서 읽지 않았다.
+- **Neo4j 비밀번호에 `/`를 쓰지 않는다 (2026-11-25 정정):** Neo4j 5 이미지 시작 스크립트는 `NEO4J_AUTH=neo4j/<비밀번호>`의 비밀번호에 `/`가 있으면 `Invalid value for NEO4J_AUTH`로 컨테이너를 종료하고, 이때 **`NEO4J_AUTH` 값(비밀번호 원문)을 컨테이너 로그에 출력한다.** 이전 `New-R3Secret`은 Base64라 `/`가 나올 수 있었다(r3d build 기동에서 실제 발생). 그래서 hex로 바꿨다. 이 오류가 난 비밀번호 파일은 노출된 것으로 보고 다시 쓰지 않으며, 새 파일 이름으로 새 값을 만든다.
 - **환경 변수는 단계마다 `try { Enter-R3VerifySecrets; … } finally { Exit-R3VerifySecrets }` 안에서만 설정한다.** 어느 단계에서 오류가 나도 `finally`가 현재 PowerShell 프로세스에서 두 값을 지운다(§5.7.5~§5.7.8의 각 블록). 인증 파일은 지우지 않는다.
 
 ```powershell
-function New-R3Secret { $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b) }
+function New-R3Secret { $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') }) }   # hex 64자 (`/`·공백 없음)
 function Read-R3Secret([string]$path) {
   $s = Import-Clixml -Path $path; $p = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)
   try { [Runtime.InteropServices.Marshal]::PtrToStringBSTR($p) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($p); $s.Dispose() }

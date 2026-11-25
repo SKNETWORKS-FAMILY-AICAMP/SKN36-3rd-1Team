@@ -107,15 +107,24 @@ R3_PINS: dict[str, Any] = {
     "release_counts": {"policies": 249, "documents": 273, "release_chunks": 672, "neo4j_nodes": 1147,
                        "neo4j_relationships": 2702, "requires_condition": 211},
     "collections": {
-        "b2": {"points": 1249, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
-               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
-        "b3": {"points": 1338, "vector_digest": None, "reuse_count": None, "reuse_vector_digest": None,
-               "embed_count": None, "delete_count": None, "remove_count": 0, "plan_sha256": None},
+        # C1 (2026-11-25): r3d build 서버 계획(basis=server_snapshot, .cache/issue105-r3d-build/03-<b2|b3>-plan.json)의 값.
+        # C2 (2026-11-25): 최종 vector_digest = r3d build --index 뒤 state=complete 전체 벡터 digest
+        #   (.cache/issue105-r3d-build/07-b2-index.json·08-b3-index.json, id_set_equal·누락 0·reuse digest = C1).
+        "b2": {"points": 1249, "vector_digest": "7a39e5c9e6c6a7181c0827abcee0bf026160de3dd8dc7facd68b5df7861a1ab4",
+               "reuse_count": 1229,
+               "reuse_vector_digest": "ec0a272725b360e73617d5b7c14aeac61f9350a9307a33af4b8e20d249306094",
+               "embed_count": 20, "delete_count": 4, "remove_count": 0,
+               "plan_sha256": "16dc4a3ee31d62416bd59d10fe3bf2b47a160d1dc4eef9ff2fb5580454a1b994"},
+        "b3": {"points": 1338, "vector_digest": "d3ed4140122a9a8f815ee7eb01b0aad7c57119eb7a96c139179ed30427c5237b",
+               "reuse_count": 1316,
+               "reuse_vector_digest": "40e2eb411da501ea5411fd8df52093092e8445f1f648cd5a3b7cae70ac924de2",
+               "embed_count": 22, "delete_count": 4, "remove_count": 0,
+               "plan_sha256": "164f6b12cd8d4400a9665624e68eb672c36463b5cc522ca6174d7214382fffa8"},
     },
 }
 # 선언한 단계. pin_stage()가 R3_PINS에서 계산한 단계와 같아야 한다(테스트가 확인) → 값만 바꾸고 단계를 잊는 실수를 막는다.
 # 단계 이름: pending(C0) / stage1(C1) / stage2(C2, 최종 digest까지 확정).
-R3_PIN_STAGE = "pending"
+R3_PIN_STAGE = "stage2"
 
 R3_COLLECTIONS: dict[str, dict[str, Any]] = {
     "b2": {"config": "A_B2_V140", "collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2",
