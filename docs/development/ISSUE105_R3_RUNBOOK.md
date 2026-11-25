@@ -1,5 +1,12 @@
 # Issue #105 r3 통합 복원 번들 Runbook (B2 + B3 + Neo4j)
 
+> **현재 권장 번들 (2026-11-25): `rag-final-v140-r3-57d90f23308a.zip`** — SHA-256 `cfa1001de5c193e199ed3fc93e086e9589a020b94bd2c59b85fd949a281e0d1a`,
+> 번들 기준 source commit **`57d90f23308a`**, 249정책 릴리스(manifest `b3130722…`), Qdrant B2 1,249·B3 1,338 Point, Neo4j 1,147노드/2,702관계.
+> 별도 Docker 프로젝트 `issue105-r3d-verify`(새 볼륨)에서 preflight → `--apply` → `--verify-only` 독립 복원이 PASS했다(§5.12).
+> 이 문서를 고친 커밋은 번들 기준 source commit과 다르다. 번들의 source는 계속 `57d90f23308a`다.
+> 아래에 나오는 이전 번들(`…65022ff8adb9.zip`, `…1c007e75d1c2.zip`, `…6d0450fd6c1d.zip`)은 과거 이력·보존 자산이며 현재 권장 번들이 아니다.
+> 아래 갱신 줄의 "커밋 전 코드"·"코드만, 실행 안 함"은 각 줄을 쓴 시점의 상태다. 그 코드는 이후 커밋됐고 r3d 환경도 실행됐다(§5.11·§5.12).
+
 > **2026-11-25 갱신 — 최신 dev(#113·#118, 249정책) 반영 준비 (코드만, 실행 안 함):** `R3_PINS`를 249정책 C0(pending, manifest `b3130722…`)로 바꾸고,
 > build 프로필을 새 격리 프로젝트 `issue105-r3d-build`(56766/56797)로, 벡터 원본(`R3_SOURCES`)을 r3b 최종 snapshot으로 바꿨다(§3·§4·§5.11).
 > r3b build와 그 산출물(`.cache\issue105-r3b\`)은 보존 자산이다. 아래 2026-11-23 r3b 기록은 #110(246정책) 기준이며 최신 릴리스가 아니다.
@@ -17,6 +24,7 @@
 > **PR #111 리뷰 반영 (2026-11-23, P1-3 `756ed30`·P2-4 `4331650`):** 복원 도구가 임시 컬렉션 복원 + 검증 후 alias 공개, 최종 payload 검증으로 바뀌었다(§5.8). 위 최종 ZIP·독립 복원 PASS는 그 이전 도구의 보존 기록이며, 새 도구로 만든 ZIP과 실제 복원은 아직 없다 *(P1-3·P2-4 반영 직후 시점의 과거 기록 — 현재 상태는 바로 아래 갱신 줄)*. §5.7.3 PowerShell 경로 계산을 절대 경로 기준으로 고쳤다(P2-5).
 > → **갱신 (2026-11-23, 강의실 노트북):** 새 도구를 담은 번들 `rag-final-v140-r3-6d0450fd6c1d.zip`(SHA-256 `eb178f95…9554`, source `6d0450f`)을 만들고, 새 verify 환경에서 preflight → `--apply` → `--verify-only`(재시도 1회 포함)와 B2/B3 6개 표기 검색 검증까지 실행했다(§5.9). 기존 ZIP `…1c007e75d1c2.zip`의 기록은 그대로 보존한다.
 > **PR #111 추가 리뷰 반영 (2026-11-24, 커밋 전 코드):** 본체 직접 `--apply` 거부(P1-A), 단계별 쓰기 guard(P1-B), OS 실행 잠금(P1-C), 실패 상태 재조회 보고(P1-D), payload 인덱스 검증(P1-E)을 코드·단위 테스트로 반영했다(§5.8 추가 절). 동시성은 운영 통제(Write Freeze, §5.10)로 승인됐다. 이 코드로 만든 번들·실제 복원은 아직 없고, 기존 번들 `eb178f95…`는 복원 도구가 현재 소스와 달라 현재 래퍼에서 거부된다.
+> → **갱신 (2026-11-25):** 이 코드가 든 번들 `rag-final-v140-r3-57d90f23308a.zip`으로 새 verify 환경 독립 복원이 PASS했다(§5.12).
 
 > 상태 (2026-11-22): **`R3_PINS` 2차 확정** (미확정 0, 최신 데이터 병합본 `a60f5bc` 기준).
 >
@@ -94,9 +102,9 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 
 | 환경 | Compose 프로젝트 | Qdrant | Bolt | 인증 변수 | 출력 폴더 |
 |---|---|---|---|---|---|
-| build (r3d, 최신 dev #113·#118 249정책 재구축용 — 현재, **아직 생성 안 함**, §5.11) | `issue105-r3d-build` | 127.0.0.1:56766 | 127.0.0.1:56797 | `ISSUE105_R3D_BUILD_QDRANT_API_KEY`, `ISSUE105_R3D_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3d-build\` |
+| build (r3d, 최신 dev #113·#118 249정책 재구축용 — 현재, 2026-11-25 생성·갱신·snapshot 완료, §5.11·§5.12) | `issue105-r3d-build` | 127.0.0.1:56766 | 127.0.0.1:56797 | `ISSUE105_R3D_BUILD_QDRANT_API_KEY`, `ISSUE105_R3D_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3d-build\` |
 | **보존** build-r3b (#110 기준 246정책 최종 상태, 대상 아님) | `issue105-r3b-build` | 127.0.0.1:56666 | 127.0.0.1:56697 | `ISSUE105_R3B_BUILD_QDRANT_API_KEY`, `ISSUE105_R3B_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3b\` (보존, 새 파일 금지. 최종 snapshot 2개는 `R3_SOURCES`로 읽기만) |
-| verify (r3d, PR #111 P1-A~E 코드용 — 현재, **아직 생성 안 함**) | `issue105-r3d-verify` | 127.0.0.1:56756 | 127.0.0.1:56787 | `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3D_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3d\` (권장 위치, §5.10.14) |
+| verify (r3d, PR #111 P1-A~E 코드용 — 현재, 2026-11-25 생성·독립 복원 PASS, §5.12) | `issue105-r3d-verify` | 127.0.0.1:56756 | 127.0.0.1:56787 | `ISSUE105_R3D_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3D_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3d-verify\` (실제 사용. §5.10.14의 권장 위치 `.cache\issue105-r3d\`와 다름) |
 | **보존** verify-6d0450f (§5.9 복원·검색 검증에 사용, 대상 아님) | `issue105-r3-verify` | 127.0.0.1:56656 | 127.0.0.1:56687 | `ISSUE105_R3_VERIFY_QDRANT_API_KEY`, `ISSUE105_R3_VERIFY_NEO4J_PASSWORD` | `.cache\issue105-r3c\` (보존, 새 파일 금지) |
 | **보존** build-104 (#104 기준, 대상 아님) | `issue105-r3-build` | 127.0.0.1:56646 | 127.0.0.1:56677 | `ISSUE105_R3_BUILD_QDRANT_API_KEY`, `ISSUE105_R3_BUILD_NEO4J_PASSWORD` | `.cache\issue105-r3\` |
 
@@ -107,6 +115,7 @@ build 환경 도구 3개(update·load·build)는 모든 쓰기 전에 **`issue10
 - #104 산출물(B2 1233 `d1fa3194…`·B3 1320 `a471e21f…` 컬렉션, Neo4j 1133/2674, snapshot·ZIP `rag-final-v140-r3-65022ff8adb9.zip`, 보고서 25~40, DPAPI 파일)은 그대로 보존한다.
   - 현재 도구로는 #104 build 서버에 접속할 수 없다. #104 상태는 ZIP과 verify 복원으로만 다시 확인한다.
 - verify 프로필은 2026-11-24에 r3d(`issue105-r3d-verify`, compose `issue105_r3d_verify.compose.yaml`)로 바꿨다(커밋 전 코드). 이전 verify(`issue105-r3-verify`)는 `PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]`로 옮겨 그 포트·인증 변수·프로젝트를 거부 목록에 넣었고, 출력 폴더 `.cache\issue105-r3c\`(§5.9 번들·보고서·검색 증거)를 보존 경로로 등록했다. 이전 compose 파일·컨테이너·볼륨·인증 파일은 바꾸지 않았다. 새 환경은 아직 만들지 않았다(§5.10.14).
+  → **갱신 (2026-11-25):** r3d build·r3d verify 환경을 새 프로젝트·새 볼륨으로 만들어 실행했다. 실행한 PC(강의실 노트북)에 있던 이전 verify(`issue105-r3-verify`)·r2 verify 컨테이너·볼륨과 `.cache\issue105-r3c\` 자산은 그대로다. r3b·#104 build 환경은 그 PC에 없다(§5.12).
 
 다음 접속·출력은 거부된다.
 
@@ -1032,6 +1041,7 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 > PR #111 리뷰 P1(동시성)에 대해 리뷰어가 승인한 **운영 통제(A 방식)** 절차다 (2026-11-24 작성).
 > 이 절은 **사람이 지키는 운영 절차**다. 외부 쓰기를 기술적으로 강제 차단하지 않는다. 기술적으로 막는 것은 이 복원 래퍼끼리의 중복 apply(로컬 OS 잠금)뿐이다(§5.10.6).
 > 대상 코드는 P1-A~E·C-1·C-2 반영본(커밋 전)이다. 이 코드가 든 **새 번들로 실제 복원한 기록은 아직 없다**(§5.10.13). 기존 번들(`eb178f95…`)은 복원 도구가 현재 소스와 달라 새 래퍼에서 거부된다.
+> → **갱신 (2026-11-25):** 이 코드가 든 번들 `rag-final-v140-r3-57d90f23308a.zip`으로 `issue105-r3d-verify`에서 독립 복원이 PASS했다(§5.12). 다만 이 실행의 Write Freeze 실행 기록 파일(§5.10.4)은 로컬 `.cache`에서 확인되지 않았다.
 
 #### 5.10.1 적용 환경과 보호 대상
 
@@ -1210,11 +1220,15 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 
 - 확인됨 (fake·mock 단위 테스트, 실제 DB·Docker 없음): 같은 잠금 경로의 두 번째 apply 거부(같은 프로세스·별도 Python 프로세스), 잠금 실패 시 DB 접속·쓰기 0, 보유 프로세스 강제 종료 뒤 재획득, 예외 시 잠금 해제, 부분 공개 FAILED·분류·재조회, 실패 후 삭제·재시도 0, 실패 보고서의 인증값 가림, 인덱스 검증, 이미 쓴(빈 서버 아닌) 대상의 apply 거부(복원 호출·쓰기 0), 쓰기 시작 뒤 일반 예외의 CLI `FAILED`·종료 코드 1·재조회 진단 유지. (PR #111 P1-A~E·C-1·C-2 테스트, r2/r3 회귀 437 passed)
 - 미확인 (실환경): 실제 `%LOCALAPPDATA%` 잠금 파일과 두 터미널 동시 실행, 실제 부분 공개 장애(의도적으로 재현하지 않음), 이 절의 PowerShell 블록 실제 실행, 새 번들로 새 환경 복원(리뷰 요구 5 — 최종 번들 확정 뒤 별도 검증).
+  - → **갱신 (2026-11-25):** 새 번들로 새 환경 복원(리뷰 요구 5)은 PASS했다(§5.12, 실제 잠금 파일 이름·소유자 정보가 apply 보고서 `run_lock`에 기록됨). 나머지(두 터미널 동시 실행, 부분 공개 장애, 이 절 PowerShell 블록 실행 여부, Write Freeze 실행 기록)는 여전히 미확인이다.
 - 운영 통제의 효과(다른 작업이 실제로 멈췄는지)는 도구가 증명하지 못한다. 실행 기록(§5.10.4)이 근거다.
 
-#### 5.10.14 새 독립 verify 환경 `issue105-r3d-verify` (설정만 반영, 아직 생성·실행 안 함)
+#### 5.10.14 새 독립 verify 환경 `issue105-r3d-verify` (2026-11-24 설정 반영 → 2026-11-25 생성·독립 복원 PASS, §5.12)
 
 > 2026-11-24 기준: 코드(`scripts/restore_profiles_v140.py`)와 compose 파일만 반영했다(커밋 전). **컨테이너·볼륨·인증 파일·보고서·번들은 아직 없고, preflight·apply·verify-only도 실행하지 않았다.** 이 환경의 복원 결과는 기록된 것이 없다.
+>
+> → **갱신 (2026-11-25):** 이 환경을 만들어 번들 `rag-final-v140-r3-57d90f23308a.zip`으로 preflight → `--apply` → `--verify-only`를 실행했고 모두 PASS했다(§5.12).
+> 실제 보고서·인증 파일 위치는 아래 표의 권장 위치(`.cache\issue105-r3d\`)가 아니라 **`.cache\issue105-r3d-verify\`** 다.
 
 | 항목 | 값 |
 |---|---|
@@ -1226,7 +1240,7 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 | 이미지·자원 한도 | 이전 verify와 같음 (Qdrant 1.12.4 `241edb9d…`, Neo4j 5.26.32 community `42ef3ebf…`) |
 | 실행 잠금 | `%LOCALAPPDATA%\issue105-r3\locks\issue105-r3d-verify-56756.lock` (이전 verify와 다른 파일) |
 | 출력 위치 (권장) | `.cache\issue105-r3d\` — 도구 기본값이 아니므로 `--report`·`--out-dir`로 지정한다 |
-| 기준값 | 단일 `R3_PINS`. 2026-11-25부터 249정책 C0(pending, manifest `b3130722…`, §5.11) → C2 확정 전에는 이 환경에서 복원할 수 없다. 환경마다 다른 기준값은 없다 |
+| 기준값 | 단일 `R3_PINS`. 2026-11-25부터 249정책 C0(pending, manifest `b3130722…`, §5.11) → C2 확정 전에는 이 환경에서 복원할 수 없다. 환경마다 다른 기준값은 없다. → 갱신: 같은 날 C2(stage2) 확정(커밋 `57d90f2`, §5.12) |
 
 - **보존·거부되는 이전 verify:** `PRESERVED_R3_ENVIRONMENTS["verify-6d0450f"]` — 포트 56656/56687, `ISSUE105_R3_VERIFY_*` 인증 변수, `issue105-r3-verify` 프로젝트는 r3 도구가 거부한다. `.cache\issue105-r3c\` 안에는 r3 도구가 새 파일을 만들지 않는다.
 - **기존 번들은 이 환경에 쓰지 않는다:** `eb178f95…` 번들은 복원 도구와 기준값 모듈이 현재 소스와 달라 래퍼가 거부한다. 이 환경에는 현재 소스로 만든 **새 번들**만 쓴다.
@@ -1236,11 +1250,14 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
   - §5.7.6~§5.7.8 보고서: `$runDir = Join-Path $repoRoot '.cache\issue105-r3d\verify-run-<번들 sha12>-01'`(새 폴더, 덮어쓰기 금지). §5.7.8의 인덱스 확인 블록까지 실행한다.
   - §5.10 Write Freeze: 대상 포트 56756/56787, 잠금 파일은 위 표의 경로, 실행 기록은 `.cache\issue105-r3d\write-freeze-record-<번들 sha12>-01.md`(새 파일).
 - 이 절의 PowerShell 값 대입은 아직 실제로 실행하지 않았다.
+  → 갱신 (2026-11-25): 복원은 실행됐지만(§5.12) 어떤 명령 블록으로 실행했는지는 보고서에 남지 않았다. 이 절의 값 대입을 그대로 썼는지는 확인되지 않았다.
 
-### 5.11 최신 dev(#113·#118, 249정책) 반영 — R3_PINS C0 전환과 r3d build 준비 (2026-11-25, 코드만 반영)
+### 5.11 최신 dev(#113·#118, 249정책) 반영 — R3_PINS C0 전환과 r3d build 준비 (2026-11-25, 처음엔 코드만 반영 → 같은 날 실행·C1·C2 완료, §5.12)
 
 > **상태:** 코드·compose·테스트만 바꿨다(커밋 전). Docker·Qdrant·Neo4j·Ollama 실행, snapshot 복원·생성, 계획 파일·번들 생성은 **하지 않았다.**
 > 아래 C1·C2 값과 실제 계획은 아직 없다.
+>
+> → **갱신 (2026-11-25):** 이후 §5.11.5 순서대로 r3d build를 실행했다. 실제 서버 계획은 §5.11.4 추정과 같은 값이었고, C1(stage1)·C2(stage2)를 확정해 `57d90f2`로 커밋했다. 결과와 증거는 §5.12에 있다.
 
 #### 5.11.1 기준 릴리스 (병합 `ce7266b`, 릴리스 파일에서 다시 계산)
 
@@ -1259,7 +1276,7 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
   `--apply`·`--index`·Neo4j `--load`·`--cross-db`·`--create-snapshot`·`--build`·번들 복원은 기준값 게이트에서 거부된다.
 - #110 기준 C2 값(manifest `29b57236…`)은 이제 `R3_PINS`가 아니라 r3d 원본(§4)의 기록이다.
 
-#### 5.11.3 r3d build 환경 (설정만, 아직 생성 안 함)
+#### 5.11.3 r3d build 환경 (2026-11-25 생성·실행, §5.12.2)
 
 | 항목 | 값 |
 |---|---|
@@ -1288,7 +1305,7 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 | remove | 0 | 0 |
 | 목표 Point / 임베딩 합계 | 1,249 / 20 | 1,338 / 22 |
 
-#### 5.11.5 다음 실행 순서 (각 단계 별도 승인, 아직 실행 안 함)
+#### 5.11.5 다음 실행 순서 (각 단계 별도 승인 — 2026-11-25에 1~7 모두 실행, 결과 §5.12)
 
 1. (승인) Docker Desktop 기동 → `docker compose -f docs/development/issue105_r3d_build.compose.yaml config --quiet` →
    기존 `issue105-r3b-build`·`issue105-r3-verify` 컨테이너·볼륨 목록을 읽기 전용으로 기록 → `up -d` (새 인증값, 새 DPAPI 파일).
@@ -1301,6 +1318,75 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
 6. C2 기록(최종 vector_digest) → Neo4j `--load` → `--cross-db` → `--create-snapshot` → `--build` (출력 `.cache/issue105-r3d-build/`).
 7. 새 번들로 r3d verify 독립 복원(§5.10·§5.10.14, Write Freeze 포함).
 
+### 5.12 R3D 최종 번들과 독립 복원 검증 (현재 권장 번들, 2026-11-25, 강의실 노트북)
+
+이 절의 값은 아래 로컬 보고서(`.cache`, Git 제외)를 다시 읽어 대조한 것이다(문서 작업에서는 서버에 접속하지 않았다). 인증값은 기록하지 않는다.
+**번들 기준 source commit은 `57d90f23308a`다.** 이 절을 추가한 문서 수정 커밋은 번들의 source가 아니다. 문서만 바뀌므로 복원 계약 비교 대상 파일(`SOURCE_IDENTITY_FILES`)은 그대로다.
+
+#### 5.12.1 최종 번들
+
+| 항목 | 값 |
+|---|---|
+| ZIP | `.cache\issue105-r3d-final-bundle-57d90f2\rag-final-v140-r3-57d90f23308a.zip` |
+| 크기 / SHA-256 | 39,225,228 bytes / `cfa1001de5c193e199ed3fc93e086e9589a020b94bd2c59b85fd949a281e0d1a` (= `.zip.sha256` = `.zip.report.json` `bundle_sha256`, 빌드 보고서 `status=BUILT`) |
+| 구성 (7개, ZIP CRC 이상 없음) | `b2-r3-v1.12.4.snapshot`, `b3-r3-v1.12.4.snapshot`, `source-57d90f23308a.zip`, `compose.yaml`(= `issue105_r3d_verify.compose.yaml`), `restore_final_v140_r3.py`, `package.json`, `SHA256SUMS` |
+| source commit | `57d90f23308a` (`feat: #105 R3D 벡터 재사용 및 최종 C2 기준값 확정`) |
+| 릴리스 | manifest `b31307223f73…f3da`, 정책 249 / 문서 273 / 릴리스 청크 672 / Neo4j 1,147노드·2,702관계 / REQUIRES_CONDITION 211 |
+| B2 | 1,249 Point, vector `7a39e5c9e6c6…1ab4`, payload `a376bdcd4f77…ba98`, snapshot SHA-256 `9075b059…` |
+| B3 | 1,338 Point, vector `d3ed4140122a…237b`, payload `a6e7911da2d1…8569`, snapshot SHA-256 `62a07b9e…` |
+
+- `package.json`의 manifest·건수·Point·vector digest는 `R3_PINS`(C2 stage2, 커밋 `57d90f2`)와 같다.
+
+#### 5.12.2 r3d build (벡터 재사용, 보고서 `.cache\issue105-r3d-build\`)
+
+| 단계 | 결과 |
+|---|---|
+| 원본 snapshot 복원 (r3b 최종, `R3_SOURCES`) | `01-b2-restore.json`·`02-b3-restore.json`: PASS(`RESTORED`). B2 1,233 Point·vector `90d0f593…`·snapshot `834f17b6…`, B3 1,320 Point·vector `718046c3…`·snapshot `91311f2d…` (= `R3_SOURCES`) |
+| 서버 계획 (`basis=server_snapshot`) → C1 | `03-b2-plan.json` `plan_sha256 16dc4a3e…b994`, `03-b3-plan.json` `164f6b12…ffa8`. 재사용 B2 1,229·B3 1,316, 삭제 후 재임베딩 4·4, 신규 16·18 |
+| `--apply` → `--index` → C2 | `07-b2-index.json`·`08-b3-index.json`: PASS, `state=complete`, `id_set_equal=true`, payload 불일치·누락 0, 임베딩 B2 20·B3 22(다시 임베딩한 ID = 계획의 신규 ∪ 삭제 대상), 재사용 vector digest = 계획 |
+| Neo4j 적재·검증 | `10-neo4j-load.json` PASS(`state=complete`), `11-neo4j-verify.json` PASS(`db_writes=0`) |
+| Qdrant↔Neo4j 교차 검증 | `12-cross-db.json` PASS(`db_writes=0`, B2·B3 전체 Point 읽기, Neo4j 1,147/2,702) |
+| snapshot·번들 | §5.12.1 |
+
+#### 5.12.3 독립 복원 실행 이력 (verify 프로젝트 `issue105-r3d-verify`, 새 볼륨, 보고서 `.cache\issue105-r3d-verify\`)
+
+| 단계 | 결과 | 보고서 (크기, SHA-256) |
+|---|---|---|
+| preflight 1차 | **FAILED** (`error_type=FileNotFoundError`). 실행자 기록에 따르면 래퍼 `--bundle`에 ZIP 파일 경로를 넘겼다. 래퍼는 **압축을 푼 번들 폴더**를 받는다. 보고서에는 예외 종류만 남아 있고(일반 예외 경로라 `reason` 없음) 넘긴 경로는 기록되지 않았다. 실패 보고서는 보존한다 | `01-preflight.json` (204 B, `3c60e9fe…fae0`) |
+| preflight 2차 (실행자 기록: 압축 해제 폴더 `.cache\issue105-r3d-verify\extracted-bundle` 사용. 보고서에는 경로 미기록) | PASS, `servers.state=empty`, `db_writes=0`, `PREFLIGHT_PASS_NO_WRITES`, 건수 249/273/672/1147/2702/211 | `02-preflight.json` (2,771 B, `e063de7b…443e`) |
+| `--apply` (1회) | PASS: `restore_apply.status=PASS`, apply 안의 `post_verify.status=PASS`, `partial_publish=false`, `embedding_calls=0`, 실행 잠금 `run_lock.lock_file=issue105-r3d-verify-56756.lock` | `03-apply.json` (30,120 B, `a1c1a91d…a284`) |
+| 별도 `--verify-only` | PASS: `mode=verify-only`, `db_writes=0`, `servers.state=complete`, `servers.qdrant.state=published`, `embedding_calls=0`, `full_graph_properties_verified=true`, `all_vectors_and_protected_payload_unchanged=true` | `04-verify-only.json` (13,347 B, `50fc3beb…deaf`) |
+
+#### 5.12.4 실제 검증 값 (`03-apply.json`·`04-verify-only.json`)
+
+| 항목 | B2 | B3 |
+|---|---|---|
+| 정식 alias → 임시 컬렉션 | `exp_b2_qwen3emb06b_v140_v1` → `…__tmp_727fe99fe30e0c4350a8d4fa1486c9f2` | `exp_b3_qwen3emb06b_v140_v1` → `…__tmp_531adcf350a7a9a05000535b31e4d4f0` |
+| Point / vector digest / payload digest | 1,249 / `7a39e5c9…` / `a376bdcd…` | 1,338 / `d3ed4140…` / `a6e7911d…` |
+| payload 정렬 갱신 | 0 | 0 |
+| 원문 슬라이스 (`verify_full_index_passed`) | true | true |
+| Cross-DB (7개 검사 × Point, verify-only) | PASS 8,743 | PASS 9,366 |
+
+- **payload 인덱스 (P1-E):** 컬렉션마다 `store.PAYLOAD_INDEX_FIELDS` 8개, 결과는 모두 `status=PASS`, `missing_fields=[]`, `invalid_types={}`.
+  - 공개 직전 `restore_apply.payload_indexes.before_alias_publish`: 임시 컬렉션 B2·B3
+  - 공개 직후 `restore_apply.payload_indexes.after_alias_publish`: 정식 alias B2·B3
+  - apply 안의 재검증 `post_verify.payload_indexes.verify_only`, 별도 verify-only `post_verify.payload_indexes.verify_only`: 정식 alias B2·B3
+- **alias:** `post_verify.aliases`(복원 도구)와 `servers.qdrant.aliases`(래퍼 서버 조회)가 같은 2개 매핑이다. `partial_publish=false`(apply·verify-only 모두).
+- **Cross-DB 합계:** 18,109건(B2 8,743 + B3 9,366) PASS. MISSING·MISMATCH·NOT_TESTED 0, `failures=[]`, `all_points_read=true`.
+- **Neo4j:** 노드 1,147 · 관계 2,702, 전체 속성 검증 true.
+- **복원 단계 임베딩 호출:** 0 (apply·verify-only).
+- 공유용 보고서 `03-apply.json`·`04-verify-only.json`을 점검했다. 로컬 DPAPI 인증값 9개 모두 포함되지 않았고, 인증 관련 필드 이름과 로컬 파일 경로도 없다. 주소는 loopback(`127.0.0.1`)뿐이다.
+- §5.7.6~§5.7.8의 PowerShell 고정값(건수 246/268/…, snapshot SHA `834f17b6…`·`91311f2d…`)은 **이전 번들 기준**이다. 현재 번들로 다시 실행할 때는 이 절의 값(249/273/672/1147/2702/211, snapshot `9075b059…`·`62a07b9e…`)으로 바꿔 쓴다.
+
+#### 5.12.5 이 실행으로도 확인되지 않은 것 (완료로 표시하지 않음)
+
+- 다른 PC·다른 OS 사용자에서 같은 번들로 독립 재현(이번 실행은 강의실 노트북 1대)
+- 실제 서비스 E2E(FastAPI → RAG → LLM → React)와 검색 품질(249정책 번들에서 6개 표기 검색 등은 다시 실행하지 않았다)
+- 동시 쓰기 위험의 완전한 제거: alias TOCTOU·부분 공개 위험은 남아 있고 운영 통제(§5.10)로 다룬다. 이번 실행의 Write Freeze 실행 기록 파일(§5.10.4)은 로컬 `.cache`에서 확인되지 않았다.
+- 실제 부분 공개 장애 대응(의도적으로 재현하지 않음)
+- 번들·보고서의 팀 공유 위치와 보관 기간 (현재 로컬 `.cache`에만 있음)
+
+## 6. r2 호환성과 데이터 PR 병합 시 주의
 
 - **r2 도구 상수는 r2 값으로 유지해야 한다.** `restore_final_v140.py`의 `SNAPSHOT_POINTS`·`EXPECTED`와 seed·update·load·build의 고정값이 여기에 해당한다.
 - 데이터 브랜치 tip(`bc7763d`)의 변경을 그대로 병합하면 안 된다.
@@ -1354,3 +1440,6 @@ Assert-R3PayloadIndexes $ver 'post_verify.payload_indexes.verify_only' $canonica
   - ~~dev(#106·#109) 통합 시 `test_issue79_pending_review_remains_separate`의 의미 충돌(`needs_review` ↔ #90 `verified`)은 아직 처리하지 않았다.~~
     → **처리 완료 (PR #111 리뷰 P1-1, 커밋 `3b0505b`, 현재 HEAD에 포함):** 테스트를 `test_issue79_incheon_age_evidence_verified`로 바꿔, 인천 연령 관계 2개가 공식 안내문(`DOC_STG_ICN_001_NOTICE_2026`) 근거로 `verified`인지 확인한다(`tests/unit/test_issue79_age_corrections_fullscan.py`). 옛 테스트 이름은 저장소에 남아 있지 않다.
   - verify 환경(`issue105-r3-verify`)은 복원 1회용이다. 컨테이너·볼륨을 유지할지 정리할지는 별도 승인 사항이다(삭제 명령은 이 문서에 넣지 않음).
+- **R3D 최종 번들(`rag-final-v140-r3-57d90f23308a.zip`) 이후 남은 작업 (2026-11-25):** 독립 복원은 PASS했다(§5.12). 다음은 완료가 아니다(§5.12.5).
+  - 다른 PC 재현, 실제 서비스 E2E·검색 품질 재확인, 동시 쓰기 위험(운영 통제로만 다룸), 이번 실행의 Write Freeze 실행 기록 확인, 번들·보고서 공유 위치
+  - `issue105-r3d-build`·`issue105-r3d-verify`·이전 verify 컨테이너와 볼륨의 유지·정리 여부는 별도 승인 사항이다(삭제 명령은 이 문서에 넣지 않음).
