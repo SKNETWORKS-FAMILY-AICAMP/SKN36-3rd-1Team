@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | R119 | [PR #119](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/119) · [issue107-r3d-verification.md](issue107-r3d-verification.md) | `6b4fdc9` + PR #119 |
 | R121 | [PR #121](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/121) · [ssr120-merge-verification](../development/ssr120-merge-verification/) | PR #121 병합 전 통합본 |
-| R124 | [PR #124](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/124) (열림) · `docs/reports/issue120-122-django-ssr-followup.md` | `6b4fdc9` |
+| R124 | [issue120-122-django-ssr-followup.md](issue120-122-django-ssr-followup.md) (이 검증표와 같은 [PR #124](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/124)) | `6b4fdc9` |
 | R123 | [PR #123](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/123) (열림) · #75 브라우저 회귀 중간 검증표 | `e853282` |
 | R125 | [PR #125](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/125) (열림) · K-패스 목록 검색 별칭 | `1f43e62` |
 | R112 | [PR #112](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/112) (열림) · 자녀 월령 Checker·Generator | `dabc7de` |
