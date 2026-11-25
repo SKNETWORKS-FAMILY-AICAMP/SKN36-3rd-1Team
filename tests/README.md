@@ -32,7 +32,10 @@
    ```
 
    `tests/unit` 전체를 이 환경으로 돌리면 v1.4.0 전용 테스트(`test_embedding_resume.py`, `test_runpod_transfer.py`, `test_embedding_ab_eval.py` 등)가 실패합니다.
-   반대로 1번 환경에서는 위 legacy 파일들이 실패합니다(두 환경 결과를 합쳐서 판단).
+   위 파일 중 v1.3.2 데이터를 기대값으로 쓰는 테스트에는 `@legacy_dataset_only`([`unit/legacy_dataset_gate.py`](unit/legacy_dataset_gate.py))가 붙어 있어, 1번 환경에서는 `NOT_APPLICABLE` 사유로 건너뜁니다(#116). 이 테스트들은 2번 환경에서만 실제로 검증되므로 두 환경 결과를 합쳐서 판단합니다. 반대로 위 파일에 섞여 있는 v1.4.0 기대값 테스트(`test_chunking.py`의 API 문서 235건 확인 등)에는 `@release_dataset_only`가 붙어 2번 환경에서 건너뜁니다.
+   데이터셋은 `database.handoff_data`를 import할 때 한 번 정해지므로, 테스트 안에서 환경변수를 바꾸는 방식으로는 고정되지 않습니다.
+
+- `data/raw/**`는 Git에 없으므로 원본 JSON을 직접 읽는 테스트(`test_contacts_chunking_boundary.py`의 DOC_GOV_029·048)는 원본이 없는 PC에서 `NOT_RUN` 사유로 건너뜁니다.
 
 - `OPENAI_API_KEY`를 비워 두면 mock이 빠진 테스트가 있어도 실제 OpenAI를 호출하지 않고 실패합니다.
 - `tests/manual/`은 실제 OpenAI를 호출하므로 pytest로 함께 돌리지 않습니다 (비용 발생, 사전 승인).

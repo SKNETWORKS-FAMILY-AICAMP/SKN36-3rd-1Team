@@ -15,6 +15,12 @@ from scripts.build_clean_dataset import iter_document_chunks
 RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw" / "gov24" / "items"
 
 
+def _raw_item_required(name: str):
+    """data/raw/**는 .gitignore 대상이라 새 clone에는 원본이 없다(#116). 없으면 이유를 밝혀 건너뛴다."""
+    return unittest.skipUnless((RAW_DIR / name).is_file(),
+                               f"NOT_RUN: 원본 data/raw/gov24/items/{name}이 이 PC에 없음(.gitignore 대상)")
+
+
 def _naive_chunks(text: str, size: int, overlap: int) -> list[str]:
     """회귀 전 로직(순수 750자 고정창, 경계 보존 없음)과 같은 결과를 내는지 비교하는 기준선."""
     pieces = []
@@ -69,6 +75,7 @@ class ContactBoundaryPreservedTests(unittest.TestCase):
         for first, second in zip(pieces, pieces[1:]):
             self.assertIn(first[-80:][-40:], second[:120])  # 수정 전엔 겹치는 내용이 전혀 없었다
 
+    @_raw_item_required("359000000104.json")
     def test_doc_gov_029_contacts_no_longer_truncated(self):
         with open(RAW_DIR / "359000000104.json", encoding="utf-8") as f:
             item = json.load(f)
@@ -79,6 +86,7 @@ class ContactBoundaryPreservedTests(unittest.TestCase):
             pieces[1],
         )
 
+    @_raw_item_required("449000000108.json")
     def test_doc_gov_048_contacts_no_longer_truncated(self):
         with open(RAW_DIR / "449000000108.json", encoding="utf-8") as f:
             item = json.load(f)

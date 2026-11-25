@@ -28,6 +28,8 @@ from database import handoff_data as hd  # noqa: E402
 from database import retrieval_eval as rv  # noqa: E402
 from database import retrieval_run as rr  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 
 def setUpModule():
@@ -41,6 +43,7 @@ def _onehot(index: int) -> list[float]:
     return vector
 
 
+@legacy_dataset_only
 class TestFrozenSet(unittest.TestCase):
     def test_loads_real_frozen_set(self):
         questions, freeze = rr.load_frozen_questions()
@@ -61,6 +64,7 @@ class TestFrozenSet(unittest.TestCase):
                 rr.load_frozen_questions(target)
 
 
+@legacy_dataset_only
 class TestEvaluateCollection(unittest.TestCase):
     """실제 B3 청크 일부를 one-hot 벡터로 넣어, 질문 벡터가 어느 청크를 가리키는지 정해 둔다 (sample_only 벡터)."""
 
@@ -118,6 +122,7 @@ class TestEvaluateCollection(unittest.TestCase):
         self.assertLessEqual(summary["overall"]["recall_at_3"], summary["overall"]["recall_at_5"])
 
 
+@legacy_dataset_only
 class TestRunEmbedsOnce(unittest.TestCase):
     def test_questions_embedded_once_and_reused(self):
         client = store.get_client(location=":memory:")
@@ -142,6 +147,7 @@ class TestRunEmbedsOnce(unittest.TestCase):
         json.dumps(output, ensure_ascii=False)                                 # 결과는 JSON으로 저장 가능
 
 
+@legacy_dataset_only
 class TestModelsAndInstruction(unittest.TestCase):
     """모델별 1회 임베딩, 질의 지시문 적용, 알 수 없는 지시문 거부"""
 

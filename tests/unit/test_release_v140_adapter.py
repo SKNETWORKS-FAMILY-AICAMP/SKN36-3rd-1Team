@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from database import release_adapter as ra  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 RELEASE = ROOT / "data" / "releases" / "v1.4.0-candidate"
 META = {"policy_name": "sample_only", "category": "sample_only", "region": "전국", "life_stages": ["청년"],
@@ -270,6 +272,7 @@ class ApprovedReleaseTests(unittest.TestCase):
 class DefaultDatasetRegressionTests(unittest.TestCase):
     """data/handoff를 명시한 v1.3.2 호환 동작."""
 
+    @legacy_dataset_only
     def test_explicit_legacy_is_not_release_and_metadata_is_policy_keyed(self):
         import database.handoff_data as hd
         from database.qdrant import store
