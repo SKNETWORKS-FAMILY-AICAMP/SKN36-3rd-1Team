@@ -1,5 +1,5 @@
 /* SSOK 정책 상세(SSR) 스타일.
-   색·폰트·버튼은 frontend/src/styles.css의 라이트 테마 토큰(:root)과 .btn/.badge 규칙을 옮겨 왔다.
+   색·폰트·버튼은 frontend/src/styles.css의 테마 토큰(:root, :root[data-theme="dark"])과 .btn/.badge 규칙을 옮겨 왔다.
    React 쪽 토큰이 바뀌면 이 파일의 :root도 같이 맞춘다. */
 :root{
   color-scheme:light;
@@ -8,6 +8,17 @@
   --ok:#5b8a4f; --ok-bg:#e8f0e0; --warn:#b87517; --warn-bg:#fbefd8; --bad:#c45a4a; --bad-bg:#f8e4de; --muted-bg:#f1e8dc;
   --shadow:0 3px 0 rgba(53,68,61,.06),0 12px 26px rgba(71,103,90,.12); --glow:rgba(71,103,90,.20);
   --logo-text:#354b40; --logo-o:#b78027; --logo-star:#d79a32; --logo-lens:#fffaf2;
+  --warn-ink:#775922; --countdown-line:#ecd9ad; --card-clear:rgba(253,253,249,0);
+}
+/* 다크: React styles.css의 :root[data-theme="dark"] 토큰과 같다. React 상세 링크의 ?theme=dark일 때만 켜진다 */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101010; --bg-2:#191919; --card:#202020; --ink:#f0f0f0; --ink-2:#c5c5c5; --ink-3:#a6a6a6; --line:#393939;
+  --primary:#b8d5c5; --primary-soft:#283730; --on-primary:#101010; --accent-light:#a9c8b7;
+  --ok:#a5d394; --ok-bg:#26322a; --warn:#f2c27a; --warn-bg:#352d23; --bad:#f0a092; --bad-bg:#372729; --muted-bg:#272727;
+  --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --glow:rgba(184,213,197,.16);
+  --logo-text:#dcebe1; --logo-o:#dfad58;
+  --warn-ink:var(--warn); --countdown-line:rgba(223,173,88,.45); --card-clear:rgba(32,32,32,0);
 }
 *{box-sizing:border-box}
 /* .btn 등의 display가 hidden 속성을 덮지 않게 한다(JS 전까지 서류 접기 버튼을 숨김) */
@@ -36,7 +47,7 @@ a{color:inherit}
 .pill{padding:4px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:13px}
 .badge{display:inline-flex;align-items:center;font-size:13px;padding:4px 12px;border-radius:999px;white-space:nowrap}
 .b-ok{background:var(--ok-bg);color:var(--ok)}.b-bad{background:var(--bad-bg);color:var(--bad)}.b-muted{background:var(--muted-bg);color:var(--ink-2)}
-.b-countdown{background:transparent;color:var(--logo-o);border:1px solid #ecd9ad}
+.b-countdown{background:transparent;color:var(--logo-o);border:1px solid var(--countdown-line)}
 .hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .schedule span{display:block;font-size:13px;color:var(--ink-3)}
 .schedule b{font-family:"Jua","Malgun Gothic",sans-serif;font-weight:400;font-size:20px}
@@ -47,7 +58,7 @@ a{color:inherit}
 .panel h2{font-size:20px;margin:0 0 12px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .panel-head h2{margin-bottom:12px}
-.warning{padding:12px 15px;border-radius:12px;background:var(--warn-bg);font-size:13.5px;color:#775922;margin:0 0 16px}
+.warning{padding:12px 15px;border-radius:12px;background:var(--warn-bg);font-size:13.5px;color:var(--warn-ink);margin:0 0 16px}
 .excerpt-block+.excerpt-block{border-top:1px solid var(--line);margin-top:16px;padding-top:16px}
 .excerpt-block h3{font-size:15px;color:var(--ink-2);margin:0 0 6px}
 .excerpt{white-space:pre-line;overflow-wrap:anywhere;font-size:14.5px;line-height:1.85;margin:0}
@@ -56,7 +67,7 @@ a{color:inherit}
 .empty{color:var(--ink-2);font-size:14.5px;margin:0}
 .doc-item+.doc-item{border-top:1px dashed var(--line);margin-top:14px;padding-top:14px}
 .docs-body.is-collapsed{max-height:220px;overflow:hidden;position:relative}
-.docs-body.is-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(rgba(253,253,249,0),var(--card))}
+.docs-body.is-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(var(--card-clear),var(--card))}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:12px;font-size:15px;text-decoration:none;white-space:nowrap;cursor:pointer;border:0;transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-2px)}

@@ -5,6 +5,7 @@ import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
 import { lifeHref, mapHref, policyDetailHref } from '../lib/route';
+import { useTheme } from '../lib/theme';
 import { answerView, freshnessNote, sourceDetail } from '../lib/answerView';
 import { LOADING_STAGES, policyQuestion } from '../config/request';
 import type { GraphIndex } from '../graph/graphModel';
@@ -396,7 +397,8 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   const rlabel = schedule.label;
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);
-  const detailHref = sample ? null : policyDetailHref(p.policy_id);
+  const theme = useTheme();
+  const detailHref = sample ? null : policyDetailHref(p.policy_id, undefined, theme);
   // 검수된 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.
   const requirementRows: { label: string; value: string; document_id?: string | null; chunk_id?: string | null; source_url?: string | null }[] =
     p.official_requirements?.length ? p.official_requirements

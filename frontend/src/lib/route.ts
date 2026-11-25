@@ -44,14 +44,18 @@ const DETAIL_POLICY_ID = /^POL_[A-Z0-9_]{1,124}$/;
  * 기본 주소는 VITE_POLICY_DETAIL_BASE_URL(예: http://127.0.0.1:8001/policies/). 비어 있거나
  * http(s)가 아니면 null을 돌려 링크를 숨긴다 — 설정하지 않은 환경의 기존 화면은 그대로다.
  * 환경 변수는 호출할 때 읽는다(테스트에서 바꿀 수 있게).
+ * 다크 테마면 ?theme=dark를 붙여 상세 페이지도 같은 테마로 연다. 라이트는 기본값이라 붙이지 않는다.
  */
-export function policyDetailHref(policyId: string, base = import.meta.env.VITE_POLICY_DETAIL_BASE_URL as string | undefined): string | null {
+export function policyDetailHref(policyId: string, base = import.meta.env.VITE_POLICY_DETAIL_BASE_URL as string | undefined,
+  theme: 'light' | 'dark' = 'light'): string | null {
   if (!base?.trim() || !DETAIL_POLICY_ID.test(policyId)) return null;
   try {
     const root = new URL(base.trim());
     if (!['http:', 'https:'].includes(root.protocol) || root.username || root.password || root.search || root.hash) return null;
     if (!root.pathname.endsWith('/')) root.pathname += '/';
-    return new URL(`${encodeURIComponent(policyId)}/`, root).href;
+    const href = new URL(`${encodeURIComponent(policyId)}/`, root);
+    if (theme === 'dark') href.searchParams.set('theme', 'dark');
+    return href.href;
   } catch {
     return null;
   }

@@ -83,6 +83,14 @@ def react_links(policy_id: str) -> dict[str, str | None]:
     return {"home": f"{base}#/", "map": f"{base}#/map?policy={quote(policy_id, safe='')}"}
 
 
+def page_theme(request: HttpRequest) -> str:
+    """React 상세 링크의 ?theme=dark만 다크로 받는다. 없거나 다른 값이면 기본 라이트.
+
+    React 테마는 버튼으로 고른 값(브라우저 저장소)이라 다른 서버인 Django가 직접 읽을 수 없다.
+    """
+    return "dark" if request.GET.get("theme") == "dark" else "light"
+
+
 def _error(request: HttpRequest, status: int) -> HttpResponse:
     messages = {
         404: ("정책을 찾을 수 없어요", "주소가 올바른지 확인해 주세요. 정책이 목록에서 빠졌을 수도 있어요."),
@@ -91,7 +99,8 @@ def _error(request: HttpRequest, status: int) -> HttpResponse:
     }
     title, message = messages[status]
     return render(request, "policies/error.html",
-                  {"status": status, "title": title, "message": message, "react_base": react_base()}, status=status)
+                  {"status": status, "title": title, "message": message, "react_base": react_base(),
+                   "theme": page_theme(request)}, status=status)
 
 
 @require_GET
@@ -116,6 +125,7 @@ def policy_detail(request: HttpRequest, policy_id: str) -> HttpResponse:
         "react_base": react_base(),
         "dataset_version": result.dataset_version,
         "evaluated_on": result.evaluated_on,
+        "theme": page_theme(request),
     }
     return render(request, "policies/detail.html", context)
 

@@ -12,7 +12,16 @@ import { PolicyCompare } from './PolicyCompare';
 
 // 상담 화면이 너무 길어지지 않도록 처음엔 두 줄(데스크톱 3열 기준)만 보여 준다
 const PAGE_SIZE = 6;
-const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
+/**
+ * 목록 영역에 무엇을 보여 줄지. 처음 불러올 때만 '불러오는 중'을 보여 주고,
+ * 이미 받은 목록을 다시 확인하는 동안에는 카드를 그대로 둔다(카드가 다시 만들어지면 펼침이 닫힌다).
+ */
+export function explorerPhase(load: 'loading' | 'ready' | 'error', loadedOnce: boolean): 'loading' | 'error' | 'list' {
+  if (load === 'error') return 'error';
+  if (load === 'loading' && !loadedOnce) return 'loading';
+  return 'list';
+}
+const filters: [ScheduleFilter, string][] =[['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
 export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;
@@ -25,6 +34,9 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   activeRef.current = active;
   const [catalog, setCatalog] = useState<CatalogPolicy[]>([]), [version, setVersion] = useState('');
   const [load, setLoad] = useState<'loading' | 'ready' | 'error'>('loading'), [attempt, setAttempt] = useState(0);
+  // 한 번이라도 목록을 받았는지. 탭 복귀·포커스로 다시 부르는 동안 카드를 지우지 않아 펼친 카드가 유지된다
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const phase = explorerPhase(load, loadedOnce);
   const [tab, setTab] = useState<'all' | 'saved'>('all');
   const [query, setQuery] = useState(''), [region, setRegion] = useState(''), [category, setCategory] = useState('');
   const [filter, setFilter] = useState<ScheduleFilter>('all'), [sort, setSort] = useState<'deadline' | 'name'>('deadline');
@@ -45,14 +57,17 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
           const data = await loadPolicyCatalog(controller.signal);
           if (alive) {
             setCatalog(data.items.map(item => ({ policy: { ...item, conditions: [] }, regions: item.regions, categories: item.categories })));
-            setVersion(data.dataset_version); setEvaluatedOn(data.evaluated_on); setLoad('ready');
+            setVersion(data.dataset_version); setEvaluatedOn(data.evaluated_on); setLoad('ready'); setLoadedOnce(true);
           }
         } else {
           const { loadGraphDataset } = await import('../graph/loadGraph');
           const data = await loadGraphDataset();
-          if (alive) { setCatalog(catalogPolicies(data.index)); setVersion(data.version); setLoad('ready'); }
+          if (alive) { setCatalog(catalogPolicies(data.index)); setVersion(data.version); setLoad('ready'); setLoadedOnce(true); }
         }
-      } catch { if (alive) setLoad('error'); }
+      } catch {
+        // 다시 불러오기에 실패하면 이전 목록을 최신처럼 보여 주지 않는다(#107). 다음 성공 전까지 목록을 숨긴다
+        if (alive) { setLoad('error'); setLoadedOnce(false); }
+      }
       finally { pending = false; }
     }
     void refresh();
@@ -118,9 +133,9 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
     <p className="schedule-scope">{version ? `배포 데이터 ${version} 기준` : '배포 정책 목록'} · {POLICY_API_URL ? `서버의 정책 파일 기준 · 일정 확인일 ${evaluatedOn || '확인 중'}. 검색 DB의 반영 상태와는 다를 수 있어요.` : '전체 일정 API 미연결 · 일정은 오늘 확인된 상담 응답이 있는 정책만 표시합니다.'} 목록은 신청 자격 판정이 아닙니다.</p>
     {tab === 'saved' && <p className="schedule-scope">저장은 이 브라우저·기기에서만 유지돼요. 재방문·탭 복귀 시 일정을 다시 확인하고, 확인에 실패하면 마감 안내를 숨겨요.</p>}
     {state?.error && <p role="alert">{state.error}</p>}
-    {load === 'loading' && <p role="status">정책 목록을 불러오고 있어요…</p>}
-    {load === 'error' && <div role="alert">정책 목록을 불러오지 못했어요. <button className="chip" type="button" onClick={() => setAttempt(x => x + 1)}>다시 시도</button></div>}
-    {load === 'ready' && <><p className="schedule-count" role="status">정책 {rows.length}개 · {Math.min(limit, rows.length)}개 표시</p>
+    {phase === 'loading' && <p role="status">정책 목록을 불러오고 있어요…</p>}
+    {phase === 'error' && <div role="alert">정책 목록을 불러오지 못했어요. <button className="chip" type="button" onClick={() => setAttempt(x => x + 1)}>다시 시도</button></div>}
+    {phase === 'list' && <><p className="schedule-count" role="status">정책 {rows.length}개 · {Math.min(limit, rows.length)}개 표시</p>
       <div className="schedule-grid">{rows.slice(0, limit).map(({ policy, schedule }) => (
         <div key={policy.policy_id} className={'explorer-item' + (picked.includes(policy.policy_id) ? ' picked' : '')}>
           {/* 고르기 체크박스는 카드(펼침 영역) 밖에 둬서 누를 때 카드가 열리고 닫히지 않게 한다 */}

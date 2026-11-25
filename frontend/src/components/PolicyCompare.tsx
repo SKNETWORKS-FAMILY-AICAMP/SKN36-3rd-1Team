@@ -5,7 +5,8 @@ import {
 } from '../lib/policyCompare';
 import { scheduleView } from '../lib/applicationSchedule';
 import { policyQuestion } from '../config/request';
-import { mapHref } from '../lib/route';
+import { mapHref, policyDetailHref } from '../lib/route';
+import { useTheme } from '../lib/theme';
 import { safeHttpUrl } from '../lib/validate';
 import { useScheduleDay } from './ScheduleClock';
 import { summarizeConditions } from './TurnView';
@@ -48,8 +49,8 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
   /** 테스트·미리보기용. 없으면 배포 스냅샷에서 읽는다 */
   initialDetails?: Map<string, PolicyDetail>;
 }) {
-  const today = useScheduleDay();
-  const [details, setDetails] = useState<Map<string, PolicyDetail>>(initialDetails ?? new Map());
+  const today = useScheduleDay(), theme = useTheme();
+  const [details,setDetails] = useState<Map<string, PolicyDetail>>(initialDetails ?? new Map());
   const [detailState, setDetailState] = useState<'loading' | 'ready' | 'error'>(initialDetails ? 'ready' : 'loading');
   const [differencesOnly, setDifferencesOnly] = useState(true);
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -110,6 +111,7 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
         {ordered.map(({ policy }, i) => {
           const view = views[i], p = personal.get(policy.policy_id) ?? null, detail = details.get(policy.policy_id) ?? {};
           const source = safeHttpUrl(policy.source_url);
+          const detailHref = policyDetailHref(policy.policy_id, undefined, theme);
           const action = nextAction(policy.policy_name, source, p);
           return (
             <li key={policy.policy_id} className="compare-card">
@@ -152,8 +154,11 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
                   ? <a className="btn btn-p" href={action.href} target="_blank" rel="noopener noreferrer">{action.label}</a>
                   : <button className="btn btn-p" type="button" onClick={(event) => ask(action.question, event.currentTarget, policy.policy_id)}>{action.label}</button>}
                 <div className="compare-actions-sub">
-                  <button className="btn btn-o" type="button" onClick={() => setOpenId(policy.policy_id)}>상세 보기</button>
-                  {source && <a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">공식 공고 ↗</a>}
+                  <button className="btn btn-o" type="button" onClick={() => setOpenId(policy.policy_id)}>빠르게 보기</button>
+                  {/* 다른 카드와 같은 Django 정책 상세(SSR). 새 탭으로 열어 비교 화면과 체크 표시를 지킨다 */}
+                  {detailHref && <a className="btn btn-o" href={detailHref} target="_blank" rel="noopener noreferrer"
+                    aria-label={`${policy.policy_name} 정책 상세보기 (새 탭)`}>정책 상세보기 ↗</a>}
+                  {source &&<a className="btn btn-o" href={source} target="_blank" rel="noopener noreferrer">공식 공고 ↗</a>}
                 </div>
               </div>
             </li>
