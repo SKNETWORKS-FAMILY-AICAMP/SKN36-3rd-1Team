@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, Citation, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
-import { hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
+import { hasConfirmedAndFailureWithUnknown, hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
@@ -369,15 +369,23 @@ export function summarizeConditions(conditions: ConditionResult[]) {
     return true;
   });
   const showVerdict = hasOnlyAndGroups(conditions);
-  const hidesVerdict = !showVerdict && displayedConditions.some(({ status }) => status !== 'needs_check');
+  // UNKNOWN 하위 그룹만 보류된 단일 AND 정책은 Checker가 확정한 미충족 행을 원인으로 바로 보여 준다(#40).
+  const confirmedFailure = !showVerdict && hasConfirmedAndFailureWithUnknown(conditions);
+  const badgeFor = (status: ConditionStatus): [string, string] =>
+    confirmedFailure && status === 'ineligible' ? CONDITION_LABEL.ineligible : conditionBadge(status, showVerdict);
+  const hidesVerdict = !showVerdict && !confirmedFailure && displayedConditions.some(({ status }) => status !== 'needs_check');
   const labelsByBadge = new Map<string, { cls: string; labels: Set<string> }>();
-  for (const { status, label } of displayedConditions) {
-    const [cls, badge] = conditionBadge(status, showVerdict);
+  // 원인 항목이 요약 맨 앞에 오도록 미충족 행부터 넣는다.
+  const ordered = confirmedFailure
+    ? [...displayedConditions.filter(({ status }) => status === 'ineligible'), ...displayedConditions.filter(({ status }) => status !== 'ineligible')]
+    : displayedConditions;
+  for (const { status, label } of ordered) {
+    const [cls, badge] = badgeFor(status);
     const entry = labelsByBadge.get(badge) ?? { cls, labels: new Set<string>() };
     entry.labels.add(label);
     labelsByBadge.set(badge, entry);
   }
-  return { unjudged, displayedConditions, showVerdict, hidesVerdict, labelsByBadge, excluded: matchesExclusion(conditions) };
+  return { unjudged, displayedConditions, showVerdict, hidesVerdict, confirmedFailure, badgeFor, labelsByBadge, excluded: matchesExclusion(conditions) };
 }
 
 export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAskPolicy, sources = [], onOpenMap, askAsPrimary = false }: {
@@ -391,7 +399,8 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
 }) {
   const savedState = useSavedPolicies();
   const isSaved = !sample && !!savedState?.saved.some(s => s.policy_id === p.policy_id);
-  const { unjudged, displayedConditions, showVerdict, hidesVerdict, labelsByBadge } = summarizeConditions(p.conditions);
+  const { unjudged, displayedConditions, hidesVerdict, confirmedFailure, badgeFor, labelsByBadge } = summarizeConditions(p.conditions);
+  const failureCause = labelsByBadge.has(CONDITION_LABEL.ineligible[1]);
   const schedule = scheduleView(p, useScheduleDay());
   const [rcls] = RECEPTION_LABEL[schedule.status];
   const rlabel = schedule.label;
@@ -477,10 +486,15 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
       ) : displayedConditions.length > 0 && (
         <>
           <div className="policy-condition-summary">
+            {/* 미충족 행이 없는 예외 응답에서도 종합 미충족은 알린다 */}
+            {confirmedFailure && !failureCause && (
+              <div><span className="badge b-bad">조건 불일치</span><span>확인된 필수 조건을 충족하지 않아요.</span></div>
+            )}
             {Array.from(labelsByBadge, ([badge, { cls, labels }]) => (
               <div key={badge}>
                 <span className={`badge ${cls}`}>{badge}</span>
-                <span>{Array.from(labels).join(' · ')}</span>
+                <span>{Array.from(labels).join(' · ')}
+                  {confirmedFailure && badge === CONDITION_LABEL.ineligible[1] && ' — 확인된 필수 조건을 충족하지 않아요.'}</span>
               </div>
             ))}
             {!p.exclusion_reasons?.length && matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
@@ -494,7 +508,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
             <summary>판정 사유 자세히 보기</summary>
             <ul className="rows">
               {displayedConditions.map((c, i) => {
-            const [cls, label] = conditionBadge(c.status, showVerdict);
+            const [cls, label] = badgeFor(c.status);
             return (
               // 같은 field의 조건이 여러 개 올 수 있어(계약 §4) 순번을 함께 key로 쓴다
               <li key={`${c.field}-${i}`} style={{ animationDelay: `${0.25 + i * 0.14}s` }}>

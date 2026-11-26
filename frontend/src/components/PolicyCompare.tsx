@@ -20,7 +20,7 @@ function personalSummary(consulted: ConsultedCheck | undefined) {
   const s = summarizeConditions(consulted.check.conditions);
   const groups = Array.from(s.labelsByBadge, ([badge, { cls, labels }]) => ({ badge, cls, labels: [...labels] }));
   const needs = s.displayedConditions.filter(c => c.status === 'needs_check').map(c => c.label);
-  const failed = s.showVerdict && s.displayedConditions.some(c => c.status === 'ineligible');
+  const failed = s.confirmedFailure || (s.showVerdict && s.displayedConditions.some(c => c.status === 'ineligible'));
   const cell: CompareCell = s.unjudged ? { text: '자동 판정 안 함', tone: 'muted' }
     : !groups.length ? { text: '비교한 조건 없음', tone: 'muted' }
     : { text: groups.map(g => `${g.badge}: ${g.labels.join('·')}`).join(' / '), tone: failed || s.excluded ? 'bad' : needs.length || !s.showVerdict ? 'warn' : 'ok' };

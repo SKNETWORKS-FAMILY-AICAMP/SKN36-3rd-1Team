@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import type { ConditionResult } from '../api/types';
-import { andGroupResult, hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from './conditionGroups';
+import { andGroupResult, hasConfirmedAndFailureWithUnknown, hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from './conditionGroups';
 
 const row = (reason: string, field = 'eligibility'): ConditionResult => ({ field, label: '자격 요건', status: 'needs_check', reason });
 const AND = row('모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.');
@@ -21,6 +21,16 @@ it('confirms only AND-only structures and treats anything unclear as not confirm
   expect(hasOnlyAndGroups([age])).toBe(false);
   expect(hasOnlyAndGroups([age, AND, row('여러 루트 조건 그룹의 결합 논리가 확인되지 않았습니다.')])).toBe(false);
   expect(hasOnlyAndGroups([age, row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.')])).toBe(false);
+});
+
+it('does not promote an ambiguous AND group failure to a policy verdict', () => {
+  const unknown = row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.');
+  const failed = andGroupResult([{ ...age, status: 'ineligible' }]);
+  expect(hasConfirmedAndFailureWithUnknown([unknown, failed])).toBe(true);
+  for (const other of [OR, NOT, AND, row('여러 루트 조건 그룹의 결합 논리가 확인되지 않았습니다.')]) {
+    expect(hasConfirmedAndFailureWithUnknown([unknown, other, failed])).toBe(false);
+  }
+  expect(hasConfirmedAndFailureWithUnknown([failed, unknown])).toBe(false);
 });
 
 it('builds an AND summary row with the checker AND rule and recognizes it as AND', () => {

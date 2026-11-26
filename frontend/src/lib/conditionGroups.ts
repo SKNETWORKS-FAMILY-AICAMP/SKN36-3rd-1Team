@@ -50,7 +50,22 @@ export function hasOnlyAndGroups(conditions: ConditionResult[]): boolean {
 }
 
 /** Checker가 비교할 조건이 없을 때 쓰는 사유(UNKNOWN 그룹, 조건 구조 없음). 뒤에 데이터 품질 보류 문구가 붙을 수 있다. */
-const UNJUDGED_REASON_PREFIXES = ['UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '확인 가능한 자격 조건 구조가 없어'];
+const UNKNOWN_GROUP_REASON = 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.';
+const UNJUDGED_REASON_PREFIXES = [UNKNOWN_GROUP_REASON, '확인 가능한 자격 조건 구조가 없어'];
+
+/**
+ * UNKNOWN 하위 그룹이 보류돼도 Checker가 단일 AND 종합 행에 보존한 미충족은 표시한다.
+ * 평평한 응답에서 다른 그룹이나 구조 경고가 있으면 종합 행의 범위를 추정하지 않는다.
+ */
+export function hasConfirmedAndFailureWithUnknown(conditions: ConditionResult[]): boolean {
+  const eligibility = conditions.filter((condition) => condition.field === 'eligibility');
+  const root = eligibility[eligibility.length - 1];
+  return eligibility.length > 1
+    && root?.status === 'ineligible'
+    && groupLogic(root) === 'AND'
+    && eligibility.slice(0, -1).every((condition) =>
+      condition.status === 'needs_check' && condition.reason.startsWith(UNKNOWN_GROUP_REASON));
+}
 
 /**
  * 비교할 조건이 없다는 사유만 있는 정책이면 true(화면 표시: '자동 판정 안 함').

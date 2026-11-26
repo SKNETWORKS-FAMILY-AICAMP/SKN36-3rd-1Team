@@ -2,7 +2,7 @@ import { kstDay } from '../lib/applicationSchedule';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
-import { PolicyCard, TurnView } from './TurnView';
+import { PolicyCard, summarizeConditions, TurnView } from './TurnView';
 import { mockAsk } from '../mock/mockAsk';
 import fromChecker from './__fixtures__/policyChecksFromChecker.json';
 
@@ -263,6 +263,28 @@ it('keeps verdict badges for policies whose groups are all AND', () => {
   expect(card).toContain('조건 불일치');
   expect(card).not.toContain('개별 비교');
   expect(card).not.toContain('(종합 결과)');
+});
+
+it.each(['ineligible', 'needs_check'] as const)('distinguishes an AND failure from UNKNOWN review (%s)', (status) => {
+  const conditions: ConditionResult[] = [
+    { field: 'age', label: '나이', status: status === 'ineligible' ? 'ineligible' : 'eligible', reason: '가상 나이 비교' },
+    { field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.' },
+    { field: 'eligibility', label: '자격 요건', status, reason: '모든 조건을 충족해야 합니다(종합 결과).' },
+    { field: 'income', label: '소득', status: 'needs_check', reason: '소득 확인 필요' },
+  ];
+  const { card } = renderPolicy('POL_GOV_002_70', [], { conditions });
+  expect(card).toContain('추가 확인 필요');
+  expect(card).not.toContain('조건상 적합');
+  expect(card.includes('확인된 필수 조건을 충족하지 않아요.')).toBe(status === 'ineligible');
+  expect(card.includes('조건이 어떻게 결합되는지 확인되지 않았어요.')).toBe(status === 'needs_check');
+  // 미충족이 확정되면 원인 항목(나이)을 요약 맨 앞과 상세 배지에 '조건 불일치'로 보여 준다.
+  expect(card.includes('<span class="badge b-bad">조건 불일치</span><span>나이 — 확인된 필수 조건을 충족하지 않아요.</span>')).toBe(status === 'ineligible');
+  if (status === 'ineligible') expect(card.indexOf('조건 불일치')).toBeLessThan(card.indexOf('추가 확인 필요'));
+  expect(card.includes('개별 비교')).toBe(status === 'needs_check');
+  const { confirmedFailure, hidesVerdict, badgeFor } = summarizeConditions(conditions);
+  expect(confirmedFailure).toBe(status === 'ineligible');
+  expect(hidesVerdict).toBe(status === 'needs_check');
+  expect(badgeFor('eligible')[1]).toBe('개별 비교');
 });
 
 it('does not repeat a missing-age request that the input button already asks for', () => {
