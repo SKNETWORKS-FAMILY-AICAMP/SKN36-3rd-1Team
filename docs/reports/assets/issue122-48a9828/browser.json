@@ -1,0 +1,64 @@
+{
+  "dev": "48a9828b583e49e9aa327bcc7c9f21df0cc5fbbe",
+  "results": [
+    {
+      "label": "home-detail-return",
+      "verdict": "PASS",
+      "href": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업",
+      "http": 200,
+      "openerNull": true,
+      "openAfterReturn": true,
+      "stateUnchanged": true
+    },
+    {
+      "label": "saved-detail-return",
+      "verdict": "PASS",
+      "href": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업",
+      "http": 200,
+      "openerNull": true,
+      "openAfterReturn": true,
+      "stateUnchanged": true
+    },
+    {
+      "label": "consultation-detail-return",
+      "verdict": "PASS",
+      "askHttp": 200,
+      "isSample": false,
+      "selectedPolicy": "POL_YC_007",
+      "href": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업",
+      "http": 200,
+      "openerNull": true,
+      "openAfterReturn": true,
+      "stateUnchanged": true
+    },
+    {
+      "label": "recent-schedule-detail-return",
+      "verdict": "PASS",
+      "href": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업",
+      "http": 200,
+      "openerNull": true,
+      "openAfterReturn": true,
+      "stateUnchanged": true
+    },
+    {
+      "label": "404-return-POL_QA_NO_SUCH_POLICY_122",
+      "verdict": "PASS",
+      "url": "http://127.0.0.1:18301/policies/POL_QA_NO_SUCH_POLICY_122/",
+      "http": 404,
+      "home": "http://127.0.0.1:18305/#/",
+      "reactCatalogLoaded": true
+    },
+    {
+      "label": "404-return-pol_yc_007",
+      "verdict": "PASS",
+      "url": "http://127.0.0.1:18301/policies/pol_yc_007/",
+      "http": 404,
+      "home": "http://127.0.0.1:18305/#/",
+      "reactCatalogLoaded": true
+    }
+  ]
+}
