@@ -1,0 +1,768 @@
+{
+  "date_kst": "2026-11-26",
+  "verdict": "READY",
+  "git_dev_sha": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
+  "pr133": {
+    "state": "open",
+    "head_sha": "a59223cd27ef565da9c950dfc9f0854dc762b906",
+    "virtual_integration_tests_passed": 55,
+    "new_conflicts": false,
+    "previous_conflict": "Adjacent pipeline imports; both changes retained in compatibility worktree."
+  },
+  "credentials_present": {
+    "ISSUE105_R3D_VERIFY_QDRANT_API_KEY": false,
+    "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD": false,
+    "OPENAI_API_KEY": false
+  },
+  "project_venv_present": false,
+  "review_environment_openai_sdk_present": false,
+  "release": {
+    "version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "policy_rows": 249
+  },
+  "r3d": {
+    "status": "BLOCKED",
+    "attempted_authenticated_connections": 0,
+    "reason": "Required R3D-specific process environment variables absent; stopped as instructed.",
+    "b2_points": null,
+    "b3_points": null,
+    "neo4j_nodes": null,
+    "neo4j_relationships": null,
+    "manifest_match_to_running_db": null,
+    "actual_faq_b2_chunks": null
+  },
+  "llm": {
+    "status": "BLOCKED",
+    "actual_calls": 0,
+    "cost": 0,
+    "original_responses": null,
+    "pipeline_responses": null
+  },
+  "catalog_http": [
+    {
+      "query": "K-패스",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001"
+      ]
+    },
+    {
+      "query": "K패스",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001"
+      ]
+    },
+    {
+      "query": "k패스",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001"
+      ]
+    },
+    {
+      "query": "k-패스",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001"
+      ]
+    },
+    {
+      "query": "모두의 카드",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001",
+        "POL_BOK_075"
+      ]
+    },
+    {
+      "query": "모두의카드",
+      "http": 200,
+      "policy_ids": [
+        "POL_STG_MOLIT_001",
+        "POL_BOK_075"
+      ]
+    }
+  ],
+  "browser": {
+    "engine": "ChatGPT in-app browser",
+    "url": "http://127.0.0.1:5178/",
+    "catalog_endpoint": "http://127.0.0.1:8013/api/policies",
+    "mode": "Real React + real release-backed catalog HTTP; search session disabled; chat demo mode.",
+    "search_results": [
+      {
+        "query": "K-패스",
+        "kpass_visible": true,
+        "result_count": 1
+      },
+      {
+        "query": "K패스",
+        "kpass_visible": true,
+        "result_count": 1
+      },
+      {
+        "query": "k패스",
+        "kpass_visible": true,
+        "result_count": 1
+      },
+      {
+        "query": "k-패스",
+        "kpass_visible": true,
+        "result_count": 1
+      },
+      {
+        "query": "모두의 카드",
+        "kpass_visible": true,
+        "result_count": 2
+      },
+      {
+        "query": "모두의카드",
+        "kpass_visible": true,
+        "result_count": 2
+      }
+    ],
+    "sejong_card_visible": true,
+    "sejong_reception_label": "일정 확인 필요",
+    "sejong_apply_links": 0,
+    "sejong_apply_buttons": 0,
+    "preserved_source_href": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+    "console_errors": [],
+    "console_warnings": [],
+    "actual_llm_answer_rendering": "BLOCKED",
+    "sejong_municipal_homepage_in_llm_answer": "BLOCKED"
+  },
+  "sejong_catalog_response": {
+    "http": 200,
+    "items": [
+      {
+        "policy_id": "POL_YC_065",
+        "policy_name": "세종시 위원회 청년참여 확대",
+        "agency": "세종특별자치시",
+        "regions": [
+          "세종특별자치시"
+        ],
+        "categories": [
+          "지역별 생활지원·복지"
+        ],
+        "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+        "official_apply_url": null,
+        "reception_status": "unknown",
+        "application_schedule": null,
+        "required_documents": null,
+        "requirement_excerpts": null
+      }
+    ]
+  },
+  "other_policy_catalog_response": {
+    "http": 200,
+    "items": [
+      {
+        "policy_id": "POL_STG_SEOUL_001",
+        "policy_name": "서울특별시 청년수당",
+        "agency": "서울특별시 미래청년기획관 청년정책담당관",
+        "regions": [
+          "서울특별시"
+        ],
+        "categories": [
+          "지역별 생활지원·복지"
+        ],
+        "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+        "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+        "reception_status": "closed",
+        "application_schedule": {
+          "evaluated_on": "2026-11-26",
+          "start_date": "2026-05-27",
+          "end_date": "2026-05-29",
+          "is_ongoing": false,
+          "days_to_start": -183,
+          "days_to_end": -181
+        },
+        "required_documents": null,
+        "requirement_excerpts": null
+      }
+    ]
+  },
+  "resume_checks": [
+    {
+      "checked_at_kst": "2026-11-26T12:15:29.432017+09:00",
+      "verdict": "BLOCKED",
+      "runbook_sections": [
+        "3",
+        "5.7.4",
+        "5.10.14",
+        "5.12"
+      ],
+      "credentials_present": {
+        "ISSUE105_R3D_VERIFY_QDRANT_API_KEY": false,
+        "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD": false,
+        "OPENAI_API_KEY": false
+      },
+      "runtime": {
+        "reused_python": "../ssok-ui-analysis/.review-venv/Scripts/python.exe",
+        "project_venv_present": false,
+        "modules_present": {
+          "fastapi": true,
+          "httpx": true,
+          "neo4j": true,
+          "qdrant_client": true,
+          "openai": false,
+          "pytest": false,
+          "dotenv": true
+        }
+      },
+      "baseline": {
+        "dev_sha": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
+        "pr133_state": "open",
+        "pr133_head_sha": "a59223cd27ef565da9c950dfc9f0854dc762b906",
+        "release_version": "1.4.0-candidate",
+        "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+        "policy_file_rows": 249
+      },
+      "r3d": {
+        "status": "BLOCKED",
+        "authenticated_connection_attempts": 0,
+        "qdrant_url": "http://127.0.0.1:56756",
+        "neo4j_uri": "bolt://127.0.0.1:56787",
+        "policy_count": null,
+        "document_count": null,
+        "chunk_count": null,
+        "b2_points": null,
+        "b3_points": null,
+        "neo4j_nodes": null,
+        "neo4j_relationships": null,
+        "manifest_match": null,
+        "current_bundle_match": null,
+        "faq_actual_b2_chunks": null,
+        "actually_verified_r3d_policy_ids": [],
+        "reason": "All required R3D-specific process credentials are absent. No authentication bypass, extraction, decryption or unauthenticated retries."
+      },
+      "llm": {
+        "status": "BLOCKED",
+        "actual_calls": 0,
+        "actual_cost": 0,
+        "original_responses": null,
+        "pipeline_responses": null,
+        "reason": "OPENAI_API_KEY absent and openai SDK absent from the existing review environment."
+      },
+      "virtual_integration": {
+        "status": "PASS",
+        "tests": 55,
+        "failures": 0,
+        "errors": 0,
+        "new_regression_failures": 0,
+        "worktree_existing_source_changes": [],
+        "actual_db_or_llm": false,
+        "policy_ids_in_release_mock_tests": [
+          "POL_YC_065",
+          "POL_STG_MOLIT_001",
+          "POL_STG_NTS_001",
+          "POL_STG_SEOUL_001"
+        ],
+        "test_modules": [
+          "test_issue103_guidance",
+          "test_official_requirements",
+          "test_official_requirements_api"
+        ],
+        "command": "python -B -c \"import sys,unittest; sys.path[:0]=['tests/integration','tests/unit']; names=['test_issue103_guidance','test_official_requirements','test_official_requirements_api']; r=unittest.TextTestRunner().run(unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(n) for n in names)); sys.exit(not r.wasSuccessful())\"",
+        "execution_directory": "../issue103-pr133-compat",
+        "bytecode_disabled": true
+      },
+      "browser": {
+        "status": "NOT_RERUN",
+        "previous_results_preserved": true
+      },
+      "code_or_data_changes_this_resume": false
+    }
+  ],
+  "external_verification_preparations": [
+    {
+      "recorded_at_utc": "2026-11-26T05:14:33.406929+00:00",
+      "status": "BLOCKED",
+      "reason": "Awaiting external PowerShell real R3D/LLM evidence; no external results have been supplied yet.",
+      "latest_dev_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
+      "pr133": {
+        "state": "merged",
+        "head_sha": "cdbc3533231b87d675e60cb089196971665da489",
+        "merge_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad"
+      },
+      "main_worktree_head_preserved": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
+      "latest_combined_worktree": "../issue103-latest-dev-verify-20261126",
+      "user_python": "C:\\dev\\project\\SKN36-3rd-1Team\\SKN36-3rd-1Team\\.venv\\Scripts\\python.exe",
+      "user_python_version": "3.12.13",
+      "dependencies": {
+        "fastapi": "0.162.1",
+        "httpx": "0.28.1",
+        "qdrant-client": "1.12.2",
+        "neo4j": "5.28.8",
+        "openai": "3.59.0",
+        "pytest": "9.2.0",
+        "beautifulsoup4": "4.15.0"
+      },
+      "openai_requirement_pin": "3.46.0",
+      "dependencies_changed": false,
+      "local_release": {
+        "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+        "manifest_files_checked": 36,
+        "manifest_mismatches": [],
+        "documents": 273,
+        "reconstructed_b2_chunks": 1249,
+        "reconstructed_b3_chunks": 1338,
+        "actual_DB_counts": null
+      },
+      "tests": {
+        "main_backend": {
+          "passed": 192,
+          "failed_environment": 1,
+          "subtests_passed": 510,
+          "environment_failure": "data/raw/gov24/items/449000000108.json absent; same failure reproduced on clean dev a2ff030"
+        },
+        "latest_dev_plus_103_plus_final_133": {
+          "passed": 75,
+          "subtests_passed": 153,
+          "failures": 0
+        },
+        "readonly_verifier": {
+          "passed": 9,
+          "subtests_passed": 19,
+          "failures": 0
+        },
+        "frontend": {
+          "passed": 186,
+          "blocked": "jsdom absent",
+          "typecheck": "PASS"
+        },
+        "new_product_regression_failures": 0
+      },
+      "mobile_browser": {
+        "status": "PASS",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "kpass_six_spellings_visible": true,
+        "sejong_apply_link_count": 0,
+        "official_source_link_preserved": true,
+        "document_client_width": 375,
+        "document_scroll_width": 375,
+        "console_errors": [],
+        "mode": "Real release-backed catalogue API; actual R3D chat not executed"
+      },
+      "actual_r3d_calls": 0,
+      "actual_openai_calls": 0,
+      "external_verifier": {
+        "path": "tests/manual/verify_issue103_r3d_readonly.py",
+        "maximum_llm_calls": 11,
+        "semantic_review_required": true,
+        "bundle_directory_optional": true,
+        "sha256": "14a5df5e51c8cde377322912282313cec9c6e724701c4d6dcca3ee7f2641b9fa"
+      }
+    },
+    {
+      "recorded_at_utc": "2026-11-26T05:18:49.265640+00:00",
+      "status": "BLOCKED",
+      "reason": "Awaiting external PowerShell real R3D/LLM evidence; no external results have been supplied yet.",
+      "latest_dev_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
+      "pr133": {
+        "state": "merged",
+        "head_sha": "cdbc3533231b87d675e60cb089196971665da489",
+        "merge_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad"
+      },
+      "main_worktree_head_preserved": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
+      "latest_combined_worktree": "../issue103-latest-dev-verify-20261126",
+      "user_python": "C:\\dev\\project\\SKN36-3rd-1Team\\SKN36-3rd-1Team\\.venv\\Scripts\\python.exe",
+      "user_python_version": "3.12.13",
+      "dependencies": {
+        "fastapi": "0.162.1",
+        "httpx": "0.28.1",
+        "qdrant-client": "1.12.2",
+        "neo4j": "5.28.8",
+        "openai": "3.59.0",
+        "pytest": "9.2.0",
+        "beautifulsoup4": "4.15.0"
+      },
+      "openai_requirement_pin": "3.46.0",
+      "dependencies_changed": false,
+      "local_release": {
+        "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+        "manifest_files_checked": 36,
+        "manifest_mismatches": [],
+        "documents": 273,
+        "reconstructed_b2_chunks": 1249,
+        "reconstructed_b3_chunks": 1338,
+        "actual_DB_counts": null
+      },
+      "tests": {
+        "main_backend": {
+          "passed": 192,
+          "failed_environment": 1,
+          "subtests_passed": 510,
+          "environment_failure": "data/raw/gov24/items/449000000108.json absent; same failure reproduced on clean dev a2ff030"
+        },
+        "latest_dev_plus_103_plus_final_133": {
+          "passed": 76,
+          "subtests_passed": 153,
+          "failures": 0
+        },
+        "readonly_verifier": {
+          "passed": 10,
+          "subtests_passed": 19,
+          "failures": 0
+        },
+        "frontend": {
+          "passed": 186,
+          "blocked": "jsdom absent",
+          "typecheck": "PASS"
+        },
+        "new_product_regression_failures": 0
+      },
+      "mobile_browser": {
+        "status": "PASS",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "kpass_six_spellings_visible": true,
+        "sejong_apply_link_count": 0,
+        "official_source_link_preserved": true,
+        "document_client_width": 375,
+        "document_scroll_width": 375,
+        "console_errors": [],
+        "mode": "Real release-backed catalogue API; actual R3D chat not executed"
+      },
+      "actual_r3d_calls": 0,
+      "actual_openai_calls": 0,
+      "external_verifier": {
+        "path": "tests/manual/verify_issue103_r3d_readonly.py",
+        "maximum_llm_calls": 11,
+        "semantic_review_required": true,
+        "bundle_directory_optional": true,
+        "sha256": "6f25de23f1a08d72ebbbc93554fa05fa4079ca7898c701cc0e6cfd40f5c2da27"
+      }
+    }
+  ],
+  "external_execution_reviews": [
+    {
+      "recorded_at_utc": "2026-11-26T05:26:08.350712+00:00",
+      "external_execution_time_utc": "2026-11-26T05:21:03.408997+00:00",
+      "evidence_files": [
+        {
+          "path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-preflight-20261126-142102-640.json",
+          "sha256": "0399656bc9e215758feb9720ec84915734a803494a3199b97565035b0e7248d8"
+        },
+        {
+          "path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-142102-640.json",
+          "sha256": "5d7b9a1ceaff8899b2031a2d5bdba374a88980534ad506a4cd06cd946416cc66"
+        }
+      ],
+      "source_git_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
+      "product_source_hash_matches": {
+        "backend/rag/application_links.py": true,
+        "backend/rag/pipeline.py": true,
+        "backend/api/main.py": true,
+        "backend/api/schemas.py": true,
+        "backend/api/policy_catalog.py": true,
+        "backend/eligibility/checker.py": true,
+        "backend/llm/generator.py": true,
+        "ai/prompts/system_prompt.py": true
+      },
+      "preflight": {
+        "status": "PASS",
+        "missing_env_names": [],
+        "missing_packages": [],
+        "git_error": null
+      },
+      "external_credentials_present": {
+        "ISSUE105_R3D_VERIFY_QDRANT_API_KEY": true,
+        "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD": true,
+        "OPENAI_API_KEY": true
+      },
+      "qdrant_connection": {
+        "status": "BLOCKED",
+        "attempted": true,
+        "error_type": "UnexpectedResponse",
+        "http_status": null,
+        "reason": "First get_collections call failed before any authentication PASS entry; old verifier omitted numeric HTTP status."
+      },
+      "neo4j_connection": {
+        "status": "BLOCKED",
+        "attempted": false
+      },
+      "database_baseline": {
+        "status": "BLOCKED",
+        "executed": false
+      },
+      "actual_llm_calls": 0,
+      "successful_llm_responses": 0,
+      "verdict": "BLOCKED",
+      "execution_error": {
+        "error_type": "UnexpectedResponse",
+        "backend": null,
+        "kind": null
+      },
+      "new_product_regression_failures": 0,
+      "verifier_update": {
+        "http_status_only_no_body_or_headers": true,
+        "execution_stage": true,
+        "connections_only_mode": true,
+        "loopback_qdrant_trust_env": false,
+        "proxy_cause_proven": false,
+        "sha256": "166d6184d4df25cd3e603e17619f7240e0865b095e5b27832051de252dd169a1"
+      },
+      "local_latest_integration": {
+        "status": "PASS",
+        "tests": 79,
+        "subtests": 153,
+        "actual_db_or_llm": false
+      }
+    }
+  ],
+  "external_connection_diagnoses": [
+    {
+      "reviewed_at_utc": "2026-11-26T05:30:16.285569+00:00",
+      "evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-142901-769.json",
+      "evidence_sha256": "7c8737a00db900361c30c579c3f9707970ae8f54fb06f4d6283db9ac78d34fcb",
+      "external_preflight": {
+        "status": "PASS",
+        "missing_env_names": [],
+        "missing_packages": [],
+        "git_error": null
+      },
+      "external_credentials_present": {
+        "ISSUE105_R3D_VERIFY_QDRANT_API_KEY": true,
+        "ISSUE105_R3D_VERIFY_NEO4J_PASSWORD": true,
+        "OPENAI_API_KEY": true
+      },
+      "execution_stage": "qdrant_authentication",
+      "execution_error": {
+        "error_type": "UnexpectedResponse",
+        "backend": null,
+        "kind": "auth",
+        "http_status": 401
+      },
+      "qdrant": {
+        "status": "BLOCKED",
+        "authenticated": false,
+        "http_status": 401,
+        "trust_env": false
+      },
+      "neo4j": {
+        "status": "BLOCKED",
+        "executed": false
+      },
+      "db_baseline": {
+        "status": "BLOCKED",
+        "executed": false
+      },
+      "llm": {
+        "status": "BLOCKED",
+        "actual_calls": 0
+      },
+      "classification": "Server rejected the supplied Qdrant credential, not missing process variables. Exact credential mismatch cause remains unverified.",
+      "product_regression_failure_observed": false,
+      "verdict": "BLOCKED",
+      "next_step": "User obtains the existing R3D verify key through its normal authorized source, sets it in the same PowerShell process, then reruns connections-only. No extraction, credential reset, DB restore or authentication bypass."
+    },
+    {
+      "evidence_file": "issue103-connection-20261126-143254-438.json",
+      "evidence_sha256": "bc13747010a49fe963c8d16866a032c77a218813c809b61dd42292133772c39d",
+      "preflight": {
+        "status": "PASS",
+        "missing_env_names": [],
+        "missing_packages": [],
+        "git_error": null
+      },
+      "execution_stage": "qdrant_authentication",
+      "execution_error": {
+        "error_type": "UnexpectedResponse",
+        "backend": null,
+        "kind": "auth",
+        "http_status": 401
+      },
+      "actual_llm_calls": 0,
+      "verdict": "BLOCKED",
+      "user_input_issue": "User appears to have entered a credential filename into a raw-key prompt; no credential file was opened or decrypted."
+    }
+  ],
+  "external_connection_successes": [
+    {
+      "evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-144925-493.json",
+      "evidence_sha256": "583e488a089d6964b00b07ceb1cb93fe751eadfccc96ebab4d18edaea9b51ab8",
+      "executed_at_utc": "2026-11-26T05:49:25.820840+00:00",
+      "source_git_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
+      "checks": [
+        {
+          "check": "qdrant_authentication",
+          "status": "PASS"
+        },
+        {
+          "check": "neo4j_authentication",
+          "status": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "actual_llm_calls": 0,
+      "external_openai_key_present": false,
+      "database_baseline_executed": false,
+      "verdict": "BLOCKED: DB baseline and actual LLM evidence pending"
+    }
+  ],
+  "historical_verdict_before_final_review": "BLOCKED",
+  "current_verdict_source": "final_review; earlier sections are historical evidence",
+  "final_review": {
+    "date_kst": "2026-11-26",
+    "verdict": "READY",
+    "branch": "fix/103-sejong-apply-url-final",
+    "dev_sha": "042d0fd84979d385323342dea4bcea2dd2b5fc35",
+    "pr133": {
+      "state": "MERGED",
+      "head_sha": "cdbc3533231b87d675e60cb089196971665da489",
+      "merge_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
+      "historical_virtual_integration_passed": 55
+    },
+    "pr135_issue78": "Already in base dev; no separate issue78 branch merged or copied.",
+    "actual_evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-150052-281.json",
+    "actual_evidence_sha256": "088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58",
+    "actual_llm_calls_external": 11,
+    "new_llm_calls_by_agent": 0,
+    "original_http": {
+      "200": 10,
+      "502": 1
+    },
+    "original_automated_status": "FAIL",
+    "recorded_real_response_replay": {
+      "passed": 11,
+      "failed": 0,
+      "new_llm_calls": 0,
+      "db_calls": 0
+    },
+    "r3d_status": "PASS",
+    "policy_count": 249,
+    "document_count": 273,
+    "b2_points": 1249,
+    "b3_points": 1338,
+    "neo4j_nodes": 1147,
+    "neo4j_relationships": 2702,
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "bundle_file_provenance": "BLOCKED: --bundle-dir not provided; full database contents match frozen R3 pins.",
+    "fresh_live_post_fix_e2e": "BLOCKED: not executed; recorded response replay is separate evidence.",
+    "focused_regression": {
+      "passed": 111,
+      "subtests_passed": 203
+    },
+    "backend_final": {
+      "tests": 2457,
+      "failures_and_errors": [
+        "tests.integration.test_rag_pipeline.PipelineTests::test_regenerated_doc_gov_048_chunks_reach_api_response_intact",
+        "tests.test_candidate_release.CandidateIntegrityTests::test_chunk_texts_and_document_hashes_match_saved_bodies",
+        "tests.test_candidate_release.CandidateIntegrityTests::test_frozen_manifests_match_actual_files",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_bundle_matches_r3_contract",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_crash_leftovers_are_preserved_and_build_still_isolated",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_existing_bundle_is_never_overwritten",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_existing_partial_zip_sha_or_report_is_refused_and_kept",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_failure_midway_leaves_no_partial_or_staging",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_final_zip_name_created_meanwhile_is_not_overwritten",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_partial_created_by_another_job_is_kept",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_refusals_before_any_output",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_report_write_failure_keeps_zip_and_sha256",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_sha256_write_failure_keeps_verified_zip",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_verify_detects_tampered_or_extra_members",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_zip_or_verify_failure_removes_only_own_partial_and_staging",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_autocrlf_false_eol_only_difference_is_accepted",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_autocrlf_true_crlf_worktree_and_lf_blob_is_accepted",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_content_change_or_uncommitted_pins_are_refused_in_both_modes",
+        "tests.unit.test_build_restore_bundle_r3.PlanModeTests::test_plan_is_read_only_and_lists_missing_pins",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_bad_inputs_stop_without_outputs",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_bundle_matches_restore_contract",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_existing_bundle_is_never_overwritten",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_failure_midway_leaves_no_partial_or_staging",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_snapshot_missing_or_changed_is_rejected",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_verify_detects_tampered_missing_or_forbidden_members",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_commit_checks_manifest_restore_tool_and_forbidden_files",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_git_archive_contains_only_committed_tree",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_only_full_existing_sha_is_accepted",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_real_repository_head_has_no_tracked_credentials",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_candidate_semantic_suspicions_remain",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_counts_id_and_vector_links",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_current_release_age_links_are_independent_of_historical_candidate",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_manifest_git_bytes_and_lf_normalization_match",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_nullable_revision_is_explicit_in_candidate_contract",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_old_31_and_current_250_null_errors_are_reproduced",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_plan_and_fake_load_preserve_input_and_optional_metadata",
+        "tests.unit.test_r3b_build_isolation.BundleToolTests::test_plan_mode_on_preserved_folder_stays_read_only"
+      ],
+      "skipped": 129
+    },
+    "backend_baseline": {
+      "tests": 2429,
+      "failures_and_errors": [
+        "tests.integration.test_rag_pipeline.PipelineTests::test_regenerated_doc_gov_048_chunks_reach_api_response_intact",
+        "tests.test_candidate_release.CandidateIntegrityTests::test_chunk_texts_and_document_hashes_match_saved_bodies",
+        "tests.test_candidate_release.CandidateIntegrityTests::test_frozen_manifests_match_actual_files",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_bundle_matches_r3_contract",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_crash_leftovers_are_preserved_and_build_still_isolated",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_existing_bundle_is_never_overwritten",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_existing_partial_zip_sha_or_report_is_refused_and_kept",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_failure_midway_leaves_no_partial_or_staging",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_final_zip_name_created_meanwhile_is_not_overwritten",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_partial_created_by_another_job_is_kept",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_refusals_before_any_output",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_report_write_failure_keeps_zip_and_sha256",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_sha256_write_failure_keeps_verified_zip",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_verify_detects_tampered_or_extra_members",
+        "tests.unit.test_build_restore_bundle_r3.BuildBundleTests::test_zip_or_verify_failure_removes_only_own_partial_and_staging",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_autocrlf_false_eol_only_difference_is_accepted",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_autocrlf_true_crlf_worktree_and_lf_blob_is_accepted",
+        "tests.unit.test_build_restore_bundle_r3.CommitEolTests::test_content_change_or_uncommitted_pins_are_refused_in_both_modes",
+        "tests.unit.test_build_restore_bundle_r3.PlanModeTests::test_plan_is_read_only_and_lists_missing_pins",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_bad_inputs_stop_without_outputs",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_bundle_matches_restore_contract",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_existing_bundle_is_never_overwritten",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_failure_midway_leaves_no_partial_or_staging",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_snapshot_missing_or_changed_is_rejected",
+        "tests.unit.test_build_restore_bundle_v140.BuildBundleTests::test_verify_detects_tampered_missing_or_forbidden_members",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_commit_checks_manifest_restore_tool_and_forbidden_files",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_git_archive_contains_only_committed_tree",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_only_full_existing_sha_is_accepted",
+        "tests.unit.test_build_restore_bundle_v140.SourceCommitTests::test_real_repository_head_has_no_tracked_credentials",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_candidate_semantic_suspicions_remain",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_counts_id_and_vector_links",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_current_release_age_links_are_independent_of_historical_candidate",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_manifest_git_bytes_and_lf_normalization_match",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_nullable_revision_is_explicit_in_candidate_contract",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_old_31_and_current_250_null_errors_are_reproduced",
+        "tests.unit.test_candidate_loader_compatibility.TestCandidateGitInput::test_plan_and_fake_load_preserve_input_and_optional_metadata",
+        "tests.unit.test_r3b_build_isolation.BundleToolTests::test_plan_mode_on_preserved_folder_stays_read_only"
+      ],
+      "skipped": 129
+    },
+    "new_regression_failures": [],
+    "react": {
+      "passed": 186,
+      "environment_error": "jsdom missing; DOM suite BLOCKED",
+      "typescript": "PASS",
+      "browser": "Previously verified desktop/mobile; no frontend changes in final diff."
+    },
+    "source_sha256": {
+      "ai/prompts/system_prompt.py": "e78d6ab9f0e49a21d676039c9218590214045c9a2076f4a7ec5ca3f206152ac1",
+      "backend/api/policy_catalog.py": "3d654f04d6a5eb6b3f0bf4b0108344e050da709984efd86b500cf1fe95e42bab",
+      "backend/rag/pipeline.py": "e797631f965034518e995f4bffc3e392600d164565c0ac9e1ffff9b0037c9960",
+      "backend/rag/application_links.py": "1b77cf263a9b1c1a7ffd50d8a038d05af0e90eb6ea9f58768b26495b169a239a",
+      "tests/integration/test_issue103_guidance.py": "331916fadbadab70b7cc18da20e35d1c1faa95321acd9e401a62e0b29faf263f",
+      "tests/integration/test_issue103_actual_response_replay.py": "780168995ec1618e9f8c7cf77227765d344f146abaeec527e9cdac2f27427972",
+      "tests/fixtures/issue103-r3d-mixed-url-response.json": "d9d79e8f5df2d515a6c62093dc3bde40a46264ca28cf495f1166965f7963d5b3",
+      "tests/manual/verify_issue103_r3d_readonly.py": "166d6184d4df25cd3e603e17619f7240e0865b095e5b27832051de252dd169a1",
+      "tests/unit/test_issue103_readonly_verifier.py": "fff1e5de6affefe2b90f460c0d109ca5840b2fee497710b70985e8d12aab72fb"
+    },
+    "db_writes": 0,
+    "env_edits": 0,
+    "git_commit_push_pr_merge": false,
+    "existing_failure_causes": [
+      "Missing data/raw/gov24/items/449000000108.json",
+      "Candidate saved-body/hash/manifest verification failure also on clean dev",
+      "Git subprocess exit 128 in temporary bundle tests and historical candidate git show; identical case IDs on clean dev"
+    ]
+  }
+}

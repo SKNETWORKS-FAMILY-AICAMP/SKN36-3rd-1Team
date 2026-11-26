@@ -1,0 +1,1257 @@
+{
+  "provenance": "Actual external R3D search and validated LLM output, 2026-11-26; replay is not a new LLM call.",
+  "evidence_sha256": "088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58",
+  "request": {
+    "question": "서울특별시 청년수당와 세종시 위원회 청년참여 확대의 신청 방법과 공식 신청 주소를 각각 구분해서 알려줘.",
+    "profile": {
+      "age": 27,
+      "region": "",
+      "income": null
+    },
+    "history": []
+  },
+  "search_result": {
+    "query": "서울특별시 청년수당와 세종시 위원회 청년참여 확대의 신청 방법과 공식 신청 주소를 각각 구분해서 알려줘.",
+    "filters": null,
+    "region_search": {
+      "requested_values": [],
+      "filter_values": null,
+      "applied_filters": null,
+      "unconfirmed_region_values": [],
+      "unconfirmed_policy_ids": [],
+      "unconfirmed_review_route": "지역 필터를 생략하고 policy_id 필터로 별도 검색하여 원문 확인",
+      "is_eligibility_decision": false,
+      "note": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다."
+    },
+    "k": 10,
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "query_template": null,
+    "policies": [
+      {
+        "policy_id": "POL_YC_065",
+        "policy_name": "세종시 위원회 청년참여 확대",
+        "best_rank": 1,
+        "best_score": 0.845286,
+        "evidence": [
+          {
+            "rank": 1,
+            "score": 0.845286,
+            "policy_id": "POL_YC_065",
+            "document_id": "DOC_YC_065",
+            "chunk_id": "CHK_B2_DOC_YC_065_C003",
+            "point_id": "c4269f96-a293-5234-965c-05ec313d7845",
+            "policy_name": "세종시 위원회 청년참여 확대",
+            "text": "[신청기간 및 신청방법]\n- 신청기간:  ~ \n- 신청방법: 공고문 참조\n\n[신청 URL] https://www.sejong.go.kr",
+            "char_start": 403,
+            "char_end": 478,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "[신청기간 및 신청방법] + [신청 URL]",
+            "region": "세종특별자치시",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "source_type": "api",
+            "content_hash": "8b3697f45f3ea58bc70807f5ede1ac3e052a3ebceb6f0d64251c461bd40e01fa",
+            "verification_status": "extracted",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261107_173008",
+            "region_match": {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 2,
+            "score": 0.74037814,
+            "policy_id": "POL_YC_065",
+            "document_id": "DOC_YC_065",
+            "chunk_id": "CHK_B2_DOC_YC_065_C001",
+            "point_id": "6eef7c01-cb8d-53e7-bcf1-d1a0eb8e0760",
+            "policy_name": "세종시 위원회 청년참여 확대",
+            "text": "[정책명] 세종시 위원회 청년참여 확대 (정책번호: 20261029005400214581)\n\n[주관/운영기관] 세종특별자치시 (기관구분: 지자체)\n\n[정책분류] 참여･기반 > 청년참여 (제공방법: 인프라 구축)\n\n[정책개요(설명)]\n市 모든 위원회에 청년 참여 의무화 및 청년을 주로 다루는 위원회의 경우 청년 참여 점진적 확대*\n\n[지원내용]\n- 市 위원회 구성 시 청년참여 확대 추진 및 반기별 추진현황 점검\n   - 세종 청년인재DB 인재풀 확충 및 참여 홍보(공공기관, 대학교 등)",
+            "char_start": 0,
+            "char_end": 273,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "[정책명] + [주관/운영기관] + [정책분류] + [정책개요(설명)] + [지원내용]",
+            "region": "세종특별자치시",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "source_type": "api",
+            "content_hash": "8b3697f45f3ea58bc70807f5ede1ac3e052a3ebceb6f0d64251c461bd40e01fa",
+            "verification_status": "extracted",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261107_173008",
+            "region_match": {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 8,
+            "score": 0.6789136,
+            "policy_id": "POL_YC_065",
+            "document_id": "DOC_YC_065",
+            "chunk_id": "CHK_B2_DOC_YC_065_C002",
+            "point_id": "45944780-5f20-5522-9aaa-5b03c3b44b21",
+            "policy_name": "세종시 위원회 청년참여 확대",
+            "text": "[지원대상 및 자격요건]\n- 대상연령: 만 19~39세 (제한여부: N)\n- 혼인상태: 제한없음\n- 소득요건: 무관 (0원 ~ 0원)\n- 취업상태: 제한없음\n- 학력요건: 제한없음\n- 전공요건: 제한없음\n- 특화요건: 제한없음",
+            "char_start": 275,
+            "char_end": 401,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "[지원대상 및 자격요건]",
+            "region": "세종특별자치시",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "source_type": "api",
+            "content_hash": "8b3697f45f3ea58bc70807f5ede1ac3e052a3ebceb6f0d64251c461bd40e01fa",
+            "verification_status": "extracted",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261107_173008",
+            "region_match": {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          }
+        ],
+        "graph_status": "FOUND",
+        "graph": {
+          "policy_id": "POL_YC_065",
+          "policy": {
+            "application_method": "온라인/방문 신청",
+            "policy_id": "POL_YC_065",
+            "agency": "세종특별자치시",
+            "official_id": "20261029005400214581",
+            "eligibility": "연령: 만 19~39세 / 혼인: 제한없음 / 소득: 무관 / 취업: 제한없음",
+            "policy_name": "세종시 위원회 청년참여 확대",
+            "income_source_review": "not_reviewed",
+            "source_type": "api",
+            "target_groups": [
+              "청년"
+            ],
+            "household_source_review": "not_reviewed",
+            "life_stages": [
+              "청년"
+            ],
+            "verification_status": "extracted",
+            "benefit": "- 市 위원회 구성 시 청년참여 확대 추진 및 반기별 추진현황 점검\n   - 세종 청년인재DB 인재풀 확충 및 참여 홍보(공공기관, 대학교 등)",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "collected_at": "2026-11-04T19:30:00+09:00",
+            "application_status_note": "위원회별 청년위원 모집 일정은 세종시 공식 공고에서 확인해야 함. 2026년 모집 공고는 확인되지 않았고, 확인된 최근 모집은 2025년 제3기 청년정책조정위원회 청년위원(세종시 공고 제2025-484호, 2025.3.1.~3.20., 종료). 정책은 유지하고 전용 신청 경로가 없어 신청 주소는 비운다(조장 결정 2026-11-21, #18)",
+            "organization": "세종특별자치시",
+            "region": "세종특별자치시",
+            "category": "지역별 생활지원·복지",
+            "application_period": "위원회별 청년위원 모집 일정은 공식 공고 확인 필요"
+          },
+          "organizations": [
+            {
+              "name": "세종특별자치시",
+              "agency_id": "AGENCY_세종특별자치시",
+              "type": "소관부처/지자체",
+              "relationship": {
+                "target_name": "세종특별자치시",
+                "evidence_location": "소관기관",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "regions": [
+            {
+              "name": "세종특별자치시",
+              "region_id": "REGION_SEJONG",
+              "relationship": {
+                "target_name": "세종특별자치시",
+                "evidence_location": "지역범위",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "categories": [
+            {
+              "category_id": "CAT_REGIONAL_WELFARE",
+              "name": "지역별 생활지원·복지",
+              "relationship": {
+                "target_name": "지역별 생활지원·복지",
+                "evidence_location": "정책분류",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "target_groups": [
+            {
+              "group_id": "GROUP_YOUTH",
+              "name": "청년",
+              "description": "생애주기 외 특정 자격/가구/사회적 집단 (청년)",
+              "relationship": {
+                "target_name": "청년",
+                "evidence_location": "지원대상",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "life_stages": [
+            {
+              "age_range": "19~39세",
+              "stage_id": "LIFESTAGE_청년",
+              "name": "청년",
+              "description": "청년 구직·주거·자산형성·일자리 지원",
+              "relationship": {
+                "target_name": "청년",
+                "evidence_location": "생애단계",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "documents": [
+            {
+              "policy_id": "POL_YC_065",
+              "source_type": "api",
+              "content_hash": "8b3697f45f3ea58bc70807f5ede1ac3e052a3ebceb6f0d64251c461bd40e01fa",
+              "document_id": "DOC_YC_065",
+              "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+              "verification_status": "extracted",
+              "local_raw_path": "data/raw/youthcenter/items/20261029005400214581.json",
+              "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+              "relationship": {
+                "target_name": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+                "evidence_location": "전문",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "modifies_condition_of": [],
+          "condition_modified_by": [],
+          "eligibility": {
+            "evaluated": false,
+            "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+            "condition_tree": [
+              {
+                "group_id": "GRP_POL_YC_065_ROOT",
+                "logic": "AND",
+                "is_root": true,
+                "description": "세종시 위원회 청년참여 확대 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)",
+                "relationship": {
+                  "target_name": "Root Condition Group (POL_YC_065)",
+                  "evidence_location": "기본자격요건",
+                  "evidence_document_id": "DOC_YC_065",
+                  "review_status": "extracted"
+                },
+                "conditions": [
+                  {
+                    "unit": "세",
+                    "evidence_location": "지원조건 JA0110/JA0111",
+                    "name": "연령조건: 만 19세~39세",
+                    "description": "정책 지원 자격 조건 (연령조건: 만 19세~39세)",
+                    "type": "AGE",
+                    "value": "19~39",
+                    "operator": "BETWEEN",
+                    "condition_id": "COND_AGE_19_39",
+                    "relationship": {
+                      "target_name": "연령조건: 만 19세~39세",
+                      "evidence_location": "원문 대조 교정",
+                      "evidence_document_id": "DOC_YC_065",
+                      "review_status": "extracted"
+                    }
+                  }
+                ],
+                "groups": [
+                  {
+                    "group_id": "GRP_POL_YC_065_REST",
+                    "logic": "UNKNOWN",
+                    "is_root": false,
+                    "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)",
+                    "relationship": {
+                      "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_YC_065_REST)",
+                      "evidence_location": "원문 대조 교정",
+                      "evidence_document_id": "DOC_YC_065",
+                      "review_status": "extracted"
+                    },
+                    "conditions": [],
+                    "groups": []
+                  }
+                ]
+              }
+            ],
+            "requires_condition_ids": [
+              "COND_AGE_19_39"
+            ],
+            "tree_condition_ids": [
+              "COND_AGE_19_39"
+            ],
+            "tree_matches_requires_condition": true,
+            "unknown_logic_groups": [
+              "GRP_POL_YC_065_REST"
+            ],
+            "structure_issues": []
+          }
+        },
+        "evidence_document_check": {
+          "DOC_YC_065": "PASS"
+        },
+        "data_quality": {
+          "warnings": [
+            {
+              "code": "UNKNOWN_CONDITION_GROUP",
+              "level": "caution",
+              "group_ids": [
+                "GRP_POL_YC_065_REST"
+              ],
+              "affects": [
+                "all"
+              ],
+              "message": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+              "severity": "high",
+              "evidence_level": "graph_structure",
+              "verification": "not_modeled",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "EXTRACTED_NOT_VERIFIED",
+              "level": "caution",
+              "count": 9,
+              "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+              "severity": "low",
+              "evidence_level": "graph_metadata",
+              "verification": "not_officially_checked",
+              "affects": [],
+              "blocks_auto_eligibility": false,
+              "official_source_checked": false
+            },
+            {
+              "code": "MARRIAGE_CHILD_NOT_MODELED",
+              "level": "suspected",
+              "severity": "low",
+              "evidence_level": "keyword_detected",
+              "verification": "not_modeled",
+              "affects": [
+                "marriage"
+              ],
+              "evidence": {
+                "marriage": [
+                  {
+                    "source": "DOC_YC_065",
+                    "char_start": 316,
+                    "line": "- 혼인상태: 제한없음"
+                  }
+                ],
+                "children": [],
+                "unmodeled_dimensions": [
+                  "marriage"
+                ],
+                "incomplete_dimensions": [],
+                "review_dimensions": [],
+                "dimension_assessment": {
+                  "marriage": {
+                    "related_conditions": [],
+                    "keyword_only": false,
+                    "requirement_lines": [
+                      {
+                        "source": "policy.eligibility",
+                        "char_start": 0,
+                        "line": "연령: 만 19~39세 / 혼인: 제한없음 / 소득: 무관 / 취업: 제한없음"
+                      }
+                    ],
+                    "requirement_line_count": 1,
+                    "missing_details": {},
+                    "covered_details": {},
+                    "non_requirement_mentions": [],
+                    "classification": "unmodeled"
+                  },
+                  "children": {
+                    "classification": "no_text",
+                    "related_conditions": []
+                  }
+                },
+                "graph_related_conditions": {
+                  "marriage": [],
+                  "children": []
+                },
+                "eligibility_attributes.family_status_by_document": [
+                  {
+                    "document_id": "DOC_YC_065",
+                    "source_type": "api",
+                    "attribute_source": null,
+                    "family_status": [
+                      "해당없음/미확인"
+                    ]
+                  }
+                ],
+                "note": "자동 의심 후보·검토 대상. 확정된 정책 오류 아님, 공식 원문 미검증"
+              },
+              "source": "static_flags",
+              "message": "혼인·자녀 관련 문구가 있으나 해당 조건 타입이 그래프에 없음(키워드 탐지) → 추가 질문",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "SEARCH_REGION_REQUIRES_REVIEW",
+              "level": "caution",
+              "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+              "stored_regions": [
+                "세종특별자치시",
+                "세종특별자치시",
+                "세종특별자치시"
+              ],
+              "severity": "medium",
+              "evidence_level": "stored_region_string",
+              "verification": "not_officially_checked",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "extracted": 9
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "MARRIAGE_CHILD_NOT_MODELED",
+            "SEARCH_REGION_REQUIRES_REVIEW",
+            "UNKNOWN_CONDITION_GROUP"
+          ],
+          "affected_attributes": [
+            "all",
+            "marriage",
+            "region"
+          ],
+          "official_source_checked": false
+        },
+        "region_search": {
+          "matches": [
+            {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "세종특별자치시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          ],
+          "graph_available_in": [
+            {
+              "name": "세종특별자치시",
+              "region_id": "REGION_SEJONG",
+              "relationship": {
+                "target_name": "세종특별자치시",
+                "evidence_location": "지역범위",
+                "evidence_document_id": "DOC_YC_065",
+                "review_status": "extracted"
+              }
+            }
+          ],
+          "graph_usage": "post_retrieval_evidence_only",
+          "is_eligibility_decision": false,
+          "review_required": true
+        }
+      },
+      {
+        "policy_id": "POL_STG_SEOUL_001",
+        "policy_name": "서울특별시 청년수당",
+        "best_rank": 3,
+        "best_score": 0.7067107,
+        "evidence": [
+          {
+            "rank": 3,
+            "score": 0.7067107,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_INTRO_2026_C003",
+            "point_id": "504df477-a486-5b5a-b905-b7e9c0a82f9a",
+            "policy_name": "서울특별시 청년수당",
+            "text": "5. 27.(수) 10:00 ~ 2026. 5. 29.(금) 16:00\n신청방법\n청년몽땅정보통 청년수당 신청 페이지에서 신청\n제출서류\n※ 모든 제출서류는 원본 서류를 스캔하여 업로드, ‘화면캡쳐본, 컴퓨터 화면을 찍은 사진 등’은 인정되지 않음\n(필수) 최종학력 졸업증명서 또는 수료증 1부\n\n졸업예정자는 졸업 학점 이수 완료를 증빙할 2월 졸업예정증명서 또는 성적증명서+재학증명서를 대체 서류로 제출\n\n*발급 방법 : 정부24(https://plus.gov.kr) 또는 각 대학·대학원에서 온라인 발급 가능\n(선택) 근로계약서 1부 *단기근로자만 제출\n(선택) 병적증명서 또는 주민등록초본 *만 35세~37세인 의무복무 제대군인만 제출\n상세안내\n세부일정\n[선정] 예비선정자 발표 > 필수이행사항\n\n* 필수이행사항:①청년수당 참여자 사전교육(안내책자 다운로드, OT영상시청), ②청년수당 전용 신한은행 계좌 개설 및 체크카드 발급",
+            "char_start": 938,
+            "char_end": 1402,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+            "source_type": "browser_text",
+            "content_hash": "ae48104d3d098d827d28229d4d9aaf3f16910062a48a48a2d319c1ff41666116",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 4,
+            "score": 0.6914749,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_YC",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_YC_C002",
+            "point_id": "4783b251-f56d-59ab-a5e4-f022dfcff270",
+            "policy_name": "서울특별시 청년수당",
+            "text": "[출처 URL] https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994\n\n[최종수정일시] 2026-10-20 09:58:41",
+            "char_start": 712,
+            "char_end": 846,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "온통청년 정책 상세 — 2026 청년수당 지원",
+            "region": "서울특별시",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+            "source_type": "youthcenter_api",
+            "content_hash": "a4f1b820bed8cde90af507cdd310ba06cea7000e94436d296e23791964bc2076",
+            "verification_status": "verified_official_api",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261107_173008",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 5,
+            "score": 0.6914705,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_INTRO_2026_C002",
+            "point_id": "6d8b1792-7853-5777-af44-9a5c01b53419",
+            "policy_name": "서울특별시 청년수당",
+            "text": "증빙자료 (ex.근로계약서,퇴직증명서 등) 제출 시만 인정\n\n신청제외대상\n\n주민등록상 서울시 미거주자(신청 시점 기준)\n재학생 및 휴학생\n\n※ 단, 방송통신대학·사이버대학·학점은행제는 이전 최종학력 졸업 증빙하여 신청 가능\n\n고용보험에 가입된, 3개월 초과 그리고 주 30시간 초과 근로하는 취업자\n유사사업 참여중인 자 (2026년 5월 1일부터 사업 참여 종료일까지)\n\n· 서울시 ｢청년월세지원｣ 사업 참여자\n\n· 서울시 ｢희망두배 청년통장｣ 사업 참여자\n\n· 고용노동부 ｢국민취업지원제도｣ 1유형 및 2유형 참여자\n\n2017년~2026년 1차 서울시 청년수당 사업 참여자 (생애 1회 지원)\n중위소득 150% 초과 가구 청년\n\n※ ’26년 4월 건강보험료 본인부담금(노인장기요양보험료 제외) 기준\n\n기초생활수급자(생계·의료·교육·주거급여자) 및 차상위계층 (신청 시점 기준)\n실업급여 수급중인 자 (신청 시점 기준)\n군복무자(사회복무요원 포함)\n신청방법\n신청기간\n2026. 5. 27.(수) 10:00 ~ 2026. 5. 29.(금) 16:00\n신청방법\n청년몽땅정보통 청년수당 신청 페이지에서 신청\n제출서류",
+            "char_start": 447,
+            "char_end": 1012,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+            "source_type": "browser_text",
+            "content_hash": "ae48104d3d098d827d28229d4d9aaf3f16910062a48a48a2d319c1ff41666116",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 6,
+            "score": 0.6831398,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_INTRO_2026_C004",
+            "point_id": "30f4c3a4-7ea7-5d0f-86b4-5f88cef6551e",
+            "policy_name": "서울특별시 청년수당",
+            "text": "* 필수이행사항:①청년수당 참여자 사전교육(안내책자 다운로드, OT영상시청), ②청년수당 전용 신한은행 계좌 개설 및 체크카드 발급\n\n[지급] 매달11~익월10일 자기성장기록서 작성·제출 > 매달 29일 청년수당 지급\n\n* 29일이 주말/공휴일일 경우 직전 평일에 지급\n\n* 자기성장기록서 마감일까지 미제출시 해당 월부터 수당 지급 중지\n\n* 자기성장기록서 제출기한 연장 예외적 인정사유: 본인의 수술•입원 또는 직계가족•배우자•형제자매의 사망임. 자세한 사항은 반드시 모집공고문 참조)\n\n* 현금사용내역/단기근로 증빙자료를 매월 자기성장기록서 작성 기간에 제출(동일한 근로계약서를 기제출하였더라도 매월 제출)\n\n사용방법\n체크카드 사용이 원칙이며, 사업 목적에 부합한 범위에서 자유롭게 사용 가능\n현금사용은 금지되며, 특정 항목에 한하여 예외적 계좌이체 허용\n\n* (특정항목: ①주거(전·월세비, 주거 관리비, 주거 관련 대출), ②생활·공과금(전기·가스·수도요금, 통신비, 건강보험료), ③교육(학자금 대출, 자격증·시험 응시료, AI해외생성형프로그램) 에만 현금사용 가능, 나머지 항목엔 현금사용 금지\n\n현금으로 사용(계좌이체)한 경우 항목에 적합한 증빙서류를 자기성장기록서에 제출해야 하며, 개별적으로도 증빙자료를 2026.12.31.까지 보관 바람\n\n* 전·월세비 : 전·월세 관련 계약서 + 이체내역서\n\n* 전기·가스·수도요금, 건강보험료, 통신비 : 납부고지서 + 이체내역서",
+            "char_start": 1329,
+            "char_end": 2048,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+            "source_type": "browser_text",
+            "content_hash": "ae48104d3d098d827d28229d4d9aaf3f16910062a48a48a2d319c1ff41666116",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 7,
+            "score": 0.67894423,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_FAQ_2026_C016",
+            "point_id": "6da24914-924b-594a-b303-f6a57aa97632",
+            "policy_name": "서울특별시 청년수당",
+            "text": "지급 ○ 자격상실신고 제출 이후 취소 및 수정이 불가능하니 반드시 제출시 확인 요망. 자격상실 신고 제출 이후 청년수당 지급 중단됨.\n제출 방법 | 어떻게 제출하나요? | ○ 청년몽땅정보통 마이페이지 → '자격상실신고' 클릭 → 온라인 제출 * 신고 후 취소되지 않으니 주의하여 주시기 바랍니다.\n\n### 기타 FAQ\n기타사항 | 성장지원 프로그램 참여는 언제, 어떻게 하면 되나요? | ○ 청년수당 참여자 최종선정, 지급 이후 서울시 광역청년센터가 프로그램을 안내할 예정이며, 강제사항은 아니고 자율적으로 참여하면 됨 ○ 일부 프로그램은 자치구별(지역별) 서울청년센터에서 진행될 수 있음\n기타사항 | 광역청년센터 프로그램에 계속 참여할 수 있나요? | ○ 프로그램마다 참여 대상이 다를 수 있음 ○ 자세한 내용은 각 프로그램 담당자에게 확인 가능함\n기타사항 | 광역청년센터에서 발송하는 문자 계속 받을 수 있나요? | ○ 청년수당 사업 참여기간 종료 후에도 광역청년센터에서 발송하는 문자를 계속 받을 수 있음. 원치 않을 경우 수신거부 할 수 있음\n기타사항 | 사업참여 후 계좌, 카드는 계속 사용할 수 있나요? | ○ 청년수당 사업 참여 기간 종료 후에도 청년수당 계좌, 카드(교통카드 기능)는 개인이 계속 가용 가능",
+            "char_start": 8077,
+            "char_end": 8704,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+            "source_type": "browser_text",
+            "content_hash": "44e1f3dc54f364ca8f5170f50224f7af9f76fe2ccf9953f78acecf5220a0c5ef",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 9,
+            "score": 0.6780629,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_INTRO_2026_C006",
+            "point_id": "dcc97b5a-c6d6-5c80-ab87-08b7c637b338",
+            "policy_name": "서울특별시 청년수당",
+            "text": "용도 사용 제한: 예금, 적금, 민간보험·국민연금 납입, 상품권 구입(기프트콘 포함)\n서울 외 지역에서도 사용 가능하나, 해외 결제 불가\n\n※ 청년수당은 반드시 사업 목적에 맞게 사용해 주시기 바랍니다.\n\n청년수당 사용 불가 항목: 지출내역 및 자금 흐름을 확인할 수 없도록 수당 사용(ex: 타계좌로 이체, 휴대폰 소액결제, 카카오페이, 더치페이 등), 현금사용내역 증빙이 어려운 경우(중고거래, 경조사비, 종교 헌금, 기부 등), 기타 사회 정서상 허용되기 어려운 용도로 수당사용(진로와 무관한 고가의 사치품 구입, 단순 미용 목적등)\n문의\n서울시 청년수당 콜센터 : ☎ 1566-3344\n다산콜센터 : ☎ 120",
+            "char_start": 2399,
+            "char_end": 2744,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+            "source_type": "browser_text",
+            "content_hash": "ae48104d3d098d827d28229d4d9aaf3f16910062a48a48a2d319c1ff41666116",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          },
+          {
+            "rank": 10,
+            "score": 0.6729075,
+            "policy_id": "POL_STG_SEOUL_001",
+            "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+            "chunk_id": "CHK_B2_DOC_STG_SEOUL_001_FAQ_2026_C002",
+            "point_id": "d0844cd4-14fb-59bf-a2e5-c1507c9e6925",
+            "policy_name": "서울특별시 청년수당",
+            "text": "자기성장기록서에 제출 필요\n신청 자격 | 대학 휴학생은 신청할 수 있나요? | ○ 대학(대학원) 휴학생과 재학생은 청년수당 사업 신청 불가\n신청 자격 | 콜센터가 전화를 너무 안 받아요. | ○ 모집신청 시기에 전화문의가 몰릴 경우, 전화통화가 원활하지 않을 수 있음. 게시판 문의 활용 권고 - 청년몽땅정보통 → 청년수당 → 'Q&A게시판'에 문의 올리면 순차답변\n신청 자격 | 제가 신청을 잘 했나요? | ○ 청년몽땅정보통 → 마이페이지에서 확인 가능 (참여자 직접 확인) ○ 또한, 신청 정상 접수시, 카카오톡 알림톡으로 안내 예정",
+            "char_start": 592,
+            "char_end": 892,
+            "page_start": null,
+            "page_end": null,
+            "section_title": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+            "region": "서울특별시",
+            "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+            "source_type": "browser_text",
+            "content_hash": "44e1f3dc54f364ca8f5170f50224f7af9f76fe2ccf9953f78acecf5220a0c5ef",
+            "verification_status": "verified_official_text",
+            "chunking_version": "B2",
+            "embedding_model": "qwen3-embedding:0.6b",
+            "embedding_input_rule": "policy_section_body_v2",
+            "index_run_id": "RUN_FULL_A_B2_V140_20261123_031023",
+            "region_match": {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          }
+        ],
+        "graph_status": "FOUND",
+        "graph": {
+          "policy_id": "POL_STG_SEOUL_001",
+          "policy": {
+            "application_end": "2026-05-29",
+            "reception_status": "apply_period",
+            "policy_id": "POL_STG_SEOUL_001",
+            "eligibility": "연령: 만 19~34세 / 혼인: 제한없음 / 소득: 기타 / 취업: 미취업자",
+            "target_groups": [
+              "청년",
+              "구직자·취업준비생"
+            ],
+            "household_source_review": "not_reviewed",
+            "verification_status": "extracted",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+            "application_start": "2026-05-27",
+            "lifecycle_status": "active",
+            "application_method": "청년몽땅정보통(youth.seoul.go.kr) 온라인 신청",
+            "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+            "official_id": "20260317005400211516",
+            "agency": "서울특별시 미래청년기획관 청년정책담당관",
+            "approval_status": "approved",
+            "policy_name": "서울특별시 청년수당",
+            "income_source_review": "not_reviewed",
+            "source_type": "youthcenter_api",
+            "life_stages": [
+              "청년"
+            ],
+            "benefit": "미취업 청년이 진로 탐색 및 목표 달성에 집중할 수 있도록 경제적 지원과 성장 지원을 통해 사회안전망 제공(매월 50만원×최대 6개월간 지급  ※ 생애 1회 지원)",
+            "collected_at": "2026-11-06T21:19:05.938281",
+            "organization": "서울특별시 미래청년기획관 청년정책담당관",
+            "region": "서울특별시",
+            "category": "지역별 생활지원·복지",
+            "application_period": "20260527 ~ 20260529"
+          },
+          "organizations": [
+            {
+              "agency_id": "AGENCY_서울특별시_미래청년기획관_청년정책담당관",
+              "name": "서울특별시 미래청년기획관 청년정책담당관",
+              "type": "소관부처/공공기관",
+              "relationship": {
+                "target_name": "서울특별시 미래청년기획관 청년정책담당관",
+                "evidence_location": "소관기관",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "regions": [
+            {
+              "name": "서울특별시",
+              "region_id": "REGION_SEOUL",
+              "relationship": {
+                "target_name": "서울특별시",
+                "evidence_location": "지역범위",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "categories": [
+            {
+              "category_id": "CAT_REGIONAL_WELFARE",
+              "name": "지역별 생활지원·복지",
+              "relationship": {
+                "target_name": "지역별 생활지원·복지",
+                "evidence_location": "정책분류",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "target_groups": [
+            {
+              "group_id": "GROUP_JOBSEEKER",
+              "name": "구직자·취업준비생",
+              "description": "생애주기 외 특정 자격/가구/사회적 집단 (구직자·취업준비생)",
+              "relationship": {
+                "target_name": "구직자·취업준비생",
+                "evidence_location": "대상집단",
+                "review_status": "verified"
+              }
+            },
+            {
+              "group_id": "GROUP_YOUTH",
+              "name": "청년",
+              "description": "생애주기 외 특정 자격/가구/사회적 집단 (청년)",
+              "relationship": {
+                "target_name": "청년",
+                "evidence_location": "대상집단",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "life_stages": [
+            {
+              "age_range": "19~39세",
+              "stage_id": "LIFESTAGE_청년",
+              "name": "청년",
+              "description": "청년 구직·주거·자산형성·일자리 지원",
+              "relationship": {
+                "target_name": "청년",
+                "evidence_location": "생애단계",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "documents": [
+            {
+              "raw_source_sha256": "2bd926b3737ea641c0b0de6b89e5921ce61ed1bf5225e1a08fa25a95969a0825",
+              "policy_id": "POL_STG_SEOUL_001",
+              "source_type": "browser_text",
+              "doc_type": "faq",
+              "verification_status": "verified_official_text",
+              "title": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+              "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+              "version": "2026-11-18 화면 기준",
+              "local_raw_path": "data/raw/official/POL_STG_SEOUL_001_youth-seoul_faq.txt",
+              "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+              "collected_at": "2026-11-18T00:25:00+09:00",
+              "extracted_text_path": "data/releases/v1.4.0-candidate/source_text/DOC_STG_SEOUL_001_FAQ_2026.txt",
+              "content_hash": "44e1f3dc54f364ca8f5170f50224f7af9f76fe2ccf9953f78acecf5220a0c5ef",
+              "relationship": {
+                "evidence_type": "faq_reference",
+                "target_name": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+                "evidence_location": "공식문서:faq",
+                "evidence_document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+                "review_status": "verified_official_text",
+                "doc_type": "faq"
+              }
+            },
+            {
+              "raw_source_sha256": "6489a1b43e7b64de18a43400151f40fe736ed09e81e87699c28aede33b38756e",
+              "policy_id": "POL_STG_SEOUL_001",
+              "source_type": "browser_text",
+              "doc_type": "service_guide",
+              "verification_status": "verified_official_text",
+              "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+              "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+              "version": "2026-11-21 화면 기준(2026년 사업, 신청기간 2026. 5. 27.~5. 29.)",
+              "local_raw_path": "data/raw/official/POL_STG_SEOUL_001_youth-seoul_intro.txt",
+              "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+              "collected_at": "2026-11-21T23:40:00+09:00",
+              "extracted_text_path": "data/staging/official/guideline/youth_seoul_allowance_intro_20261121.txt",
+              "content_hash": "ae48104d3d098d827d28229d4d9aaf3f16910062a48a48a2d319c1ff41666116",
+              "relationship": {
+                "evidence_type": "official_service_guide",
+                "target_name": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+                "evidence_location": "공식문서:service_guide",
+                "evidence_document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+                "doc_type": "service_guide",
+                "review_status": "verified_official_text"
+              }
+            },
+            {
+              "policy_id": "POL_STG_SEOUL_001",
+              "source_type": "ordinance_text",
+              "doc_type": "ordinance",
+              "verification_status": "verified_official_text",
+              "document_id": "DOC_STG_SEOUL_001_ORD",
+              "title": "서울특별시 청년 기본 조례 제12조(청년의 고용확대 등)",
+              "version": "서울특별시조례 제9765호",
+              "local_raw_path": "data/staging/official/ordinance/서울특별시_청년기본조례_제12조.md",
+              "source_url": "https://www.law.go.kr/자치법규/서울특별시청년기본조례",
+              "collected_at": "2026-11-06T00:00:00+09:00",
+              "effective_date": "2025-07-14",
+              "content_hash": "55bb4fa0700bfd0c8182a2c1d1c69e1aa8aa0868dc1691b660cd5651c8373560",
+              "law_article": "제12조",
+              "relationship": {
+                "evidence_type": "statutory_basis",
+                "target_name": "서울특별시 청년 기본 조례 제12조(청년의 고용확대 등)",
+                "evidence_location": "공식문서:ordinance",
+                "evidence_document_id": "DOC_STG_SEOUL_001_ORD",
+                "doc_type": "ordinance",
+                "review_status": "verified_official_text",
+                "law_article": "제12조"
+              }
+            },
+            {
+              "official_id": "20261018005400213994",
+              "policy_id": "POL_STG_SEOUL_001",
+              "source_type": "youthcenter_api",
+              "doc_type": "service_guide",
+              "content_hash": "a4f1b820bed8cde90af507cdd310ba06cea7000e94436d296e23791964bc2076",
+              "verification_status": "verified_official_api",
+              "document_id": "DOC_STG_SEOUL_001_YC",
+              "title": "온통청년 정책 상세 — 2026 청년수당 지원",
+              "local_raw_path": "data/raw/youthcenter/api/page_0006.json",
+              "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+              "collected_at": "2026-11-05T00:47:54+09:00",
+              "relationship": {
+                "evidence_type": "official_service_guide",
+                "target_name": "온통청년 정책 상세 — 2026 청년수당 지원",
+                "evidence_location": "공식문서:service_guide",
+                "evidence_document_id": "DOC_STG_SEOUL_001_YC",
+                "doc_type": "service_guide",
+                "review_status": "verified_official_api"
+              }
+            }
+          ],
+          "modifies_condition_of": [],
+          "condition_modified_by": [],
+          "eligibility": {
+            "evaluated": false,
+            "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+            "condition_tree": [
+              {
+                "group_id": "GRP_POL_STG_SEOUL_001_ROOT",
+                "logic": "UNKNOWN",
+                "is_root": true,
+                "description": "서울특별시 청년수당 기본 자격 조건 그룹 (원천 조건 세부 파싱 대기 / 3값 논리 UNKNOWN 평가)",
+                "relationship": {
+                  "target_name": "기본 자격 조건 루트 그룹 (UNKNOWN)",
+                  "evidence_location": "조건그룹",
+                  "review_status": "verified"
+                },
+                "conditions": [],
+                "groups": []
+              }
+            ],
+            "requires_condition_ids": [],
+            "tree_condition_ids": [],
+            "tree_matches_requires_condition": true,
+            "unknown_logic_groups": [
+              "GRP_POL_STG_SEOUL_001_ROOT"
+            ],
+            "structure_issues": []
+          }
+        },
+        "evidence_document_check": {
+          "DOC_STG_SEOUL_001_INTRO_2026": "PASS",
+          "DOC_STG_SEOUL_001_YC": "PASS",
+          "DOC_STG_SEOUL_001_FAQ_2026": "PASS"
+        },
+        "data_quality": {
+          "warnings": [
+            {
+              "code": "UNKNOWN_CONDITION_GROUP",
+              "level": "caution",
+              "group_ids": [
+                "GRP_POL_STG_SEOUL_001_ROOT"
+              ],
+              "affects": [
+                "all"
+              ],
+              "message": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+              "handoff_checks": [
+                {
+                  "check": "S1_UNKNOWN_WITH_CONDITION_TEXT",
+                  "handoff_semantic_match": "not_modeled",
+                  "evidence_level": "keyword_detected",
+                  "evidence": {
+                    "age": [
+                      {
+                        "source": "DOC_STG_SEOUL_001_YC",
+                        "char_start": 264,
+                        "line": "- 대상연령: 만 19~34세 (제한여부: N)"
+                      }
+                    ],
+                    "income": [
+                      {
+                        "source": "DOC_STG_SEOUL_001_YC",
+                        "char_start": 304,
+                        "line": "- 소득요건: 기타 (0원 ~ 0원) / 중위소득 150% 이하  ※ 단, 기초생활수급자 및 차상위계층 제외"
+                      }
+                    ],
+                    "residence": [
+                      {
+                        "source": "DOC_STG_SEOUL_001_FAQ_2026",
+                        "char_start": 893,
+                        "line": "준비 서류 | 신청 서류 제출시 유의사항이 있나요? | ○ 모든 제출서류는 원본 서류를 스캔하여 pdf, jpg 파일로 업로드 제출해야 하며, '화면캡처본, 컴퓨터 화면을 찍은 사진 등'은 서류로 인정되지 않음(휴대폰으로 종이 원본 서류를 촬영한 파일은 화질로 인해 인"
+                      }
+                    ],
+                    "marriage": [
+                      {
+                        "source": "DOC_STG_SEOUL_001_YC",
+                        "char_start": 291,
+                        "line": "- 혼인상태: 제한없음"
+                      }
+                    ],
+                    "employment": [
+                      {
+                        "source": "DOC_STG_SEOUL_001_ORD",
+                        "char_start": 149,
+                        "line": "② 시장은 청년고용의 확대를 위해 구직자의 직업역량 강화 및 취업 지원 방안을 강구하여야 한다."
+                      }
+                    ]
+                  }
+                }
+              ],
+              "severity": "high",
+              "evidence_level": "graph_structure",
+              "verification": "not_modeled",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "SEARCH_REGION_REQUIRES_REVIEW",
+              "level": "caution",
+              "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+              "stored_regions": [
+                "서울특별시",
+                "서울특별시",
+                "서울특별시",
+                "서울특별시",
+                "서울특별시",
+                "서울특별시",
+                "서울특별시"
+              ],
+              "severity": "medium",
+              "evidence_level": "stored_region_string",
+              "verification": "not_officially_checked",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "verified": 7,
+            "verified_official_text": 3,
+            "verified_official_api": 1
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "SEARCH_REGION_REQUIRES_REVIEW",
+            "UNKNOWN_CONDITION_GROUP"
+          ],
+          "affected_attributes": [
+            "all",
+            "region"
+          ],
+          "official_source_checked": false
+        },
+        "region_search": {
+          "matches": [
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            },
+            {
+              "original_region": "서울특별시",
+              "match_basis": "unconfirmed",
+              "review_required": true,
+              "requested_values": [],
+              "filter_values": null,
+              "filter_applied": false,
+              "source": "qdrant_payload",
+              "is_eligibility_decision": false
+            }
+          ],
+          "graph_available_in": [
+            {
+              "name": "서울특별시",
+              "region_id": "REGION_SEOUL",
+              "relationship": {
+                "target_name": "서울특별시",
+                "evidence_location": "지역범위",
+                "review_status": "verified"
+              }
+            }
+          ],
+          "graph_usage": "post_retrieval_evidence_only",
+          "is_eligibility_decision": false,
+          "review_required": true
+        }
+      }
+    ],
+    "unlinked_hits": [],
+    "missing_policy_ids": [],
+    "warnings": [
+      "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다."
+    ],
+    "latency_seconds": {
+      "query_embedding": 0.2325,
+      "qdrant_search": 0.0174,
+      "neo4j_context": 0.0165
+    },
+    "data_quality_summary": {
+      "UNKNOWN_CONDITION_GROUP": 2,
+      "EXTRACTED_NOT_VERIFIED": 1,
+      "MARRIAGE_CHILD_NOT_MODELED": 1,
+      "SEARCH_REGION_REQUIRES_REVIEW": 2
+    },
+    "notes": {
+      "score": "score는 질문 벡터와 청크 벡터의 코사인 유사도(Qdrant Cosine)다. 높을수록 의미가 가깝다는 뜻일 뿐, 정책 자격을 충족한다는 뜻이 아니다.",
+      "eligibility": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+      "unknown": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+      "extracted": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+      "gov24_rule": "정부24 지원조건(JA 코드)에서 만든 조건 트리에 생성 규칙 오류 의심 사례가 있다 (무주택 필수 승격, 소득 전 구간 OR, 가구 '해당사항없음' 누락, 취업 조건 미반영). 확정된 오류는 아니다.",
+      "graph_text": "graph.policy의 eligibility·benefit 등은 수집 단계 추출 텍스트다. 답변 근거로는 evidence[].text(원문 청크)와 source_url을 쓴다.",
+      "hold": "data_quality.hold_auto_eligibility=True는 '부적격'이 아니라 '자동 판정 보류'다. affected_attributes의 항목은 원문 근거 제시·추가 질문으로 확인한다. 경고는 모두 자동 점검 의심 후보이며 공식 원문과 대조하지 않았다."
+    },
+    "search_profile": {
+      "mode": "profile",
+      "name": "b2_06b_v140",
+      "index_config": "A_B2_V140",
+      "collection": "exp_b2_qwen3emb06b_v140_v1",
+      "embedding_model": "qwen3-embedding:0.6b",
+      "embedding_dim": 1024,
+      "query_template_name": "none",
+      "query_template": null,
+      "distance": "Cosine",
+      "embedding_input_rule": "policy_section_body_v2",
+      "collection_vector_size": 1024
+    },
+    "hold_auto_eligibility_policy_ids": [
+      "POL_YC_065",
+      "POL_STG_SEOUL_001"
+    ],
+    "static_quality_flags": {
+      "status": "applied",
+      "file": "neo4j_semantic_flags_v1_4_0.json",
+      "flags_version": "neo4j_semantic_flags_v1_4_0",
+      "data_version": "1.4.0-candidate",
+      "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da"
+    },
+    "invalid_policy_ids": []
+  },
+  "generator_output": {
+    "status": "answered",
+    "answer": "서울특별시 청년수당은 신청 방법이 원문에 확인됩니다. 청년몽땅정보통의 청년수당 신청 페이지에서 신청하며, 공식 신청 주소도 확인된 전용 주소가 있습니다. 다만 현재 접수는 마감된 상태입니다. [2]\n\n세종시 위원회 청년참여 확대는 신청 방법이 원문에 \"공고문 참조\"로만 적혀 있어, 이번 근거만으로는 구체적인 신청 절차를 확인하지 못했습니다. 공식 신청 주소도 확인된 전용 주소가 없습니다. 현재 접수 여부도 공식 공고에서 확인해 주세요. [1][3]",
+    "used_source_ids": [
+      1,
+      2,
+      3
+    ],
+    "follow_up_questions": [
+      {
+        "kind": "question",
+        "text": "서울특별시 청년수당의 신청 제외 대상은 무엇인가요?"
+      },
+      {
+        "kind": "question",
+        "text": "서울특별시 청년수당의 제출서류는 무엇인가요?"
+      },
+      {
+        "kind": "question",
+        "text": "세종시 위원회 청년참여 확대의 공고문에서 신청 방법을 어떻게 확인하나요?"
+      }
+    ]
+  },
+  "expected_policy_ids": [
+    "POL_YC_065",
+    "POL_STG_SEOUL_001"
+  ]
+}

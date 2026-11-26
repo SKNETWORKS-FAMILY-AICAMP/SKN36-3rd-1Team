@@ -12,6 +12,12 @@ from backend.rag.source_sections import application_details
 
 FILES = ("neo4j/nodes_policy.jsonl", "neo4j/nodes_region.jsonl", "neo4j/nodes_category.jsonl",
          "neo4j/nodes_document.jsonl", "neo4j/relationships.jsonl", "qdrant/payload_chunks.jsonl")
+# React policySearchKey(#125)와 같은 비교 규칙. 검색 별칭·정책 원문은 추가하지 않는다.
+SEARCH_HYPHENS = "-‐‑–—－"
+
+
+def policy_search_key(text: str) -> str:
+    return "".join(char for char in text.casefold() if not char.isspace() and char not in SEARCH_HYPHENS)
 
 
 class PolicyCatalog:
@@ -90,11 +96,11 @@ class PolicyCatalog:
         today = datetime.now(KST).date()
         version, digest, policies, relations, details = self._snapshot()
         items = []
-        query = "".join(q.split()).casefold()
+        query = policy_search_key(q)
         for pid, node in policies.items():
             relation = relations[pid]
             name, agency = node["policy_name"], node.get("agency") or node.get("organization") or ""
-            if query and query not in "".join((name + agency).split()).casefold():
+            if query and query not in policy_search_key(name + agency):
                 continue
             if region and region not in relation["regions"]:
                 continue

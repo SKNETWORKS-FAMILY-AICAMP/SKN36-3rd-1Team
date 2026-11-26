@@ -17,6 +17,7 @@ from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure, application_schedule
 from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
+from backend.rag.application_links import align_application_links
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -44,8 +45,10 @@ MIN_NAMED_POLICY_LENGTH = 4
 # 생성 본문의 접수·자격 단정이 Checker 판정과 충돌하면 확인된 상태 문구로 바꾼다(문장 단위).
 SENTENCE_BREAK = re.compile(r"((?<=[.!?。！？])\s+|\n+)")
 OPEN_CLAIM = re.compile(
-    r"(?:지금|현재|바로|오늘|당장)\s*\S{0,8}?\s*(?:신청|접수)\S{0,6}?\s*(?:수\s*)?(?:있|가능)"
+    r"(?:지금|현재|바로|오늘|당장|언제든지)\s*\S{0,8}?\s*(?:신청|접수)\S{0,6}?\s*(?:수\s*)?(?:있|가능)"
     r"|접수\s*(?:중|하고\s*있)|신청\s*(?:기간|접수)\s*(?:중|입니다)"
+    r"|(?:연중\s*)?상시\s*(?:신청|접수|모집)(?:이?\s*가능|할\s*수\s*있|입니다|합니다)"
+    r"|연중\s*(?:신청|접수|모집)합니다"
 )
 ELIGIBLE_CLAIM = re.compile(
     r"자격(?:을|이|\s*요건을|\s*요건이)?\s*(?:모두\s*)?(?:충족|갖추|갖췄)"
@@ -676,10 +679,12 @@ def run_ask_pipeline(
     output = output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
     aligned = False
     if output.status != "no_evidence":
-        fixed, aligned = _align_answer_with_checks(output.answer, contexts, checks)
+        link_fixed, links_aligned = align_application_links(output.answer, contexts, checks)
+        fixed, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
+        aligned = links_aligned or checks_aligned
         if aligned:
             # 내용은 로그에 남기지 않는다.
-            logger.warning("생성 본문의 접수·자격 안내를 Checker 판정에 맞춰 바꿨습니다.")
+            logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")
             # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
             remaining = set(CITATION.findall(fixed))
             output = output.model_copy(update={
@@ -703,7 +708,7 @@ def run_ask_pipeline(
         notice = {"kind": "warn", "title": "추가 확인 필요", "text": HOLD_NOTICE_TEXT}
     if notice is None and aligned:
         notice = {"kind": "warn", "title": "추가 확인 필요",
-                  "text": "접수 상태와 신청 자격은 판정 결과를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."}
+                  "text": "신청 주소·접수 상태·신청 자격은 확인된 정책 정보를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."}
     if display_fn is not None:
         checks = [_display_check(check, display_fn) for check in checks]
     return AskResponse(
