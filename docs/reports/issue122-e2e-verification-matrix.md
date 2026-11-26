@@ -74,9 +74,9 @@
 
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
-| 04-1 | 제외 조건이 있는 정책(예: #102의 POL_GOV_016) 상담 | Pipeline 연결 전: `exclusion_reasons=null`, 답변 본문에서만 안내. 연결 후: `{field,label,reason}`이 Checker 사유와 같음 | 응답 JSON | **BLOCKED** (Pipeline 연결 미구현) | |
-| 04-2 | 공식 원문 발췌가 있는 정책 상담·목록 | `official_requirements=null` 유지. 화면은 같은 자리에 `requirement_excerpts`를 '원문 발췌'로 표시. 값 환산 없음 | 응답 JSON + 카드 스크린샷 | **미실행** (실행 가능, 02 해결 필요) | |
-| 04-3 | POL_GOV_050, `child_age_months` = 10 / 24 / 25 / 생략 / -1·1.5·"a" | 10·24 → eligible, 25 → ineligible, 생략 → needs_check, 잘못된 값 → 422(값 미노출). 조건은 `COND_CHILD_AGE_LE_24M`(LTE 24) | 요청별 응답 JSON, 422 본문 | **BLOCKED** (PR #112 미병합, API·화면 입력 미구현) | |
+| 04-1 | POL_005 74·75·76·80세 및 확정 제외 사유가 있는 정책 상담 | #135 이후 확정 사유는 Checker와 같다. POL_005 74세는 `needs_check`·`null`, 75세 이상은 `ineligible`·연령 제외 사유. 카드는 상세 사유 또는 기존 일반 경고를 표시 | 응답 JSON + 카드 스크린샷 | **FAIL** (2026-11-26 R3D 재실행: 74·75·80세 PASS, 76세는 Checker `ineligible`인데 본문이 "충족"이라 답함(2회 재현, MVP 범위 밖이라 우선순위 낮음). 청년 나이 상한 경계는 불일치 없음. 카드 스크린샷 미실행, 렌더링 회귀 PASS) | [#75 R3D 재실행](issue75-browser-regression-20261125.md#r3d-verify-db-재실행-2026-11-26-kst) |
+| 04-2 | 공식 원문 기준이 있는 정책과 발췌만 있는 정책 상담·목록 | #133 이후 구조화 요건은 같은 정책의 채택 문서 인용과 연결. `null`이면 원문 발췌가 있을 때만 발췌로 표시. 값·단위·연도 유지, 개인 판정과 분리 | 응답 JSON + 카드 스크린샷 | **BLOCKED** (실제 API 503, 렌더링 회귀 PASS) | |
+| 04-3 | POL_GOV_050, `child_age_months` = 10 / 24 / 25 / 생략 / -1·1.5·"a" | 연령 조건에서 10·24 → eligible, 25 → ineligible, 생략 → needs_check, 잘못된 값 → 422(값 미노출). 조건은 `COND_CHILD_AGE_LE_24M`(LTE 24) | 요청별 응답 JSON, 422 본문 | **BLOCKED** (PR #112 병합, FastAPI·React 요청 연결 대기) | |
 
 > **24개월 경계:** #39 본문의 테스트 시나리오 2는 24개월을 `ineligible`(24개월 미포함)로 적었지만, 이는 교정 전 내용이다. 릴리스 데이터 `data/releases/v1.4.0-candidate/neo4j/relationships.jsonl`에서 POL_GOV_050은 `COND_CHILD_AGE_LE_24M`(LTE 24)을 쓴다. `data/metadata/data_corrections_v1.4.0.json`에는 전주시 조례의 '24개월 이하' 문구를 따른다는 근거와 "반석 확정 2026-11-20, #39 A안"이 기록돼 있다. PR #112도 같은 기준이다. 따라서 24개월의 기대 결과는 `eligible`이다. #39 본문의 시나리오 2만 갱신하면 된다.
 
@@ -149,6 +149,21 @@
 - 응답 샘플에는 실행 커밋, 실행 시각(KST), 데이터 manifest를 함께 적는다.
 - "기존 증빙"은 최종 회차에서 다시 실행해 PASS·FAIL로 바꾼다. 다시 못 한 항목은 이유를 적고 "기존 증빙"으로 남긴다.
 - 실행하지 않은 항목을 PASS로 적지 않는다.
+
+### 2026-11-26 최신 dev 후속 검증
+
+원격 dev `f42e726cc5a8223179094359c2b20a422fe908a0`에 #112·#133·#135가 병합됐다. #76·#78은 Closed, #75·#122는 Open이다. 앞의 선행 조건 및 증빙 출처 표에는 이전 회차 상태가 포함되어 있다.
+
+| 범위 | 최신 증빙과 남은 검증 |
+| --- | --- |
+| 02, 03, 04, 06 · 실제 상담 | #76 공식 요건·예외 3건, #78 연령 경계 4건, RQ040/RQ042 및 복수 정책 3건이 검색 단계에서 HTTP 503으로 차단됐다. 정책 ID·Checker·Generator·React 정합성 및 실제 출처 링크는 대기다. 환경과 질문은 [#75 후속 검증](issue75-browser-regression-20261125.md#최신-dev-후속-검증-2026-11-26-kst)에 기록했다. 이후 R3D verify DB에 붙여 7건을 다시 보냈고 모두 HTTP 200이었다. #78 74·75·80세는 PASS, 76세는 Checker·본문 불일치로 FAIL이다. 나머지 본문·카드·링크 대조는 대기다([R3D 재실행](issue75-browser-regression-20261125.md#r3d-verify-db-재실행-2026-11-26-kst)). |
+| 06 · 목록 브라우저 | Edge에서 React 상담 화면 및 목록 로드를 확인했고 FastAPI의 목록 요청은 HTTP 200이었다. 상담 질문 제출은 미실행이다. |
+| 05-1, 05-5 · PR #136 | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)은 Open, head `52be7f9`다. 현재 dev에서 React 목록 검색 회귀는 여섯 표기 모두 PASS. 실제 `GET /api/policies?q=…`는 모두 HTTP 200이지만 `POL_STG_MOLIT_001` 기준으로 K-패스·k-패스만 PASS, 모두의카드·모두의 카드·K패스·k패스는 FAIL이다. 첫 두 표기는 다른 결과 1개, 뒤 두 표기는 0개였다. #136 적용 후 여섯 표기를 API에서 재확인하고 POL_YC_065 상담 답변에 홈페이지를 전용 신청 주소로 안내하는 표현이 없고 카드 신청 버튼이 숨겨지는지 대조한다. |
+| #97 RQ031 | Generator·Pipeline 수정 완료 확인 후 동일 5문항을 재평가한다. 이번 회차는 미실행이다. |
+
+민혁·지인은 R3D verify 전용 설정과 검색 요청 성공을 확인한다. 검색 복구 뒤 민지는 같은 가상 입력으로 응답·카드·문서를 대조하고 #75·#122를 갱신한다. 답변과 Checker가 불일치하면 응답 및 근거 문서와 함께 소희·지인에게 전달한다. #39는 API 및 React 연동 완료까지 차단을 유지한다.
+
+로컬 자동 검증은 `npm run typecheck`, `npm run test`(21개 파일, 189건), `npm run build`를 통과했다. 빌드에는 500 kB 초과 청크 경고가 있었다. `python -m pytest tests/unit/test_official_requirements.py tests/unit/test_issue78_exclusion_reasons.py -q`는 82건과 서브테스트 63건을 통과했다. `python -m pytest tests/integration/test_official_requirements_api.py tests/integration/test_issue78_exclusion_reasons_api.py -q -o faulthandler_timeout=12`는 47건과 서브테스트 76건을 통과했다. FastAPI 통합 테스트는 가상 의존성 및 릴리스 청크를 사용하는 검증이다.
 
 ## 6. 팀 결정이 필요한 항목
 

@@ -201,10 +201,10 @@ it('shows identical income notices once per policy without dropping distinct con
 // Release v1.4.0-candidate의 실제 조건 트리를 실제 Checker·Pipeline(run_ask_pipeline)에 통과시킨 policy_checks.
 // 검색 결과와 LLM 답변만 대역이다. 국민내일배움카드(POL_005)의 만 75세 이상은 '제외(NOT) → OR' 그룹 아래에 있다.
 
-function renderPolicy(key: keyof typeof fromChecker, followUps: AskResponse['follow_up_questions'] = []) {
+function renderPolicy(key: keyof typeof fromChecker, followUps: AskResponse['follow_up_questions'] = [], overrides: Partial<AskResponse['policy_checks'][number]> = {}) {
   const response: AskResponse = {
     status: 'answered', answer: '가상 본문', citations: [], follow_up_questions: followUps,
-    checked_at: null, is_sample: false, policy_checks: [fromChecker[key] as AskResponse['policy_checks'][number]],
+    checked_at: null, is_sample: false, policy_checks: [{ ...fromChecker[key], ...overrides } as AskResponse['policy_checks'][number]],
   };
   const noop = () => {};
   const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
@@ -236,6 +236,19 @@ it('warns only when the input actually falls into an exclusion (NOT) group', () 
     const { overview, card } = renderPolicy(key);
     expect(overview + card).not.toContain(notice);
   }
+});
+
+it('shows confirmed exclusion details once and keeps the warning for a null response', () => {
+  const notice = '지원 제외 대상 조건에 해당해요';
+  const reason = '가상 연령 제외 사유';
+  const confirmed = renderPolicy('POL_005_80', [], {
+    exclusion_reasons: [{ field: 'age', label: '연령 제외', reason }],
+  });
+  expect(confirmed.overview + confirmed.card).not.toContain(notice);
+  expect(confirmed.card.match(new RegExp(reason, 'g'))).toHaveLength(1);
+  const unconfirmed = renderPolicy('POL_005_80', [], { exclusion_reasons: null });
+  expect(unconfirmed.card).toContain(notice);
+  expect(unconfirmed.card).not.toContain(reason);
 });
 
 it('hides verdict badges when an OR group may contain the compared condition', () => {

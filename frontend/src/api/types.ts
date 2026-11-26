@@ -103,11 +103,11 @@ export interface PolicyCheck {
   official_apply_url: string | null;
   /** 원문에 [문의처]가 없으면 null(빈 배열이 아니다). */
   contacts?: Contact[] | null;
-  /** #78 구현 전까지는 항상 null(#77 계약 자리 예약). */
+  /** Checker가 확정한 제외 사유. 이 응답에서 확정된 사유가 없으면 null/생략. */
   exclusion_reasons?: ExclusionReason[] | null;
   /** 같은 정책의 지원대상·선정기준 원문 발췌가 있을 때만 제공. 없으면 null/생략. */
   requirement_excerpts?: RequirementExcerpt[] | null;
-  /** #76-A 구현 전까지는 항상 null(#77 계약 자리 예약). */
+  /** 같은 정책의 채택 근거에서 확인한 공식 기준. 확인 가능한 기준이 없으면 null/생략. */
   official_requirements?: OfficialRequirement[] | null;
 }
 

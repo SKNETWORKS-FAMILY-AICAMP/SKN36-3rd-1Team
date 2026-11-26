@@ -197,7 +197,7 @@ function Answer({ r, onFollowUp, onDemoApply, onAskPolicy }: {
   }
   // 확인할 항목만 모은다. 개별 적합·불일치는 그룹 맥락 없이 정책 자격으로 읽힐 수 있어 여기에 올리지 않는다.
   const policyReasons = r.policy_checks
-    .map((policy) => ({ policy, items: checkItems(policy.conditions, infoRequests), excluded: matchesExclusion(policy.conditions) }))
+    .map((policy) => ({ policy, items: checkItems(policy.conditions, infoRequests), excluded: !policy.exclusion_reasons?.length && matchesExclusion(policy.conditions) }))
     .filter(({ items, excluded }) => items.length > 0 || excluded);
   if (policyReasons.length > 0) {
     blocks.push(
@@ -399,7 +399,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   const applyHref = safeHttpUrl(p.official_apply_url);
   const theme = useTheme();
   const detailHref = sample ? null : policyDetailHref(p.policy_id, undefined, theme);
-  // 검수된 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.
+  // 공식 기준(#76)이 있으면 그것을, 없으면 지원대상·선정기준 원문 발췌(#107)를 같은 자리에 보여 준다.
   const requirementRows: { label: string; value: string; document_id?: string | null; chunk_id?: string | null; source_url?: string | null }[] =
     p.official_requirements?.length ? p.official_requirements
       : (p.requirement_excerpts ?? []).map(e => ({ label: e.label, value: e.text, document_id: e.document_id, chunk_id: e.chunk_id, source_url: e.source_url }));
@@ -483,7 +483,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
                 <span>{Array.from(labels).join(' · ')}</span>
               </div>
             ))}
-            {matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
+            {!p.exclusion_reasons?.length && matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
             {hidesVerdict && (
               <p className="policy-condition-note">
                 조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.
