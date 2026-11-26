@@ -294,7 +294,7 @@ def _sample_entry(conditions, quality):
 
 
 AGE = {"type": "AGE", "operator": "BETWEEN", "value": "19~35", "condition_id": "COND_AGE_SAMPLE"}
-CHILD = {"type": "SPECIAL_TARGET", "unit": "개월", "operator": "LT", "value": "24", "condition_id": "COND_CHILD_SAMPLE"}
+CHILD = {"type": "SPECIAL_TARGET", "unit": "개월", "operator": "LT", "value": "24", "condition_id": "COND_CHILD_AGE_UNDER_24M"}
 PROFILE = {"age": 25, "region": None, "income": None, "child_age_months": 10}   # sample_only
 
 
@@ -361,11 +361,26 @@ CHILD_LE_24 = {"type": "SPECIAL_TARGET", "unit": "개월", "operator": "LTE", "v
                "condition_id": "COND_CHILD_AGE_LE_24M"}
 
 
-@pytest.mark.parametrize("months", [23, 24, 25, None])
-def test_gov050_lte_child_months_current_checker_holds_without_wrong_verdict(months):
-    # 현재 Checker는 자녀 월령 LT만 자동 비교한다. LTE는 23/24/25개월·미입력 모두 needs_check
-    # (24개월을 '미만'으로 오판해 부적격 처리하지 않음). 23·24 적격 / 25 부적격 자동 판정은 Checker 별도 수정 범위.
-    assert _child_status(CHILD_LE_24, months) == ["needs_check"]
+@pytest.mark.parametrize("months, expected", [
+    (0, "eligible"), (23, "eligible"), (24, "eligible"),
+    (25, "ineligible"), (None, "needs_check"),
+])
+def test_gov050_lte_child_months_boundary_without_quality_hold(months, expected):
+    # PR #112 adds LTE support: 24 months is included, 25 is not.
+    assert _child_status(CHILD_LE_24, months) == [expected]
+
+
+@pytest.mark.parametrize("months", [0, 23, 24, 25, None])
+def test_gov050_lte_quality_hold_overrides_automatic_month_comparison(months):
+    flags = [{"code": "MARRIAGE_CHILD_NOT_MODELED", "evidence_level": "keyword_detected",
+              "severity": "low", "handoff_semantic_match": "not_modeled",
+              "affects": ["children"], "evidence": {}}]
+    quality = hs.assess_policy_data_quality({"policy": {}}, flags)
+    profile = {**PROFILE, "child_age_months": months}
+    result = check_eligibility(profile, _sample_entry([AGE, CHILD_LE_24], quality))
+    rows = [(row["field"], row["status"]) for row in result["conditions"]]
+    assert ("children", "needs_check") in rows
+    assert ("age", "eligible") in rows
 
 
 @pytest.mark.parametrize("months, expected", [(23, "eligible"), (24, "ineligible"), (25, "ineligible"),

@@ -12,6 +12,7 @@ from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
 from backend.eligibility.checker import _is_valid_age
+from backend.llm.month_age_guard import ground_child_month_ranges
 from database.region_search import ALIASES, SIDOS
 
 
@@ -74,11 +75,21 @@ def _normalize_profile(profile: dict | None) -> dict | None:
     if not valid_income:
         income = None
 
-    return {
+    # 자녀 월령은 신청자 age(세)가 아닌 별도 개월 단위 값이다.
+    # Pydantic 계약과 같이 bool, float, 숫자 문자열은 입력값으로 인정하지 않는다.
+    child_age_months = profile.get("child_age_months")
+    if type(child_age_months) is not int or child_age_months < 0:
+        child_age_months = None
+
+    normalized = {
         "age": age,
         "region": region,
         "income": income,
     }
+    # 기존 API 요청은 키 자체가 없을 수 있다. 옛 Generator 계약도 보존한다.
+    if "child_age_months" in profile:
+        normalized["child_age_months"] = child_age_months
+    return normalized
 
 
 def _region_has_detail(region: str) -> bool:
@@ -96,11 +107,227 @@ def _region_has_detail(region: str) -> bool:
     )
 
 
+def _is_applicant_age_request(text: str) -> bool:
+    """Only explicit requests for the guardian/applicant's OWN age.
+
+    The same sentence may mention '아이 돌봄', but that does not make the
+    guardian's age the child's age. A policy age *criterion* is not a request.
+    """
+    match = re.search(
+        r"(?:보호자(?:분)?|신청자|신청인|본인|귀하|"
+        r"(?:아이|자녀)를\s*(?:돌보|양육하)(?:는|시는)\s*분)"
+        r"(?:께서는|께서|\s*본인(?:의)?|[의가은는])?\s*"
+        r"(?:현재\s*)?(?:만\s*)?(?:나이|연령|생년월일|몇\s*(?:살|세))",
+        text,
+    )
+    if match is None:
+        return False
+    # '자녀/배우자 본인' refers to that family member, not the applicant.
+    if match.group().startswith("본인") and re.search(
+        r"(?:자녀|아이|아기|영유아|배우자|부모님?|가족|동거인)(?:의)?\s*$",
+        text[:match.start()],
+    ):
+        return False
+    tail = text[match.start():]
+    if re.search(r"(?:나이|연령).{0,10}(?:기준|요건|조건|범위|제한)", tail):
+        return False
+    # A previous mention ('보호자 나이는 알고 있으니') is not the target
+    # of a later child-age request. Bind the predicate to this age phrase.
+    return bool(re.search(r"몇\s*(?:살|세)$", match.group()) or re.match(
+        r"\s*(?:가|는|를|이|은|을)?\s*"
+        r"(?:알려|입력|말씀|몇\s*(?:살|세)|어떻게\s*되|"
+        r"이신가요|이세요|인가요|입니까)",
+        text[match.end():],
+    ))
+
+
+def _is_profile_method_question(text: str) -> bool:
+    """Explain how to obtain/compute a value, rather than ask for its value.
+
+    A direct input instruction in the same clause still needs input handling.
+    '어떻게 되나요' and '어디에 사시나요' are not method questions.
+    """
+    # Keep the existing contract for unsupported household/asset inputs.
+    if not re.search(
+        r"소득|수입|급여|월급|연봉|나이|연령|생년월일|월령|개월|거주|주소|지역", text,
+    ):
+        return False
+    if re.search(
+        r"(?:소득|수입|급여|나이|연령|월령|개월\s*수|거주\s*지역|주소)"
+        r"\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
+    ):
+        return False
+    action = r"(?:확인|조회|계산|산정|산출|발급|증명|볼\s*수|알\s*수)"
+    return bool(re.search(
+        r"(?:어디서|어디에서|어디로|어떤\s*(?:곳|기관|사이트|서류)에서|"
+        r"어떻게|어떤\s*(?:방법|방식)으로).{0,30}"
+        + action + r".{0,15}(?:하나요|하는지|할\s*수|가능|받나요|되나요|해야|해요|하죠|합니까|있나요)|"
+        + action + r"\s*(?:하는\s*)?(?:방법|방식|절차|경로|기관|사이트)"
+        r".{0,25}(?:무엇|어디|어떻게|인가요|알려|설명|안내)|"
+        + action + r".{0,15}(?:하려면|하려고|하려는데)"
+        r".{0,20}(?:어디|어떻게).{0,20}(?:하나요|하죠|해요|가야|할\s*수)",
+        text,
+    ))
+
+
+def _direct_profile_request_field(text: str) -> str | None:
+    """Find the input actually requested, rather than an earlier mention.
+
+    Only adjacent field/request phrases qualify; this must not span from
+    '아이 월령은 알고 있으니' to a later request for region or income.
+    """
+    if _is_profile_method_question(text):
+        return None
+    patterns = {
+        "region": r"(?:거주\s*(?:지역|지)|지역|주소)",
+        "income": r"(?<!주거)(?:월\s*)?(?:소득|수입|급여)",
+        "child_age_months": (
+            r"(?:자녀|아이|아기|영유아)(?:의)?\s*"
+            r"(?:본인(?:의)?\s*)?(?:월령|나이|연령|개월\s*수)"
+        ),
+    }
+    requests = []
+    for field, subject in patterns.items():
+        for match in re.finditer(
+            subject + r"\s*(?:을|를|은|는|이|가)?\s*"
+            r"(?:알려|입력|말씀|몇|얼마|어디|어떻게\s*되)", text,
+        ):
+            if re.search(
+                r"(?:자녀|아이|아기|영유아|배우자|부모님?|가족|동거인)"
+                r"(?:의)?\s*(?:본인(?:의)?\s*)?(?:월\s*)?$",
+                text[:match.start()],
+            ):
+                continue
+            requests.append((match.start(), field))
+    return max(requests)[1] if requests else None
+
+
+def _is_child_age_policy_question(text: str) -> bool:
+    """Age thresholds and age-dependent benefits are policy questions."""
+    # The service name may precede the threshold: '아이 돌봄 지원은 몇 개월부터
+    # 시작되나요?' must mean the same as '아이는 몇 개월부터 지원되나요?'.
+    # Require an actual service/threshold question; a personal '몇 개월인가요'
+    # remains an input request.
+    direct_value_request = bool(re.search(
+        r"(?:월령|개월\s*수|나이|연령)\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
+    ))
+    # The requested value is a benefit amount, not the child's own month-age.
+    if not direct_value_request and re.search(
+        r"(?:월령|개월|(?:자녀|아이|아기|영유아)(?:의)?\s*(?:나이|연령))"
+        r".{0,12}(?:에\s*따라|에\s*따른|별|마다)"
+        r".{0,30}(?:지원\s*(?:금|액)|금액|혜택)"
+        r".{0,20}(?:얼마|어떻게|무엇|알려|안내)", text,
+    ):
+        return True
+    threshold = re.search(
+        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과|에|일\s*때|이어야)", text,
+    )
+    if (
+        threshold
+        and not direct_value_request
+        and re.search(r"(?:자녀|아이|아기|영아|영유아|월령)", text)
+        and re.search(r"신청|지원|접수|이용|돌봄|보육|서비스", text)
+        and re.search(r"시작|종료|가능|대상|되나요|되죠|(?:할|받을|이용할)\s*수|이어야|여야", text)
+        and not re.search(r"(?:알려|입력|말씀)\s*(?:해\s*)?주시면", text)
+    ):
+        return True
+    if not direct_value_request and re.search(
+        r"(?:시작|종료|이용|신청|지원)\s*(?:가능\s*)?(?:월령|연령|나이)"
+        r".{0,15}(?:몇|어떻게|무엇)", text,
+    ):
+        return True
+    return _is_child_months_method_question(text) or bool(re.search(
+        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과)"
+        r".{0,30}(?:신청|지원|접수|이용|이어야|여야)|"
+        r"(?:월령|개월|자녀\s*나이).{0,30}(?:지원금|지원액|혜택|지원\s*내용)"
+        r".{0,25}(?:어떻게|차이|달라|다른)", text,
+    ))
+
+
+def _is_child_months_method_question(text: str) -> bool:
+    """Questions about calculating month-age must survive deduplication."""
+    if not re.search(
+        r"(?:자녀|아이|아기|영아|영유아).{0,30}(?:월령|개월)",
+        text,
+    ):
+        return False
+    return bool(re.search(
+        r"(?:어떻게|어떤\s*(?:방식|방법)|언제부터).{0,25}"
+        r"(?:산정|계산|산출|구하|세나요|측정)|"
+        r"(?:산정|계산|산출|측정)\s*(?:방법|방식|기준|법)",
+        text,
+    ))
+
+
+def _is_child_years_request(text: str) -> bool:
+    """'자녀는 몇 살인가요?'는 신청자 age가 아닌 자녀 월령 입력 요청이다.
+
+    '자녀는 몇 살까지 지원되나요?'와 정책의 연령 기준 질문은 포함하지 않는다.
+    """
+    if re.search(
+        r"(?:정책|공고|지원\s*대상|자격|요건|기준|조건|제한|범위)", text
+    ) and not re.search(r"(?:알려|입력|말씀)", text):
+        return False
+    return bool(re.search(
+        r"(?:자녀|아이|아기|영유아).{0,25}"
+        r"몇\s*(?:살|세)\s*"
+        r"(?:인가요|이세요|이신가요|입니까|이십니까|인지|인지요|"
+        r"되나요|일까요|이에요|입니까요)",
+        text,
+    ))
+
+
 def _requests_profile_value(text: str, field: str) -> bool:
     """후속 질문이 일반 사용자 입력값 자체를 묻는지 보수적으로 감지한다.
 
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
+    if _is_profile_method_question(text):
+        return False
+    if field == "child_age_months":
+        # Explicit guardian/applicant age is never child_age_months.
+        if _is_applicant_age_request(text):
+            return False
+        # Asking HOW months are calculated is not asking for the child's age.
+        if _is_child_age_policy_question(text):
+            return False
+        if _direct_profile_request_field(text) in {"region", "income"}:
+            return False
+        if _is_child_years_request(text):
+            return True
+        # A policy/service prefix does not change an adjacent question about
+        # the child's actual age into a question about a policy threshold.
+        if re.search(
+            r"(?:자녀|아이|아기|영유아)(?:의|가|는|은)?\s*"
+            r"(?:(?:월령|나이|연령)(?:이|가|은|는)?\s*)?"
+            r"몇\s*개월\s*(?:인가요|이세요|이신가요|입니까|인지\s*(?:알려|입력|말씀))",
+            text,
+        ):
+            return True
+        # 명시적으로 자녀의 개인 월령을 요청하면 정책 관련 접두어가 있어도
+        # 해당 입력 요청을 인식한다. 단, 정책 '월령 기준' 자체를 묻는 문장은 제외한다.
+        if re.search(
+            r"(?:자녀|아이|아기|영유아).{0,25}"
+            r"(?:월령|나이|연령|개월\s*수).{0,30}(?:알려|입력|말씀)",
+            text,
+        ) and not re.search(
+            r"(?:월령|나이|연령|개월\s*수).{0,12}(?:기준|조건|요건|범위|제한)",
+            text,
+        ):
+            return True
+        # 자녀 정책의 월령 기준 질문은 사용자에게 입력값을 요청하는 질문이 아니다.
+        if re.search(r"(?:정책|공고|지원\s*대상|자격|요건|기준|조건)", text):
+            return False
+        if re.search(r"몇\s*개월.{0,12}(?:미만|이하|이상|초과|이어야)", text):
+            return False
+        return bool(re.search(
+            r"(?:자녀|아이|아기|영유아).{0,25}"
+            r"(?:월령|나이|연령|몇\s*개월|개월\s*수).{0,30}"
+            r"(?:알려|입력|말씀|몇|되나요|인가요|이세요|입니까|인지|어떻게)|"
+            r"(?:자녀|아이|아기|영유아).{0,25}몇\s*개월",
+            text,
+        ))
+
     if field == "age":
         return bool(
             re.search(
@@ -417,6 +644,8 @@ def _is_explicit_profile_request(text: str) -> bool:
 
 def _is_policy_criteria_question(text: str) -> bool:
     """개인 프로필 요구가 아닌 정책의 금액·자격 기준 질문을 구별한다."""
+    if _is_profile_method_question(text) or _is_child_age_policy_question(text):
+        return True
     if _is_explicit_profile_request(text):
         return False
     return bool(re.search(
@@ -443,6 +672,28 @@ def _personal_information_request(
 
     if _is_policy_criteria_question(text):
         return None
+
+    # A stated guardian/applicant subject takes precedence over '아이 돌봄'.
+    if _is_applicant_age_request(text):
+        return "age"
+
+    # Month-age calculation is a normal user-to-AI follow-up question.
+    if _is_child_age_policy_question(text):
+        return None
+
+    requested = _direct_profile_request_field(text)
+    if requested in {"region", "income"}:
+        if requested == "region" and _is_detail_region_request(
+            text, (profile or {}).get("region"),
+        ):
+            return "detail_region"
+        return requested
+
+    # #39 REVIEW HARDENING: an infant's age is NEVER the applicant's age.
+    # Until the API/React ask_info contract is ready, keep this as body-only
+    # guidance. Do not send kind=ask_info(field='age') for a child-age query.
+    if _requests_profile_value(text, "child_age_months"):
+        return "other"
 
     # '월 소득이 기준 금액보다 낮으신가요?'는 사용자 소득 확인이다.
     # 다른 가족 구성원의 소득 비교는 본인 income 필드가 아니다.
@@ -546,6 +797,11 @@ def _info_request_to_answer(
     field: str | None = None,
 ) -> str | None:
     """허용되지 않은 추가 정보 요청을 근거 없는 설명 없이 본문용으로 바꾼다."""
+    # This field has already been classified; incidental place-like suffixes
+    # in verbs (e.g. '지원받으려면') must not change it into a region request.
+    if field == "child_age_months":
+        return "자녀의 월령(개월 수)을 알려 주세요."
+
     if field == "detail_region" or (field != "other" and _is_detail_region_request(text)):
         named_gu = re.search(
             r"(?<![가-힣])([가-힣]{2,}구)(?:에|의|는|에서|\s|$)",
@@ -560,7 +816,22 @@ def _info_request_to_answer(
     if "가구원" in text or field == "household_size":
         return "가구원 수를 알려 주세요."
 
-    if "자녀" in text or field == "child_age":
+    # 기존 child_age/"자녀 나이" 안내 문구는 기존 API 및 테스트와의
+    # 하위 호환을 위해 그대로 둔다. 분류기가 field를 other로 바꾸기도 하므로
+    # 원래 필드뿐 아니라 문장도 확인한다. 명시된 child_age_months는 우선한다.
+    if field == "child_age" or (
+        field != "child_age_months"
+        and re.search(r"자녀\s*나이", text)
+    ):
+        return "자녀 나이를 알려 주세요."
+
+    if field == "child_age_months" or _is_child_years_request(text) or re.search(
+        r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|개월)|"
+        r"(?:아이|아기|영유아).{0,30}(?:나이|연령)", text
+    ):
+        return "자녀의 월령(개월 수)을 알려 주세요."
+
+    if "자녀" in text:
         return "자녀 나이를 알려 주세요."
 
     if "혼인" in text or "결혼" in text:
@@ -640,6 +911,39 @@ def _is_redundant_request(
     if profile is None:
         return False
 
+    if _is_profile_method_question(text):
+        return False
+
+    # Do not use child_age_months to suppress a guardian/applicant age request.
+    if _is_applicant_age_request(text):
+        return profile.get("age") is not None
+
+    # Calculation/explanation questions are never redundant profile requests.
+    if _is_child_age_policy_question(text):
+        return False
+
+    requested = _direct_profile_request_field(text)
+    if requested in {"region", "income"}:
+        value = profile.get(requested)
+        if requested == "region" and value and not _region_has_detail(value):
+            if _is_detail_region_request(text, value):
+                return False
+        return value is not None
+
+    if re.search(r"(?:배우자|부모님?|가족|동거인)(?:의)?\s*본인", text):
+        return False
+
+    #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로
+    # 충족할 수 없다. child_age_months가 없으면 이 요청을 절대 지우지 않는다.
+    if _is_child_years_request(text) or re.search(
+        r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|나이|연령|개월)",
+        text,
+    ):
+        return (
+            profile.get("child_age_months") is not None
+            and _requests_profile_value(text, "child_age_months")
+        )
+
     # '이 정책의 연령 기준은?' 같은 정책 질문은
     # 개인 정보 재요청이 아니다.
     if re.search(
@@ -695,9 +999,14 @@ def _remove_redundant_answer_requests(
             len(sentence) <= 75
             and not CITATION_PATTERN.search(sentence)
             and _is_redundant_request(sentence, profile)
-            and not re.search(
-                r"(?:정책|공고|지원\s*대상|자격\s*기준)",
-                sentence,
+            and (
+                not re.search(
+                    r"(?:정책|공고|지원\s*대상|자격\s*기준)",
+                    sentence,
+                )
+                # '정책 신청을 위해 자녀 월령을 알려주세요'도 이미 알고 있으면 제거.
+                # '이 정책의 자녀 월령 기준은?' 같은 정책 질문은 유지한다.
+                or _requests_profile_value(sentence, "child_age_months")
             )
         ):
             removed = True
@@ -802,6 +1111,30 @@ def _limit_follow_ups(items: list[dict], limit: int = 3) -> list[dict]:
     return [items[i] for i in keep]
 
 
+def _normalize_child_month_bound_wording(answer: str) -> str:
+    """Repair a contradictory particle without changing the age comparator.
+
+    '24개월 이하부터 해당' incorrectly presents an upper bound as a start.
+    Only this eligibility predicate is repaired; actual lower bounds, ranges,
+    durations, and explanations of an erroneous phrase remain untouched.
+    """
+    sentences = re.split(r"(?<=[.!?])\s+|\n+", answer)
+    for sentence in sentences:
+        if not re.search(r"자녀|아이|아기|영유아|월령", sentence):
+            continue
+        if re.search(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)", sentence):
+            continue
+        corrected = re.sub(
+            r"(\d+\s*개월\s*(?:이하|미만)(?:\*\*|__)?)[ \t]*부터"
+            r"(?=[ \t]*해당)",
+            r"\1에",
+            sentence,
+        )
+        if corrected != sentence:
+            answer = answer.replace(sentence, corrected)
+    return answer
+
+
 def _validate_model_response(
     raw: Any,
     source_ids: set[int],
@@ -824,6 +1157,7 @@ def _validate_model_response(
             "LLM answer가 비어 있습니다."
         )
 
+    answer = _normalize_child_month_bound_wording(answer)
     answer = _remove_redundant_answer_requests(
         answer,
         profile,
@@ -950,10 +1284,29 @@ def _validate_model_response(
             else None
         )
 
+        # Keep the explicit month field through final conversion, including
+        # subjectless requests. Clear wording for another field still wins.
+        if (
+            kind == "ask_info"
+            and field == "child_age_months"
+            and detected_field in {None, "other"}
+            and not _is_child_age_policy_question(text)
+            and not _is_policy_criteria_question(text)
+            and (
+                _requests_profile_value(text, "child_age_months")
+                or re.search(r"몇\s*개월|월령|자녀\s*나이", text)
+            )
+        ):
+            if profile is None or profile.get("child_age_months") is None:
+                body_requests.append(_info_request_to_answer(text, field))
+            continue
+
         # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
         # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
         if kind == "ask_info":
-            if detected_field in ALLOWED_FIELDS:
+            if _is_child_age_policy_question(text) or _is_profile_method_question(text):
+                kind = "question"
+            elif detected_field in ALLOWED_FIELDS:
                 field = detected_field
             elif detected_field in {"detail_region", "other"}:
                 # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
@@ -1352,8 +1705,10 @@ def generate_answer(
             "LLM이 유효한 JSON을 반환하지 않았습니다."
         ) from error
 
-    return _validate_model_response(
+    response = _validate_model_response(
         parsed,
         source_ids,
         cleaned_profile,
     )
+    return ground_child_month_ranges(response, cleaned_contexts)
+

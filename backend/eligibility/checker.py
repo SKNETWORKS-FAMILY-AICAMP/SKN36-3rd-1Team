@@ -105,9 +105,24 @@ def _field(condition: dict) -> str:
     if kind == "INCOME":
         return "income"
 
+    # #39: Explicit non-child month conditions must not be evaluated using
+    # child_age_months. Older graph / mock conditions may lack both name and
+    # condition_id; preserve their established SPECIAL_TARGET + months contract.
+    condition_id = str(condition.get("condition_id") or "").strip()
+    name = str(condition.get("name") or "").strip()
     if (
         kind == "SPECIAL_TARGET"
         and str(condition.get("unit") or "").strip() == "개월"
+        and (
+            condition_id.startswith("COND_CHILD_AGE_")
+            # Names must explicitly describe an age, not childcare service
+            # duration, benefit period, or another measurement in months.
+            or bool(re.search(
+                r"(?:자녀|영아|영유아|아이|아기)\s*(?:의\s*)?"
+                r"(?:월령|연령|나이)", name,
+            ))
+            or (not condition_id and not name)
+        )
     ):
         return "children"
 
@@ -123,20 +138,18 @@ def _condition(condition: dict, profile: dict) -> dict:
     field = _field(condition)
 
     if field == "children":
-        # 자녀 월령은 신청자의 age 필드와 혼용하지 않는다.
-        # MVP에서는 미입력 시 needs_check.
+        # 신청자 나이(age)와 자녀 월령(child_age_months)을 구분한다.
         raw = str(condition.get("value") or "").strip()
         operator = str(
             condition.get("operator") or ""
         ).strip().upper()
 
-        # LT / 24개월 미만만 자동 비교한다.
         match = re.fullmatch(
             r"(\d{1,3})\s*(?:개월)?", raw
         )
 
         if (
-            operator != "LT"
+            operator not in {"LT", "LTE"}
             or match is None
             or int(match.group(1)) <= 0
         ):
@@ -147,6 +160,7 @@ def _condition(condition: dict, profile: dict) -> dict:
             )
 
         limit = int(match.group(1))
+        comparison = "미만" if operator == "LT" else "이하"
         months = profile.get("child_age_months")
 
         if months is None:
@@ -154,7 +168,7 @@ def _condition(condition: dict, profile: dict) -> dict:
                 "children",
                 CHECK,
                 f"자녀 월령(개월 수)을 확인해야 합니다. "
-                f"기준: {limit}개월 미만.",
+                f"기준: {limit}개월 {comparison}.",
             )
 
         if type(months) is not int or months < 0:
@@ -164,16 +178,22 @@ def _condition(condition: dict, profile: dict) -> dict:
                 "유효한 자녀 월령을 확인할 수 없습니다.",
             )
 
-        status = OK if months < limit else NO
+        eligible = (
+            months < limit
+            if operator == "LT"
+            else months <= limit
+        )
+
+        status = OK if eligible else NO
 
         return _result(
             "children",
             status,
-            f"자녀 월령 {limit}개월 미만 기준에 "
+            f"자녀 월령 {limit}개월 {comparison} 기준에 "
             f"입력한 {months}개월은 "
             + (
                 "포함됩니다."
-                if status == OK
+                if eligible
                 else "포함되지 않습니다."
             ),
         )

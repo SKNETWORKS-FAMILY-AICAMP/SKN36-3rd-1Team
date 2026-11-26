@@ -122,6 +122,7 @@ def test_child_months_exclusive_upper_bound(months, expected):
     if months is not None:
         profile["child_age_months"] = months
     result = check_eligibility(profile, policy(conditions=[{
+        "condition_id": "COND_CHILD_AGE_UNDER_24M",
         "type": "SPECIAL_TARGET", "unit": "개월", "operator": "LT",
         "value": "24", "name": "24개월 미만 자녀",
     }]))
@@ -130,6 +131,7 @@ def test_child_months_exclusive_upper_bound(months, expected):
 
 def test_child_months_ambiguous_operator_does_not_auto_qualify():
     result = check_eligibility({"age": 30, "child_age_months": 23}, policy(conditions=[{
+        "condition_id": "COND_CHILD_AGE_0_24M",
         "type": "SPECIAL_TARGET", "unit": "개월", "operator": "BETWEEN",
         "value": "0~24", "name": "자녀 지원",
     }]))
@@ -138,6 +140,7 @@ def test_child_months_ambiguous_operator_does_not_auto_qualify():
 
 def test_child_months_between_does_not_guess_exclusive_bound_even_with_name():
     result = check_eligibility({"age": 30, "child_age_months": 24}, policy(conditions=[{
+        "condition_id": "COND_CHILD_AGE_0_24M",
         "type": "SPECIAL_TARGET", "unit": "개월", "operator": "BETWEEN",
         "value": "0~24", "name": "24개월 미만 자녀",
     }]))
@@ -156,6 +159,7 @@ def test_income_ask_user_does_not_reask_already_given_income():
 
 def test_child_months_explicitly_over_limit_is_not_automatically_invalid_input():
     result = check_eligibility({"age": 30, "child_age_months": 300}, policy(conditions=[{
+        "condition_id": "COND_CHILD_AGE_UNDER_24M",
         "type": "SPECIAL_TARGET", "unit": "개월", "operator": "LT",
         "value": "24", "name": "24개월 미만 자녀",
     }]))
@@ -189,3 +193,4 @@ def test_income_nonfinite_profile_is_not_treated_as_provided():
         "income_source_review": "needs_review", "income_followup": "ask_user",
     }))
     assert "추가로 확인" in matching(result, "소득 요건")[0]["reason"]
+
