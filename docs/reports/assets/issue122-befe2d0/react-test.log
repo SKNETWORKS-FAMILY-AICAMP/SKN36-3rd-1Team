@@ -3,7 +3,7 @@
 > vitest run
 
 
- RUN  v2.1.8 C:/Users/Playdata/.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/frontend
+ RUN  v2.1.8 <로컬 경로>/frontend
 
  ✓ src/mock/mockAsk.test.ts (13 tests) 206ms
  ✓ src/graph/relatedPolicies.test.ts (8 tests) 1421ms
