@@ -38,15 +38,15 @@
 ..................................... [ 98%]
 ...............sss..........sssssssss..........s...s [100%]
 ============================== warnings summary ===============================
-.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/tests/unit/test_build_restore_bundle_r3.py::BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction
-  C:\Users\Playdata\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'a'
+<로컬 경로>/tests/unit/test_build_restore_bundle_r3.py::BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction
+  <로컬 경로>\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'a'
     return self._open_to_write(zinfo, force_zip64=force_zip64)
 
-.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/tests/unit/test_hybrid_search.py: 30 warnings
+<로컬 경로>/tests/unit/test_hybrid_search.py: 30 warnings
   C:\dev\project\SKN36-3rd-1Team\.venv\Lib\site-packages\neo4j\_meta.py:213: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
     if asyncio.iscoroutinefunction(f):
 
-.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/tests/unit/test_r3_write_gates.py::Stage1PinTests::test_cli_apply_with_stage1_pins_stops_at_the_plan_check_before_docker_or_writes
+<로컬 경로>/tests/unit/test_r3_write_gates.py::Stage1PinTests::test_cli_apply_with_stage1_pins_stops_at_the_plan_check_before_docker_or_writes
   C:\dev\project\SKN36-3rd-1Team\.venv\Lib\site-packages\qdrant_client\qdrant_remote.py:130: UserWarning: Api key is used with an insecure connection.
     warnings.warn("Api key is used with an insecure connection.")
 
