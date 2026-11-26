@@ -36,6 +36,8 @@ from database import embedding as em  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
 from database import vector_index as vi  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 QDRANT_CLIENT_AVAILABLE = importlib.util.find_spec("qdrant_client") is not None
 TEST_COLLECTION = "exp_unittest_fake_v1"
@@ -177,6 +179,7 @@ class TestEmbeddingInputV2(unittest.TestCase):
         self.assertFalse(described["policy_name_omitted"])
 
 
+@legacy_dataset_only
 class TestEmbeddingInputV2RealChunks(unittest.TestCase):
     """실제 A/B1/B2 청크 전체에 v2 규칙을 적용했을 때의 불변 조건."""
 
@@ -341,6 +344,7 @@ class TestOllamaEmbedWithFakeHttp(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # 3) 정책 메타데이터 조인·point 생성 (실제 문서 5건 + 가짜 벡터)
 # ---------------------------------------------------------------------------
+@legacy_dataset_only
 class TestPointsFromRealChunks(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -547,6 +551,7 @@ class TestEnvLoading(unittest.TestCase):
 # 5) B1/B2 결과 불변
 # ---------------------------------------------------------------------------
 class TestChunkingUnchanged(unittest.TestCase):
+    @legacy_dataset_only
     def test_b1_b2_outputs_unchanged(self):
         documents = hd.load_documents()
         for strategy, expected in (("B1", B1_OUTPUT_SHA256), ("B2", B2_OUTPUT_SHA256)):
@@ -586,6 +591,7 @@ class TestQdrantMemoryMode(unittest.TestCase):
         self.assertTrue(report["id_set_unchanged"])
         self.assertFalse(report["duplicates_found"])
 
+    @legacy_dataset_only
     def test_search_returns_ids_score_and_original_text(self):
         self._index()
         # 가짜 임베딩은 같은 문자열이면 같은 벡터 → 적재한 임베딩 입력을 그대로 질문으로 쓰면 그 청크가 1위여야 한다.

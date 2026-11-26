@@ -1,0 +1,10 @@
+{% extends "policies/base.html" %}
+{% block title %}{{ title }} · SSOK{% endblock %}
+{% block content %}
+<section class="panel error-panel" role="alert">
+  <p class="error-code">{{ status }}</p>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  {% if react_base %}<a class="btn btn-p" href="{{ react_base }}#/">상담 화면으로 돌아가기</a>{% endif %}
+</section>
+{% endblock %}

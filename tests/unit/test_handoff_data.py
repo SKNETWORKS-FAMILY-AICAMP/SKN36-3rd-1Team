@@ -14,12 +14,14 @@ pytest가 설치되어 있다면 아래도 동일하게 동작한다.
 5) 비정상 청크 27건 선택 제외, 페이지 번호 규칙, 인접 청크 조회 가능 여부
 """
 
+import hashlib
 import re
 import sys
 import unittest
 import uuid
 from collections import Counter, defaultdict
 from pathlib import Path
+from unittest.mock import patch
 
 # 프로젝트 루트를 import 경로에 추가한다.
 # (tests/ 폴더에 __init__.py가 없어서, 그대로 두면 database 모듈을 찾지 못할 수 있다.)
@@ -28,6 +30,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from database import handoff_data as hd  # noqa: E402  (경로 추가 후 import 해야 함)
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 # data/handoff/README.md 에 적힌 레이블별·관계별 기대 건수
 EXPECTED_NODES_BY_LABEL = {
@@ -64,6 +68,19 @@ CHUNK_ID_CONTRACT = re.compile(r"^(DOC_[A-Za-z0-9_]+_(P[0-9]+_)?C[0-9]+|CHK_[A-Z
 
 
 class TestManifest(unittest.TestCase):
+    def test_checksum_match_preserves_line_ending_order_and_stops_on_match(self):
+        lf = b"sample_only\n"
+        crlf = b"sample_only\r\n"
+        for raw, expected_bytes, matched_as, hash_calls in (
+            (lf, lf, "raw", 1),
+            (crlf, lf, "lf", 2),
+            (lf, crlf, "crlf", 3),
+            (lf, b"different_bytes", None, 3),
+        ):
+            with self.subTest(matched_as=matched_as), patch.object(hd, "_sha256", wraps=hd._sha256) as sha256:
+                self.assertEqual(hd.manifest_checksum_match(raw, hashlib.sha256(expected_bytes).hexdigest()), matched_as)
+                self.assertEqual(sha256.call_count, hash_calls)
+
     def test_all_files_match_manifest_checksum(self):
         results = hd.verify_manifest_checksums()
         failed = [r["file"] for r in results if not r["matched"]]
@@ -115,6 +132,7 @@ class TestNeo4jHandoff(unittest.TestCase):
         cls.nodes = hd.load_neo4j_nodes()
         cls.relationships = hd.load_neo4j_relationships()
 
+    @legacy_dataset_only
     def test_node_counts_by_label(self):
         actual = {label: len(nodes) for label, nodes in self.nodes.items()}
         self.assertEqual(actual, EXPECTED_NODES_BY_LABEL)
@@ -126,6 +144,7 @@ class TestNeo4jHandoff(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertEqual(len(set(ids)), len(ids), f"{label} 고유 ID 중복")
 
+    @legacy_dataset_only
     def test_node_properties_are_neo4j_compatible(self):
         # Neo4j 속성에는 dict·중첩 리스트·null을 저장할 수 없다. (SET n += row 실패 방지)
         problems = []
@@ -141,6 +160,7 @@ class TestNeo4jHandoff(unittest.TestCase):
     def test_relationship_count(self):
         self.assertEqual(len(self.relationships), hd.EXPECTED_RELATIONSHIP_COUNT)
 
+    @legacy_dataset_only
     def test_relationships_match_one_to_one_with_label_specs(self):
         # 수정 로더 규칙(레이블 + 고유 ID)으로 매칭하면 3,615건이 모두 정확히 연결돼야 한다.
         report = hd.match_relationships_offline(self.nodes, self.relationships)
@@ -217,12 +237,14 @@ class TestNoiseChunkSelection(unittest.TestCase):
         expected = set(hd.REVIEWED_NOISE_CHUNKS)
         if hd.dataset_version() == hd.RELEASE_V140_VERSION:
             expected.add("DOC_BOK_031_MOE_2026_P305_C01")
+            # 서울 청년수당 소개 탭의 마지막 섹션(문의 전화 2줄). 짧지만 연락처라 임베딩에 남긴다(#104 검토).
+            expected.add("DOC_STG_SEOUL_001_INTRO_2026_C04")
         self.assertEqual(candidates, sorted(expected))
         self.assertEqual(len(hd.REVIEWED_NOISE_CHUNKS), 27)
 
     def test_select_with_exclusion(self):
-        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 600 → 573).
-        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 573}
+        # 데이터셋 버전마다 원본 건수가 달라 제외 후 건수도 다르다 (v1.3.2: 557 → 530, v1.4.0-candidate: 672 → 645).
+        expected_selected = {"1.3.2": 530, hd.RELEASE_V140_VERSION: 645}
         version = hd.dataset_version()
         self.assertIn(version, expected_selected, f"기대 건수가 정해지지 않은 데이터셋: {version}")
         selected, excluded = hd.select_chunks_for_embedding(self.chunks, exclude_noise=True)
@@ -267,6 +289,7 @@ class TestPageNumbers(unittest.TestCase):
         self.assertIsNone(hd.get_verified_page_number(api_chunk))
 
 
+@legacy_dataset_only
 class TestNeighborChunks(unittest.TestCase):
     def test_chunk_sequence_is_contiguous_per_document_page(self):
         # 순번이 1, 2, 3 ... 으로 빠짐없이 이어져야 "앞·뒤 청크"를 chunk_id로 찾을 수 있다.

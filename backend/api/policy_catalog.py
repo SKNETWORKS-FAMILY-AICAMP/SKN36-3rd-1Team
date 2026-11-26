@@ -27,6 +27,8 @@ class PolicyCatalog:
         return tuple(self.file_signature(self.package_dir / name) for name in ("manifest.json", *FILES))
 
     def _snapshot(self):
+        from database.handoff_data import manifest_checksum_match
+
         # 여러 요청이 동시에 와도 같은 파일을 중복 파싱하지 않는다. 실패한 갱신은 캐시하지 않는다.
         with self._lock:
             signature = self._current_signature()
@@ -39,8 +41,7 @@ class PolicyCatalog:
                 raw = (self.package_dir / name).read_bytes()
                 expected = manifest["files"][name]["sha256"]
                 # handoff_data.verify_manifest_checksums와 동일한 OS 줄바꿈 동등성 기준.
-                lf = raw.replace(b"\r\n", b"\n")
-                if expected not in {hashlib.sha256(candidate).hexdigest() for candidate in (raw, lf, lf.replace(b"\n", b"\r\n"))}:
+                if manifest_checksum_match(raw, expected) is None:
                     raise ValueError("목록 입력 파일의 manifest 해시 불일치")
                 tables[name] = [json.loads(line) for line in raw.decode("utf-8-sig").splitlines() if line.strip()]
             if self._current_signature() != signature:
@@ -86,8 +87,8 @@ class PolicyCatalog:
             return self._data
 
     def list(self, *, q="", region="", category="", status="all", sort="deadline", offset=0, limit=500):
+        today = datetime.now(KST).date()
         version, digest, policies, relations, details = self._snapshot()
-        today = datetime.now(KST).date().isoformat()
         items = []
         query = "".join(q.split()).casefold()
         for pid, node in policies.items():
@@ -100,8 +101,8 @@ class PolicyCatalog:
             if category and category not in relation["categories"]:
                 continue
             policy = {"graph": {"policy": node}}
-            reception = _reception_status(policy)
-            schedule = application_schedule(policy, reception)
+            reception = _reception_status(policy, evaluated_on=today)
+            schedule = application_schedule(policy, reception, evaluated_on=today)
             remaining = schedule["days_to_end"] if schedule else None
             ongoing = bool(schedule and schedule["is_ongoing"])
             if status == "soon" and not (reception == "open" and not ongoing and remaining is not None and 0 <= remaining <= 7):
@@ -123,6 +124,6 @@ class PolicyCatalog:
             return (rank, remaining if finite_open else 0, item.policy_name, item.policy_id) if sort == "deadline" else (item.policy_name, item.policy_id)
         items.sort(key=order)
         return PolicyListResponse(items=items[offset:offset + limit], total=len(items), offset=offset, limit=limit,
-            dataset_version=version, manifest_sha256=digest, evaluated_on=today,
+            dataset_version=version, manifest_sha256=digest, evaluated_on=today.isoformat(),
             regions=sorted({name for relation in relations.values() for name in relation["regions"]}),
             categories=sorted({name for relation in relations.values() for name in relation["categories"]}))

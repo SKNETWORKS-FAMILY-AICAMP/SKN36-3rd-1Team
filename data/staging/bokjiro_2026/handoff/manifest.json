@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-11-24T16:06:47+09:00",
+  "status": "handoff_only (후보 데이터·DB에 넣지 않음)",
+  "summary_file": "summary_F01_F12_v8_20261124.json",
+  "summary_sha256": "824d5b04709989d08b178ae0200da6adc717cd6f72be4a97181d7a0689b8581e",
+  "report_files": {
+    "bokjiro_sources_F01_revised_v5_20261124.md": "4286bbfcfa33499add05aec51a0b5ab04784244e549bf25a8003ef7bd3dfab79",
+    "bokjiro_sources_F02_revised_v14_20261124.md": "096a8847f9f655f14cff9f766d90b858f651472947f239c50b3a0d5e8ebe3998",
+    "bokjiro_sources_F03_revised_v8_20261122.md": "35350607d85b74ec45cf4d24d2e057fe5ae6d3b7f2bf51eee56ee5b0825a709e",
+    "bokjiro_sources_F04_revised_v10_20261124.md": "245c677f01eb8d303d7e87f708da89aee4df16efecda61e08d1a5b6a5e183dd3",
+    "bokjiro_sources_F05_revised_v9_20261123.md": "c70106b4dc8a2d810848adeaa65d8971379212f39165b72371adeb3d6e6fe8e7",
+    "bokjiro_sources_F06_revised_v8_20261122.md": "9a911f0f1cfbd079b84915d0b6ebed173f8bc1d87782e7a44c47f0ded361dd9d",
+    "bokjiro_sources_F07_revised_v10_20261124.md": "15015e6559cdf47afde179a56108e40d298f3347ee4317a3043952abb141e22d",
+    "bokjiro_sources_F08_revised_v10_20261124.md": "105511c6c37be9e6ff14a935d8aa445715011d73b3dc3865efb85bc11631fdea",
+    "bokjiro_sources_F09_revised_v11_20261124.md": "e338a36e0ec0333385a7fe6df4ef800d596a659330bc6f006ed3aa2067c92d64",
+    "bokjiro_sources_F10_revised_v9_20261123.md": "38468bea3bfe1f91a2eb6777fbc415a27d44600cb9e92de5e16dfce0026ca247",
+    "bokjiro_sources_F11_revised_v9_20261123.md": "dfc0b2e2c555747ad0c06d1d13d448e25c925459f342caff12ac9b45c0e95db2",
+    "bokjiro_sources_F12_revised_v8_20261122.md": "aa50081ee042738cd9da63b4b8bc7e60f5fdf25dca2436531a357352cb8af481"
+  },
+  "counts": {
+    "targets": 361,
+    "targets_all_rows_ok": 350,
+    "rows": 1300,
+    "rows_ok": 1284,
+    "name_overlap_targets": 7
+  }
+}

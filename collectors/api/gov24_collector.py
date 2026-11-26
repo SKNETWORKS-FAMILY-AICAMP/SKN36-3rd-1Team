@@ -292,7 +292,7 @@ def normalize_gov24_record(
         f"- 대상연령: {structured_conditions['연령조건']['대상연령_시작'] or '미확인'}세 ~ {structured_conditions['연령조건']['대상연령_종료'] or '미확인'}세\n"
         f"- 소득구간: " + ", ".join(k for k, v in structured_conditions['소득구간조건'].items() if v == '적용대상') if any(v == '적용대상' for v in structured_conditions['소득구간조건'].values()) else "- 소득구간: 미확인(공고문 참조)\n"
         f"- 가구·주거: " + ", ".join(k for k, v in structured_conditions['가구주거조건'].items() if v == '적용대상') if any(v == '적용대상' for v in structured_conditions['가구주거조건'].values()) else "- 가구·주거: 미확인(공고문 참조)",
-        f"[신청기한 및 신청방법]\n- 신청기한: {apply_period or '상시/별도공고'}\n- 신청방법: {apply_method or '-'}\n- 접수기관: {reception_org or '-'}",
+        f"[신청기한 및 신청방법]\n- 신청기한: {apply_period or '미확인'}\n- 신청방법: {apply_method or '-'}\n- 접수기관: {reception_org or '-'}",
         f"[구비서류]\n{req_docs}" if req_docs else "",
         f"[근거법령]\n{laws}" if laws else "",
         f"[문의처] {contact}" if contact else "",

@@ -146,7 +146,7 @@ def summarize(records):
 
 
 def run(output):
-    if hd.dataset_version() != "1.4.0-candidate":
+    if hd.dataset_version() != hd.RELEASE_V140_VERSION:
         raise ValueError("승인 v1.4.0 데이터셋을 import 전에 지정해야 합니다")
     if output.exists():
         raise ValueError("기존 평가 경로를 덮어쓰지 않습니다")
@@ -278,8 +278,8 @@ def run_model_ab(output, *, timeout_06b=180.0, timeout_4b=300.0, resume=False, e
     예비 Recall@5는 모든 필수 근거를 포함한 질문 비율이다. MRR@5는 모든
     필수 근거를 확보하는 순위의 역수 평균이며 정책 단위 Recall/MRR이 아니다.
     """
-    if hd.dataset_version() != "1.4.0-candidate":
-        raise ValueError("모델 A/B는 데이터셋 1.4.0-candidate 전용입니다")
+    if hd.dataset_version() != hd.RELEASE_V140_VERSION:
+        raise ValueError(f"모델 A/B는 데이터셋 {hd.RELEASE_V140_VERSION} 전용입니다")
     from database import ab_eval_state as state
     if any(not math.isfinite(t) or t <= 0 for t in (timeout_06b, timeout_4b)):
         raise ValueError("Timeouts must be finite positive seconds")
@@ -361,7 +361,7 @@ def run_model_ab(output, *, timeout_06b=180.0, timeout_4b=300.0, resume=False, e
                       "timing": "Sequential models, batch_size=1, no warmup, one call/question; cold start included; "
                                 "combined=embedding+search, excludes scoring/preflight; p95 nearest rank; successful samples persist. Resumes reuse original timings; not a new uninterrupted benchmark.",
                       "head": fi.git_state(), "generator_lf_sha256": lf_hash(Path(__file__)),
-                      "dataset": "1.4.0-candidate", "manifest_lf_sha256": fi.manifest_sha256(),
+                      "dataset": hd.RELEASE_V140_VERSION, "manifest_lf_sha256": fi.manifest_sha256(),
                       "audit": audit, "results": results}
             report["reproducibility"] = {"identity_sha256": state.digest(identity), "identity_file": "identity.json",
                                          "runtime_files": "runs/*.json", "resume": resume,

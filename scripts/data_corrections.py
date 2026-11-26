@@ -16,6 +16,14 @@ SOURCE_REVIEW_ATTRIBUTES = ("income", "household")
 SOURCE_REVIEW_FIELDS = tuple(f"{attribute}_{suffix}" for attribute in SOURCE_REVIEW_ATTRIBUTES
                              for suffix in ("source_review", "source_note", "followup", "check_point")) + (
     "application_start", "application_end", "application_status_note", "application_is_ongoing")
+# 공식 신청기간이 확인되지 않은 정책의 application_period 값. 화면에서는 "신청 일정 확인 필요"로 보여 준다(#107).
+UNVERIFIED_APPLICATION_PERIOD = "미확인"
+# 수집 코드가 신청기간 칸이 비었을 때 넣던 기본 문구. 공식 원문이 아니라서 "상시 신청"으로 읽히면 안 된다.
+COLLECTION_DEFAULT_PERIODS = frozenset({"상시/공고참조", "상시 또는 공고 확인", "상시/별도공고"})
+# 저장된 reception_status는 현재 접수 상태가 아니라 일정 유형이다. Checker·화면은 이 값을 읽지 않는다.
+STORED_RECEPTION_ALWAYS = "apply_always"
+STORED_RECEPTION_PERIOD = "apply_period"
+STORED_RECEPTION_UNKNOWN = "reception_unknown"
 
 
 def load_corrections() -> dict:
@@ -30,6 +38,38 @@ def omit_outdated_line(text: str, line: str) -> str:
         raise ValueError("교정 대상 문서에서 옛 안내 행을 한 번만 찾을 수 있어야 합니다")
     del lines[matches[0]]
     return "".join(lines)
+
+
+def rewrite_line(text: str, item: dict) -> str:
+    """검색용 본문의 한 행을 교정 기록대로 바꾼다(document_line_rewrites, #107).
+
+    정부24 본문의 '- 신청기한: …' 같은 행은 수집 코드가 붙인 칸 이름 + 원문 값이다.
+    칸 이름에 무엇의 기한인지 적거나, 지난 예고 문구만 빼는 용도로만 쓴다.
+    - kept_text: 원문에서 그대로 남겨야 하는 값. 바꾸기 전·후 행에 모두 있어야 한다.
+    - dropped_text: 빼는 원문 문구(선택). 바꾸기 전 행에만 있고, 바꾼 행에는 없어야 한다.
+    """
+    line, replacement = item["line"], item["replacement"]
+    if item["kept_text"] not in line or item["kept_text"] not in replacement:
+        raise ValueError(f"행 교정은 원문 값을 그대로 남겨야 합니다: {item['document_id']}")
+    dropped = item.get("dropped_text")
+    if dropped and (dropped not in line or dropped in replacement):
+        raise ValueError(f"행 교정에서 뺄 문구를 확인하세요: {item['document_id']}")
+    lines = text.splitlines(keepends=True)
+    matches = [index for index, current in enumerate(lines) if current.rstrip("\r\n") == line]
+    if len(matches) != 1:
+        raise ValueError(f"교정할 행을 한 번만 찾을 수 있어야 합니다: {item['document_id']}")
+    ending = lines[matches[0]][len(line):]
+    lines[matches[0]] = replacement + ending
+    return "".join(lines)
+
+
+def omit_held_lines(text: str, lines: list[str]) -> str:
+    """보류한 FAQ 행을 검색용 본문에서 뺀다. 행 사이 빈 줄은 하나만 남기고, 나머지 문장과 순서는 그대로 둔다."""
+    for line in lines:
+        text = omit_outdated_line(text, line)
+    while "\n\n\n" in text:
+        text = text.replace("\n\n\n", "\n\n")
+    return text.strip()
 
 
 def apply_policy_corrections(policies: list, corrections: dict) -> None:
@@ -57,6 +97,55 @@ def apply_policy_corrections(policies: list, corrections: dict) -> None:
         policy["life_stages"] = list(item["after"])
 
 
+# 실제 신청·예약 화면까지 들어가 본 단계. 신청 버튼이나 안내만 본 경우는 확인 완료로 올리지 않는다.
+VERIFIED_APPLICATION_STAGES = frozenset({"booking_screen", "application_step", "identity_check"})
+APPLICATION_STAGES = VERIFIED_APPLICATION_STAGES | {"apply_button_out_of_period"}
+
+
+def apply_application_url_corrections(policies: list, reviews: list, baseline_policies: list,
+                                      corrections: dict) -> list:
+    """원천 신청 필드 판정 뒤, 실제 화면을 열어 확인한 신청 주소 교정을 적용한다.
+
+    after가 있으면 그 서비스 전용 신청 경로를 직접 연 주소이고, None이면 신청 화면이 아니라서 비운다.
+    어디까지 봤는지는 verified_stage에 적고, 실제 신청·예약 단계까지 본 경우만 live_application_page_verified를 true로 둔다.
+    수정 전 값이 다르면 빌드를 멈춘다. 기존 정책의 변경 목록(변경 전후)은 교정 뒤 값으로 다시 만든다.
+    """
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    review_by_id = {row["policy_id"]: row for row in reviews}
+    items = corrections.get("application_url_corrections", [])
+    assert len({item["policy_id"] for item in items}) == len(items), "신청 주소 교정 대상 중복"
+    for item in items:
+        policy = by_id[item["policy_id"]]
+        assert policy.get("official_apply_url") == item["before"], f"신청 주소 교정 전 값 불일치: {item['policy_id']}"
+        stage = item.get("verified_stage")
+        if item["after"] is None:
+            assert stage is None, f"비운 신청 주소에 확인 단계가 있음: {item['policy_id']}"
+        else:
+            assert stage in APPLICATION_STAGES, f"신청 주소의 확인 단계가 없거나 알 수 없음: {item['policy_id']}"
+        policy["official_apply_url"] = item["after"]
+        review = review_by_id[item["policy_id"]]
+        review.update({
+            "official_apply_url": item["after"],
+            "reason": f"manual_review_{item['reason']}",
+            "live_application_page_verified": stage in VERIFIED_APPLICATION_STAGES,
+            "manual_review_stage": stage,
+            "manual_review_note": item["evidence"],
+            "manual_review_checked_at": item["checked_at"],
+        })
+    changes = []
+    for baseline in baseline_policies:
+        current = by_id[baseline["policy_id"]]
+        if baseline.get("official_apply_url") != current.get("official_apply_url"):
+            changes.append({
+                "policy_id": baseline["policy_id"],
+                "field": "official_apply_url",
+                "before": baseline.get("official_apply_url"),
+                "after": current.get("official_apply_url"),
+                "reason": review_by_id[baseline["policy_id"]]["reason"],
+            })
+    return changes
+
+
 def apply_source_review(policies: list, corrections: dict) -> None:
     """정책 노드에 소득·가구 항목별 원문 확인 결과를 남긴다. 값이 없는 속성은 만들지 않는다."""
     review = corrections["source_review"]
@@ -75,6 +164,16 @@ def apply_source_review(policies: list, corrections: dict) -> None:
     assert set(dates) <= known and set(notes) <= known, "신청 기간 교정 대상 정책 불일치"
     assert ongoing <= known, f"상시 접수 교정 대상 정책 불일치: {sorted(ongoing - known)}"
     assert set(dates) & set(notes) <= set(corrections["application_notes_with_dates"]), "날짜와 확인 메모는 허용된 정책만 함께 쓴다"
+    policies_by_id = {policy["policy_id"]: policy for policy in policies}
+    for entry in corrections.get("unverified_application_periods", []):
+        policy_id = entry["policy_id"]
+        policy = policies_by_id.get(policy_id)
+        if (policy is None or policy.get("application_period") != entry["before"]
+                or policy_id in dates or policy_id in ongoing or policy_id not in notes):
+            raise ValueError(f"미확인 신청기간 교정 전 값·근거 불일치: {policy_id}")
+        policy["application_period"] = "미확인"
+        for key in ("application_start", "application_end", "application_is_ongoing"):
+            policy.pop(key, None)
     for policy in policies:
         item = dates.get(policy["policy_id"], {})
         if "start" in item:
@@ -88,20 +187,59 @@ def apply_source_review(policies: list, corrections: dict) -> None:
             policy["application_is_ongoing"] = True
 
 
+def replace_default_application_periods(policies: list) -> list[str]:
+    """수집 기본 문구("상시/공고참조" 등)를 "미확인"으로 바꾸고 바꾼 정책 ID를 돌려준다.
+
+    공식 일정으로 교정한 정책은 이미 다른 값이라 그대로 둔다. 기본 문구인데 날짜나 상시 값이 있으면
+    어느 쪽이 맞는지 알 수 없으므로 빌드를 멈춘다. 종료일 없이 "~ 상시"로 끝나는 값도 상시 근거가 없으면 멈춘다.
+    """
+    replaced = []
+    for policy in policies:
+        period = (policy.get("application_period") or "").strip()
+        if period in COLLECTION_DEFAULT_PERIODS:
+            if any(policy.get(key) for key in ("application_start", "application_end", "application_is_ongoing")):
+                raise ValueError(f"기본 신청기간 문구와 날짜·상시 값이 함께 있음: {policy['policy_id']}")
+            policy["application_period"] = UNVERIFIED_APPLICATION_PERIOD
+            replaced.append(policy["policy_id"])
+        elif period.endswith("~ 상시") and policy.get("application_is_ongoing") is not True:
+            raise ValueError(f"상시 근거 없이 '~ 상시'로 끝나는 신청기간: {policy['policy_id']}")
+    return replaced
+
+
+def check_stored_reception_status(policies: list) -> None:
+    """저장된 reception_status가 일정 값(상시·날짜)과 맞는지 확인한다. 맞지 않으면 빌드를 멈춘다."""
+    for policy in policies:
+        if "reception_status" not in policy:
+            continue
+        if policy.get("application_is_ongoing") is True:
+            expected = STORED_RECEPTION_ALWAYS
+        elif policy.get("application_start") or policy.get("application_end"):
+            expected = STORED_RECEPTION_PERIOD
+        else:
+            expected = STORED_RECEPTION_UNKNOWN
+        if policy["reception_status"] != expected:
+            raise ValueError(
+                f"저장 reception_status 불일치: {policy['policy_id']} {policy['reception_status']} (기대 {expected})")
+
+
 def apply_taxonomy_to_chunks(chunks: list, policies: list, corrections: dict) -> int:
     """청크의 분야를 정책과 맞추고, 지정 정책의 life_stages를 정책의 표준 생애단계로 맞춘다. 본문은 그대로다."""
     by_id = {policy["policy_id"]: policy for policy in policies}
     category_policies = {item["policy_id"] for item in corrections["category_corrections"]}
     align = set(corrections["chunk_life_stage_alignment_policies"])
+    # 정책명을 교정한 정책은 청크의 policy_name도 맞춘다. 임베딩 입력의 정책명 줄이 청크 메타데이터에서 오기 때문이다.
+    align_names = set(corrections.get("chunk_policy_name_alignment_policies", []))
     changed = 0
     for chunk in chunks:
         policy = by_id[chunk["policy_id"]]
-        before = (chunk["category"], chunk["life_stages"])
+        before = (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
         if chunk["policy_id"] in category_policies:
             chunk["category"] = policy["category"]
         if chunk["policy_id"] in align:
             chunk["life_stages"] = list(policy["life_stages"])
-        changed += before != (chunk["category"], chunk["life_stages"])
+        if chunk["policy_id"] in align_names:
+            chunk["policy_name"] = policy["policy_name"]
+        changed += before != (chunk["category"], chunk["life_stages"], chunk.get("policy_name"))
     return changed
 
 

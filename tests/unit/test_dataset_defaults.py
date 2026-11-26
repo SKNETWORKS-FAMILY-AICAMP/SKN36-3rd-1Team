@@ -23,7 +23,8 @@ from database.neo4j import load_graph as lg
 """ + statement + """
 print(json.dumps({'version':hd.dataset_version(),'release':hd.IS_RELEASE_PACKAGE,
  'path':str(hd.HANDOFF_DIR),'profile':hs.default_profile(),'collection':hs.resolve_search_settings()['collection'],
- 'nodes':hd.EXPECTED_NODE_COUNT,'flags':dqf.load_flags()['status'],'configs':fi.available_configs()}))
+ 'nodes':hd.EXPECTED_NODE_COUNT,'flags':dqf.load_flags()['status'],'flags_file':dqf.load_flags()['file'],
+ 'configs':fi.available_configs()}))
 """
         return subprocess.run([sys.executable, "-B", "-X", "utf8", "-c", code],
                               cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
@@ -40,8 +41,11 @@ print(json.dumps({'version':hd.dataset_version(),'release':hd.IS_RELEASE_PACKAGE
         self.assertEqual((result["profile"], result["collection"]),
                          ("b2_06b_v140", "exp_b2_qwen3emb06b_v140_v1"))
         self.assertTrue(result["release"])
-        self.assertEqual(result["nodes"], 1126)
-        self.assertEqual(result["flags"], "not_applicable")
+        self.assertEqual(result["nodes"], 1147)
+        # Issue #102: 기본 릴리스는 v1.4.0 전용 목록(neo4j_semantic_flags_v1_4_0.json)을 적용한다 (레거시 목록 아님).
+        # 목록 파일을 만든 뒤(write_flags) 실행해야 한다. 파일이 없으면 "missing"으로 실패한다.
+        self.assertEqual(result["flags"], "applied")
+        self.assertEqual(result["flags_file"], "neo4j_semantic_flags_v1_4_0.json")
         self.assertEqual(set(result["configs"]), {"A_B2_V140", "B_B3_V140", "A_B2_4B_V140"})
 
     def test_blank_uses_approved_release(self):
@@ -52,6 +56,7 @@ print(json.dumps({'version':hd.dataset_version(),'release':hd.IS_RELEASE_PACKAGE
         self.assertEqual((result["version"], result["nodes"], result["profile"]),
                          ("1.3.2", 1034, "b2_06b_baseline"))
         self.assertEqual(result["flags"], "applied")
+        self.assertEqual(result["flags_file"], "neo4j_semantic_flags_v1_3_2.json")
         self.assertFalse(result["release"])
 
     def test_explicit_absolute_path_has_priority(self):

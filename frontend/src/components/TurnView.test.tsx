@@ -2,11 +2,11 @@ import { kstDay } from '../lib/applicationSchedule';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import type { AskResponse, ConditionResult } from '../api/types';
-import { TurnView } from './TurnView';
+import { PolicyCard, TurnView } from './TurnView';
 import { mockAsk } from '../mock/mockAsk';
 import fromChecker from './__fixtures__/policyChecksFromChecker.json';
 
-it('shows one prompt per missing field before the answer and keeps suggested questions below', () => {
+it('shows one prompt per missing field after the answer and keeps suggested questions below', () => {
   const age = { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' } as const;
   const response: AskResponse = {
     status: 'answered', answer: '가상 본문', citations: [], policy_checks: [], checked_at: null, is_sample: false,
@@ -25,7 +25,7 @@ it('shows one prompt per missing field before the answer and keeps suggested que
   expect(html.match(/만 나이를 알려 주세요\./g)).toHaveLength(1);
   for (const prompt of [age.text, '거주 지역을 알려 주세요.', '연 소득을 알려 주세요.']) {
     expect(html).toContain(prompt);
-    expect(html.indexOf(prompt)).toBeLessThan(html.indexOf(response.answer));
+    expect(html.indexOf(prompt)).toBeGreaterThan(html.indexOf(response.answer));
   }
   expect(html.indexOf('신청 방법은 무엇인가요?')).toBeGreaterThan(html.indexOf(response.answer));
 });
@@ -360,4 +360,35 @@ it('shows "이 정책 물어보기" first in the card footer only in live mode, 
   expect(footer(live(false, [fromChecker.POL_GOV_002_70 as AskResponse['policy_checks'][number]]))).toContain('조건 하나하나의 충족');
   // 예시 모드에서는 가상 정책이라 질문 버튼을 숨긴다.
   expect(live(true, [unjudgedPolicy])).not.toContain('이 정책 물어보기');
+});
+
+it('둘러보기 카드는 상태 미확인 문구를 한 번만 쓰고, 주 버튼과 보조 버튼 순서를 지킨다', () => {
+  const p: AskResponse['policy_checks'][number] = {
+    policy_id: 'sample_only_unknown', policy_name: '가상 정책 (sample_only)', agency: '가상 기관', reception_status: 'unknown',
+    application_schedule: null, source_url: 'https://example.org/notice', official_apply_url: null, conditions: [],
+  };
+  const html = renderToStaticMarkup(<PolicyCard p={p} group="g" period="일정 확인 필요" stages={[]} sample={false}
+    onDemoApply={() => {}} onAskPolicy={() => {}} askAsPrimary />);
+  // 제목 옆 배지에만 '일정 확인 필요'가 있고, 신청 기간 행은 확인할 곳만 안내한다
+  expect(html.match(/일정 확인 필요/g)).toHaveLength(1);
+  expect(html).toContain('badge-quiet');
+  expect(html).toContain('공식 원문에서 확인해 주세요.');
+  // 둘러보기에서는 '내 조건으로 확인하기'가 주 버튼이고 '이 정책 물어보기'는 중복으로 두지 않는다
+  expect(html).toContain('내 조건으로 확인하기');
+  expect(html).not.toContain('이 정책 물어보기');
+  expect(html.indexOf('관계 지도')).toBeLessThan(html.indexOf('원문 보기'));
+});
+
+it('답변 본문이 없는 info 응답에서도 빠진 정보 요청을 모두 보여 준다', () => {
+  const response: AskResponse = {
+    status: 'info', answer: '', citations: [], policy_checks: [], checked_at: null, is_sample: false,
+    follow_up_questions: [
+      { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' },
+      { kind: 'ask_info', field: 'region', text: '거주 지역을 알려 주세요.' },
+      { kind: 'ask_info', field: 'income', text: '연 소득을 알려 주세요.' },
+    ],
+  };
+  const html = renderToStaticMarkup(<TurnView turn={{ id: 1, kind: 'qa', question: '가상 질문', tags: [], state: 'done', response }}
+    onFollowUp={() => {}} onRetry={() => {}} onDemoApply={() => {}} sampleMode={false} />);
+  for (const prompt of ['만 나이를 알려 주세요.', '거주 지역을 알려 주세요.', '연 소득을 알려 주세요.']) expect(html).toContain(prompt);
 });

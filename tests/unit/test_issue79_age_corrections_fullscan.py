@@ -246,16 +246,12 @@ def test_issue79_age_replacements(replacement):
     assert (policy_id, old_id) not in required_conditions
 
 
-def test_issue79_pending_review_remains_separate():
-    """#90: Keep the Incheon age evidence pending until verified."""
-
-    # TODO(#90):
-    # 공식 사업안내서가 Document로 추가되고 근거 관계의
-    # review_status가 해제되면 이 테스트도 함께 갱신한다.
-    # 현재는 검수 대기 상태가 실수로 해제되지 않았는지 확인한다.
+def test_issue79_incheon_age_evidence_verified():
+    """#90: Incheon age evidence is verified by the 2026 official notice."""
 
     policy_id = "POL_STG_ICN_001"
     condition_id = "COND_AGE_19_39"
+    notice_id = "DOC_STG_ICN_001_NOTICE_2026"
 
     matches = [
         row
@@ -269,7 +265,7 @@ def test_issue79_pending_review_remains_separate():
 
     assert len(matches) == 2
 
-    assert {
-        row.get("review_status")
-        for row in matches
-    } == {"needs_review"}
+    # 정책 직접 관계와 루트 그룹 관계 모두 공식 안내문으로 검수 완료됐는지 확인한다.
+    for row in matches:
+        assert row.get("review_status") == "verified", row
+        assert row.get("evidence_document_id") == notice_id, row

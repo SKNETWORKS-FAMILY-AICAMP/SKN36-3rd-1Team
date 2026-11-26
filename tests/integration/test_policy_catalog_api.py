@@ -121,6 +121,26 @@ def test_new_day_recalculates_schedule_without_reparsing(package):
         assert result.evaluated_on == "2026-11-26"
 
 
+def test_catalog_uses_one_evaluation_day_across_midnight(package):
+    before_midnight = datetime(2026, 11, 25, 23, 59, 59, tzinfo=KST)
+    after_midnight = datetime(2026, 11, 26, tzinfo=KST)
+    with patch("backend.api.policy_catalog.datetime", wraps=datetime) as catalog_clock, patch(
+        "backend.eligibility.checker.datetime", wraps=datetime
+    ) as checker_clock:
+        catalog_clock.now.side_effect = [before_midnight, after_midnight]
+        checker_clock.now.return_value = after_midnight
+        result = PolicyCatalog(package).list(status="soon")
+
+    catalog_clock.now.assert_called_once_with(KST)
+    checker_clock.now.assert_not_called()
+    assert result.evaluated_on == "2026-11-25"
+    assert [item.policy_id for item in result.items] == ["POL_A", "POL_B"]
+    first = result.items[0]
+    assert first.reception_status == "open"
+    assert first.application_schedule.evaluated_on == result.evaluated_on
+    assert first.application_schedule.days_to_end == 0
+
+
 def test_concurrent_first_requests_share_one_file_load(package):
     from concurrent.futures import ThreadPoolExecutor
     catalog = PolicyCatalog(package)

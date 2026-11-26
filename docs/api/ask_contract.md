@@ -1,7 +1,8 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.5 · 2026-11-22 (v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.6 · 2026-11-26 (v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.6 변경(2026-11-26 — #76 공식 자격기준 연결, 지인):** `policy_checks[].official_requirements`의 채우는 규칙만 정했다(§8.3, 문서 끝 「#76 공식 자격기준」 절). 필드 구조 `{label, value, document_id, chunk_id}`, Checker 판정, 다른 필드는 바꾸지 않는다. 검수 기록이 있으면 그것을 우선하고, 없으면 채택 근거에서 원문이 항목명을 붙인 기준만 원문 그대로 담는다. 확인 가능한 기준이 없으면 `null`이다.  
 > **v1.5 변경(2026-11-22 — #107 목록·신청 정보 연결, 강민지, PR #109 팀 리뷰 대상):** 읽기 전용 `GET /api/policies` 추가(§8.1·§9), 요청 `selected_policy_id` 추가(§3.3·§8.2), 응답 `policy_checks[]`에 `application_schedule`·`required_documents`·`requirement_excerpts` 선택 필드 추가(§8.3). 모두 선택 필드라 기존 요청·응답과 호환된다. `official_requirements`·`exclusion_reasons`는 v1.4 계약 그대로(#76-A·#78이 채움). 세부 규칙은 문서 끝 「#107 목록·신청 정보 연결」 절에 둔다.
 > **v1.4 변경(2026-11-17 — #77 완료 기준 마무리, 강민지):** `exclusion_reasons`·`official_requirements` 선택 필드를 §8.3에 기록(자리만 예약, 둘 다 항상 `null`) — #77에서 세 기능(제외 정보·공식 요건·문의처)을 하나의 계약으로 같이 설계하기로 한 것 중 남아 있던 두 자리를 채웠다. 값을 채우는 구현은 각각 [#78](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/78)·[#76-A](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/76)가 한다. `backend/api/schemas.py`의 `ExclusionReason`·`OfficialRequirement`, `frontend/src/api/types.ts`의 같은 이름 타입이 이 정의를 따른다.  
 > **v1.3 변경(2026-11-17 — #77 추가 보완, 강민지):** `Contact`에 `document_id`·`chunk_id`·`source_url` 추가(§8.3) — 같은 정책의 **채택 청크 전체**(없으면 검색된 인용 가능한 미채택 후보)에서 문의처를 모으되, 어느 청크·출처에서 나왔는지 문의처 항목마다 추적할 수 있게 했다. 기관명·번호가 같은 항목은 첫 등장만 남기고, 같은 기관의 다른 번호는 유지한다.  
@@ -504,10 +505,10 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `official_apply_url`: 실제 `graph.policy.official_apply_url`에 **유효한 신청 URL**이 있을 때만. 공고 URL을 임의로 복사하지 않는다. 없으면 `null`.
 - `contacts`(선택, v1.2 추가·v1.3 필드 보완): 해당 정책의 **채택 청크 전체**(`contexts`에 선택된 이 정책의 모든 청크)에서 `[문의처]` 블록을 모으고, 그중 유효한 문의처가 하나도 없을 때만 같은 정책의 **인용 가능하지만 채택되지 않은 후보**로 보완한다. `{agency, phone, document_id, chunk_id, source_url}` 목록이며, 원문에 없으면 `null`(빈 배열 아님). 기관명·전화번호가 모두 같은 항목은 첫 등장 순서로 한 번만 남기고, 같은 기관이라도 전화번호가 다르면 둘 다 유지한다. `document_id`·`chunk_id`·`source_url`은 그 문의처가 실제로 나온 청크를 가리키며, `source_url`이 유효한 http(s) 주소가 아니면 `null`이다. `phone`은 원문 숫자·구분자 그대로이며, 번호 뒤에 설명이 더 있으면(예: "각 기관 120 센터") 맥락을 잃지 않도록 구절 전체를 담을 수 있다 — 항상 전화번호 단독 형식은 아니다. 프론트에서 그대로 노출할 때 이 점을 감안한다.
 - `exclusion_reasons`(선택, v1.4 자리 예약 — #78이 채운다): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고, `reason`은 "75세 이상이라 제외 대상입니다" 같은 구체적 문구다. #78에서 Checker의 제외 사유 생성 로직은 구현되었지만, Pipeline·API 응답 연결은 후속 작업이다. 연동 전까지 최종 API 응답에서 이 필드는 `null`이며, Checker의 확정 제외 사유는 데이터 품질 보류와 개별·종합 판정을 존중한다. #107의 원문 블록 발췌는 조건 트리 기반 제외 사유 생성과 구분한다.
-- `official_requirements`(선택, v1.4 자리 예약 — #76-A가 채운다): 정책이 요구하는 공식 자격 기준(값·단위·연도)과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다(#76 참고). `document_id`·`chunk_id`는 그 기준이 실제로 나온 근거를 가리킨다. #76-A 구현 전에는 `null`을 유지한다. 아래 #107 추가 계약의 명시적 원문 블록 발췌와 조건 트리 기반 구조화 구현은 구분한다.
+- `official_requirements`(선택, v1.4 자리 예약 · v1.6 채움 규칙 — #76): 정책이 요구하는 공식 자격 기준과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다. `document_id`·`chunk_id`는 그 기준이 실제로 나온 같은 정책의 채택 근거를 가리킨다. 검수 기록이 있으면 우선 쓰고, 없으면 채택 근거에서 명확한 항목만 제한적으로 원문 그대로 담는다. 자동 추출한 항목은 검수 완료 기준이 아니다. 확인 가능한 기준이 없으면 `null`이며, `null`은 '조건 없음'이 아니라 '확인 가능한 기준이 없음'이다. 사용자의 충족 여부는 `conditions`(Checker)만 나타낸다. 세부 규칙은 문서 끝 「#76 공식 자격기준」 절.
 - `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」).
 - `required_documents`(선택, v1.5): 원문 `[구비서류]`·`[제출서류]` 블록 발췌 `{text, document_id, chunk_id, source_url}` 목록. 완전한 서류 목록을 보증하지 않는다. 없으면 `null`.
-- `requirement_excerpts`(선택, v1.5): 원문 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]` 블록 발췌 `{label, text, document_id, chunk_id, source_url}` 목록. 검수된 공식 기준(`official_requirements`)이 아니며 값·단위·연도를 환산하지 않는다. 없으면 `null`.
+- `requirement_excerpts`(선택, v1.5): 원문 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]` 블록 발췌 `{label, text, document_id, chunk_id, source_url}` 목록. 항목 단위 공식 기준(`official_requirements`)이 아니며 값·단위·연도를 환산하지 않는다. 없으면 `null`.
 - 선택 정책 지역 보류(v1.5): `selected_policy_id` 요청에서 정책의 대상 지역(`graph.regions`)에 입력 지역도 전국도 없으면, §4.3 Pipeline 방어 규칙대로 처리한다. Checker의 `region` 행이 `eligible`이면 `needs_check`로 내리고 기존 사유 뒤에 지역 불일치 사유를 덧붙인다. `region` 행이 없거나 `needs_check`뿐이면 그 사유는 바꾸지 않고 `{"field": "region", "status": "needs_check"}` 행(대상 지역·입력 지역을 적은 사유)을 따로 앞에 둔다. `ineligible` 행이 있으면 그대로 둔다. 종합(`eligibility`) 행이 `eligible`이면 `needs_check`로 내리고 사유를 덧붙인다. 불충족으로 단정하지 않는다.
 - `checked_at`: **공식 원문 재확인 시간**을 검증 가능할 때만 ISO 8601 문자열. 데이터 수집시각/오늘 날짜를 임의로 넣지 않는다. MVP 기본은 `null`.
 - `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`).
@@ -645,7 +646,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 - 설정된 `LIFEPOLICY_DATASET_DIR` 릴리스 파일에서 읽는다. 목록 조회는 DB 검색·임베딩·LLM을 호출하지 않는다. 기존 서버의 검색 세션 수명은 유지한다.
 - 응답: `items`, 필터 후 전체 `total`, `offset`, `limit`, `dataset_version`, manifest 원본 바이트의 `manifest_sha256`, KST `evaluated_on`, `source_kind=release_files`, 전체 지역·분야 선택지 `regions/categories`.
-- item: `policy_id/policy_name/agency/regions/categories/source_url/official_apply_url/reception_status/application_schedule/required_documents/requirement_excerpts`. 개인 `conditions`·자격 점수와 검수된 공식 기준(`official_requirements`, #76)은 없다.
+- item: `policy_id/policy_name/agency/regions/categories/source_url/official_apply_url/reception_status/application_schedule/required_documents/requirement_excerpts`. 개인 `conditions`·자격 점수와 공식 기준(`official_requirements`, #76)은 없다.
 - 파일 버전은 검색 DB의 적재 버전을 증명하지 않는다. DB 최신 여부는 별도 검증한다.
 - 파일·ID·참조·manifest 해시가 잘못됐으면 503 `POLICY_CATALOG_UNAVAILABLE`. 이전 캐시를 최신 결과로 대신 반환하지 않는다. 해시 비교의 줄바꿈 동등성은 handoff_data와 동일(raw/LF/CRLF).
 - 분류·문자열 필터와 정렬은 페이지 분할 전에 적용한다. 지역은 명시된 관계의 정확한 이름으로 필터한다(전국 자동 포함·추론 없음).
@@ -667,7 +668,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 `requirement_excerpts`: 선택 목록 또는 null. 각 항목은 `{label, text, document_id, chunk_id, source_url}`. 원문 `[지원대상]`, `[선정기준]`, `[지원대상 및 선정기준]` 블록만 그대로 발췌한다. 연도·단위·값을 환산하거나 검수 완료 상태로 승격하지 않는다. 같은 문서·본문 중복만 제거한다.
 
-`official_requirements`는 이 작업에서 채우지 않는다. 반석의 값·단위·연도·출처 검수 뒤 #76-A가 채우는 기존 계약 그대로이며, 그 전까지 `null`이다. 화면은 `official_requirements`가 있으면 그것을, 없으면 `requirement_excerpts`를 같은 '공식 자격기준' 자리에 '원문 발췌'로 표시한다.
+`official_requirements`는 이 작업(#107)에서 채우지 않는다. 채우는 규칙은 아래 「#76 공식 자격기준」 절을 따른다. 화면은 `official_requirements`가 있으면 그것을, 없으면 `requirement_excerpts`를 같은 '공식 자격기준' 자리에 '원문 발췌'로 표시한다.
 
 상담은 실제 채택 청크에서만 발췌하며, 목록은 해당 정책의 같은 릴리스 청크에서만 발췌한다. 목록 정보가 곧 답변 인용이나 개인 판정 근거로 자동 채택되는 것은 아니다. 필드 생략/null은 이전 응답과 호환된다. source_url이 없으면 동일 document_id의 citation만 연결하며 카드 대표 URL로 대체하지 않는다.
 
@@ -675,3 +676,23 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 `VITE_POLICY_API_URL`이 있으면 전체 URL을 사용한다. 없고 VITE_ASK_API_URL이 있으면 같은 서버의 `/api/policies`를 사용한다. 둘 다 없으면 배포 스냅샷 탐색으로 표시하고 전체 일정 연결 상태로 과장하지 않는다.
 목록은 최초·KST 날짜 변경·탭 복귀 시 갱신한다. 필터·정렬·저장은 이미 받은 목록을 사용한다. 목록 실패·버전 변경·미확인 일정에서는 과거 마감 임박 안내를 숨긴다. 관심 정책에는 ID·이름·원문 링크만 저장한다.
+
+## #76 공식 자격기준 (v1.6)
+
+`policy_checks[].official_requirements`의 채우는 규칙이다. 필드 구조·Checker 판정·다른 필드는 바꾸지 않는다. 구현: `backend/rag/official_requirements.py`.
+
+- 근거 범위: 이번 응답에서 채택된 **같은 정책**의 청크만 쓴다. 다른 정책의 문서·청크, 채택되지 않은 후보는 쓰지 않는다. 추가 검색·LLM 호출은 없다.
+- 우선순위: 값·단위·연도·출처를 검수한 기록이 있고 그 값이 채택 근거 원문에 그대로 있으면 그 기록을 먼저 쓴다. 같은 `label`에는 검수 값만 둔다. 검수 기록의 저장 위치·작성 절차는 미확정이며, 기록이 없으면 다음 규칙만 적용된다.
+- 원문 항목 발췌: 검수 기록이 없으면 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]`·`[지원대상 상세]`·`[추가 신청자격조건]` 블록에서 원문이 직접 항목명을 붙인 줄(`항목: 값`, `(항목) 값`)만 담는다. 항목명은 연령·소득·거주·가구·취업·혼인·학력·대상 계열로 제한한다. `label`은 원문 항목명, `value`는 원문 값 그대로다. 항목명 없이 바로 이어지는 줄(예: `※ 단, … 중복수혜 불가`)은 그 항목의 단서이므로 다음 항목명 줄 전까지 `value`에 이어 담는다(원문 줄바꿈·들여쓰기만 공백 하나로 정리). 문장 속 나이·금액을 추측해 뽑지 않는다.
+- 자동 추출 항목은 **검수 완료 기준이 아니다.** API·화면은 이를 '검수된 기준'으로 표현하지 않는다. 응답에는 검수 여부를 구분하는 필드가 없으므로, 화면은 원문 항목 발췌임을 함께 안내한다.
+- 담지 않는 것:
+  - 지원내용·신청기간·신청방법·구비서류·근거법령·참여 제한 블록. 지원 금액을 소득 기준으로, 신청기간을 자격으로 옮기지 않는다. `상시`·`미확인` 일정을 자격으로 옮기지 않는다.
+  - 우대·가점·우선·제외·신청기간 문구가 섞인 값, 뒤 줄을 가리키는 값("아래 모든 조건…", "다음에 해당하는 경우…"), 청크 끝에서 잘렸을 수 있는 항목. 단서 줄까지 이은 값 전체에 적용하고, 걸리면 앞줄만 남기지 않고 항목 전체를 뺀다.
+  - 이용료·본인부담 구간 문구(`이용료`·`본인부담`·`자부담`·`무료`·`감면`·`할인`)가 섞인 값. 예: "기준중위소득 120% 이하 무료, 소득 초과 가정은 이용료의 40% 본인부담"은 초과해도 이용할 수 있으므로 신청 자격 소득기준이 아니다(사업명 `차상위본인부담`은 해당 없음).
+  - 수집기가 만든 문장과 기본값: 온통청년 `[지원대상 및 자격요건]`, 정부24 `[구조화 지원조건 요약]`, `제한없음`·`무관`·`미상`·`0~0세`·`0원 ~ 0원`·`(제한여부: …)`
+- `null`: 확인 가능한 기준이 없으면 `null`(빈 배열 아님)이다. `null`은 '조건 없음'·'제한 없음'·`false`가 아니라 '이 응답의 근거로 확인 가능한 기준이 없음'이다. 화면은 기존대로 `requirement_excerpts`를 같은 자리에 '원문 발췌'로 표시한다.
+- 데이터 품질 경고: 원문 자체의 표기 오류(`SOURCE_AGE_ERROR_MARK`)가 있으면 그 항목(연령)은 검수 기록이 있어도 담지 않는다. 그래프·Checker 쪽 경고(자동 판정 보류)는 원문 기준이 없다는 뜻이 아니므로 원문 항목 발췌를 막지 않는다.
+- 출처 정합성: 검색 계층의 `evidence_document_check`가 `MISMATCH`인 문서(그래프상 그 정책의 근거 문서가 아님)의 청크는 검수·발췌 모두 쓰지 않는다. `NOT_TESTED`(그래프 없음)는 빼지 않는다.
+- 검수 기록 대조: 값은 숫자 경계까지 맞아야 한다(원문 `150만원`에 검수 값 `50만원`은 불일치). 형식이 잘못된 기록(예: `checks.value`가 배열)은 오류 없이 그 기록만 건너뛴다.
+- 개인 판정과 분리: `official_requirements`는 Generator 입력에 넣지 않고 생성 뒤에 붙인다. 사용자의 충족 여부는 `conditions`·`reception_status`(Checker)로만 나타내며, 공식 기준을 찾았다고 판정을 바꾸지 않는다.
+- 검증 필요 예외(데이터 동결, 데이터는 수정하지 않음): `SOURCE_AGE_ERROR_MARK`가 붙은 `POL_YC_029`·`POL_YC_033`·`POL_YC_043`은 `[추가 신청자격조건]`에 연령 문구가 있지만 위 규칙대로 연령 항목을 담지 않는다. 경고의 원인이 수집기 템플릿의 `0~0세` 표기인지, 그 문구가 공식 원문인지 데이터 담당 확인이 필요하다.

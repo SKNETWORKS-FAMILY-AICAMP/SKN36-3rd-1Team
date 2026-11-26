@@ -22,6 +22,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from database import full_index as fi  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 SMALL_DOCUMENTS = ("DOC_NHUF_003", "DOC_YC_003", "DOC_GOV_048")
 
@@ -37,6 +39,7 @@ def fake_embedder(texts):
     return [[((len(text) + index) % 7 + 1) / 10.0 for index in range(fi.EMBEDDING_DIM)] for text in texts]
 
 
+@legacy_dataset_only
 class TestConfigs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -91,6 +94,7 @@ class TestConfigs(unittest.TestCase):
                 fi.get_config("X_PROTECTED")
 
 
+@legacy_dataset_only
 class TestWriteSafety(unittest.TestCase):
     def setUp(self):
         self.client = store.get_client(location=":memory:")
@@ -125,6 +129,25 @@ class TestWriteSafety(unittest.TestCase):
         self.assertEqual(again["written"], 0)
         self.assertEqual(store.count_points(self.client, self.collection), len(self.chunks))
 
+    def test_verify_full_index_checks_the_injected_collection(self):
+        """collection 인자(#111 P1-3): 기본은 구성의 정식 이름, 주입하면 그 컬렉션만 같은 기준으로 검증한다."""
+        self._execute(confirm_write=True)
+        default = fi.verify_full_index("B_B3", client=self.client, chunks=self.chunks, documents=self.documents)
+        explicit = fi.verify_full_index("B_B3", client=self.client, chunks=self.chunks, documents=self.documents,
+                                        collection=self.collection)
+        self.assertTrue(default["passed"] and explicit["passed"], (default, explicit))
+        with self.assertRaisesRegex(ValueError, "not found"):     # 주입한 이름만 본다 (정식 이름으로 돌아가지 않음)
+            fi.verify_full_index("B_B3", client=self.client, chunks=self.chunks, documents=self.documents,
+                                 collection="exp_sample_only_absent__tmp_" + "0" * 32)
+        partial = "exp_sample_only_partial__tmp_" + "1" * 32       # 일부만 적재한 다른 컬렉션 → 같은 기준으로 불합격
+        with mock.patch.dict(fi.FULL_INDEX_CONFIGS, {"B_B3": {**fi.FULL_INDEX_CONFIGS["B_B3"], "collection": partial}}):
+            fi.execute_full_index("B_B3", client=self.client, embedder=fake_embedder, documents=self.documents,
+                                  policy_metadata=self.metadata, chunks=self.chunks[:1], confirm_write=True)
+        result = fi.verify_full_index("B_B3", client=self.client, chunks=self.chunks, documents=self.documents,
+                                      collection=partial)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["count"], 1)
+
     def test_resume_writes_only_missing_points(self):
         half = self.chunks[: len(self.chunks) // 2]
         self._execute(chunks=half, confirm_write=True)               # 중단된 상황 재현: 절반만 적재
@@ -158,6 +181,7 @@ class TestWriteSafety(unittest.TestCase):
         self.assertEqual(store.count_points(self.client, self.collection), count)
 
 
+@legacy_dataset_only
 class Test4BConfigSafety(unittest.TestCase):
     """4B 구성(2560차원): 차원·모델이 다른 데이터와 섞이지 않는지 (메모리 Qdrant, 가짜 2560차원 벡터)"""
 

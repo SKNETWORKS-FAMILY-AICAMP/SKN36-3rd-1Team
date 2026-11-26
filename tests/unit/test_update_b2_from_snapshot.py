@@ -539,6 +539,11 @@ class RealDumpFlowTests(unittest.TestCase):
     def setUpClass(cls):
         if hd.dataset_version() != seed.DATASET_VERSION:
             raise unittest.SkipTest("NOT_RUN: v1.4.0-candidate 데이터셋이 아님")
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from r2_release_gate import SKIP_REASON, r2_release_is_current
+        if not r2_release_is_current():            # #105: r2 기대값은 r2 릴리스에만 적용
+            raise unittest.SkipTest(SKIP_REASON)
         cls.ref = update.build_reference()
         cls.dump = seed.load_dump(seed.DEFAULT_DUMP)
 

@@ -61,12 +61,12 @@ FULL_INDEX_CONFIGS: dict[str, dict[str, Any]] = {
                 "model": "qwen3-embedding:4b", "dim": 2560},
     # 승인된 v1.4.0 릴리스(data/releases/v1.4.0-candidate, PR #16·#17). 본문·문서별 메타데이터는 release_adapter.
     # 검색 근거를 변경하면 새 DB에서 청크를 다시 집계하고 검증한다.
-    "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1139,
-                  "dataset": "1.4.0-candidate"},
-    "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1221,
-                  "dataset": "1.4.0-candidate"},
-    "A_B2_4B_V140": {"collection": "exp_b2_qwen3emb4b_v140_v1", "strategy": "B2", "expected_chunks": 1139,
-                     "dataset": "1.4.0-candidate", "model": "qwen3-embedding:4b", "dim": 2560},
+    "A_B2_V140": {"collection": "exp_b2_qwen3emb06b_v140_v1", "strategy": "B2", "expected_chunks": 1249,
+                  "dataset": handoff_data.RELEASE_V140_VERSION},
+    "B_B3_V140": {"collection": "exp_b3_qwen3emb06b_v140_v1", "strategy": "B3", "expected_chunks": 1338,
+                  "dataset": handoff_data.RELEASE_V140_VERSION},
+    "A_B2_4B_V140": {"collection": "exp_b2_qwen3emb4b_v140_v1", "strategy": "B2", "expected_chunks": 1249,
+                     "dataset": handoff_data.RELEASE_V140_VERSION, "model": "qwen3-embedding:4b", "dim": 2560},
 }
 # 구성에 model·dim이 없으면 기본값(0.6B, 1024)을 쓴다 → 기존 구성 3개의 동작·기록은 그대로다
 # 구성에 dataset이 없으면 v1.3.2 인계 패키지 전용이다.
@@ -345,21 +345,27 @@ def execute_full_index(name: str, *, client, embedder, documents: list[dict[str,
             "upsert_seconds": round(upsert_seconds, 3), "verification": verification}
 
 
-def verify_full_index(name: str, *, client, chunks: list[dict[str, Any]], documents: list[dict[str, Any]]) -> dict[str, Any]:
-    """적재 결과 검증 (읽기 전용): 건수·id 집합·payload(원문 슬라이스·위치·해시·모델·규칙)·문서/정책 포함."""
+def verify_full_index(name: str, *, client, chunks: list[dict[str, Any]], documents: list[dict[str, Any]],
+                      collection: str | None = None) -> dict[str, Any]:
+    """적재 결과 검증 (읽기 전용): 건수·id 집합·payload(원문 슬라이스·위치·해시·모델·규칙)·문서/정책 포함.
+
+    collection: 검증할 실제 컬렉션 이름. 기본(None)은 구성의 정식 이름이다. r3 복원은 alias 공개 전에
+    임시 컬렉션을 넘긴다. 이름만 바뀌고 검증 항목·통과 기준은 같다.
+    """
     config = get_config(name)
+    target = config["collection"] if collection is None else collection
     content_hashes = {document["document_id"]: document["content_hash"] for document in documents}
     by_id = documents_by_id(documents)
     model, dim = config_model(config)
-    inspection = inspect_collection(client, config["collection"], chunks, content_hashes, model, dim)
-    payloads = _retrieve_payloads(client, config["collection"], [chunk["point_id"] for chunk in chunks])
+    inspection = inspect_collection(client, target, chunks, content_hashes, model, dim)
+    payloads = _retrieve_payloads(client, target, [chunk["point_id"] for chunk in chunks])
     slice_mismatch = sum(1 for payload in payloads.values()
                          if by_id[payload["document_id"]]["text"][payload["char_start"]:payload["char_end"]] != payload.get("text"))
     documents_present = {payload["document_id"] for payload in payloads.values()}
     policies_present = {payload["policy_id"] for payload in payloads.values()}
-    count = store.count_points(client, config["collection"])
+    count = store.count_points(client, target)
     result = {"state": inspection["state"], "count": count, "expected": len(chunks),
-              "id_set_equal": store.list_point_ids(client, config["collection"]) == {c["point_id"] for c in chunks},
+              "id_set_equal": store.list_point_ids(client, target) == {c["point_id"] for c in chunks},
               "payload_slice_mismatch": slice_mismatch,
               "missing_documents": sorted({d["document_id"] for d in documents} - documents_present),
               "missing_policies": sorted({d["policy_id"] for d in documents} - policies_present),

@@ -1,0 +1,154 @@
+{
+  "data": {
+    "total": 249,
+    "returned": 249,
+    "dataset_version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "evaluated_on": "2026-11-25",
+    "source_kind": "release_files",
+    "all_ids_match_POL_rule": true,
+    "duplicate_ids": 0,
+    "item_keys": [
+      "agency",
+      "application_schedule",
+      "categories",
+      "official_apply_url",
+      "policy_id",
+      "policy_name",
+      "reception_status",
+      "regions",
+      "required_documents",
+      "requirement_excerpts",
+      "source_url"
+    ]
+  },
+  "cache": {
+    "sequential_5_requests_upstream_calls": 0,
+    "after_ttl_10_concurrent_status": [
+      200
+    ],
+    "after_ttl_10_concurrent_upstream_calls": 1
+  },
+  "http": {
+    "detail_POL_YC_007": 200,
+    "not_found": 404,
+    "bad_lowercase": 404,
+    "bad_format": 404,
+    "no_trailing_slash": 301,
+    "post": 403,
+    "head": 405,
+    "upstream_down": 503,
+    "upstream_down_hides_internal": true
+  },
+  "react": {
+    "doc_has_empty_root": true,
+    "doc_has_policy_name": false,
+    "api_requests": [
+      "http://127.0.0.1:15300/src/api/client.ts",
+      "http://127.0.0.1:15300/src/api/policyCatalog.ts",
+      "http://127.0.0.1:18300/api/policies?limit=500&offset=0"
+    ],
+    "count_text": "정책 249개 · 6개 표시",
+    "filter_region_and_open": "정책 2개 · 2개 표시",
+    "card_open_after_click": true,
+    "footer": [
+      "정책 상세보기 ↗",
+      "관계 지도",
+      "원문 보기 ↗",
+      "☆ 관심 정책 저장"
+    ],
+    "detail_link": {
+      "href": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "target": "_blank",
+      "rel": "noopener noreferrer"
+    },
+    "has_period_row": true,
+    "has_agency_row": true,
+    "save_initial": [
+      "☆ 관심 정책 저장",
+      "false"
+    ],
+    "save_after_click": [
+      "★ 저장 해제",
+      "true"
+    ],
+    "save_after_second_click": [
+      "☆ 관심 정책 저장",
+      "false"
+    ],
+    "popup": {
+      "url": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업 · SSOK 정책 상세",
+      "opener_null": true
+    },
+    "card_still_open_after_link": true,
+    "map_hash": "#/map?policy=POL_YC_007",
+    "map_rendered": true,
+    "life_rendered": true,
+    "ask_sample_mode_renders_turn": true
+  },
+  "react_overflow": {
+    "1440": false,
+    "768": false,
+    "390": false,
+    "320": false
+  },
+  "django_ssr": {
+    "POL_YC_007": {
+      "status": 200,
+      "name_in_html": true,
+      "agency_in_html": true,
+      "period_label_in_html": true,
+      "requirement_in_html": "no excerpt in data",
+      "document_in_html": "no documents in data",
+      "browser_fetch_xhr": [],
+      "render_meta": true
+    },
+    "POL_STG_MOLIT_002": {
+      "status": 200,
+      "name_in_html": true,
+      "agency_in_html": true,
+      "period_label_in_html": true,
+      "requirement_in_html": true,
+      "document_in_html": true,
+      "browser_fetch_xhr": [],
+      "render_meta": true
+    }
+  },
+  "js_off": {
+    "name_visible": true,
+    "docs_fully_visible": true,
+    "toggle_hidden": true
+  },
+  "toggle": {
+    "initial": [
+      "더보기",
+      "false"
+    ],
+    "click": [
+      "접기",
+      "true"
+    ],
+    "enter": [
+      "더보기",
+      "false"
+    ],
+    "space": [
+      "접기",
+      "true"
+    ]
+  },
+  "django_overflow": {
+    "1440": false,
+    "768": false,
+    "390": false,
+    "320": false
+  },
+  "django_buttons_overlap": {
+    "1440": false,
+    "768": false,
+    "390": false,
+    "320": false
+  },
+  "long_docs_policy": "POL_STG_MOLIT_002"
+}

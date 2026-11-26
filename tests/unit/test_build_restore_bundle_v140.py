@@ -5,7 +5,6 @@ snapshot 생성 경로는 test_update_b2_from_snapshot의 Sample·FakeQdrant(벡
 """
 import hashlib
 import json
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -39,15 +38,30 @@ def commit_all(repo, message, *paths):
     return git(repo, "rev-parse", "HEAD")
 
 
+R2_SOURCE_COMMIT = "027f40b556c5408a2f0b9547acef4964254e37b8"   # r2 번들 소스 커밋 (restore_profiles_v140.R2_PROFILE)
+
+
+def r2_blob(rel: str) -> bytes:
+    """
+    #105: r2 기준 파일(manifest·복원 도구·compose)은 작업 트리가 아니라 r2 소스 커밋에서 읽는다.
+    최신 릴리스가 병합돼 작업 트리 manifest가 바뀌어도 r2 번들 도구 테스트의 기준은 r2 그대로다.
+    r2 커밋이 없는 얕은 복제본이면 작업 트리 파일을 쓴다(이 경우 최신 릴리스에서는 manifest 불일치로 실패해 드러난다).
+    """
+    try:
+        return bundle.run_git(["show", f"{R2_SOURCE_COMMIT}:{rel}"])
+    except bundle.BundleError:
+        return (bundle.ROOT / rel).read_bytes()
+
+
 class TempRepo:
-    """필수 파일(실제 복원 도구·compose·manifest·requirements)만 담은 sample_only 저장소."""
+    """필수 파일(r2 복원 도구·compose·manifest·requirements)만 담은 sample_only 저장소."""
 
     def __init__(self, root: Path):
         self.path = root / "repo"
         for rel in bundle.REQUIRED_COMMIT_PATHS:
             target = self.path / rel
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(bundle.ROOT / rel, target)
+            target.write_bytes(r2_blob(rel))
         (self.path / "database").mkdir(parents=True, exist_ok=True)
         (self.path / "database" / "sample_only.py").write_bytes(b"VALUE = 1\n")      # 바이트 그대로 (LF)
         git(self.path, "init", "-q")

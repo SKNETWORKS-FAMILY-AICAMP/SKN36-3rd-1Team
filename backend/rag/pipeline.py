@@ -1,6 +1,6 @@
 """정책 검색, 조건 검사, 답변 생성과 출처 검증을 연결한다."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from json import JSONDecodeError
 import logging
 import re
@@ -12,6 +12,7 @@ from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOut
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure, application_schedule
+from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
@@ -542,11 +543,14 @@ def run_ask_pipeline(
     check_fn: Callable[[dict, dict], dict],
     generate_fn: Callable[..., dict],
     display_fn: Callable[[list[dict]], list[dict]] | None = None,
+    requirement_reviews: Collection[dict] = (),
 ) -> AskResponse:
     """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
 
     generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
     display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
+    requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
+        항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
     """
     profile = request.profile.model_dump()
     supplied_region = profile["region"].strip()
@@ -590,6 +594,7 @@ def run_ask_pipeline(
         if pid in contexts_by_policy and context["chunk_id"] not in selected_ids:
             candidates_by_policy.setdefault(pid, []).append(context)
     checks = []
+    requirements = {}
     for pid, selected in contexts_by_policy.items():
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
         if request.selected_policy_id:
@@ -605,6 +610,11 @@ def run_ask_pipeline(
         check["contacts"] = contacts or None
         check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
         check.update(application_details(selected))
+        # 이 정책에 채택된 근거만 읽는다(정책 간 혼합 방지). Generator 입력은 바꾸지 않도록 생성 뒤에 붙인다.
+        # 그래프상 이 정책의 근거 문서가 아닌 문서(evidence_document_check=MISMATCH)는 기준 추출에서 뺀다.
+        requirements[pid] = official_requirements(pid, selected, requirement_reviews,
+                                                  by_id[pid].get("data_quality"),
+                                                  by_id[pid].get("evidence_document_check"))
         checks.append(check)
     history = [turn.model_dump() for turn in request.history[-10:]]
     try:
@@ -653,6 +663,7 @@ def run_ask_pipeline(
     answer, citations = _citations(output, contexts)
     if output.status == "no_evidence":
         checks = []
+    checks = [{**check, "official_requirements": requirements.get(check["policy_id"])} for check in checks]
     if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):
         notice = {"kind": "warn", "title": "추가 확인 필요", "text": HOLD_NOTICE_TEXT}
     if notice is None and aligned:

@@ -1,0 +1,35 @@
+{% load static %}<!doctype html>
+<html lang="ko" data-theme="{% if theme == 'dark' %}dark{% else %}light{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="ssok-render" content="django-ssr">
+  <title>{% block title %}SSOK{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'policies/detail.css' %}">
+</head>
+<body>
+  <div class="util"><div class="wrap"><span class="dot"></span><span>학습용 시연 화면이에요 · 이 페이지는 서버에서 완성된 HTML이에요</span></div></div>
+  <header class="gnb">
+    <div class="wrap">
+      <a class="logo" {% if react_base %}href="{{ react_base }}#/"{% endif %} aria-label="SSOK 홈">
+        <svg viewBox="55 7 140 46" role="img" aria-hidden="true" focusable="false"><g fill="none" stroke="var(--logo-text)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 20.5C18 18 15 17.5 11.5 17.5C5.5 17.5 2 20.5 2 24C2 28 6 29 11.5 30C17 31 21 32.5 21 36.3C21 40 17.5 42.5 11.5 42.5C7 42.5 3.5 41.5 1 39" transform="translate(62 0)"/><path d="M21 20.5C18 18 15 17.5 11.5 17.5C5.5 17.5 2 20.5 2 24C2 28 6 29 11.5 30C17 31 21 32.5 21 36.3C21 40 17.5 42.5 11.5 42.5C7 42.5 3.5 41.5 1 39" transform="translate(94 0)"/><circle cx="141" cy="30" r="13" fill="var(--logo-lens)" stroke="var(--logo-o)" stroke-width="8"/><path d="M151 40l4 4" stroke="var(--logo-o)" stroke-width="6"/><path d="M0 -6.5Q1 -1 6.5 0Q1 1 0 6.5Q-1 1 -6.5 0Q-1 -1 0 -6.5Z" transform="translate(141 30) scale(.72)" fill="var(--logo-star)" stroke="none"/><path d="M168 17.5V42.5M185 17.5L171 30.5M174.5 28L186 42.5"/></g></svg>
+      </a>
+      {% if react_base %}
+      <nav class="tabs" aria-label="SSOK 화면">
+        <a href="{{ react_base }}#/">상담하기</a>
+        <a href="{{ react_base }}#/life">생애주기</a>
+        <a href="{{ react_base }}#/map">정책 관계 지도</a>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <main class="wrap detail-wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-foot"><div class="wrap">SSOK · 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.{% block footer_extra %}{% endblock %}</div></footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

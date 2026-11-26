@@ -233,7 +233,7 @@ def main():
     args = parser.parse_args()
     require_target(args.url)
     verify_container(args.docker)
-    if hd.dataset_version() != "1.4.0-candidate" or any(not r["matched"] for r in hd.verify_manifest_checksums()):
+    if hd.dataset_version() != hd.RELEASE_V140_VERSION or any(not r["matched"] for r in hd.verify_manifest_checksums()):
         raise ValueError("Release dataset/checksum mismatch")
     docs = hd.load_documents(verify_hash=True)
     chunks = fi.build_config_chunks(CONFIG, docs)[0]

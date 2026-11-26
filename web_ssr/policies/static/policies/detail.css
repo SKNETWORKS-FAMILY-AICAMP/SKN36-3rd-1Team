@@ -1,0 +1,99 @@
+/* SSOK 정책 상세(SSR) 스타일.
+   색·폰트·버튼은 frontend/src/styles.css의 테마 토큰(:root, :root[data-theme="dark"])과 .btn/.badge 규칙을 옮겨 왔다.
+   React 쪽 토큰이 바뀌면 이 파일의 :root도 같이 맞춘다. */
+:root{
+  color-scheme:light;
+  --bg:#f8f8f3; --bg-2:#eeefe8; --card:#fdfdf9; --ink:#35443d; --ink-2:#53645b; --ink-3:#64736b; --line:#dce2d9;
+  --primary:#47675a; --primary-soft:#e0eee4; --on-primary:#ffffff; --accent-light:#58786a;
+  --ok:#5b8a4f; --ok-bg:#e8f0e0; --warn:#b87517; --warn-bg:#fbefd8; --bad:#c45a4a; --bad-bg:#f8e4de; --muted-bg:#f1e8dc;
+  --shadow:0 3px 0 rgba(53,68,61,.06),0 12px 26px rgba(71,103,90,.12); --glow:rgba(71,103,90,.20);
+  --logo-text:#354b40; --logo-o:#b78027; --logo-star:#d79a32; --logo-lens:#fffaf2;
+  --warn-ink:#775922; --countdown-line:#ecd9ad; --card-clear:rgba(253,253,249,0);
+}
+/* 다크: React styles.css의 :root[data-theme="dark"] 토큰과 같다. React 상세 링크의 ?theme=dark일 때만 켜진다 */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101010; --bg-2:#191919; --card:#202020; --ink:#f0f0f0; --ink-2:#c5c5c5; --ink-3:#a6a6a6; --line:#393939;
+  --primary:#b8d5c5; --primary-soft:#283730; --on-primary:#101010; --accent-light:#a9c8b7;
+  --ok:#a5d394; --ok-bg:#26322a; --warn:#f2c27a; --warn-bg:#352d23; --bad:#f0a092; --bad-bg:#372729; --muted-bg:#272727;
+  --shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(0,0,0,.3); --glow:rgba(184,213,197,.16);
+  --logo-text:#dcebe1; --logo-o:#dfad58;
+  --warn-ink:var(--warn); --countdown-line:rgba(223,173,88,.45); --card-clear:rgba(32,32,32,0);
+}
+*{box-sizing:border-box}
+/* .btn 등의 display가 hidden 속성을 덮지 않게 한다(JS 전까지 서류 접기 버튼을 숨김) */
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Gowun Dodum","Malgun Gothic",sans-serif;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+h1,h2,h3,.btn,.tabs a,.badge{font-family:"Jua","Malgun Gothic",sans-serif;font-weight:400}
+a{color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+.util{background:var(--bg-2);font-size:12.5px;color:var(--ink-2);padding:6px 0}
+.util .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--logo-o);margin-right:8px;vertical-align:middle}
+.gnb{background:var(--card);border-bottom:1px solid var(--line)}
+.gnb .wrap{display:flex;align-items:center;gap:28px;min-height:68px}
+.logo{display:inline-flex}
+.logo svg{width:118px;height:40px}
+.tabs{display:flex;gap:6px;background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tabs a{text-decoration:none;padding:6px 14px;border-radius:999px;color:var(--ink-2);font-size:15px}
+.tabs a:hover{background:var(--card);color:var(--primary)}
+
+.detail-wrap{margin-top:26px;margin-bottom:56px}
+.crumb{font-size:13px;color:var(--ink-3);margin:0 0 16px}
+.detail-hero{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:var(--shadow)}
+.detail-hero h1{font-size:30px;line-height:1.4;margin:14px 0 8px}
+.meta{color:var(--ink-2);margin:0}
+.pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{padding:4px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:13px}
+.badge{display:inline-flex;align-items:center;font-size:13px;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.b-ok{background:var(--ok-bg);color:var(--ok)}.b-bad{background:var(--bad-bg);color:var(--bad)}.b-muted{background:var(--muted-bg);color:var(--ink-2)}
+.b-countdown{background:transparent;color:var(--logo-o);border:1px solid var(--countdown-line)}
+.hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.schedule span{display:block;font-size:13px;color:var(--ink-3)}
+.schedule b{font-family:"Jua","Malgun Gothic",sans-serif;font-weight:400;font-size:20px}
+.quiet{color:var(--ink-3);font-size:12.5px;margin:0;text-align:right}
+
+.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px;margin-top:22px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:20px}
+.panel h2{font-size:20px;margin:0 0 12px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel-head h2{margin-bottom:12px}
+.warning{padding:12px 15px;border-radius:12px;background:var(--warn-bg);font-size:13.5px;color:var(--warn-ink);margin:0 0 16px}
+.excerpt-block+.excerpt-block{border-top:1px solid var(--line);margin-top:16px;padding-top:16px}
+.excerpt-block h3{font-size:15px;color:var(--ink-2);margin:0 0 6px}
+.excerpt{white-space:pre-line;overflow-wrap:anywhere;font-size:14.5px;line-height:1.85;margin:0}
+.source{font-size:12px;color:var(--ink-3);margin:10px 0 0}
+.caption{font-size:12.5px;color:var(--ink-3);margin:12px 0 0}
+.empty{color:var(--ink-2);font-size:14.5px;margin:0}
+.doc-item+.doc-item{border-top:1px dashed var(--line);margin-top:14px;padding-top:14px}
+.docs-body.is-collapsed{max-height:220px;overflow:hidden;position:relative}
+.docs-body.is-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(var(--card-clear),var(--card))}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:12px;font-size:15px;text-decoration:none;white-space:nowrap;cursor:pointer;border:0;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible,.tabs a:focus-visible,a:focus-visible{outline:3px solid var(--logo-o);outline-offset:2px}
+.btn-p{background:linear-gradient(135deg,var(--primary),var(--accent-light));color:var(--on-primary);box-shadow:0 6px 16px var(--glow)}
+.btn-o{border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn-o:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{min-height:36px;padding:0 14px;font-size:14px}
+.side .btn{width:100%;margin:0 0 10px}
+.side p{font-size:13px;color:var(--ink-3);margin:8px 0 0}
+
+.error-panel{max-width:620px;margin:40px auto;text-align:center;padding:40px 28px}
+.error-panel h1{font-size:26px;margin:4px 0 10px}
+.error-code{font-family:"Jua","Malgun Gothic",sans-serif;color:var(--logo-o);font-size:15px;margin:0}
+.site-foot{border-top:1px solid var(--line);padding:20px 0 28px;font-size:12.5px;color:var(--ink-3)}
+
+@media (max-width:760px){
+  .wrap{padding:0 16px}
+  .gnb .wrap{gap:12px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+  .logo svg{width:92px;height:32px}
+  .tabs a{padding:5px 10px;font-size:13px}
+  .detail-hero{padding:20px;border-radius:20px}
+  .detail-hero h1{font-size:24px}
+  .hero-bottom{flex-direction:column;align-items:flex-start}
+  .quiet{text-align:left}
+  .detail-grid{grid-template-columns:1fr;gap:0}
+  .panel{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}.btn:hover{transform:none}}

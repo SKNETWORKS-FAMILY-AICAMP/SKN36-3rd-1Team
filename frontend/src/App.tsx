@@ -12,6 +12,7 @@ import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge } from './lib/validate';
 import { PolicyScheduleList } from './components/PolicyScheduleList';
 import { PolicyExplorer } from './components/PolicyExplorer';
+import type { ConsultedCheck } from './lib/policyCompare';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { PersonaStart } from './components/PersonaStart';
@@ -81,10 +82,16 @@ export default function App() {
 
   // 화면을 바꾸면 맨 위에서 시작한다. 다른 화면에서 질문을 보내고 넘어온 경우엔 그 답변 위치로 간다
   const showLatestTurn = useRef(false);
+  const explorerScroll = useRef<number | null>(null);
   useEffect(() => {
     if (onAskPage && showLatestTurn.current) {
       showLatestTurn.current = false;
-      setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 80);
+      explorerScroll.current = null;
+      const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 80);
+      return () => clearTimeout(timer);
+    } else if (onAskPage && explorerScroll.current !== null) {
+      scrollTo({ top: explorerScroll.current, behavior: 'instant' });
+      explorerScroll.current = null;
     } else {
       scrollTo({ top: 0 });
     }
@@ -92,7 +99,9 @@ export default function App() {
 
   // 새 대화가 생기면 그 위치로 스크롤
   useEffect(() => {
-    if (turns.length) setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 60);
+    if (!turns.length) return;
+    const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 60);
+    return () => clearTimeout(timer);
   }, [turns.length, reduceMotion]);
 
   // 알림을 연달아 띄워도 앞 알림의 타이머가 새 알림을 일찍 끄지 않도록 타이머를 하나만 둔다
@@ -216,6 +225,15 @@ export default function App() {
   // 상담에서 가장 최근에 나온 정책: 생애주기·관계 지도가 이어서 보여 준다
   const recent = useMemo(() => recentPoliciesFromTurns(turns), [turns]);
   const latestResponse = useMemo(() => [...turns].reverse().find(t => t.kind === 'qa' && t.state === 'done' && t.response), [turns]);
+  // 정책 비교용: 정책마다 가장 최근 상담(예시 응답 제외)의 Checker 결과와 그때 입력한 조건. 새로 판정하지 않는다
+  const consulted = useMemo(() => {
+    const map = new Map<string, ConsultedCheck>();
+    for (const t of [...turns].reverse()) {
+      if (t.kind !== 'qa' || t.state !== 'done' || !t.response || t.response.is_sample) continue;
+      for (const check of t.response.policy_checks) if (!map.has(check.policy_id)) map.set(check.policy_id, { check, tags: t.tags.map(tag => tag.text) });
+    }
+    return map;
+  }, [turns]);
 
   const profileText = describeProfile(profile);
   const condText = profileText ? `내 조건 · ${profileText}` : '내 조건 없음';
@@ -241,22 +259,22 @@ export default function App() {
         </div>
       </header>
 
-      {route.page !== 'ask' ? (
+      {route.page !== 'ask' && (
         <ErrorBoundary resetKey={location.hash}>
+          {route.page === 'map' && explorerScroll.current !== null && (
+            <div className="wrap"><a className="btn btn-o" href={askHref}>← 보던 정책으로</a></div>
+          )}
           <Suspense fallback={<section className="board"><div className="wrap map-msg" role="status">화면을 여는 중이에요…</div></section>}>
             {route.page === 'map'
               ? <PolicyMap policyId={route.policyId} recent={recent} reduceMotion={reduceMotion} onAsk={askFromOtherPage} />
               : <LifeTimeline stageName={route.stage} myAge={profile.age} onAsk={askFromOtherPage} recent={recent} />}
           </Suspense>
         </ErrorBoundary>
-      ) : (<>
+      )}
+      <div hidden={!onAskPage}>
       <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
-      <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
-        onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
-      <PolicyScheduleList onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
-        onAsk={(question, origin) => { ask(question, origin); }} />
       <section className="board" id="board">
         <div className="wrap">
           <div className="board-h"><h2>상담 <span>결과</span></h2><p>답변마다 근거 출처를 함께 보여 드려요</p></div>
@@ -264,7 +282,7 @@ export default function App() {
             <PersonaStart personas={PERSONAS} onPersona={startPersona} />
           )}
           {turns.map((t, i) => (
-            <div key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
+            <div className="consultation-turn" key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
               <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}
                 onAskPolicy={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
             </div>
@@ -307,7 +325,18 @@ export default function App() {
           )}
         </div>
       </section>
-      </>)}
+      {/* 질문하러 온 사람이 상담 결과를 먼저 보도록 둘러보기·일정은 상담 결과 아래에 둔다.
+          최근 상담 일정은 완료된 상담이 있을 때만 보여 준다(빈 안내만 있는 섹션을 줄인다). */}
+      {latestResponse?.kind === 'qa' && latestResponse.response && (
+        <PolicyScheduleList onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse.response}
+          onAsk={(question, origin) => { ask(question, origin); }} />
+      )}
+      <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
+        onOpenMap={() => { explorerScroll.current = window.scrollY; }}
+        active={onAskPage}
+        consulted={consulted}
+        onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
+      </div>
 
       <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
 

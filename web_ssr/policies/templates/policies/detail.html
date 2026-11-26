@@ -1,0 +1,78 @@
+{% extends "policies/base.html" %}{% load static %}
+{% block title %}{{ policy.policy_name }} · SSOK 정책 상세{% endblock %}
+{% block content %}
+<p class="crumb">정책 둘러보기 <span aria-hidden="true">›</span> 정책 상세정보</p>
+
+<section class="detail-hero" aria-labelledby="policy-title">
+  <div class="pills">
+    <span class="badge {{ reception_badge }}" data-testid="reception">{{ schedule.label }}</span>
+    {% if schedule.badge %}<span class="badge b-countdown">{{ schedule.badge }}</span>{% endif %}
+    {% for region in policy.regions %}<span class="pill">{{ region }}</span>{% endfor %}
+    {% for category in policy.categories %}<span class="pill">{{ category }}</span>{% endfor %}
+  </div>
+  <h1 id="policy-title">{{ policy.policy_name }}</h1>
+  <p class="meta" data-testid="agency">{% if policy.agency %}{{ policy.agency }}{% else %}담당 기관은 공식 원문에서 확인해 주세요.{% endif %}</p>
+  <div class="hero-bottom">
+    <div class="schedule"><span>신청 기간</span><b>{{ schedule.period }}</b></div>
+    <p class="quiet">일정 확인일 {{ evaluated_on }}<br>접수 상태는 공고 일정 기준이며, 내가 신청할 수 있다는 뜻은 아니에요.</p>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div>
+    <section class="panel" aria-labelledby="req-title">
+      <h2 id="req-title">지원 자격 원문</h2>
+      <p class="warning">정책 원문의 지원대상·선정기준 발췌예요. 개인의 신청 가능 여부를 판정한 결과가 아니에요.</p>
+      {% for excerpt in policy.requirement_excerpts %}
+      <article class="excerpt-block">
+        <h3>{{ excerpt.labels|join:" · " }}</h3>
+        <p class="excerpt">{{ excerpt.text }}</p>
+        <p class="source">공식 원문 발췌 · {{ excerpt.document_id }}{% if excerpt.source_url %} · <a href="{{ excerpt.source_url }}" target="_blank" rel="noopener noreferrer">기준 원문 ↗</a>{% endif %}</p>
+      </article>
+      {% empty %}
+      <p class="empty">이 정책에는 확인된 지원 자격 원문 발췌가 없어요.{% if policy.source_url %} <a href="{{ policy.source_url }}" target="_blank" rel="noopener noreferrer">공식 원문에서 확인 ↗</a>{% endif %}</p>
+      {% endfor %}
+    </section>
+
+    <section class="panel" aria-labelledby="docs-title">
+      <div class="panel-head">
+        <h2 id="docs-title">제출서류 원문</h2>
+        {% if policy.required_documents %}
+        {# JavaScript가 동작할 때만 보이는 버튼. 꺼져 있으면 서류 전체가 그대로 보인다. #}
+        <button type="button" class="btn btn-o btn-sm docs-toggle" data-docs-toggle aria-controls="docs-body" aria-expanded="true" hidden>접기</button>
+        {% endif %}
+      </div>
+      {% if policy.required_documents %}
+      <div class="docs-body" id="docs-body" data-docs-body>
+        {% for doc in policy.required_documents %}
+        <div class="doc-item">
+          <p class="excerpt">{{ doc.text }}</p>
+          <p class="source">{{ doc.document_id }}{% if doc.source_url %} · <a href="{{ doc.source_url }}" target="_blank" rel="noopener noreferrer">서류 원문 ↗</a>{% endif %}</p>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="caption">제출 대상별 추가 서류와 전체 목록은 공식 공고에서 확인해 주세요.</p>
+      {% else %}
+      <p class="empty">이 정책에는 확인된 서류 목록이 제공되지 않았어요.{% if policy.source_url %} <a href="{{ policy.source_url }}" target="_blank" rel="noopener noreferrer">공식 원문에서 서류 확인 ↗</a>{% endif %}</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="panel side" aria-labelledby="links-title">
+    <h2 id="links-title">공식 정보 확인</h2>
+    {% if policy.official_apply_url %}
+    <a class="btn btn-p" href="{{ policy.official_apply_url }}" target="_blank" rel="noopener noreferrer">공식 신청 페이지 ↗</a>
+    {% endif %}
+    {% if policy.source_url %}
+    <a class="btn {% if policy.official_apply_url %}btn-o{% else %}btn-p{% endif %}" href="{{ policy.source_url }}" target="_blank" rel="noopener noreferrer">공식 원문 보기 ↗</a>
+    {% endif %}
+    {% if links.map %}<a class="btn btn-o" href="{{ links.map }}">정책 관계 지도</a>{% endif %}
+    {% if links.home %}<a class="btn btn-o" href="{{ links.home }}">상담 화면으로</a>{% endif %}
+    {% if not policy.official_apply_url %}<p>확인된 별도 신청 주소가 없어 공식 원문으로 안내해요.</p>{% endif %}
+    {% if not policy.source_url %}<p>확인된 공식 원문 주소가 없어요.</p>{% endif %}
+    <p>내 조건으로 자격을 확인하려면 상담 화면에서 이 정책을 물어보세요.</p>
+  </aside>
+</div>
+{% endblock %}
+{% block footer_extra %}<br><small>배포 데이터 {{ dataset_version }} · 정책 ID {{ policy.policy_id }} · Django 서버 렌더링</small>{% endblock %}
+{% block scripts %}<script src="{% static 'policies/detail.js' %}" defer></script>{% endblock %}

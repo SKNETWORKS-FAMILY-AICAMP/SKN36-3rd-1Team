@@ -35,8 +35,18 @@ from scripts.review_candidate_application_urls import EVIDENCE_PATH, review_cand
 from scripts import data_corrections as dc
 HANDOFF_DIR = BASE_DIR / "data" / "handoff"
 STAGING_DIR = BASE_DIR / "data" / "staging"
+# 복지로 2026 추가 정책 묶음(scripts/stage_bokjiro_2026_policies.py가 만든 입력). 분류는 레코드에 적혀 있다.
+BOKJIRO_2026_DIR = STAGING_DIR / "bokjiro_2026"
 CANDIDATE_DIR = BASE_DIR / "data" / "releases" / "v1.4.0-candidate"
 KST = timezone(timedelta(hours=9))
+
+def read_batch_jsonl(name: str) -> list[dict]:
+    """복지로 2026 묶음 파일을 읽는다. 묶음이 없으면 빈 목록이다."""
+    path = BOKJIRO_2026_DIR / name
+    if not path.is_file():
+        return []
+    return [json.loads(line) for line in path.open(encoding="utf-8") if line.strip()]
+
 
 def get_file_sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -49,30 +59,105 @@ def get_file_sha256(path: Path) -> str:
 def prepare_document_excerpts(documents: list[dict], corrections: dict) -> dict[str, str]:
     """보존된 본문을 검증하고, 옛 기준 행을 뺀 검색용 파일을 후보에 따로 기록한다."""
     omissions = corrections.get("outdated_document_lines", [])
-    if not omissions:
+    application_periods = corrections.get("unverified_application_periods", [])
+    # 행 전체를 빼지 않고 칸 이름만 바꾸거나 지난 예고 문구만 빼는 교정(#107). 행 단위로 기록한다.
+    rewrites = corrections.get("document_line_rewrites", [])
+    edits = [*omissions, *application_periods, *rewrites]
+    if not edits:
         return {}
     by_id = {row["document_id"]: row for row in documents}
-    source_ids = {item["document_id"] for item in omissions}
+    source_ids = {item["document_id"] for item in edits}
     with (BASE_DIR / "data/processed/documents.jsonl").open(encoding="utf-8") as source:
         bodies = {row["document_id"]: row["text"] for row in map(json.loads, source)
                   if row["document_id"] in source_ids}
     updated = {}
-    for item in omissions:
+    for item in edits:
         doc_id = item["document_id"]
         document = by_id[doc_id]
         text = bodies[doc_id]
         expected = item["expected_content_hash"]
+        policy_id = item.get("policy_id")
+        replacement = item.get("superseded_by_document_id")
         if (document["content_hash"] != expected or hashlib.sha256(text.encode()).hexdigest() != expected
-                or item["superseded_by_document_id"] not in by_id or doc_id in updated):
-            raise ValueError(f"옛 안내 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
-        excerpt = dc.omit_outdated_line(text, item["text"]).replace("\r\n", "\n").replace("\r", "\n").strip()
+                or (policy_id is None and replacement not in by_id)
+                or (policy_id is not None and document["policy_id"] != policy_id) or doc_id in updated):
+            raise ValueError(f"검색 본문 교정의 문서·본문·대체 출처를 확인하세요: {doc_id}")
+        if "replacement" in item:
+            # 행 교정: 청크에도 같은 행 교정을 적용하도록 교정 기록 자체를 넘긴다.
+            line = item
+            excerpt = dc.rewrite_line(text, item)
+        else:
+            line = item["text"] if policy_id is None else f'- 신청기간: {item["before"]}'
+            excerpt = dc.omit_outdated_line(text, line)
+        excerpt = excerpt.replace("\r\n", "\n").replace("\r", "\n").strip()
         path = CANDIDATE_DIR / "source_text" / f"{doc_id}.txt"
         path.parent.mkdir(exist_ok=True)
         path.write_text(excerpt + "\n", encoding="utf-8", newline="\n")
         document["extracted_text_path"] = path.relative_to(BASE_DIR).as_posix()
         document["content_hash"] = hashlib.sha256(excerpt.encode()).hexdigest()
-        updated[doc_id] = item["text"]
+        updated[doc_id] = line
     return updated
+
+
+HELD_LINE_STATUS = "needs_review"
+
+
+def prepare_held_excerpts(documents: list[dict], corrections: dict) -> dict[str, list[str]]:
+    """공식 FAQ 안에서 서로 맞지 않거나 기한이 지난 행을 검색용 본문에서 보류한다.
+
+    staging 추출본(원문)은 그대로 두고, 후보의 source_text에 보류 행을 뺀 본문을 따로 쓴다.
+    사유와 상태는 반드시 적고, 기준 문서(superseded_by_document_id)를 적었다면 후보에 있어야 한다.
+    """
+    held: dict[str, list[str]] = {}
+    for item in corrections.get("held_document_lines", []):
+        if item.get("status") != HELD_LINE_STATUS or not item.get("reason"):
+            raise ValueError(f"보류 행에는 사유와 {HELD_LINE_STATUS} 상태가 필요합니다: {item.get('document_id')}")
+        held.setdefault(item["document_id"], []).append(item)
+    by_id = {row["document_id"]: row for row in documents}
+    updated = {}
+    for doc_id, items in held.items():
+        missing = [i["superseded_by_document_id"] for i in items
+                   if i.get("superseded_by_document_id") and i["superseded_by_document_id"] not in by_id]
+        if missing:
+            raise ValueError(f"보류 행의 기준 문서가 후보에 없습니다: {missing}")
+        document = by_id[doc_id]
+        source = BASE_DIR / document["extracted_text_path"]
+        if not source.is_relative_to(STAGING_DIR):
+            raise ValueError(f"보류 행은 staging 추출본이 있는 문서에만 씁니다: {doc_id}")
+        text = source.read_text(encoding="utf-8").strip()
+        expected = {item["expected_content_hash"] for item in items}
+        if expected != {document["content_hash"]} or hashlib.sha256(text.encode()).hexdigest() not in expected:
+            raise ValueError(f"보류 행 교정의 문서 본문 해시를 확인하세요: {doc_id}")
+        lines = [item["text"] for item in items]
+        excerpt = dc.omit_held_lines(text, lines)
+        path = CANDIDATE_DIR / "source_text" / f"{doc_id}.txt"
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(excerpt + "\n", encoding="utf-8", newline="\n")
+        document["extracted_text_path"] = path.relative_to(BASE_DIR).as_posix()
+        document["content_hash"] = hashlib.sha256(excerpt.encode()).hexdigest()
+        updated[doc_id] = lines
+    return updated
+
+
+def hold_chunk_lines(chunks: list[dict], held_lines: dict[str, list[str]]) -> tuple[list[dict], list[str]]:
+    """보류 행을 청크에서 빼고, 보류 행만 있던 청크는 후보에서 뺀다. 반환: (남은 청크, 뺀 chunk_id)."""
+    kept, dropped, removed = [], [], set()
+    for chunk in chunks:
+        lines = held_lines.get(chunk["document_id"])
+        if lines:
+            hits = [line for line in lines if line in chunk["text"].split("\n")]
+            if hits:
+                chunk["text"] = dc.omit_held_lines(chunk["text"], hits)
+                removed.update((chunk["document_id"], line) for line in hits)
+            if not chunk["text"]:
+                dropped.append(chunk["chunk_id"])
+                continue
+        kept.append(chunk)
+    expected = {(doc_id, line) for doc_id, lines in held_lines.items() for line in lines}
+    leftover = [c["chunk_id"] for c in kept for line in held_lines.get(c["document_id"], []) if line in c["text"]]
+    if removed != expected or leftover:
+        raise ValueError(f"보류 행이 청크에서 빠지지 않았거나 여러 청크에 나뉘어 있습니다: {leftover}")
+    return kept, dropped
 
 
 # -----------------------------------------------------------------------------
@@ -88,7 +173,9 @@ STANDARD_CATEGORIES = {
         "POL_STG_NTS_001": "CAT_YOUTH_JOB_ASSET"         # 중소기업 소득세 감면 -> 청년 취업·교육·자산형성
     },
     "교통비·생활비": "CAT_TRANSPORT_MEDICAL_CARE",
-    "지역 복지": "CAT_REGIONAL_WELFARE"
+    "지역 복지": "CAT_REGIONAL_WELFARE",
+    # 표준 분야명 그대로 들어온 신규 정책(복지로 2026 묶음)
+    "청년 취업·교육·자산형성": "CAT_YOUTH_JOB_ASSET",
 }
 
 STANDARD_REGIONS = {
@@ -174,45 +261,52 @@ def build_candidate_release():
     existing_oids = {p["official_id"] for p in policies}
 
     new_policies = []
-    with open(STAGING_DIR / "policies.jsonl", "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip(): continue
-            sp = json.loads(line)
-            if sp["policy_id"] == "POL_001":
-                continue # 기존 정책은 병합 대상
-            
-            assert sp["policy_id"] not in existing_pids, f"Policy ID 충돌 감지: {sp['policy_id']}"
-            assert sp["official_id"] not in existing_oids, f"Official ID 충돌 감지: {sp['official_id']}"
-            
-            # 표준 생애주기 및 대상그룹 적용
-            clean_ls = [s.replace("LIFESTAGE_", "") for s in POLICY_LIFESTAGES_MAP[sp["policy_id"]]]
-            clean_tg = [g.replace("GROUP_", "") for g in POLICY_TARGET_GROUPS_MAP[sp["policy_id"]]]
+    staged_policies = [json.loads(line) for line in
+                       (STAGING_DIR / "policies.jsonl").open(encoding="utf-8") if line.strip()]
+    # 복지로 2026 묶음은 레코드의 생애단계·대상집단·분류를 표준 매핑에 등록한다.
+    for sp in read_batch_jsonl("policies.jsonl"):
+        POLICY_LIFESTAGES_MAP[sp["policy_id"]] = [f"LIFESTAGE_{stage}" for stage in sp["life_stages"]]
+        POLICY_TARGET_GROUPS_MAP[sp["policy_id"]] = list(sp["target_groups"])
+        staged_policies.append(sp)
+    new_official_ids = set()
+    for sp in staged_policies:
+        if sp["policy_id"] == "POL_001":
+            continue # 기존 정책은 병합 대상
 
-            p_node = {
-                "policy_id": sp["policy_id"],
-                "official_id": sp["official_id"],
-                "policy_name": sp["policy_name"],
-                "source_type": sp["source_type"],
-                "category": sp["category"],
-                "agency": sp["agency"],
-                "organization": sp["agency"],
-                "region": sp["regions"][0] if sp["regions"] else "전국",
-                "life_stages": clean_ls,
-                "target_groups": clean_tg,
-                "eligibility": sp.get("eligibility_text") or sp["selection_rationale"],
-                "benefit": sp.get("benefit_text") or sp["category"],
-                "application_period": sp.get("application_period") or "상시 또는 공고 확인",
-                "application_method": sp.get("application_method") or "온라인 신청",
-                # 신청 주소가 확인되지 않으면 null (출처 URL로 대신 채우지 않음 → UI '신청하기' 미노출)
-                "official_apply_url": sp.get("official_apply_url"),
-                "source_url": sp["source_url"],
-                "verification_status": sp["verification_status"],
-                "collected_at": source_evidence[sp["policy_id"]]["collected_at"],
-                "approval_status": sp["approval_status"],
-                "reception_status": sp["reception_status"],
-                "lifecycle_status": sp["lifecycle_status"]
-            }
-            new_policies.append(p_node)
+        assert sp["policy_id"] not in existing_pids, f"Policy ID 충돌 감지: {sp['policy_id']}"
+        assert sp["official_id"] not in existing_oids, f"Official ID 충돌 감지: {sp['official_id']}"
+        assert sp["official_id"] not in new_official_ids, f"신규 정책 Official ID 중복: {sp['official_id']}"
+        new_official_ids.add(sp["official_id"])
+
+        # 표준 생애주기 및 대상그룹 적용
+        clean_ls = [s.replace("LIFESTAGE_", "") for s in POLICY_LIFESTAGES_MAP[sp["policy_id"]]]
+        clean_tg = [g.replace("GROUP_", "") for g in POLICY_TARGET_GROUPS_MAP[sp["policy_id"]]]
+
+        p_node = {
+            "policy_id": sp["policy_id"],
+            "official_id": sp["official_id"],
+            "policy_name": sp["policy_name"],
+            "source_type": sp["source_type"],
+            "category": sp["category"],
+            "agency": sp["agency"],
+            "organization": sp["agency"],
+            "region": sp["regions"][0] if sp["regions"] else "전국",
+            "life_stages": clean_ls,
+            "target_groups": clean_tg,
+            "eligibility": sp.get("eligibility_text") or sp["selection_rationale"],
+            "benefit": sp.get("benefit_text") or sp["category"],
+            "application_period": sp.get("application_period") or dc.UNVERIFIED_APPLICATION_PERIOD,
+            "application_method": sp.get("application_method") or "온라인 신청",
+            # 신청 주소가 확인되지 않으면 null (출처 URL로 대신 채우지 않음 → UI '신청하기' 미노출)
+            "official_apply_url": sp.get("official_apply_url"),
+            "source_url": sp["source_url"],
+            "verification_status": sp["verification_status"],
+            "collected_at": source_evidence[sp["policy_id"]]["collected_at"],
+            "approval_status": sp["approval_status"],
+            "reception_status": sp["reception_status"],
+            "lifecycle_status": sp["lifecycle_status"]
+        }
+        new_policies.append(p_node)
 
     merged_policies = policies + new_policies
     # 원본 인계 파일은 읽기만 한다. 후보에서는 신청 주소만 교정한다.
@@ -223,8 +317,15 @@ def build_candidate_release():
     # 신규 정책의 그래프 관계는 수집 단계의 코드값으로 만들므로 표기 교정 전 값을 보관한다
     new_policies_for_edges = [dict(policy) for policy in new_policies]
     corrections = dc.load_corrections()
+    # 원천 신청 필드 판정 뒤, 신청 화면을 직접 확인한 교정(#18)을 덮어쓴다. 변경 목록도 교정 뒤 값으로 다시 만든다.
+    application_changes = dc.apply_application_url_corrections(
+        merged_policies, application_reviews, baseline_policies, corrections,
+    )
     dc.apply_policy_corrections(merged_policies, corrections)
     dc.apply_source_review(merged_policies, corrections)
+    # 수집 기본 문구가 "상시 신청"으로 읽히지 않도록 "미확인"으로 바꾼다(#107). 정책 노드 속성만 바뀐다.
+    default_period_policies = dc.replace_default_application_periods(merged_policies)
+    dc.check_stored_reception_status(merged_policies)
     (CANDIDATE_DIR / "application_url_review.json").write_text(
         json.dumps(application_reviews, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8", newline="\n",
@@ -234,7 +335,7 @@ def build_candidate_release():
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
     print(f"  -> 병합 완료: 총 {len(merged_policies)}건 (+{len(new_policies)}건 증분)")
 
-    # (2) nodes_document.jsonl (기존 246건 + 신규 22건 = 268건)
+    # (2) nodes_document.jsonl (기존 246건 + 신규 24건 = 270건)
     print("\n[D-1.2] Document 노드 병합 및 4단계 검증 분류 적용...")
     documents = []
     with open(HANDOFF_DIR / "neo4j" / "nodes_document.jsonl", "r", encoding="utf-8") as f:
@@ -244,19 +345,21 @@ def build_candidate_release():
 
     existing_dids = {d["document_id"] for d in documents}
     new_docs = []
-    with open(STAGING_DIR / "documents.jsonl", "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip(): continue
-            sd = json.loads(line)
-            assert sd["document_id"] not in existing_dids, f"Document ID 충돌 감지: {sd['document_id']}"
-            assert sd.get("verification_status"), f"검증 상태 누락: {sd['document_id']}"
-            # 원본 경로·해시·추출 텍스트 경로는 apply_official_crosscheck.py가 staging에 기록한 값을 그대로 쓴다
-            new_docs.append(sd)
+    staged_documents = [json.loads(line) for line in
+                        (STAGING_DIR / "documents.jsonl").open(encoding="utf-8") if line.strip()]
+    for sd in staged_documents + read_batch_jsonl("documents.jsonl"):
+        assert sd["document_id"] not in existing_dids, f"Document ID 충돌 감지: {sd['document_id']}"
+        assert sd.get("verification_status"), f"검증 상태 누락: {sd['document_id']}"
+        # 원본 경로·해시·추출 텍스트 경로는 apply_official_crosscheck.py(복지로 2026 묶음은 stage_bokjiro_2026_policies.py)가
+        # staging에 기록한 값을 그대로 쓴다
+        existing_dids.add(sd["document_id"])
+        new_docs.append(sd)
 
     merged_documents = documents + new_docs
     # 복지로 원본은 보존하고, 동결 인계본의 문서는 복사한 뒤 후보 검색 본문을 별도로 만든다.
     merged_documents = [dict(document) for document in merged_documents]
     outdated_lines = prepare_document_excerpts(merged_documents, corrections)
+    held_lines = prepare_held_excerpts(merged_documents, corrections)
     with open(neo4j_out / "nodes_document.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for d in merged_documents:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
@@ -487,24 +590,32 @@ def build_candidate_release():
     existing_cids = {c["chunk_id"] for c in chunks}
     doc_status = {d["document_id"]: d["verification_status"] for d in new_docs}
     new_chunks = []
-    with open(STAGING_DIR / "payload_chunks.jsonl", "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip(): continue
-            sc = json.loads(line)
-            assert sc["chunk_id"] not in existing_cids, f"Chunk ID 충돌 감지: {sc['chunk_id']}"
-            # 청크 검증 상태는 소속 문서의 상태와 같게 맞춘다
-            sc["verification_status"] = doc_status[sc["document_id"]]
-            new_chunks.append(sc)
+    staged_chunks = [json.loads(line) for line in
+                     (STAGING_DIR / "payload_chunks.jsonl").open(encoding="utf-8") if line.strip()]
+    for sc in staged_chunks + read_batch_jsonl("payload_chunks.jsonl"):
+        assert sc["chunk_id"] not in existing_cids, f"Chunk ID 충돌 감지: {sc['chunk_id']}"
+        existing_cids.add(sc["chunk_id"])
+        # 청크 검증 상태는 소속 문서의 상태와 같게 맞춘다
+        sc["verification_status"] = doc_status[sc["document_id"]]
+        new_chunks.append(sc)
 
     merged_chunks = chunks + new_chunks
     changed_excerpts = set()
     for chunk in merged_chunks:
         line = outdated_lines.get(chunk["document_id"])
-        if line and line in chunk["text"]:
+        if isinstance(line, dict):
+            # 행 교정(document_line_rewrites): 그 행이 들어 있는 청크에서만 바꾼다.
+            if line["line"] in chunk["text"].splitlines():
+                chunk["text"] = dc.rewrite_line(chunk["text"], line)
+                changed_excerpts.add(chunk["document_id"])
+        elif line and line in chunk["text"]:
             chunk["text"] = dc.omit_outdated_line(chunk["text"], line)
             changed_excerpts.add(chunk["document_id"])
     if changed_excerpts != set(outdated_lines):
         raise ValueError("옛 안내 행이 후보 청크에서 누락되었거나 분리되어 있습니다")
+    merged_chunks, held_dropped_chunks = hold_chunk_lines(merged_chunks, held_lines)
+    # 보류 행만 있던 신규 청크는 후보에 넣지 않는다 (증분 포인트 목록·건수도 실제 남은 청크 기준)
+    new_chunks = [c for c in new_chunks if c["chunk_id"] not in set(held_dropped_chunks)]
     region_chunks_corrected = dc.apply_region_to_chunks(merged_chunks, corrections)
     taxonomy_chunks_corrected = dc.apply_taxonomy_to_chunks(merged_chunks, merged_policies, corrections)
     with open(qdrant_out / "payload_chunks.jsonl", "w", encoding="utf-8", newline="\n") as f:
@@ -590,7 +701,11 @@ def build_candidate_release():
             "added_condition_group_ids": [group["group_id"] for group in corrections["new_condition_groups"]],
             "removed_condition_group_ids": sorted(dc.removed_group_ids(corrections)),
             "region_corrected_chunks": region_chunks_corrected,
+            "unverified_application_periods": corrections.get("unverified_application_periods", []),
+            "default_application_periods_replaced": default_period_policies,
             "search_excerpts_updated": corrections.get("outdated_document_lines", []),
+            "search_lines_held": corrections.get("held_document_lines", []),
+            "held_line_dropped_chunks": held_dropped_chunks,
         },
         "application_url_evidence_sha256": get_file_sha256(
             BASE_DIR / "data/metadata/application_url_evidence_v1.4.0.json"
@@ -640,6 +755,7 @@ def build_candidate_release():
         "- 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).",
         "- 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.",
         "- 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.",
+        f"- 복지로 2026 추가 정책 {len(read_batch_jsonl('policies.jsonl'))}건(`POL_BOK_099`~)은 복지로 상세 XML(기준연도 2026)을 근거 문서로 넣었다(`verified_official_api`). 선정과 검수 근거: `data/staging/bokjiro_2026/selection.json`, `handoff/`(검수표 v8 전 행 OK), `docs/data/reports/bokjiro_2026_youth_policies_review.md`. 신청 주소는 XML에 없어 비웠고 신청기간은 `미확인`이다.",
         "",
         "## 1-2. 원문 대조 교정 (2026-11-09)",
         "",
@@ -667,7 +783,10 @@ def build_candidate_release():
 
 - 기존 정책 {len(application_changes)}건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
+- 예외로 `data_corrections_v1.4.0.json`의 `application_url_corrections` {len(corrections.get('application_url_corrections', []))}건은 화면을 직접 열어 확인한 교정이다(#18). 그중 {sum(1 for item in corrections.get('application_url_corrections', []) if item['after'])}건은 그 서비스 전용 신청 경로로 바꿨다(실제 신청·예약 단계까지 확인한 것은 {sum(1 for item in corrections.get('application_url_corrections', []) if item.get('verified_stage') in dc.VERIFIED_APPLICATION_STAGES)}건, 나머지는 신청 버튼까지 확인, 단계는 `verified_stage`). 나머지 교정은 누리집 첫 화면·로그인 뒤 전체 목록·빈 신청 목록·전화·방문·이메일 신청이라 비웠다. 현재 접수 가능 여부는 보증하지 않는다.
 - `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
+- 온통청년 신청기간 미확인 {len(corrections.get("unverified_application_periods", []))}건은 사업기간이 신청일로 전달되지 않도록 정책과 검색용 본문·청크를 교정했다(#107).
+- 공식 FAQ 안에서 서로 맞지 않거나 지난 기한이 남은 행 {len(corrections.get('held_document_lines', []))}건은 검색용 본문(`source_text/`)과 청크에서 보류했다(`held_document_lines`, `needs_review`). staging 추출본(원문)은 그대로이고, 보류 행만 있던 청크 {len(held_dropped_chunks)}개는 후보에서 뺐다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
 ---
@@ -687,8 +806,8 @@ def build_candidate_release():
 
 ---
 
-## 3. 신규 9개 정책 루트 조건 그룹(`HAS_ROOT_CONDITION_GROUP`) 보완
-- 신규 정책 9건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_{pid}_ROOT` 노드 9개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
+## 3. 신규 정책 루트 조건 그룹(`HAS_ROOT_CONDITION_GROUP`) 보완
+- 신규 정책 {len(new_policies)}건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_<policy_id>_ROOT` 노드 {len(new_cgroups)}개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
 - 임의의 가상 조건을 만들지 않고 `logic: "UNKNOWN"`으로 처리하여 자격 판정 시 시스템 안전성을 확보함.
 
 ---

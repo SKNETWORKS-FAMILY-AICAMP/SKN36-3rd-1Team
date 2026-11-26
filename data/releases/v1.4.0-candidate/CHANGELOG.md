@@ -3,7 +3,7 @@
 - **릴리스 버전**: `v1.4.0-candidate`
 - **배포 상태**: `CANDIDATE / PENDING_DB_REVIEW`
 - **기준 베이스라인**: `v1.3.2-verified` (원본 인계 파일 보존, 후보의 신청 주소는 교정)
-- **최종 검증 일시**: 2026-11-18 22:58:47 KST
+- **최종 검증 일시**: 2026-11-24 21:15:03 KST
 - **책임자**: LifePolicy AI 데이터 아키텍처팀
 
 ---
@@ -12,45 +12,49 @@
 
 | 데이터 항목 | v1.3.2-verified (기존) | v1.4.0-candidate (후보) | 증감 |
 | :--- | ---: | ---: | ---: |
-| 정책 (`Policy`) | 237 | 246 | +9 |
-| 근거 문서 (`Document`) | 246 | 262 | +16 |
-| • 신규 문서 `verified_official_api` | - | 8 | +8 |
-| • 신규 문서 `verified_official_raw` | - | 2 | +2 |
-| • 신규 문서 `verified_official_text` | - | 6 | +6 |
-| 벡터 청크 (`Chunk`) | 557 | 600 | +43 |
-| 그래프 노드 (전체) | 1034 | 1126 | +92 |
-| • Organization | 116 | 123 | +7 |
-| • ConditionGroup | 343 | 351 | +9 (루트 UNKNOWN) |
-| 그래프 관계 (전체) | 3615 | 2668 | +89 |
-| • ADMINISTERED_BY | 237 | 246 | +9 |
-| • APPLIES_TO_LIFESTAGE | 419 | 437 | +18 |
-| • AVAILABLE_IN | 238 | 247 | +9 |
+| 정책 (`Policy`) | 237 | 249 | +12 |
+| 근거 문서 (`Document`) | 246 | 273 | +27 |
+| • 신규 문서 `verified_official_api` | - | 11 | +11 |
+| • 신규 문서 `verified_official_raw` | - | 4 | +4 |
+| • 신규 문서 `verified_official_text` | - | 12 | +12 |
+| 벡터 청크 (`Chunk`) | 557 | 672 | +115 |
+| 그래프 노드 (전체) | 1034 | 1147 | +113 |
+| • Organization | 116 | 126 | +10 |
+| • ConditionGroup | 343 | 354 | +12 (루트 UNKNOWN) |
+| 그래프 관계 (전체) | 3615 | 2702 | +123 |
+| • ADMINISTERED_BY | 237 | 249 | +12 |
+| • APPLIES_TO_LIFESTAGE | 419 | 441 | +22 |
+| • AVAILABLE_IN | 238 | 250 | +12 |
 | • CONTAINS_CONDITION | 735 | 224 | +-511 |
 | • CONTAINS_GROUP | 106 | 105 | +-1 |
-| • HAS_CATEGORY | 237 | 246 | +9 |
-| • HAS_ROOT_CONDITION_GROUP | 237 | 246 | +9 |
+| • HAS_CATEGORY | 237 | 249 | +12 |
+| • HAS_ROOT_CONDITION_GROUP | 237 | 249 | +12 |
 | • REQUIRES_CONDITION | 735 | 211 | +-524 |
-| • SUPPORTED_BY | 246 | 262 | +16 |
-| • TARGETS | 424 | 443 | +19 |
+| • SUPPORTED_BY | 246 | 273 | +27 |
+| • TARGETS | 424 | 450 | +26 |
 
 ## 1-1. 신규 문서 공식 원문 대조 (2026-11-06)
 
 - 신규 문서는 공식 원문으로 확인한 것만 포함한다: 국가법령정보센터 조문 원문(`verified_official_text`), 정부24·온통청년 공식 API 응답(`verified_official_api`).
 - 초기 후보의 요약 문서 22건 중 원문과 다르거나 원문을 확보하지 못한 문서는 제외했다. 문서별 판정과 사유: `data/staging/crosscheck_results.json`, `docs/data/official_source_crosscheck_report.md`.
 - 신규 정책의 자격 조건 그룹은 모두 `UNKNOWN`이며 정책 노드 `verification_status`는 `extracted`이다. 실제 자격 판정에 쓰기 전 조건 구조화가 필요하다.
+- 복지로 2026 추가 정책 3건(`POL_BOK_099`~)은 복지로 상세 XML(기준연도 2026)을 근거 문서로 넣었다(`verified_official_api`). 선정과 검수 근거: `data/staging/bokjiro_2026/selection.json`, `handoff/`(검수표 v8 전 행 OK), `docs/data/reports/bokjiro_2026_youth_policies_review.md`. 신청 주소는 XML에 없어 비웠고 신청기간은 `미확인`이다.
 
 ## 1-2. 원문 대조 교정 (2026-11-09)
 
-- 설명 문구 10건, 지역 4건, 연령 조건 제거 24건·원문 값 교체 5건, 가구 조건 교정 46건을 적용했다.
-- 관계 1331개 제거·교체, 295개 추가(교체분 포함), 표기 교정 청크 89개. 함께 가구유형 OR 그룹 90개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.
+- 설명 문구 28건, 지역 4건, 연령 조건 제거 24건·원문 값 교체 5건, 가구 조건 교정 46건을 적용했다.
+- 관계 1331개 제거·교체, 295개 추가(교체분 포함), 표기 교정 청크 114개. 함께 가구유형 OR 그룹 90개를 제거했다. 근거: `data/metadata/data_corrections_v1.4.0.json`.
 - `data/handoff`(v1.3.2)는 변경하지 않았다. 제거된 조건은 '제한 없음'이 아니라 자동 판정 불가로 처리해야 한다.
 - 방과후보육료 출생일 기준은 교육부 2026년도 안내서 인쇄 297쪽(PDF 305쪽)을 연결했다. 복지로 영유아보육료의 옛 방과후 연령 표 행은 후보 검색 본문에서 제외했다.
 
 ## 1-2. 기존 정책의 신청 주소 교정
 
-- 기존 정책 219건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
+- 기존 정책 235건에서 `official_apply_url`을 변경했다(원문 대조 교정은 1-2절). 전체 판정은 `application_url_review.json`, 변경 전후 값은 `release_delta_manifest.json`의 `updated_policy_properties`에 있다.
 - 출처·참고·안내·공고 주소를 신청 주소로 대체하지 않는다. 남은 주소는 원천의 신청 필드에 근거한 값이며, 실제 접수 화면·로그인·현재 접수 가능 여부는 검증하지 않았다.
+- 예외로 `data_corrections_v1.4.0.json`의 `application_url_corrections` 19건은 화면을 직접 열어 확인한 교정이다(#18). 그중 4건은 그 서비스 전용 신청 경로로 바꿨다(실제 신청·예약 단계까지 확인한 것은 3건, 나머지는 신청 버튼까지 확인, 단계는 `verified_stage`). 나머지 교정은 누리집 첫 화면·로그인 뒤 전체 목록·빈 신청 목록·전화·방문·이메일 신청이라 비웠다. 현재 접수 가능 여부는 보증하지 않는다.
 - `data/handoff/`, 기존 정제본, 수집 원문은 보존한다. 후보 검색 근거의 변경은 위 원문 대조 교정 및 증분 명세를 따른다.
+- 온통청년 신청기간 미확인 12건은 사업기간이 신청일로 전달되지 않도록 정책과 검색용 본문·청크를 교정했다(#107).
+- 공식 FAQ 안에서 서로 맞지 않거나 지난 기한이 남은 행 2건은 검색용 본문(`source_text/`)과 청크에서 보류했다(`held_document_lines`, `needs_review`). staging 추출본(원문)은 그대로이고, 보류 행만 있던 청크 1개는 후보에서 뺐다.
 - 후보용 Neo4j 로더는 기본적으로 사전 검증만 수행한다. 실제 적재는 비어 있는 검증 DB에서만 허용하며, 기본값은 검증 후 롤백이다.
 
 ---
@@ -70,8 +74,8 @@
 
 ---
 
-## 3. 신규 9개 정책 루트 조건 그룹(`HAS_ROOT_CONDITION_GROUP`) 보완
-- 신규 정책 9건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_POL_STG_ICN_001_ROOT` 노드 9개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
+## 3. 신규 정책 루트 조건 그룹(`HAS_ROOT_CONDITION_GROUP`) 보완
+- 신규 정책 12건에 대해 조건 누락 없이 3값 논리(3-Valued Logic)를 지원하는 `GRP_<policy_id>_ROOT` 노드 12개를 생성하고 `HAS_ROOT_CONDITION_GROUP` 관계를 연결함.
 - 임의의 가상 조건을 만들지 않고 `logic: "UNKNOWN"`으로 처리하여 자격 판정 시 시스템 안전성을 확보함.
 
 ---

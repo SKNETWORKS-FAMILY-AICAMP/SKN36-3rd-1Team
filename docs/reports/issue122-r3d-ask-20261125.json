@@ -1,0 +1,311 @@
+{
+ "sample_only_profile": {
+  "age": 27,
+  "region": "서울특별시",
+  "income": null
+ },
+ "note": "가상 프로필로 보낸 실제 POST /api/ask 응답 요약(답변은 앞 500자). 비밀값 없음.",
+ "executed_at_kst": "2026-11-25 저녁 실행, 결과 파일 저장 19:28",
+ "code": "dev 3970a97 + PR #125 dde7f31 (worktree codex/103-kpass-list-search)",
+ "db": {
+  "project": "issue105-r3d-verify",
+  "qdrant": "127.0.0.1:56756",
+  "neo4j": "127.0.0.1:56787",
+  "collection": "exp_b2_qwen3emb06b_v140_v1 (alias)",
+  "bundle": "rag-final-v140-r3-57d90f23308a",
+  "manifest_lf_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da"
+ },
+ "results": [
+  {
+   "kind": "kpass",
+   "q": "모두의카드 신청 방법 알려줘",
+   "status": 200,
+   "sec": 2.2,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    }
+   ],
+   "answer": "모두의카드(K-패스) (대중교통비 환급지원)는 현재 접수 중이에요. 다만 신청 자격은 공식 공고만으로는 확정할 수 없습니다. 제공된 원문에는 회원가입 후 이용 가능하다는 안내와, 카드 발급 후 홈페이지 또는 앱에서 회원가입해야 적립이 가능하다는 내용만 확인되며 [2][3], 나이 조건은 만 19세 이상 기준에 사용자의 만 27세가 포함된다고만 확인됩니다 [1]. 종합 자격은 자동 판정이 보류되어 있어, 실제 신청 가능 여부는 공식 공고에서 다시 확인해 주세요 [1].",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "kpass",
+   "q": "모두의 카드 신청 방법 알려줘",
+   "status": 200,
+   "sec": 2.0,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    }
+   ],
+   "answer": "모두의 카드(K-패스) (대중교통비 환급지원)는 현재 접수 중이에요. 다만 신청 자격은 공식 공고만으로는 확인되지 않았습니다. 제공된 원문은 회원가입, 카드 변경, 재발급, 적립 안내 중심이라 신청 대상·자격 요건이 확인되지 않았고, 자격 판정도 추가 확인이 필요합니다 [1][2][3][4][5].\n\n원문에서 확인되는 내용은 다음과 같습니다. 모두의카드 발급 후 홈페이지 또는 앱에서 회원가입을 해야 적립이 가능하고, 회원가입 이전 사용분은 소급처리되지 않습니다 [3]. 또한 이용 중인 카드가 변경되면 변경된 카드정보를 등록한 날부터 적립되며, 등록 없이 이용한 내역은 적립되지 않습니다 [2][4][5].",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "kpass",
+   "q": "K-패스 신청 방법 알려줘",
+   "status": 200,
+   "sec": 2.0,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    }
+   ],
+   "answer": "K-패스는 **상시신청**이며, K-패스 모바일 앱이나 누리집(korea-pass.kr)에서 회원가입하면 됩니다. 다만 회원가입 전에 K-패스 카드 발급이 필요합니다 [1]. 현재 접수 중이지만, 신청 자격은 별도로 확인해야 합니다. 공식 원문상 지원대상은 K-패스 사업에 참여하는 지자체에 주민등록이 되어 있는 만 19세 이상 국민이며, 청년층과 저소득층 기준도 함께 제시되어 있습니다 [2].",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "kpass",
+   "q": "k-패스 신청 방법 알려줘",
+   "status": 200,
+   "sec": 1.6,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    }
+   ],
+   "answer": "K-패스는 **상시신청**이며, K-패스 모바일 앱이나 누리집(korea-pass.kr)에서 회원가입하면 됩니다. 회원가입 전에 K-패스 카드 발급이 필요하고, 구비서류는 해당없음으로 안내되어 있습니다. [1]\n\n현재 접수 중이에요. 다만 신청 자격은 만 19세 이상의 국민, K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어 있는 자, 청년층(만 19~34세 국민), 저소득층(기초생활수급자 및 차상위계층)으로 안내되어 있어요. 사용자는 만 27세이므로 연령 기준에는 해당하지만, 거주지가 K-패스 참여 지자체인지와 다른 자격 요건은 이 원문만으로는 추가 확인이 필요합니다. [2]",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "kpass",
+   "q": "K패스 신청 방법 알려줘",
+   "status": 200,
+   "sec": 2.1,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    }
+   ],
+   "answer": "K-패스는 현재 **접수 중**이고, 신청은 K-패스 모바일 앱이나 누리집(korea-pass.kr)에서 회원가입하는 방식입니다. 다만 회원가입 전에 K-패스 카드를 먼저 발급받아야 합니다. [1]\n\n신청 자격은 공식 원문상 K-패스 사업에 참여하는 지자체에 주민등록이 되어 있는 만 19세 이상 국민이며, 청년층은 만 19~34세, 저소득층은 기초생활수급자 및 차상위계층입니다. 사용자는 만 27세이므로 연령 기준에는 포함되지만, 서울특별시가 K-패스 사업 참여 지자체인지와 다른 자격 요건은 이 근거만으로는 자동 확정할 수 없어 신청 자격은 추가 확인이 필요합니다. [2]\n\n구비서류는 해당 없음으로 안내되어 있습니다. [1]",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "kpass",
+   "q": "k패스 신청 방법 알려줘",
+   "status": 200,
+   "sec": 2.4,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_GOV24"
+    }
+   ],
+   "answer": "K-패스는 **상시신청**이며, K-패스 모바일 앱이나 누리집(korea-pass.kr)에서 회원가입하면 됩니다. 다만 회원가입 전에 K-패스 카드 발급이 필요합니다 [1].\n\n현재 접수 중이에요. 신청 자격은 공식 공고상 K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어 있는 만 19세 이상의 국민이며, 청년층은 만 19~34세, 저소득층은 기초생활보장법상 기초생활수급자 및 차상위계층입니다 [2]. 사용자는 만 27세이므로 연령 기준에는 포함되지만, 거주지가 K-패스 사업 참여 지자체인지와 다른 지원대상 해당 여부는 추가 확인이 필요합니다 [2].",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "faq",
+   "q": "모두의 카드 한시 상향 혜택은 언제까지 적용돼?",
+   "status": 200,
+   "sec": 1.3,
+   "policies": [
+    "POL_STG_MOLIT_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_MOLIT_001_FAQ_2026"
+    }
+   ],
+   "answer": "모두의 카드(K-패스) 혜택은 **2026년 4월 1일부터 2026년 9월 30일까지** 한시적으로 상향 적용됩니다. 원문에 이 기간이 명시되어 있고, 2026년 4월~9월로도 안내되어 있습니다 [1][2]. 현재 접수 상태는 열려 있지만, 신청 자격은 공식 공고에서 확인이 필요합니다 [1].",
+   "apply": {
+    "POL_STG_MOLIT_001": null
+   },
+   "reception": {
+    "POL_STG_MOLIT_001": "open"
+   }
+  },
+  {
+   "kind": "faq",
+   "q": "2011년 이전에 중소기업에 취업했는데 중소기업 취업자 소득세 감면 받을 수 있어?",
+   "status": 200,
+   "sec": 1.9,
+   "policies": [
+    "POL_STG_NTS_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_NTS_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_NTS_001_FAQ_2026"
+    }
+   ],
+   "answer": "중소기업 취업자 소득세 감면은 **2012년 1월 1일 이후** 중소기업에 취업하는 경우부터 적용됩니다. 따라서 2011년 12월 31일 이전에 이미 중소기업에 취업해 계속 근무 중이라면 감면을 받을 수 없습니다. 또한 2011년 12월 31일 이전에 중소기업에 취업한 사람이 계약기간 연장 등을 통해 같은 중소기업에 재취업하는 경우도 감면 대상이 아닙니다. [1]\n\n다만 2012년 1월 1일 이후에 중소기업에 취업한 경우에는 감면 대상이 될 수 있고, 취업한 기업이 중소기업기본법상 중소기업이더라도 조세특례제한법시행령 제27조제3항에 열거된 업종을 주된 사업으로 영위하는 경우에만 적용됩니다. 금융 및 보험업, 보건업, 일부 전문서비스업, 주점업 등은 예시로 제외 업종이 제시되어 있습니다. [1][2]",
+   "apply": {
+    "POL_STG_NTS_001": null
+   },
+   "reception": {
+    "POL_STG_NTS_001": "unknown"
+   }
+  },
+  {
+   "kind": "faq",
+   "q": "서울시 청년수당 사업 공고는 어디서 확인할 수 있어?",
+   "status": 200,
+   "sec": 2.0,
+   "policies": [
+    "POL_STG_SEOUL_001"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_STG_SEOUL_001_INTRO_2026"
+    },
+    {
+     "document_id": "DOC_STG_SEOUL_001_FAQ_2026"
+    },
+    {
+     "document_id": "DOC_STG_SEOUL_001_INTRO_2026"
+    }
+   ],
+   "answer": "서울시 청년수당 사업 공고는 청년몽땅정보통(https://youth.seoul.go.kr) 공지사항에서 확인할 수 있고, 사업신청에 대한 상세내용은 공고문을 통해 확인 가능합니다. 신청은 청년몽땅정보통 청년수당 신청 페이지에서 하도록 안내되어 있습니다. [2][1]\n\n다만 현재 이 사업은 접수가 마감된 상태입니다. [1]\n\n신청 자격은 공식 원문상 서울에 거주하는 만 19세~34세 미취업 또는 단기 근로 청년, 중위소득 150% 이하, 그리고 재학생·휴학생 제외로 안내되어 있지만, 이번 입력에서는 자격 판정이 자동으로 확정되지 않아 추가 확인이 필요합니다. [3][2]",
+   "apply": {
+    "POL_STG_SEOUL_001": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005"
+   },
+   "reception": {
+    "POL_STG_SEOUL_001": "closed"
+   }
+  },
+  {
+   "kind": "sejong",
+   "q": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "status": 200,
+   "sec": 1.9,
+   "policies": [
+    "POL_YC_065"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_YC_065"
+    },
+    {
+     "document_id": "DOC_YC_065"
+    },
+    {
+     "document_id": "DOC_YC_065"
+    }
+   ],
+   "answer": "세종시 위원회 청년참여 확대는 **신청 방법이 공고문 참조**로만 확인되고, 원문에는 구체적인 접수 절차가 적혀 있지 않습니다. 신청 URL은 세종시 홈페이지로 제시되어 있습니다[1]. 모집 일정도 원문에 신청기간이 비어 있어 확인되지 않았습니다[1].\n\n자격은 만 19~39세가 대상이고, 혼인·소득·취업·학력·전공 요건은 제한없음으로 적혀 있습니다[3]. 다만 대상 지역은 세종특별자치시로 확인되며, 입력하신 지역은 서울특별시라 거주 요건은 공식 공고에서 다시 확인이 필요합니다[2][3].",
+   "apply": {
+    "POL_YC_065": null
+   },
+   "reception": {
+    "POL_YC_065": "unknown"
+   }
+  },
+  {
+   "kind": "selected",
+   "q": "글로벌첨단전략산업 기술경영 전문인력 양성사업 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+   "status": 200,
+   "sec": 5.3,
+   "policies": [
+    "POL_YC_007"
+   ],
+   "citations": [
+    {
+     "document_id": "DOC_YC_007",
+     "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214681",
+     "title": "[온통청년 정책] 글로벌첨단전략산업 기술경영 전문인력 양성사업 (20261101005400214681)"
+    },
+    {
+     "document_id": "DOC_YC_007",
+     "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214681",
+     "title": "[온통청년 정책] 글로벌첨단전략산업 기술경영 전문인력 양성사업 (20261101005400214681)"
+    },
+    {
+     "document_id": "DOC_YC_007",
+     "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214681",
+     "title": "[온통청년 정책] 글로벌첨단전략산업 기술경영 전문인력 양성사업 (20261101005400214681)"
+    }
+   ],
+   "answer": "글로벌첨단전략산업 기술경영 전문인력 양성사업은 현재 접수 중이에요. 신청은 DGIST 누리집(www.dgist.ac.kr) 대학원 신입생 모집공고를 참고하면 됩니다 [1].\n\n지원 대상은 원문상 학사 학위 취득자 또는 취득 예정자(기업 재직자 포함)이며, 학력 요건으로는 대졸 예정·대학 졸업·석·박사가 제시돼 있습니다 [2]. 다만 거주 지역은 대구광역시로 확인되지만, 입력하신 지역은 서울특별시라서 거주 요건은 공식 공고에서 다시 확인이 필요합니다 [3]. 나이 기준은 데이터에 정리되지 않아 공식 원문 확인이 필요합니다 [2].\n\n필요한 서류는 이번 공식 원문에서 확인되지 않았습니다. 신청 서류는 DGIST 대학원 신입생 모집공고에서 확인해 주세요 [1]. 학력을 알려 주세요.",
+   "apply": {
+    "POL_YC_007": null
+   },
+   "reception": {
+    "POL_YC_007": "open"
+   }
+  }
+ ]
+}

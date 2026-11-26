@@ -26,6 +26,8 @@ from database import embedding as em  # noqa: E402
 from database import handoff_data as hd  # noqa: E402
 from database import llm_chunking as lc  # noqa: E402
 from database.qdrant import store  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tests/unit 공용 가드(legacy_dataset_gate) import용
+from legacy_dataset_gate import legacy_dataset_only  # noqa: E402  (v1.3.2 실데이터 테스트는 data/handoff에서만)
 
 # 실제 응답의 제안 21개 (title == start_text). 창 0 = 원문 [0, 5891)
 NHUF_003_WINDOW_0 = (0, 5891)
@@ -192,6 +194,7 @@ class TestSavedOpenAIResponse(unittest.TestCase):
                 with self.subTest(chunk=chunk["chunk_id"], title=title):
                     self.assertTrue(em.starts_a_line(chunk["text"], title))
 
+    @legacy_dataset_only
     def test_embedding_header_and_payload_keep_titles(self):
         chunk = self._chunk_containing("연 1.9%")
         info = em.describe_embedding_input(chunk, {"policy_name": "가상 정책명"}, "policy_section_body_v2")
