@@ -1,14 +1,17 @@
 """정책 검색, 조건 검사, 답변 생성과 출처 검증을 연결한다."""
 
+from collections import Counter
 from collections.abc import Callable, Collection
 from json import JSONDecodeError
 import logging
 import re
 
 from httpx import NetworkError, TimeoutException
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from backend.api.schemas import AskRequest, AskResponse, Contact, EligibilityOutput, GeneratorOutput
+from backend.api.schemas import (
+    AskRequest, AskResponse, Contact, EligibilityOutput, ExclusionReason, GeneratorOutput,
+)
 from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure, application_schedule
@@ -22,6 +25,7 @@ from database.unknown_group_scope import (
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
+EXCLUSION_REASONS = TypeAdapter(list[ExclusionReason])
 CITATION = re.compile(r"\[(\d+)\]")
 # 검색 계층(data_quality.affected_attributes)·Checker와 같은 공통 상수("all" 제외).
 # 목록 밖의 값과 "all"은 영향 범위를 확정할 수 없으므로 정책 전체를 보류한다.
@@ -199,6 +203,35 @@ def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str 
     if root is not None and root["status"] == "eligible":
         root["status"] = "needs_check"
         root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
+
+
+def _confirmed_exclusion_reasons(raw: dict, conditions: list[dict]) -> list[dict] | None:
+    """Checker가 확정한 제외 사유(#78)를 다시 계산하지 않고, 이 정책의 최종 판정과 맞을 때만 그대로 넘긴다.
+
+    raw는 이 정책의 Checker 결과, conditions는 Pipeline 보류까지 반영한 같은 정책의 조건이다.
+    - 사유가 없거나 빈 목록이면 None. '확인된 제외 사유가 전달되지 않음'이지 '제외 조건 없음'이 아니다.
+    - 종합 판정(마지막 eligibility 행)이 ineligible이 아니면 None. 보류로 낮춘 판정과 어긋나는 확정 사유를 내보내지 않는다.
+    - Pipeline이 보류로 낮춘 필드의 사유는 뺀다. 그룹 행을 보류했으면 전부, 다른 보류가 있으면 복합(eligibility) 사유도 뺀다.
+    남은 사유는 Checker 순서·문구 그대로다.
+    """
+    reasons = raw.get("exclusion_reasons")
+    if reasons is None:
+        return None
+    try:
+        reasons = EXCLUSION_REASONS.validate_python(reasons)
+    except ValidationError as exc:
+        raise AskError("ELIGIBILITY_OUTPUT_INVALID") from exc
+    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
+    if not reasons or root is None or root["status"] != "ineligible":
+        return None
+    before = Counter((row.field.lower(), row.status) for row in EligibilityOutput.model_validate(raw).conditions)
+    after = Counter((row["field"].lower(), row["status"]) for row in conditions)
+    held = {field for field, _ in (before - after) + (after - before)}
+    if "eligibility" in held:
+        return None
+    kept = [reason.model_dump() for reason in reasons
+            if reason.field.lower() not in held and not (held and reason.field.lower() == "eligibility")]
+    return kept or None
 
 
 def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict:
@@ -599,6 +632,8 @@ def run_ask_pipeline(
         check = _policy_check(by_id[pid], raw_checks[pid], profile, selected[0])
         if request.selected_policy_id:
             _hold_selected_policy_region(by_id[pid], check, profile["region"])
+        # 보류 반영이 끝난 뒤 같은 정책의 Checker 결과만 읽는다. Generator와 화면이 같은 값을 받는다(#78).
+        check["exclusion_reasons"] = _confirmed_exclusion_reasons(raw_checks[pid], check["conditions"])
         contacts = _collect_contacts(selected)
         if not contacts:
             # 미채택 후보 청크에서만 찾았다 — 그 청크는 답변의 citations에 들어가지 않으므로,

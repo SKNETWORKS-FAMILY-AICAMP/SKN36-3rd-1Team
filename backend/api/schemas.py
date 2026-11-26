@@ -53,7 +53,7 @@ class Contact(BaseModel):
 
 
 class ExclusionReason(BaseModel):
-    """NOT 제외 조건 하나(#77 계약 — 자리만 예약, #78이 채운다). ConditionResult와 같은 field/label 체계를 쓴다."""
+    """Checker가 확정한 NOT 제외 사유 하나(#77 계약, #78). ConditionResult와 같은 field/label 체계를 쓴다."""
 
     field: NonBlank
     label: NonBlank
@@ -103,7 +103,8 @@ class PolicyCheck(EligibilityOutput):
     official_apply_url: str | None
     contacts: list[Contact] | None = None
     requirement_excerpts: list[RequirementExcerpt] | None = None
-    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. exclusion_reasons는 자리만 예약했고(#78),
+    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. exclusion_reasons는 Checker가 확정한
+    # 같은 정책의 제외 사유를 그대로 담고, 최종 판정과 맞지 않으면 None이다(#78, pipeline._confirmed_exclusion_reasons).
     # official_requirements는 채택 근거의 자격 블록에서 원문이 항목명을 붙인 기준(또는 원문과 맞는 검수 기록)만
     # 원문 그대로 채운다(#76, backend/rag/official_requirements.py). 확인된 기준이 없으면 None이다.
     exclusion_reasons: list[ExclusionReason] | None = None
