@@ -26,6 +26,18 @@ def main():
     from backend.llm import generator as g
     from backend.eligibility.checker import check_eligibility
     cases = [
+        ("income_method_missing", "월 소득을 어디서 확인하나요?",
+         {"age": 30, "region": "서울특별시", "income": None, "child_age_months": 24},
+         "소득 확인 방법을 설명. 일반 후속 질문을 소득 입력 버튼으로 바꾸지 않음."),
+        ("income_method_given", "월 소득을 어디서 확인하나요?",
+         {"age": 30, "region": "서울특별시", "income": 300, "child_age_months": 24},
+         "소득이 입력돼도 확인 방법 질문을 중복 입력 요청으로 제거하지 않음."),
+        ("support_start_missing", "아이 돌봄 지원은 몇 개월부터 시작되나요?",
+         {"age": 30, "region": "서울특별시", "income": None, "child_age_months": None},
+         "지원 시작 월령을 설명. 개인 월령 입력 요구만으로 대체하지 않음."),
+        ("support_start_given", "아이 돌봄 지원은 몇 개월부터 시작되나요?",
+         {"age": 30, "region": "서울특별시", "income": 300, "child_age_months": 24},
+         "입력 여부와 무관하게 정책 시작 월령 질문에 답변. 근거에 하한이 없으면 추정하지 않음."),
         ("child_missing", "이 지원을 신청할 수 있을까요? 확인에 필요한 정보도 알려 주세요.",
          {"age": 30, "region": "서울특별시", "income": None, "child_age_months": None},
          "미입력 자녀 월령은 필요시 개월 단위로 본문 안내. 신청자 나이 버튼으로 바꾸지 않음."),
@@ -93,4 +105,5 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 

@@ -136,12 +136,43 @@ def _is_applicant_age_request(text: str) -> bool:
     ))
 
 
+def _is_profile_method_question(text: str) -> bool:
+    """Explain how to obtain/compute a value, rather than ask for its value.
+
+    A direct input instruction in the same clause still needs input handling.
+    '어떻게 되나요' and '어디에 사시나요' are not method questions.
+    """
+    # Keep the existing contract for unsupported household/asset inputs.
+    if not re.search(
+        r"소득|수입|급여|월급|연봉|나이|연령|생년월일|월령|개월|거주|주소|지역", text,
+    ):
+        return False
+    if re.search(
+        r"(?:소득|수입|급여|나이|연령|월령|개월\s*수|거주\s*지역|주소)"
+        r"\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
+    ):
+        return False
+    action = r"(?:확인|조회|계산|산정|산출|발급|증명)"
+    return bool(re.search(
+        r"(?:어디서|어디에서|어디로|어떤\s*(?:곳|기관|사이트|서류)에서|"
+        r"어떻게|어떤\s*(?:방법|방식)으로).{0,30}"
+        + action + r".{0,15}(?:하나요|하는지|할\s*수|가능|받나요|되나요|해야|해요|하죠|합니까)|"
+        + action + r"\s*(?:하는\s*)?(?:방법|방식|절차|경로|기관|사이트)"
+        r".{0,25}(?:무엇|어디|어떻게|인가요|알려|설명|안내)|"
+        + action + r".{0,15}(?:하려면|하려고|하려는데)"
+        r".{0,20}(?:어디|어떻게).{0,20}(?:하나요|하죠|해요|가야|할\s*수)",
+        text,
+    ))
+
+
 def _direct_profile_request_field(text: str) -> str | None:
     """Find the input actually requested, rather than an earlier mention.
 
     Only adjacent field/request phrases qualify; this must not span from
     '아이 월령은 알고 있으니' to a later request for region or income.
     """
+    if _is_profile_method_question(text):
+        return None
     patterns = {
         "region": r"(?:거주\s*(?:지역|지)|지역|주소)",
         "income": r"(?<!주거)(?:월\s*)?(?:소득|수입|급여)",
@@ -168,6 +199,30 @@ def _direct_profile_request_field(text: str) -> str | None:
 
 def _is_child_age_policy_question(text: str) -> bool:
     """Age thresholds and age-dependent benefits are policy questions."""
+    # The service name may precede the threshold: '아이 돌봄 지원은 몇 개월부터
+    # 시작되나요?' must mean the same as '아이는 몇 개월부터 지원되나요?'.
+    # Require an actual service/threshold question; a personal '몇 개월인가요'
+    # remains an input request.
+    direct_value_request = bool(re.search(
+        r"(?:월령|개월\s*수|나이|연령)\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
+    ))
+    threshold = re.search(
+        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과|에)", text,
+    )
+    if (
+        threshold
+        and not direct_value_request
+        and re.search(r"(?:자녀|아이|아기|영아|영유아|월령)", text)
+        and re.search(r"신청|지원|접수|이용|돌봄|보육|서비스", text)
+        and re.search(r"시작|종료|가능|대상|되나요|되죠|(?:할|받을|이용할)\s*수|이어야|여야", text)
+        and not re.search(r"(?:알려|입력|말씀)\s*(?:해\s*)?주시면", text)
+    ):
+        return True
+    if not direct_value_request and re.search(
+        r"(?:시작|종료|이용|신청|지원)\s*(?:가능\s*)?(?:월령|연령|나이)"
+        r".{0,15}(?:몇|어떻게|무엇)", text,
+    ):
+        return True
     return _is_child_months_method_question(text) or bool(re.search(
         r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과)"
         r".{0,30}(?:신청|지원|접수|이용|이어야|여야)|"
@@ -214,6 +269,8 @@ def _requests_profile_value(text: str, field: str) -> bool:
 
     정책의 자격 기준을 묻는 정상 후속 질문은 제거하지 않는다.
     """
+    if _is_profile_method_question(text):
+        return False
     if field == "child_age_months":
         # Explicit guardian/applicant age is never child_age_months.
         if _is_applicant_age_request(text):
@@ -565,6 +622,8 @@ def _is_explicit_profile_request(text: str) -> bool:
 
 def _is_policy_criteria_question(text: str) -> bool:
     """개인 프로필 요구가 아닌 정책의 금액·자격 기준 질문을 구별한다."""
+    if _is_profile_method_question(text) or _is_child_age_policy_question(text):
+        return True
     if _is_explicit_profile_request(text):
         return False
     return bool(re.search(
@@ -823,6 +882,9 @@ def _is_redundant_request(
     profile: dict | None,
 ) -> bool:
     if profile is None:
+        return False
+
+    if _is_profile_method_question(text):
         return False
 
     # Do not use child_age_months to suppress a guardian/applicant age request.
@@ -1190,7 +1252,7 @@ def _validate_model_response(
         # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
         # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
         if kind == "ask_info":
-            if _is_child_age_policy_question(text):
+            if _is_child_age_policy_question(text) or _is_profile_method_question(text):
                 kind = "question"
             elif detected_field in ALLOWED_FIELDS:
                 field = detected_field
@@ -1596,3 +1658,4 @@ def generate_answer(
         source_ids,
         cleaned_profile,
     )
+
