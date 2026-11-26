@@ -148,3 +148,23 @@ GitHub 상태는 #75 Open, #76 Closed, #78 Closed, #122 Open이다. 이번 회�
 | #78 `exclusion_reasons=null` + NOT 불일치 | R3D Neo4j를 읽기 전용 조회한 결과 `logic=NOT` 그룹은 `POL_005`의 한 건이었다. 74세는 구조화 필드가 `null`이고 NOT이 `needs_check`여서 경고가 없었다. 75·80세는 NOT이 `ineligible`이고 구조화 사유가 1건씩 있어 상세 제외 사유만 표시됐다. `null`과 NOT `ineligible`이 함께 나오는 실응답은 확보하지 못했다. | 실응답 미재현 · Mock PASS |
 
 재현은 [#122 기동 명령](issue122-e2e-verification-matrix.md#재현-명령)을 따른다. React에서 나이를 입력하고 목록에서 JSON의 `request.selected_policy_id`에 해당하는 정책을 찾아 펼친 다음 ‘내 조건으로 확인하기’를 누른다. DevTools Network에서 `POST /api/ask`의 필드와 상담 결과 카드의 제목·발췌 및 링크를 비교한다. `frontend`에서 `npm run test -- src/components/PolicyApplicationInfo.test.tsx src/components/TurnView.test.tsx src/lib/conditionGroups.test.ts`를 실행해 49건 통과했다.
+
+## 2026-11-27 KST · 최신 dev 실제 React 상담 재검증
+
+GitHub의 `dev`와 로컬 HEAD·`origin/dev`가 모두 `1c082cf542d3b7bf469c096a599d42ca7accce65`였다. Chrome에서 React :18305를 열고 FastAPI :18304로 가상 상담을 제출했다. 이미 실행 중인 R3D verify Neo4j :56787·Qdrant :56756, 기본 B2 alias `exp_b2_qwen3emb06b_v140_v1`, Ollama :11434를 사용했다. 로컬 `1.4.0-candidate` manifest SHA-256은 `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`였다. 이번 회차에는 DB 개수와 공급자 응답 모델 식별자를 다시 측정하지 않았다.
+
+각 문항을 새 Chrome 탭에서 2회씩 제출했다. 공통 입력은 지역 공란, 소득 미입력, 대화 이력 없음, 정책 선택 없음이다. **6/6 HTTP 200, 모두 `is_sample=false`, 502 0/6**이었다. 아래 판정은 두 번째 실행의 Network 응답, 카드별 DOM과 R3D 릴리스의 `SUPPORTED_BY` 관계를 대조한 결과다. 첫 실행에서도 복수 정책의 후보 5개가 같았다. [두 회차 요청·응답과 카드 DOM](assets/issue122-1c082cf/ask-browser.json) · [복수 정책 화면](assets/issue122-1c082cf/multi.png)
+
+| 시나리오 · 가상 입력 | 응답과 Checker | 카드·출처 대조 | 판정 |
+| --- | --- | --- | --- |
+| #75 복수 정책 · 교육비·구직·교통 지원 정책이 있나요? · 29세 · 01:19:57 KST | HTTP 200. `POL_BOK_024`, `POL_BOK_020`, `POL_YC_009`, `POL_YC_043`, `POL_BOK_052`. 경기청년 역량강화는 구직에 관련된다. 나머지는 초중고 교육 지원 3건과 공학교육혁신센터 1건이었고 교통 후보가 없었다. 본문은 교통 근거 부족을 밝혔고 언급한 4개 정책의 자격 확인을 보류해 Checker의 `needs_check`와 일치했다. | 카드 5/5의 정책 ID·‘원문 보기’ href가 API 및 같은 정책의 릴리스 문서와 일치. 본문 출처 4/4도 각각 `DOC_BOK_024`, `DOC_BOK_020`, `DOC_YC_043`, `DOC_BOK_052`에 연결됐다. `POL_YC_009`은 본문에 언급되지 않았으며 카드 원문은 `DOC_YC_009`였다. | **FAIL** · 검색 관련성 |
+| RQ040 · 공무원도 국민내일배움카드를 발급받을 수 있나요? · 30세 · 01:20:07 KST | HTTP 200. `POL_005`만 반환. 본문의 공무원 제외는 공식 정책 규칙이다. 프로필에는 재직 정보가 없어 Checker의 재직 확인과 종합 판정은 보류됐고 카드도 개인 자격을 확정하지 않았다. | 카드 1/1, 본문 인용 3건 모두 `POL_005 → DOC_WORK24_001`의 고용24 href와 일치. | **PASS** |
+| RQ042 · 부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요? · 25세 · 01:20:12 KST | HTTP 200. `POL_009`, `POL_YC_035`. 본문은 `POL_009`의 2촌 이내 주택 임차 제외와 부모와의 별도 거주 요건을 함께 설명했다. `POL_YC_035`의 세부 제외 기준은 유보했다. 두 정책의 개인 판정은 `needs_check`, 접수는 `closed`로 본문·카드에 일치했다. | 카드 2/2는 각각 `DOC_MOLIT_001`·`DOC_YC_035`로 연결됐다. 본문 인용 4/4는 해당 정책의 문서였으며 정부24 대체 근거 `DOC_MOLIT_002`도 `POL_009` 소속이었다. | **PASS** |
+
+카드 원문 href는 8/8, 답변 인용 행은 중복 포함 11/11 일치했다. 대조 범위는 React가 렌더링한 링크와 릴리스의 정책·문서 매핑이다. 외부 사이트 도착 페이지와 Django 상세 응답은 이번 회차에 열지 않았다.
+
+**재현.** [#122 기동 명령](issue122-e2e-verification-matrix.md#재현-명령)의 React·상담 API 포트를 사용한다. 정책 목록 API도 :18304로 지정하고 R3D 접속 설정은 기존 실행 환경에서 읽는다. 새 Chrome 탭에서 나이와 질문을 입력하고 ‘질문하기’를 누른다. Network의 `POST /api/ask`에서 응답 상태·`policy_checks[].conditions`·`citations`를 확인한다. 카드의 상세 URL에서 정책 ID를 읽고 ‘원문 보기’ href를 `source_url`과 비교한다. 답변 출처 href를 `neo4j/nodes_document.jsonl` 및 `neo4j/relationships.jsonl`의 `SUPPORTED_BY`에 대조한다.
+
+**인계.** 지인·민혁은 복수 정책 질문으로 [FastAPI 검색 진입점](../../backend/api/main.py), [결합 검색](../../database/hybrid_search.py), [Pipeline 후보·인용 처리](../../backend/rag/pipeline.py)를 순서대로 대조한다. 교통 정책(예: 릴리스의 K-패스 `POL_STG_MOLIT_001`)이 어느 단계에서 빠지는지 확인하고, 초중고 정책이 29세 구직 시나리오에서 우선 노출되는 원인을 조사한다. 현재 증빙에서 확인한 범위는 사용자에게 반환된 후보다. 민지는 수정 후 같은 질문으로 답변·카드·출처까지 재검증한다.
+
+#76의 실제 공식 요건·원문 발췌 카드와 #78의 실제 `POL_005` 선택 상담 카드 PASS는 [11-26 기존 증빙](#2026-11-26-kst--pr-137-병합-후-실제-상담)을 재사용했다. `POL_005` 76세 직접 연령 질문의 Checker·본문 불일치 FAIL(2/2)과 `POL_009` 35세 [502 재시험 0/3](youth-rent-age35-502-diagnostics.md)은 이전 결과를 유지한다. 두 입력은 이번 회차 미실행이다.
