@@ -1,0 +1,8 @@
+..................................                                               [100%]
+============================== warnings summary ===============================
+tests/unit/test_issue103_readonly_verifier.py: 30 warnings
+  C:\dev\project\SKN36-3rd-1Team\.venv\Lib\site-packages\neo4j\_meta.py:213: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(f):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+34 passed, 30 warnings, 64 subtests passed in 5.96s

@@ -174,3 +174,48 @@
 | 상세 탭 복귀 시 카드 펼침 유지 | #120 · R124 | 이번 범위에서 고칠지 |
 | 비교 화면 Django 링크 | #120 · R124 | 추가할지 |
 | #116 기준 실패 목록 | #116 · PR #127 | PR #127 병합 시 기준은 "실패 0"으로 정리됨. 최종 회차 전에 병합할지 |
+
+## 7. 2026-11-26 KST · PR #137 병합 후 실행 결과
+
+기준 [dev `befe2d026bb59511966f212dd40c968c0dcea5f2`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/befe2d026bb59511966f212dd40c968c0dcea5f2). 아래 판정은 이번 실행 범위에 적용한다. 위 표의 기존 증빙과 최종 판정 대기 상태는 이력으로 유지한다. [Notion 4차 작업 계획](https://app.notion.com/p/415896a638728147ad78c1ff2346a92c)의 민지 담당 실행 범위 및 [PR #137](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/137)의 병합·테스트 결과를 확인했다.
+
+- 실행 환경은 Windows, 로컬 Chrome CDP, Node 24.20.0, Python 3.14, Django 5.2.19, FastAPI 0.162.4다. React :18305, Django :18301, 목록 API :18300, 실제 상담 API :18304. Django는 `DEBUG=False`와 테스트 설정으로 실행했다.
+- 목록 API HTTP 200, 릴리스 `1.4.0-candidate`, 정책 249개, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. R3D verify 읽기 전용 실측은 Neo4j 1,147노드·2,702관계, Qdrant B2 1,249·B3 1,338포인트였다. 애플리케이션은 B2 기준으로 상담했고 `gpt-5.4-mini`, Ollama `qwen3-embedding:0.6b` 설정을 사용했다. 공급자의 개별 응답 모델 식별자는 공개 응답 계약에 없다. [DB 측정 JSON](assets/issue122-befe2d0/r3d-db.json)
+- 실제 상담 입력·정책 ID·응답과 #75·#76·#78 분야별 판정은 [상담 회귀 기록](issue75-browser-regression-20261125.md#2026-11-26-kst--pr-137-병합-후-실제-상담) 참조.
+
+| ID | 입력 및 기대 결과 | 이번 실제 결과 | 이번 판정 |
+| --- | --- | --- | --- |
+| 01 / 06-1 | `GET /api/policies?limit=500`, React 홈과 목록 | HTTP 200, 정책 249개. React에 같은 건수 표시. | PASS |
+| 07-1 / 07-2 | `POL_YC_007`을 홈과 관심 정책에서 펼치고 상세 탭을 연 뒤 닫기 | 같은 ID·정책명의 Django 새 탭, `window.opener=null`. 홈과 관심 목록 모두 원래 카드 펼침 유지. 이전 R124 FAIL 해결 확인. [SSR](assets/issue122-befe2d0/ssr-detail.png) · [관심 정책](assets/issue122-befe2d0/saved-return.png) | PASS |
+| 07-3 | `POL_YC_007`의 ‘내 조건으로 확인하기’로 실제 상담 후 상담 카드 상세 탭을 닫기 | 브라우저 요청 `selected_policy_id=POL_YC_007`, HTTP 200, API 카드와 SSR 정책 동일. 질문과 답변을 포함한 화면 텍스트가 복귀 전후 동일. [요청·응답 및 DOM](assets/issue122-befe2d0/ask-browser-selected-007.json) | PASS |
+| 07-4 / 07-5 | 두 정책 비교 및 최근 상담의 신청 일정 카드에서 상세 열기 | 비교 화면과 ‘자세히 비교하기’ 표시. 최근 상담 일정의 `POL_YC_007` 상세 탭에 같은 제목 표시. [비교](assets/issue122-befe2d0/compare.png) · [최근 일정 JSON](assets/issue122-befe2d0/recent-schedule-nojs.json) | PASS |
+| 07-6 | Django 회귀 | `python web_ssr/manage.py test policies --settings=config.settings_test` 43건 PASS. [로그](assets/issue122-befe2d0/django-test.log) | PASS |
+| 08-1 / 08-2 | 존재하지 않는 ID와 소문자 ID | 두 URL 모두 HTTP 404와 사용자 안내. 정상 React 주소를 설정한 Django 인스턴스에서 복귀 링크를 클릭해 홈 로드를 확인했다. [화면](assets/issue122-befe2d0/ssr-404.png) | PASS |
+| 08-3 | Django :18307의 상위 프록시가 HTTP 503을 반환한 뒤 정상 API로 연결 | 503 사용자 안내 확인. 프록시 복구 후 같은 상세 URL·같은 탭에서 새로고침해 200 및 정책 제목 확인. [503](assets/issue122-befe2d0/ssr-503.png) · [복구](assets/issue122-befe2d0/ssr-503-recovered.png) | PASS |
+| 08-4 | 실제 DB 중단 및 릴리스 손상 | 위 503은 격리 프록시 장애 시험이다. 실제 DB 중단과 릴리스 손상 행은 이번 범위에서 실행하지 않았다. | 미실행 |
+| 08-5 | 일정 근거 미확인 `POL_YC_065`·`POL_BOK_065`·`POL_004`, 마감 `POL_009`, 정상 비교 `POL_YC_007` | 미확인·마감 카드에 D-day·캘린더 없음. 정상 카드는 D-4와 캘린더 제공. [실측 JSON](assets/issue122-befe2d0/schedule.json) | PASS |
+| 08-6 | KST 자정 직전부터 시뮬레이션. 탭 복귀 이벤트·관심 정책 재열람 | 브라우저 시계와 다음 날 응답을 주입한 독립 시험. D-4 → D-3 갱신, 포커스 후 재조회 및 저장 목록 재열람에서도 D-3. [화면](assets/issue122-befe2d0/kst-saved-next-day.png) | PASS |
+| 08-7 | Chrome에서 JS 실행을 끄고 `POL_STG_MOLIT_002` 상세 진입 | 제목·기관·신청 기간·자격·서류·원문 확인. Fetch/XHR 0건. [DOM](assets/issue122-befe2d0/recent-schedule-nojs.json) | PASS |
+| 08-8 | React·Django 각각 320px 및 390px 다크 모드 | 네 조합에서 `scrollWidth=clientWidth`, `data-theme=dark` 확인. Django 하단 공식 원문·관계 지도·상담 링크는 두 너비 모두 44px. [브라우저 기록](assets/issue122-befe2d0/browser.json) · [320px SSR](assets/issue122-befe2d0/ssr-320-dark.png) · [390px React](assets/issue122-befe2d0/react-390-dark.png) · [링크 측정](assets/issue122-befe2d0/mobile-links.json) | PASS (테마·가로 넘침) |
+| 09-1 | 기본 데이터셋에서 전체 Python 단위 테스트 | 첫 실행은 Git 하위 프로세스 설정 오류로 실패 29·오류 7. 실행 프로세스에서 GIT_CONFIG_COUNT를 제거하고 재시도해 2,869 PASS·80 SKIP·실패 0. 영향받은 세 파일 별도 재실행도 78 PASS. [첫 실행 요약](assets/issue122-befe2d0/python-unit-initial-summary.log) · [전체 재실행](assets/issue122-befe2d0/python-unit-clean-env.log) · [세 파일](assets/issue122-befe2d0/git-subprocess-retry.log) | PASS (환경 보정 후) |
+| 09-2 | v1.3.2 레거시 데이터셋과 tests/README.md의 10개 파일 | 240 PASS, v1.4.0 전용 2 SKIP, 실패 0. [로그](assets/issue122-befe2d0/python-legacy.log) | PASS |
+| 09-3 | React 모의·DOM 회귀 및 타입 검사·빌드 | `npm run test` 21개 파일, 189건 PASS. 첫 시도에서 기존 설치본에 jsdom이 없어 187건만 실행됐고, jsdom 포함 기설치 복사본에서 전체 통과했다. `npm run build` PASS, 500 kB 청크 경고. [테스트](assets/issue122-befe2d0/react-test.log) · [빌드](assets/issue122-befe2d0/react-build.log) | PASS |
+
+### 선행 작업 및 담당자 인계
+
+- **#39 지인·민지.** `dev`의 공개 `UserProfile` 및 `FollowUp`에는 월령 요청 계약이 없다. [별도 API 연동 브랜치 `b2bb499`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/b2bb499)의 초안은 `child_age_months` 단일 정수(0 이상) 또는 `null`, 검색에 미사용, Checker·Generator 전달, `ask_info.field`는 기존 목록 유지다. 다자녀 입력 주체와 후속 입력 버튼을 팀에서 확정할 때까지 정식 UI/API 연동은 BLOCKED. UX 초안은 본인 나이와 분리한 선택 정수 입력 ‘자녀 만 나이(개월)’와 공란 허용이다. 인계 시험 입력은 생략/`null`/0/23/24/25, `-1`·소수·문자열·불리언·배열 422, 과거 요청 하위 호환, 본인 나이와 독립, 입력 후 재질문 금지다. `POL_GOV_050`은 24개월 포함과 25개월 제외를 검증하며, 다자녀는 계약 확정 뒤 선택 대상과 재질문 여부를 검증한다.
+- **#97 소희·지인.** [이슈의 최신 재검증 기록](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/97#issuecomment-7156782019)은 PASS 1 / 부분 2 / FAIL 2였다. 현재 `dev`에서 해당 오류의 교정 배포를 확인하지 못해 동일 5문항은 미실행. 수정 확인 후 같은 질문·근거·생성 직후 답변을 대조한다.
+- **#122는 Open 유지.** 개별 독립 시험과 실제 상담 표본을 갱신했다. #39 정식 계약, #136 병합 후 재검증 및 기존·신규 상담 실패의 담당자 후속이 남아 있다.
+
+### 재현 명령
+
+분리된 `dev` 체크아웃에서 기설치된 의존성을 사용한다. 인증 값은 기존 `.env`와 R3D verify 실행 설정을 통해 프로세스에만 전달한다.
+
+```powershell
+python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 18300 --http h11
+python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 18304 --http h11 --env-file <기존-.env>
+python web_ssr/manage.py test policies --settings=config.settings_test
+python -m pytest tests/unit/test_official_requirements.py tests/unit/test_issue78_exclusion_reasons.py tests/integration/test_official_requirements_api.py tests/integration/test_issue78_exclusion_reasons_api.py -q -o faulthandler_timeout=12
+```
+
+Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SSR_REACT_BASE_URL`을 React 주소로 지정하고 `runserver 127.0.0.1:18301 --noreload --insecure`를 실행한다. 별도 장애 인스턴스 :18307은 상위 프록시 :18306을 사용한다. `frontend`에서 `VITE_POLICY_API_URL=http://127.0.0.1:18300/api/policies`, `VITE_ASK_API_URL=http://127.0.0.1:18304/api/ask`, `VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:18301/policies/`를 지정하고 `npm run dev -- --port 18305 --strictPort`를 실행한다. 독립 시험에서는 상담 API URL을 비워도 된다. [브라우저 재현 스크립트](assets/issue122-befe2d0/README.md)

@@ -1,0 +1,14 @@
+import fs from 'node:fs/promises';
+const get=async port=>(await (await fetch('http://127.0.0.1:'+port+'/api/policies?limit=500')).json()).items;
+const [dev,pr]=await Promise.all([get(18300),get(18308)]);
+const pairs=dev.map(p=>[p,pr.find(x=>x.policy_id===p.policy_id)]);
+const changes=pairs.filter(([a,b])=>a.official_apply_url!==b?.official_apply_url||a.source_url!==b?.source_url);
+const positives=dev.filter(p=>p.official_apply_url);
+const loans=dev.filter(p=>/버팀목|디딤돌/.test(p.policy_name)).map(p=>({id:p.policy_id,name:p.policy_name,schedule:p.application_schedule,status:p.reception_status}));
+console.log({links:positives.length,changes:changes.length,positives:positives.slice(0,8).map(p=>[p.policy_id,p.policy_name]),loans});
+await fs.writeFile(new URL('pr136-link-parity.json',import.meta.url),JSON.stringify({count:dev.length,positives:positives.length,changes:changes.map(([a,b])=>[a.policy_id,b?.policy_id]),loans},null,2));
+const policy=positives.find(p=>p.reception_status==='open')??positives[0];if(!policy)process.exit();
+const request={question:policy.policy_name+'의 공식 신청 링크와 정책 출처를 알려 주세요.',profile:{age:29,region:'서울',income:null},history:[],selected_policy_id:policy.policy_id};
+const a=await fetch('http://127.0.0.1:18309/api/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(request),signal:AbortSignal.timeout(75000)});const body=await a.json();
+console.log(JSON.stringify({http:a.status,policy:policy.policy_id,expectedLink:policy.official_apply_url,actualLink:body.policy_checks?.[0]?.official_apply_url,source:body.citations?.map(c=>c.document_id)}));
+await fs.writeFile(new URL('pr136-positive-link.json',import.meta.url),JSON.stringify({http:a.status,request,expectedLink:policy.official_apply_url,body},null,2));

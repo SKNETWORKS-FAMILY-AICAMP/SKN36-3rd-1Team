@@ -1,0 +1,12 @@
+..............................................................................       [100%]
+============================== warnings summary ===============================
+.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/tests/unit/test_build_restore_bundle_r3.py::BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction
+  C:\Users\Playdata\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'a'
+    return self._open_to_write(zinfo, force_zip64=force_zip64)
+
+.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/tests/unit/test_r3b_build_isolation.py: 30 warnings
+  C:\dev\project\SKN36-3rd-1Team\.venv\Lib\site-packages\neo4j\_meta.py:213: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(f):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+78 passed, 31 warnings, 132 subtests passed in 32.69s

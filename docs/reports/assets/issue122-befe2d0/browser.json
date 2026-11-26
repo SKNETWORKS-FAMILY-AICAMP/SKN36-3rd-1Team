@@ -1,0 +1,61 @@
+[
+  {
+    "id": "home-list",
+    "status": "PASS",
+    "actual": "React home and 249 policies"
+  },
+  {
+    "id": "07-1-detail-and-07-2-home-return",
+    "status": "PASS",
+    "actual": {
+      "title": "글로벌첨단전략산업 기술경영 전문인력 양성사업",
+      "url": "http://127.0.0.1:18301/policies/POL_YC_007/",
+      "openAfterReturn": true
+    }
+  },
+  {
+    "id": "07-2-saved-return",
+    "status": "PASS",
+    "actual": "Saved tab retained its open card"
+  },
+  {
+    "id": "07-4-compare",
+    "status": "PASS",
+    "actual": "Two policies rendered in comparison"
+  },
+  {
+    "id": "08-1-08-2-404-js-off",
+    "status": "PASS",
+    "actual": "SSR title with JS disabled; two HTTP 404s and home links"
+  },
+  {
+    "id": "08-mobile-dark-320-390",
+    "status": "PASS",
+    "actual": [
+      {
+        "kind": "react",
+        "theme": "dark",
+        "width": 320,
+        "scroll": 320
+      },
+      {
+        "kind": "ssr",
+        "theme": "dark",
+        "width": 320,
+        "scroll": 320
+      },
+      {
+        "kind": "react",
+        "theme": "dark",
+        "width": 390,
+        "scroll": 390
+      },
+      {
+        "kind": "ssr",
+        "theme": "dark",
+        "width": 390,
+        "scroll": 390
+      }
+    ]
+  }
+]
