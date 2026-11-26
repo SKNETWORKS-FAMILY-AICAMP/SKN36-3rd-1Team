@@ -1,0 +1,1261 @@
+[
+  {
+    "id": "employment",
+    "request": {
+      "question": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례) 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 29,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_010"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)는 현재 접수 중이에요. 신청은 본인이 거주지 관할 고용센터에 방문하거나 온라인(www.work24.go.kr)으로 할 수 있고, 접수기관은 전국 고용센터입니다 [1].\n\n지원 대상은 15세~69세 구직자 중 I유형과 II유형으로 나뉘며, I유형은 중위소득 60% 이하·재산 4억 이하(15~34세 청년은 재산 5억원 이하)이고 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 경우입니다. II유형은 I유형에 해당하지 않는 가구단위 중위소득 100% 이하이며, 청년은 소득 기준이 적용되지 않습니다 [4]. 다만 사용자의 나이만으로는 전체 자격을 확정할 수 없고, 소득·재산·취업경험 등은 추가 확인이 필요합니다 [2][4].\n\n필수 서류는 취업지원신청서와 지원자격 확인을 위한 개인정보 수집·이용·제공 동의서입니다. 필요하면 가구단위 증빙서류, 특정취약계층 증빙서류, 전산망으로 확인되지 않는 소득·재산·취업경험 관련 증빙자료를 추가로 제출합니다 [1].\n\n문의처는 고용노동부 고객상담센터 1350입니다 [3].",
+      "citations": [
+        {
+          "title": "고용노동부 국민취업지원제도 정부24 공공서비스 상세원문 (149200005007)",
+          "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+          "document_id": "DOC_MOEL_001",
+          "page_number": null
+        },
+        {
+          "title": "고용노동부 국민취업지원제도 온통청년 정책 상세원문 (20260710005400113256)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20260710005400113256",
+          "document_id": "DOC_MOEL_002",
+          "page_number": null
+        },
+        {
+          "title": "고용노동부 국민취업지원제도 정부24 공공서비스 상세원문 (149200005007)",
+          "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+          "document_id": "DOC_MOEL_001",
+          "page_number": null
+        },
+        {
+          "title": "고용노동부 국민취업지원제도 정부24 공공서비스 상세원문 (149200005007)",
+          "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+          "document_id": "DOC_MOEL_001",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_010",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 15~69세 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": [
+            {
+              "text": "(필수) 취업지원신청서 및 지원자격 확인을 위한 개인정보 수집, 이용 및 제공 동의서\r\n(필요시 추가서류)\r\n - 가구단위 증빙서류: 가족관계증명원, 이혼소송확인서, 실종신고서 등\r\n - 특정취약계층 증빙서류: 관련 추천서, 확인서 등\r\n - 전산망으로 확인불가 또는 전산망에 실시간 연계되지 않은 소득, 재산, 취업경험 관련정보: 사업주 확인자료 등 관련 증빙자료",
+              "document_id": "DOC_MOEL_001",
+              "chunk_id": "CHK_B2_DOC_MOEL_001_C004",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007"
+            }
+          ],
+          "policy_name": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)",
+          "agency": "고용노동부 국민취업지원기획팀",
+          "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "고용노동부 고객상담센터",
+              "phone": "1350",
+              "document_id": "DOC_MOEL_001",
+              "chunk_id": "CHK_B2_DOC_MOEL_001_C005",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관)",
+              "document_id": "DOC_MOEL_001",
+              "chunk_id": "CHK_B2_DOC_MOEL_001_C002",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+              "label": "지원대상"
+            },
+            {
+              "text": "∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관)",
+              "document_id": "DOC_MOEL_001",
+              "chunk_id": "CHK_B2_DOC_MOEL_001_C002",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "국민취업지원제도 신청 시 제출 서류를 항목별로 정리해 주세요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "국민취업지원제도 신청 절차를 단계별로 알려주세요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)",
+          "official": [
+            [
+              "지원대상∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관) · 기준 원문 ↗",
+              "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007"
+            ],
+            [
+              "선정기준∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관) · 기준 원문 ↗",
+              "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007"
+            ]
+          ],
+          "warnings": 0,
+          "heading": "공식 자격기준 · 원문 발췌",
+          "exclusions": null,
+          "text": "고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)상시 접수접수 중고용노동부 국민취업지원기획팀청소년청년중장년신청 기간상시 접수신청 기관고용노동부 국민취업지원기획팀서류 발췌(필수) 취업지원신청서 및 지원자격 확인을 위한 개인정보 수집, 이용 및 제공 동의서\r\n(필요시 추가서류)\r\n - 가구단위 증빙서류: 가족관계증명원, 이혼소송확인서, 실종신고서 등\r\n - 특정취약계층 증빙서류: 관련 추천서, 확인서 등\r\n - 전산망으로 확인불가 또는 전산망에 실시간 연계되지 않은 소득, 재산, 취업경험 관련정보: 사업주 확인자료 등 관련 증빙자료 · 서류 원문 ↗ 제출 대상별 추가 서류·전체 목록은 공식 공고에서 확인해 주세요.문의처고용노동부 고객상담센터 · 1350 · 문의처 원문공식 자격기준 · 원문 발췌원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.지원대상∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관) · 기준 원문 ↗선정기준∙ I유형\r\n  -(요건심사형) 15세~69세 구직자 중 중위소득 60% 이하, 재산 4억 이하(15~34세 청년은 재산 5억원 이하)이면서, 최근 2년 이내 100일 또는 800시간 이상의 취업경험이 있는 분\r\n  -(선발형) 15세~69세 구직자 중 요건심사형 중 취업경험 요건을 충족하지 못한 분( 15~34세 청년은 중위소득 120% 이하, 재산 5억원 이하, 취업경험은 선발시 고려)\r\n\r\n∙ II유형: 15세~69세 구직자 중 I유형에 해당하지 않는 가구단위 중위소득 100% 이하(청년은 소득 무관) · 기준 원문 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 15~69세 기준에 입력한 만 29세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+        "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20260710005400113256"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "kpass",
+    "request": {
+      "question": "K-패스 (대중교통비 환급지원) 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 29,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_STG_MOLIT_001"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "K-패스(모두의 카드)는 현재 **접수 중**입니다. 신청은 K-패스 모바일 앱 또는 누리집(korea-pass.kr)에서 회원가입으로 진행하며, 회원가입 전에 K-패스 카드 발급이 필요합니다. 구비서류는 해당없음으로 안내되어 있습니다.[1]\n\n지원 대상은 K-패스 사업에 참여하는 지자체에 주민등록이 되어 있는 만 19세 이상의 국민이며, 청년층은 만 19~34세 국민, 저소득층은 기초생활보장법에 따른 기초생활수급자 및 차상위계층입니다.[2] 다만 질문에 주신 만 29세는 연령 기준에는 들어가지만, 거주지가 K-패스 참여 지자체인지와 다른 지원조건 충족 여부는 이 원문만으로는 자동 확정할 수 없습니다.[2]",
+      "citations": [
+        {
+          "title": "정부24 공공서비스 상세 — K-패스",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+          "document_id": "DOC_STG_MOLIT_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "정부24 공공서비스 상세 — K-패스",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+          "document_id": "DOC_STG_MOLIT_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_STG_MOLIT_001",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "모두의 카드(K-패스) (대중교통비 환급지원)",
+          "agency": "국토교통부 광역교통경제과",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "K-패스 고객센터",
+              "phone": "031-427-4415",
+              "document_id": "DOC_STG_MOLIT_001_GOV24",
+              "chunk_id": "CHK_B2_DOC_STG_MOLIT_001_GOV24_C002",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층",
+              "document_id": "DOC_STG_MOLIT_001_GOV24",
+              "chunk_id": "CHK_B2_DOC_STG_MOLIT_001_GOV24_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+              "label": "지원대상"
+            },
+            {
+              "text": "○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층",
+              "document_id": "DOC_STG_MOLIT_001_GOV24",
+              "chunk_id": "CHK_B2_DOC_STG_MOLIT_001_GOV24_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "K-패스 카드 발급 방법은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "K-패스의 청년층 지원 기준은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "K-패스의 저소득층 지원 기준은 어떻게 되나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "모두의 카드(K-패스) (대중교통비 환급지원)",
+          "official": [
+            [
+              "지원대상○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층 · 기준 원문 ↗",
+              "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104"
+            ],
+            [
+              "선정기준○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층 · 기준 원문 ↗",
+              "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104"
+            ]
+          ],
+          "warnings": 0,
+          "heading": "공식 자격기준 · 원문 발췌",
+          "exclusions": null,
+          "text": "모두의 카드(K-패스) (대중교통비 환급지원)상시 접수접수 중국토교통부 광역교통경제과청년중장년신청 기간상시 접수신청 기관국토교통부 광역교통경제과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗문의처K-패스 고객센터 · 031-427-4415 · 문의처 원문공식 자격기준 · 원문 발췌원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.지원대상○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층 · 기준 원문 ↗선정기준○ 지원조건\r\n - K-패스 사업에 참여하고 있는 지자체에 주민등록이 되어있는 자\r\n - 만 19세 이상의 국민\r\n - 청년층 : 청년기본법에 따른 만19~34세 국민\r\n - 저소득층 : 기초생활보장법에 따른 기초생활수급자 및 차상위계층 · 기준 원문 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2143816&bnefType=all&svcId=161300000104"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "road-toll",
+    "request": {
+      "question": "고속도로 다자녀가구 통행료 할인 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 32,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_STG_EX_001"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고속도로 다자녀가구 통행료 할인은 현재 접수 중이에요. 신청은 고속도로 통행료 홈페이지·앱 또는 영업소 방문으로 할 수 있고, 영업소 방문 시에는 신분증, 자녀와 함께 등재된 부(모) 또는 자녀 기준 주민등록등본, 신청인 또는 자녀 기준 가족관계증명서, 자동차등록증을 준비해야 합니다. 공공 마이데이터를 이용하지 않으면 주민등록등본과 가족관계증명서가 추가로 필요할 수 있습니다 [2][1].\n\n신청 대상은 부 또는 모와 만 19세 미만 자녀 2명 이상이 주민등록등본에 함께 등재된 가구이고, 부 또는 모가 소유하거나 1년 이상 리스·렌트한 비영업용 차량이어야 하며, 고속도로 이용 시 부 또는 모가 탑승하고 하이패스로 출구 차로를 통과해야 합니다. 할인 등록 차량, 하이패스카드, 환급계좌 명의도 신청인 명의와 같아야 합니다 [2][3].\n\n다만 현재 제공된 공식 원문에는 자녀 월령을 따로 확인하는 기준은 보이지 않고, 자동 판정은 추가 확인이 필요하다고 되어 있습니다. 그래서 신청 자격은 공식 공고 기준으로 다시 확인해 주세요 [2].",
+      "citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 고속도로 다자녀가구 통행료 할인",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+          "document_id": "DOC_STG_EX_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "정부24 공공서비스 상세 — 고속도로 다자녀가구 통행료 할인",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+          "document_id": "DOC_STG_EX_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "정부24 공공서비스 상세 — 고속도로 다자녀가구 통행료 할인",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+          "document_id": "DOC_STG_EX_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_STG_EX_001",
+          "conditions": [
+            {
+              "field": "children",
+              "label": "자녀 월령",
+              "reason": "자녀 월령(개월 수)을 확인해야 합니다. 기준: 228개월 미만. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": [
+            {
+              "text": "공공 마이데이터 미이용 시 주민등록등본, 가족관계증명서(주민등록등본만으로 부모·자녀 관계 확인 불가 시 주민등록등본과 함께 구비) 등 아래 서류를 구비하여 영업소를 방문하여 신청하여야 합니다.",
+              "document_id": "DOC_STG_EX_001_GOV24",
+              "chunk_id": "CHK_B2_DOC_STG_EX_001_GOV24_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042"
+            }
+          ],
+          "policy_name": "고속도로 다자녀가구 통행료 할인",
+          "agency": "한국도로공사",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+          "official_apply_url": "https://www.hipass.co.kr/mchldRdct/noticeForTwo.do",
+          "contacts": [
+            {
+              "agency": "통행료정책처",
+              "phone": "054-811-2224",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            },
+            {
+              "agency": "통행료정책처",
+              "phone": "054-811-2225",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "○ 부 또는 모와 만 19세 미만 자녀 2명 이상이 주민등록등본에 함께 등재되어 있는 가구   \r\n   - 차량요건 : 부 또는 모가 소유하거나 1년 이상 리스·렌트한 비영업용 차량 (승용차 또는 12인승 이하 승합차, 세대당 1대)\r\n     ※ 개인·법인사업자가 소유하거나 리스·렌트한 차량 신청 불가\r\n   - 탑승요건 : 고속도로 이용 시 부 또는 모 탑승 필수(휴대전화 위치정보로 확인)\r\n   - 결제요건 : 하이패스를 이용하여 출구 차로 통과\r\n   - 신청조건 : 할인 등록하려는 차량, 하이패스카드, 환급계좌 명의가 신청인 명의와 동일해야 함",
+              "document_id": "DOC_STG_EX_001_GOV24",
+              "chunk_id": "CHK_B2_DOC_STG_EX_001_GOV24_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042",
+              "label": "지원대상"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "고속도로 다자녀가구 통행료 할인의 할인율과 적용 기간은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "고속도로 다자녀가구 통행료 할인은 어떤 차량이 제외되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "고속도로 다자녀가구 통행료 할인 신청 시 영업소 방문 절차는 어떻게 되나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "고속도로 다자녀가구 통행료 할인",
+          "official": [
+            [
+              "지원대상○ 부 또는 모와 만 19세 미만 자녀 2명 이상이 주민등록등본에 함께 등재되어 있는 가구   \r\n   - 차량요건 : 부 또는 모가 소유하거나 1년 이상 리스·렌트한 비영업용 차량 (승용차 또는 12인승 이하 승합차, 세대당 1대)\r\n     ※ 개인·법인사업자가 소유하거나 리스·렌트한 차량 신청 불가\r\n   - 탑승요건 : 고속도로 이용 시 부 또는 모 탑승 필수(휴대전화 위치정보로 확인)\r\n   - 결제요건 : 하이패스를 이용하여 출구 차로 통과\r\n   - 신청조건 : 할인 등록하려는 차량, 하이패스카드, 환급계좌 명의가 신청인 명의와 동일해야 함 · 기준 원문 ↗",
+              "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042"
+            ]
+          ],
+          "warnings": 0,
+          "heading": "공식 자격기준 · 원문 발췌",
+          "exclusions": null,
+          "text": "고속도로 다자녀가구 통행료 할인상시 접수접수 중한국도로공사아동청소년중장년신청 기간상시 접수신청 기관한국도로공사서류 발췌공공 마이데이터 미이용 시 주민등록등본, 가족관계증명서(주민등록등본만으로 부모·자녀 관계 확인 불가 시 주민등록등본과 함께 구비) 등 아래 서류를 구비하여 영업소를 방문하여 신청하여야 합니다. · 서류 원문 ↗ 제출 대상별 추가 서류·전체 목록은 공식 공고에서 확인해 주세요.문의처통행료정책처 · 054-811-2224문의처통행료정책처 · 054-811-2225공식 자격기준 · 원문 발췌원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.지원대상○ 부 또는 모와 만 19세 미만 자녀 2명 이상이 주민등록등본에 함께 등재되어 있는 가구   \r\n   - 차량요건 : 부 또는 모가 소유하거나 1년 이상 리스·렌트한 비영업용 차량 (승용차 또는 12인승 이하 승합차, 세대당 1대)\r\n     ※ 개인·법인사업자가 소유하거나 리스·렌트한 차량 신청 불가\r\n   - 탑승요건 : 고속도로 이용 시 부 또는 모 탑승 필수(휴대전화 위치정보로 확인)\r\n   - 결제요건 : 하이패스를 이용하여 출구 차로 통과\r\n   - 신청조건 : 할인 등록하려는 차량, 하이패스카드, 환급계좌 명의가 신청인 명의와 동일해야 함 · 기준 원문 ↗내 조건 확인추가 확인 필요자녀 월령 · 자격 요건판정 사유 자세히 보기자녀 월령자녀 월령(개월 수)을 확인해야 합니다. 기준: 228개월 미만. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요신청하기 ↗이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2187218&bnefType=all&svcId=B50000400042"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "foster",
+    "request": {
+      "question": "가정위탁아동 양육보조금 지원 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 32,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_GOV_022"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "가정위탁아동 양육보조금 지원은 **현재 접수 중**입니다. 신청기한은 상시신청이고, 주민등록상 주소지 구청을 방문해 신청하면 됩니다. 상담과 가정 조사 등이 함께 진행되며, 대구광역시 중구 아동복지위원회 소속 사례결정위원회의 심의를 거쳐 보호 결정이 이뤄집니다. [1]\n\n지원대상은 보호대상아동(부모의 사망, 학대, 경제적 빈곤 등으로 분리 보호가 필요한 18세 미만 아동)을 지자체의 보호조치 결정으로 가정위탁보호 중인 위탁가정이며, 지자체 심의 의결을 거쳐 만 24세까지 연장될 수 있습니다. 위탁 유형은 일반가정위탁, 전문가정위탁, 일시가정위탁 등이 안내돼 있습니다. 다만 사용자의 만 32세는 원문에 적힌 18세 미만 기준에 해당하지 않아, 이 정책의 지원대상으로 보기는 어렵습니다. [2]\n\n구비서류는 원문에 구체 목록이 적혀 있지 않고, 시군구 가정위탁 담당부서로 직접 문의하라고 안내돼 있습니다. 상담 및 가정 방문 조사도 필수로 적혀 있어, 필요한 서류는 해당 부서에서 확인해야 합니다. [1]",
+      "citations": [
+        {
+          "title": "[정부24 공공서비스] 가정위탁아동 양육보조금 지원 (341000000101)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101",
+          "document_id": "DOC_GOV_022",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 가정위탁아동 양육보조금 지원 (341000000101)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101",
+          "document_id": "DOC_GOV_022",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_022",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 0~17세 기준에 입력한 만 32세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": [
+            {
+              "text": "시군구 가정위탁 담당부서로 직접 문의(상담 및 가정 방문 조사 등 필수)",
+              "document_id": "DOC_GOV_022",
+              "chunk_id": "CHK_B2_DOC_GOV_022_C004",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101"
+            }
+          ],
+          "policy_name": "가정위탁아동 양육보조금 지원",
+          "agency": "대구광역시 중구",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "복지정책과",
+              "phone": "053-661-2608",
+              "document_id": "DOC_GOV_022",
+              "chunk_id": "CHK_B2_DOC_GOV_022_C004",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "○ 보호대상아동(부모의 사망, 학대, 경제적 빈곤 등으로 분리 보호가 필요한 18세 미만 아동)을 지자체의 보호조치 결정을 통해 가정위탁보호 중인 위탁가정(지자체 심의 의결을 거쳐 만24세까지 연장가능)\r\n○ 위탁 유형 : 일반가정위탁, 전문가정위탁, 일시가정위탁 등",
+              "document_id": "DOC_GOV_022",
+              "chunk_id": "CHK_B2_DOC_GOV_022_C002",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101",
+              "label": "지원대상"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "가정위탁아동 양육보조금 지원의 문의처는 어디인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "가정위탁아동 양육보조금 지원의 지원내용은 무엇인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "가정위탁아동 양육보조금 지원",
+          "official": [
+            [
+              "지원대상○ 보호대상아동(부모의 사망, 학대, 경제적 빈곤 등으로 분리 보호가 필요한 18세 미만 아동)을 지자체의 보호조치 결정을 통해 가정위탁보호 중인 위탁가정(지자체 심의 의결을 거쳐 만24세까지 연장가능)\r\n○ 위탁 유형 : 일반가정위탁, 전문가정위탁, 일시가정위탁 등 · 기준 원문 ↗",
+              "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101"
+            ]
+          ],
+          "warnings": 0,
+          "heading": "공식 자격기준 · 원문 발췌",
+          "exclusions": null,
+          "text": "가정위탁아동 양육보조금 지원상시 접수접수 중대구광역시 중구아동신청 기간상시 접수신청 기관대구광역시 중구서류 발췌시군구 가정위탁 담당부서로 직접 문의(상담 및 가정 방문 조사 등 필수) · 서류 원문 ↗ 제출 대상별 추가 서류·전체 목록은 공식 공고에서 확인해 주세요.문의처복지정책과 · 053-661-2608 · 문의처 원문공식 자격기준 · 원문 발췌원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.지원대상○ 보호대상아동(부모의 사망, 학대, 경제적 빈곤 등으로 분리 보호가 필요한 18세 미만 아동)을 지자체의 보호조치 결정을 통해 가정위탁보호 중인 위탁가정(지자체 심의 의결을 거쳐 만24세까지 연장가능)\r\n○ 위탁 유형 : 일반가정위탁, 전문가정위탁, 일시가정위탁 등 · 기준 원문 ↗내 조건 확인조건 불일치나이추가 확인 필요거주 지역판정 사유 자세히 보기나이만 0~17세 기준에 입력한 만 32세가 포함되지 않습니다.조건 불일치거주 지역신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000495&bnefType=all&svcId=341000000101"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "age74",
+    "request": {
+      "question": "고용24 국민내일배움카드 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 74,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_005"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고용24 국민내일배움카드는 **현재 접수 중이에요**. 신청은 고용24에서 온라인으로 하거나 가까운 고용센터를 방문해서 할 수 있습니다. [3][4]\n\n지원 대상은 원문상 “국민 누구나”를 기본으로 안내하면서, 실업 상태라면 구직 신청이 필요하고 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 일부 장기 훈련은 예외적으로 구직 신청이 필요하다고 되어 있습니다. 또 공무원·사립학교 교직원, 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생과 고등학교 1~2학년생, 생계급여 수급자(조건부 수급자 또는 조건부과 유예자는 지원 가능), 다른 부처나 지자체의 교육·훈련비 지원을 받는 사람 등은 제외 대상으로 적혀 있습니다. [2][3]\n\n다만 질문에 포함된 신청자 나이 74세만으로는 이 제도의 전체 신청 가능 여부를 확정할 수 없습니다. 원문에는 나이만으로 일괄 판단하는 기준이 확인되지 않았고, 다른 제외 조건과 구직 신청 필요 여부를 함께 봐야 합니다. [2][3]\n\n필요한 서류는 대부분 따로 없지만, 자영업자(사업자등록증이 있는 사람)나 특수형태근로종사자 등 일부는 제출 서류가 있을 수 있습니다. 은행 방문으로 카드를 수령하는 경우에는 고용센터에서 발급한 국민내일배움카드 발급 확인서와 신분증이 필요합니다. [1]\n\n원문에서 확인되는 신청 방법은 온라인 신청서 작성 또는 거주지 관할 고용센터 방문이며, 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담을 거쳐야 합니다. [1][5]",
+      "citations": [
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_005",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 74세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "고용24 국민내일배움카드",
+          "agency": "고용노동부 / 한국고용정보원",
+          "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "국민내일배움카드로 받을 수 있는 훈련비 지원 내용은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "140시간 이상 장기 과정은 어떤 절차를 거쳐야 하나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "국민내일배움카드 신청 시 구직 신청이 필요한 경우는 언제인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "고용24 국민내일배움카드",
+          "official": [],
+          "warnings": 0,
+          "heading": null,
+          "exclusions": null,
+          "text": "고용24 국민내일배움카드상시 접수접수 중고용노동부 / 한국고용정보원청소년청년중장년노년신청 기간상시 접수신청 기관고용노동부 / 한국고용정보원필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인개별 비교나이추가 확인 필요기타 자격 조건조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.판정 사유 자세히 보기나이만 75세 이상(상한 없음) 기준에 입력한 만 74세가 포함되지 않습니다.개별 비교기타 자격 조건제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "age75",
+    "request": {
+      "question": "고용24 국민내일배움카드 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 75,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_005"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 신청은 온라인(고용24)으로 하거나 가까운 고용센터를 방문해서 할 수 있습니다. 다만 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담을 거쳐야 합니다. [3][4][5]\n\n지원 대상은 원문상 “직업능력개발훈련이 필요한 국민”이며, 실업 상태라면 구직 신청이 필요하고 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 일부 장기 훈련은 예외적으로 구직 신청이 필요합니다. 또 원문에 따르면 공무원·사립학교 교직원, 일부 고소득 자영업자·법인대표·비영리단체 대표, 졸업까지 2년 이상 남은 대학/대학원 재학생과 고등학교 1~2학년생, 생계급여 수급자, 다른 부처나 지자체의 교육·훈련비 지원을 받는 사람 등은 제외됩니다. 사용자는 만 75세로 입력되어 있어, 제공된 판정 정보상 나이 기준은 제외 대상에 해당합니다. [2][3][4]\n\n필요한 서류는 대부분 따로 없지만, 자영업자(사업자등록증이 있는 사람)나 특수형태근로종사자 등 일부는 제출 서류가 있을 수 있습니다. 은행 방문으로 카드를 수령하는 경우에는 고용센터에서 발급한 ‘국민내일배움카드 발급 확인서’와 신분증이 필요합니다. [1]\n\n다만 공식 원문에는 “대부분의 경우 따로 준비해야 할 서류는 없지만”이라고만 되어 있어, 어떤 경우에 어떤 서류가 필요한지는 이번 근거에서 모두 확인되지 않았습니다. [1]",
+      "citations": [
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_005",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 75세가 포함됩니다.",
+              "status": "eligible"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+              "status": "eligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "ineligible"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "고용24 국민내일배움카드",
+          "agency": "고용노동부 / 한국고용정보원",
+          "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 75세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다."
+            }
+          ],
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "국민내일배움카드의 본인부담금과 지원 한도는 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "140시간 이상 장기 과정의 훈련 진단·상담은 어떻게 진행되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "국민내일배움카드 신청 후 발급 절차는 어떻게 되나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "고용24 국민내일배움카드",
+          "official": [],
+          "warnings": 0,
+          "heading": null,
+          "exclusions": "나이 · 만 75세 이상(상한 없음) 기준에 입력한 만 75세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다.",
+          "text": "고용24 국민내일배움카드상시 접수접수 중고용노동부 / 한국고용정보원청소년청년중장년노년신청 기간상시 접수신청 기관고용노동부 / 한국고용정보원필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인나이 · 만 75세 이상(상한 없음) 기준에 입력한 만 75세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다.개별 비교나이추가 확인 필요기타 자격 조건조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.판정 사유 자세히 보기나이만 75세 이상(상한 없음) 기준에 입력한 만 75세가 포함됩니다.개별 비교기타 자격 조건제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+      ]
+    },
+    "returnState": null
+  },
+  {
+    "id": "age80",
+    "request": {
+      "question": "고용24 국민내일배움카드 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+      "profile": {
+        "age": 80,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": "POL_005"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고용24 국민내일배움카드는 **현재 접수 중**이며, 신청은 고용24 온라인 또는 가까운 고용센터 방문으로 할 수 있습니다. 신청서 작성 후 심사 결과에 따라 발급이 진행되고, 일부 경우에는 구직 신청이 필요합니다. [3][4]\n\n지원 대상은 원문상 “직업능력개발훈련이 필요한 국민”이며, 다만 공고에는 제외 대상도 함께 적혀 있습니다. 예를 들어 공무원·사립학교 교직원, 일정 요건의 재학생, 생계급여 수급자, 다른 부처나 지자체의 교육·훈련비 지원을 받는 사람 등은 제외 대상로 안내되어 있습니다. [3][2]\n\n질문하신 분은 만 80세로 입력되어 있어, 원문에 있는 “만 75세 이상” 제외 기준에 해당합니다. 따라서 이 조건만 보면 지원에서 제외됩니다. [2]\n\n필요한 서류는 대부분 따로 준비할 서류가 없지만, 자영업자(사업자등록증이 있는 사람)나 특수형태근로종사자 등 일부는 제출 서류가 있을 수 있습니다. 은행 방문으로 카드를 수령하는 경우에는 고용센터에서 발급한 국민내일배움카드 발급 확인서와 신분증이 필요합니다. [1]\n\n참고로 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담이 필요합니다. [5]",
+      "citations": [
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_005",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.",
+              "status": "eligible"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+              "status": "eligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "ineligible"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "고용24 국민내일배움카드",
+          "agency": "고용노동부 / 한국고용정보원",
+          "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다."
+            }
+          ],
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "고용24에서 카드 발급 신청하는 순서를 단계별로 알려주세요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    },
+    "dom": {
+      "cardCount": 1,
+      "openCount": 0,
+      "cards": [
+        {
+          "name": "고용24 국민내일배움카드",
+          "official": [],
+          "warnings": 0,
+          "heading": null,
+          "exclusions": "나이 · 만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다.",
+          "text": "고용24 국민내일배움카드상시 접수접수 중고용노동부 / 한국고용정보원청소년청년중장년노년신청 기간상시 접수신청 기관고용노동부 / 한국고용정보원필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인나이 · 만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다.개별 비교나이추가 확인 필요기타 자격 조건조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.판정 사유 자세히 보기나이만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.개별 비교기타 자격 조건제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기관계 지도원문 보기 ↗☆ 관심 정책 저장"
+        }
+      ],
+      "links": [
+        "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+      ]
+    },
+    "returnState": null
+  }
+]

@@ -201,6 +201,8 @@
 | 09-2 | v1.3.2 레거시 데이터셋과 tests/README.md의 10개 파일 | 240 PASS, v1.4.0 전용 2 SKIP, 실패 0. [로그](assets/issue122-befe2d0/python-legacy.log) | PASS |
 | 09-3 | React 모의·DOM 회귀 및 타입 검사·빌드 | `npm run test` 21개 파일, 189건 PASS. 첫 시도에서 기존 설치본에 jsdom이 없어 187건만 실행됐고, jsdom 포함 기설치 복사본에서 전체 통과했다. `npm run build` PASS, 500 kB 청크 경고. [테스트](assets/issue122-befe2d0/react-test.log) · [빌드](assets/issue122-befe2d0/react-build.log) | PASS |
 
+- #76 원문 발췌 fallback은 실제 React 상담 4건에서 PASS. #78의 null + NOT 불일치 조합은 현재 R3D 표본에서 미재현이며 기존 Mock은 PASS. [추가 검증](issue75-browser-regression-20261125.md#2026-11-26-kst--7678-실제-fallback-추가-검증)
+
 ### 선행 작업 및 담당자 인계
 
 - **#39 지인·민지.** `dev`의 공개 `UserProfile` 및 `FollowUp`에는 월령 요청 계약이 없다. [별도 API 연동 브랜치 `b2bb499`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/b2bb499)의 초안은 `child_age_months` 단일 정수(0 이상) 또는 `null`, 검색에 미사용, Checker·Generator 전달, `ask_info.field`는 기존 목록 유지다. 다자녀 입력 주체와 후속 입력 버튼을 팀에서 확정할 때까지 정식 UI/API 연동은 BLOCKED. UX 초안은 본인 나이와 분리한 선택 정수 입력 ‘자녀 만 나이(개월)’와 공란 허용이다. 인계 시험 입력은 생략/`null`/0/23/24/25, `-1`·소수·문자열·불리언·배열 422, 과거 요청 하위 호환, 본인 나이와 독립, 입력 후 재질문 금지다. `POL_GOV_050`은 24개월 포함과 25개월 제외를 검증하며, 다자녀는 계약 확정 뒤 선택 대상과 재질문 여부를 검증한다.

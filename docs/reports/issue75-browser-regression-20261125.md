@@ -137,3 +137,14 @@ React 회귀에는 구조화 사유가 있는 응답의 중복 경고 생략과 
 후보의 `python -m pytest tests/integration/test_issue103_guidance.py tests/integration/test_issue103_actual_response_replay.py tests/unit/test_issue103_readonly_verifier.py tests/unit/test_faq_review_holds.py -q`는 34건·서브테스트 64건 통과했다. [로그](assets/issue122-befe2d0/pr136-tests.log). [실제 후보 상담](assets/issue122-befe2d0/pr136-live.json) · [정상 신청 주소 요청](assets/issue122-befe2d0/pr136-positive-link.json). 병합 후 dev에서 여섯 검색어, 세종 신청·일정, FAQ 단정, 기존 링크를 다시 시험한다.
 
 GitHub 상태는 #75 Open, #76 Closed, #78 Closed, #122 Open이다. 이번 회차는 실제 브라우저와 API 증빙을 추가했다. #75의 복수 정책 관련성, #78의 76세 생성 불일치, #122 전체 통합 판정은 남아 있다.
+
+### 2026-11-26 KST · #76·#78 실제 fallback 추가 검증
+
+서비스 코드는 `befe2d026bb59511966f212dd40c968c0dcea5f2`와 동일하다. 기존 R3D verify 상담 API(:18304)로 연결한 Chrome React(:18305)에서 가상 프로필과 정책 선택 버튼으로 7건을 제출했다. 모두 HTTP 200, `is_sample=false`였다. 입력 질문·정책 ID·응답·DOM은 [추가 검증 JSON](assets/issue122-befe2d0/fallback-browser.json)에 기록했다.
+
+| 항목 | 실제 결과 | 판정 |
+| --- | --- | --- |
+| #76 `official_requirements=null` + 원문 발췌 | 국민취업지원제도(`POL_010`) 2행, K-패스(`POL_STG_MOLIT_001`) 2행, 다자녀 통행료 할인(`POL_STG_EX_001`) 1행, 가정위탁 양육보조금(`POL_GOV_022`) 1행. 네 카드 모두 제목이 ‘공식 자격기준 · 원문 발췌’였고 API의 본문과 출처 URL이 카드 6개 행과 일치했다. [브라우저 캡처](assets/issue122-befe2d0/fallback-employment.png) | PASS |
+| #78 `exclusion_reasons=null` + NOT 불일치 | R3D Neo4j를 읽기 전용 조회한 결과 `logic=NOT` 그룹은 `POL_005`의 한 건이었다. 74세는 구조화 필드가 `null`이고 NOT이 `needs_check`여서 경고가 없었다. 75·80세는 NOT이 `ineligible`이고 구조화 사유가 1건씩 있어 상세 제외 사유만 표시됐다. `null`과 NOT `ineligible`이 함께 나오는 실응답은 확보하지 못했다. | 실응답 미재현 · Mock PASS |
+
+재현은 [#122 기동 명령](issue122-e2e-verification-matrix.md#재현-명령)을 따른다. React에서 나이를 입력하고 목록에서 JSON의 `request.selected_policy_id`에 해당하는 정책을 찾아 펼친 다음 ‘내 조건으로 확인하기’를 누른다. DevTools Network에서 `POST /api/ask`의 필드와 상담 결과 카드의 제목·발췌 및 링크를 비교한다. `frontend`에서 `npm run test -- src/components/PolicyApplicationInfo.test.tsx src/components/TurnView.test.tsx src/lib/conditionGroups.test.ts`를 실행해 49건 통과했다.
