@@ -1,0 +1,4 @@
+First run: python -m pytest tests/unit -q -rf -o faulthandler_timeout=20
+29 failed, 2835 passed, 80 skipped, 31 warnings, 7 errors, 17442 subtests passed
+Git subprocess stderr: error: missing config value GIT_CONFIG_VALUE_0
+The retry removed GIT_CONFIG_COUNT for that PowerShell process and left repository configuration unchanged.

@@ -1,0 +1,471 @@
+[
+  {
+    "id": "RQ040",
+    "cards": [
+      "POL_005"
+    ],
+    "policyIds": [
+      "POL_005"
+    ],
+    "documents": [
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "RQ042",
+    "cards": [
+      "POL_009",
+      "POL_YC_035"
+    ],
+    "policyIds": [
+      "POL_YC_035",
+      "POL_009"
+    ],
+    "documents": [
+      {
+        "id": "DOC_YC_035",
+        "policies": [
+          "POL_YC_035"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_YC_035",
+        "policies": [
+          "POL_YC_035"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_MOLIT_002",
+        "policies": [
+          "POL_009"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_MOLIT_001",
+        "policies": [
+          "POL_009"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": [
+      {
+        "policy": "POL_009",
+        "document": "DOC_MOLIT_002",
+        "chunk": "CHK_B2_DOC_MOLIT_002_C002",
+        "displayed": true
+      }
+    ]
+  },
+  {
+    "id": "multi",
+    "cards": [
+      "POL_YC_009",
+      "POL_YC_043",
+      "POL_BOK_020",
+      "POL_BOK_052",
+      "POL_BOK_024"
+    ],
+    "policyIds": [
+      "POL_BOK_024",
+      "POL_BOK_020",
+      "POL_YC_009",
+      "POL_YC_043",
+      "POL_BOK_052"
+    ],
+    "documents": [
+      {
+        "id": "DOC_BOK_024",
+        "policies": [
+          "POL_BOK_024"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_020",
+        "policies": [
+          "POL_BOK_020"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_YC_009",
+        "policies": [
+          "POL_YC_009"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_YC_043",
+        "policies": [
+          "POL_YC_043"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_052",
+        "policies": [
+          "POL_BOK_052"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "official",
+    "cards": [
+      "POL_BOK_004"
+    ],
+    "policyIds": [
+      "POL_BOK_004"
+    ],
+    "documents": [
+      {
+        "id": "DOC_BOK_004",
+        "policies": [
+          "POL_BOK_004"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_004",
+        "policies": [
+          "POL_BOK_004"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_004",
+        "policies": [
+          "POL_BOK_004"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": [
+      {
+        "policy": "POL_BOK_004",
+        "document": "DOC_BOK_004",
+        "chunk": "CHK_B2_DOC_BOK_004_C002",
+        "displayed": true
+      },
+      {
+        "policy": "POL_BOK_004",
+        "document": "DOC_BOK_004",
+        "chunk": "CHK_B2_DOC_BOK_004_C002",
+        "displayed": true
+      },
+      {
+        "policy": "POL_BOK_004",
+        "document": "DOC_BOK_004",
+        "chunk": "CHK_B2_DOC_BOK_004_C002",
+        "displayed": true
+      }
+    ]
+  },
+  {
+    "id": "bok061",
+    "cards": [
+      "POL_BOK_061"
+    ],
+    "policyIds": [
+      "POL_BOK_061"
+    ],
+    "documents": [
+      {
+        "id": "DOC_BOK_061",
+        "policies": [
+          "POL_BOK_061"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_061",
+        "policies": [
+          "POL_BOK_061"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_BOK_061",
+        "policies": [
+          "POL_BOK_061"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": [
+      {
+        "policy": "POL_BOK_061",
+        "document": "DOC_BOK_061",
+        "chunk": "CHK_B2_DOC_BOK_061_C002",
+        "displayed": true
+      }
+    ]
+  },
+  {
+    "id": "gov061",
+    "cards": [
+      "POL_GOV_061"
+    ],
+    "policyIds": [
+      "POL_GOV_061"
+    ],
+    "documents": [
+      {
+        "id": "DOC_GOV_061",
+        "policies": [
+          "POL_GOV_061"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_GOV_061",
+        "policies": [
+          "POL_GOV_061"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_GOV_061",
+        "policies": [
+          "POL_GOV_061"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": [
+      {
+        "policy": "POL_GOV_061",
+        "document": "DOC_GOV_061",
+        "chunk": "CHK_B2_DOC_GOV_061_C002",
+        "displayed": true
+      }
+    ]
+  },
+  {
+    "id": "age74",
+    "cards": [
+      "POL_005"
+    ],
+    "policyIds": [
+      "POL_005"
+    ],
+    "documents": [
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "age75",
+    "cards": [
+      "POL_005"
+    ],
+    "policyIds": [
+      "POL_005"
+    ],
+    "documents": [
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "age76",
+    "cards": [
+      "POL_005"
+    ],
+    "policyIds": [
+      "POL_005"
+    ],
+    "documents": [
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "age80",
+    "cards": [
+      "POL_005"
+    ],
+    "policyIds": [
+      "POL_005"
+    ],
+    "documents": [
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_WORK24_001",
+        "policies": [
+          "POL_005"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  },
+  {
+    "id": "selected-007",
+    "cards": [
+      "POL_YC_007"
+    ],
+    "policyIds": [
+      "POL_YC_007"
+    ],
+    "documents": [
+      {
+        "id": "DOC_YC_007",
+        "policies": [
+          "POL_YC_007"
+        ],
+        "inRelease": true
+      },
+      {
+        "id": "DOC_YC_007",
+        "policies": [
+          "POL_YC_007"
+        ],
+        "inRelease": true
+      }
+    ],
+    "official": []
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "count": 249,
+  "positives": 7,
+  "changes": [],
+  "loans": [
+    {
+      "id": "POL_BOK_065",
+      "name": "내집마련 디딤돌 대출",
+      "schedule": null,
+      "status": "unknown"
+    },
+    {
+      "id": "POL_004",
+      "name": "주택도시기금 청년전용 버팀목전세자금대출",
+      "schedule": null,
+      "status": "unknown"
+    }
+  ]
+}

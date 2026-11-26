@@ -1,0 +1,41 @@
+
+> lifepolicy-demo-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v2.1.8 C:/Users/Playdata/.codex/worktrees/minji-dev-browser-regression/SKN36-3rd-1Team/frontend
+
+ ✓ src/mock/mockAsk.test.ts (13 tests) 206ms
+ ✓ src/graph/relatedPolicies.test.ts (8 tests) 1421ms
+   ✓ 상담과 관련된 정책 찾기 > 대표 상황 카드 질문은 실제 팀 데이터에서 관련 정책을 하나 이상 찾는다 1399ms
+ ✓ src/graph/graphModel.test.ts (11 tests) 1603ms
+   ✓ 팀 기준 데이터 (data/releases/v1.4.0-candidate) > 실제 그래프 파일을 읽으면 manifest 건수와 같고, 끊긴 연결이 없다 1576ms
+ ✓ src/api/policyCatalog.test.ts (10 tests) 30ms
+ ✓ src/lib/policyCompare.test.ts (9 tests) 530ms
+   ✓ 비교 화면은 요약·정책 카드·접힌 상세 비교 순서로 보여 주고 확정 표현을 쓰지 않는다 427ms
+ ✓ src/components/PolicyDetailLink.test.tsx (12 tests) 180ms
+ ✓ src/components/PolicyApplicationInfo.test.tsx (19 tests) 624ms
+   ✓ 공식 기준과 내 조건을 분리하고 연도·단위·값을 원문 그대로 표시한다 349ms
+ ✓ src/components/TurnView.test.tsx (25 tests) 755ms
+   ✓ shows one prompt per missing field after the answer and keeps suggested questions below 309ms
+ ✓ src/lib/policyPersonal.test.ts (13 tests) 18ms
+ ✓ src/graph/lifeStages.test.ts (6 tests) 587ms
+   ✓ 팀 기준 데이터 > 생애단계 정책 수가 그래프의 APPLIES_TO_LIFESTAGE 관계 수와 같고, 미분류와 합치면 전체 정책이 빠짐없이 들어간다 576ms
+ ✓ src/lib/conditionGroups.test.ts (5 tests) 11ms
+ ✓ src/lib/answerView.test.ts (7 tests) 14ms
+ ✓ src/lib/applicationSchedule.test.ts (11 tests) 140ms
+ ✓ src/lib/parseProfile.test.ts (12 tests) 76ms
+ ✓ src/api/client.test.ts (6 tests) 7ms
+ ✓ src/lib/recentPolicies.test.ts (2 tests) 6ms
+ ✓ src/lib/validate.test.ts (5 tests) 8ms
+ ✓ src/lib/route.test.ts (3 tests) 8ms
+ ✓ src/lib/profileReply.test.ts (4 tests) 7ms
+ ✓ src/lib/policySearch.test.ts (6 tests) 1352ms
+   ✓ 팀 기준 데이터 (data/releases/v1.4.0-candidate) > 여섯 표기는 실제 목록에서 K-패스 정책만 찾고, 붙임표 없는 검색어 결과는 이전 규칙과 같다 1344ms
+ ✓ src/components/PolicyExplorer.dom.test.tsx (2 tests) 423ms
+   ✓ 정책 목록 다시 불러오기 중 펼친 카드 (#122) > 탭으로 돌아와 목록을 다시 불러오는 동안과 끝난 뒤에도 같은 카드가 펼쳐져 있다 307ms
+
+ Test Files  21 passed (21)
+      Tests  189 passed (189)
+   Start at  21:02:10
+   Duration  13.30s (transform 17.91s, setup 0ms, collect 23.51s, tests 8.01s, environment 3.48s, prepare 9.85s)

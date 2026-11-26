@@ -1,0 +1,403 @@
+[
+  {
+    "id": "sejong",
+    "request": {
+      "question": "세종시 위원회 청년위원은 지금 상시 신청할 수 있나요? 개별 모집 일정과 직접 신청 주소를 알려 주세요.",
+      "profile": {
+        "age": 29,
+        "region": "서울",
+        "income": null
+      },
+      "history": [],
+      "selected_policy_id": "POL_YC_065"
+    },
+    "http": 200,
+    "body": {
+      "status": "info",
+      "answer": "세종시 위원회 청년참여 확대는 대상연령이 만 19~39세로 확인되지만, 거주 지역은 세종특별자치시로 되어 있어 입력하신 서울특별시와는 달라 **신청 자격은 추가 확인이 필요해요**. 또한 공식 원문에는 신청기간이 비어 있고 신청방법은 “공고문 참조”로만 적혀 있어, 지금 상시 신청 가능한지와 개별 모집 일정은 이번 근거만으로 확인되지 않았습니다. 신청 주소도 확인된 전용 신청 페이지가 없고, 제공된 URL은 기관 홈페이지 표기라 실제 신청 주소로 확정할 수 없습니다. [1][2][3]\n\n확인된 내용은 다음과 같습니다. 대상연령은 만 19~39세이고, 세종특별자치시가 주관하는 청년참여 확대 정책입니다. 다만 거주 요건과 신청 일정, 직접 신청 주소는 공식 원문에서 충분히 확인되지 않았습니다. [2][3][1]",
+      "citations": [
+        {
+          "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+          "document_id": "DOC_YC_065",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+          "document_id": "DOC_YC_065",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+          "document_id": "DOC_YC_065",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_YC_065",
+          "conditions": [
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "이 정책의 대상 지역은 세종특별자치시이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+              "status": "needs_check"
+            },
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19~39세 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": null,
+          "policy_name": "세종시 위원회 청년참여 확대",
+          "agency": "세종특별자치시",
+          "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "세종시 위원회 청년참여 확대의 신청방법은 어디에서 확인할 수 있나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "세종시 위원회 청년참여 확대의 신청기간이 공고문에 따로 있나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "faq",
+    "request": {
+      "question": "모두의 카드 한시 기준은 언제까지 적용되며, 미확정 환급률은 얼마인가요?",
+      "profile": {
+        "age": 29,
+        "region": "서울",
+        "income": null
+      },
+      "history": [],
+      "selected_policy_id": "POL_STG_MOLIT_001"
+    },
+    "http": 200,
+    "body": {
+      "status": "info",
+      "answer": "모두의 카드(K-패스) (대중교통비 환급지원)는 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 제공된 원문에서는 2026년 4월 1일부터 2026년 9월 30일까지 혜택이 한시적으로 상향된다고만 확인되며, 미확정 환급률은 일반 20%, 청년·2자녀·어르신 30%, 3자녀 이상 50%, 저소득 53.3%로 제시되어 있습니다. 시차 출퇴근 시간대에는 일반 50%, 청년·2자녀·어르신 60%, 3자녀 이상 80%, 저소득 83.3%가 적용됩니다 [1][2]. 다만 이 원문은 혜택 상향 기간과 환급률만 보여 주고, 질문하신 ‘한시 기준’의 정확한 적용 방식이나 신청 자격의 최종 판정 근거는 확인되지 않았습니다. 또한 확인된 전용 신청 주소도 없습니다 [1][2][3][4][5].",
+      "citations": [
+        {
+          "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+          "url": "https://korea-pass.kr/notice/faqList.do",
+          "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+          "page_number": null
+        },
+        {
+          "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+          "url": "https://korea-pass.kr/notice/faqList.do",
+          "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+          "page_number": null
+        },
+        {
+          "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+          "url": "https://korea-pass.kr/notice/faqList.do",
+          "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+          "page_number": null
+        },
+        {
+          "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+          "url": "https://korea-pass.kr/notice/faqList.do",
+          "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+          "page_number": null
+        },
+        {
+          "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+          "url": "https://korea-pass.kr/notice/faqList.do",
+          "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_STG_MOLIT_001",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "모두의 카드(K-패스) (대중교통비 환급지원)",
+          "agency": "국토교통부 광역교통경제과",
+          "source_url": "https://korea-pass.kr/notice/faqList.do",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "모두의 카드(K-패스)의 신청 자격 기준은 무엇인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "normal",
+    "request": {
+      "question": "국민내일배움카드 공식 신청 링크와 출처를 알려 주세요.",
+      "profile": {
+        "age": 29,
+        "region": "서울",
+        "income": null
+      },
+      "history": [],
+      "selected_policy_id": "POL_005"
+    },
+    "http": 200,
+    "body": {
+      "status": "answered",
+      "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 고용24 국민내일배움카드: 현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요., 가까운 고용센터 방문으로도 신청할 수 있습니다. 고용24 국민내일배움카드: 현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요., 전용 신청 주소는 확인되지 않았습니다. 출처는 고용24 안내 페이지와 신청 절차 안내입니다[1][2][3][5].\n\n신청 자격은 일부 조건이 추가 확인 필요해요. 공식 원문에는 국민 누구나 상시 신청 가능하다고 되어 있지만[2], 동시에 구직 신청이 필요한 경우와 신청 제외 대상이 함께 안내되어 있습니다[2][3][4][5]. 예를 들어 일자리가 없는 상태에서 신청하는 경우에는 구직 신청이 필요하고[4], 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 일부 훈련은 예외입니다[4]. 또한 공무원·사립학교 교직원, 일정 소득 이상의 일부 자영업자·법인대표·특수형태근로종사자, 다른 부처나 지자체의 훈련비 지원을 받는 사람 등은 제외 사유로 안내되어 있습니다[4].\n\n사용자 프로필의 만 29세는 연령 기준상 제외 사유에 해당하지 않는 것으로 보이지만, 소득과 다른 제외 조건은 이번 근거만으로는 확정할 수 없습니다[4].",
+      "citations": [
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        },
+        {
+          "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+          "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "document_id": "DOC_WORK24_001",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_005",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 29세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "application_schedule": {
+            "evaluated_on": "2026-11-26",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "policy_name": "고용24 국민내일배움카드",
+          "agency": "고용노동부 / 한국고용정보원",
+          "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "official_apply_url": null,
+          "contacts": null,
+          "requirement_excerpts": null,
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "국민내일배움카드 신청 자격에서 제외되는 대상은 누구인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "국민내일배움카드는 온라인으로 어떻게 신청하나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "국민내일배움카드 신청 시 필요한 서류가 있나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  }
+]

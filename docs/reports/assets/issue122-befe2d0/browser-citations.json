@@ -1,0 +1,151 @@
+[
+  {
+    "id": "RQ040",
+    "request": {
+      "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?",
+      "profile": {
+        "age": 30,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": null
+    },
+    "http": 200,
+    "policyIds": [
+      "POL_005"
+    ],
+    "citationLinks": [
+      {
+        "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+        "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+        "document_id": "DOC_WORK24_001",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+        "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+        "document_id": "DOC_WORK24_001",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+        "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+        "document_id": "DOC_WORK24_001",
+        "page_number": null,
+        "displayed": true
+      }
+    ],
+    "renderedLinks": [
+      "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+    ]
+  },
+  {
+    "id": "RQ042",
+    "request": {
+      "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?",
+      "profile": {
+        "age": 25,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": null
+    },
+    "http": 200,
+    "policyIds": [
+      "POL_YC_035",
+      "POL_009"
+    ],
+    "citationLinks": [
+      {
+        "title": "[온통청년 정책] 청년월세 지원 (20261030005400214649)",
+        "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+        "document_id": "DOC_YC_035",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+        "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+        "document_id": "DOC_MOLIT_002",
+        "page_number": null,
+        "displayed": true
+      }
+    ],
+    "renderedLinks": [
+      "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+      "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+    ]
+  },
+  {
+    "id": "multi",
+    "request": {
+      "question": "교육비·구직·교통 지원 정책이 있나요?",
+      "profile": {
+        "age": 29,
+        "region": "",
+        "income": null
+      },
+      "history": [],
+      "awaiting_field": null,
+      "selected_policy_id": null
+    },
+    "http": 200,
+    "policyIds": [
+      "POL_BOK_024",
+      "POL_BOK_020",
+      "POL_YC_009",
+      "POL_YC_043",
+      "POL_BOK_052"
+    ],
+    "citationLinks": [
+      {
+        "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+        "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+        "document_id": "DOC_BOK_024",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+        "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+        "document_id": "DOC_BOK_020",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "[온통청년 정책] 공학교육혁신센터 지원 (20261101005400214679)",
+        "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+        "document_id": "DOC_YC_009",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "[온통청년 정책] 경기청년 역량강화 기회지원 (20261030005400214634)",
+        "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+        "document_id": "DOC_YC_043",
+        "page_number": null,
+        "displayed": true
+      },
+      {
+        "title": "[중앙부처복지서비스] 초.중.고 학생 교육정보화 지원 (WLF00003227)",
+        "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+        "document_id": "DOC_BOK_052",
+        "page_number": null,
+        "displayed": true
+      }
+    ],
+    "renderedLinks": [
+      "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+      "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+    ]
+  }
+]

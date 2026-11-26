@@ -1,0 +1,133 @@
+[
+  {
+    "q": "모두의카드",
+    "react": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "pr136": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "모두의 카드",
+    "react": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "pr136": [
+      "POL_BOK_075",
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "K-패스",
+    "react": [
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [
+      "POL_STG_MOLIT_001"
+    ],
+    "pr136": [
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "k-패스",
+    "react": [
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [
+      "POL_STG_MOLIT_001"
+    ],
+    "pr136": [
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "K패스",
+    "react": [
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [],
+    "pr136": [
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "k패스",
+    "react": [
+      "POL_STG_MOLIT_001"
+    ],
+    "dev": [],
+    "pr136": [
+      "POL_STG_MOLIT_001"
+    ],
+    "parity": true,
+    "selected": []
+  },
+  {
+    "q": "위원회",
+    "react": [
+      "POL_BOK_101",
+      "POL_YC_065"
+    ],
+    "dev": [
+      "POL_BOK_101",
+      "POL_YC_065"
+    ],
+    "pr136": [
+      "POL_BOK_101",
+      "POL_YC_065"
+    ],
+    "parity": true,
+    "selected": [
+      {
+        "id": "POL_YC_065",
+        "apply": null,
+        "source": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+        "status": "unknown"
+      }
+    ]
+  },
+  {
+    "q": "글로벌첨단전략산업",
+    "react": [
+      "POL_YC_007"
+    ],
+    "dev": [
+      "POL_YC_007"
+    ],
+    "pr136": [
+      "POL_YC_007"
+    ],
+    "parity": true,
+    "selected": [
+      {
+        "id": "POL_YC_007",
+        "apply": null,
+        "source": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214681",
+        "status": "open"
+      }
+    ]
+  }
+]
