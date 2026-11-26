@@ -1,0 +1,536 @@
+[
+  {
+    "id": "RQ031",
+    "request": {
+      "profile": {
+        "income": null,
+        "age": null,
+        "region": ""
+      },
+      "question": "수산자원보호 직접지불제는 1년에 며칠 이상 조업해야 하나요?",
+      "history": []
+    },
+    "http_status": 200,
+    "seconds": 24.423,
+    "response": {
+      "status": "answered",
+      "answer": "수산자원보호 직접지불제는 원문상 **해당 연도에 60일 이상 조업**해야 합니다. 다만 총허용어획량을 적용하는 어종을 주로 어획하는 어선은 30일 이상 조업해도 인정됩니다. [1][2]",
+      "citations": [
+        {
+          "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+          "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+          "page_number": 1
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_006",
+          "conditions": [
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": [
+            {
+              "text": "ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침 별지 제1호 서식), 수산자원보호 의무 이행계획서 및 증빙자료(지침 별지 제2호 서식)와 필요 구비서류를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출\r\n\r\n▸ 선정신청서 제출시 구비서류\r\n  ① 직접지불금 입금 통장 사본\r\n  ② 수산물 판매 영수증 사본 등 어업 생산실적 증명자료(위판실적 등 확인되는 경우는 제출 불필요)\r\n  ③ 수산자원보호의무 이행계획서(지침 별지 제2호 서식)\r\n\r\nㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등이 포함된 단체(협회, 단체, 조합 등)는 수산자원보호 직접지불금 지급대상단체 선정신청서(지침 별지 제3호 서식)와 수산자원보호의무 이행 세부계획서(지침 별지 제4호 서식) 각 1부를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194"
+            }
+          ],
+          "policy_name": "수산자원보호 직접지불제",
+          "agency": "해양수산부",
+          "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "해양수산부 수산직불제팀",
+              "phone": "051-773-5454",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 신청기간은 언제인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 신청방법은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 다른 지급요건은 무엇인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "RQ031_EXACT60",
+    "request": {
+      "profile": {
+        "income": null,
+        "age": null,
+        "region": ""
+      },
+      "question": "수산자원보호 직접지불제에서 해당 연도 조업일수가 정확히 60일이면 지급요건을 충족하나요? 원문의 지급요건과 지급제한 기준을 구분해서 알려주세요.",
+      "history": []
+    },
+    "http_status": 200,
+    "seconds": 4.313,
+    "response": {
+      "status": "answered",
+      "answer": "수산자원보호 직접지불제에서 해당 연도 조업일수가 정확히 60일이면, 원문상 **지급요건을 충족하는 기준**에 해당합니다. 지급요건에는 “해당 연도 조업일수가 60일 이상일 것”이라고 되어 있어 60일은 포함됩니다 [1].\n\n다만 지급제한 기준도 따로 있습니다. 원문에는 “당해연도 조업일수가 60일 이하인 경우” 1차 10%, 2차 20%, 3차 이상 40%씩 미지급한다고 되어 있어, 60일은 이 미지급 기준에도 포함됩니다 [2]. 따라서 60일은 지급요건에는 맞지만, 지급제한 기준과는 겹치는 표현이 있어 실제 지급액 산정이나 적용 방식은 공고의 세부 운영 기준을 함께 확인해야 합니다 [1][2].\n\n신청 자격 전체는 자동 판정이 보류되어 있어 추가 확인이 필요합니다. 원문상 지급요건에는 교육 이수, 수산관계법령 준수, 어업경영정보 등록 및 변경등록, 유효한 어업허가, 그리고 기본의무와 선택의무 2개 이상 준수까지 함께 요구됩니다 [1]. 또한 지원대상과 제외대상도 별도로 확인되어야 합니다 [3]. 현재 접수 여부는 공식 공고에서 확인해 주세요 [3].",
+      "citations": [
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_006",
+          "conditions": [
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": [
+            {
+              "text": "ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침 별지 제1호 서식), 수산자원보호 의무 이행계획서 및 증빙자료(지침 별지 제2호 서식)와 필요 구비서류를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출\r\n\r\n▸ 선정신청서 제출시 구비서류\r\n  ① 직접지불금 입금 통장 사본\r\n  ② 수산물 판매 영수증 사본 등 어업 생산실적 증명자료(위판실적 등 확인되는 경우는 제출 불필요)\r\n  ③ 수산자원보호의무 이행계획서(지침 별지 제2호 서식)\r\n\r\nㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등이 포함된 단체(협회, 단체, 조합 등)는 수산자원보호 직접지불금 지급대상단체 선정신청서(지침 별지 제3호 서식)와 수산자원보호의무 이행 세부계획서(지침 별지 제4호 서식) 각 1부를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194"
+            }
+          ],
+          "policy_name": "수산자원보호 직접지불제",
+          "agency": "해양수산부",
+          "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "해양수산부 수산직불제팀",
+              "phone": "051-773-5454",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "선정기준"
+            },
+            {
+              "text": "□ 지원 대상\r\n\r\n  ㅇ 수산자원의 지속가능한 이용을 위하여 휴어 등 강화된 자원보호 의무를 이행하는 어업인등과 「수산업법」제41조에 따라 허가를 받은 「상법」상 회사 \r\n\r\n□ 제외 대상\r\n\r\n  ㅇ 신청일 이전 3년 이내에 거짓이나 그 밖의 부정한 방법으로 어업경영체에 등록하거나, 수산자원보호 직접지불금을 수령한 경우 \r\n\r\n  ㅇ 신청일 이전 1년 이내에 거짓이나 그 밖의 부정한 방법으로 수산자원보호 직접지불금을 신청한 경우 \r\n\r\n  ㅇ ｢해양수산부 국고보조금 관리에 관한 규정｣ 제13조제4항 및 제23조제1항의 각호에 해당하는 사람은 선정 및 보조금 교부 제외",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C002",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "지원대상"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 신청 서류는 무엇인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 제외 대상은 어떻게 되나요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "BOUNDARY_59",
+    "request": {
+      "profile": {
+        "income": null,
+        "age": null,
+        "region": ""
+      },
+      "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 59일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+      "history": []
+    },
+    "http_status": 200,
+    "seconds": 8.324,
+    "response": {
+      "status": "answered",
+      "answer": "수산자원보호 직접지불제의 최소 조업일수는 **해당 연도 60일 이상**입니다. 다만 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선은 30일 이상이면 인정된다고 원문에 적혀 있습니다. 따라서 질문처럼 2026년 조업일수가 정확히 59일이고, TAC 적용 어종을 주로 어획하는 어선이 아니라면 최소 조업일수 요건은 충족하지 못합니다. [1][2]\n\n지급제한도 따로 확인됩니다. 당해연도 조업일수가 60일 이하인 경우에는 1차 위반 시 10퍼센트, 2차 위반 시 20퍼센트, 3차 이상 위반 시 40퍼센트씩 미지급된다고 되어 있습니다. 그래서 59일이면 이 지급제한에 해당합니다. [3]\n\n다만 최종 지급 자격은 조업일수만으로 결정되지 않습니다. 원문에는 교육 이수, 수산관계법령 준수, 어업경영정보 등록·변경등록, 유효한 어업허가, 그리고 기본의무와 선택의무 2개 이상 준수까지 함께 요구되어 있습니다. 현재 입력으로는 이 요건들을 모두 충족하는지 확인되지 않았고, 접수 여부도 공식 공고에서 확인이 필요합니다. [2][4]",
+      "citations": [
+        {
+          "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+          "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+          "page_number": 1
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_006",
+          "conditions": [
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": null,
+          "policy_name": "수산자원보호 직접지불제",
+          "agency": "해양수산부",
+          "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "해양수산부 수산직불제팀",
+              "phone": "051-773-5454",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 다른 지급요건은 무엇인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "BOUNDARY_60",
+    "request": {
+      "profile": {
+        "income": null,
+        "age": null,
+        "region": ""
+      },
+      "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 60일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+      "history": []
+    },
+    "http_status": 200,
+    "seconds": 4.475,
+    "response": {
+      "status": "answered",
+      "answer": "수산자원보호 직접지불제에서 최소 조업일수 요건은 **해당 연도 60일 이상 조업**입니다. 다만 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선은 30일 이상 조업해도 인정된다고 원문에 적혀 있습니다. 따라서 질문처럼 TAC 적용 어종을 주로 어획하는 어선이 **아니라면**, 2026년 조업일수 60일은 최소 요건을 충족합니다 [1][2].\n\n지급제한은 별도로 확인됩니다. 당해연도 조업일수가 60일 이하인 경우에는 1차 10%, 2차 20%, 3차 이상 40%씩 미지급된다고 되어 있어, 60일은 이 미지급 기준에 걸리지 않습니다 [4].\n\n최종 지급 자격은 조업일수만으로 확정되지 않습니다. 원문에는 직불금 신청년도에 관련 교육 이수, 수산관계법령 준수, 어업경영정보 등록 및 변경등록, 신청일부터 이행점검 종료일까지 유효한 어업허가, 그리고 기본의무와 선택의무 2개 이상을 함께 준수해야 한다고 되어 있습니다 [3][5]. 현재 입력만으로는 이 전체 요건 충족 여부를 확인할 수 없어, 최종 지급 자격은 추가 확인이 필요합니다. 현재 접수 여부도 공식 공고에서 확인해 주세요 [3][5].",
+      "citations": [
+        {
+          "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+          "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+          "page_number": 1
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_006",
+          "conditions": [
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": null,
+          "policy_name": "수산자원보호 직접지불제",
+          "agency": "해양수산부",
+          "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "해양수산부 수산직불제팀",
+              "phone": "051-773-5454",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 지급요건은 무엇인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 지급제한 기준은 무엇인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 지원대상은 누구인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  },
+  {
+    "id": "BOUNDARY_61",
+    "request": {
+      "profile": {
+        "income": null,
+        "age": null,
+        "region": ""
+      },
+      "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 61일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+      "history": []
+    },
+    "http_status": 200,
+    "seconds": 3.588,
+    "response": {
+      "status": "answered",
+      "answer": "수산자원보호 직접지불제의 **최소 조업일수**는 해당 연도에 60일 이상입니다. 다만 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선은 30일 이상 조업해도 인정됩니다. 따라서 질문처럼 2026년 조업일수가 정확히 61일이고, TAC 적용 어종을 주로 어획하는 어선이 아니라면 최소 조업일수 요건은 충족합니다. [1][2]\n\n지급제한은 별도로 확인됩니다. 당해연도 조업일수가 60일 이하인 경우에는 1차 위반 시 10퍼센트, 2차 위반 시 20퍼센트, 3차 이상 위반 시 40퍼센트씩 미지급됩니다. 질문의 61일은 이 미지급 기준에 해당하지 않습니다. [3]\n\n최종 지급 자격은 조업일수만으로 확정되지 않습니다. 공식 원문에는 직불금 신청년도에 관련 교육 이수, 수산관계법령 준수, 어업경영정보 등록 및 변경등록, 신청일부터 이행점검 종료일까지 유효한 어업허가, 그리고 기본의무와 선택의무 2개 이상 준수까지 함께 요구됩니다. 현재 입력으로는 이 다른 요건들은 확인되지 않았고, 공식 판정도 자격은 추가 확인이 필요하다고 되어 있습니다. 또한 현재 접수 여부도 공식 공고에서 확인해 주세요. [2][4]",
+      "citations": [
+        {
+          "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+          "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+          "page_number": 1
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        },
+        {
+          "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+          "document_id": "DOC_GOV_006",
+          "page_number": null
+        }
+      ],
+      "policy_checks": [
+        {
+          "policy_id": "POL_GOV_006",
+          "conditions": [
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "application_schedule": null,
+          "required_documents": null,
+          "policy_name": "수산자원보호 직접지불제",
+          "agency": "해양수산부",
+          "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+          "official_apply_url": null,
+          "contacts": [
+            {
+              "agency": "해양수산부 수산직불제팀",
+              "phone": "051-773-5454",
+              "document_id": null,
+              "chunk_id": null,
+              "source_url": null
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+              "document_id": "DOC_GOV_006",
+              "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+              "label": "선정기준"
+            }
+          ],
+          "exclusion_reasons": null,
+          "official_requirements": null
+        }
+      ],
+      "follow_up_questions": [
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 신청 요건은 무엇인가요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 지급제한 기준은 어떻게 되나요?",
+          "field": null
+        },
+        {
+          "kind": "question",
+          "text": "수산자원보호 직접지불제의 지원대상은 누구인가요?",
+          "field": null
+        }
+      ],
+      "checked_at": null,
+      "notice": {
+        "kind": "warn",
+        "title": "추가 확인 필요",
+        "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+      },
+      "is_sample": false
+    }
+  }
+]
