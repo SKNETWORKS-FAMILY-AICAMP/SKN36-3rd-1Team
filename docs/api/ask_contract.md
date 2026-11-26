@@ -1,7 +1,8 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.6 · 2026-11-26 (v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.7 · 2026-11-26 (v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.7 변경(2026-11-26 — #78 후속 제외 사유 연결, 지인, 팀 리뷰 대상):** `policy_checks[].exclusion_reasons`에 Checker가 확정한 제외 사유를 그대로 전달한다(§8.3, 문서 끝 「#78 제외 사유 전달」 절). 필드 구조 `{field, label, reason}`, `conditions`·종합 판정, `official_requirements`(v1.6) 등 다른 필드는 바꾸지 않는다. 확정 사유가 없거나 이 응답의 최종 판정과 맞지 않으면 `null`이다.  
 > **v1.6 변경(2026-11-26 — #76 공식 자격기준 연결, 지인):** `policy_checks[].official_requirements`의 채우는 규칙만 정했다(§8.3, 문서 끝 「#76 공식 자격기준」 절). 필드 구조 `{label, value, document_id, chunk_id}`, Checker 판정, 다른 필드는 바꾸지 않는다. 검수 기록이 있으면 그것을 우선하고, 없으면 채택 근거에서 원문이 항목명을 붙인 기준만 원문 그대로 담는다. 확인 가능한 기준이 없으면 `null`이다.  
 > **v1.5 변경(2026-11-22 — #107 목록·신청 정보 연결, 강민지, PR #109 팀 리뷰 대상):** 읽기 전용 `GET /api/policies` 추가(§8.1·§9), 요청 `selected_policy_id` 추가(§3.3·§8.2), 응답 `policy_checks[]`에 `application_schedule`·`required_documents`·`requirement_excerpts` 선택 필드 추가(§8.3). 모두 선택 필드라 기존 요청·응답과 호환된다. `official_requirements`·`exclusion_reasons`는 v1.4 계약 그대로(#76-A·#78이 채움). 세부 규칙은 문서 끝 「#107 목록·신청 정보 연결」 절에 둔다.
 > **v1.4 변경(2026-11-17 — #77 완료 기준 마무리, 강민지):** `exclusion_reasons`·`official_requirements` 선택 필드를 §8.3에 기록(자리만 예약, 둘 다 항상 `null`) — #77에서 세 기능(제외 정보·공식 요건·문의처)을 하나의 계약으로 같이 설계하기로 한 것 중 남아 있던 두 자리를 채웠다. 값을 채우는 구현은 각각 [#78](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/78)·[#76-A](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/76)가 한다. `backend/api/schemas.py`의 `ExclusionReason`·`OfficialRequirement`, `frontend/src/api/types.ts`의 같은 이름 타입이 이 정의를 따른다.  
@@ -504,7 +505,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `source_url`: 해당 정책의 인용 가능한 `evidence[].source_url` 우선 → 적합한 Graph 원문 URL → 없으면 `""`. 링크가 비어 있으면 프론트는 링크 버튼을 숨겨야 한다.
 - `official_apply_url`: 실제 `graph.policy.official_apply_url`에 **유효한 신청 URL**이 있을 때만. 공고 URL을 임의로 복사하지 않는다. 없으면 `null`.
 - `contacts`(선택, v1.2 추가·v1.3 필드 보완): 해당 정책의 **채택 청크 전체**(`contexts`에 선택된 이 정책의 모든 청크)에서 `[문의처]` 블록을 모으고, 그중 유효한 문의처가 하나도 없을 때만 같은 정책의 **인용 가능하지만 채택되지 않은 후보**로 보완한다. `{agency, phone, document_id, chunk_id, source_url}` 목록이며, 원문에 없으면 `null`(빈 배열 아님). 기관명·전화번호가 모두 같은 항목은 첫 등장 순서로 한 번만 남기고, 같은 기관이라도 전화번호가 다르면 둘 다 유지한다. `document_id`·`chunk_id`·`source_url`은 그 문의처가 실제로 나온 청크를 가리키며, `source_url`이 유효한 http(s) 주소가 아니면 `null`이다. `phone`은 원문 숫자·구분자 그대로이며, 번호 뒤에 설명이 더 있으면(예: "각 기관 120 센터") 맥락을 잃지 않도록 구절 전체를 담을 수 있다 — 항상 전화번호 단독 형식은 아니다. 프론트에서 그대로 노출할 때 이 점을 감안한다.
-- `exclusion_reasons`(선택, v1.4 자리 예약 — #78이 채운다): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고, `reason`은 "75세 이상이라 제외 대상입니다" 같은 구체적 문구다. #78에서 Checker의 제외 사유 생성 로직은 구현되었지만, Pipeline·API 응답 연결은 후속 작업이다. 연동 전까지 최종 API 응답에서 이 필드는 `null`이며, Checker의 확정 제외 사유는 데이터 품질 보류와 개별·종합 판정을 존중한다. #107의 원문 블록 발췌는 조건 트리 기반 제외 사유 생성과 구분한다.
+- `exclusion_reasons`(선택, v1.4 자리 예약 · v1.7 실제 값 전달 — #78): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고(복합 제외 조건은 `field: "eligibility"`일 수 있다), `reason`은 Checker가 만든 문구 그대로다. 사유 생성은 Checker(`check_eligibility`) 단일 책임이며, Pipeline은 같은 정책의 Checker 결과를 다시 계산하지 않고 순서·문구 그대로 전달한다. 종합 판정이 `ineligible`이 아니거나 Pipeline이 보류로 낮춘 필드의 사유는 전달하지 않는다. 없으면 `null`이며, `null`은 '제외 조건 없음'이 아니라 '확정된 제외 사유가 전달되지 않음'이다. Generator 입력의 같은 정책 `policy_checks`에도 같은 값이 들어간다. 세부 규칙은 문서 끝 「#78 제외 사유 전달」 절. #107의 원문 블록 발췌는 조건 트리 기반 제외 사유 생성과 구분한다.
 - `official_requirements`(선택, v1.4 자리 예약 · v1.6 채움 규칙 — #76): 정책이 요구하는 공식 자격 기준과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다. `document_id`·`chunk_id`는 그 기준이 실제로 나온 같은 정책의 채택 근거를 가리킨다. 검수 기록이 있으면 우선 쓰고, 없으면 채택 근거에서 명확한 항목만 제한적으로 원문 그대로 담는다. 자동 추출한 항목은 검수 완료 기준이 아니다. 확인 가능한 기준이 없으면 `null`이며, `null`은 '조건 없음'이 아니라 '확인 가능한 기준이 없음'이다. 사용자의 충족 여부는 `conditions`(Checker)만 나타낸다. 세부 규칙은 문서 끝 「#76 공식 자격기준」 절.
 - `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」).
 - `required_documents`(선택, v1.5): 원문 `[구비서류]`·`[제출서류]` 블록 발췌 `{text, document_id, chunk_id, source_url}` 목록. 완전한 서류 목록을 보증하지 않는다. 없으면 `null`.
@@ -696,3 +697,35 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - 검수 기록 대조: 값은 숫자 경계까지 맞아야 한다(원문 `150만원`에 검수 값 `50만원`은 불일치). 형식이 잘못된 기록(예: `checks.value`가 배열)은 오류 없이 그 기록만 건너뛴다.
 - 개인 판정과 분리: `official_requirements`는 Generator 입력에 넣지 않고 생성 뒤에 붙인다. 사용자의 충족 여부는 `conditions`·`reception_status`(Checker)로만 나타내며, 공식 기준을 찾았다고 판정을 바꾸지 않는다.
 - 검증 필요 예외(데이터 동결, 데이터는 수정하지 않음): `SOURCE_AGE_ERROR_MARK`가 붙은 `POL_YC_029`·`POL_YC_033`·`POL_YC_043`은 `[추가 신청자격조건]`에 연령 문구가 있지만 위 규칙대로 연령 항목을 담지 않는다. 경고의 원인이 수집기 템플릿의 `0~0세` 표기인지, 그 문구가 공식 원문인지 데이터 담당 확인이 필요하다.
+
+## #78 제외 사유 전달 (v1.7)
+
+`policy_checks[].exclusion_reasons`를 채우는 규칙이다. 필드 구조·Checker 판정·다른 필드(`official_requirements` v1.6 포함)는 바꾸지 않는다. 구현: `backend/rag/pipeline.py`의 `_confirmed_exclusion_reasons`.
+
+- 역할: 제외 사유 생성(어떤 NOT 조건이 확정 해당인지)은 Checker 단일 책임이다(`backend/eligibility/checker.py`, PR #108). Checker는 단일 조건 트리에서 종합 판정이 `ineligible`일 때만 확정 사유를 만들고, OR 선택 경로 안의 NOT·데이터 품질 보류 필드·`0~120세` 같은 미검증 전 연령 범위·UNKNOWN 조건으로는 제외를 확정하지 않는다. Pipeline은 같은 정책의 Checker 결과를 재계산하지 않고 그대로 전달한다.
+- 전달 조건: Pipeline 보류(§4.3 데이터 품질 보류, 입력 누락, 소득 기준 보류, 선택 정책 지역 보류)를 반영한 뒤 그 정책의 종합(마지막 `eligibility`) 행이 `ineligible`일 때만 전달한다. Pipeline이 보류로 낮춘 필드의 사유는 뺀다. 그룹(`eligibility`) 행을 보류했으면 전부 빼고, 다른 필드 보류가 있으면 복합(`field: "eligibility"`) 사유도 뺀다. 남은 사유의 순서·문구는 Checker 그대로다.
+- `null`: Checker가 사유를 주지 않았거나 빈 목록, 종합 판정이 `ineligible`이 아님, 위 규칙으로 모두 빠짐. 빈 배열은 보내지 않는다. `null`은 '제외 조건 없음'·'지원 가능'의 증거가 아니다.
+- 형식 오류: Checker가 준 값이 `{field, label, reason}` 목록(빈 문자열 불가)이 아니면 `ELIGIBILITY_OUTPUT_INVALID`(502)다.
+- 정책 간 혼합 방지: Context에 채택된 정책마다 그 정책의 Checker 결과만 읽는다. 채택되지 않은 정책의 사유는 어떤 응답에도 나오지 않는다. 출처는 같은 정책 항목의 `source_url`·`citations`로 이어지며, `ExclusionReason`에는 별도 출처 필드를 두지 않는다.
+- 개별 조건과 구분: NOT 아래 개별 조건의 `eligible`은 '그 제외 조건에 해당'이라는 뜻이다(예: `만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.`). 화면·LLM은 이를 신청 자격 충족으로 표현하지 않고, 종합 판정과 `exclusion_reasons`로 안내한다.
+- Generator: 생성 전에 붙이므로 Generator의 같은 정책 `policy_checks`에 같은 값이 들어간다(시스템 프롬프트 「제외 조건 안내」). 화면용 조건 요약(`display_fn`)은 이 필드를 바꾸지 않는다.
+- 현재 데이터 주의(v1.4.0 후보): `POL_005`(NOT → OR → 제외 조건 13개)는 `EXTRACTED_NOT_VERIFIED` 등으로 `hold_auto_eligibility=true`라, Checker가 74·75·76·80세·미입력 모두 종합 판정을 `needs_check`로 두고 `exclusion_reasons`는 `null`이다. 품질 보류가 풀리면 75세 이상에서 연령 제외 사유가 전달된다(테스트 시뮬레이션으로만 확인).
+
+예시(가상 정책, sample_only — 80세, ROOT(AND) → NOT → OR(75세 이상)):
+
+```json
+{
+  "policy_id": "POL_X78",
+  "conditions": [
+    {"field": "age", "label": "나이", "status": "eligible",
+     "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다."},
+    {"field": "eligibility", "label": "자격 요건", "status": "eligible", "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과)."},
+    {"field": "eligibility", "label": "자격 요건", "status": "ineligible", "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과)."},
+    {"field": "eligibility", "label": "자격 요건", "status": "ineligible", "reason": "모든 조건을 충족해야 합니다(종합 결과)."}
+  ],
+  "exclusion_reasons": [
+    {"field": "age", "label": "나이",
+     "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다. 해당 조건은 지원 제외 기준이며, 입력하신 정보가 제외 대상에 해당합니다."}
+  ]
+}
+```

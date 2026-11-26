@@ -494,8 +494,9 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(check.exclusion_reasons[0].reason, "75세 이상이라 제외 대상입니다.")
         self.assertEqual(check.official_requirements[0].value, "1인 가구 기준 2,392,013원")
 
-    def test_pipeline_never_fills_exclusion_reasons_or_official_requirements_yet(self):
-        # #78·#76-A 구현 전까지는 Pipeline이 이 두 필드를 채우는 로직이 없어야 한다(#77 범위 밖).
+    def test_pipeline_leaves_exclusion_reasons_and_official_requirements_null_without_evidence(self):
+        # Checker가 제외 사유를 주지 않고(#78) 자격 블록·검수 기록도 없으면(#76) 두 필드는 null이다.
+        # 실제 값 전달은 tests/integration/test_issue78_exclusion_reasons_api.py에서 검증한다.
         response = self.ask()
         self.assertIsNone(response.policy_checks[0].exclusion_reasons)
         self.assertIsNone(response.policy_checks[0].official_requirements)
