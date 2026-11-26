@@ -1,6 +1,6 @@
 """질문 API와 프로세스별 Hybrid 검색 세션을 관리한다."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from contextlib import asynccontextmanager
 import logging
 import os
@@ -98,8 +98,12 @@ def create_app(
     generate_fn: Callable = _generate_answer,
     display_fn: Callable[[list[dict]], list[dict]] | None = None,
     catalog_factory: Callable = PolicyCatalog,
+    requirement_reviews: Collection[dict] = (),
 ) -> FastAPI:
-    """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다."""
+    """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다.
+
+    requirement_reviews: 공식 기준 검수 기록(#76). 검수 기록 저장 위치가 확정되기 전까지 기본값은 빈 목록이다.
+    """
     search_lock = Lock()
 
     @asynccontextmanager
@@ -162,7 +166,7 @@ def create_app(
     def ask(request: AskRequest) -> AskResponse:
         try:
             return run_ask_pipeline(request, search_fn=search, check_fn=check_fn, generate_fn=generate_fn,
-                                    display_fn=display_fn)
+                                    display_fn=display_fn, requirement_reviews=requirement_reviews)
         except AskError as exc:
             status, message = ERRORS[exc.code]
             if status >= 500:
