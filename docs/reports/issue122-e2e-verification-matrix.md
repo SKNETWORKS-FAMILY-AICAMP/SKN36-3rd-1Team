@@ -74,7 +74,7 @@
 
 | ID | 입력 | 기대 결과 | 증빙 기준 | 현재 상태 | 최종 판정 |
 | --- | --- | --- | --- | --- | --- |
-| 04-1 | POL_005 74·75·76·80세 및 확정 제외 사유가 있는 정책 상담 | #135 이후 확정 사유는 Checker와 같고, 품질 보류 중 POL_005는 `null`. 카드는 상세 사유 또는 기존 일반 경고를 표시 | 응답 JSON + 카드 스크린샷 | **BLOCKED** (실제 API 503, 렌더링 회귀 PASS) | |
+| 04-1 | POL_005 74·75·76·80세 및 확정 제외 사유가 있는 정책 상담 | #135 이후 확정 사유는 Checker와 같다. POL_005 74세는 `needs_check`·`null`, 75세 이상은 `ineligible`·연령 제외 사유. 카드는 상세 사유 또는 기존 일반 경고를 표시 | 응답 JSON + 카드 스크린샷 | **FAIL** (2026-11-26 R3D 재실행: 74·75·80세 PASS, 76세는 Checker `ineligible`인데 본문이 "충족"이라 답함. 카드 스크린샷 미실행, 렌더링 회귀 PASS) | [#75 R3D 재실행](issue75-browser-regression-20261125.md#r3d-verify-db-재실행-2026-11-26-kst) |
 | 04-2 | 공식 원문 기준이 있는 정책과 발췌만 있는 정책 상담·목록 | #133 이후 구조화 요건은 같은 정책의 채택 문서 인용과 연결. `null`이면 원문 발췌가 있을 때만 발췌로 표시. 값·단위·연도 유지, 개인 판정과 분리 | 응답 JSON + 카드 스크린샷 | **BLOCKED** (실제 API 503, 렌더링 회귀 PASS) | |
 | 04-3 | POL_GOV_050, `child_age_months` = 10 / 24 / 25 / 생략 / -1·1.5·"a" | 연령 조건에서 10·24 → eligible, 25 → ineligible, 생략 → needs_check, 잘못된 값 → 422(값 미노출). 조건은 `COND_CHILD_AGE_LE_24M`(LTE 24) | 요청별 응답 JSON, 422 본문 | **BLOCKED** (PR #112 병합, FastAPI·React 요청 연결 대기) | |
 
@@ -156,7 +156,7 @@
 
 | 범위 | 최신 증빙과 남은 검증 |
 | --- | --- |
-| 02, 03, 04, 06 · 실제 상담 | #76 공식 요건·예외 3건, #78 연령 경계 4건, RQ040/RQ042 및 복수 정책 3건이 검색 단계에서 HTTP 503으로 차단됐다. 정책 ID·Checker·Generator·React 정합성 및 실제 출처 링크는 대기다. 환경과 질문은 [#75 후속 검증](issue75-browser-regression-20261125.md#최신-dev-후속-검증-2026-11-26-kst)에 기록했다. |
+| 02, 03, 04, 06 · 실제 상담 | #76 공식 요건·예외 3건, #78 연령 경계 4건, RQ040/RQ042 및 복수 정책 3건이 검색 단계에서 HTTP 503으로 차단됐다. 정책 ID·Checker·Generator·React 정합성 및 실제 출처 링크는 대기다. 환경과 질문은 [#75 후속 검증](issue75-browser-regression-20261125.md#최신-dev-후속-검증-2026-11-26-kst)에 기록했다. 이후 R3D verify DB에 붙여 7건을 다시 보냈고 모두 HTTP 200이었다. #78 74·75·80세는 PASS, 76세는 Checker·본문 불일치로 FAIL이다. 나머지 본문·카드·링크 대조는 대기다([R3D 재실행](issue75-browser-regression-20261125.md#r3d-verify-db-재실행-2026-11-26-kst)). |
 | 06 · 목록 브라우저 | Edge에서 React 상담 화면 및 목록 로드를 확인했고 FastAPI의 목록 요청은 HTTP 200이었다. 상담 질문 제출은 미실행이다. |
 | 05-1, 05-5 · PR #136 | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)은 Open, head `52be7f9`다. 현재 dev에서 React 목록 검색 회귀는 여섯 표기 모두 PASS. 실제 `GET /api/policies?q=…`는 모두 HTTP 200이지만 `POL_STG_MOLIT_001` 기준으로 K-패스·k-패스만 PASS, 모두의카드·모두의 카드·K패스·k패스는 FAIL이다. 첫 두 표기는 다른 결과 1개, 뒤 두 표기는 0개였다. #136 적용 후 여섯 표기를 API에서 재확인하고 POL_YC_065 상담 답변에 홈페이지를 전용 신청 주소로 안내하는 표현이 없고 카드 신청 버튼이 숨겨지는지 대조한다. |
 | #97 RQ031 | Generator·Pipeline 수정 완료 확인 후 동일 5문항을 재평가한다. 이번 회차는 미실행이다. |
