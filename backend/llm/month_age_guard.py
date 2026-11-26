@@ -16,21 +16,27 @@ _LOWER_EVIDENCE = re.compile(
     r"\d+\s*(?:개월\s*)?(?:~|～|–|—|-)\s*\d+\s*개월|"
     r"출생|태어난|신생아"
 )
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?。！？])(?:[ \t]+|(?=[가-힣]))|\r?\n")
+_NEGATIVE_ELIGIBILITY = re.compile(
+    r"제외|불가|비대상|대상(?:이|에)\s*(?:아니|아닙|해당하지\s*않)|"
+    r"(?:신청|이용|지원받)(?:을)?\s*할\s*수\s*없"
+)
 _MARK = r"(?:\*\*|__)?"
 _RANGE = re.compile(
     r"(?<![\d.\-])" + _MARK + r"(?P<low>\d+)\s*(?:개월)?" + _MARK
     + r"\s*(?:부터|이상\s*(?:이고|이며|,)?|~|～|–|—|-)\s*" + _MARK
-    + r"(?P<high>\d+)\s*개월" + _MARK + r"(?:\s*(?:까지|이하|미만)" + _MARK + r")?"
+    + r"(?P<high>\d+)\s*개월" + _MARK
+    + r"(?:\s*" + _MARK + r"(?P<upper_word>까지|이하|미만)" + _MARK + r")?"
 )
 _START = re.compile(
-    r"(?<![\d.\-])" + _MARK + r"(?:생후\s*)?\d+\s*개월" + _MARK + r"\s*(?:이상\s*)?부터"
+    r"(?<![\d.\-])" + _MARK + r"(?:생후\s*)?(?P<low>\d+)\s*개월" + _MARK + r"\s*(?:이상\s*)?부터"
     r"(?=\s*(?:신청(?:할\s*수\s*있(?:습니다|어요)|\s*가능(?:합니다|해요))|"
     r"지원(?:을\s*받을\s*수\s*있(?:습니다|어요)|\s*가능(?:합니다|해요))|"
     r"이용(?:할\s*수\s*있(?:습니다|어요)|\s*가능(?:합니다|해요))|해당(?:합니다|됩니다)))"
 )
 _START_STATEMENT = re.compile(
     r"(?:시작|최소|최저)\s*월령(?:은|이|의\s*기준은)?\s*"
-    + _MARK + r"\d+\s*개월" + _MARK + r"\s*(?:입니다|이에요|로\s*확인됩니다)"
+    + _MARK + r"(?P<low>\d+)\s*개월" + _MARK + r"\s*(?:입니다|이에요|로\s*확인됩니다)"
 )
 
 
@@ -41,7 +47,7 @@ def _upper_only(contexts: list[dict]) -> tuple[str, str, int] | None:
     supplied evidence prevents an 'unknown start' correction. Complex bounds
     and conflicting/alternative upper bounds are left for normal generation.
     """
-    found = []
+    found: list[tuple[str, str, int]] = []
     for context in contexts:
         if context.get("quality_warnings"):
             return None
@@ -53,8 +59,12 @@ def _upper_only(contexts: list[dict]) -> tuple[str, str, int] | None:
         # because the narrow canonical parser cannot interpret that wording.
         if "개월" in _CHILD_UPPER.sub("", text):
             return None
-        found.extend((m["limit"], m["comparison"], context["source_id"])
-                     for m in _CHILD_UPPER.finditer(text))
+        for match in _CHILD_UPPER.finditer(text):
+            before = _SENTENCE_BREAK.split(text[:match.start()])[-1]
+            after = _SENTENCE_BREAK.split(text[match.end():], maxsplit=1)[0]
+            if _NEGATIVE_ELIGIBILITY.search(before + match.group() + after):
+                return None
+            found.append((match["limit"], match["comparison"], context["source_id"]))
     if not found or len({(limit, comparison) for limit, comparison, _ in found}) != 1:
         return None
     return found[0]
@@ -99,23 +109,32 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
         limit, comparison, source_id = bound
         changed = False
 
-        def is_age_measurement(match: re.Match[str]) -> bool:
+        def can_correct_start(match: re.Match[str]) -> bool:
             prefix = re.split(r"[.!?\n]", paragraph[:match.start()])[-1]
             suffix = paragraph[match.end():]
             # The paragraph may mention a child-age criterion and a different
             # measurement. A benefit/service duration is not an age range.
-            return not (
+            if (
                 re.search(r"기간|일정|납부|임대|휴직", prefix)
-                or re.match(r"\s*(?:동안|간)", suffix)
-            )
+                or re.match(r"\s*(?:동안|간|에\s*걸쳐)", suffix)
+            ):
+                return False
+            try:
+                start, upper = int(match["low"]), int(limit)
+            except ValueError:
+                return False
+            return start < upper or (start == upper and comparison == "이하")
 
         def replace(match: re.Match[str]) -> str:
             nonlocal changed
-            if not is_age_measurement(match):
+            if not can_correct_start(match):
                 return match.group()
             # Do not manufacture a correction when even the upper endpoint
             # disagrees with the evidence; this guard handles inferred starts.
             if match["high"].lstrip("0") != limit.lstrip("0"):
+                return match.group()
+            answer_comparison = match["upper_word"]
+            if answer_comparison in {"이하", "미만"} and answer_comparison != comparison:
                 return match.group()
             changed = True
             return f"{limit}개월 {comparison}"
@@ -124,14 +143,14 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
 
         def replace_start(match: re.Match[str]) -> str:
             nonlocal changed
-            if not is_age_measurement(match):
+            if not can_correct_start(match):
                 return match.group()
             changed = True
             return f"{limit}개월 {comparison}인 경우"
 
         def replace_statement(match: re.Match[str]) -> str:
             nonlocal changed
-            if not is_age_measurement(match):
+            if not can_correct_start(match):
                 return match.group()
             changed = True
             return "시작 월령은 이번 근거에서 확인되지 않았습니다"
