@@ -8,6 +8,8 @@ _CHILD_UPPER = re.compile(
     r"(?:자녀|아이|아기|영유아|영아|아동)(?:의)?\s*"
     r"(?:월령|연령|나이)(?:은|는|이|가)?\s*(?:생후\s*)?"
     r"(?P<limit>\d+)\s*개월\s*(?P<comparison>이하|미만)"
+    # A comparator inside a negation or exclusion does not establish a bound.
+    r"(?=(?:입니다|이다)?[ \t]*(?:[.。](?=\s|$)|\r?\n|$))"
 )
 _LOWER_EVIDENCE = re.compile(
     r"\d+\s*개월\s*(?:이상|초과|부터)|"
@@ -18,7 +20,7 @@ _MARK = r"(?:\*\*|__)?"
 _RANGE = re.compile(
     r"(?<![\d.\-])" + _MARK + r"(?P<low>\d+)\s*(?:개월)?" + _MARK
     + r"\s*(?:부터|이상\s*(?:이고|이며|,)?|~|～|–|—|-)\s*" + _MARK
-    + r"(?P<high>\d+)\s*개월" + _MARK + r"\s*(?:까지|이하)?" + _MARK
+    + r"(?P<high>\d+)\s*개월" + _MARK + r"(?:\s*(?:까지|이하|미만)" + _MARK + r")?"
 )
 _START = re.compile(
     r"(?<![\d.\-])" + _MARK + r"(?:생후\s*)?\d+\s*개월" + _MARK + r"\s*(?:이상\s*)?부터"
@@ -99,11 +101,13 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
 
         def is_age_measurement(match: re.Match[str]) -> bool:
             prefix = re.split(r"[.!?\n]", paragraph[:match.start()])[-1]
+            suffix = paragraph[match.end():]
             # The paragraph may mention a child-age criterion and a different
             # measurement. A benefit/service duration is not an age range.
-            if re.search(r"기간|일정|납부|임대|휴직", prefix):
-                return False
-            return True
+            return not (
+                re.search(r"기간|일정|납부|임대|휴직", prefix)
+                or re.match(r"\s*(?:동안|간)", suffix)
+            )
 
         def replace(match: re.Match[str]) -> str:
             nonlocal changed

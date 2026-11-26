@@ -73,6 +73,8 @@ def test_ambiguous_multi_policy_paragraph_is_not_rewritten(answer):
     "자녀 월령 기준은 24개월 이하이며 시작 월령은 확인되지 않았습니다 [1].",
     "자녀 월령 기준은 0개월부터 36개월까지입니다 [1].",
     "자녀 월령은 24개월 이하입니다. 지원 기간은 0개월부터 24개월까지입니다 [1].",
+    "자녀 월령은 24개월 이하입니다. 지원금은 0~24개월 동안 지급됩니다 [1].",
+    "자녀 월령은 24개월 이하입니다. 지원금은 0~24개월간 지급됩니다 [1].",
     "자녀 월령의 '0개월부터 24개월까지'라는 표현은 잘못됐습니다 [1].",
 ])
 def test_other_claims_and_already_correct_answers_are_unchanged(answer):
@@ -86,11 +88,25 @@ def test_conflicting_upper_bounds_do_not_produce_a_guessed_correction():
         "장애 아동의 자녀 월령은 36개월 이하입니다.", 2)]) == raw
 
 
-def test_exclusive_upper_bound_keeps_its_comparator():
-    out = ground_child_month_ranges(response("자녀 월령의 신청 범위는 0~24개월입니다 [1]."),
+@pytest.mark.parametrize("range_text,expected", [
+    ("0~24개월", "24개월 미만"),
+    ("0개월 이상 24개월 미만", "24개월 미만"),
+    ("0~24개월 (원문 기준)", "24개월 미만 (원문 기준)"),
+])
+def test_exclusive_upper_bound_keeps_its_comparator(range_text, expected):
+    out = ground_child_month_ranges(response(f"자녀 월령의 신청 범위는 {range_text}입니다 [1]."),
                                     [evidence("자녀 월령은 24개월 미만입니다.")])
-    assert "24개월 미만입니다" in out["answer"]
+    assert f"신청 범위는 {expected}입니다" in out["answer"]
     assert "24개월 이하" not in out["answer"]
+
+
+@pytest.mark.parametrize("official", [
+    "자녀 월령은 24개월 이하로 제한하지 않습니다.",
+    "자녀 월령이 24개월 이하인 경우는 지원 대상에서 제외합니다.",
+])
+def test_nonasserted_upper_bounds_cannot_supply_a_correction(official):
+    raw = response("자녀 지원 기준은 0개월부터 신청 가능합니다 [1].")
+    assert ground_child_month_ranges(raw, [evidence(official)]) == raw
 
 
 def test_each_policys_paragraph_is_grounded_separately():
