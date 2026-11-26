@@ -12,6 +12,7 @@ from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
 from backend.eligibility.checker import _is_valid_age
+from backend.llm.month_age_guard import ground_child_month_ranges
 from database.region_search import ALIASES, SIDOS
 
 
@@ -113,9 +114,10 @@ def _is_applicant_age_request(text: str) -> bool:
     guardian's age the child's age. A policy age *criterion* is not a request.
     """
     match = re.search(
-        r"(?:보호자|신청자|신청인|본인|귀하|(?:아이|자녀)를\s*돌보는\s*분)"
+        r"(?:보호자(?:분)?|신청자|신청인|본인|귀하|"
+        r"(?:아이|자녀)를\s*(?:돌보|양육하)(?:는|시는)\s*분)"
         r"(?:께서는|께서|\s*본인(?:의)?|[의가은는])?\s*"
-        r"(?:현재\s*)?(?:나이|연령|생년월일|몇\s*(?:살|세))",
+        r"(?:현재\s*)?(?:만\s*)?(?:나이|연령|생년월일|몇\s*(?:살|세))",
         text,
     )
     if match is None:
@@ -129,10 +131,13 @@ def _is_applicant_age_request(text: str) -> bool:
     tail = text[match.start():]
     if re.search(r"(?:나이|연령).{0,10}(?:기준|요건|조건|범위|제한)", tail):
         return False
-    return bool(re.search(
+    # A previous mention ('보호자 나이는 알고 있으니') is not the target
+    # of a later child-age request. Bind the predicate to this age phrase.
+    return bool(re.search(r"몇\s*(?:살|세)$", match.group()) or re.match(
+        r"\s*(?:가|는|를|이|은|을)?\s*"
         r"(?:알려|입력|말씀|몇\s*(?:살|세)|어떻게\s*되|"
         r"이신가요|이세요|인가요|입니까)",
-        tail,
+        text[match.end():],
     ))
 
 
@@ -152,11 +157,11 @@ def _is_profile_method_question(text: str) -> bool:
         r"\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
     ):
         return False
-    action = r"(?:확인|조회|계산|산정|산출|발급|증명)"
+    action = r"(?:확인|조회|계산|산정|산출|발급|증명|볼\s*수|알\s*수)"
     return bool(re.search(
         r"(?:어디서|어디에서|어디로|어떤\s*(?:곳|기관|사이트|서류)에서|"
         r"어떻게|어떤\s*(?:방법|방식)으로).{0,30}"
-        + action + r".{0,15}(?:하나요|하는지|할\s*수|가능|받나요|되나요|해야|해요|하죠|합니까)|"
+        + action + r".{0,15}(?:하나요|하는지|할\s*수|가능|받나요|되나요|해야|해요|하죠|합니까|있나요)|"
         + action + r"\s*(?:하는\s*)?(?:방법|방식|절차|경로|기관|사이트)"
         r".{0,25}(?:무엇|어디|어떻게|인가요|알려|설명|안내)|"
         + action + r".{0,15}(?:하려면|하려고|하려는데)"
@@ -206,8 +211,16 @@ def _is_child_age_policy_question(text: str) -> bool:
     direct_value_request = bool(re.search(
         r"(?:월령|개월\s*수|나이|연령)\s*(?:을|를)\s*(?:알려|입력|말씀)", text,
     ))
+    # The requested value is a benefit amount, not the child's own month-age.
+    if not direct_value_request and re.search(
+        r"(?:월령|개월|(?:자녀|아이|아기|영유아)(?:의)?\s*(?:나이|연령))"
+        r".{0,12}(?:에\s*따라|에\s*따른|별|마다)"
+        r".{0,30}(?:지원\s*(?:금|액)|금액|혜택)"
+        r".{0,20}(?:얼마|어떻게|무엇|알려|안내)", text,
+    ):
+        return True
     threshold = re.search(
-        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과|에)", text,
+        r"몇\s*(?:개월|살|세)\s*(?:부터|까지|미만|이하|이상|초과|에|일\s*때|이어야)", text,
     )
     if (
         threshold
@@ -281,6 +294,15 @@ def _requests_profile_value(text: str, field: str) -> bool:
         if _direct_profile_request_field(text) in {"region", "income"}:
             return False
         if _is_child_years_request(text):
+            return True
+        # A policy/service prefix does not change an adjacent question about
+        # the child's actual age into a question about a policy threshold.
+        if re.search(
+            r"(?:자녀|아이|아기|영유아)(?:의|가|는|은)?\s*"
+            r"(?:(?:월령|나이|연령)(?:이|가|은|는)?\s*)?"
+            r"몇\s*개월\s*(?:인가요|이세요|이신가요|입니까|인지\s*(?:알려|입력|말씀))",
+            text,
+        ):
             return True
         # 명시적으로 자녀의 개인 월령을 요청하면 정책 관련 접두어가 있어도
         # 해당 입력 요청을 인식한다. 단, 정책 '월령 기준' 자체를 묻는 문장은 제외한다.
@@ -775,6 +797,11 @@ def _info_request_to_answer(
     field: str | None = None,
 ) -> str | None:
     """허용되지 않은 추가 정보 요청을 근거 없는 설명 없이 본문용으로 바꾼다."""
+    # This field has already been classified; incidental place-like suffixes
+    # in verbs (e.g. '지원받으려면') must not change it into a region request.
+    if field == "child_age_months":
+        return "자녀의 월령(개월 수)을 알려 주세요."
+
     if field == "detail_region" or (field != "other" and _is_detail_region_request(text)):
         named_gu = re.search(
             r"(?<![가-힣])([가-힣]{2,}구)(?:에|의|는|에서|\s|$)",
@@ -1084,6 +1111,30 @@ def _limit_follow_ups(items: list[dict], limit: int = 3) -> list[dict]:
     return [items[i] for i in keep]
 
 
+def _normalize_child_month_bound_wording(answer: str) -> str:
+    """Repair a contradictory particle without changing the age comparator.
+
+    '24개월 이하부터 해당' incorrectly presents an upper bound as a start.
+    Only this eligibility predicate is repaired; actual lower bounds, ranges,
+    durations, and explanations of an erroneous phrase remain untouched.
+    """
+    sentences = re.split(r"(?<=[.!?])\s+|\n+", answer)
+    for sentence in sentences:
+        if not re.search(r"자녀|아이|아기|영유아|월령", sentence):
+            continue
+        if re.search(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)", sentence):
+            continue
+        corrected = re.sub(
+            r"(\d+\s*개월\s*(?:이하|미만)(?:\*\*|__)?)[ \t]*부터"
+            r"(?=[ \t]*해당)",
+            r"\1에",
+            sentence,
+        )
+        if corrected != sentence:
+            answer = answer.replace(sentence, corrected)
+    return answer
+
+
 def _validate_model_response(
     raw: Any,
     source_ids: set[int],
@@ -1106,6 +1157,7 @@ def _validate_model_response(
             "LLM answer가 비어 있습니다."
         )
 
+    answer = _normalize_child_month_bound_wording(answer)
     answer = _remove_redundant_answer_requests(
         answer,
         profile,
@@ -1653,9 +1705,10 @@ def generate_answer(
             "LLM이 유효한 JSON을 반환하지 않았습니다."
         ) from error
 
-    return _validate_model_response(
+    response = _validate_model_response(
         parsed,
         source_ids,
         cleaned_profile,
     )
+    return ground_child_month_ranges(response, cleaned_contexts)
 

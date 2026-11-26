@@ -1,5 +1,6 @@
 """Real model + fixed synthetic evidence; no DB/API/UI E2E. Run from repo root."""
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -93,6 +94,10 @@ def main():
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
     report = {"executed_at": datetime.now(timezone.utc).isoformat(),
               "commit": commit.stdout.strip() if commit.returncode == 0 else None,
+              "source_sha256": {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+                                for path in ["backend/llm/generator.py", "backend/llm/month_age_guard.py",
+                                             "backend/eligibility/checker.py",
+                                             "ai/prompts/system_prompt.py"]},
               "model": os.getenv("LLM_MODEL") or g.DEFAULT_MODEL,
               "scope": "real LLM + actual Checker/Generator + synthetic fixed evidence; no search/DB/API/UI",
               "manual_review_required": True, "cases": records}
