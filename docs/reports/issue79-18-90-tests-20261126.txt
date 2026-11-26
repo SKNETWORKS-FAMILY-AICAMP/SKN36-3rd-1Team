@@ -1,0 +1,31 @@
+.......................... [  6%]
+........................................................................ [ 22%]
+........................................................................ [ 39%]
+........................................................................................................................................................ [ 74%]
+......................................F.................. [ 87%]
+....................................................                                               [100%]
+================================== FAILURES ===================================
+_ PipelineTests.test_regenerated_doc_gov_048_chunks_reach_api_response_intact _
+
+self = <test_rag_pipeline.PipelineTests testMethod=test_regenerated_doc_gov_048_chunks_reach_api_response_intact>
+
+    def test_regenerated_doc_gov_048_chunks_reach_api_response_intact(self):
+        # ����� ��: 750�� ����â�� [����ó] 32�� ��� �߰��� �߶� ������ ��ȣ�� �������(#77).
+        # ���� raw JSON�� scripts/build_clean_dataset.py�� iter_document_chunks�� �ٽ� �ɰ� �����
+        # Qdrant ���� �˻� �Ƚ�ó�� �����ؼ�, /api/ask ������� 32���� �� �߸��� �����ϴ��� Ȯ���Ѵ�.
+        import json
+        from pathlib import Path
+
+        from collectors.preprocessing.normalize import format_gov24_item_text
+        from scripts.build_clean_dataset import iter_document_chunks
+
+        raw_path = (Path(__file__).resolve().parents[2]
+                    / "data" / "raw" / "gov24" / "items" / "449000000108.json")
+>       with open(raw_path, encoding="utf-8") as f:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Playdata\\Documents\\ChatGPT\\4th ���� ������Ʈ\\issue79-18-90-api-verify\\data\\raw\\gov24\\items\\449000000108.json'
+
+tests\integration\test_rag_pipeline.py:418: FileNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_rag_pipeline.py::PipelineTests::test_regenerated_doc_gov_048_chunks_reach_api_response_intact
+1 failed, 430 passed, 603 subtests passed in 13.38s
