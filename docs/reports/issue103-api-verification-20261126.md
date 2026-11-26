@@ -4,7 +4,7 @@
 
 ## A. 시작 환경
 
-- 최초 디렉터리: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트` (Git 저장소 아님).
+- 최초 디렉터리: `<workspace>` (Git 저장소 아님).
 - 작업 worktree: `issue103-sejong-verify`, 브랜치 `fix/103-sejong-apply-url-guidance`.
 - 기준 `origin/dev`: `a2ff03001c11738475bdf1ab1b9b4886f9ea52e6`. Git fetch는 DNS 제약으로 실패했지만 GitHub 연결 도구의 `/branches/dev` 조회로 동일한 최신 SHA를 확인했다.
 - GitHub 확인: #103 Open, PR #125·130·131·132 Merged, #133 Open. #133 HEAD `a59223cd27ef565da9c950dfc9f0854dc762b906`, base `a2ff030`.
@@ -167,7 +167,7 @@ PR #133은 본 브랜치에 포함하지 않았다. 별도 `issue103-pr133-compa
 로컬 재현(PowerShell, 준비된 의존성 환경 사용):
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify'
+Set-Location '<workspace>\issue103-sejong-verify'
 $issue103Python = '..\ssok-ui-analysis\.review-venv\Scripts\python.exe'
 & $issue103Python -m unittest discover -s tests/integration -p test_issue103_guidance.py -v
 & $issue103Python tests/manual/verify_issue103_offline.py
@@ -180,7 +180,7 @@ Pop-Location
 아래는 **사용자가 최종 승인한 뒤 직접 실행할 명령 예시**다. 이번 작업에서 실행하지 않았다. 최종 R3D 검증이 끝나기 전에는 검증 완료·Issue Close 문구를 PR에 넣지 않는다.
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify'
+Set-Location '<workspace>\issue103-sejong-verify'
 git status --short --branch
 git diff --check
 $issue103Files = @(
@@ -234,7 +234,7 @@ Runbook §3·§5.7.4·§5.10.14·§5.12를 재확인했다. 현재 PowerShell Pr
 재현 명령(기존 통합 worktree에서 실행, 실제 DB·LLM 호출 없음):
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr133-compat'
+Set-Location '<workspace>\issue103-pr133-compat'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 & '..\ssok-ui-analysis\.review-venv\Scripts\python.exe' -B -c "import sys,unittest; sys.path[:0]=['tests/integration','tests/unit']; names=['test_issue103_guidance','test_official_requirements','test_official_requirements_api']; r=unittest.TextTestRunner().run(unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(n) for n in names)); sys.exit(not r.wasSuccessful())"
 ```
@@ -279,8 +279,8 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 ### 다음 실행 (인증값이 있는 같은 PowerShell)
 
 ```powershell
-$issue103Root = 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
+$issue103Root = '<workspace>\issue103-latest-dev-verify-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
 Set-Location $issue103Root
 $issue103Stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
 $issue103Connection = ".cache\issue103-connection-$issue103Stamp.json"
@@ -319,8 +319,8 @@ PowerShell 7에서 기존 값을 다시 직접 입력하려면:
 
 ```powershell
 $env:ISSUE105_R3D_VERIFY_QDRANT_API_KEY = Read-Host '현재 R3D verify Qdrant의 기존 키' -MaskInput
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
+Set-Location '<workspace>\issue103-latest-dev-verify-20261126'
 $issue103Diagnostic = ".cache\issue103-connection-$(Get-Date -Format 'yyyyMMdd-HHmmss-fff').json"
 & $issue103Python -B tests/manual/verify_issue103_r3d_readonly.py --connections-only --out $issue103Diagnostic
 Write-Output "결과 파일: $issue103Diagnostic"
@@ -346,12 +346,12 @@ Write-Output "결과 파일: $issue103Diagnostic"
 이 절이 앞선 인증 BLOCKED 기록 이후의 최신 결과다. 과거 기록·외부 원본 JSON은 보존했다.
 
 ### 환경·Git 및 판정
-작업 경로: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr-ready-20261126`. 브랜치 `fix/103-sejong-apply-url-final`, 기준 최신 dev `042d0fd84979d385323342dea4bcea2dd2b5fc35`.
+작업 경로: `<workspace>\issue103-pr-ready-20261126`. 브랜치 `fix/103-sejong-apply-url-final`, 기준 최신 dev `042d0fd84979d385323342dea4bcea2dd2b5fc35`.
 기존 dirty worktree는 그대로 두고 최신 dev에서 새 작업 공간을 만들었다. #133은 현재 dev에 병합되었고 #78 관련 #135도 이미 포함되어 있다. 별도 #78 브랜치를 가져오지 않았다. Issue #103은 OPEN이며 PR 본문은 `Related to #103`을 사용한다.
 **PR 준비: READY. 일반 PR: YES, Draft PR: YES. 신규 회귀 실패 0건.** PR 준비와 전체 실시간 E2E 완료는 별개다.
 
 ### 실제 R3D·LLM 결과
-외부 실행 증거: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126\.cache\issue103-r3d-llm-20261126-150052-281.json`. SHA-256 `088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58`.
+외부 실행 증거: `<workspace>\issue103-latest-dev-verify-20261126\.cache\issue103-r3d-llm-20261126-150052-281.json`. SHA-256 `088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58`.
 사용자 PowerShell의 실제 인증 성공을 인정한다. 별도 프로세스의 Process 환경변수는 기존 Codex 프로세스로 자동 역전파되지 않으므로, Codex 인증변수 미상속을 외부 검증 실패로 취급하지 않았다. 인증값·인증 파일은 추출/복호화하지 않았다.
 
 | 검증 | 판정 | 실제 확인 내용 |
@@ -392,10 +392,10 @@ FAQ B2 청크는 원본 릴리스 chunk_id와 직접 등치하지 않고 동일 
 - #133 기존 가상 통합 55 PASS 기록 유지. 최신 dev의 #133/#135 포함 상태에서 관련 테스트도 통과. schemas.py·official_requirements.py·contract 변경 없음. Pipeline 인접 변경은 후속 #78 작업에서 두 처리 단계를 함께 보존해야 한다.
 
 ### 재현 명령과 남은 작업
-Python: `C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe` (3.12.13). 설치/새 venv/의존성 파일 수정 없음. 실제 openai 3.59.0과 저장소 지정 3.46.0 차이는 기록하며 임의 변경하지 않았다.
+Python: `<repo>\.venv\Scripts\python.exe` (3.12.13). 설치/새 venv/의존성 파일 수정 없음. 실제 openai 3.59.0과 저장소 지정 3.46.0 차이는 기록하며 임의 변경하지 않았다.
 ```powershell
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr-ready-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
+Set-Location '<workspace>\issue103-pr-ready-20261126'
 & $issue103Python -B -m pytest tests/integration/test_issue103_actual_response_replay.py tests/integration/test_issue103_guidance.py tests/integration/test_official_requirements_api.py tests/integration/test_issue78_exclusion_reasons_api.py tests/unit/test_official_requirements.py tests/unit/test_issue103_readonly_verifier.py -q --disable-warnings -p no:cacheprovider
 & $issue103Python -B -m pytest tests -q --disable-warnings -p no:cacheprovider --tb=no
 Push-Location frontend
@@ -411,8 +411,12 @@ $out = ".cache\issue103-postfix-$(Get-Date -Format 'yyyyMMdd-HHmmss-fff').json"
 ### 변경 파일·PR 준비
 제품 코드: ai/prompts/system_prompt.py, backend/api/policy_catalog.py, backend/rag/application_links.py, backend/rag/pipeline.py.
 회귀·증거: tests/integration/test_issue103_guidance.py, tests/integration/test_issue103_actual_response_replay.py, tests/fixtures/issue103-r3d-mixed-url-response.json, tests/unit/test_issue103_readonly_verifier.py, tests/manual/verify_issue103_r3d_readonly.py.
-문서: 기존 이름의 API/final-readiness MD·JSON 4개 및 issue103-pr-description.md. 기존 구현·과거 worktree는 보존했고 불필요한 옛 offline helper는 최종 PR에 복사하지 않았다.
+문서: 기존 이름의 API/final-readiness MD·JSON 4개. (리뷰 반영으로 PR 작성 보조 파일 2개는 PR에서 제외) 기존 구현·과거 worktree는 보존했고 불필요한 옛 offline helper는 최종 PR에 복사하지 않았다.
 PR 제목: **fix: 세종 신청 URL 오안내와 K-패스 목록 검색 누락 수정 (#103)**.
-본문은 `docs/reports/issue103-pr-description.md`. 승인 후 Git 명령은 `docs/reports/issue103-pr-commands.ps1`에 정확한 파일 목록으로 제공한다. Commit·Push·PR 생성·Merge·Issue Close·데이터/DB/.env 변경은 실행하지 않았다.
+PR 본문·Git 명령 보조 파일(`issue103-pr-description.md`, `issue103-pr-commands.ps1`)은 리뷰에 따라 저장소에서 제외했다. Commit·Push·PR 생성·Merge·Issue Close·데이터/DB/.env 변경은 실행하지 않았다.
 
 기존 실패 원인 보충: raw gov24/items/449000000108.json 누락, candidate 저장 본문/hash/manifest 대조 실패, bundle 임시 Git 및 과거 candidate git show의 exit 128이 깨끗한 동일 dev에서도 재현됐다. 해당 입력·데이터는 변경하지 않았다.
+
+## PR #136 리뷰 피드백 반영 — 2026-11-26
+
+리뷰 반영 내용(재현·수정·회귀 결과·남은 검증)은 `docs/reports/issue103-final-readiness-20261126.md`의 같은 제목 절에 기록했다.

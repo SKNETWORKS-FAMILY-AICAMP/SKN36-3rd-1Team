@@ -288,7 +288,7 @@
       },
       "main_worktree_head_preserved": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
       "latest_combined_worktree": "../issue103-latest-dev-verify-20261126",
-      "user_python": "C:\\dev\\project\\SKN36-3rd-1Team\\SKN36-3rd-1Team\\.venv\\Scripts\\python.exe",
+      "user_python": "<repo>\\.venv\\Scripts\\python.exe",
       "user_python_version": "3.12.13",
       "dependencies": {
         "fastapi": "0.162.1",
@@ -370,7 +370,7 @@
       },
       "main_worktree_head_preserved": "a2ff03001c11738475bdf1ab1b9b4886f9ea52e6",
       "latest_combined_worktree": "../issue103-latest-dev-verify-20261126",
-      "user_python": "C:\\dev\\project\\SKN36-3rd-1Team\\SKN36-3rd-1Team\\.venv\\Scripts\\python.exe",
+      "user_python": "<repo>\\.venv\\Scripts\\python.exe",
       "user_python_version": "3.12.13",
       "dependencies": {
         "fastapi": "0.162.1",
@@ -447,11 +447,11 @@
       "external_execution_time_utc": "2026-11-26T05:21:03.408997+00:00",
       "evidence_files": [
         {
-          "path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-preflight-20261126-142102-640.json",
+          "path": "<workspace>\\issue103-latest-dev-verify-20261126\\.cache\\issue103-preflight-20261126-142102-640.json",
           "sha256": "0399656bc9e215758feb9720ec84915734a803494a3199b97565035b0e7248d8"
         },
         {
-          "path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-142102-640.json",
+          "path": "<workspace>\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-142102-640.json",
           "sha256": "5d7b9a1ceaff8899b2031a2d5bdba374a88980534ad506a4cd06cd946416cc66"
         }
       ],
@@ -520,7 +520,7 @@
   "external_connection_diagnoses": [
     {
       "reviewed_at_utc": "2026-11-26T05:30:16.285569+00:00",
-      "evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-142901-769.json",
+      "evidence_path": "<workspace>\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-142901-769.json",
       "evidence_sha256": "7c8737a00db900361c30c579c3f9707970ae8f54fb06f4d6283db9ac78d34fcb",
       "external_preflight": {
         "status": "PASS",
@@ -586,7 +586,7 @@
   ],
   "external_connection_successes": [
     {
-      "evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-144925-493.json",
+      "evidence_path": "<workspace>\\issue103-latest-dev-verify-20261126\\.cache\\issue103-connection-20261126-144925-493.json",
       "evidence_sha256": "583e488a089d6964b00b07ceb1cb93fe751eadfccc96ebab4d18edaea9b51ab8",
       "executed_at_utc": "2026-11-26T05:49:25.820840+00:00",
       "source_git_sha": "5b250ade107c4d2c8ad12b71c645db13df4a56ad",
@@ -621,7 +621,7 @@
       "historical_virtual_integration_passed": 55
     },
     "pr135_issue78": "Already in base dev; no separate issue78 branch merged or copied.",
-    "actual_evidence_path": "C:\\Users\\Playdata\\Documents\\ChatGPT\\4th 단위 프로젝트\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-150052-281.json",
+    "actual_evidence_path": "<workspace>\\issue103-latest-dev-verify-20261126\\.cache\\issue103-r3d-llm-20261126-150052-281.json",
     "actual_evidence_sha256": "088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58",
     "actual_llm_calls_external": 11,
     "new_llm_calls_by_agent": 0,

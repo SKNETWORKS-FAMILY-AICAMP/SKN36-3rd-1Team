@@ -28,7 +28,7 @@
 아래는 화면에 값을 드러내지 않고 사용자가 직접 입력하는 대안이다. Runbook의 '현재 프로세스에서만 설정하고 finally에서 제거' 원칙을 따른다. 조직에서 승인한 R3D 전용 `Enter-/Exit-R3VerifySecrets`가 이미 준비되어 있다면 사용자가 그 정상 절차를 직접 사용해도 된다. 여기서는 인증 파일 경로를 추측하거나 읽지 않았다.
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify'
+Set-Location '<workspace>\issue103-sejong-verify'
 
 $issue103AuthNames = @(
   'ISSUE105_R3D_VERIFY_QDRANT_API_KEY',
@@ -144,12 +144,12 @@ React Vite `http://127.0.0.1:5178/`와 위 FastAPI 목록 서버를 연결했다
 
 ```powershell
 # 목록 전용 FastAPI — 실제 R3D 상담 검증 서버가 아님
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify'
+Set-Location '<workspace>\issue103-sejong-verify'
 & '..\ssok-ui-analysis\.review-venv\Scripts\python.exe' -c "from backend.api.main import create_app; import uvicorn; uvicorn.run(create_app(session_factory=lambda: None),host='127.0.0.1',port=8013)"
 ```
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify\frontend'
+Set-Location '<workspace>\issue103-sejong-verify\frontend'
 $env:VITE_POLICY_API_URL = 'http://127.0.0.1:8013/api/policies'
 $env:VITE_ASK_API_URL = ''
 node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5178 --strictPort
@@ -221,7 +221,7 @@ Runbook §3·§5.7.4·§5.10.14·§5.12를 재확인했다. 현재 PowerShell Pr
 재현 명령(기존 통합 worktree에서 실행, 실제 DB·LLM 호출 없음):
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr133-compat'
+Set-Location '<workspace>\issue103-pr133-compat'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 & '..\ssok-ui-analysis\.review-venv\Scripts\python.exe' -B -c "import sys,unittest; sys.path[:0]=['tests/integration','tests/unit']; names=['test_issue103_guidance','test_official_requirements','test_official_requirements_api']; r=unittest.TextTestRunner().run(unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(n) for n in names)); sys.exit(not r.wasSuccessful())"
 ```
@@ -248,7 +248,7 @@ Codex 명령은 Windows PowerShell 7.6.9의 별도 프로세스에서 실행된�
 
 사용자가 지정한 실제 기존 Python을 확인했다:
 
-`C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe` — Python **3.12.13**.
+`<repo>\.venv\Scripts\python.exe` — Python **3.12.13**.
 
 설치 상태: fastapi 0.162.1, httpx 0.28.1, qdrant-client 1.12.2, neo4j 5.28.8, openai **3.59.0**, pytest 9.2.0, beautifulsoup4 4.15.0. 이전 `.review-venv`와 달리 openai·bs4·pytest가 준비되어 있다. `requirements.txt`의 openai 고정값은 3.46.0이므로 버전 차이는 기록했다. 패키지 설치·다운그레이드·의존성 파일 변경은 하지 않았다. 관련 Generator/Mock 회귀는 이 사용자 환경에서 통과했으며 실제 SDK 네트워크 호환성은 외부 실행에서 확인한다.
 
@@ -289,9 +289,9 @@ POL_003/004/006/007을 각각 상담해 Checker unknown 여부와 최종 답변�
 최신 dev `5b250ade`에 이미 최종 #133이 포함되어 있다. 새 worktree에서 #103과 가상 통합 후 **76 PASS, 153 subtests PASS**. 최종 #133 55개 + #103 11개 + 외부 검증기 10개다. 이전 가상 통합의 55 PASS는 삭제하지 않았다. 공식 자격기준·Checker·citations 연결을 보존했다.
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
+Set-Location '<workspace>\issue103-latest-dev-verify-20261126'
 $env:PYTHONDONTWRITEBYTECODE = '1'
-& 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe' -B -m pytest tests/integration/test_issue103_guidance.py tests/integration/test_official_requirements_api.py tests/unit/test_official_requirements.py tests/unit/test_issue103_readonly_verifier.py -q --disable-warnings -p no:cacheprovider
+& '<repo>\.venv\Scripts\python.exe' -B -m pytest tests/integration/test_issue103_guidance.py tests/integration/test_official_requirements_api.py tests/unit/test_official_requirements.py tests/unit/test_issue103_readonly_verifier.py -q --disable-warnings -p no:cacheprovider
 ```
 
 ### J. FastAPI·React 회귀 — PASS(핵심), 환경 예외 BLOCKED
@@ -316,8 +316,8 @@ React는 다시 **186 PASS**, jsdom 부재 오류 1개로 전체 성공은 아�
 **인증값이 이미 준비된 사용자 PowerShell에서 아래를 실행한다. 값을 채팅에 보내지 않는다.** 최신 dev/#133과 #103의 결합을 확인하기 위해 원래 작업 브랜치가 아닌 새 검증 worktree를 실행 대상으로 쓴다. 준비된 기존 Python을 그대로 사용한다.
 
 ```powershell
-$issue103Root = 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
+$issue103Root = '<workspace>\issue103-latest-dev-verify-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
 Set-Location $issue103Root
 $env:PYTHONDONTWRITEBYTECODE = '1'
 $issue103Stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
@@ -362,7 +362,7 @@ PR 제목 초안: `fix(#103): 세종 신청 URL 오안내 방어 및 K-패스 �
 외부 결과 검토와 최종 승인이 끝난 후에만 아래를 실행한다. 주 작업 브랜치는 아직 최신 dev보다 뒤에 있으므로 제출 전에 동기화·import 충돌 정리·재검증이 필요하다. `rebase --continue`는 충돌을 실제로 해결한 뒤에만 사용한다. 강제 push는 필요하지 않다.
 
 ```powershell
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-sejong-verify'
+Set-Location '<workspace>\issue103-sejong-verify'
 git diff --check
 git add -- backend/rag/application_links.py backend/rag/pipeline.py backend/api/policy_catalog.py ai/prompts/system_prompt.py tests/integration/test_issue103_guidance.py tests/unit/test_issue103_readonly_verifier.py tests/manual/verify_issue103_offline.py tests/manual/verify_issue103_r3d_readonly.py docs/reports/issue103-api-verification-20261126.md docs/reports/issue103-api-verification-20261126.json docs/reports/issue103-final-readiness-20261126.md docs/reports/issue103-final-readiness-20261126.json
 git diff --cached --stat
@@ -406,8 +406,8 @@ gh pr create --draft --base dev --head fix/103-sejong-apply-url-guidance --title
 ### 다음 실행 (인증값이 있는 같은 PowerShell)
 
 ```powershell
-$issue103Root = 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
+$issue103Root = '<workspace>\issue103-latest-dev-verify-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
 Set-Location $issue103Root
 $issue103Stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
 $issue103Connection = ".cache\issue103-connection-$issue103Stamp.json"
@@ -446,8 +446,8 @@ PowerShell 7에서 기존 값을 다시 직접 입력하려면:
 
 ```powershell
 $env:ISSUE105_R3D_VERIFY_QDRANT_API_KEY = Read-Host '현재 R3D verify Qdrant의 기존 키' -MaskInput
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
+Set-Location '<workspace>\issue103-latest-dev-verify-20261126'
 $issue103Diagnostic = ".cache\issue103-connection-$(Get-Date -Format 'yyyyMMdd-HHmmss-fff').json"
 & $issue103Python -B tests/manual/verify_issue103_r3d_readonly.py --connections-only --out $issue103Diagnostic
 Write-Output "결과 파일: $issue103Diagnostic"
@@ -473,12 +473,12 @@ Write-Output "결과 파일: $issue103Diagnostic"
 이 절이 앞선 인증 BLOCKED 기록 이후의 최신 결과다. 과거 기록·외부 원본 JSON은 보존했다.
 
 ### 환경·Git 및 판정
-작업 경로: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr-ready-20261126`. 브랜치 `fix/103-sejong-apply-url-final`, 기준 최신 dev `042d0fd84979d385323342dea4bcea2dd2b5fc35`.
+작업 경로: `<workspace>\issue103-pr-ready-20261126`. 브랜치 `fix/103-sejong-apply-url-final`, 기준 최신 dev `042d0fd84979d385323342dea4bcea2dd2b5fc35`.
 기존 dirty worktree는 그대로 두고 최신 dev에서 새 작업 공간을 만들었다. #133은 현재 dev에 병합되었고 #78 관련 #135도 이미 포함되어 있다. 별도 #78 브랜치를 가져오지 않았다. Issue #103은 OPEN이며 PR 본문은 `Related to #103`을 사용한다.
 **PR 준비: READY. 일반 PR: YES, Draft PR: YES. 신규 회귀 실패 0건.** PR 준비와 전체 실시간 E2E 완료는 별개다.
 
 ### 실제 R3D·LLM 결과
-외부 실행 증거: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-latest-dev-verify-20261126\.cache\issue103-r3d-llm-20261126-150052-281.json`. SHA-256 `088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58`.
+외부 실행 증거: `<workspace>\issue103-latest-dev-verify-20261126\.cache\issue103-r3d-llm-20261126-150052-281.json`. SHA-256 `088c551457fcc1ff848af63eb4926b235f46fb5af1966540932c68f758b18c58`.
 사용자 PowerShell의 실제 인증 성공을 인정한다. 별도 프로세스의 Process 환경변수는 기존 Codex 프로세스로 자동 역전파되지 않으므로, Codex 인증변수 미상속을 외부 검증 실패로 취급하지 않았다. 인증값·인증 파일은 추출/복호화하지 않았다.
 
 | 검증 | 판정 | 실제 확인 내용 |
@@ -519,10 +519,10 @@ FAQ B2 청크는 원본 릴리스 chunk_id와 직접 등치하지 않고 동일 
 - #133 기존 가상 통합 55 PASS 기록 유지. 최신 dev의 #133/#135 포함 상태에서 관련 테스트도 통과. schemas.py·official_requirements.py·contract 변경 없음. Pipeline 인접 변경은 후속 #78 작업에서 두 처리 단계를 함께 보존해야 한다.
 
 ### 재현 명령과 남은 작업
-Python: `C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe` (3.12.13). 설치/새 venv/의존성 파일 수정 없음. 실제 openai 3.59.0과 저장소 지정 3.46.0 차이는 기록하며 임의 변경하지 않았다.
+Python: `<repo>\.venv\Scripts\python.exe` (3.12.13). 설치/새 venv/의존성 파일 수정 없음. 실제 openai 3.59.0과 저장소 지정 3.46.0 차이는 기록하며 임의 변경하지 않았다.
 ```powershell
-$issue103Python = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
-Set-Location 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue103-pr-ready-20261126'
+$issue103Python = '<repo>\.venv\Scripts\python.exe'
+Set-Location '<workspace>\issue103-pr-ready-20261126'
 & $issue103Python -B -m pytest tests/integration/test_issue103_actual_response_replay.py tests/integration/test_issue103_guidance.py tests/integration/test_official_requirements_api.py tests/integration/test_issue78_exclusion_reasons_api.py tests/unit/test_official_requirements.py tests/unit/test_issue103_readonly_verifier.py -q --disable-warnings -p no:cacheprovider
 & $issue103Python -B -m pytest tests -q --disable-warnings -p no:cacheprovider --tb=no
 Push-Location frontend
@@ -538,8 +538,55 @@ $out = ".cache\issue103-postfix-$(Get-Date -Format 'yyyyMMdd-HHmmss-fff').json"
 ### 변경 파일·PR 준비
 제품 코드: ai/prompts/system_prompt.py, backend/api/policy_catalog.py, backend/rag/application_links.py, backend/rag/pipeline.py.
 회귀·증거: tests/integration/test_issue103_guidance.py, tests/integration/test_issue103_actual_response_replay.py, tests/fixtures/issue103-r3d-mixed-url-response.json, tests/unit/test_issue103_readonly_verifier.py, tests/manual/verify_issue103_r3d_readonly.py.
-문서: 기존 이름의 API/final-readiness MD·JSON 4개 및 issue103-pr-description.md. 기존 구현·과거 worktree는 보존했고 불필요한 옛 offline helper는 최종 PR에 복사하지 않았다.
+문서: 기존 이름의 API/final-readiness MD·JSON 4개. (리뷰 반영으로 PR 작성 보조 파일 2개는 PR에서 제외) 기존 구현·과거 worktree는 보존했고 불필요한 옛 offline helper는 최종 PR에 복사하지 않았다.
 PR 제목: **fix: 세종 신청 URL 오안내와 K-패스 목록 검색 누락 수정 (#103)**.
-본문은 `docs/reports/issue103-pr-description.md`. 승인 후 Git 명령은 `docs/reports/issue103-pr-commands.ps1`에 정확한 파일 목록으로 제공한다. Commit·Push·PR 생성·Merge·Issue Close·데이터/DB/.env 변경은 실행하지 않았다.
+PR 본문·Git 명령 보조 파일(`issue103-pr-description.md`, `issue103-pr-commands.ps1`)은 리뷰에 따라 저장소에서 제외했다. Commit·Push·PR 생성·Merge·Issue Close·데이터/DB/.env 변경은 실행하지 않았다.
 
 기존 실패 원인 보충: raw gov24/items/449000000108.json 누락, candidate 저장 본문/hash/manifest 대조 실패, bundle 임시 Git 및 과거 candidate git show의 exit 128이 깨끗한 동일 dev에서도 재현됐다. 해당 입력·데이터는 변경하지 않았다.
+
+## PR #136 리뷰 피드백 반영 — 2026-11-26 (최신 판정)
+
+리뷰: PR #136 코멘트(2026-11-26 08:41 UTC). 작업 브랜치 `fix/103-sejong-apply-url-final`(PR HEAD `52be7f9`), 최신 dev `befe2d0`(리뷰 당시 기준 `f42e726`). 이번 반영은 새 worktree에서 진행했고 기존 worktree·브랜치·데이터·DB·`.env`는 변경하지 않았다.
+
+### A. 리뷰 피드백
+1. 정책명 없는 일반 마무리 문구("자세한 내용은 각 신청 페이지에서 확인하세요.") 때문에 서울·세종 혼합 정상 답변 전체가 HTTP 502.
+2. 전용 신청 주소가 없는 정책에서 "주민센터 방문 또는 온라인으로 신청할 수 있습니다 [6]"을 보정하면서 원문 근거가 있는 방문 신청 안내까지 삭제.
+3. PR 작성 보조 파일(`issue103-pr-commands.ps1`, `issue103-pr-description.md`) 포함. 전자에는 개인 PC 로컬 경로 포함.
+
+### B. 수정 전 재현 결과 (PR HEAD `52be7f9`, 코드 변경 전)
+- 기록된 실제 R3D·LLM 서울·세종 응답(`tests/fixtures/issue103-r3d-mixed-url-response.json`) 끝에 빈 줄 + 마무리 문구 → **HTTP 502 `LLM_OUTPUT_INVALID`** 재현.
+  - 원인: `align_application_links()`의 `LINK_CLAIM`이 "신청 페이지"를 신청 주소 주장으로 보고, 정책명·인용이 없고 빈 문단 뒤라 `paragraph_policy`도 없어 대상이 전체 정책(서울+세종)이 된다. 세종 `official_apply_url=null`이 섞여 `len(targets) != 1` → 무조건 `AskError`.
+  - 같은 문단(공백 구분) 변형은 200이었지만, 앞 문장 끝 인용 `[1][3]`이 마무리 절 앞에 붙어 세종 문장으로 오인되어 마무리 문구가 세종 전용 보정 문구로 바뀌고 인용 위치도 이동했다.
+- 릴리스 원문 `POL_GOV_020`(출산장려금 지원, `official_apply_url=null`, 원문 "거주지 관할 읍면동 주민센터에 방문 신청")에 "주민센터 방문 또는 온라인으로 신청할 수 있습니다 [1]." → 200이지만 답변이 "현재 확인된 전용 신청 주소는 없습니다…"로 바뀌며 **주민센터 방문 안내 삭제** 재현.
+  - 원인: `LINK_CLAIM`의 `온라인.{0,100}신청`이 절 전체를 신청 주소 주장으로 판정하고, 단일 정책 보정이 절 전체를 `NO_APPLICATION_LINK`로 치환한다. 방문 근거 확인 단계가 없었다.
+- Pipeline 후처리와 Generator 프롬프트(2-2절)의 역할: 프롬프트는 생성 단계 지침, `align_application_links()`는 생성 후 결정적 검증으로 중복이 아닌 이중 방어다. 이번 결함은 모두 후처리에 있어 프롬프트는 변경하지 않았다.
+
+### C. 수정 내용
+변경 파일: `backend/rag/application_links.py`(제품 코드 유일 변경), `tests/integration/test_issue103_review_feedback.py`(신규), 보고서 MD·JSON 4개(경로 익명화·본 절), PR 보조 파일 2개 제외.
+- 일반 안내 구분: 여러 정책이 대상인데 **정책명·인용·URL이 모두 없는 절**만 그 절을 중립 문구 "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."로 바꾼다. 대상 정책 모두에 근거 문맥이 있을 때만 이 문구를 쓰고, 근거 없는 정책이 섞이면 문구 없이 그 절만 뺀다.
+- 기존 방어 유지: 여러 정책 이름이 섞이거나, 여러 정책 인용이 섞이거나, URL(`https?://`, `www.`)을 직접 제시하는 모호한 신청 안내는 기존처럼 `LLM_OUTPUT_INVALID`(502). 정책명이 있는 잘못된 URL은 기존처럼 해당 정책 문장만 보정하고 다른 정책 링크·인용을 빌리지 않는다.
+- '각/모든/두 + 정책·신청·공식…' 복수 지칭은 같은 문단의 마지막 정책 하나로 좁히지 않는다.
+- 절 맨 앞의 인용(`… 주세요. [1][3] 다음 문장`)은 앞 문장 출처로 보고 위치를 그대로 유지한다.
+- 방문·온라인 혼합: 절에 오프라인 접수처+방문(주민센터·행정복지센터·동사무소·구청·시청·군청)이 있고, **같은 정책의 근거 문맥**에 그 접수처·방문·신청/접수가 함께 있을 때만 "{접수처} 방문 신청 방법은 확인되지만, 전용 온라인 신청 주소는 확인되지 않았습니다."로 보정하고 원래 인용 번호를 유지한다. 근거가 없거나 다른 정책 문맥에만 있으면 방문 안내를 만들지 않고 기존 `NO_APPLICATION_LINK`를 쓴다. '홈페이지 방문'은 방문 신청으로 보지 않는다.
+- 보존: 방문 신청만 안내하는 문장, 일반 홈페이지·공고 확인 안내, 유효한 `official_apply_url`이 있는 정책의 온라인 안내, policy_id·citations·응답 스키마.
+- PR 보조 파일: 두 파일은 `52be7f9`에 커밋되어 PR 변경에 포함되어 있었고 서비스·테스트에서 참조하지 않는다. 저장소 밖 백업(`<workspace>\issue103-pr-helper-backup-20261126\`) 후 작업 트리에서 삭제했다(커밋 시 삭제 반영). 보고서 4개의 개인 경로는 `<workspace>`·`<repo>`로 익명화했고 데이터 manifest 해시는 보고서 파일과 무관하다.
+
+### D. 수정 후 테스트 (로컬, `<repo>\.venv` Python 3.12.13)
+| 범위 | 결과 |
+|---|---|
+| 신규 리뷰 회귀 `test_issue103_review_feedback.py` | 15 passed |
+| 기존 #103 회귀(guidance·replay·verifier) | 28 passed (신규 포함 43 passed, 70 subtests) |
+| PR 브랜치 전체 unit+integration | 2300 passed, 129 skipped, **1 failed(기존)** |
+| 최신 dev `befe2d0` + PR + 이번 변경 임시 병합 전체 | 3104 passed, 129 skipped, **1 failed(기존)** |
+| 임시 병합: #112 자녀 월령·#133 official_requirements·Checker·Generator·ask API·catalog·Pipeline | 333 passed (doc_gov_048 1건 제외) |
+| `py_compile` | PASS |
+| ruff/flake8 | 미설치로 **미실행** |
+
+기존 실패 1건: `test_rag_pipeline.py::test_regenerated_doc_gov_048_chunks_reach_api_response_intact` — `data/raw/gov24/items/449000000108.json`이 `origin/dev`에도 추적되지 않아 동일하게 발생. **신규 실패 0건.**
+병합 정합성: `git merge-tree` 기준 최신 dev와 충돌 없음. #78 후속 `fix/78-exclusion-reasons-api`(`b2bb499`)와도 `backend/rag/pipeline.py`는 자동 병합(그 브랜치는 주석 2줄만 추가), 단 그 브랜치와 dev 사이 `docs/api/ask_contract.md` 충돌은 이 PR과 무관. #78 병합 후 `pytest tests/integration/test_issue103_review_feedback.py tests/integration/test_issue103_guidance.py tests/integration/test_rag_pipeline.py`로 재확인 필요.
+
+### E. 남은 검증
+- 실제 R3D 재검증: **미실행** (이번 반영은 기록된 R3D 응답·동결 릴리스 재생만 사용).
+- 실제 LLM 재검증: **미실행** (마무리 문구·혼합 안내는 가상 생성 결과로 검증).
+- React 브라우저 검증: **미실행** (응답 스키마 변경 없음).
+- 방문 접수처 동의어(예: 답변 "행정복지센터" vs 원문 "주민센터")는 보수적으로 방문 안내를 남기지 않는다. 방문만 안내하는 문장의 원문 근거 검증은 이번 범위 밖(기존 동작 유지).
