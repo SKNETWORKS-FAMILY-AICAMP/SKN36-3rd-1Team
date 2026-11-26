@@ -1,7 +1,9 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.7 · 2026-11-26 (v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.8 · 2026-11-26 (v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.8 변경(2026-11-26 — #39 자녀 월령 API·Pipeline 연동, 지인, 팀 리뷰 대상):** 요청 `profile.child_age_months` 선택 필드 추가(§3.2·§8.2). 단위 개월, 0 이상 정수 또는 `null`, 생략 시 `null`. 기존 요청과 호환된다. 신청자 `age`와 별개이며 검색 필터로 쓰지 않는다. Pipeline은 같은 값을 Checker와 Generator에 그대로 전달한다(§4.1·§5.1). `ask_info.field`는 여전히 `age/region/income`만 허용한다(자녀 월령 `ask_info` 활성화는 React 입력 UI 연결 후 별도 결정, §5.1). 응답 형식(`conditions`·`citations`·`official_requirements`·`exclusion_reasons`·`follow_up_questions`)은 바뀌지 않는다. 자녀 여러 명 입력은 팀 결정 전까지 범위 밖이다.
+>
 > **v1.7 변경(2026-11-26 — #78 후속 제외 사유 연결, 지인, 팀 리뷰 대상):** `policy_checks[].exclusion_reasons`에 Checker가 확정한 제외 사유를 그대로 전달한다(§8.3, 문서 끝 「#78 제외 사유 전달」 절). 필드 구조 `{field, label, reason}`, `conditions`·종합 판정, `official_requirements`(v1.6) 등 다른 필드는 바꾸지 않는다. 확정 사유가 없거나 이 응답의 최종 판정과 맞지 않으면 `null`이다.  
 > **v1.6 변경(2026-11-26 — #76 공식 자격기준 연결, 지인):** `policy_checks[].official_requirements`의 채우는 규칙만 정했다(§8.3, 문서 끝 「#76 공식 자격기준」 절). 필드 구조 `{label, value, document_id, chunk_id}`, Checker 판정, 다른 필드는 바꾸지 않는다. 검수 기록이 있으면 그것을 우선하고, 없으면 채택 근거에서 원문이 항목명을 붙인 기준만 원문 그대로 담는다. 확인 가능한 기준이 없으면 `null`이다.  
 > **v1.5 변경(2026-11-22 — #107 목록·신청 정보 연결, 강민지, PR #109 팀 리뷰 대상):** 읽기 전용 `GET /api/policies` 추가(§8.1·§9), 요청 `selected_policy_id` 추가(§3.3·§8.2), 응답 `policy_checks[]`에 `application_schedule`·`required_documents`·`requirement_excerpts` 선택 필드 추가(§8.3). 모두 선택 필드라 기존 요청·응답과 호환된다. `official_requirements`·`exclusion_reasons`는 v1.4 계약 그대로(#76-A·#78이 채움). 세부 규칙은 문서 끝 「#107 목록·신청 정보 연결」 절에 둔다.
@@ -94,12 +96,19 @@ normalized_profile = {
     "age": 25,               # int | None, 만 나이, 0~120
     "region": "서울특별시",     # str | None, 정식 시·도명
     "income": None,          # int | float | None, 연 소득/만원 단위
+    "child_age_months": None,  # int | None, 자녀 월령(개월), v1.8(#39)
 }
 ```
 
 - `age`: 정수만 허용. `null`은 `None`; 실수·bool 등은 검증 오류(422).
 - `region`: React `"서울"` → `"서울특별시"`. `database/region_search.py`의 `ALIASES`, `SIDOS`를 재사용하고, 변환 규칙을 중복 구현하지 않는다. 미입력 `""`과 인식 불가능한 값은 `None`으로 취급하되 **인식 불가 지역은 판정 확정에 이용하지 않고 안내·로그로 남긴다**.
 - `income`: React 타입이 `number | null`이므로 **소수도 허용**하는 0 이상의 유한한 수. 단위는 연 소득 **만원**. **개인 소득인지 가구 소득인지 불명확하므로 중위소득·가구소득 조건을 직접 충족/불충족으로 판정하지 않는다.**
+- `child_age_months`(v1.8, #39): 자녀의 만 개월 수. **신청자 본인 나이 `age`와 다른 값**이며 서로 변환·대체하지 않는다.
+  - 0 이상 정수 또는 `null`. 필드를 생략하면 `null`(미입력). `0`은 유효한 입력(미입력이 아님).
+  - 엄격 검증: 음수, 실수(`24.5`, `24.0` 포함), 문자열(`"24"`), bool(`true`/`false`), 배열·객체는 422 `INVALID_REQUEST`. 자동 형 변환을 하지 않으며, 422 응답·로그에 입력값을 되돌려 주지 않는다.
+  - 상한은 두지 않는다(정책 근거 없음). 큰 값은 Checker가 조건과 비교해 판정한다.
+  - 정규화 프로필에는 항상 이 키가 있다(생략 요청이면 `None`). Pipeline은 값을 바꾸지 않고 Checker의 `profile`과 Generator의 `profile=`에 **같은 값**을 넘긴다.
+  - 검색 필터(§3.3)에 사용하지 않는다. 값은 하나만 받는다(자녀가 여러 명인 경우는 팀 결정 전까지 MVP 범위 밖).
 - `awaiting_field`에 `age/region/income`이 들어와도 서버가 자유 텍스트에서 임의 값을 확정 파싱하지 않는다. 최종 판정 입력은 이번 요청의 `profile`이 우선이다. 프론트가 추가 응답을 프로필에 반영한 경우 다음 요청에서 전달한다.
 
 ### 3.3 검색 필터
@@ -293,7 +302,7 @@ def generate_answer(
 - `contexts`: §6의 Context Builder 결과(출처 번호 포함) **그대로**.
 - `policy_checks`: §4의 **재검증을 거친** 정책별 결과 목록. `contexts`에 나타난 정책만 포함.
 - `history`: `[ {"role": "user"|"assistant", "text": "..."} ]` 목록, 최대 최근 10턴. **이전 대화는 현재 정책의 사실 근거가 아니다.**
-- `profile`(v1.1): §3.2 정규화 프로필 `{"age": int|None, "region": 시·도 정식명|None, "income": float|None}`. Pipeline이 키워드 인자로 넘기며, 정규화 책임은 Pipeline에 있다. Generator는 이미 입력된 값을 다시 묻지 않는 데 사용하고, 정책 사실의 근거로 쓰지 않는다. `None`이면 사용자 정보를 모르는 것으로 처리한다(기존 4인자 호출과 호환).
+- `profile`(v1.1, v1.8): §3.2 정규화 프로필 `{"age": int|None, "region": 시·도 정식명|None, "income": float|None, "child_age_months": int|None}`. Pipeline이 키워드 인자로 넘기며, 정규화 책임은 Pipeline에 있다. Generator는 이미 입력된 값을 다시 묻지 않는 데 사용하고, 정책 사실의 근거로 쓰지 않는다. `None`이면 사용자 정보를 모르는 것으로 처리한다(기존 4인자 호출과 호환).
 
 **반환 (필수 필드)**
 
@@ -317,6 +326,7 @@ def generate_answer(
 
 - `kind="question"`: 프론트는 버튼의 `text`를 **사용자의 새 질문으로 그대로 전송**한다. 따라서 **사용자가 AI에게 이어서 묻는 질문만** 허용한다(예: "신청 서류는 무엇이 필요한가요?"). AI가 사용자에게 묻거나 제안·부탁하는 문장(예: "어느 구에 거주하시나요?", "신청 서류도 알려드릴까요?")은 `question`에 넣지 않는다. `field` 생략 가능.
 - `kind="ask_info"`: `field`는 MVP에서 **`age`, `region`, `income` 중 하나**만 허용하며, 그 값이 아직 입력되지 않았을 때만 사용한다.
+- `child_age_months`(v1.8)는 이미 입력된 값으로 취급해 다시 묻지 않는다(`0` 포함). 값이 `None`이고 원문에 자녀 월령 조건이 있으면 **본문에서만** 안내한다. `ask_info(field="child_age_months")`는 API 스키마(`FollowUp`)·React 입력 UI가 연결될 때까지 허용하지 않는다 — Generator 출력에 이 값이 남아 있으면 Pipeline은 `LLM_OUTPUT_INVALID`(502)로 처리한다.
 - 그 밖의 정보 요청(시·군·구, 가구원 수, 자녀 개월 수 등)은 버튼이 아니라 **`answer` 본문에서** 안내한다(이유 문장은 원문 근거가 있을 때만). 허용되지 않은 `ask_info`를 `question`으로 바꾸거나, "알려주세요"를 물음표 질문으로 바꿔 버튼으로 내보내지 않는다.
 - `answered`인데 본문에 정상 출처 인용이 0개라면 **Pipeline이 잘못된 LLM 출력으로 처리**한다.
 - 확인되지 않은 자격·혜택·금액·신청 링크를 지어내지 않는다. `needs_check`를 임의로 `eligible`로 단정하지 않는다.
@@ -441,17 +451,20 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 }
 ```
 
+자녀 월령을 함께 보내는 예(v1.8): `"profile": {"age": 32, "region": "전북", "income": null, "child_age_months": 10}`
+
 | 필드 | 검증 규칙 |
 |---|---|
 | `question` | 공백 정리 후 1~2000자; 위반 422 |
 | `profile.age` | 정수 `0..120` 또는 `null` |
 | `profile.region` | 문자열, `""`은 미입력. 미인식은 `None` 정규화 및 보류 안내 |
 | `profile.income` | 0 이상 유한한 `number` 또는 `null`, 단위 만원 |
+| `profile.child_age_months` (v1.8, 선택) | 자녀 월령, 단위 **개월**. 0 이상 정수 또는 `null`, 기본값 `null`(생략 가능). 허용: 생략, `null`, `0`, `10`, `24`, `25`. 거부(422): `-1`, `24.5`, `24.0`, `"24"`, `true`, `false`, 배열·객체. 신청자 `age`와 별개(§3.2) |
 | `history` | `role=user/assistant`, `text` 문자열, 최근 10턴까지만 사용 |
-| `awaiting_field` | `string|null`; MVP 확정 판정에 반영되는 필드는 `profile`의 `age/region/income`뿐 |
+| `awaiting_field` | `string|null`; MVP 확정 판정에 반영되는 필드는 `profile`의 `age/region/income`과 `child_age_months`(v1.8)뿐 |
 | `selected_policy_id` (v1.5, 선택) | `string|null`, 형식 `^POL_[A-Z0-9_]+$`, 최대 128자, 위반 422. 목록에서 고른 정책으로만 상담할 때 사용. 생략·`null`이면 기존과 동일하게 처리(§3.3) |
 
-`age` 정수와 `income` 유한수 검증에서는 bool, NaN, Infinity, 문자열 자동 변환 등에 주의한다. 프론트가 후속 답변을 사용자 프로필에 반영하는지는 프론트 처리(`parseProfile` 등)와 통합 테스트에서 확인한다.
+`age`·`child_age_months` 정수와 `income` 유한수 검증에서는 bool, NaN, Infinity, 문자열 자동 변환 등에 주의한다. 프론트가 후속 답변을 사용자 프로필에 반영하는지는 프론트 처리(`parseProfile` 등)와 통합 테스트에서 확인한다.
 
 ### 8.3 응답 JSON (React 현재 타입 유지)
 
@@ -615,6 +628,8 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | T20 | `open`/`before`/`unknown` 혼합 | 기존 검색 순서 유지 |
 | T21 | Checker가 `needs_check`와 구체적 사유 반환 | 사유가 LLM 입력·응답에 그대로 유지 |
 | T22 | 정규화 프로필 | Generator에 `profile=` 키워드로 전달(서울→서울특별시, 소득 0 유지, 미입력 None) |
+| T23 (v1.8) | `child_age_months` 생략·`null`·`0`·`24` / `-1`·`24.5`·`"24"`·`true`·`false`·배열·객체 | 앞은 200, Checker·Generator에 같은 값 그대로(생략은 `None`, `0` 유지) / 뒤는 422, 입력값 미노출, 검색 미호출 |
+| T24 (v1.8) | 자녀 월령 조건(`POL_GOV_050`의 `COND_CHILD_AGE_LE_24M`, LTE 24) | 자녀 월령 조건 단독: 0·10·23·24 → `eligible`, 25 → `ineligible`, 미입력 → `needs_check`. 정책 종합 판정은 다른 조건과 함께 Checker가 정한다. 신청자 `age`로 대신 판정하지 않음 |
 
 테스트는 **Mock/픽스처 단위 → 소희 실제 함수 → 실제 검색 데이터 → React 브라우저** 순서로 한다. 테스트가 통과하기 전에는 구현 완료라고 표시하지 않는다.
 

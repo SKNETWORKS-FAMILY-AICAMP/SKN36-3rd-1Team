@@ -279,7 +279,8 @@ class PipelineTests(unittest.TestCase):
     def test_normalization_and_checker_reception_kept(self):
         response = self.ask(awaiting_field="child_age", history=[{"role": "user", "text": str(i)} for i in range(12)])
         self.search.assert_called_once_with("질문", filters={"region": "서울특별시"}, k=10)
-        self.assertEqual(self.check.call_args.args[0], {"age": 25, "region": "서울특별시", "income": 1.5})
+        self.assertEqual(self.check.call_args.args[0],
+                         {"age": 25, "region": "서울특별시", "income": 1.5, "child_age_months": None})
         self.assertEqual(len(self.generate.call_args.args[3]), 10)
         # 신청 상태는 Checker 단일 책임이다. application_period 문구("상시신청")로 덮어쓰지 않는다.
         self.assertEqual(response.policy_checks[0].reception_status, "open")
@@ -287,10 +288,19 @@ class PipelineTests(unittest.TestCase):
 
     def test_normalized_profile_reaches_generator(self):
         cases = (
-            ({"age": 25, "region": "서울", "income": 1.5}, {"age": 25, "region": "서울특별시", "income": 1.5}),
-            ({"age": 25, "region": "서울", "income": 0}, {"age": 25, "region": "서울특별시", "income": 0}),
-            ({"age": None, "region": "", "income": None}, {"age": None, "region": None, "income": None}),
-            ({"age": 30, "region": "미확인시", "income": None}, {"age": 30, "region": None, "income": None}),
+            ({"age": 25, "region": "서울", "income": 1.5},
+             {"age": 25, "region": "서울특별시", "income": 1.5, "child_age_months": None}),
+            ({"age": 25, "region": "서울", "income": 0},
+             {"age": 25, "region": "서울특별시", "income": 0, "child_age_months": None}),
+            ({"age": None, "region": "", "income": None},
+             {"age": None, "region": None, "income": None, "child_age_months": None}),
+            ({"age": 30, "region": "미확인시", "income": None},
+             {"age": 30, "region": None, "income": None, "child_age_months": None}),
+            # #39: 자녀 월령은 신청자 age와 별개로 그대로 전달된다. 0개월은 미입력이 아니다.
+            ({"age": 30, "region": "서울", "income": None, "child_age_months": 0},
+             {"age": 30, "region": "서울특별시", "income": None, "child_age_months": 0}),
+            ({"age": 30, "region": "서울", "income": None, "child_age_months": 24},
+             {"age": 30, "region": "서울특별시", "income": None, "child_age_months": 24}),
         )
         for supplied, expected in cases:
             with self.subTest(supplied=supplied):

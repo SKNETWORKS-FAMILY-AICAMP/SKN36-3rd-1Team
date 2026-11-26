@@ -78,7 +78,7 @@ def _check_eligibility(profile: dict, policy: dict) -> dict:
 def _generate_answer(
     question: str, contexts: list[dict], checks: list[dict], history: list[dict], profile: dict | None = None,
 ) -> dict:
-    """Pipeline이 정규화한 프로필(age/region/income)을 Generator에 키워드 인자로 넘긴다.
+    """Pipeline이 정규화한 프로필(age/region/income/child_age_months)을 Generator에 키워드 인자로 넘긴다.
 
     Generator가 profile 인자를 지원해야 한다(#35). 오류를 숨기는 재호출은 하지 않는다.
     """
