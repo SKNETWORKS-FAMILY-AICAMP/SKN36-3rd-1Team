@@ -259,6 +259,46 @@ class PipelineTrustBoundaryTests(unittest.TestCase):
                     self.ask(stub_checker(reasons))
                 self.assertEqual(caught.exception.code, "ELIGIBILITY_OUTPUT_INVALID")
 
+    def test_unrelated_field_hold_keeps_confirmed_reason(self):
+        # 선택 정책 지역 보류는 region 행만 낮춘다. 무관한 나이 제외 사유는 남고, 복합 사유만 보수적으로 뺀다.
+        region_row = {"field": "region", "label": "거주 지역", "reason": "가상 지역 조건", "status": "eligible"}
+        composite = {"field": "eligibility", "label": "자격 요건 (복합 제외 조건)", "reason": "가상 복합 사유입니다."}
+        item = policy("POL_SEL", graph={"policy": {"application_period": "상시신청"}, "eligibility": {},
+                                        "regions": [{"name": "부산광역시"}]})
+        ask = AskRequest(question="가상 정책 신청할 수 있나요?", selected_policy_id="POL_SEL",
+                         profile=UserProfile(age=80, region="서울", income=None), history=[])
+        response = run_ask_pipeline(ask, search_fn=Mock(return_value={"policies": [item]}),
+                                    check_fn=stub_checker([AGE_REASON, composite], extra=[region_row]),
+                                    generate_fn=Mock(return_value=answer("가상 답변 [1]")))
+        check = response.policy_checks[0]
+        self.assertEqual(next(c for c in check.conditions if c.field == "region").status, "needs_check")
+        self.assertEqual(check.conditions[-1].status, "ineligible")
+        self.assertEqual([r.model_dump() for r in check.exclusion_reasons], [AGE_REASON])
+
+    def test_composite_reason_and_order_kept_without_any_hold(self):
+        composite = {"field": "eligibility", "label": "자격 요건 (복합 제외 조건)", "reason": "가상 복합 사유입니다."}
+        second = {"field": "age", "label": "나이", "reason": "가상 두 번째 연령 제외 사유입니다."}
+        check = self.ask(stub_checker([composite, AGE_REASON, second])).policy_checks[0]
+        self.assertEqual([r.model_dump() for r in check.exclusion_reasons], [composite, AGE_REASON, second])
+
+    def test_checker_result_is_not_mutated(self):
+        produced = []
+
+        def recording(profile, item):
+            produced.append(stub_checker([AGE_REASON])(profile, item))
+            return produced[-1]
+
+        self.ask(recording)
+        self.assertEqual(produced[0], stub_checker([AGE_REASON])({}, {"policy_id": "P"}))
+
+    def test_other_policy_or_incomplete_checker_result_is_rejected(self):
+        other = lambda profile, item: {**stub_checker([AGE_REASON])(profile, item), "policy_id": "OTHER"}
+        incomplete = lambda profile, item: {"policy_id": item["policy_id"], "exclusion_reasons": [AGE_REASON]}
+        for check_fn in (other, incomplete):
+            with self.assertRaises(AskError) as caught:
+                self.ask(check_fn)
+            self.assertEqual(caught.exception.code, "ELIGIBILITY_OUTPUT_INVALID")
+
 
 class GeneratorInputTests(unittest.TestCase):
     def test_real_generator_prompt_carries_only_each_policys_reasons(self):
