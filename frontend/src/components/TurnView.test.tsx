@@ -265,6 +265,20 @@ it('keeps verdict badges for policies whose groups are all AND', () => {
   expect(card).not.toContain('(종합 결과)');
 });
 
+it.each(['ineligible', 'needs_check'] as const)('distinguishes an AND failure from UNKNOWN review (%s)', (status) => {
+  const conditions: ConditionResult[] = [
+    { field: 'age', label: '나이', status: status === 'ineligible' ? 'ineligible' : 'eligible', reason: '가상 나이 비교' },
+    { field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.' },
+    { field: 'eligibility', label: '자격 요건', status, reason: '모든 조건을 충족해야 합니다(종합 결과).' },
+    { field: 'income', label: '소득', status: 'needs_check', reason: '소득 확인 필요' },
+  ];
+  const { card } = renderPolicy('POL_GOV_002_70', [], { conditions });
+  expect(card).toContain('추가 확인 필요');
+  expect(card).not.toContain('조건상 적합');
+  expect(card.includes('확인된 필수 조건을 충족하지 않아요.')).toBe(status === 'ineligible');
+  expect(card.includes('조건이 어떻게 결합되는지 확인되지 않았어요.')).toBe(status === 'needs_check');
+});
+
 it('does not repeat a missing-age request that the input button already asks for', () => {
   const age = { kind: 'ask_info', field: 'age', text: '만 나이를 알려 주세요.' } as const;
   const policy = (id: string): AskResponse['policy_checks'][number] => ({

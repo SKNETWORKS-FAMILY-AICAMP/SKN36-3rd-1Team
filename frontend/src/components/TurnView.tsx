@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import type { AskResponse, Citation, ConditionResult, ConditionStatus, FollowUp, PolicyCheck, ReceptionStatus } from '../api/types';
-import { hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
+import { hasConfirmedAndFailureWithUnknown, hasOnlyAndGroups, isGroupRow, isUnjudgedOnly, matchesExclusion } from '../lib/conditionGroups';
 import { Icon, type IconName } from './Icon';
 import { MascotFace } from './Logo';
 import { safeHttpUrl } from '../lib/validate';
@@ -392,6 +392,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   const savedState = useSavedPolicies();
   const isSaved = !sample && !!savedState?.saved.some(s => s.policy_id === p.policy_id);
   const { unjudged, displayedConditions, showVerdict, hidesVerdict, labelsByBadge } = summarizeConditions(p.conditions);
+  const confirmedFailure = hasConfirmedAndFailureWithUnknown(p.conditions);
   const schedule = scheduleView(p, useScheduleDay());
   const [rcls] = RECEPTION_LABEL[schedule.status];
   const rlabel = schedule.label;
@@ -477,6 +478,9 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
       ) : displayedConditions.length > 0 && (
         <>
           <div className="policy-condition-summary">
+            {confirmedFailure && (
+              <div><span className="badge b-bad">조건 불일치</span><span>확인된 필수 조건을 충족하지 않아요.</span></div>
+            )}
             {Array.from(labelsByBadge, ([badge, { cls, labels }]) => (
               <div key={badge}>
                 <span className={`badge ${cls}`}>{badge}</span>
@@ -484,7 +488,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
               </div>
             ))}
             {!p.exclusion_reasons?.length && matchesExclusion(p.conditions) && <p className="exclusion-warn">{EXCLUSION_NOTICE}</p>}
-            {hidesVerdict && (
+            {hidesVerdict && !confirmedFailure && (
               <p className="policy-condition-note">
                 조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.
               </p>

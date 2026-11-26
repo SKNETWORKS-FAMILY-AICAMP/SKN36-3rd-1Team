@@ -1,0 +1,189 @@
+{
+  "gov042-30": {
+    "profile": {
+      "age": 30,
+      "region": "서울특별시",
+      "income": null
+    },
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "quality": [
+      "MARRIAGE_CHILD_NOT_MODELED",
+      "SEARCH_REGION_REQUIRES_REVIEW",
+      "SUSPECTED_REGION_GRANULARITY_LOST",
+      "UNKNOWN_CONDITION_GROUP"
+    ],
+    "checker": {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+        {
+          "field": "age",
+          "label": "나이",
+          "status": "ineligible",
+          "reason": "만 0~17세 기준에 입력한 만 30세가 포함되지 않습니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "needs_check",
+          "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "ineligible",
+          "reason": "모든 조건을 충족해야 합니다(종합 결과)."
+        },
+        {
+          "field": "income",
+          "label": "소득",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "region",
+          "label": "거주 지역",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "income",
+          "label": "소득 요건",
+          "status": "needs_check",
+          "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요."
+        }
+      ],
+      "reception_status": "open",
+      "exclusion_reasons": null
+    },
+    "retrieved_documents": [
+      "DOC_GOV_042"
+    ]
+  },
+  "gov042-10": {
+    "profile": {
+      "age": 10,
+      "region": "서울특별시",
+      "income": null
+    },
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "quality": [
+      "MARRIAGE_CHILD_NOT_MODELED",
+      "SEARCH_REGION_REQUIRES_REVIEW",
+      "SUSPECTED_REGION_GRANULARITY_LOST",
+      "UNKNOWN_CONDITION_GROUP"
+    ],
+    "checker": {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+        {
+          "field": "age",
+          "label": "나이",
+          "status": "eligible",
+          "reason": "만 0~17세 기준에 입력한 만 10세가 포함됩니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "needs_check",
+          "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "needs_check",
+          "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "income",
+          "label": "소득",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "region",
+          "label": "거주 지역",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "income",
+          "label": "소득 요건",
+          "status": "needs_check",
+          "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요."
+        }
+      ],
+      "reception_status": "open",
+      "exclusion_reasons": null
+    },
+    "retrieved_documents": [
+      "DOC_GOV_042"
+    ]
+  },
+  "gov039-30": {
+    "profile": {
+      "age": 30,
+      "region": "서울특별시",
+      "income": null
+    },
+    "collection": "exp_b2_qwen3emb06b_v140_v1",
+    "quality": [
+      "EMPLOYMENT_NOT_MODELED",
+      "MARRIAGE_CHILD_NOT_MODELED",
+      "SEARCH_REGION_REQUIRES_REVIEW",
+      "SUSPECTED_REGION_GRANULARITY_LOST",
+      "UNKNOWN_CONDITION_GROUP"
+    ],
+    "checker": {
+      "policy_id": "POL_GOV_039",
+      "conditions": [
+        {
+          "field": "age",
+          "label": "나이",
+          "status": "eligible",
+          "reason": "입력한 만 30세는 데이터에 저장된 연령 범위에 포함됩니다. 다만 실제 적용 연령 제한은 공식 공고로 확인해야 합니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "needs_check",
+          "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "eligibility",
+          "label": "자격 요건",
+          "status": "needs_check",
+          "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "income",
+          "label": "소득",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "region",
+          "label": "거주 지역",
+          "status": "needs_check",
+          "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+        },
+        {
+          "field": "income",
+          "label": "소득 요건",
+          "status": "needs_check",
+          "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준 중위소득 100% 이하 여부와 재산·금융재산 원문 검토 메모: 정부24는 경기도형 긴급복지 기준 준용. 경기도 안내: 기준 중위소득 100% 이하, 특례시 재산 372백만원 이하, 금융재산 18,494천원 이하(4인 기준). 외국인 주민 동일 적용은 미확인 필요한 소득 정보를 추가로 확인해 주세요."
+        },
+        {
+          "field": "housing",
+          "label": "가구 요건",
+          "status": "needs_check",
+          "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 수원시 거주 외국인 여부와 국내 체류 90일 초과 원문 검토 메모: 수원시 거주 외국인(체류 90일 초과)이 대상이라 다문화가족 요건이 아님. 그래프 다문화가족 조건 제거 가구 관련 추가 정보를 답변 본문에서 확인해 주세요."
+        }
+      ],
+      "reception_status": "open",
+      "exclusion_reasons": null
+    },
+    "retrieved_documents": [
+      "DOC_GOV_039"
+    ]
+  }
+}
