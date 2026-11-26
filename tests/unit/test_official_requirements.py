@@ -3,9 +3,15 @@
 모든 정책·문서·값은 구조 검증용 가상 데이터(sample_only)이며 실제 정책 기준이 아니다.
 """
 
+import re
 import unittest
 
 from backend.rag.official_requirements import official_requirements
+
+
+def _flat(text):
+    """공백·줄바꿈 차이만 없앤 비교용 문자열(이어 붙인 단서 줄 비교)."""
+    return re.sub(r"\s+", " ", text).strip()
 
 TEXT_A = (
     "[지원대상]\n만 19세 이상 34세 이하 가상 청년\n"
@@ -124,6 +130,64 @@ class OfficialRequirementTests(unittest.TestCase):
         rows = official_requirements("POL_A", contexts, reviews)
         self.assertEqual([row["value"] for row in rows], ["가구 기준 중위소득 150% 이하"])
 
+    def test_review_value_must_match_whole_number_not_digit_suffix(self):
+        # PR #133 리뷰: 원문 '150만원'에 검수 값 '50만원'이 일치로 인정되면 안 된다.
+        ctx = context(text="[선정기준]\n월 소득 150만원 이하(가상), 재산 1,500만원 이하(가상)\n[문의처]\n가상\n")
+        for value in ("50만원 이하(가상)", "500만원 이하(가상)", "0만원 이하(가상)"):
+            with self.subTest(value=value):
+                self.assertIsNone(official_requirements("POL_A", [ctx], [review(label="소득", value=value)]))
+        for value in ("150만원 이하(가상)", "1,500만원 이하(가상)", "월 소득 150만원"):
+            with self.subTest(value=value):
+                rows = official_requirements("POL_A", [ctx], [review(label="소득", value=value)])
+                self.assertEqual([row["value"] for row in rows], [value])
+
+    def test_review_path_respects_source_age_error_mark(self):
+        # PR #133 리뷰: 원문 연령 표기 오류 경고가 있으면 검수 기록 경로도 연령을 내보내지 않는다.
+        flagged = {"warnings": [{"code": "SOURCE_AGE_ERROR_MARK", "affects": ["age"]}]}
+        records = [review(label="연령 기준", value="만 19세 이상 34세 이하 가상 청년"),
+                   review(label="나이", value="만 19세 이상 34세 이하 가상 청년"), review()]
+        rows = official_requirements("POL_A", [context()], records, data_quality=flagged)
+        self.assertEqual([row["label"] for row in rows], ["소득 기준"])
+        unflagged = official_requirements("POL_A", [context()], records)
+        self.assertEqual([row["label"] for row in unflagged], ["연령 기준", "나이", "소득 기준"])
+
+    def test_malformed_check_and_warning_types_do_not_raise(self):
+        # PR #133 리뷰: checks.value 등에 배열·객체가 오면 500이 아니라 그 기록만 건너뛴다.
+        bad = [review(checks={"value": ["verified"], "unit": "verified", "year": "verified"}),
+               review(checks={"value": "verified", "unit": {"a": 1}, "year": "verified"}),
+               review(checks={"value": "verified", "unit": "verified", "year": ["x"]}),
+               {**review(), "review_status": ["verified"]}, {**review(), "chunk_id": ["CHK_A1"]},
+               {**review(), "label": ["소득"]}, {**review(), "policy_id": ["POL_A"]}]
+        quality = [{"warnings": [{"code": ["SOURCE_AGE_ERROR_MARK"]}]}, {"warnings": "x"}, {"warnings": {"a": 1}},
+                   {"warnings": [None, 3]}, "x", []]
+        for item in bad:
+            with self.subTest(review=repr(item)[:60]):
+                self.assertIsNone(official_requirements("POL_A", [context()], [item]))
+        for data_quality in quality:
+            with self.subTest(data_quality=repr(data_quality)):
+                rows = official_requirements("POL_A", [context()], [review()], data_quality=data_quality)
+                self.assertEqual([row["label"] for row in rows], ["소득 기준"])
+        for checks in (["MISMATCH"], "MISMATCH", {"DOC_A": ["MISMATCH"]}, {("DOC_A",): "MISMATCH"}):
+            with self.subTest(document_checks=repr(checks)):
+                self.assertIsNotNone(official_requirements("POL_A", [context()], [review()],
+                                                           document_checks=checks))
+
+    def test_mismatched_evidence_document_is_excluded(self):
+        # PR #133 리뷰: evidence_document_check가 MISMATCH인 문서(그래프상 다른 정책 문서)는 쓰지 않는다.
+        other = context(document_id="DOC_X", chunk_id="CHK_X1", source_id=2,
+                        text="[지원대상]\n- 연령: 만 60세 이상(가상)\n[문의처]\n가상\n")
+        records = [review(), review(label="연령", value="만 60세 이상(가상)", document_id="DOC_X", chunk_id="CHK_X1")]
+        both = official_requirements("POL_A", [context(), other], records,
+                                     document_checks={"DOC_A": "PASS", "DOC_X": "PASS"})
+        self.assertEqual({row["document_id"] for row in both}, {"DOC_A", "DOC_X"})
+        rows = official_requirements("POL_A", [context(), other], records,
+                                     document_checks={"DOC_A": "PASS", "DOC_X": "MISMATCH"})
+        self.assertEqual([(row["label"], row["document_id"]) for row in rows], [("소득 기준", "DOC_A")])
+        # 원문 발췌 경로도 같다. NOT_TESTED(그래프 없음)는 빼지 않는다.
+        self.assertIsNone(official_requirements("POL_A", [other], document_checks={"DOC_X": "MISMATCH"}))
+        self.assertEqual([row["label"] for row in official_requirements(
+            "POL_A", [other], document_checks={"DOC_X": "NOT_TESTED"})], ["연령"])
+
     def test_inputs_are_not_mutated(self):
         contexts, reviews = [context()], [review()]
         before = (repr(contexts), repr(reviews))
@@ -237,6 +301,42 @@ class SourceRequirementTests(unittest.TestCase):
         record = review(label="소득", value="중위소득 150% 이하(가상)")
         rows = official_requirements("POL_A", [src(text)], [record])
         self.assertEqual([r["label"] for r in rows], ["소득", "연령"])
+
+    def test_fee_or_copayment_tier_is_not_an_eligibility_criterion(self):
+        # PR #133 리뷰(POL_BOK_061 형태): 120% 초과도 본인부담으로 이용 가능 → 신청 자격 소득기준으로 내보내지 않는다.
+        text = ("[선정기준]\n(연령기준) 만 18세 미만(가상)\n"
+                "(소득기준) 기준중위소득 120% 이하 무료, 소득 초과 가정은 이용료의 40% 본인부담(가상)\n"
+                "(장애정도) 가상\n")
+        self.assertEqual([r["label"] for r in rows_of(text)], ["연령기준"])
+        for value in ("중위소득 100% 이하 이용료 감면(가상)", "자부담 10%(가상)",
+                      "중위소득 50% 이하 무료(가상)", "본인 부담 없음(가상)"):
+            with self.subTest(value=value):
+                self.assertIsNone(rows_of(f"[지원대상]\n- 소득: {value}\n"))
+        # 비용 문구가 아닌 경우: 사업 이름 '차상위본인부담', 지원액 차등 표기는 소득 상한(신청 자격)을 막지 않는다.
+        for value in ("수급자 및 차상위 계층(차상위본인부담 포함, 가상)", "기준중위소득 120% 이하 (소득별 차등지원, 가상)"):
+            with self.subTest(value=value):
+                self.assertEqual([r["value"] for r in rows_of(f"[지원대상]\n- 소득: {value}\n")], [value])
+
+    def test_unlabeled_next_line_is_kept_with_its_item(self):
+        # PR #133 리뷰(POL_GOV_061 형태): 신청자격 바로 다음 줄의 단서(중복수혜 불가)를 빠뜨리지 않는다.
+        text = ("[지원대상]\n< 지원대상 >\n - 신청자격 : 가상 이용권을 전액 사용한 자\n"
+                "        ※ 단, 가상 장학금 중복수혜 불가\n - 지원규모 : 35명\n")
+        rows = rows_of(text)
+        self.assertEqual([(r["label"], r["value"]) for r in rows],
+                         [("신청자격", "가상 이용권을 전액 사용한 자 ※ 단, 가상 장학금 중복수혜 불가")])
+        self.assertIn(_flat(rows[0]["value"]), _flat(src(text)["text"]))
+
+    def test_item_with_continuation_reaching_chunk_end_is_dropped_whole(self):
+        # 단서 줄이 청크 끝에서 잘렸을 수 있으면 앞줄만 내보내지 않고 항목 전체를 뺀다.
+        text = "[지원대상]\n- 연령: 만 19세 ~ 34세(가상)\n- 소득: 중위소득 150% 이하(가상)\n  ※ 단, 가구원 수에 따라"
+        self.assertEqual([r["label"] for r in official_requirements("POL_A", [context(text=text)])], ["연령"])
+
+    def test_continuation_with_other_meaning_drops_whole_item(self):
+        # 이어진 줄이 제외·우대 문구나 뒤 목록을 가리키면 일부만 잘라 내보내지 않는다.
+        for tail in ("다음에 해당하는 경우 지원대상에서 제외합니다.", "※ 저소득층 우대(가상)"):
+            with self.subTest(tail=tail):
+                text = f"[지원대상]\n- 연령: 만 19세 ~ 34세(가상)\n{tail}\n- 거주: 서울(가상)\n"
+                self.assertEqual([r["label"] for r in rows_of(text)], ["거주"])
 
     def test_every_value_is_a_verbatim_substring_of_its_chunk(self):
         text = "[지원대상 상세]\n소득기준 : 기준중위소득  180% 이하(가상)\n(연령기준) 만 18세 미만(가상)\n"

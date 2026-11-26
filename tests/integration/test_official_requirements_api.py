@@ -10,6 +10,7 @@ import copy
 import json
 from importlib.util import find_spec
 from pathlib import Path
+import re
 import unittest
 from unittest.mock import Mock
 
@@ -27,6 +28,13 @@ else:
 ROOT = Path(__file__).resolve().parents[2]
 RELEASE_CHUNKS = ROOT / "data" / "releases" / "v1.4.0-candidate" / "qdrant" / "payload_chunks.jsonl"
 REQUEST = {"question": "가상 정책 자격은?", "profile": {"age": 25, "region": "서울", "income": None}, "history": []}
+
+
+def _flat(text):
+    """공백·줄바꿈 차이만 없앤 비교용 문자열. 단서 줄을 이어 붙인 값은 원문 줄바꿈이 공백 하나가 된다."""
+    return re.sub(r"\s+", " ", text).strip()
+
+
 TEXT_A = ("[지원대상]\n만 19세 이상 34세 이하 가상 청년\n[선정기준]\n가구 기준 중위소득 150% 이하(가상)\n"
           "[문의처]\n가상기관A (02-000-0001)\n")
 TEXT_B = "[지원대상]\n만 65세 이상 가상 어르신\n[구비서류]\n가상 신청서\n"
@@ -116,9 +124,23 @@ class OfficialRequirementsApiTests(unittest.TestCase):
 
     def test_invalid_review_records_do_not_break_ask(self):
         broken = [None, {}, {"policy_id": "POL_A"}, {**REVIEWS[0], "chunk_id": "CHK_B"},
-                  {**REVIEWS[0], "value": "가구 기준 중위소득 180% 이하(가상)"}, {**REVIEWS[0], "checks": []}]
+                  {**REVIEWS[0], "value": "가구 기준 중위소득 180% 이하(가상)"}, {**REVIEWS[0], "checks": []},
+                  # PR #133 리뷰: checks.value에 배열 등 잘못된 형식 → 500이 아니라 그 기록만 건너뛴다.
+                  {**REVIEWS[0], "checks": {**CHECKS, "value": ["verified"]}},
+                  {**REVIEWS[0], "checks": {**CHECKS, "unit": {"x": 1}}}, {**REVIEWS[0], "label": ["소득"]},
+                  {**REVIEWS[0], "value": "50% 이하(가상)"}]
         data = self.post(reviews=broken)
         self.assertTrue(all(check["official_requirements"] is None for check in data["policy_checks"]))
+
+    def test_mismatched_evidence_document_is_not_used(self):
+        # PR #133 리뷰: 검색 계층 evidence_document_check가 MISMATCH인 문서는 공식 기준에 쓰지 않는다.
+        search = two_policies()
+        search["policies"][0]["evidence_document_check"] = {"DOC_A": "MISMATCH"}
+        search["policies"][1]["evidence_document_check"] = {"DOC_B": "PASS"}
+        data = self.post(search=search)
+        by_id = {check["policy_id"]: check for check in data["policy_checks"]}
+        self.assertIsNone(by_id["POL_A"]["official_requirements"])
+        self.assertEqual([row["chunk_id"] for row in by_id["POL_B"]["official_requirements"]], ["CHK_B"])
 
     def test_no_evidence_answer_has_no_policy_checks(self):
         session = Mock()
@@ -260,8 +282,8 @@ class ReleaseDataTests(unittest.TestCase):
                     self.assertIn(row["chunk_id"], texts)
                     document_id, text = texts[row["chunk_id"]]
                     self.assertEqual(row["document_id"], document_id)
-                    self.assertIn(row["value"], text)
-                    self.assertNotRegex(row["value"], r"상시|신청\s*기간|제한여부|0원\s*~\s*0원|미상")
+                    self.assertIn(_flat(row["value"]), _flat(text))
+                    self.assertNotRegex(row["value"], r"상시|신청\s*기간|제한여부|0원\s*~\s*0원|미상|(?<!차상위)본인\s*부담|이용료")
 
     def test_representative_policies_through_api(self):
         # 릴리스 원문(v1.4.0-candidate payload_chunks)에서 직접 확인한 값.
@@ -305,7 +327,8 @@ class ReleaseB2ChunkTests(unittest.TestCase):
 
         if handoff_data.dataset_version() != "1.4.0-candidate":
             raise unittest.SkipTest("v1.4.0 데이터셋 전용")
-        wanted = {"POL_BOK_045", "POL_BOK_004", "POL_BOK_007", "POL_GOV_046", "POL_009"}
+        wanted = {"POL_BOK_045", "POL_BOK_004", "POL_BOK_007", "POL_GOV_046", "POL_009", "POL_BOK_061",
+                  "POL_GOV_061"}
         documents = [d for d in handoff_data.load_documents(verify_hash=False) if d.get("policy_id") in wanted]
         chunks, _ = chunking.chunk_documents(documents, strategy="B2")
         cls.by_policy = {}
@@ -332,6 +355,23 @@ class ReleaseB2ChunkTests(unittest.TestCase):
         for pid, rows in expected.items():
             with self.subTest(policy_id=pid):
                 self.assertEqual([(r["label"], r["value"], r["chunk_id"]) for r in self.rows(pid)], rows)
+
+    def test_fee_tier_income_line_is_not_eligibility(self):
+        # PR #133 리뷰: POL_BOK_061 '(소득기준) 기준중위소득 120% 이하 무료, 소득 초과 가정은 이용료의 40% 본인부담'은
+        # 이용료 구간이다(초과해도 본인부담으로 이용 가능). 신청 자격 소득기준으로 내보내지 않는다. 연령기준은 유지.
+        chunk = next(c for c in self.by_policy["POL_BOK_061"] if "120% 이하 무료" in c["text"])
+        self.assertEqual(chunk["chunk_id"], "CHK_B2_DOC_BOK_061_C002")
+        rows = self.rows("POL_BOK_061")
+        self.assertEqual([(r["label"], r["chunk_id"]) for r in rows], [("연령기준", "CHK_B2_DOC_BOK_061_C002")])
+        self.assertTrue(all("본인부담" not in r["value"] and "120%" not in r["value"] for r in rows))
+
+    def test_next_line_condition_stays_with_requirement(self):
+        # PR #133 리뷰: POL_GOV_061 '신청자격' 바로 다음 줄의 '※ 단, 소득연계형 국가장학금 중복수혜 불가'를 함께 담는다.
+        rows = self.rows("POL_GOV_061")
+        self.assertEqual([(r["label"], r["chunk_id"]) for r in rows], [("신청자격", "CHK_B2_DOC_GOV_061_C002")])
+        self.assertTrue(rows[0]["value"].endswith("전액을 사용한 자 ※ 단, 소득연계형 국가장학금 중복수혜 불가"))
+        chunk = next(c for c in self.by_policy["POL_GOV_061"] if c["chunk_id"] == rows[0]["chunk_id"])
+        self.assertIn(_flat(rows[0]["value"]), _flat(chunk["text"]))
 
     def test_line_at_b2_chunk_end_is_conservatively_dropped(self):
         # POL_GOV_046의 '가입연령' 줄은 B2 청크 C002의 마지막 줄이라 잘림 규칙으로 내보내지 않는다(실제 DB 응답도 null).

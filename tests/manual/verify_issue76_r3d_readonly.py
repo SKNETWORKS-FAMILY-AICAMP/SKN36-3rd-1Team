@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sys
 from urllib.parse import urlsplit
 
@@ -33,6 +34,7 @@ POLICIES = {
     "POL_BOK_004": "여러 기준",
     "POL_BOK_007": "조건 UNKNOWN(S1) + 원문 기준",
     "POL_009": "제외 조건(EXCLUSION_NOT_MODELED)",
+    "POL_BOK_061": "이용료 구간 소득 문구(PR #133 리뷰)", "POL_GOV_061": "다음 줄 단서(PR #133 리뷰)",
     "POL_YC_029": "출처 검토 필요(SOURCE_AGE_ERROR_MARK)",
     "POL_BOK_099": "신규 복지로", "POL_BOK_101": "신규 복지로", "POL_BOK_104": "신규 복지로",
     "POL_003": "신청기간 미확인 대출", "POL_004": "신청기간 미확인 대출",
@@ -48,6 +50,11 @@ def _endpoint(name: str) -> str:
     value = os.environ.get(name) or ""
     parts = urlsplit(value)
     return f"{parts.scheme}://{parts.hostname}:{parts.port}" if parts.hostname else "(unset)"
+
+
+def _flat(text: str) -> str:
+    # 단서 줄을 이어 붙인 값은 원문 줄바꿈이 공백 하나가 된다. 공백·줄바꿈 차이만 없애고 대조한다.
+    return re.sub(r"\s+", " ", text).strip()
 
 
 ADOPTED: list[list[dict]] = []  # 호출마다 Generator가 받은 채택 근거(chunk_id 등, 본문 제외)
@@ -160,14 +167,14 @@ def main() -> int:
                         problems.append(f"검색 결과에 없거나 다른 정책의 청크: {requirement['chunk_id']}")
                     elif hit[1] != requirement["document_id"]:
                         problems.append(f"문서 불일치: {requirement['chunk_id']}")
-                    elif requirement["value"] not in hit[2]:
+                    elif _flat(requirement["value"]) not in _flat(hit[2]):
                         problems.append(f"DB 청크 원문에 없는 값: {requirement['label']}")
                     if requirement["chunk_id"] not in adopted_ids:
                         problems.append(f"채택되지 않은 청크: {requirement['chunk_id']}")
                     if requirement["document_id"] not in cited:
                         problems.append(f"citations에 없는 문서: {requirement['document_id']}")
                     # 참고: 청크 경계가 다른 릴리스 파일 본문에도 같은 원문 값이 있는가.
-                    requirement["in_release_text"] = any(requirement["value"] in text
+                    requirement["in_release_text"] = any(_flat(requirement["value"]) in _flat(text)
                                                          for text in release_texts.get(check["policy_id"], []))
                 failures += bool(problems) or check["policy_id"] != pid
                 row.update({
