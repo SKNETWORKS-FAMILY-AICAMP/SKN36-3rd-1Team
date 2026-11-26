@@ -61,7 +61,10 @@ class ExclusionReason(BaseModel):
 
 
 class OfficialRequirement(BaseModel):
-    """정책이 요구하는 공식 기준 하나(#77 계약 — 자리만 예약, #76-A가 채운다). value는 원문 그대로이며 임의 환산 금지."""
+    """정책이 요구하는 공식 기준 하나(#77 계약, #76이 채운다). label·value는 근거 원문 그대로이며 임의 환산 금지.
+
+    document_id·chunk_id는 그 기준이 나온 같은 정책의 채택 근거다. 사용자의 충족 여부(conditions)가 아니다.
+    """
 
     label: NonBlank
     value: NonBlank
@@ -100,8 +103,9 @@ class PolicyCheck(EligibilityOutput):
     official_apply_url: str | None
     contacts: list[Contact] | None = None
     requirement_excerpts: list[RequirementExcerpt] | None = None
-    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. 아래 둘은 자리만 예약한 것으로,
-    # Pipeline이 항상 None을 돌려준다 — 값을 채우는 구현은 각각 #78·#76-A에서 한다.
+    # #77 계약에서 세 기능(제외 정보·공식 요건·문의처)을 함께 설계했다. exclusion_reasons는 자리만 예약했고(#78),
+    # official_requirements는 채택 근거의 자격 블록에서 원문이 항목명을 붙인 기준(또는 원문과 맞는 검수 기록)만
+    # 원문 그대로 채운다(#76, backend/rag/official_requirements.py). 확인된 기준이 없으면 None이다.
     exclusion_reasons: list[ExclusionReason] | None = None
     official_requirements: list[OfficialRequirement] | None = None
 
