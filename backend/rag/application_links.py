@@ -8,24 +8,26 @@ CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
 # URL 안의 마침표는 문장 경계가 아니다. 쉼표로 나눈 정책 설명도 독립 검증한다.
 BREAK = re.compile(r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|[,;]\s*|\s+(?:하지만|그러나|다만)\s+)")
+# '누리집'은 홈페이지와 같은 뜻의 공공기관 표기다. 같은 웹 신청 경로 표현으로 검사한다.
+SITE = r"(?:홈페이지|웹\s*사이트|누리집)"
 LINK_CLAIM = re.compile(
     r"신청\s*(?:URL|url|주소|링크|페이지|사이트)"
-    r"|(?:홈페이지|웹사이트|https?://|온라인).{0,100}(?:신청|접수)"
-    r"|(?:신청|접수).{0,100}(?:홈페이지|웹사이트|https?://)",
+    rf"|(?:{SITE}|https?://|온라인).{{0,100}}(?:신청|접수)"
+    rf"|(?:신청|접수).{{0,100}}(?:{SITE}|https?://)",
 )
 CAUTION = re.compile(
     r"신청\s*(?:URL|url|주소|링크|페이지|사이트).{0,20}(?:없|미확인|확인되지|아닙|아니|확인.{0,4}필요)"
-    r"|(?:홈페이지|웹사이트).{0,12}(?:신청|접수).{0,10}(?:없|않|못|불가)"
+    rf"|{SITE}.{{0,12}}(?:신청|접수).{{0,10}}(?:없|않|못|불가)"
     # '신청 공고는 홈페이지에서 확인'은 접수 경로 안내가 아니다.
-    r"|(?:홈페이지|웹사이트).{0,15}(?:공고|공지).{0,15}확인"
-    r"|(?:신청|모집)\s*(?:공고|공지).{0,80}(?:홈페이지|웹사이트|https?://).{0,80}확인",
+    rf"|{SITE}.{{0,15}}(?:공고|공지).{{0,15}}확인"
+    rf"|(?:신청|모집)\s*(?:공고|공지).{{0,80}}(?:{SITE}|https?://).{{0,80}}확인",
 )
 WEB_ACTION = re.compile(r"(?:신청|접수)(?:할\s*수\s*있|이?\s*가능|하세요|해\s*주세요)")
 NO_APPLICATION_LINK = "현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요."
 # 정책명·인용·주소 없이 여러 정책을 묶는 마무리 안내('각 신청 페이지에서 확인하세요')의 중립 문구.
 GENERIC_NOTICE = "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."
 URL = re.compile(r"https?://|www\.", re.IGNORECASE)
-PLURAL = re.compile(r"(?:각|각각|모든|두)\s*(?:정책|사업|신청|공식|기관|홈페이지)")
+PLURAL = re.compile(rf"(?:각|각각|모든|두)\s*(?:정책|사업|신청|공식|기관|{SITE})")
 # '홈페이지 방문'과 구분하려고 오프라인 접수처가 있는 방문만 본다.
 OFFLINE_VISIT = re.compile(r"(주민센터|행정복지센터|동사무소|구청|시청|군청)\S{0,3}\s*(?:방문|내방)")
 
@@ -48,8 +50,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
     """같은 정책의 구조화 신청 주소가 없는 경우에만 웹 신청 단정을 보정한다.
 
     원문은 수정하지 않는다. 이름과 인용, 같은 문단의 명시된 정책으로 대상을 확정하며, 여러 정책 사이에서
-    대상을 확정하지 못하는 신청 안내는 특정 정책의 링크나 인용으로 대체하지 않는다(주소·인용이 섞이면 거절,
-    정책명·주소·인용 없는 일반 마무리 안내는 중립 문구로 보정).
+    대상을 확정하지 못하는 신청 안내는 특정 정책의 링크나 인용으로 대체하지 않는다. 주소를 직접 제시하면 거절하고,
+    주소 없이 여러 정책을 묶은 안내(마무리 문구, '각 홈페이지에서 신청 [1][2]')는 그 절만 중립 문구로 보정한다.
     일반 홈페이지 소개·공식 원문 링크·방문 신청 안내는 그대로 두고, 방문·온라인 혼합 문장에서는
     같은 정책 원문으로 확인되는 방문 접수처만 남긴다.
     """
@@ -83,14 +85,23 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         if not targets or all(valid_source_url(by_id[pid].get("official_apply_url")) for pid in targets):
             continue
         if len(targets) != 1:
-            # 여러 정책의 이름·인용이 섞이거나 주소를 직접 제시하면 특정 정책의 출처를 빌리지 않고 거절한다.
-            if named or cited or URL.search(plain):
+            # 어느 정책의 주소인지 모르는 URL을 직접 제시하면 출처 혼입이므로 거절한다.
+            if URL.search(plain):
                 from backend.rag.pipeline import AskError
 
                 raise AskError("LLM_OUTPUT_INVALID")
-            # 정책명·인용·주소가 없는 일반 안내는 신청 경로를 특정하지 않으므로 그 절만 중립 문구로 바꾼다.
-            # 근거 문맥이 없는 정책이 섞이면 "각 정책의 공식 안내"도 주장하지 않고 절을 뺀다.
-            parts[index] = head + (GENERIC_NOTICE if targets <= set(policy_of.values()) else "")
+            # 주소 없이 여러 정책을 묶은 신청 안내는 그 절만 중립 문구로 바꾸고 나머지 답변은 유지한다.
+            # 근거 문맥이 없는 정책이 섞이면 "각 정책의 공식 안내"도 주장하지 않는다.
+            text = GENERIC_NOTICE if targets <= set(policy_of.values()) else ""
+            if named or cited:
+                # 이름·인용으로 특정된 정책 중 전용 신청 주소가 없는 정책만 구조화 정보대로 밝히고,
+                # 원래 인용은 각자 자기 정책 근거를 가리키므로 그대로 둔다.
+                missing = [pid for pid in by_id if pid in targets
+                           and not valid_source_url(by_id[pid].get("official_apply_url"))]
+                notes = " ".join(f"{by_id[pid]['policy_name']}: 현재 확인된 전용 신청 주소는 없습니다." for pid in missing)
+                markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers))
+                text = " ".join(filter(None, (text, notes, markers)))
+            parts[index] = head + text
             changed = True
             continue
         pid = next(iter(targets))

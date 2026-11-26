@@ -83,9 +83,77 @@ class ClosingPhraseTests(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(fixed, GENERIC_NOTICE)
 
-    def test_mixed_policy_citations_are_still_rejected(self):
-        with self.assertRaises(AskError):
-            align_application_links("신청 페이지에서 확인하세요 [1][2].", AB_CONTEXTS, [A, B])
+    def test_multi_policy_citations_without_url_are_neutralized(self):
+        # 2차 리뷰: 인용이 각자 올바른 정책을 가리키는 묶음 안내는 502가 아니라 그 절만 보정한다.
+        fixed, changed = align_application_links("가상 안내입니다. 두 정책은 각 홈페이지에서 신청할 수 있습니다 [1][2].",
+                                                 AB_CONTEXTS, [A, B])
+        self.assertTrue(changed)
+        self.assertEqual(fixed, "가상 안내입니다. " + GENERIC_NOTICE + " 가상위원회: 현재 확인된 전용 신청 주소는 없습니다. [1][2]")
+
+    def test_named_multi_policy_without_url_is_neutralized(self):
+        fixed, changed = align_application_links("가상위원회와 가상수당은 각 누리집에서 신청할 수 있습니다.", AB_CONTEXTS, [A, B])
+        self.assertTrue(changed)
+        self.assertEqual(fixed, GENERIC_NOTICE + " 가상위원회: 현재 확인된 전용 신청 주소는 없습니다.")
+        self.assertNotIn("가상수당:", fixed)
+
+    def test_named_or_cited_multi_policy_with_url_is_still_rejected(self):
+        for text in ("가상위원회와 가상수당은 https://example.org/apply 에서 신청하세요.",
+                     "신청 주소는 https://example.org/apply 입니다 [1][2]."):
+            with self.subTest(text=text), self.assertRaises(AskError):
+                align_application_links(text, AB_CONTEXTS, [A, B])
+
+    def test_seoul_sejong_combined_application_sentence_returns_200(self):
+        # 2차 리뷰 사례를 기록된 실제 R3D 서울·세종 응답 뒤에 붙여 API 전체로 확인한다.
+        original = self.data["generator_output"]["answer"]
+        sentence = "서울 정책과 세종 정책은 각 홈페이지에서 신청할 수 있습니다 [1][2]."
+        response = self.ask_recorded(original + "\n\n" + sentence)
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertTrue(body["answer"].startswith(original))
+        tail = body["answer"][len(original):]
+        self.assertNotIn("각 홈페이지에서 신청할 수 있습니다", tail)
+        self.assertIn(GENERIC_NOTICE, tail)
+        self.assertIn("세종시 위원회 청년참여 확대: 현재 확인된 전용 신청 주소는 없습니다.", tail)
+        self.assertTrue(tail.endswith("[1][2]"))
+        checks = {p["policy_id"]: p for p in body["policy_checks"]}
+        self.assertIsNone(checks[SEJONG]["official_apply_url"])
+        self.assertTrue(checks["POL_STG_SEOUL_001"]["official_apply_url"])
+        self.assertEqual(len(body["citations"]), 3)
+
+
+class NurijipSynonymTests(unittest.TestCase):
+    """2차 리뷰: '누리집'도 '홈페이지'와 같은 웹 신청 경로 표현으로 보정한다."""
+
+    def test_nurijip_application_claim_is_corrected_like_homepage(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "가상 원문"}]
+        for text in ("세종 정책은 시청 누리집을 통해 신청할 수 있습니다.", "세종 정책은 시청 홈페이지를 통해 신청할 수 있습니다.",
+                     "누리집에서 온라인 접수하세요 [1].", "신청은 세종시 누리집에서 하시면 됩니다 [1].",
+                     "세종시 웹 사이트에서 신청할 수 있습니다 [1]."):
+            with self.subTest(text=text):
+                fixed, changed = align_application_links(text, contexts, [A])
+                self.assertTrue(changed)
+                self.assertIn("전용 신청 주소는 없습니다", fixed)
+
+    def test_nurijip_notice_and_caution_wording_is_preserved(self):
+        for text in ("세종시 누리집에서 신청 관련 공고를 확인하세요 [1].", "신청 공고는 세종시 누리집에서 확인할 수 있습니다 [1].",
+                     "누리집에서는 신청할 수 없습니다 [1].", "공식 누리집은 https://www.sejong.go.kr 입니다 [1]."):
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, [{"source_id": 1, "policy_id": "A"}], [A]), (text, False))
+
+    def test_nurijip_for_policy_with_valid_url_is_unchanged(self):
+        text = "가상수당은 누리집에서 신청할 수 있습니다 [2]."
+        self.assertEqual(align_application_links(text, AB_CONTEXTS, [A, B]), (text, False))
+
+    def test_nurijip_through_api_with_real_sejong_release(self):
+        policy = release_policy(SEJONG)
+        request = {"question": "세종 청년위원회 신청 방법 알려줘.", "profile": {"age": 27, "region": "세종", "income": None}, "history": []}
+        response = post({"policies": [policy]}, answered("세종 정책은 시청 누리집을 통해 신청할 수 있습니다 [1]."), request)
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertNotIn("누리집을 통해 신청할 수 있습니다", body["answer"])
+        self.assertIn("전용 신청 주소는 없습니다", body["answer"])
+        self.assertIsNone(body["policy_checks"][0]["official_apply_url"])
+        self.assertEqual(body["citations"][0]["document_id"], "DOC_YC_065")
 
     def test_named_wrong_policy_url_is_corrected_without_borrowing(self):
         text = "가상위원회 신청 주소는 https://example.org/apply 입니다 [1]. 가상수당 신청 주소는 https://example.org/apply 입니다 [2]."
