@@ -155,7 +155,10 @@ class StatedMissingLinkTests(unittest.TestCase):
         self.assertNotIn(MISSING, fixed)
         self.assertNotIn("홈페이지 접수", fixed)
         self.assertEqual(fixed.count(PHRASE), 1)
-        self.assertTrue(fixed.endswith("\n\n확인된 공식 신청 URL은 따로 제공되지 않았습니다. [2]"))
+        # 마지막 문단의 '신청 URL은 따로 제공되지 않았습니다'는 첫 문단과 같은 안내라 빠진다(PR #161 리뷰 후속).
+        self.assertNotIn("제공되지 않았습니다", fixed)
+        # 인용 번호는 저장 응답과 같은 수로 유지하고(PR #140 검증), 인용만 남은 문단은 앞 문단에 붙인다.
+        self.assertEqual(fixed, "가상 정책은 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. [2] [2]")
 
     def test_online_method_verified_by_source_is_kept(self):
         # POL_005 형태: 원문에 온라인 신청서 작성 안내가 있으면 '온라인으로 신청'은 방법 설명이라 남긴다(#158 인계).
@@ -186,6 +189,54 @@ class StatedMissingLinkTests(unittest.TestCase):
         fixed = aligned(text)
         self.assertEqual(fixed.count(PHRASE), 1)
         self.assertNotIn("현재는", fixed)
+
+    def test_consecutive_llm_missing_link_sentences_keep_first_only(self):
+        # 인천 형태: LLM이 '주소는 확인되지 않았어요'와 '링크는 확인되지 않았습니다'를 연달아 쓰면 첫 문장만 남긴다.
+        for text in ("공식 신청 주소는 확인되지 않았어요. 판정 정보의 공식 신청 URL이 비어 있어 직접 신청 링크는 확인되지 않았습니다. [2]",
+                     "공식 신청 주소는 확인되지 않았어요. 확인된 신청 URL은 제공되지 않았습니다[2]."):
+            with self.subTest(text=text):
+                fixed, changed = align_application_links(text, CONTEXTS, [self.OPEN])
+                self.assertTrue(changed)
+                self.assertEqual(fixed, "공식 신청 주소는 확인되지 않았어요. [2]")
+
+    def test_mixed_missing_and_web_claim_clause_gets_notice(self):
+        # PR #161 리뷰 필수 1: 미확인 문구와 웹 신청 단정이 한 절에 있으면 절이 통째로 사라지지 않고 보정 안내가 들어간다.
+        text = "가상 정책은 만 19~34세 대상이에요 [1]. 공식 신청 주소는 확인되지 않았지만 가상 홈페이지에서 신청할 수 있어요 [2]."
+        fixed, _ = align_application_links(text, CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, f"가상 정책은 만 19~34세 대상이에요 [1]. {MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [2]")
+
+    def test_unrelated_eopsi_is_not_a_missing_link_statement(self):
+        # PR #161 리뷰 필수 2: '신청 주소 변경 없이'는 링크 미확인 안내가 아니다.
+        fixed, _ = align_application_links("신청 주소 변경 없이 가상 홈페이지에서 신청할 수 있어요 [1].", CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, f"{MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [1]")
+
+    def test_negated_or_unrelated_online_sentences_are_kept(self):
+        # PR #161 리뷰 필수 3: 온라인 신청을 부정하거나 신청 행위가 아닌 문장은 보정하지 않는다.
+        for text in ("신청서는 온라인 제출이 아니라 우편으로 보내요 [1].",
+                     "신청서는 온라인으로 제출할 수 없고 우편으로 보내야 해요 [1].",
+                     "접수는 온라인이 아닌 방문으로만 받아요 [1].",
+                     "접수는 온라인 대신 우편으로 해요 [1].",
+                     "신청 온라인 설명회는 다음 달이에요 [1].",
+                     "온라인으로는 신청이 안 됩니다 [1]."):
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, CONTEXTS, [self.OPEN]), (text, False))
+
+    def test_online_negated_in_source_is_not_verified(self):
+        # PR #161 리뷰 선택 1: 원문 어디에든 온라인 신청을 받지 않는다고 하면 온라인 신청 단정을 보정한다.
+        contexts = [{"source_id": 1, "policy_id": "A",
+                     "text": "방문 접수만 가능하며 온라인 신청은 받지 않습니다.\n선정 결과는 온라인 신청 시스템에서 조회합니다."}]
+        fixed, changed = align_application_links("신청은 온라인으로 하면 돼요 [1].", contexts, [self.OPEN])
+        self.assertTrue(changed)
+        self.assertIn(MISSING, fixed)
+
+    def test_removed_trailing_clause_keeps_sentence_whole(self):
+        # PR #161 리뷰 선택 2: 뒷절이 빠져도 '필요하고,'로 끊기지 않고, 빠진 문단은 빈 줄을 남기지 않는다.
+        stated = "신청 링크는 확인되지 않았어요."
+        fixed, _ = align_application_links(f"{stated} 서류는 신분증이 필요하고, 홈페이지에서 신청하세요 [1]. 기간은 상시예요 [1].",
+                                           CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, f"{stated} 서류는 신분증이 필요하고, 신청 방법은 공식 공고에서 확인해 주세요. [1] 기간은 상시예요 [1].")
+        fixed, _ = align_application_links(f"{stated} [1]\n\n홈페이지에서 신청하세요.\n\n서류는 신분증 [1].", CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, f"{stated} [1]\n\n서류는 신분증 [1].")
 
     def test_multi_policy_answer_keeps_policy_name_label(self):
         other = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": None, "reception_status": "open"}

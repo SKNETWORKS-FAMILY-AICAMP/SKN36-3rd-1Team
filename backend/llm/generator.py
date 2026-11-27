@@ -46,6 +46,8 @@ _UNDECIDED_ELIGIBILITY_TAIL = re.compile(
     r"(?:(?:확정|판단)\s*할\s*수\s*없(?:습니다|어요)|(?:확정|판단)\s*하기\s*어렵(?:습니다|어요))"
     r"(?=(?:[ \t]*\[\d+\])*[ \t]*[.!。！]?[ \t]*(?:\[\d+\][ \t]*)*$)"
 )
+# 쉼표 앞 절이 나열·대조로 끝날 때만 TAIL을 적용한다.
+_TAIL_LEAD = re.compile(r"(?:있고|있으며|있지만|있으나|이고|이며|되지만|이지만)\s*(?:\[\d+\]\s*)*$")
 
 # #39: child_age_months는 자녀 한 명의 값이다. 다른 자녀·자녀별 확인 안내를 식별한다.
 MULTI_CHILD_PATTERN = (
@@ -1205,6 +1207,10 @@ def _align_overall_eligibility(
     # Match complete summaries so a qualifier such as '소득만으로는' or
     # '나이를 입력하지 않으면' is never attached to a confirmed denial.
     def replace_tail(match: re.Match[str]) -> str:
+        # 앞 절이 '…있고,'·'…이며,'처럼 나열로 이어질 때만 바꾼다. '나이를 입력하지 않아,'·'정보가 없어서,'
+        # 같은 원인·조건 절 뒤의 유보는 미입력 때문에 탈락한 것처럼 읽히므로 두지 않는다(PR #161 리뷰).
+        if not _TAIL_LEAD.search(match.string[:match.start()]):
+            return match.group(0)
         return f"{match['sep']}현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
 
     sentences = re.split(r"((?<=[.!?。！？])\s+|\n+)", answer)
