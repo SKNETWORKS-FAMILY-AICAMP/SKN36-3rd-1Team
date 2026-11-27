@@ -9,7 +9,7 @@ import { describeProfile, readProfileReply, REGIONS } from './lib/parseProfile';
 import { planProfileReply } from './lib/profileReply';
 import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
-import { AGE_MAX, checkAge } from './lib/validate';
+import { AGE_MAX, checkAge, checkChildMonths } from './lib/validate';
 import { PolicyScheduleList } from './components/PolicyScheduleList';
 import { PolicyExplorer } from './components/PolicyExplorer';
 import type { ConsultedCheck } from './lib/policyCompare';
@@ -42,6 +42,8 @@ export default function App() {
   const [age, setAge] = useState('');
   const [region, setRegion] = useState('');
   const [income, setIncome] = useState<number | null>(null);
+  // #39: 자녀 월령(개월). 신청자 나이(age)와 따로 받는다. 확인하려는 자녀 한 명의 값이다.
+  const [childMonths, setChildMonths] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [awaiting, setAwaiting] = useState<{ field: string; question: string; turnId: number } | null>(null);
   const [toast, setToast] = useState<{ text: string; icon: IconName } | null>(null);
@@ -57,9 +59,13 @@ export default function App() {
   // 잘못된 나이(음수, 120 초과, 소수 등)는 조건으로 보내지 않고 입력칸에 안내한다
   const ageCheck = checkAge(age);
   const ageError = ageCheck.ok ? null : ageCheck.message;
+  // 잘못된 자녀 월령(음수, 소수, 문자)도 보내지 않고(null) 입력칸에 안내한다. 0개월은 그대로 보낸다
+  const childCheck = checkChildMonths(childMonths);
+  const childMonthsError = childCheck.ok ? null : childCheck.message;
+  const childValue = childCheck.ok ? childCheck.value : null;
   const profile: UserProfile = useMemo(
-    () => ({ age: ageCheck.ok ? ageCheck.value : null, region, income }),
-    [ageCheck.ok, ageCheck.ok ? ageCheck.value : null, region, income],
+    () => ({ age: ageCheck.ok ? ageCheck.value : null, region, income, child_age_months: childValue }),
+    [ageCheck.ok, ageCheck.ok ? ageCheck.value : null, region, income, childValue],
   );
 
   useEffect(() => { turnsRef.current = turns; }, [turns]);
@@ -146,6 +152,7 @@ export default function App() {
     if (values.age != null) setAge(String(values.age));
     if (values.region) setRegion(values.region);
     if (values.income != null) setIncome(values.income);
+    if (values.child_age_months != null) setChildMonths(String(values.child_age_months));
   }, []);
 
   const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null, selectedPolicyId: string | null = null) => {
@@ -180,6 +187,7 @@ export default function App() {
     const tags: { icon: IconName; text: string }[] = [];
     if (next.age != null) tags.push({ icon: 'cake', text: `${next.age}세` });
     if (next.region) tags.push({ icon: 'pin', text: next.region });
+    if (next.child_age_months != null) tags.push({ icon: 'bottle', text: `자녀 ${next.child_age_months}개월` });
 
     const request: AskRequest = { question, profile: next, history: history(turnsRef.current), awaiting_field: field, selected_policy_id: selectedPolicyId };
     requests.current.set(id, request);
@@ -203,12 +211,16 @@ export default function App() {
     }
   };
 
-  /** 대표 상황 카드: PRD 시나리오의 조건을 '내 조건'에 넣고 대표 질문을 바로 보낸다 (소득은 비운다). */
+  /**
+   * 대표 상황 카드: PRD 시나리오의 조건을 '내 조건'에 넣고 대표 질문을 바로 보낸다 (소득은 비운다).
+   * 자녀 월령은 PRD에 값이 없어 지어내지 않고 비운다(#39).
+   */
   const startPersona = useCallback((p: Persona, origin: HTMLElement | null) => {
-    const base: UserProfile = { age: p.profile.age, region: p.profile.region, income: null };
+    const base: UserProfile = { age: p.profile.age, region: p.profile.region, income: null, child_age_months: null };
     setAge(base.age != null ? String(base.age) : '');
     setRegion(base.region);
     setIncome(null);
+    setChildMonths('');
     ask(p.question, origin, base);
   }, [ask]);
 
@@ -272,7 +284,8 @@ export default function App() {
         </ErrorBoundary>
       )}
       <div hidden={!onAskPage}>
-      <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion} categories={CATEGORIES}
+      <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion}
+        childMonths={childMonths} childMonthsError={childMonthsError} onChildMonths={setChildMonths} categories={CATEGORIES}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
       <section className="board" id="board">

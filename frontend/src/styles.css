@@ -358,6 +358,8 @@ body.has-mini .jump{bottom:100px}
 /* 나이 입력 오류 */
 .cin.invalid{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
 .cond-error{margin-top:8px;font-size:14px;color:var(--bad)}
+/* #39 자녀 월령 기준 안내(자녀 한 명 기준) */
+.cond-note{margin-top:8px;font-size:13px;color:var(--ink-3)}
 
 /* ===== 화면 이동 탭 (상담하기 / 정책 관계 지도) ===== */
 nav.tabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line)}
