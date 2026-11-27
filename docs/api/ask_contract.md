@@ -2,7 +2,7 @@
 
 > **버전:** v1.8 · 2026-11-26 (v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
-> **v1.8 변경(2026-11-26 — #39 자녀 월령 API·Pipeline 연동, 지인, 팀 리뷰 대상):** 요청 `profile.child_age_months` 선택 필드 추가(§3.2·§8.2). 단위 개월, 0 이상 정수 또는 `null`, 생략 시 `null`. 기존 요청과 호환된다. 신청자 `age`와 별개이며 검색 필터로 쓰지 않는다. Pipeline은 같은 값을 Checker와 Generator에 그대로 전달한다(§4.1·§5.1). `ask_info.field`는 여전히 `age/region/income`만 허용한다(자녀 월령 `ask_info` 활성화는 React 입력 UI 연결 후 별도 결정, §5.1). 응답 형식(`conditions`·`citations`·`official_requirements`·`exclusion_reasons`·`follow_up_questions`)은 바뀌지 않는다. 자녀 여러 명 입력은 팀 결정 전까지 범위 밖이다.
+> **v1.8 변경(2026-11-26 — #39 자녀 월령 API·Pipeline 연동, 지인, 팀 리뷰 대상):** 요청 `profile.child_age_months` 선택 필드 추가(§3.2·§8.2). 단위 개월, 0 이상 정수 또는 `null`, 생략 시 `null`. 기존 요청과 호환된다. 신청자 `age`와 별개이며 검색 필터로 쓰지 않는다. Pipeline은 같은 값을 Checker와 Generator에 그대로 전달한다(§4.1·§5.1). `ask_info.field`는 여전히 `age/region/income`만 허용한다(자녀 월령 `ask_info` 활성화는 React 입력 UI 연결 후 별도 결정, §5.1). 응답 형식(`conditions`·`citations`·`official_requirements`·`exclusion_reasons`·`follow_up_questions`)은 바뀌지 않는다. 한 요청의 값은 신청 여부를 확인하려는 자녀 한 명의 월령이다. 여러 자녀 값을 한 요청에 담는 구조는 두지 않고, 자녀가 여러 명이면 자녀별로 각각 확인하도록 답변 본문에서 안내한다(2026-11-27 합의, §5.1).
 >
 > **v1.7 변경(2026-11-26 — #78 후속 제외 사유 연결, 지인, 팀 리뷰 대상):** `policy_checks[].exclusion_reasons`에 Checker가 확정한 제외 사유를 그대로 전달한다(§8.3, 문서 끝 「#78 제외 사유 전달」 절). 필드 구조 `{field, label, reason}`, `conditions`·종합 판정, `official_requirements`(v1.6) 등 다른 필드는 바꾸지 않는다. 확정 사유가 없거나 이 응답의 최종 판정과 맞지 않으면 `null`이다.  
 > **v1.6 변경(2026-11-26 — #76 공식 자격기준 연결, 지인):** `policy_checks[].official_requirements`의 채우는 규칙만 정했다(§8.3, 문서 끝 「#76 공식 자격기준」 절). 필드 구조 `{label, value, document_id, chunk_id}`, Checker 판정, 다른 필드는 바꾸지 않는다. 검수 기록이 있으면 그것을 우선하고, 없으면 채택 근거에서 원문이 항목명을 붙인 기준만 원문 그대로 담는다. 확인 가능한 기준이 없으면 `null`이다.  
@@ -108,7 +108,7 @@ normalized_profile = {
   - 엄격 검증: 음수, 실수(`24.5`, `24.0` 포함), 문자열(`"24"`), bool(`true`/`false`), 배열·객체는 422 `INVALID_REQUEST`. 자동 형 변환을 하지 않으며, 422 응답·로그에 입력값을 되돌려 주지 않는다.
   - 상한은 두지 않는다(정책 근거 없음). 큰 값은 Checker가 조건과 비교해 판정한다.
   - 정규화 프로필에는 항상 이 키가 있다(생략 요청이면 `None`). Pipeline은 값을 바꾸지 않고 Checker의 `profile`과 Generator의 `profile=`에 **같은 값**을 넘긴다.
-  - 검색 필터(§3.3)에 사용하지 않는다. 값은 하나만 받는다(자녀가 여러 명인 경우는 팀 결정 전까지 MVP 범위 밖).
+  - 검색 필터(§3.3)에 사용하지 않는다. 값은 하나만 받으며, 신청 여부를 확인하려는 자녀 한 명의 월령이다. 자녀가 여러 명이면 자녀별로 각각 확인하도록 안내한다(§5.1). 여러 자녀 값을 한 요청에 담는 구조는 MVP 범위 밖이다.
 - `awaiting_field`에 `age/region/income`이 들어와도 서버가 자유 텍스트에서 임의 값을 확정 파싱하지 않는다. 최종 판정 입력은 이번 요청의 `profile`이 우선이다. 프론트가 추가 응답을 프로필에 반영한 경우 다음 요청에서 전달한다.
 
 ### 3.3 검색 필터
@@ -327,6 +327,7 @@ def generate_answer(
 - `kind="question"`: 프론트는 버튼의 `text`를 **사용자의 새 질문으로 그대로 전송**한다. 따라서 **사용자가 AI에게 이어서 묻는 질문만** 허용한다(예: "신청 서류는 무엇이 필요한가요?"). AI가 사용자에게 묻거나 제안·부탁하는 문장(예: "어느 구에 거주하시나요?", "신청 서류도 알려드릴까요?")은 `question`에 넣지 않는다. `field` 생략 가능.
 - `kind="ask_info"`: `field`는 MVP에서 **`age`, `region`, `income` 중 하나**만 허용하며, 그 값이 아직 입력되지 않았을 때만 사용한다.
 - `child_age_months`(v1.8)는 이미 입력된 값으로 취급해 다시 묻지 않는다(`0` 포함). 값이 `None`이고 원문에 자녀 월령 조건이 있으면 **본문에서만** 안내한다. `ask_info(field="child_age_months")`는 API 스키마(`FollowUp`)·React 입력 UI가 연결될 때까지 허용하지 않는다 — Generator 출력에 이 값이 남아 있으면 Pipeline은 `LLM_OUTPUT_INVALID`(502)로 처리한다.
+- 입력된 `child_age_months`는 자녀 한 명의 값이다. 자녀가 여러 명이거나 다른 자녀를 언급하면 그 값을 다른 자녀에게 적용하지 않고, 자녀별로 각각 확인하도록 **본문에서** 안내한다. 값이 입력돼 있어도 이 안내(예: "자녀가 여러 명이면 자녀별 월령을 각각 알려 주세요")는 중복 입력 요청으로 지우지 않는다(T26).
 - 그 밖의 정보 요청(시·군·구, 가구원 수, 자녀 개월 수 등)은 버튼이 아니라 **`answer` 본문에서** 안내한다(이유 문장은 원문 근거가 있을 때만). 허용되지 않은 `ask_info`를 `question`으로 바꾸거나, "알려주세요"를 물음표 질문으로 바꿔 버튼으로 내보내지 않는다.
 - `answered`인데 본문에 정상 출처 인용이 0개라면 **Pipeline이 잘못된 LLM 출력으로 처리**한다.
 - 확인되지 않은 자격·혜택·금액·신청 링크를 지어내지 않는다. `needs_check`를 임의로 `eligible`로 단정하지 않는다.
@@ -631,6 +632,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | T23 (v1.8) | `child_age_months` 생략·`null`·`0`·`24` / `-1`·`24.5`·`"24"`·`true`·`false`·배열·객체 | 앞은 200, Checker·Generator에 같은 값 그대로(생략은 `None`, `0` 유지) / 뒤는 422, 입력값 미노출, 검색 미호출 |
 | T24 (v1.8) | 자녀 월령 조건(`POL_GOV_050`의 `COND_CHILD_AGE_LE_24M`, LTE 24), 데이터 품질 보류 없음(fixture) | 자녀 월령 조건 단독: 0·10·23·24 → `eligible`, 25 → `ineligible`, 미입력 → `needs_check`. 정책 종합 판정은 다른 조건과 함께 Checker가 정한다. 신청자 `age`로 대신 판정하지 않음 |
 | T25 (v1.8) | 같은 조건 + 데이터 품질 보류(`data_quality.affected_attributes`에 `children`) | 월령과 관계없이 `children`·종합 모두 `needs_check`(보류), `exclusion_reasons`는 `null`(보류는 확정 제외가 아님). 사유에는 Checker의 비교 결과(24 "포함됩니다" / 25 "포함되지 않습니다")와 보류 문구가 함께 남는다. 2026-11-27 실제 R3D(verify) 읽기 전용 검증에서 `POL_GOV_050`은 이 경우였다: `children` 보류는 정적 플래그 `MARRIAGE_CHILD_NOT_MODELED`(S10, `children` incomplete)에서만 오고, `region`은 그래프 계산 경고로 함께 보류된다. 같은 정책 객체에서 보류만 메모리상 끈 사본은 24 → `children` `eligible`(종합은 가구 원문 확인 행 때문에 `needs_check`), 25 → `children`·종합 `ineligible`. 플래그 유지·해제는 데이터 담당 판단(`docs/reports/issue39-r3d-child-age-20261127.md`) |
+| T26 (v1.8) | `child_age_months`가 입력된 상태에서 본문에 "자녀가 여러 명이면 자녀별 월령을 각각 알려 주세요" 안내 | 다자녀 안내는 유지, 같은 자녀 월령을 다시 묻는 문장("자녀 월령을 알려 주세요")만 제거. 프롬프트에 자녀별 확인 규칙 포함 |
 
 테스트는 **Mock/픽스처 단위 → 소희 실제 함수 → 실제 검색 데이터 → React 브라우저** 순서로 한다. 테스트가 통과하기 전에는 구현 완료라고 표시하지 않는다.
 
