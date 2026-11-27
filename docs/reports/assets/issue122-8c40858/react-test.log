@@ -1,0 +1,37 @@
+
+> lifepolicy-demo-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v2.1.8 C:/dev/project/SKN36-3rd-1Team/frontend
+
+ ✓ src/mock/mockAsk.test.ts (13 tests) 46ms
+ ✓ src/lib/policyCompare.test.ts (9 tests) 67ms
+ ✓ src/graph/relatedPolicies.test.ts (8 tests) 572ms
+   ✓ 상담과 관련된 정책 찾기 > 대표 상황 카드 질문은 실제 팀 데이터에서 관련 정책을 하나 이상 찾는다 563ms
+ ✓ src/components/PolicyApplicationInfo.test.tsx (19 tests) 157ms
+ ✓ src/graph/graphModel.test.ts (11 tests) 699ms
+   ✓ 팀 기준 데이터 (data/releases/v1.4.0-candidate) > 실제 그래프 파일을 읽으면 manifest 건수와 같고, 끊긴 연결이 없다 687ms
+ ✓ src/components/PolicyDetailLink.test.tsx (12 tests) 84ms
+ ✓ src/api/policyCatalog.test.ts (10 tests) 22ms
+ ✓ src/components/TurnView.test.tsx (27 tests) 268ms
+ ✓ src/lib/conditionGroups.test.ts (6 tests) 9ms
+ ✓ src/lib/applicationSchedule.test.ts (11 tests) 76ms
+ ✓ src/lib/policyPersonal.test.ts (13 tests) 15ms
+ ✓ src/lib/answerView.test.ts (7 tests) 10ms
+ ✓ src/lib/parseProfile.test.ts (12 tests) 36ms
+ ✓ src/graph/lifeStages.test.ts (6 tests) 297ms
+ ✓ src/api/client.test.ts (6 tests) 6ms
+ ✓ src/lib/recentPolicies.test.ts (2 tests) 5ms
+ ✓ src/lib/validate.test.ts (5 tests) 8ms
+ ✓ src/lib/profileReply.test.ts (4 tests) 11ms
+ ✓ src/lib/route.test.ts (3 tests) 7ms
+ ✓ src/lib/policySearch.test.ts (6 tests) 928ms
+   ✓ 팀 기준 데이터 (data/releases/v1.4.0-candidate) > 여섯 표기는 실제 목록에서 K-패스 정책만 찾고, 붙임표 없는 검색어 결과는 이전 규칙과 같다 923ms
+ ✓ src/components/PolicyExplorer.dom.test.tsx (2 tests) 192ms
+
+ Test Files  21 passed (21)
+      Tests  192 passed (192)
+   Start at  10:44:39
+   Duration  6.32s (transform 3.81s, setup 0ms, collect 5.93s, tests 3.52s, environment 1.99s, prepare 5.74s)
+
