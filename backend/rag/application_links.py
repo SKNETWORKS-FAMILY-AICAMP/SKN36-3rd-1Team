@@ -32,17 +32,30 @@ PLURAL = re.compile(rf"(?:각|각각|모든|두)\s*(?:정책|사업|신청|공�
 OFFLINE_VISIT = re.compile(r"(주민센터|행정복지센터|동사무소|구청|시청|군청)\S{0,3}\s*(?:방문|내방)")
 
 
+# 방문 신청을 받지 않는다는 원문·답변을 '방문 신청 가능'으로 뒤집지 않도록 부정 조건을 함께 본다.
+VISIT_NEGATION = re.compile(
+    r"받지\s*않|하지\s*않|되지\s*않|않습니다|않음|불가|제외|안\s*됩|안\s*되|안\s*됨|할\s*수\s*없|없습니다|없음|금지|아닙니다"
+)
+SEGMENT = re.compile(r"[\r\n]+|(?<=[.!?。])\s+")
+
+
 def _verified_visit(clause: str, pid: str, contexts: list[dict]) -> str | None:
-    """절의 방문 접수처가 같은 정책 원문에 방문 신청으로 적혀 있을 때만 그 접수처를 돌려준다."""
+    """절의 방문 접수처가 같은 정책 원문에 방문 신청 가능으로 적혀 있을 때만 그 접수처를 돌려준다.
+
+    원문은 문장·줄 단위로 보고, 접수처·방문·신청(접수)이 함께 있으면서 부정 표현이 없는 문장만 근거로 인정한다.
+    답변 절 자체가 방문 신청을 부정하는 경우도 방문 안내를 만들지 않는다.
+    """
     match = OFFLINE_VISIT.search(clause)
-    if not match:
+    if not match or VISIT_NEGATION.search(clause):
         return None
     place = match.group(1)
     for ctx in contexts:
-        text = str(ctx.get("text") or "")
-        if ctx.get("policy_id") == pid and place in text and re.search(r"방문|내방", text) \
-                and re.search(r"신청|접수", text):
-            return place
+        if ctx.get("policy_id") != pid:
+            continue
+        for segment in SEGMENT.split(str(ctx.get("text") or "")):
+            if place in segment and re.search(r"방문|내방", segment) and re.search(r"신청|접수", segment) \
+                    and not VISIT_NEGATION.search(segment):
+                return place
     return None
 
 
@@ -82,6 +95,14 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         # '각 신청 페이지'처럼 여러 정책을 가리키면 같은 문단의 마지막 정책 하나로 좁히지 않는다.
         unscoped = set(by_id) if PLURAL.search(plain) or not paragraph_policy else {paragraph_policy}
         targets = named or cited or unscoped
+        scope = None if named or PLURAL.search(plain) else paragraph_policy
+        if cited and scope and scope not in cited:
+            # 제목·문단의 정책과 인용 정책이 다르면 인용 정책의 주소가 유효하다는 이유로 넘어가지 않는다.
+            # 둘 중 전용 신청 주소가 없는 정책이 하나뿐이면 그 정책 기준으로 보정한다(다른 정책 인용은 빌리지 않음).
+            targets = cited | {scope}
+            unverified = {pid for pid in targets if not valid_source_url(by_id[pid].get("official_apply_url"))}
+            if len(unverified) == 1:
+                targets = unverified
         if not targets or all(valid_source_url(by_id[pid].get("official_apply_url")) for pid in targets):
             continue
         if len(targets) != 1:

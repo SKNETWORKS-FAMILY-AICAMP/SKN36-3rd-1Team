@@ -121,6 +121,96 @@ class ClosingPhraseTests(unittest.TestCase):
         self.assertEqual(len(body["citations"]), 3)
 
 
+class HeadingCitationMismatchTests(unittest.TestCase):
+    """3차 리뷰: 문단 제목의 정책과 다른 정책의 인용이 붙어도 제목 정책의 신청 URL을 검증한다."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+    def test_sejong_heading_with_seoul_citation_is_corrected(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "t"}, {"source_id": 2, "policy_id": "B", "text": "t"}]
+        for heading in ("### 가상위원회\n", "**가상위원회**\n", "가상위원회 안내입니다. "):
+            with self.subTest(heading=heading):
+                fixed, changed = align_application_links(
+                    heading + "신청 URL은 https://example.org/unverified 입니다 [2].", contexts, [A, B])
+                self.assertTrue(changed)
+                self.assertNotIn("https://example.org/unverified", fixed)
+                self.assertIn("가상위원회: 현재 확인된 전용 신청 주소는 없습니다.", fixed)
+                self.assertNotIn("[2]", fixed)  # 다른 정책 근거를 빌리지 않는다.
+
+    def test_seoul_heading_with_sejong_citation_is_corrected_for_cited_policy(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "t"}, {"source_id": 2, "policy_id": "B", "text": "t"}]
+        fixed, changed = align_application_links("### 가상수당\n신청 URL은 https://example.org/unverified 입니다 [1].",
+                                                 contexts, [A, B])
+        self.assertTrue(changed)
+        self.assertNotIn("https://example.org/unverified", fixed)
+        self.assertTrue(fixed.endswith("가상위원회: 현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요. "
+                                       "현재 모집 일정과 접수 여부도 공식 공고 확인이 필요합니다. [1]"))
+
+    def test_matching_heading_and_citation_with_valid_url_is_unchanged(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "t"}, {"source_id": 2, "policy_id": "B", "text": "t"}]
+        text = "### 가상수당\n신청 주소는 https://example.org/apply 입니다 [2]."
+        self.assertEqual(align_application_links(text, contexts, [A, B]), (text, False))
+
+    def test_recorded_seoul_sejong_answer_with_mismatched_citation_via_api(self):
+        original = self.data["generator_output"]["answer"]
+        extra = "\n\n### 세종시 위원회 청년참여 확대\n신청 URL은 https://www.sejong.go.kr/apply 입니다 [2]."
+        generated = {**deepcopy(self.data["generator_output"]), "answer": original + extra}
+        response = post(self.data["search_result"], generated, self.data["request"])
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertTrue(body["answer"].startswith(original))
+        tail = body["answer"][len(original):]
+        self.assertNotIn("https://www.sejong.go.kr/apply", tail)
+        self.assertIn("세종시 위원회 청년참여 확대: 현재 확인된 전용 신청 주소는 없습니다.", tail)
+        self.assertNotIn("[2]", tail)
+        checks = {p["policy_id"]: p for p in body["policy_checks"]}
+        self.assertIsNone(checks[SEJONG]["official_apply_url"])
+        self.assertTrue(checks["POL_STG_SEOUL_001"]["official_apply_url"])
+
+
+class VisitNegationTests(unittest.TestCase):
+    """3차 리뷰: 원문이 방문 신청을 받지 않는다고 하면 '방문 신청 방법은 확인되지만'으로 뒤집지 않는다."""
+
+    def test_negative_visit_evidence_is_not_turned_into_visit_guidance(self):
+        for evidence in ("주민센터 방문 신청은 받지 않습니다.", "주민센터 방문 신청 불가", "주민센터 방문 접수는 제외합니다.",
+                         "주민센터를 방문하여 신청할 수 없습니다.", "주민센터 방문 신청은 하지 않습니다.",
+                         "※ 주민센터 방문 신청 안 됨"):
+            with self.subTest(evidence=evidence):
+                contexts = [{"source_id": 1, "policy_id": "A", "text": "온라인 공고를 확인하세요.\n" + evidence}]
+                fixed, changed = align_application_links(MIXED, contexts, [A])
+                self.assertTrue(changed)
+                self.assertNotIn("방문 신청 방법은 확인", fixed)
+                self.assertIn("전용 신청 주소는 없습니다", fixed)
+
+    def test_negative_segment_does_not_hide_positive_segment_of_same_place(self):
+        contexts = [{"source_id": 1, "policy_id": "A",
+                     "text": "우편 접수는 받지 않습니다.\n- 신청방법: 거주지 관할 주민센터에 방문 신청"}]
+        fixed, _ = align_application_links(MIXED, contexts, [A])
+        self.assertIn("주민센터 방문 신청 방법은 확인되지만", fixed)
+
+    def test_negative_answer_clause_is_not_turned_into_visit_guidance(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "거주지 관할 주민센터에 방문 신청"}]
+        fixed, changed = align_application_links("주민센터 방문 신청은 안 되고 온라인으로 신청할 수 있습니다 [1].", contexts, [A])
+        self.assertTrue(changed)
+        self.assertNotIn("방문 신청 방법은 확인", fixed)
+
+    def test_negative_visit_evidence_via_api(self):
+        policy = release_policy(VISIT_POLICY)
+        # sample_only: 릴리스 원문의 방문 신청 문장을 부정 문장으로 바꾼 테스트 전용 입력(데이터 파일은 변경하지 않음).
+        for hit in policy["evidence"]:
+            hit["text"] = hit["text"].replace("주민센터에 방문 신청", "주민센터 방문 신청은 받지 않습니다.")
+        self.assertFalse(any("주민센터에 방문 신청" in hit["text"] for hit in policy["evidence"]))
+        request = {"question": "신청 방법 알려줘.", "selected_policy_id": VISIT_POLICY,
+                   "profile": {"age": 30, "region": "", "income": None}, "history": []}
+        response = post({"policies": [policy]}, answered(MIXED), request)
+        self.assertEqual(response.status_code, 200, response.text)
+        answer = response.json()["answer"]
+        self.assertNotIn("방문 신청 방법은 확인", answer)
+        self.assertIn("전용 신청 주소는 없습니다", answer)
+
+
 class NurijipSynonymTests(unittest.TestCase):
     """2차 리뷰: '누리집'도 '홈페이지'와 같은 웹 신청 경로 표현으로 보정한다."""
 
