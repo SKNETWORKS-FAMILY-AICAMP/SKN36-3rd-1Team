@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "markdown_and_report_counts": "PASS",
+    "personal_paths_removed": "PASS",
+    "xml_parse_and_exact_path_only_changes": "PASS",
+    "original_json_unchanged": "PASS",
+    "service_code_unchanged": "PASS",
+    "git_diff_check": "PASS",
+    "saved_answers_replay_3_of_3": "PASS",
+    "gov059_false_positive_confirmed": "PASS",
+    "pol005_saved_punctuation_inspected": "PASS"
+  },
+  "powershell_51": {
+    "powershell_version": "5.1.26100.9818",
+    "parser": "PASS",
+    "utf8_bom_and_korean": "PASS",
+    "legacy_parameters": "PASS",
+    "new_parameters": "PASS",
+    "timestamp_filename": "PASS",
+    "explicit_out_priority": "PASS",
+    "collision_preserves_existing": "PASS",
+    "external_calls": 0
+  },
+  "new_llm_calls": 0,
+  "db_calls": 0,
+  "notes": [
+    "Initial nested Python-to-PowerShell probe lacked Get-FileHash in inherited module environment; direct Windows PowerShell 5.1 invocation passed all checks."
+  ]
+}

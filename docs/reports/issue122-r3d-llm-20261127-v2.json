@@ -1,0 +1,1882 @@
+{
+  "mode": "real_llm",
+  "llm_calls": 3,
+  "model": "gpt-5.4-mini",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "cases": [
+    {
+      "scenario": "income_failed_and",
+      "policy_id": "POL_GOV_042",
+      "request_profile": {
+        "age": 45,
+        "region": "",
+        "income": null
+      },
+      "http": 200,
+      "response": {
+        "status": "answered",
+        "answer": "이 정책은 현재 접수 중이에요. 신청은 거주지 관할 읍면동 행정복지센터를 방문해 할 수 있고, 신청기한은 상시신청입니다 [1]. 다만 자격은 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 또는 만9세 미만의 장애가 예견되는 아동이 대상이며 [2], 소득은 국비사업 소득기준(중위소득 180%) 초과자라는 원문이 확인됩니다 [3]. 사용자의 만 45세는 이 연령 대상에 해당하지 않아 나이 기준은 충족하지 않습니다. 지역과 소득은 추가 확인이 필요해 전체 신청 자격은 확정할 수 없습니다. 필요한 서류는 발달재활서비스 신청서이며, 만9세 미만 장애예견아동(장애미등록아동)은 발달재활서비스 의뢰서와 검사자료도 필요합니다 [1].",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "document_id": "DOC_GOV_042",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "document_id": "DOC_GOV_042",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "document_id": "DOC_GOV_042",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_042",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+                "status": "ineligible"
+              },
+              {
+                "field": "income",
+                "label": "소득",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "income",
+                "label": "소득 요건",
+                "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": [
+              {
+                "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+              }
+            ],
+            "policy_name": "발달재활서비스 지원(시자체)",
+            "agency": "강원특별자치도 춘천시",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "장애인복지과",
+                "phone": "033-250-4326",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "발달재활서비스 신청 시 필요한 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "발달재활서비스의 지원대상과 소득 기준은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_GOV_042",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "ineligible",
+              "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "ineligible",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과)."
+            },
+            {
+              "field": "income",
+              "label": "소득",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "income",
+              "label": "소득 요건",
+              "status": "needs_check",
+              "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요."
+            }
+          ],
+          "reception_status": "open",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": [
+        {
+          "policy_id": "POL_GOV_042",
+          "data_quality": {
+            "warnings": [
+              {
+                "code": "UNKNOWN_CONDITION_GROUP",
+                "level": "caution",
+                "group_ids": [
+                  "GRP_POL_GOV_042_OR_INC"
+                ],
+                "affects": [
+                  "income"
+                ],
+                "message": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+                "severity": "high",
+                "evidence_level": "graph_structure",
+                "verification": "not_modeled",
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              },
+              {
+                "code": "EXTRACTED_NOT_VERIFIED",
+                "level": "caution",
+                "count": 15,
+                "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+                "severity": "low",
+                "evidence_level": "graph_metadata",
+                "verification": "not_officially_checked",
+                "affects": [],
+                "blocks_auto_eligibility": false,
+                "official_source_checked": false
+              },
+              {
+                "code": "SUSPECTED_REGION_GRANULARITY_LOST",
+                "level": "suspected",
+                "organization": "강원특별자치도 춘천시",
+                "graph_regions": [
+                  "강원특별자치도"
+                ],
+                "municipality_in_organization": "춘천시",
+                "message": "운영기관은 춘천시인데 그래프 지역은 ['강원특별자치도'](시·도 단위)뿐임. 시·군·구 거주 요건이 사라졌을 수 있으니 지역 판정은 원문으로 (확정 아님)",
+                "severity": "high",
+                "evidence_level": "graph_property_pattern",
+                "verification": "suspected",
+                "affects": [
+                  "region"
+                ],
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              },
+              {
+                "code": "MARRIAGE_CHILD_NOT_MODELED",
+                "level": "suspected",
+                "severity": "low",
+                "evidence_level": "keyword_detected",
+                "verification": "not_modeled",
+                "affects": [
+                  "children"
+                ],
+                "evidence": {
+                  "marriage": [],
+                  "children": [
+                    {
+                      "source": "DOC_GOV_042",
+                      "char_start": 89,
+                      "line": "장애아동 및 장애예견아동을 위해 발달재활서비스 지원"
+                    }
+                  ],
+                  "unmodeled_dimensions": [
+                    "children"
+                  ],
+                  "incomplete_dimensions": [],
+                  "review_dimensions": [],
+                  "dimension_assessment": {
+                    "marriage": {
+                      "classification": "no_text",
+                      "related_conditions": []
+                    },
+                    "children": {
+                      "related_conditions": [],
+                      "keyword_only": false,
+                      "requirement_lines": [
+                        {
+                          "source": "DOC_GOV_042",
+                          "char_start": 126,
+                          "line": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동"
+                        },
+                        {
+                          "source": "DOC_GOV_042",
+                          "char_start": 166,
+                          "line": "○ 만9세 미만의 장애가 예견되는 아동"
+                        },
+                        {
+                          "source": "DOC_GOV_042",
+                          "char_start": 402,
+                          "line": "○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료"
+                        }
+                      ],
+                      "requirement_line_count": 5,
+                      "missing_details": {
+                        "family_type": [
+                          {
+                            "source": "DOC_GOV_042",
+                            "char_start": 126,
+                            "line": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동"
+                          },
+                          {
+                            "source": "DOC_GOV_042",
+                            "char_start": 166,
+                            "line": "○ 만9세 미만의 장애가 예견되는 아동"
+                          }
+                        ]
+                      },
+                      "covered_details": {},
+                      "non_requirement_mentions": [],
+                      "text_child_ages": [
+                        [
+                          "LT",
+                          "108"
+                        ],
+                        [
+                          "LT",
+                          "216"
+                        ]
+                      ],
+                      "graph_child_ages": [],
+                      "classification": "unmodeled",
+                      "child_age_check": "mismatch"
+                    }
+                  },
+                  "graph_related_conditions": {
+                    "marriage": [],
+                    "children": []
+                  },
+                  "eligibility_attributes.family_status_by_document": [
+                    {
+                      "document_id": "DOC_GOV_042",
+                      "source_type": "api",
+                      "attribute_source": null,
+                      "family_status": [
+                        "1인가구",
+                        "한부모·조손"
+                      ]
+                    }
+                  ],
+                  "note": "자동 의심 후보·검토 대상. 확정된 정책 오류 아님, 공식 원문 미검증"
+                },
+                "source": "static_flags",
+                "message": "혼인·자녀 관련 문구가 있으나 해당 조건 타입이 그래프에 없음(키워드 탐지) → 추가 질문",
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              },
+              {
+                "code": "SEARCH_REGION_REQUIRES_REVIEW",
+                "level": "caution",
+                "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+                "stored_regions": [
+                  "강원특별자치도",
+                  "강원특별자치도",
+                  "강원특별자치도"
+                ],
+                "severity": "medium",
+                "evidence_level": "stored_region_string",
+                "verification": "not_officially_checked",
+                "affects": [
+                  "region"
+                ],
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              }
+            ],
+            "review_status_counts": {
+              "extracted": 15
+            },
+            "graph_text_fields": [
+              "eligibility",
+              "benefit",
+              "application_period",
+              "application_method"
+            ],
+            "hold_auto_eligibility": true,
+            "hold_reasons": [
+              "MARRIAGE_CHILD_NOT_MODELED",
+              "SEARCH_REGION_REQUIRES_REVIEW",
+              "SUSPECTED_REGION_GRANULARITY_LOST",
+              "UNKNOWN_CONDITION_GROUP"
+            ],
+            "affected_attributes": [
+              "children",
+              "income",
+              "region"
+            ],
+            "official_source_checked": false
+          },
+          "eligibility_structure": {
+            "evaluated": false,
+            "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+            "condition_tree": [
+              {
+                "group_id": "GRP_POL_GOV_042_ROOT",
+                "logic": "AND",
+                "is_root": true,
+                "description": "발달재활서비스 지원(시자체) 복합 자격 조건 루트 그룹 (AND 결합)",
+                "relationship": {
+                  "target_name": "Root Condition Group (POL_GOV_042)",
+                  "evidence_location": "기본자격요건",
+                  "evidence_document_id": "DOC_GOV_042",
+                  "review_status": "extracted"
+                },
+                "conditions": [
+                  {
+                    "unit": "세",
+                    "evidence_location": "지원조건 JA0110/JA0111",
+                    "name": "연령조건: 만 0세~17세",
+                    "description": "정책 지원 자격 조건 (연령조건: 만 0세~17세)",
+                    "type": "AGE",
+                    "value": "0~17",
+                    "operator": "BETWEEN",
+                    "condition_id": "COND_AGE_0_17",
+                    "relationship": {
+                      "target_name": "연령조건: 만 0세~17세",
+                      "evidence_location": "필수조건",
+                      "evidence_document_id": "DOC_GOV_042",
+                      "review_status": "extracted"
+                    }
+                  }
+                ],
+                "groups": [
+                  {
+                    "group_id": "GRP_POL_GOV_042_OR_INC",
+                    "logic": "UNKNOWN",
+                    "is_root": false,
+                    "description": "발달재활서비스 지원(시자체) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR) (자동 판정 보류: 원문은 국비사업 소득기준(중위소득 180%) 초과자로, 중위소득 101~200% 구간과 경계가 맞지 않음)",
+                    "relationship": {
+                      "target_name": "소득선택조건그룹 (GRP_POL_GOV_042_OR_INC)",
+                      "evidence_location": "선택조건그룹",
+                      "evidence_document_id": "DOC_GOV_042",
+                      "review_status": "extracted"
+                    },
+                    "conditions": [
+                      {
+                        "unit": "%",
+                        "evidence_location": "지원조건 JA02",
+                        "name": "소득조건: 중위소득 0~50%",
+                        "description": "정책 지원 자격 조건 (소득조건: 중위소득 0~50%)",
+                        "type": "INCOME",
+                        "value": "중위소득_0_50_",
+                        "operator": "IN_RANGE",
+                        "condition_id": "COND_INC_중위소득_0_50_",
+                        "relationship": {
+                          "target_name": "소득조건: 중위소득 0~50%",
+                          "evidence_location": "선택조건",
+                          "evidence_document_id": "DOC_GOV_042",
+                          "review_status": "extracted"
+                        }
+                      },
+                      {
+                        "unit": "%",
+                        "evidence_location": "지원조건 JA02",
+                        "name": "소득조건: 중위소득 101~200%",
+                        "description": "정책 지원 자격 조건 (소득조건: 중위소득 101~200%)",
+                        "type": "INCOME",
+                        "value": "중위소득_101_200_",
+                        "operator": "IN_RANGE",
+                        "condition_id": "COND_INC_중위소득_101_200_",
+                        "relationship": {
+                          "target_name": "소득조건: 중위소득 101~200%",
+                          "evidence_location": "선택조건",
+                          "evidence_document_id": "DOC_GOV_042",
+                          "review_status": "extracted"
+                        }
+                      },
+                      {
+                        "unit": "%",
+                        "evidence_location": "지원조건 JA02",
+                        "name": "소득조건: 중위소득 200% 초과",
+                        "description": "정책 지원 자격 조건 (소득조건: 중위소득 200% 초과)",
+                        "type": "INCOME",
+                        "value": "중위소득_200_초과",
+                        "operator": "IN_RANGE",
+                        "condition_id": "COND_INC_중위소득_200_초과",
+                        "relationship": {
+                          "target_name": "소득조건: 중위소득 200% 초과",
+                          "evidence_location": "선택조건",
+                          "evidence_document_id": "DOC_GOV_042",
+                          "review_status": "extracted"
+                        }
+                      },
+                      {
+                        "unit": "%",
+                        "evidence_location": "지원조건 JA02",
+                        "name": "소득조건: 중위소득 51~75%",
+                        "description": "정책 지원 자격 조건 (소득조건: 중위소득 51~75%)",
+                        "type": "INCOME",
+                        "value": "중위소득_51_75_",
+                        "operator": "IN_RANGE",
+                        "condition_id": "COND_INC_중위소득_51_75_",
+                        "relationship": {
+                          "target_name": "소득조건: 중위소득 51~75%",
+                          "evidence_location": "선택조건",
+                          "evidence_document_id": "DOC_GOV_042",
+                          "review_status": "extracted"
+                        }
+                      },
+                      {
+                        "unit": "%",
+                        "evidence_location": "지원조건 JA02",
+                        "name": "소득조건: 중위소득 76~100%",
+                        "description": "정책 지원 자격 조건 (소득조건: 중위소득 76~100%)",
+                        "type": "INCOME",
+                        "value": "중위소득_76_100_",
+                        "operator": "IN_RANGE",
+                        "condition_id": "COND_INC_중위소득_76_100_",
+                        "relationship": {
+                          "target_name": "소득조건: 중위소득 76~100%",
+                          "evidence_location": "선택조건",
+                          "evidence_document_id": "DOC_GOV_042",
+                          "review_status": "extracted"
+                        }
+                      }
+                    ],
+                    "groups": []
+                  }
+                ]
+              }
+            ],
+            "requires_condition_ids": [
+              "COND_AGE_0_17",
+              "COND_INC_중위소득_0_50_",
+              "COND_INC_중위소득_101_200_",
+              "COND_INC_중위소득_200_초과",
+              "COND_INC_중위소득_51_75_",
+              "COND_INC_중위소득_76_100_"
+            ],
+            "tree_condition_ids": [
+              "COND_AGE_0_17",
+              "COND_INC_중위소득_0_50_",
+              "COND_INC_중위소득_101_200_",
+              "COND_INC_중위소득_200_초과",
+              "COND_INC_중위소득_51_75_",
+              "COND_INC_중위소득_76_100_"
+            ],
+            "tree_matches_requires_condition": true,
+            "unknown_logic_groups": [
+              "GRP_POL_GOV_042_OR_INC"
+            ],
+            "structure_issues": []
+          }
+        }
+      ],
+      "generator_checks": [
+        {
+          "policy_id": "POL_GOV_042",
+          "policy_name": "발달재활서비스 지원(시자체)",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "ineligible"
+            },
+            {
+              "field": "income",
+              "label": "소득",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "income",
+              "label": "소득 요건",
+              "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "agency": "강원특별자치도 춘천시",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": [
+            "agency='장애인복지과' phone='033-250-4326' document_id='DOC_GOV_042' chunk_id='CHK_B2_DOC_GOV_042_C003' source_url='https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233'"
+          ],
+          "application_schedule": {
+            "evaluated_on": "2026-11-27",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": [
+            {
+              "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+              "document_id": "DOC_GOV_042",
+              "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "label": "지원대상",
+              "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+              "document_id": "DOC_GOV_042",
+              "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+            }
+          ]
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_042",
+          "document_id": "DOC_GOV_042",
+          "chunk_id": "CHK_B2_DOC_GOV_042_C003"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_042",
+          "document_id": "DOC_GOV_042",
+          "chunk_id": "CHK_B2_DOC_GOV_042_C001"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_042",
+          "document_id": "DOC_GOV_042",
+          "chunk_id": "CHK_B2_DOC_GOV_042_C002"
+        }
+      ],
+      "generator_profile": {
+        "age": 45,
+        "region": null,
+        "income": null
+      },
+      "generator_output": {
+        "status": "answered",
+        "answer": "이 정책은 현재 접수 중이에요. 신청은 거주지 관할 읍면동 행정복지센터를 방문해 할 수 있고, 신청기한은 상시신청입니다 [1]. 다만 자격은 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 또는 만9세 미만의 장애가 예견되는 아동이 대상이며 [2], 소득은 국비사업 소득기준(중위소득 180%) 초과자라는 원문이 확인됩니다 [3]. 사용자의 만 45세는 이 연령 대상에 해당하지 않아 나이 기준은 충족하지 않습니다. 지역과 소득은 추가 확인이 필요해 전체 신청 자격은 확정할 수 없습니다. 필요한 서류는 발달재활서비스 신청서이며, 만9세 미만 장애예견아동(장애미등록아동)은 발달재활서비스 의뢰서와 검사자료도 필요합니다 [1].",
+        "used_source_ids": [
+          1,
+          2,
+          3
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "발달재활서비스 신청 시 필요한 서류는 무엇인가요?"
+          },
+          {
+            "kind": "question",
+            "text": "발달재활서비스의 지원대상과 소득 기준은 어떻게 되나요?"
+          }
+        ]
+      },
+      "status_differences": [],
+      "citation_document_match": true,
+      "pipeline_api_exclusion_match": true
+    },
+    {
+      "scenario": "age80",
+      "policy_id": "POL_005",
+      "request_profile": {
+        "age": 80,
+        "region": "",
+        "income": null
+      },
+      "http": 200,
+      "response": {
+        "status": "info",
+        "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문에는 구직 신청이 필요한 경우가 있고, 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 일부 장기 훈련은 예외가 있으며, 생계급여 수급자·다른 부처나 지자체의 교육/훈련비 지원을 받는 사람·부정수급자·부정행위로 지원금을 반환하지 않은 사람 등은 제외된다고 안내합니다 [1][3]. 신청 방법은 고용24에서 온라인으로 신청서를 작성해 제출하거나, 거주지 관할 고용센터에 방문해 신청할 수 있고, 심사 후 카드 발급이 진행됩니다 [1][2][5]. 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담이 필요합니다 [4][5]. 다만 취업 상태 등 일부 자격 기준은 공식 원문과 데이터 구조상 자동으로 확정하기 어려워, 현재 입력만으로 전체 적격 여부는 단정할 수 없습니다 [1][2][3].",
+        "citations": [
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_005",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.",
+                "status": "eligible"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": null,
+            "policy_name": "고용24 국민내일배움카드",
+            "agency": "고용노동부 / 한국고용정보원",
+            "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "국민내일배움카드 신청 자격에서 제외되는 경우는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "국민내일배움카드는 어떻게 신청하나요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "140시간 이상 과정은 어떤 절차가 필요한가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_005",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "eligible",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "status": "needs_check",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+            }
+          ],
+          "reception_status": "open",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": [
+        {
+          "policy_id": "POL_005",
+          "data_quality": {
+            "warnings": [
+              {
+                "code": "EXTRACTED_NOT_VERIFIED",
+                "level": "caution",
+                "count": 14,
+                "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+                "severity": "low",
+                "evidence_level": "graph_metadata",
+                "verification": "not_officially_checked",
+                "affects": [],
+                "blocks_auto_eligibility": false,
+                "official_source_checked": false
+              },
+              {
+                "code": "EMPLOYMENT_NOT_MODELED",
+                "level": "suspected",
+                "severity": "medium",
+                "evidence_level": "handoff_attribute",
+                "verification": "mismatch",
+                "affects": [
+                  "employment"
+                ],
+                "evidence": {
+                  "eligibility_attributes.employment_status_by_document": [
+                    {
+                      "document_id": "DOC_WORK24_001",
+                      "source_type": "html",
+                      "attribute_source": null,
+                      "employment_status": [
+                        "구직자·취업준비생",
+                        "소상공인·재직자"
+                      ]
+                    }
+                  ],
+                  "documents_with_specific_employment_attr": [
+                    "DOC_WORK24_001"
+                  ],
+                  "attribute_conflict": false,
+                  "text": [
+                    {
+                      "source": "DOC_WORK24_001",
+                      "char_start": 1268,
+                      "line": "- 200만원 추가 : 기간제·파견·단시간·일용근로자로 재직중인 피보험자, 고용위기지역 및 특별고용지원업종 종사자, 출소예정자, 기초생활수급자 및 차상위계층, 장애인,"
+                    }
+                  ]
+                },
+                "source": "static_flags",
+                "message": "인계 속성의 취업 상태 요건이 그래프 조건에 없음 → 취업 상태는 추가 질문으로 확인 (확정 아님)",
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              }
+            ],
+            "review_status_counts": {
+              "verified": 13,
+              "extracted": 14
+            },
+            "graph_text_fields": [
+              "eligibility",
+              "benefit",
+              "application_period",
+              "application_method"
+            ],
+            "hold_auto_eligibility": true,
+            "hold_reasons": [
+              "EMPLOYMENT_NOT_MODELED"
+            ],
+            "affected_attributes": [
+              "employment"
+            ],
+            "official_source_checked": false
+          },
+          "eligibility_structure": {
+            "evaluated": false,
+            "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+            "condition_tree": [
+              {
+                "group_id": "GRP_POL_005_ROOT",
+                "logic": "AND",
+                "is_root": true,
+                "description": "고용24 국민내일배움카드 복합 자격 조건 루트 그룹 (AND 결합)",
+                "relationship": {
+                  "target_name": "Root Condition Group (POL_005)",
+                  "evidence_location": "기본자격요건",
+                  "evidence_document_id": "DOC_WORK24_001",
+                  "review_status": "verified"
+                },
+                "conditions": [],
+                "groups": [
+                  {
+                    "group_id": "GRP_POL_005_NOT_EXCL",
+                    "logic": "NOT",
+                    "is_root": false,
+                    "description": "고용24 국민내일배움카드 참여 제외 대상 그룹: 하위 OR 그룹의 제외 조건 중 하나라도 해당하면 참여 제외",
+                    "relationship": {
+                      "target_name": "참여제외그룹 (GRP_POL_005_NOT_EXCL)",
+                      "evidence_location": "제외조건그룹",
+                      "evidence_document_id": "DOC_WORK24_001",
+                      "review_status": "verified"
+                    },
+                    "conditions": [],
+                    "groups": [
+                      {
+                        "group_id": "GRP_POL_005_OR_EXCL",
+                        "logic": "OR",
+                        "is_root": false,
+                        "description": "고용24 국민내일배움카드 참여 제외 조건 그룹: 하나라도 해당하면 참여 제외",
+                        "relationship": {
+                          "target_name": "참여제외 OR 그룹 (GRP_POL_005_OR_EXCL)",
+                          "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                          "evidence_document_id": "DOC_WORK24_001",
+                          "review_status": "extracted"
+                        },
+                        "conditions": [
+                          {
+                            "unit": "세",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "연령조건: 75세 이상",
+                            "description": "국민내일배움카드 참여 제외 조건 (연령조건: 75세 이상)",
+                            "type": "AGE",
+                            "value": "75~120",
+                            "operator": "BETWEEN",
+                            "condition_id": "COND_AGE_75_120",
+                            "relationship": {
+                              "target_name": "연령조건: 75세 이상",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표)",
+                            "type": "EMPLOYMENT",
+                            "value": "사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+                            "condition_id": "COND_EXCL_CORP_REP",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 지원·융자·수강제한 기간인 부정수급자)",
+                            "type": "SPECIAL_TARGET",
+                            "value": "지원·융자·수강제한 기간인 부정수급자",
+                            "condition_id": "COND_EXCL_FRAUD_RESTRICTED",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 지원·융자·수강제한 기간인 부정수급자",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 부정행위에 따른 지원금을 반환하지 않은 사람)",
+                            "type": "SPECIAL_TARGET",
+                            "value": "부정행위에 따른 지원금을 반환하지 않은 사람",
+                            "condition_id": "COND_EXCL_FRAUD_UNPAID",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람)",
+                            "type": "EMPLOYMENT",
+                            "value": "대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+                            "condition_id": "COND_EXCL_LARGE_FIRM_WORKER",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능))",
+                            "type": "SPECIAL_TARGET",
+                            "value": "생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+                            "condition_id": "COND_EXCL_LIVELIHOOD_BENEFIT",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득이 300만원 이상인 비영리단체 대표)",
+                            "type": "EMPLOYMENT",
+                            "value": "월 소득이 300만원 이상인 비영리단체 대표",
+                            "condition_id": "COND_EXCL_NONPROFIT_REP",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 월 소득이 300만원 이상인 비영리단체 대표",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 기타 지원 필요성이 인정되지 않는 사람)",
+                            "type": "SPECIAL_TARGET",
+                            "value": "기타 지원 필요성이 인정되지 않는 사람",
+                            "operator": "IN",
+                            "condition_id": "COND_EXCL_NO_NEED",
+                            "relationship": {
+                              "target_name": "제외: 기타 지원 필요성이 인정되지 않는 사람",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람)",
+                            "type": "SPECIAL_TARGET",
+                            "value": "다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+                            "condition_id": "COND_EXCL_OTHER_SUBSIDY",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 공무원, 사립학교 교직원",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 공무원, 사립학교 교직원)",
+                            "type": "EMPLOYMENT",
+                            "value": "공무원, 사립학교 교직원",
+                            "condition_id": "COND_EXCL_PUBLIC_EMPLOYEE",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 공무원, 사립학교 교직원",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자)",
+                            "type": "EMPLOYMENT",
+                            "value": "사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+                            "condition_id": "COND_EXCL_SELF_EMPLOYED",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 월 소득 500만원 이상의 특수형태근로종사자)",
+                            "type": "EMPLOYMENT",
+                            "value": "월 소득 500만원 이상의 특수형태근로종사자",
+                            "condition_id": "COND_EXCL_SPECIAL_WORKER",
+                            "operator": "IN",
+                            "relationship": {
+                              "target_name": "제외: 월 소득 500만원 이상의 특수형태근로종사자",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          },
+                          {
+                            "unit": "해당 여부",
+                            "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                            "name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+                            "description": "국민내일배움카드 참여 제외 조건 (제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생)",
+                            "type": "EDUCATION",
+                            "value": "졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+                            "operator": "IN",
+                            "condition_id": "COND_EXCL_STUDENT",
+                            "relationship": {
+                              "target_name": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생",
+                              "evidence_location": "DOC_WORK24_001 지원 제외 대상",
+                              "evidence_document_id": "DOC_WORK24_001",
+                              "review_status": "extracted"
+                            }
+                          }
+                        ],
+                        "groups": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "requires_condition_ids": [],
+            "tree_condition_ids": [
+              "COND_AGE_75_120",
+              "COND_EXCL_CORP_REP",
+              "COND_EXCL_FRAUD_RESTRICTED",
+              "COND_EXCL_FRAUD_UNPAID",
+              "COND_EXCL_LARGE_FIRM_WORKER",
+              "COND_EXCL_LIVELIHOOD_BENEFIT",
+              "COND_EXCL_NONPROFIT_REP",
+              "COND_EXCL_NO_NEED",
+              "COND_EXCL_OTHER_SUBSIDY",
+              "COND_EXCL_PUBLIC_EMPLOYEE",
+              "COND_EXCL_SELF_EMPLOYED",
+              "COND_EXCL_SPECIAL_WORKER",
+              "COND_EXCL_STUDENT"
+            ],
+            "tree_matches_requires_condition": false,
+            "unknown_logic_groups": [],
+            "structure_issues": []
+          }
+        }
+      ],
+      "generator_checks": [
+        {
+          "policy_id": "POL_005",
+          "policy_name": "고용24 국민내일배움카드",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 80세가 포함됩니다.",
+              "status": "eligible"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "target",
+              "label": "기타 자격 조건",
+              "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "employment",
+              "label": "기타 자격 조건",
+              "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "education",
+              "label": "기타 자격 조건",
+              "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "agency": "고용노동부 / 한국고용정보원",
+          "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": null,
+          "application_schedule": {
+            "evaluated_on": "2026-11-27",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": null,
+          "requirement_excerpts": null
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_005",
+          "document_id": "DOC_WORK24_001",
+          "chunk_id": "CHK_B2_DOC_WORK24_001_C005"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_005",
+          "document_id": "DOC_WORK24_001",
+          "chunk_id": "CHK_B2_DOC_WORK24_001_C007"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_005",
+          "document_id": "DOC_WORK24_001",
+          "chunk_id": "CHK_B2_DOC_WORK24_001_C004"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_005",
+          "document_id": "DOC_WORK24_001",
+          "chunk_id": "CHK_B2_DOC_WORK24_001_C006"
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_005",
+          "document_id": "DOC_WORK24_001",
+          "chunk_id": "CHK_B2_DOC_WORK24_001_C008"
+        }
+      ],
+      "generator_profile": {
+        "age": 80,
+        "region": null,
+        "income": null
+      },
+      "generator_output": {
+        "status": "info",
+        "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문에는 구직 신청이 필요한 경우가 있고, 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 일부 장기 훈련은 예외가 있으며, 생계급여 수급자·다른 부처나 지자체의 교육/훈련비 지원을 받는 사람·부정수급자·부정행위로 지원금을 반환하지 않은 사람 등은 제외된다고 안내합니다 [1][3]. 신청 방법은 고용24에서 온라인으로 신청서를 작성해 제출하거나, 거주지 관할 고용센터에 방문해 신청할 수 있고, 심사 후 카드 발급이 진행됩니다 [1][2][5]. 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담이 필요합니다 [4][5]. 다만 취업 상태 등 일부 자격 기준은 공식 원문과 데이터 구조상 자동으로 확정하기 어려워, 현재 입력만으로 전체 적격 여부는 단정할 수 없습니다 [1][2][3].",
+        "used_source_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "국민내일배움카드 신청 자격에서 제외되는 경우는 무엇인가요?"
+          },
+          {
+            "kind": "question",
+            "text": "국민내일배움카드는 어떻게 신청하나요?"
+          },
+          {
+            "kind": "question",
+            "text": "140시간 이상 과정은 어떤 절차가 필요한가요?"
+          }
+        ]
+      },
+      "status_differences": [],
+      "citation_document_match": true,
+      "pipeline_api_exclusion_match": true
+    },
+    {
+      "scenario": "sejong_unknown_url",
+      "policy_id": "POL_GOV_059",
+      "request_profile": {
+        "age": 30,
+        "region": "세종",
+        "income": null
+      },
+      "http": 200,
+      "response": {
+        "status": "answered",
+        "answer": "세종시 청년 행정인턴은 지원대상으로 세종시에 주민등록이 되어 있는 19세 이상 39세 이하 청년 또는 세종시에 소재한 대학 재학자가 제시되어 있고, 입력된 만 30세와 세종특별자치시는 나이·지역 기준과 맞습니다. 다만 종합 자격은 일부 조건이 자동 판정 보류라서 **신청 자격은 추가 확인이 필요해요**. [2]\n\n신청 방법은 2026년 하계 청년 행정인턴 최종선발자 21명에 한해 접수하는 화면이며, 접수가 마감됐어요. [1] 다만 같은 공고의 신청기간은 2026.6.15.~6.21.로 이미 종료되었고, 접수 상태도 마감으로 안내됩니다. [3]\n\n구비서류는 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집·이용(제공) 동의서가 공통이고, 세종시 관내 대학생 자격일 경우 재학증명서가 추가됩니다. 우선선발은 해당 증빙서류를 더 제출해야 합니다. [1]",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 세종시 청년 행정인턴 (569000000346)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "document_id": "DOC_GOV_059",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 세종시 청년 행정인턴 (569000000346)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "document_id": "DOC_GOV_059",
+            "page_number": null
+          },
+          {
+            "title": "세종특별자치시 공지사항 「2026년 하계 청년 행정인턴 모집접수(6.15~6.21)」 — 모집 신청기간",
+            "url": "https://www.sejong.go.kr/bbs/R0071/view.do?nttId=B000000155492Et9lO7u",
+            "document_id": "DOC_GOV_059_SEJONG_NOTICE_2026",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_059",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 30세가 포함됩니다.",
+                "status": "eligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-06-15",
+              "end_date": "2026-06-21",
+              "is_ongoing": false,
+              "days_to_start": -165,
+              "days_to_end": -159
+            },
+            "required_documents": [
+              {
+                "text": "- (공통서류) 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집.이용(제공) 동의서, 재학증명서(세종시 관내 대학생 자격일 경우) \n- (해당자 추가제출) 우선선발의 경우,  해당 증빙서류 제출 필요 \n ※ 상기 서류는 공고일 기준으로 변경될 수 있으므로 매년 모집공고를 확인하시기 바랍니다.",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+              }
+            ],
+            "policy_name": "세종시 청년 행정인턴",
+            "agency": "세종특별자치시",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "official_apply_url": "https://www.sejong.go.kr",
+            "contacts": [
+              {
+                "agency": "청년정책담당관",
+                "phone": "044-300-6014",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "ㅇ 세종시에 주민등록이 되어 있는 19세 이상 39세 이하인 청년 또는 세종시에 소재한 대학에 재학중인 자",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "CHK_B2_DOC_GOV_059_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 구비서류를 더 자세히 알려줘?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "세종시 청년 행정인턴의 지원대상을 더 자세히 설명해줘?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_GOV_059",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "eligible",
+              "reason": "만 19~39세 기준에 입력한 만 30세가 포함됩니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다."
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            }
+          ],
+          "reception_status": "closed",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": [
+        {
+          "policy_id": "POL_GOV_059",
+          "data_quality": {
+            "warnings": [
+              {
+                "code": "EXTRACTED_NOT_VERIFIED",
+                "level": "caution",
+                "count": 8,
+                "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+                "severity": "low",
+                "evidence_level": "graph_metadata",
+                "verification": "not_officially_checked",
+                "affects": [],
+                "blocks_auto_eligibility": false,
+                "official_source_checked": false
+              },
+              {
+                "code": "SEARCH_REGION_REQUIRES_REVIEW",
+                "level": "caution",
+                "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+                "stored_regions": [
+                  "세종특별자치시",
+                  "세종특별자치시",
+                  "세종특별자치시",
+                  "세종특별자치시"
+                ],
+                "severity": "medium",
+                "evidence_level": "stored_region_string",
+                "verification": "not_officially_checked",
+                "affects": [
+                  "region"
+                ],
+                "blocks_auto_eligibility": true,
+                "official_source_checked": false
+              }
+            ],
+            "review_status_counts": {
+              "extracted": 8,
+              "verified_official_text": 1
+            },
+            "graph_text_fields": [
+              "eligibility",
+              "benefit",
+              "application_period",
+              "application_method"
+            ],
+            "hold_auto_eligibility": true,
+            "hold_reasons": [
+              "SEARCH_REGION_REQUIRES_REVIEW"
+            ],
+            "affected_attributes": [
+              "region"
+            ],
+            "official_source_checked": false
+          },
+          "eligibility_structure": {
+            "evaluated": false,
+            "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+            "condition_tree": [
+              {
+                "group_id": "GRP_POL_GOV_059_ROOT",
+                "logic": "AND",
+                "is_root": true,
+                "description": "세종시 청년 행정인턴 복합 자격 조건 루트 그룹 (AND 결합)",
+                "relationship": {
+                  "target_name": "Root Condition Group (POL_GOV_059)",
+                  "evidence_location": "기본자격요건",
+                  "evidence_document_id": "DOC_GOV_059",
+                  "review_status": "extracted"
+                },
+                "conditions": [
+                  {
+                    "unit": "세",
+                    "evidence_location": "지원조건 JA0110/JA0111",
+                    "name": "연령조건: 만 19세~39세",
+                    "description": "정책 지원 자격 조건 (연령조건: 만 19세~39세)",
+                    "type": "AGE",
+                    "value": "19~39",
+                    "operator": "BETWEEN",
+                    "condition_id": "COND_AGE_19_39",
+                    "relationship": {
+                      "target_name": "연령조건: 만 19세~39세",
+                      "evidence_location": "필수조건",
+                      "evidence_document_id": "DOC_GOV_059",
+                      "review_status": "extracted"
+                    }
+                  }
+                ],
+                "groups": []
+              }
+            ],
+            "requires_condition_ids": [
+              "COND_AGE_19_39"
+            ],
+            "tree_condition_ids": [
+              "COND_AGE_19_39"
+            ],
+            "tree_matches_requires_condition": true,
+            "unknown_logic_groups": [],
+            "structure_issues": []
+          }
+        }
+      ],
+      "generator_checks": [
+        {
+          "policy_id": "POL_GOV_059",
+          "policy_name": "세종시 청년 행정인턴",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19~39세 기준에 입력한 만 30세가 포함됩니다.",
+              "status": "eligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "closed",
+          "agency": "세종특별자치시",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+          "official_apply_url": "https://www.sejong.go.kr",
+          "exclusion_reasons": null,
+          "contacts": [
+            "agency='청년정책담당관' phone='044-300-6014' document_id='DOC_GOV_059' chunk_id='CHK_B2_DOC_GOV_059_C003' source_url='https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346'"
+          ],
+          "application_schedule": {
+            "evaluated_on": "2026-11-27",
+            "start_date": "2026-06-15",
+            "end_date": "2026-06-21",
+            "is_ongoing": false,
+            "days_to_start": -165,
+            "days_to_end": -159
+          },
+          "required_documents": [
+            {
+              "text": "- (공통서류) 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집.이용(제공) 동의서, 재학증명서(세종시 관내 대학생 자격일 경우) \n- (해당자 추가제출) 우선선발의 경우,  해당 증빙서류 제출 필요 \n ※ 상기 서류는 공고일 기준으로 변경될 수 있으므로 매년 모집공고를 확인하시기 바랍니다.",
+              "document_id": "DOC_GOV_059",
+              "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "label": "지원대상",
+              "text": "ㅇ 세종시에 주민등록이 되어 있는 19세 이상 39세 이하인 청년 또는 세종시에 소재한 대학에 재학중인 자",
+              "document_id": "DOC_GOV_059",
+              "chunk_id": "CHK_B2_DOC_GOV_059_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+            }
+          ]
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059",
+          "chunk_id": "CHK_B2_DOC_GOV_059_C003"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059",
+          "chunk_id": "CHK_B2_DOC_GOV_059_C001"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059_SEJONG_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_GOV_059_SEJONG_NOTICE_2026_C001"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059",
+          "chunk_id": "CHK_B2_DOC_GOV_059_C002"
+        }
+      ],
+      "generator_profile": {
+        "age": 30,
+        "region": "세종특별자치시",
+        "income": null
+      },
+      "generator_output": {
+        "status": "answered",
+        "answer": "세종시 청년 행정인턴은 지원대상으로 세종시에 주민등록이 되어 있는 19세 이상 39세 이하 청년 또는 세종시에 소재한 대학 재학자가 제시되어 있고, 입력된 만 30세와 세종특별자치시는 나이·지역 기준과 맞습니다. 다만 종합 자격은 일부 조건이 자동 판정 보류라서 **신청 자격은 추가 확인이 필요해요**. [2]\n\n신청 방법은 2026년 하계 청년 행정인턴 최종선발자 21명에 한해 접수하는 화면이며, 온라인(정부24 혜택알리미)·이메일·방문 접수 중 하나로 제출하도록 안내되어 있습니다. [1] 다만 같은 공고의 신청기간은 2026.6.15.~6.21.로 이미 종료되었고, 접수 상태도 마감으로 안내됩니다. [3]\n\n구비서류는 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집·이용(제공) 동의서가 공통이고, 세종시 관내 대학생 자격일 경우 재학증명서가 추가됩니다. 우선선발은 해당 증빙서류를 더 제출해야 합니다. [1]",
+        "used_source_ids": [
+          1,
+          2,
+          3
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 구비서류를 더 자세히 알려줘?"
+          },
+          {
+            "kind": "question",
+            "text": "세종시 청년 행정인턴의 지원대상을 더 자세히 설명해줘?"
+          }
+        ]
+      },
+      "status_differences": [],
+      "citation_document_match": true,
+      "pipeline_api_exclusion_match": true
+    }
+  ],
+  "before": {
+    "graph": [
+      {
+        "nodes": 1147,
+        "relationships": 2702
+      }
+    ],
+    "points": 1249
+  },
+  "after": {
+    "graph": [
+      {
+        "nodes": 1147,
+        "relationships": 2702
+      }
+    ],
+    "points": 1249
+  },
+  "counts_unchanged": true
+}
