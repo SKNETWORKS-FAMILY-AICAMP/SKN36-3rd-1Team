@@ -1,5 +1,7 @@
-import type { AskResponse, Notice } from '../api/types';
-import { isUnjudgedOnly } from './conditionGroups';
+import type { AskResponse, ConditionResult, Notice } from '../api/types';
+import {
+  hasConfirmedAndFailureWithUnknown, hasOnlyAndGroups, isUnjudgedOnly, matchesExclusion,
+} from './conditionGroups';
 
 /**
  * 답변 상태별로 화면에 무엇을 보여 줄지 정한다 (CODING_STYLE §11: 정상 답변·추가 확인·근거 없음을 다른 상태로 표현).
@@ -17,6 +19,28 @@ export const NO_EVIDENCE_GUIDE = {
 
 /** backend/rag/pipeline.py가 needs_check 조건이 있을 때 붙이는 일반 보류 안내 */
 const HOLD_NOTICE_TEXT = '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.';
+
+/**
+ * 팀 합의 #78: 종합 판정이 확인 필요(needs_check)일 때 화면 안내는 "신청 자격은 추가 확인이 필요해요"로 보여 준다.
+ * API의 notice 원문(계약 §8 예시)은 그대로 두고 화면 표시만 바꾼다.
+ */
+export const HOLD_NOTICE_DISPLAY: Notice = {
+  kind: 'warn',
+  title: '신청 자격은 추가 확인이 필요해요',
+  text: '자동 판정을 보류한 조건이 있어요. 공식 공고에서 확인해 주세요.',
+};
+
+/**
+ * 화면이 불일치를 확정할 수 있는 정책이면 true. 카드와 같은 기준이다.
+ * - NOT 제외 그룹에 해당(matchesExclusion)
+ * - UNKNOWN 하위 그룹이 있어도 단일 AND 종합 행이 불일치로 확정(#40, #80 소득 예외)
+ * - AND 그룹만 있고 불일치 행이 있음
+ */
+function isConfirmedIneligible(conditions: ConditionResult[]): boolean {
+  return matchesExclusion(conditions)
+    || hasConfirmedAndFailureWithUnknown(conditions)
+    || (hasOnlyAndGroups(conditions) && conditions.some(({ status }) => status === 'ineligible'));
+}
 
 export const INFO_GUIDE_TITLE = '추가 확인이 필요해요';
 export const INFO_CAVEAT = '공식 원문 근거가 부족해 확정 답변은 하지 않았어요.';
@@ -58,11 +82,18 @@ export function answerView(r: AskResponse): AnswerView {
   };
   // 모든 정책의 보류 사유가 '비교할 조건 없음'뿐이면, 일반 보류 경고는 카드의 '자동 판정 안 함' 안내와 같은 내용이라 생략한다.
   // 다른 경고(지역 확인 등)나 구체적인 확인 사항이 있는 정책이 하나라도 있으면 경고를 그대로 둔다.
+  const isHoldNotice = notice?.kind === 'warn' && notice.text === HOLD_NOTICE_TEXT;
   if (
-    notice?.kind === 'warn' && notice.text === HOLD_NOTICE_TEXT
+    isHoldNotice
     && r.policy_checks.length > 0 && r.policy_checks.every((policy) => isUnjudgedOnly(policy.conditions))
   ) {
     view.warning = null;
+  } else if (isHoldNotice && r.policy_checks.some(({ conditions }) => (
+    !isConfirmedIneligible(conditions) && !isUnjudgedOnly(conditions)
+    && conditions.some(({ status }) => status === 'needs_check')
+  ))) {
+    // 확인 필요 조건이 남은 정책이 없으면(불일치 확정·전부 적합·'자동 판정 안 함' 정책뿐) 합의 문구가 카드와 어긋나므로 서버 문장을 그대로 둔다.
+    view.warning = HOLD_NOTICE_DISPLAY;
   }
 
   if (r.status === 'answered') {
