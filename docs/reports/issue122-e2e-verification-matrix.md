@@ -339,3 +339,42 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136) 미병합 | 6표기 API·UI, 세종 신청 버튼·FAQ 답변 대조 |
 | #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`, 2026-11-27) · 병합 후 재확인 미실행 | 최신 dev에서 인천 연령 경계·인용 출처 재검증 |
 | #40 30세 상담 마지막 요약 | 생성 답변 실행별 변동, 후속 관찰 | 재현 시 지인 Pipeline·소희 Generator 전달 |
+
+## 11. 2026-11-27 KST · 최종 현황 통합 (dev `4708009`)
+
+기준 [dev `4708009`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/4708009) (PR #147 병합). 이번 절은 **새 상담 실행 없이** 병합된 #143·#145·#150 증빙과 열린 PR #148·#139의 기록을 한 표로 모은 것이다. 실DB·실LLM 재실행은 하지 않았다. 제품 코드·계약·데이터는 바꾸지 않았다. 판정 기호는 §1과 같다.
+
+### 11-1. 병합 완료 근거
+
+| PR | 범위 | 판정 | 근거 |
+| --- | --- | --- | --- |
+| [#143](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/143) | #75 RQ040·RQ042 실제 React 상담, 07-1~07-5 상세 이동·탭 복귀, 08-1·08-2 Django 404 | RQ040 **PASS** · RQ042 **PASS** · 07/08 6개 시나리오 **PASS** · 29세 복수 분야 **FAIL**(아래 11-2) | §8 · §9 |
+| [#145](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/145) | #40 비교 화면 30·10세·390px, 카드 원문 링크 도착, 복수 정책 출처 | 비교 화면 **PASS** · 원문 URL·HTTP 8/8 **PASS**(명칭 7/8, `POL_009` `needs_review` 1) · 복수 정책 출처 5/5 **PASS** | §10 |
+| [#150](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/150) | §10에서 남긴 dev 기존 실패 `test_unjudged_prefixes_match_checker`, 원본 없는 환경의 `test_regenerated_doc_gov_048_…` | **PASS** — 이번 dev에서 두 파일 96 passed·1 skipped(사유: `data/raw` 원본 없음)·subtests 160 passed | 아래 11-4 |
+
+### 11-2. 남은 항목 판정
+
+| 항목 | 관련 | 판정 | 근거·재현 | 다음 조치 |
+| --- | --- | --- | --- | --- |
+| `POL_GOV_042` 45세 종합 판정 의미 불일치 | #40 후속 · #122 03-2 | **FAIL** | Checker·Pipeline·API 모두 종합 `ineligible`인데 실제 `gpt-5.4-mini` 답변이 “전체 신청 자격은 확정할 수 없습니다”로 미확정 안내. 구조화 상태 전달 불일치는 0건(실DB+Mock 11건, 실LLM 3건)이라 계산 오류가 아닌 **답변 의미 전달** 문제. 1회 관측, 반복 안정성 미검증. dev `8c40858` 기준 [PR #148](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/148)(열림·미병합) 보고서 `docs/reports/issue122-r3d-llm-e2e-consistency-20261127.md` §C | 소희·지인 Generator 문구 보정 → 같은 입력 재검증. §3 #40 절의 수용 기준(30세 문구)과 같은 유형 |
+| 29세 교육비·구직·교통 질문의 검색 후보 누락 | #75 · #122 02 | **FAIL** | 후보가 교육 분야 5개뿐이고 구직·교통 정책 없음. §8(지역 공란) 2/2 재현, §10(서울)에서도 같은 경향. 본문·카드·출처 연결 자체는 일치(카드 5/5·인용 5/5). 검색 수정 PR 없음 | 지인·민혁 검색 관련성 수정 → §8과 같은 질문·프로필(가상 29세·지역 공란)로 재검증 |
+| RQ031 조업일수 60일 경계 5문항 | #97 · #82 | **FAIL** | 2026-11-25 R3D 재검증: HTTP 200 5/5, 고시 인용 5/5, 판정 **통과 1 · 부분 통과 2 · 실패 2**(59일 충족/미충족 모순, 정확히 60일 포함 관계 오류). 공식 기준(고시 60일 이상·TAC 30일)은 확인 완료. Generator·Pipeline 수정은 dev에 없음. [재검증 보고서](issue97-rq031-r3d-retest-20261125.md) | 소희·지인 답변 수정 → 같은 5문항 재평가 |
+| `child_age_months` API 연결(04-3) | #39 | **BLOCKED** | 현재 dev의 `UserProfile`에 월령 필드가 없어 API가 값을 버린다(PR #148 §C에서 실DB로 확인). Checker 직접 비교는 24개월 포함·25개월 미포함이지만 #102 품질 보류(`MARRIAGE_CHILD_NOT_MODELED`)로 둘 다 `needs_check`. [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 열림, 2026-11-27 리뷰에서 수정 2건 요청(코멘트 자리표시자, 다자녀 패턴 범위) | #139 병합 후 24/25/생략/잘못된 값 422 재실행, React 입력 연결 |
+
+### 11-3. 그 밖의 상태 (변경 없음)
+
+| 항목 | 상태 |
+| --- | --- |
+| `POL_005` 76세 직접 질문 (04-1) | **FAIL** 유지(§8). 재실행 없음 |
+| #103 세종 신청 URL·목록 별칭(05-1·05-5) | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합. 병합 후 6표기 API·세종 상담 재확인은 **미실행** |
+| #79·#90 인천 연령·출처(05-6) | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) 병합. 병합 후 재확인 **미실행** |
+| 08-4 실제 DB 중단·릴리스 손상 | **미실행** |
+| 05-4 #102 보류 누락 예시 | **BLOCKED** 유지 |
+
+### 11-4. 이번 회차 실행한 검증
+
+- `python -m pytest tests/unit/test_shared_constants.py tests/integration/test_rag_pipeline.py -q` → 96 passed, 1 skipped, subtests 160 passed.
+- `python -m pytest tests/unit -q` → **2,883 passed · 80 skipped · 실패 0** · subtests 17,518 passed (`GIT_CONFIG_COUNT` 제거한 프로세스, §7 09-1과 같은 방식). §10의 1 failed는 #150으로 해소됐다.
+- 실DB·실LLM 상담, 브라우저, React 테스트·빌드, Django 테스트, 린트는 이번 회차 **미실행**.
+
+**#122는 Open 유지.** FAIL 3건(#148 45세 의미, #75 검색 후보, #97 RQ031)과 BLOCKED 1건(#39)이 남아 있다. 각 수정이 dev에 병합되면 민지가 같은 입력으로 재검증하고 이 절의 판정을 갱신한다.
