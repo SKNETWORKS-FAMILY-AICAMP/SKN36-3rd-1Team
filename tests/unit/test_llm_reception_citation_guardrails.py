@@ -80,3 +80,13 @@ def test_prompts_define_both_reception_and_eligibility():
     assert "신청 자격은 추가 확인이 필요해요" in SYSTEM_PROMPT
     assert "서로 다른 정보" in SYSTEM_PROMPT
     assert "모든 정책에 신청 가능" in SYSTEM_PROMPT
+
+
+def test_unknown_reception_wording_matches_team_agreement():
+    """#103 합의: 접수 미확인 문장은 프롬프트와 Pipeline 보정 문구가 같고, 바꿔 쓰지 않도록 지시한다."""
+    from backend.rag.pipeline import RECEPTION_NOTICE
+
+    agreed = "현재 접수 여부는 공식 공고에서 확인해 주세요"
+    assert RECEPTION_NOTICE["unknown"] == f"{agreed}."
+    assert "표현을 바꾸지 말고 그대로 쓰세요" in SYSTEM_PROMPT
+    assert "상시 신청이 가능하다고 임의로 추정하지 마세요" in SYSTEM_PROMPT
