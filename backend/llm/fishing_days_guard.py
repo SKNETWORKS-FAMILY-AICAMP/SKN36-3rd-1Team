@@ -6,14 +6,14 @@ import re
 _POLICY_ID = "POL_GOV_006"
 _NOTICE_DOCUMENT = "DOC_GOV_006_MOF_NOTICE_2024"
 _SUMMARY_DOCUMENT = "DOC_GOV_006"
-_FISHING_TOPIC = re.compile(r"조업\s*일수|며칠\s*(?:이상\s*)?조업|\d+\s*일\s*조업")
-_OTHER_TOPICS = re.compile(r"신청\s*(?:방법|절차|기간|서류|주소|링크)|서류|교육|어업\s*허가|접수|지급액")
 _CALENDAR_DATE = re.compile(r"\d{1,2}\s*월\s*\d{1,2}\s*일|\d{4}[-./]\d{1,2}[-./]\d{1,2}")
 _DAY_RANGE = re.compile(r"\d+\s*(?:일\s*)?[~～–—-]\s*\d+\s*일")
 _DAY_MENTION = re.compile(r"\d\s*일")
+_COUNT_LABEL = r"조업\s*일수(?:가|는|이|은|[:：])?\s*(?:정확히\s*)?"
+_COUNT_PHRASE = _COUNT_LABEL + r"\d{1,3}\s*일"
 _STATED_DAYS = re.compile(
-    r"(?<!\w)조업\s*일수(?:가|는|이|은|[:：])?\s*(?:정확히\s*)?(\d{1,3})\s*일"
-    r"(?=\s*(?:입니다|이에요|이다(?!고)|이고|이며|이면|이라면|인데|[.!?,。！？]|$))"
+    r"(?<!\w)" + _COUNT_LABEL + r"(\d{1,3})\s*일"
+    r"(?=\s*(?:입니다|이에요|이다(?!고)|이고|이며|이면|이라면|인데|인\s*경우|[.!?,。！？]|$))"
 )
 _NON_ACTUAL_PREFIX = re.compile(r"(?<!\w)(?:최소|최대|필요한|미|비)\s*$")
 _WORKED_DAYS = re.compile(
@@ -25,6 +25,29 @@ _TAC_STATUS = re.compile(
     r"주로\s*어획하는\s*어선(?:에\s*해당(?P<applies>합니다|해요|하고|하며|하므로|하지\s*않)|"
     r"(?P<is_vessel>입니다|이에요|이고|이므로|이\s*아닙니다|이\s*아니))"
 )
+_QUESTION_PREFIX = (
+    r"(?:수산자원보호\s*직접지불제(?:에서|의|는)?\s+)?"
+    r"(?:(?:해당\s*연도(?:에)?|올해|\d{4}\s*년(?:에)?|1년에|연간)\s+)?(?:기준으로\s+)?"
+)
+_MINIMUM_QUESTION = re.compile(
+    _QUESTION_PREFIX
+    + r"(?:(?:며칠|몇\s*일)\s*(?:이상\s*)?조업\s*(?:해야\s*(?:하나요|합니까|하죠)|하면\s*(?:되나요|됩니까))"
+    r"|(?:최소\s*)?조업\s*일수(?:\s*(?:기준|요건))?(?:은|는|이|가|을|를)?\s*"
+    r"(?:(?:며칠|몇\s*일)\s*(?:인가요|입니까|이에요|인가)|알려\s*주세요|어떻게\s*되나요))"
+)
+_QUALIFICATION_QUESTION = re.compile(
+    _QUESTION_PREFIX + rf"(?:{_COUNT_PHRASE}(?:이면|이라면|인\s*경우)\s*[,，]?\s*)?"
+    r"(?:(?:(?:최소\s*)?조업\s*일수(?:\s*(?:요건|조건|기준))?|(?:지급\s*)?요건|기준|조건)"
+    r"(?:을|를|은|는)?\s*)?충족\s*(?:하나요|합니까|해요|하죠|하는지\s*알려\s*주세요)"
+)
+_DAY_STATEMENT = re.compile(_QUESTION_PREFIX + rf"(?:{_COUNT_PHRASE}(?:입니다|이에요|이다)|{_WORKED_DAYS.pattern})")
+_TAC_STATEMENT = re.compile(
+    _QUESTION_PREFIX + rf"(?:{_COUNT_PHRASE}(?:이고|이며)\s*[,，]?\s*)?{_TAC_STATUS.pattern}(?:습니다|아요|에요)?"
+)
+_DISTINCTION_REQUEST = re.compile(
+    r"(?:원문의\s*)?(?:그\s*요건|(?:지급|최소\s*조업\s*일수)\s*요건)(?:과|와)\s*"
+    r"지급\s*제한(?:\s*기준)?(?:\s*및\s*최종\s*지급\s*자격)?(?:을|를)\s*구분해서\s*알려\s*주세요"
+)
 _NOTICE_RULE = re.compile(
     r"최소\s*조업\s*일수\s*(?:[:：]\s*)?해당\s+연도에\s+(\d{1,3})\s*일\s*이상\s*조업할\s*것\.\s*"
     r"단,\s*총허용어획량을\s*적용하는\s*어종을\s*주로\s*어획하는\s*어선의\s*경우는\s*"
@@ -33,23 +56,37 @@ _NOTICE_RULE = re.compile(
 _SUMMARY_LIMIT = re.compile(r"조업\s*일수(?:가|는)?\s*(\d{1,3})\s*일\s*이하")
 
 
+def _asks_only_fishing_day_requirement(question: str, has_days: bool) -> bool:
+    """Only replace replies when every part is covered by the generated answer."""
+    asks_requirement = False
+    for raw_part in re.split(r"(?<=[.!?。！？])\s+|\n+", question):
+        part = raw_part.strip().rstrip(".!?。！？").rstrip()
+        if _MINIMUM_QUESTION.fullmatch(part) or (has_days and _QUALIFICATION_QUESTION.fullmatch(part)):
+            asks_requirement = True
+        elif not has_days or not any(pattern.fullmatch(part) for pattern in (
+            _DAY_STATEMENT, _TAC_STATEMENT, _DISTINCTION_REQUEST,
+        )):
+            return False
+    return asks_requirement
+
+
 def ground_fishing_days(response: dict, question: str, contexts: list[dict]) -> dict:
     """Keep the numerical comparison separate from a payout decision."""
     if (
         response["status"] != "answered"
-        or not _FISHING_TOPIC.search(question)
-        or _OTHER_TOPICS.search(question)
         or any(context.get("policy_id") != _POLICY_ID for context in contexts)
     ):
         return response
 
-    count_text = _CALENDAR_DATE.sub("", question)
+    count_text = _CALENDAR_DATE.sub("", question).strip()
     values = [match[1] for match in _STATED_DAYS.finditer(count_text)
               if not _NON_ACTUAL_PREFIX.search(count_text[:match.start()])]
     values.extend(_WORKED_DAYS.findall(count_text))
     # A day count must be explicitly attached to a stated or completed amount
     # of fishing. Unmatched days, thresholds, and ranges keep the model reply.
     if _DAY_RANGE.search(count_text) or len(values) > 1 or len(values) != len(_DAY_MENTION.findall(count_text)):
+        return response
+    if not _asks_only_fishing_day_requirement(count_text, has_days=bool(values)):
         return response
 
     rules = [
