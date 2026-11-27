@@ -24,12 +24,16 @@ DEFAULT_MAX_OUTPUT_TOKENS = 1000
 CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 ALLOWED_FIELDS = {"age", "region", "income"}
 _UNDECIDED_ELIGIBILITY = re.compile(
-    r"(?P<reason>확인이\s+필요해\s+)?"
+    r"^(?P<lead>[ \t]*(?:[-*+]\s+)?(?:(?:다만|따라서|정리하면|종합하면)[,]?\s+)?)"
+    r"(?:(?P<pending>(?:거주\s*지역|지역|소득)"
+    r"(?:\s*(?:과|와|및|·|,)\s*(?:거주\s*지역|지역|소득))*"
+    r"(?:은|는|이|가)\s*(?:추가\s*)?확인이\s*필요)해\s+)?"
+    r"(?P<emphasis>\*\*|__)?"
     r"(?:전체|최종|종합)\s*(?:(?:신청|지원)\s*)?자격(?:은|이|을)\s*"
     r"(?:(?:확정|판단)\s*할\s*수\s*없(?:습니다|어요)|"
     r"(?:확정|판단)\s*하기\s*어렵(?:습니다|어요)|"
     r"미확정(?:입니다|이에요)|추가\s*확인이\s*필요(?:합니다|해요))"
-    r"(?=(?:\*\*|__)?\s*(?:[.!。！]|\[\d+\]|$))"
+    r"(?=(?:\*\*|__)?(?:[ \t]*\[\d+\])*[ \t]*[.!。！]?[ \t]*$)"
 )
 
 # #39: child_age_months는 자녀 한 명의 값이다. 다른 자녀·자녀별 확인 안내를 식별한다.
@@ -1179,11 +1183,18 @@ def _align_overall_eligibility(
     )
     if root.get("status") != "ineligible":
         return answer
-    verdict = "현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
-    return _UNDECIDED_ELIGIBILITY.sub(
-        lambda match: f"확인이 필요하지만, {verdict}" if match["reason"] else verdict,
-        answer,
-    )
+
+    def replace_summary(match: re.Match[str]) -> str:
+        pending = f"{match['pending']}하지만, " if match["pending"] else ""
+        return (
+            f"{match['lead']}{pending}{match['emphasis'] or ''}"
+            "현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
+        )
+
+    # Match complete summaries so a qualifier such as '소득만으로는' or
+    # '나이를 입력하지 않으면' is never attached to a confirmed denial.
+    sentences = re.split(r"((?<=[.!?。！？])\s+|\n+)", answer)
+    return "".join(_UNDECIDED_ELIGIBILITY.sub(replace_summary, sentence) for sentence in sentences)
 
 
 def _validate_model_response(

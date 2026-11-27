@@ -52,13 +52,38 @@ def fake_model(monkeypatch, output):
         ("ineligible", False, False),
     ],
 )
+@pytest.mark.parametrize(
+    ("original", "aligned"),
+    [
+        (
+            "지역과 소득은 추가 확인이 필요해 전체 신청 자격은 확정할 수 없습니다.",
+            "지역과 소득은 추가 확인이 필요하지만, 현재 입력 기준으로는 신청 자격을 충족하지 않습니다.",
+        ),
+        (
+            "따라서 **전체 신청 자격은 확정할 수 없습니다** [1].",
+            "따라서 **현재 입력 기준으로는 신청 자격을 충족하지 않습니다** [1].",
+        ),
+        (
+            "소득 정보만으로는 전체 신청 자격을 판단할 수 없습니다.",
+            "소득 정보만으로는 전체 신청 자격을 판단할 수 없습니다.",
+        ),
+        (
+            "나이를 입력하지 않으면 전체 신청 자격을 확정할 수 없습니다.",
+            "나이를 입력하지 않으면 전체 신청 자격을 확정할 수 없습니다.",
+        ),
+        (
+            "다만, 소득 정보를 입력하지 않으면 전체 신청 자격은 확정할 수 없습니다.",
+            "다만, 소득 정보를 입력하지 않으면 전체 신청 자격은 확정할 수 없습니다.",
+        ),
+    ],
+)
 def test_overall_eligibility_hedge_follows_confirmed_root(
-    monkeypatch, root_status, one_policy, corrected,
+    monkeypatch, root_status, one_policy, corrected, original, aligned,
 ):
     # PR #148의 GOV042/45세 답변에서 나이와 종합 결론이 엇갈린 부분.
     answer = (
         "만 45세는 연령 대상에 해당하지 않아 나이 기준은 충족하지 않습니다 [1]. "
-        "지역과 소득은 추가 확인이 필요해 전체 신청 자격은 확정할 수 없습니다. "
+        f"{original} "
         "필요한 서류는 발달재활서비스 신청서입니다 [1]."
     )
     fake_model(monkeypatch, {
@@ -86,12 +111,7 @@ def test_overall_eligibility_hedge_follows_confirmed_root(
 
     result = generate_answer("발달재활서비스를 신청할 수 있나요?", contexts, checks)
 
-    expected = answer
-    if corrected:
-        expected = answer.replace(
-            "확인이 필요해 전체 신청 자격은 확정할 수 없습니다",
-            "확인이 필요하지만, 현재 입력 기준으로는 신청 자격을 충족하지 않습니다",
-        )
+    expected = answer.replace(original, aligned) if corrected else answer
     assert result["answer"] == expected
     assert result["used_source_ids"] == [1]
 
