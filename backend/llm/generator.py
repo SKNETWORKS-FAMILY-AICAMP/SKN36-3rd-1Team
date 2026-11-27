@@ -12,6 +12,7 @@ from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
 from backend.eligibility.checker import _is_valid_age
+from backend.llm.fishing_days_guard import ground_fishing_days
 from backend.llm.month_age_guard import ground_child_month_ranges
 from database.region_search import ALIASES, SIDOS
 
@@ -1776,5 +1777,8 @@ def generate_answer(
         response["answer"] = _align_overall_eligibility(
             response["answer"], cleaned_contexts, policy_checks,
         )
+    # The policy-specific guard uses selected source document IDs, which are
+    # not needed in the model's normalized context payload.
+    response = ground_fishing_days(response, question, contexts)
     return ground_child_month_ranges(response, cleaned_contexts)
 
