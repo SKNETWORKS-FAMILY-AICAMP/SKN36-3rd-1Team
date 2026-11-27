@@ -1,0 +1,744 @@
+{
+  "date_kst": "2026-11-27",
+  "pr": 140,
+  "head": "b19faf639f51b7a2599ceb813353187fc27af580",
+  "before_replay": [
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 18,
+      "same_citations": false,
+      "before": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 19,
+      "same_citations": false,
+      "before": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 39,
+      "same_citations": false,
+      "before": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        },
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 40,
+      "same_citations": false,
+      "before": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        },
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": null,
+      "same_citations": false,
+      "before": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "인천광역시 서해구 청년 기본 조례 제9조(청년정책 사업의 추진)·제12조(청년의 고용확대 및 안정 등)",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_YC_024",
+      "age": null,
+      "same_citations": true,
+      "before": [
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        }
+      ]
+    },
+    {
+      "policy_id": "POL_BOK_004",
+      "age": null,
+      "same_citations": true,
+      "before": [
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        },
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        }
+      ],
+      "replayed": [
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        },
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        }
+      ]
+    }
+  ],
+  "after_replay": [
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 18,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C002",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C003",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C004",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_NOTICE_2026_C001",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 19,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C002",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C003",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C004",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_NOTICE_2026_C001",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 39,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C002",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C003",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C004",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_NOTICE_2026_C001",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": 40,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        },
+        {
+          "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C002",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C003",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C004",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_NOTICE_2026_C001",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "age": null,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C002",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C003",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_ORD_C004",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+          "page_number": null
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "CHK_B2_DOC_STG_ICN_001_NOTICE_2026_C001",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_YC_024",
+      "age": null,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        },
+        {
+          "title": "[온통청년 정책] 경기 컬처패스 (20261031005400214661)",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "document_id": "DOC_YC_024",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_YC_024",
+          "document_id": "DOC_YC_024",
+          "chunk_id": "CHK_B2_DOC_YC_024_C003",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_YC_024",
+          "document_id": "DOC_YC_024",
+          "chunk_id": "CHK_B2_DOC_YC_024_C002",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_YC_024",
+          "document_id": "DOC_YC_024",
+          "chunk_id": "CHK_B2_DOC_YC_024_C001",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214661",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    },
+    {
+      "policy_id": "POL_BOK_004",
+      "age": null,
+      "http_status": 200,
+      "saved_citations": [
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        },
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        }
+      ],
+      "replayed_citations": [
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        },
+        {
+          "title": "[중앙부처복지서비스] 청년내일저축계좌 (WLF00000060)",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "document_id": "DOC_BOK_004",
+          "page_number": null
+        }
+      ],
+      "identity_and_occurrence_mapping": "PASS",
+      "context_sources": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_BOK_004",
+          "document_id": "DOC_BOK_004",
+          "chunk_id": "CHK_B2_DOC_BOK_004_C002",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "page_number": null
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_BOK_004",
+          "document_id": "DOC_BOK_004",
+          "chunk_id": "CHK_B2_DOC_BOK_004_C003",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "page_number": null
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_BOK_004",
+          "document_id": "DOC_BOK_004",
+          "chunk_id": "CHK_B2_DOC_BOK_004_C004",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "page_number": null
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_BOK_004",
+          "document_id": "DOC_BOK_004",
+          "chunk_id": "CHK_B2_DOC_BOK_004_C001",
+          "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060",
+          "page_number": null
+        }
+      ],
+      "original_chunk_id_verification": "UNVERIFIED: original LLM API response did not save chunk_id; document-equivalent chunks cannot be distinguished"
+    }
+  ],
+  "before_wrong_age_mutation": "old test passed despite injected wrong eligible comparisons",
+  "after_age_mutations": "seven synthetic wrong-result cases and actual Checker monkeypatch detected by independent oracle",
+  "policy_count": 53,
+  "boundary_cases": 346,
+  "valid_api_boundary_cases": 344,
+  "unknown_full_hold_policies": 46,
+  "scoped_age_preserved_policies": 7,
+  "external_llm_calls_this_review": 0,
+  "r3d_recheck": {
+    "status": "PASS",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "neo4j_counts": [
+      {
+        "policies": 249
+      }
+    ],
+    "qdrant_counts": {
+      "exp_b2_qwen3emb06b_v140_v1": 1249,
+      "exp_b3_qwen3emb06b_v140_v1": 1338
+    },
+    "source_documents_hash_verified": 273,
+    "llm_calls": 0,
+    "source_chunks_checked": 58,
+    "source_chunks_passed": 58
+  },
+  "integration": {
+    "dev": "8c4085823fc1f06a7d1b805dd6ea1d66200079ca",
+    "heads": {
+      "origin/feature/39-child-age-api-pipeline": "bafdf6589b7cfebca6541ab9aef333858c039d1a",
+      "origin/fix/103-sejong-apply-url-final": "e5784b26543b547ee5e56b9c48075c8631f42f3c"
+    },
+    "conflicts": [],
+    "merged_files": [
+      "ai/prompts/system_prompt.py",
+      "backend/rag/pipeline.py"
+    ]
+  }
+}

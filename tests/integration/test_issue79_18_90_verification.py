@@ -13,6 +13,12 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
+from pr140_verification_oracles import (
+    assert_age_outcomes, assert_replay_sources, bind_saved_completion, boundary_values,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from backend.api.main import create_app
@@ -40,6 +46,7 @@ GROUPS = {r['group_id']: r for r in rows('neo4j/nodes_condition_group.jsonl')}
 RELS = rows('neo4j/relationships.jsonl')
 CHUNKS = rows('qdrant/payload_chunks.jsonl')
 CORRECTIONS = json.loads((ROOT / 'data/metadata/data_corrections_v1.4.0.json').read_text(encoding='utf-8'))
+AGE_RULES = json.loads((ROOT / 'tests/fixtures/pr140_age_expectations.json').read_text(encoding='utf-8'))['policies']
 
 
 def release_graph(pid):
@@ -77,15 +84,15 @@ def generate(question, contexts, checks, history, profile=None):
             'used_source_ids': [c['source_id'] for c in contexts], 'follow_up_questions': []}
 
 
-def exercise(policy, age):
+def exercise(policy, age, *, check_fn=check_eligibility):
     profile = {'age': age, 'region': '', 'income': None}
     capture = Mock(side_effect=generate)
     session = Mock()
     session.search_policy_context.return_value = {'policies': [copy.deepcopy(policy)]}
     request = {'question': policy['policy_name'] + ' 지원 요건과 공식 출처',
                'profile': profile, 'history': [], 'selected_policy_id': policy['policy_id']}
-    raw = check_eligibility(profile, policy)
-    with TestClient(create_app(session_factory=lambda: session, check_fn=check_eligibility,
+    raw = check_fn(profile, policy)
+    with TestClient(create_app(session_factory=lambda: session, check_fn=check_fn,
                               generate_fn=capture)) as client:
         response = client.post('/api/ask', json=request)
     assert response.status_code == 200, response.text
@@ -125,20 +132,32 @@ def test_incheon_boundaries_and_hold():
     assert all(c['status'] != 'eligible' for c in exercise(held, 19)['generator_checks'][0]['conditions'])
 
 
-def test_corrected_applicant_boundaries_through_api():
-    records = [r for r in CORRECTIONS['requires_condition_additions']
-               if CONDITIONS[r['condition_id']]['type'] == 'AGE']
-    assert len(records) == 53
-    for record in records:
-        p = item(record['policy_id'])
-        condition = CONDITIONS[record['condition_id']]
-        low, high = map(int, condition['value'].split('~'))
-        for age in (low - 1, low, high, high + 1, None):
-            # Invalid domain boundaries belong to Checker, not valid API requests.
-            if age is not None and not 0 <= age <= 120:
-                assert _condition(condition, {'age': age})['status'] == 'needs_check'
-            else:
-                exercise(p, age)
+@pytest.mark.parametrize('rule', AGE_RULES, ids=[r['policy_id'] for r in AGE_RULES])
+def test_corrected_applicant_boundaries_through_api(rule):
+    p = item(rule['policy_id'])
+    condition = CONDITIONS[rule['condition_id']]
+    assert condition['type'] == 'AGE'
+    assert condition['operator'] == rule['operator']
+    assert condition['unit'] == rule['unit']
+    assert condition['value'] == f"{rule['lower']}~{rule['stored_upper']}"
+    actual_groups = [{'group_id': g['group_id'], 'logic': g['logic'],
+                      'condition_ids': [c['condition_id'] for c in g['conditions']]}
+                     for t in p['graph']['eligibility']['condition_tree'] for g in _tree_groups(t)]
+    assert actual_groups == rule['group_snapshot']
+    assert p['data_quality']['hold_auto_eligibility']
+    assert rule['evidence_document_id'] in DOCS
+    assert DOCS[rule['evidence_document_id']]['policy_id'] == rule['policy_id']
+    links = [r for r in RELS if r['source_id'] == rule['policy_id']
+             and r['relation'] == 'REQUIRES_CONDITION' and r['target_id'] == rule['condition_id']]
+    assert len(links) == 1
+    assert links[0]['evidence_document_id'] == rule['evidence_document_id']
+    for age in boundary_values(rule):
+        direct = _condition(condition, {'age': age})
+        if age is not None and not 0 <= age <= 120:
+            assert direct['status'] == 'needs_check'
+            continue
+        result = exercise(p, age)
+        assert_age_outcomes(rule, age, direct, result['checker'], result['api']['policy_checks'][0])
 
 
 def test_multi_policy_sources_and_null_url():
@@ -171,16 +190,15 @@ def test_saved_live_llm_contract_replay():
         saved = run['response']
         session = Mock()
         session.search_policy_context.return_value = by_pid[run['policy_id']]
-        completion = {'status': saved['status'], 'answer': saved['answer'],
-                      'used_source_ids': sorted({int(n) for n in re.findall(r'\[(\d+)\]', saved['answer'])}),
-                      'follow_up_questions': saved['follow_up_questions']}
         with TestClient(create_app(session_factory=lambda: session, check_fn=check_eligibility,
-                                  generate_fn=lambda *a, **kw: completion)) as client:
+                                  generate_fn=lambda question, contexts, *a, **kw:
+                                  bind_saved_completion(saved, contexts, run['policy_id']))) as client:
             response = client.post('/api/ask', json={'question': '공식 신청 URL과 연령 근거를 알려주세요.',
                 'profile': {'age': run['age'], 'region': '', 'income': None},
                 'selected_policy_id': run['policy_id'], 'history': []})
         assert response.status_code == 200
         assert {p['policy_id'] for p in response.json()['policy_checks']} == {run['policy_id']}
+        assert_replay_sources(saved, response.json(), run['policy_id'])
 
 
 def main():
