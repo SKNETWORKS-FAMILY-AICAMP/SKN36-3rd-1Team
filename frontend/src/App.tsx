@@ -152,7 +152,7 @@ export default function App() {
     if (values.age != null) setAge(String(values.age));
     if (values.region) setRegion(values.region);
     if (values.income != null) setIncome(values.income);
-    if (values.child_age_months != null) setChildMonths(String(values.child_age_months));
+    // 자녀 월령(#39)은 '내 조건' 입력칸으로만 받는다. 조건 답·ask_info로 들어오는 경로가 아직 없어 여기서 다루지 않는다.
   }, []);
 
   const ask = useCallback((raw: string, origin: HTMLElement | null, next: UserProfile = profile, field: string | null = null, selectedPolicyId: string | null = null) => {

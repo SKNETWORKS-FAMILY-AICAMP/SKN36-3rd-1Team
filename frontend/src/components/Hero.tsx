@@ -80,7 +80,7 @@ export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion,
             <small>만 원</small>
           </label>
           {/* #39: 자녀 한 명의 월령. 자녀가 여러 명이면 자녀별로 따로 확인한다(답변 본문에서 안내) */}
-          <label className={'cin' + (childMonthsError ? ' invalid' : childMonths ? ' filled' : '')} title="확인하려는 자녀 한 명의 월령이에요">
+          <label className={'cin' + (childMonthsError ? ' invalid' : childMonths ? ' filled' : '')}>
             <Icon name="bottle" className="ic" /><span className="lbl">자녀 월령</span>
             <input id="child-age-months" type="text" inputMode="numeric" placeholder="입력" value={childMonths}
               onChange={(e) => onChildMonths(e.target.value)}
