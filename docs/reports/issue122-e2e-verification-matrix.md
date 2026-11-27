@@ -262,3 +262,39 @@ python -m pytest tests/unit/test_official_requirements.py tests/unit/test_issue7
 ```
 
 Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SSR_REACT_BASE_URL`을 React 주소로 지정하고 `runserver 127.0.0.1:18301 --noreload --insecure`를 실행한다. 별도 장애 인스턴스 :18307은 상위 프록시 :18306을 사용한다. `frontend`에서 `VITE_POLICY_API_URL=http://127.0.0.1:18300/api/policies`, `VITE_ASK_API_URL=http://127.0.0.1:18304/api/ask`, `VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:18301/policies/`를 지정하고 `npm run dev -- --port 18305 --strictPort`를 실행한다. 독립 시험에서는 상담 API URL을 비워도 된다. [브라우저 재현 스크립트](assets/issue122-befe2d0/README.md)
+
+## 8. 2026-11-27 KST · 최신 dev #75 잔여 검증
+
+검증 SHA는 GitHub `dev`·로컬 `origin/dev`·HEAD가 일치한 `1c082cf542d3b7bf469c096a599d42ca7accce65`다. R3D verify B2와 로컬 `1.4.0-candidate` manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`를 사용했다. 실제 Chrome React에서 지역·소득 공란의 가상 프로필로 각 문항을 2회 제출했다. **HTTP 200 6/6, 502 0/6**이다. 질문 원문, 정책별 대조, 요청 시각과 재현 절차는 [#75 브라우저 후속 기록](issue75-browser-regression-20261125.md#2026-11-27-kst--최신-dev-실제-react-상담-재검증)에 있다.
+
+| 범위 | 시나리오·응답·카드/출처 | 판정 |
+| --- | --- | --- |
+| #75 · 02 / 06 | 교육비·구직·교통, 29세. HTTP 200 2/2. 본문에 나온 정책의 Checker 보류와 카드·출처 연결은 일치. 교통 후보 누락 및 초중고·공학교육 결과 우세 재현. 두 번째 실행에서 카드 5/5, 인용 4/4 일치. | **FAIL** |
+| #75 대조 · RQ040 | 공무원 국민내일배움카드 발급, 30세. HTTP 200 2/2. 공식 제외와 개인 확인 보류가 양립. 카드 1/1·인용 3/3이 `POL_005` 고용24 원문에 연결. | **PASS** |
+| #75 대조 · RQ042 | 부모님 집 월세, 25세. HTTP 200 2/2. `POL_009`의 2촌 이내 임차 제외·별도 거주 요건 및 `POL_YC_035`의 확인 보류 구분. 카드 2/2·인용 4/4 정책 연결 일치. | **PASS** |
+| #76 · 03 | 기존 실제 공식 요건과 원문 발췌 카드. [공식 기준 화면](assets/issue122-befe2d0/live-official.png) · [fallback 증빙](assets/issue122-befe2d0/fallback-browser.json) | **기존 PASS** · 이번 미실행 |
+| #78 · 04 | 기존 실제 `POL_005` 선택 상담 카드 74·75·76·80세. [76세 화면](assets/issue122-befe2d0/live-age76.png) · [브라우저 증빙](assets/issue122-befe2d0/ask-browser.json) | **기존 PASS** · 이번 미실행 |
+| #78 · 04-1 직접 연령 질문 | `POL_005` 76세, 서울, 소득 공란. 기존 HTTP 200 두 건에서 Checker `ineligible`과 본문 불일치 2/2 유지. | **기존 FAIL** · 이번 미실행 |
+| `POL_009` 35세 502 | 이전 `LLM_OUTPUT_INVALID` 1회 및 동일 질문 재시험 0/3 유지. 이번 0/6은 위 #75·대조 문항 집계다. [진단 기록](youth-rent-age35-502-diagnostics.md) | **미실행** |
+| #39 자녀 월령 · #122 나머지 행 | #39 정식 API·UI 계약은 선행 결정 대기. 전체 E2E, DB 장애·릴리스 손상, #97 및 그 외 회귀는 이번 범위에서 실행하지 않았다. | **BLOCKED** · #39 / **미실행** · 나머지 |
+
+**#122 전체 E2E 미완료.** 이번 회차 상담 3개 시나리오는 PASS 2·FAIL 1이다. 지인·민혁은 복수 정책 검색 관련성, 소희·지인은 `POL_005` 직접 질문의 답변 불일치와 청년월세 502 진단을 맡는다. 민지는 검색 수정 후 동일 Chrome 시나리오 및 남은 화면 회귀를 확인한다. 이번 회차 검증은 실제 브라우저 제출·Network·DOM·릴리스 관계 대조였으며 전체 테스트·린트·빌드는 미실행이다.
+
+## 9. 2026-11-27 KST · React 상세 이동·탭 복귀와 Django 404
+
+원격 `origin/dev` 기준 SHA는 `48a9828b583e49e9aa327bcc7c9f21df0cc5fbbe`였다. 실행한 로컬 브랜치와 이 SHA의 `frontend/`, `backend/`, `web_ssr/`, `database/`, `data/`에 차이가 없는 것을 확인했다. Windows Chrome에서 React :18305, Django 5.2.19 :18301 (`DEBUG=False`), FastAPI :18304를 사용했다. 실제 상담은 R3D verify B2, 릴리스 manifest SHA-256 `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da` 기준이다.
+
+| 범위 | 실행 결과 | 판정 |
+| --- | --- | --- |
+| 07-1 / 07-2 · 홈 | `POL_YC_007` 카드에서 상세를 열어 새 탭 HTTP 200, 동일 정책 ID와 제목 ‘글로벌첨단전략산업 기술경영 전문인력 양성사업’, `window.opener=null`을 확인했다. 상세 탭을 닫은 후 홈 URL과 카드 펼침이 유지됐다. | PASS |
+| 07-2 · 관심 정책 | 같은 정책을 저장하고 관심 정책 탭에서 상세를 열었다. HTTP 200과 ID·제목이 일치했고 복귀 후 관심 정책 탭 선택과 카드 펼침·내용이 유지됐다. | PASS |
+| 07-3 · 실제 상담 | 카드의 ‘내 조건으로 확인하기’에서 `POST /api/ask` HTTP 200, `selected_policy_id=POL_YC_007`, `is_sample=false`, 같은 정책의 응답 카드를 확인했다. 상세 HTTP 200과 ID·제목이 일치했고 복귀 후 질문·답변·정책 및 카드 펼침이 유지됐다. | PASS |
+| 07-5 · 최근 상담 신청 일정 | 같은 상담의 일정 카드에서 상세 HTTP 200과 ID·제목이 일치했다. 상세 탭을 닫은 뒤 일정 카드 펼침과 상담 질문·답변·정책을 확인했다. | PASS |
+| 08-1 · 없는 정책 ID | `/policies/POL_QA_NO_SUCH_POLICY_122/`는 HTTP 404와 ‘정책을 찾을 수 없어요’를 표시했다. 안내 링크를 클릭해 React 홈과 정책 목록 로드를 확인했다. | PASS |
+| 08-2 · 소문자 정책 ID | `/policies/pol_yc_007/`은 HTTP 404와 같은 안내를 표시했다. 내부 URL 설정 출력 없이 링크가 React 홈으로 복귀했고 정책 목록을 로드했다. | PASS |
+
+[Chrome Network·DOM 결과](assets/issue122-48a9828/browser.json) · [정책 상세 화면](assets/issue122-48a9828/ssr-detail.png) · [404 화면](assets/issue122-48a9828/ssr-404.png)
+
+**재현.** [재현 명령](#재현-명령)에 따라 기동하되 Django 상위 API와 React 목록·상담을 모두 :18304에 연결한다. React 홈에서 ‘글로벌첨단전략산업’ 카드를 펼쳐 상세 새 탭을 열고 닫는다. 같은 정책을 저장한 뒤 관심 정책 탭에서 반복한다. 홈의 ‘내 조건으로 확인하기’로 실제 상담을 제출하고 상담 카드와 최근 상담의 신청 일정 카드에서 각각 반복한다. 위 두 404 URL을 방문해 Network의 문서 HTTP 상태를 보고, 사용자 안내의 홈 링크로 복귀해 정책 목록이 표시되는지 확인한다.
+
+초기 자동 비교는 관심 정책 별표를 제목에 포함했고, 전체 화면 텍스트 비교에는 마감 알림과 카드의 보조 태그 변화가 섞였다. 최종 실행은 정책 제목과 카드 펼침·관심 탭 선택·상담 질문과 답변을 각각 비교했다. 위 6개 브라우저 시나리오가 통과했으며, 카드와 상세 페이지의 공식 원문 href 대조, 비교 화면, 모바일, 503 복구 및 전체 테스트·린트·빌드는 이번 회차 미실행이다. **#122 전체 E2E는 미완료** 상태다.
