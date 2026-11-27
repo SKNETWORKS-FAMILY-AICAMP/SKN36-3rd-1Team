@@ -458,4 +458,18 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 
 **후속.** 18세 연령 충돌 설명은 #140의 기존 FAIL이 그대로 남은 것이라 새 Generator 오류가 아니다(데이터 담당의 18/19세 기준 확인이 먼저, #140 §후속 1). 보정 문구 두 번 반복은 §12 지인 후속에 사례로 더한다.
 
-**실행하지 않음.** 인천 React 상담 화면, 전각 문자 정규화, 모바일·다크 모드, 전체 테스트·빌드·린트.
+### 13-3. 인천 React 상담 화면 · 390px 다크 모드 · 전체 테스트
+
+| 범위 | 결과 | 판정 |
+| --- | --- | --- |
+| React 목록 카드 | 홈 '나이' 18 입력 후 '복지공유제' 검색 → 1건. 신청하기류 버튼 0개, 외부 링크는 정부24 '서류 원문'·'기준 원문'·'원문 보기'뿐 | **PASS** |
+| React 실제 상담 (카드 '내 조건으로 확인하기', 18세) | `POST /api/ask` 200, `is_sample=false`. 질문 칩 '18세'. 답변이 "만 18세는 원문에 적힌 19~39세 기준에 맞지 않아 나이 조건은 충족하지 않습니다"로 API 조건과 일치. 신청하기류 0개, 정부24 링크를 신청으로 표시한 곳 0개. 근거 출처 2개(NOTICE_2026·GOV24) 렌더링 | **PASS** (연령·신청 주소·출처) |
+| 같은 화면의 보정 문구 | "…직접 신청 링크는 확인되지 않았어요. 신청 방법은… 현재 접수 여부는… [1][2] 현재 접수 여부는… 직접 신청 링크는 확인되지 않았어요 [1][2]." — '.,'는 없지만 같은 안내가 연달아 반복 | **FAIL** (Pipeline, 13-2와 같은 후속) |
+| 390×844 다크 모드 | 앱 테마 버튼으로 `data-theme=dark`. `scrollWidth=clientWidth=390`, 화면 오른쪽을 넘는 요소 0개. 근거 출처 카드 2개 323×96px로 화면 안 | **PASS** |
+| Python 전체 (이 PR head `605eaf1`, 별도 worktree) | `pytest tests/unit tests/integration` **3,244 passed · 130 skipped · 실패 0** (§12-1의 3,245·129와 skip 1개 차이는 같은 실행 위치 차이) | **PASS** |
+| React (같은 커밋, `frontend/`는 dev와 동일) | `npm run typecheck` 통과 · `npm run test` 21개 파일 **197 passed** · `vite build` 통과(500 kB 초과 청크 경고) | **PASS** |
+
+- 13-2의 API 직접 호출(질문 "…지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.")에서는 18세를 포함으로 잘못 안내했지만, React 카드 버튼 질문("…지원 대상이랑 신청 방법, 필요한 서류 알려줘")에서는 맞게 안내했다. 질문·실행에 따라 결과가 달라지므로 18세 연령 설명 FAIL은 유지한다.
+- [화면 기록](assets/issue122-0cb19f6/icn-react-browser.json) · [데스크톱](assets/issue122-0cb19f6/icn-react-18-desktop.jpg) · [390 다크](assets/issue122-0cb19f6/icn-react-18-390-dark.jpg) · [390 다크 출처](assets/issue122-0cb19f6/icn-react-18-390-dark-sources.jpg)
+
+**실행하지 않음.** 전각 문자 정규화, 린트(저장소에 ESLint·ruff 설정 없음), Django 테스트(이 PC Python에 Django 미설치).

@@ -1,0 +1,44 @@
+{
+ "dev_sha": "0cb19f6 (PR #151 병합)",
+ "date_kst": "2026-11-27",
+ "env": "React(Vite) :18305 (VITE_POLICY_API_URL·VITE_ASK_API_URL = FastAPI :18304, R3D verify B2), Claude 데스크톱 내장 브라우저",
+ "profile_sample_only": {"age": 18, "region": "", "income": null},
+ "steps": "홈 상단 '나이'에 18 입력 → '정책 둘러보기' 검색창에 '복지공유제' → 카드 펼침 → '내 조건으로 확인하기'",
+ "list_card": {
+  "result": "정책 1개 · 1개 표시",
+  "external_links": [
+   {"text": "서류 원문 ↗", "href": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"},
+   {"text": "기준 원문 ↗", "href": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"},
+   {"text": "원문 보기 ↗", "href": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"}
+  ],
+  "apply_like_controls": 0
+ },
+ "ask": {
+  "request": "POST http://127.0.0.1:18304/api/ask → 200 (프리플라이트 OPTIONS 200)",
+  "question_rendered": "중소기업 재직청년 복지공유제 지원 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+  "profile_chip": "18세",
+  "response_summary": {
+   "status": "answered",
+   "is_sample": false,
+   "policy_id": "POL_STG_ICN_001",
+   "age_condition": "needs_check — 만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+   "reception_status": "unknown",
+   "official_apply_url": null,
+   "card_source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+   "citations": [
+    {"document_id": "DOC_STG_ICN_001_NOTICE_2026", "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice"},
+    {"document_id": "DOC_STG_ICN_001_GOV24", "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"}
+   ],
+   "answer": "중소기업 재직청년 복지공유제 지원은 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년을 대상으로 하며, 우선선발은 인천 서해구·검단구 소재 중소기업 재직 서해구·검단구 청년, 일반선발은 기본요건 충족자입니다 [1][2]. 다만 입력된 만 18세는 원문에 적힌 19~39세 기준에 맞지 않아 나이 조건은 충족하지 않습니다 [1].\n\n신청기간은 2026. 6. 29. ~ 7. 24.이고, 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2] 현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요 [1][2].\n\n필요한 서류는 중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등입니다 [2].\n\n지원 제외로는 2025년 제2호, 제3호 중소기업 재직청년 복지공유제 선정자는 지원불가라고 적혀 있습니다 [1].",
+   "notice": "추가 확인 필요 — 자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+  },
+  "page_checks": {"apply_like_controls": 0, "gov24_link_labeled_as_apply": 0}
+ },
+ "mobile_dark": {
+  "viewport": "390x844, 앱 테마 버튼으로 data-theme=dark (body 배경 rgb(16,16,16))",
+  "scrollWidth": 390, "clientWidth": 390, "elements_past_right_edge": 0,
+  "source_cards": [{"width": 323, "height": 96, "right": 357}, {"width": 323, "height": 96, "right": 357}],
+  "restored": "확인 후 테마 light·데스크톱 크기로 되돌림"
+ },
+ "screenshots": ["icn-react-18-desktop.jpg", "icn-react-18-390-dark.jpg", "icn-react-18-390-dark-sources.jpg"]
+}
