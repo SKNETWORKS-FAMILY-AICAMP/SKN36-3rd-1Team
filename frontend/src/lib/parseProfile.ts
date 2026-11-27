@@ -62,5 +62,7 @@ export function describeProfile(p: Partial<UserProfile>): string {
     p.age != null ? `${p.age}세` : null,
     p.region || null,
     p.income != null ? `연 ${p.income.toLocaleString('ko-KR')}만 원` : null,
+    // #39: 0개월도 입력된 값이라 != null로 본다. 신청자 나이(세)와 섞이지 않게 '자녀'를 붙인다.
+    p.child_age_months != null ? `자녀 ${p.child_age_months}개월` : null,
   ].filter(Boolean).join(' · ');
 }

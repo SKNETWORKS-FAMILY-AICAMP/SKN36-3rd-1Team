@@ -12,6 +12,11 @@ export interface UserProfile {
   age: number | null;
   region: string; // '' = 미입력. 시·도 약칭(서울, 경기 …)
   income: number | null; // 연 소득, 만 원 단위. 화면에는 표시만 하고 판정은 백엔드가 한다
+  /**
+   * 자녀 월령(개월), ask_contract v1.8(#39). 신청 여부를 확인하려는 자녀 한 명의 값이다.
+   * 신청자 나이(age)와 별개이며 서로 바꿔 쓰지 않는다. null·생략 = 미입력, 0은 유효한 값이다.
+   */
+  child_age_months?: number | null;
 }
 
 export interface ChatTurnMessage {
