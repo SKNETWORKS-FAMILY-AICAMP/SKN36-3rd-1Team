@@ -12,7 +12,7 @@ from pydantic import TypeAdapter, ValidationError
 from backend.api.schemas import (
     AskRequest, AskResponse, Contact, EligibilityOutput, ExclusionReason, GeneratorOutput,
 )
-from backend.rag.context_builder import rank_citable_contexts, select_contexts, valid_source_url
+from backend.rag.context_builder import complete_condition_evidence, rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure, application_schedule
 from backend.rag.official_requirements import official_requirements
@@ -621,6 +621,7 @@ def run_ask_pipeline(
     # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
     named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
     contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
+    contexts = complete_condition_evidence(contexts, ranked, policies, request.question, profile)
 
     contexts_by_policy = {}
     for context in contexts:

@@ -1,6 +1,7 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.7 · 2026-11-26 (v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.8 · 2026-11-27 (v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **v1.8 변경(#122 조건부 연령 근거 보강, 병합 전 팀 검수 대상):** 기본 5개 선정은 유지한다. 명시적 연령·자격·신청 가능 질문, 또는 유효한 나이가 있는 신청 방법·절차 질문에서 같은 정책·같은 검증 문서의 누락된 AGE 근거를 요청당 최대 1개 추가해 Generator context는 최대 6개다. 기존 순서·내용·source_id와 판정은 보존한다. API citations는 모델이 실제 인용한 근거만 포함한다.
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
 > **v1.7 변경(2026-11-26 — #78 후속 제외 사유 연결, 지인, 팀 리뷰 대상):** `policy_checks[].exclusion_reasons`에 Checker가 확정한 제외 사유를 그대로 전달한다(§8.3, 문서 끝 「#78 제외 사유 전달」 절). 필드 구조 `{field, label, reason}`, `conditions`·종합 판정, `official_requirements`(v1.6) 등 다른 필드는 바꾸지 않는다. 확정 사유가 없거나 이 응답의 최종 판정과 맞지 않으면 `null`이다.  
 > **v1.6 변경(2026-11-26 — #76 공식 자격기준 연결, 지인):** `policy_checks[].official_requirements`의 채우는 규칙만 정했다(§8.3, 문서 끝 「#76 공식 자격기준」 절). 필드 구조 `{label, value, document_id, chunk_id}`, Checker 판정, 다른 필드는 바꾸지 않는다. 검수 기록이 있으면 그것을 우선하고, 없으면 채택 근거에서 원문이 항목명을 붙인 기준만 원문 그대로 담는다. 확인 가능한 기준이 없으면 `null`이다.  
@@ -52,7 +53,7 @@ React AskRequest
           1) 입력 검증 + 프로필 정규화
           2) Hybrid 검색(Qdrant + Neo4j): 청크 Top-10
           3) rank_citable_contexts()로 인용 가능 후보를 한 번 만들고, 후보 정책마다 check_eligibility(profile, policy) 1회
-          4) closed 정책(질문에 정책명 전체가 있는 정책 제외)을 후순위로 select_contexts(): source_id 부여
+          4) closed 정책(질문에 정책명 전체가 있는 정책 제외)을 후순위로 select_contexts(): source_id 부여 → complete_condition_evidence(): 누락된 AGE 근거 최대 1개 보강
           5) 선택된 context의 policy_id에 해당하는 정책만 선별(3의 판정 결과 재사용)
           6) 품질 경고 기준 재검증(확정 판정을 needs_check로 보수적 변경)
           7) generate_answer(question, contexts, policy_checks, history, profile=normalized_profile)
@@ -357,6 +358,12 @@ def build_contexts(
     policies: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
 ) -> list[dict]:
     """rank_citable_contexts + select_contexts (호환용)."""
+
+def complete_condition_evidence(
+    selected: list[dict], ranked: list[dict], policies: list[dict],
+    question: str, profile: dict, *, limit: int = 1,
+) -> list[dict]:
+    """기존 source_id·본문·순서를 보존하고 같은 정책·문서의 AGE 근거를 최대 1개 추가."""
 ```
 
 Pipeline은 후보를 `rank_citable_contexts()`로 **한 번만** 만들고, 판정 대상 정책 선정(후보에 있는 정책 ID)과 최종 근거 선택(`select_contexts()`)에 같은 후보를 재사용한다.
@@ -383,7 +390,7 @@ Pipeline은 후보를 `rank_citable_contexts()`로 **한 번만** 만들고, 판
 1. 텍스트는 **반드시 `evidence[].text`**에서 가져온다. `graph.policy`의 추출 텍스트를 원문처럼 인용하지 않는다.
 2. `source_id`는 이번 요청에서만 유효한 **1부터 연속된 정수**.
 3. `chunk_id` 중복을 제거하고, 빈 원문·빈 URL·유효하지 않은 `http(s)` URL은 인용 Context에서 제외한다. 제외 사실은 개인정보 없이 로그로 기록.
-4. 정책별 근거 균형을 고려한다: 먼저 검색 상위 정책마다 근거 1개씩 채택하고, 남는 슬롯을 전체 청크 검색 순위대로 채운다. 최종 `source_id`는 선별된 Context 순서대로 붙인다. `max_contexts=5`는 정책 수가 아니라 **최대 출처 5개**다.
+4. 정책별 근거 균형을 고려한다: 먼저 검색 상위 정책마다 근거 1개씩 채택하고, 남는 슬롯을 전체 청크 검색 순위대로 채운다. 기본 `select_contexts(max_contexts=5)`와 source_id 1~5는 그대로 유지한다. Pipeline은 별도 `complete_condition_evidence(selected, ranked, policies, question, profile, limit=1)`로 누락된 AGE 근거만 최대 1개 덧붙인다(최대 6개; limit=0은 무변화). 추가 조회·재검색 없이 기존 후보에서 이미 채택된 정책만 대상으로 하며, 조건 관계의 evidence_document_id와 후보 document_id가 같고 evidence_document_check가 PASS여야 한다. 기존 근거의 충족 여부도 같은 정책·문서에서만 확인한다. Checker의 BETWEEN/상한 sentinel 규칙과 같은 경계값을 사용하며 이상·이하·초과·미만/범위 및 포함·제외 문맥이 불명확하거나 제3자 나이·우대·서류 문맥이면 추가하지 않는다. 지원하지 않는 형식은 기존 근거를 유지한다. 보강은 판정을 재계산하지 않는다. 기존 1~5번 인용은 유지되며 추가 source_id는 6이다. API citations 개수는 context 개수가 아니라 실제 사용된 인용 개수이고, 기존 §7의 번호 검증·재번호 규칙을 따른다. 추가 채택 근거 때문에 application_details/contacts/official_requirements가 원문 기반으로 보완될 수 있지만 conditions/exclusion_reasons/reception_status·품질 보류는 변경하지 않는다.
 4-1. (v1.1) `deprioritized_policy_ids`(Checker가 `closed`로 판정한 정책)는 삭제하지 않고, 다른 정책의 근거(첫 근거와 추가 근거)를 모두 배정한 뒤 남은 슬롯에만 넣는다. 각 그룹 안의 순서는 4번 규칙을 그대로 따른다. 모든 후보가 마감이면 기존 순서와 같다.
 4-2. (v1.1) **정책명 직접 질문 예외:** 질문에 정책명 전체가 들어 있으면(공백·문장부호를 제외하고 비교, 4자 미만의 짧은 이름은 제외) 그 정책은 마감이어도 후순위 대상에서 빼고 원래 검색 순서의 근거 자리를 유지한다. 신청 상태는 Checker 결과(`closed`) 그대로 응답한다. 부분 이름·약칭은 이름 지정으로 보지 않는다. 검색 결과에 해당 정책이 없으면 이 규칙으로 보완되지 않는다.
 5. `title`: 같은 `document_id`의 Graph 문서 제목을 찾으면 사용, 없으면 `policy_name`으로 대체한다.
