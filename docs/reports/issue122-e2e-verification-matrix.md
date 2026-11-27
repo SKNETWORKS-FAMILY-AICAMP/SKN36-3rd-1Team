@@ -336,8 +336,8 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | #97 RQ031 5문항 | 소희·지인 답변 수정 대기 | 동일 5문항 재평가 |
 | #78 76세 직접 질문 | 소희·지인 후속 대기 (Checker `ineligible` ↔ 본문 불일치 2/2) | 수정 후 재검증 |
 | #39 자녀 월령 UI | [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 미병합, 다자녀·`ask_info` 팀 결정 | React 입력·타입 연동, 경계 0/23/24/25 검증 |
-| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합(`4708009`) · 세종·FAQ는 §12에서 재확인, 접수 미확인 문구 누락은 §12-1에서 수정·재확인, 보정 문구 겹침(Pipeline)은 후속 대기 · 6표기 API·UI는 미실행 | 후속 수정 후 §12 같은 질문으로 재확인, 6표기 목록 API·UI 재확인 |
-| #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`, 2026-11-27) · 병합 후 재확인 미실행 | 최신 dev에서 인천 연령 경계·인용 출처 재검증 |
+| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합(`4708009`) · 세종·FAQ는 §12에서 재확인, 접수 미확인 문구 누락은 §12-1에서 수정·재확인, 보정 문구 겹침(Pipeline)은 후속 대기 · 6표기 API·UI는 §13에서 PASS | 후속 수정 후 §12 같은 질문으로 재확인 |
+| #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`) · §13에서 재확인, 18세 연령 설명(Generator)·보정 문구 겹침(Pipeline) 후속 대기 | 수정 후 §13 같은 입력으로 재확인 |
 | #40 30세 상담 마지막 요약 | 생성 답변 실행별 변동, 후속 관찰 | 재현 시 지인 Pipeline·소희 Generator 전달 |
 
 ## 11. 2026-11-27 KST · 최종 현황 통합 (dev `4708009`)
@@ -366,8 +366,8 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | 항목 | 상태 |
 | --- | --- |
 | `POL_005` 76세 직접 질문 (04-1) | **FAIL** 유지(§8). 재실행 없음 |
-| #103 세종 신청 URL·목록 별칭(05-1·05-5) | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합. 세종·FAQ 상담·화면은 §12에서 재확인(PASS 6 · FAIL 2: 접수 미확인 문구 누락은 §12-1에서 수정 후 8/8 PASS, 보정 문구 겹침 `".,"`은 지인 후속). 6표기 목록 API·UI 재확인은 **미실행** |
-| #79·#90 인천 연령·출처(05-6) | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) 병합. 병합 후 재확인 **미실행** |
+| #103 세종 신청 URL·목록 별칭(05-1·05-5) | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합. 세종·FAQ 상담·화면은 §12에서 재확인(PASS 6 · FAIL 2: 접수 미확인 문구 누락은 §12-1에서 수정 후 8/8 PASS, 보정 문구 겹침 `".,"`은 지인 후속). 6표기 목록 API·UI는 §13에서 **PASS** |
+| #79·#90 인천 연령·출처(05-6) | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) 병합. §13에서 재확인: 신청 URL 오설명 0/5(**PASS**, #136 반영), 18세 연령 설명 **FAIL** 유지, 보정 문구 겹침 **FAIL** |
 | 08-4 실제 DB 중단·릴리스 손상 | **미실행** |
 | 05-4 #102 보류 누락 예시 | **BLOCKED** 유지 |
 
@@ -425,3 +425,37 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 - **실제 LLM 재확인:** 같은 R3D·같은 질문·같은 가상 프로필로 8회(세종 지역 공란·세종 프로필 각 2, 국세청 2, 세종 선택 상담 2). **HTTP 200 8/8, 합의 문구 8/8**, '여부도' 잔존 0. [재확인 기록](assets/issue103-unknown-notice/live-recheck.json)
 - **남은 문제:** 보정 문구 겹침(`".,"`)이 재확인 8회 중 1회(세종 선택 상담) 다시 나왔다. #136 신청 링크 보정 쪽 문제라 이 PR에서는 고치지 않았다(지인 후속).
 
+## 13. 2026-11-27 KST · dev `0cb19f6` K-패스 6표기 목록·인천 연령·출처 재확인
+
+기준 [dev `0cb19f6`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/0cb19f6) (PR #151 병합). **이 PR의 §12-1 수정은 포함하지 않은** dev 그대로다. 별도 worktree에서 FastAPI :18304(목록·상담 공용), React :18305, R3D verify B2(§12와 같은 컨테이너), 릴리스 `1.4.0-candidate`·manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 실제 상담 5회, 모두 HTTP 200·`is_sample=false`.
+
+### 13-1. K-패스 6표기 목록 검색 (05-1)
+
+| 입력 | `GET /api/policies?q=` | React 검색창 | 판정 |
+| --- | --- | --- | --- |
+| K-패스 · K패스 · k패스 · k-패스 | 각 1건 `POL_STG_MOLIT_001` | 각 '정책 1개', 카드 '모두의 카드(K-패스) (대중교통비 환급지원)' | **PASS** 4/4 |
+| 모두의 카드 · 모두의카드 | 각 2건 `POL_STG_MOLIT_001`·`POL_BOK_075` | 각 '정책 2개', 위 카드 + '대중교통비 환급 지원(모두의카드)' | **PASS** 2/2 (`POL_BOK_075`는 이름에 '모두의카드'가 있어 #136 보고서 기대와 같음) |
+
+- 범위 밖 관찰: 'K‐패스'(U+2010 하이픈)는 1건으로 찾지만, 전각 'Ｋ－패스'는 0건이다(전각 문자 정규화 없음). '-'만 입력은 0건(#136 설계). React 콘솔에는 연결 거부(`ERR_CONNECTION_REFUSED`) 기록이 남아 있었는데, 같은 탭에서 앞선 회차 서버를 끈 동안의 재연결 시도로 보인다. 이번 회차의 목록 요청 `GET /api/policies`는 200이었다.
+- [API·React 기록](assets/issue122-0cb19f6/kpass-6-spellings.json) · [화면](assets/issue122-0cb19f6/kpass-react-search.jpg)
+
+### 13-2. 인천 `POL_STG_ICN_001` 연령·출처 (05-6)
+
+질문은 PR #140 실제 LLM 검증과 같다: "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요."(선택 상담, 지역 공란). DB 조건은 `COND_AGE_19_39`(근거 `DOC_STG_ICN_001_NOTICE_2026`, verified)이고, 정부24 문서는 18~39세로 적혀 있다(#140 §C).
+
+| 나이 | API 나이 조건 / 종합 | 인용 문서 | 답변 | 판정 |
+| --- | --- | --- | --- | --- |
+| 18 | "19~39세에 포함되지 않음" + 품질 보류 → `needs_check` / `needs_check` | GOV24 | "대상연령 18~39세… 만 18세는 연령 기준에 포함" — DB 기준(19~39)과 충돌을 설명하지 않고 포함으로 안내 | 구조 PASS / **설명 FAIL** (#140 FAIL 유지) |
+| 19 | 포함 / `needs_check` | NOTICE_2026·GOV24 | 18~39만 설명, 19세는 두 범위 모두 포함이라 결론은 맞음 | PASS (충돌 설명 없음) |
+| 38 | 포함 / `needs_check` | NOTICE_2026·GOV24 | 원문 19~39 · 요약 18~39 차이를 설명하고 시작 연령 확정 불가로 안내 | **PASS** |
+| 40 | 미포함 / `needs_check` | NOTICE_2026·GOV24 | "만 40세는 연령 기준에 맞지 않아 지원 대상에서 제외" — 두 범위 모두 40세 제외라 사실은 맞지만, 종합 보류(`needs_check`)보다 단정적 | PASS (관찰) |
+| 미입력 | 미입력 / `needs_check` | NOTICE_2026·GOV24 | 나이·지역·재직 요건 확정 불가로 안내 | PASS |
+
+- **신청 URL 오설명 (#140 FAIL 항목):** 5/5 모두 `official_apply_url=null`이고, 정부24 상세를 신청 주소로 설명한 답변은 0건이다. #136 신청 링크 보정이 반영됐다 → **PASS**.
+- **출처:** 사업안내서 성격의 `DOC_STG_ICN_001_NOTICE_2026`을 4/5가 인용(18세만 GOV24 단독). 카드 '원문 보기'(`source_url`)는 5/5 모두 조례 문서 `DOC_STG_ICN_001_ORD`(law.go.kr)로, 같은 정책의 `SUPPORTED_BY` 문서지만 답변 인용과는 다르다(Pipeline이 첫 채택 문맥 URL을 카드에 쓰는 기존 설계). 세 문서 링크 모두 HTTP 200 도착(GOV24는 경로 끝 '/' 리다이렉트 1회) → **PASS**.
+- **보정 문구 겹침 (Pipeline):** 4/5(18·19·38·40세)에서 "…확인해 주세요., …"가 나오고, 18·38·40세는 같은 보정 문장이 **두 번 반복**됐다. §12의 지인 후속과 같은 원인으로 보이며 더 심한 사례다 → **FAIL**.
+- [요청·응답 전문과 링크 도착](assets/issue122-0cb19f6/icn-age-source.json)
+
+**후속.** 18세 연령 충돌 설명은 #140의 기존 FAIL이 그대로 남은 것이라 새 Generator 오류가 아니다(데이터 담당의 18/19세 기준 확인이 먼저, #140 §후속 1). 보정 문구 두 번 반복은 §12 지인 후속에 사례로 더한다.
+
+**실행하지 않음.** 인천 React 상담 화면, 전각 문자 정규화, 모바일·다크 모드, 전체 테스트·빌드·린트.
