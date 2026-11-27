@@ -302,5 +302,5 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | #78 76세 직접 질문 | 소희·지인 후속 대기 (Checker `ineligible` ↔ 본문 불일치 2/2) | 수정 후 재검증 |
 | #39 자녀 월령 UI | [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 미병합, 다자녀·`ask_info` 팀 결정 | React 입력·타입 연동, 경계 0/23/24/25 검증 |
 | #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136) 미병합 | 6표기 API·UI, 세종 신청 버튼·FAQ 답변 대조 |
-| #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) 보완 대기 | 인용 비교·경계 기대값 보완 후 재리뷰 |
+| #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`, 2026-11-27) · 병합 후 재확인 미실행 | 최신 dev에서 인천 연령 경계·인용 출처 재검증 |
 | #40 30세 상담 마지막 요약 | 생성 답변 실행별 변동, 후속 관찰 | 재현 시 지인 Pipeline·소희 Generator 전달 |
