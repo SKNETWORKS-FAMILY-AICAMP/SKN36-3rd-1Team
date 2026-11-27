@@ -265,18 +265,19 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 
 ## 8. 2026-11-27 KST · dev `8c40858` 즉시 착수 검증
 
-기준 [dev `8c40858`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/8c40858) (PR #144 병합). 제품 코드·계약은 바꾸지 않았다. React :18305, FastAPI :18304(목록·상담 공용), R3D verify B2(Neo4j :56787·Qdrant :56756, 기존 컨테이너 재시작·초기화 없음), 릴리스 `1.4.0-candidate` 249개, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 헤드리스 Chrome CDP로 실행했고 프로필은 가상 나이·서울·소득 공란·이력 없음이다. 실제 상담 호출은 5회(모두 HTTP 200, `is_sample=false`)다.
+기준 [dev `8c40858`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/8c40858) (PR #144 병합). 제품 코드·계약은 바꾸지 않았다. React :18305, FastAPI :18304(목록·상담 공용), R3D verify B2(Neo4j :56787·Qdrant :56756, 기존 컨테이너 재시작·초기화 없음), 릴리스 `1.4.0-candidate` 249개, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 헤드리스 Chrome CDP로 실행했고 프로필은 가상 나이·서울·소득 공란이다. 각 시나리오는 새 탭에서 시작했고, 30세 비교의 두 번째 상담(`POL_GOV_039`)에는 같은 세션의 첫 상담 2턴이 `history`로 함께 전송됐다. 실제 상담 호출은 5회(모두 HTTP 200, `is_sample=false`)다.
 
 | 범위 | 입력 | 결과 | 판정 |
 | --- | --- | --- | --- |
-| #40 비교 화면 · 30세 | `POL_GOV_042`·`POL_GOV_039`를 각각 ‘내 조건으로 확인하기’로 상담한 뒤 두 정책 비교 | `POL_GOV_042`: ‘조건 불일치 · 나이’, ‘추가 확인 필요’(거주 지역·자격 요건·소득·소득 요건), 다음 행동 ‘공식 자격기준 확인 ↗’. `POL_GOV_039`: ‘추가 확인 필요’, 나이 ‘개별 비교’와 조건 결합 안내, 다음 행동 ‘거주 지역 조건 확인하기’. PR #144 카드 표시와 같다. [DOM·응답](assets/issue40-8c40858/browser-compare-30.json) · [데스크톱](assets/issue40-8c40858/compare-30-desktop.png) · [390px](assets/issue40-8c40858/compare-30-390.png) | PASS |
+| #40 비교 화면 · 30세 | `POL_GOV_042`·`POL_GOV_039`를 각각 ‘내 조건으로 확인하기’로 상담한 뒤 두 정책 비교 | `POL_GOV_042`: ‘조건 불일치 · 나이’, ‘추가 확인 필요’(거주 지역·자격 요건·소득·소득 요건), 다음 행동 ‘공식 자격기준 확인 ↗’. `POL_GOV_039`: ‘추가 확인 필요’, 나이 ‘개별 비교’와 조건 결합 안내, 다음 행동 ‘거주 지역 조건 확인하기’. §3 #40 절에 기록한 비교 화면 규칙(‘조건 불일치’ + ‘공식 자격기준 확인’)과 같다. 카드 요약 문장 ‘— 확인된 필수 조건을 충족하지 않아요.’는 비교 화면에는 표시되지 않는다. [DOM·응답](assets/issue40-8c40858/browser-compare-30.json) · [데스크톱](assets/issue40-8c40858/compare-30-desktop.png) · [390px](assets/issue40-8c40858/compare-30-390.png) | PASS |
 | #40 비교 화면 · 10세 | `POL_GOV_042`만 상담 후 `POL_GOV_039`와 비교 | `POL_GOV_042`: 종합 보류 유지(‘추가 확인 필요’, 나이 ‘개별 비교’, 조건 결합 안내). 상담하지 않은 `POL_GOV_039`는 개인 판정 없이 ‘내 조건으로 확인하기’. [DOM·응답](assets/issue40-8c40858/browser-compare-10.json) · [데스크톱](assets/issue40-8c40858/compare-10-desktop.png) · [390px](assets/issue40-8c40858/compare-10-390.png) | PASS |
-| #40 모바일 | 위 두 비교 화면을 390×844로 전환 | 두 경우 모두 `scrollWidth=clientWidth=390`, 카드 안 가로 잘림 0. ‘지원 내용’은 설계상 말줄임 | PASS (가로 넘침) |
-| #75 카드 원문 링크 도착 | PR #143 증빙 `issue122-1c082cf/ask-browser.json`의 카드 ‘원문 보기’ 8개(+ `POL_009` 기준 원문 1개) | 9개 모두 HTTP 200, 리다이렉트 없이 같은 URL. 도착 페이지 정책명이 카드 정책과 일치(온통청년은 렌더링 후 제목으로 확인). `POL_009`는 릴리스 문서 `DOC_MOLIT_001`과 같은 복지로 페이지이지만, 페이지 명칭(‘청년월세 지원사업’)이 카드 정책명(‘국토교통부 청년월세 한시 특별지원’)과 달라 명칭 표기는 `needs_review`. [도착 기록](assets/issue75-8c40858/link-landing.json) | PASS (8/8) |
+| #40 모바일 | 위 두 비교 화면을 390×844로 전환 | 두 경우 모두 `scrollWidth=clientWidth=390`, 카드 안 가로 잘림 0. ‘지원 내용’ 말줄임은 `styles.css`의 `.compare-benefit`·`.compare-text` `-webkit-line-clamp` 설정에 따른 것 | PASS (가로 넘침) |
+| #75 카드 원문 링크 도착 | PR #143 증빙 [`issue122-1c082cf/ask-browser.json`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/codex/75-122-react-r3d-recheck/docs/reports/assets/issue122-1c082cf/ask-browser.json)(PR #143 브랜치, dev 미병합)의 카드 ‘원문 보기’ 8개(+ `POL_009` 기준 원문 1개) | 9개 모두 HTTP 200, 리다이렉트 없이 같은 URL. 카드 8개 중 7개는 도착 페이지 정책명이 카드 정책과 일치(온통청년은 렌더링 후 제목으로 확인). `POL_009`는 릴리스 문서 `DOC_MOLIT_001`과 같은 복지로 페이지이지만, 페이지 명칭(‘청년월세 지원사업’)이 카드 정책명(‘국토교통부 청년월세 한시 특별지원’)과 달라 명칭 표기는 `needs_review`. 카드 정책명은 정부24 문서 `DOC_MOLIT_002` 제목과 같으므로, 복지로 원문 페이지가 후속 사업 명칭으로 바뀌었는지 데이터 담당 확인이 필요하다. [도착 기록](assets/issue75-8c40858/link-landing.json) | PASS (URL·HTTP 8/8) · 명칭 7/8 + `needs_review` 1 |
 | #122·#76 복수 정책 출처 | React 질문 ‘교육비·구직·교통 지원 정책이 있나요?’ 가상 29세 | 정책 5개. 정책마다 카드 ‘원문 보기’ = API `source_url` = 릴리스 `nodes_policy.source_url`. 답변 인용 [1]~[5] = `citations` 5개, 각 `document_id`가 같은 정책 소유 문서(릴리스 relationships)이고 URL이 릴리스 문서 `source_url`과 같으며 화면 출처 영역에 5개 모두 렌더링. 문서 단위 대조(03-1과 같은 이유로 청크 단위 아님). [대조표](assets/issue122-8c40858/source-match.json) · [요청·응답·DOM](assets/issue122-8c40858/browser-multi-29.json) · [화면](assets/issue122-8c40858/multi-29.png) | PASS (5/5) |
 
-- 같은 29세 질문의 후보는 이번에도 교육 분야 5개뿐이고 구직·교통 정책이 없었다. #75 기존 FAIL(검색 수정 전)과 같은 현상으로 기록만 한다. 대체 표본으로 먼저 보낸 RQ042(가상 25세)는 이번 실행에서 `POL_009` 1개만 반환해 복수 정책 표본에서 제외했다. [기록](assets/issue122-8c40858/browser-multi-rq042.json)
-- 실행하지 않음: 전체 테스트·린트·빌드(제품 코드 변경 없음), 비교 화면의 다크 모드, 신규 카드(`POL_BOK_013`·`POL_BOK_025`)의 외부 도착 페이지.
+- 같은 29세 질문의 후보는 이번에도 교육 분야 5개뿐이고 구직·교통 정책이 없었다. 다만 PR #143 증빙은 지역 공란(`region: ""`), 이번은 서울이라 프로필이 다르고, 후보도 `POL_YC_009`·`POL_YC_043` 대신 `POL_BOK_013`·`POL_BOK_025`가 나왔다. #75 기존 FAIL(검색 수정 전)과 같은 경향으로 기록만 한다. 이 응답 끝에는 자녀 정보를 입력하지 않은 29세에게 “자녀 나이를 알려 주세요.”가 붙어 있어 #75 관찰 메모로 남긴다. 대체 표본으로 먼저 보낸 RQ042(가상 25세)는 이번 실행에서 `POL_009` 1개만 반환해 복수 정책 표본에서 제외했다. [기록](assets/issue122-8c40858/browser-multi-rq042.json)
+- 회귀 실행(같은 dev, 제품 코드 변경 없음): React `npm run typecheck` 통과, `npm run test` 21개 파일 192건 통과, `npm run build` 통과(500 kB 초과 청크 경고). Python `pytest tests/unit` **2,869 passed · 80 skipped · 1 failed**. 실패는 `tests/unit/test_shared_constants.py::TestFrontendCheckerWording::test_unjudged_prefixes_match_checker`로, PR #144(`f3770c4`)가 `UNJUDGED_REASON_PREFIXES`의 첫 항목을 상수 `UNKNOWN_GROUP_REASON` 참조로 바꿔 테스트의 문자열 리터럴 추출 정규식이 이를 읽지 못해 생긴 **dev 기존 실패**다. 상수 값은 Checker 사유와 같아 화면 동작 변화는 없다. 이 PR에서는 고치지 않았다(후속 필요). [React 테스트](assets/issue122-8c40858/react-test.log) · [빌드](assets/issue122-8c40858/react-build.log) · [Python](assets/issue122-8c40858/python-unit.log)
+- 실행하지 않음: 린트(저장소에 ESLint·ruff 설정 없음), Django `manage.py test`(이 PC의 Python 환경에 Django 미설치, 설치는 승인 필요), 비교 화면의 다크 모드, 신규 카드(`POL_BOK_013`·`POL_BOK_025`)의 외부 도착 페이지.
 
 ### 산출물 취합 (README·발표용 초안)
 
@@ -294,7 +295,7 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 
 | 항목 | 대기 사유 | 이후 민지 작업 |
 | --- | --- | --- |
-| #75 29세 복수 분야 질문 | 지인 검색 수정 대기, [PR #143](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/143) 미병합 | 같은 질문·프로필로 API·카드·출처 재검증 |
+| #75 29세 복수 분야 질문 | 지인 검색 수정 대기(수정 PR 없음) · 기존 FAIL 기록 [PR #143](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/143) 미병합 | PR #143과 같은 질문·프로필(가상 29세·지역 공란)로 API·카드·출처 재검증 |
 | #97 RQ031 5문항 | 소희·지인 답변 수정 대기 | 동일 5문항 재평가 |
 | #78 76세 직접 질문 | 소희·지인 후속 대기 (Checker `ineligible` ↔ 본문 불일치 2/2) | 수정 후 재검증 |
 | #39 자녀 월령 UI | [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 미병합, 다자녀·`ask_info` 팀 결정 | React 입력·타입 연동, 경계 0/23/24/25 검증 |
