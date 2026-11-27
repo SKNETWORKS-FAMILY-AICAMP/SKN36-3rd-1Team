@@ -23,6 +23,14 @@ DEFAULT_MAX_OUTPUT_TOKENS = 1000
 
 CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 ALLOWED_FIELDS = {"age", "region", "income"}
+_UNDECIDED_ELIGIBILITY = re.compile(
+    r"(?P<reason>확인이\s+필요해\s+)?"
+    r"(?:전체|최종|종합)\s*(?:(?:신청|지원)\s*)?자격(?:은|이|을)\s*"
+    r"(?:(?:확정|판단)\s*할\s*수\s*없(?:습니다|어요)|"
+    r"(?:확정|판단)\s*하기\s*어렵(?:습니다|어요)|"
+    r"미확정(?:입니다|이에요)|추가\s*확인이\s*필요(?:합니다|해요))"
+    r"(?=(?:\*\*|__)?\s*(?:[.!。！]|\[\d+\]|$))"
+)
 
 # 연령 검사는 Checker의 단일 구현을 사용한다(순환 import 없음).
 # 전국 시·도 공식명/약칭은 검색 모듈에서 가져온다.
@@ -1135,6 +1143,38 @@ def _normalize_child_month_bound_wording(answer: str) -> str:
     return answer
 
 
+def _align_overall_eligibility(
+    answer: str,
+    contexts: list[dict],
+    policy_checks: list[dict],
+) -> str:
+    """Keep an unambiguous confirmed denial distinct from unresolved conditions."""
+    # An uncited summary cannot safely be attributed among several policies.
+    if len(policy_checks) != 1:
+        return answer
+    check = policy_checks[0]
+    policy_id = check.get("policy_id")
+    if not policy_id or any(context.get("policy_id") != policy_id for context in contexts):
+        return answer
+    conditions = check.get("conditions")
+    if not isinstance(conditions, list):
+        return answer
+    root = next(
+        (
+            item for item in reversed(conditions)
+            if isinstance(item, dict) and item.get("field") == "eligibility"
+        ),
+        {},
+    )
+    if root.get("status") != "ineligible":
+        return answer
+    verdict = "현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
+    return _UNDECIDED_ELIGIBILITY.sub(
+        lambda match: f"확인이 필요하지만, {verdict}" if match["reason"] else verdict,
+        answer,
+    )
+
+
 def _validate_model_response(
     raw: Any,
     source_ids: set[int],
@@ -1710,5 +1750,9 @@ def generate_answer(
         source_ids,
         cleaned_profile,
     )
+    if response["status"] != "no_evidence":
+        response["answer"] = _align_overall_eligibility(
+            response["answer"], cleaned_contexts, policy_checks,
+        )
     return ground_child_month_ranges(response, cleaned_contexts)
 

@@ -43,6 +43,59 @@ def fake_model(monkeypatch, output):
     )
 
 
+@pytest.mark.parametrize(
+    ("root_status", "one_policy", "corrected"),
+    [
+        ("ineligible", True, True),
+        ("needs_check", True, False),
+        ("eligible", True, False),
+        ("ineligible", False, False),
+    ],
+)
+def test_overall_eligibility_hedge_follows_confirmed_root(
+    monkeypatch, root_status, one_policy, corrected,
+):
+    # PR #148의 GOV042/45세 답변에서 나이와 종합 결론이 엇갈린 부분.
+    answer = (
+        "만 45세는 연령 대상에 해당하지 않아 나이 기준은 충족하지 않습니다 [1]. "
+        "지역과 소득은 추가 확인이 필요해 전체 신청 자격은 확정할 수 없습니다. "
+        "필요한 서류는 발달재활서비스 신청서입니다 [1]."
+    )
+    fake_model(monkeypatch, {
+        "status": "answered",
+        "answer": answer,
+        "used_source_ids": [1],
+        "follow_up_questions": [],
+    })
+    contexts = [{**CTX[0], "policy_id": "POL_GOV_042", "text": "만 18세 미만 대상"}]
+    checks = [{
+        "policy_id": "POL_GOV_042",
+        "conditions": [
+            {"field": "age", "status": "ineligible"},
+            {"field": "eligibility", "status": "needs_check"},
+            {"field": "eligibility", "status": root_status},
+            {"field": "region", "status": "needs_check"},
+            {"field": "income", "status": "needs_check"},
+        ],
+    }]
+    if not one_policy:
+        contexts.append({**CTX[0], "source_id": 2})
+        checks.append({"policy_id": "POL_TEST", "conditions": [
+            {"field": "eligibility", "status": "needs_check"},
+        ]})
+
+    result = generate_answer("발달재활서비스를 신청할 수 있나요?", contexts, checks)
+
+    expected = answer
+    if corrected:
+        expected = answer.replace(
+            "확인이 필요해 전체 신청 자격은 확정할 수 없습니다",
+            "확인이 필요하지만, 현재 입력 기준으로는 신청 자격을 충족하지 않습니다",
+        )
+    assert result["answer"] == expected
+    assert result["used_source_ids"] == [1]
+
+
 def test_answer_contract_and_citation(monkeypatch):
     fake_model(
         monkeypatch,
