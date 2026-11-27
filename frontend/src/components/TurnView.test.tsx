@@ -347,6 +347,7 @@ it('labels policies with nothing to compare as not personally judged instead of 
   expect(card).not.toMatch(/위 답변|추가 확인 필요|데이터에 정리/);
   // 카드와 같은 내용인 공통 보류 안내는 생략한다. 출처 번호와 원문 링크는 그대로다.
   expect(html).not.toContain('자동 판정을 보류한 조건이 있습니다');
+  expect(html).not.toContain('신청 자격은 추가 확인이 필요해요');
   expect(html).not.toMatch(/notice (warn|info)/);
   expect(html).toMatch(/<sup>.*<a href="https:\/\/www\.gov\.kr\/portal\/rcvfvrSvc\/dtlEx\/149200005007"/);
   expect(card).toContain('원문 보기');
@@ -357,6 +358,7 @@ it('keeps the info-status guide, which is about the answer rather than the card'
     is_sample: false, notice: holdNotice, policy_checks: [unjudgedPolicy] });
   expect(html).toContain('추가 확인이 필요해요');
   expect(html).not.toContain('자동 판정을 보류한 조건이 있습니다');
+  expect(html).not.toContain('신청 자격은 추가 확인이 필요해요');
   expect(html).toContain('자동 판정 안 함');
 });
 
@@ -364,7 +366,9 @@ it('keeps the hold warning and specific checks when another policy has items the
   const html = renderAnswer({ status: 'answered', answer: '본문', citations: [], checked_at: null, is_sample: false, notice: holdNotice,
     follow_up_questions: [{ kind: 'ask_info', field: 'income', text: '연 소득을 알려 주세요.' }],
     policy_checks: [unjudgedPolicy, fromChecker.POL_005_30 as AskResponse['policy_checks'][number]] });
-  expect(html).toContain('자동 판정을 보류한 조건이 있습니다');
+  // #78 합의: 종합 판정이 확인 필요인 정책이 있으면 화면은 합의 문구로 보여 준다.
+  expect(html).toContain('신청 자격은 추가 확인이 필요해요');
+  expect(html).not.toContain('자동 판정을 보류한 조건이 있습니다');
   expect(html).toContain('notice warn');
   expect(html).toContain('연 소득을 알려 주세요.');
   expect(html).toContain('외 10개 보기');

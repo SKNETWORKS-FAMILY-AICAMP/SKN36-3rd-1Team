@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AskResponse } from '../api/types';
-import { INFO_CAVEAT, NO_EVIDENCE_GUIDE, answerView, freshnessNote, sourceDetail } from './answerView';
+import fromChecker from '../components/__fixtures__/policyChecksFromChecker.json';
+import { HOLD_NOTICE_DISPLAY, INFO_CAVEAT, NO_EVIDENCE_GUIDE, answerView, freshnessNote, sourceDetail } from './answerView';
 
 describe('출처 표시', () => {
   it('페이지 번호가 있으면 사이트 주소 뒤에 붙인다', () => {
@@ -51,5 +52,27 @@ describe('answerView 답변 상태별 표시', () => {
     const info = { kind: 'info' as const, title: '신청 주소는 공고마다 달라요', text: '출처만 보여 드려요.' };
     expect(answerView({ ...base, answer: '답변[1]', notice: warn })).toMatchObject({ warning: warn, extraInfo: null });
     expect(answerView({ ...base, answer: '답변[1]', notice: info })).toMatchObject({ warning: null, extraInfo: info });
+  });
+});
+
+describe('자동 판정 보류 안내 문구 (#78 합의)', () => {
+  type Check = AskResponse['policy_checks'][number];
+  const hold = { kind: 'warn' as const, title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.' };
+  const age30 = fromChecker.POL_005_30 as Check;
+  const age80 = fromChecker.POL_005_80 as Check;
+
+  it('종합 판정이 확인 필요인 정책이 있으면 "신청 자격은 추가 확인이 필요해요"로 보여 준다', () => {
+    expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age30] }).warning).toEqual(HOLD_NOTICE_DISPLAY);
+    // 확정 불일치 정책이 함께 있어도 확인 필요 정책이 하나라도 있으면 합의 문구다.
+    expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80, age30] }).warning).toEqual(HOLD_NOTICE_DISPLAY);
+  });
+
+  it('제외 조건에 해당해 불일치가 확정된 정책만 있으면 서버 문장을 그대로 둔다', () => {
+    expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80] }).warning).toEqual(hold);
+  });
+
+  it('보류 안내가 아닌 경고(지역 확인 등)는 바꾸지 않는다', () => {
+    const region = { kind: 'warn' as const, title: '추가 확인 필요', text: '입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요.' };
+    expect(answerView({ ...base, answer: '답변[1]', notice: region, policy_checks: [age30] }).warning).toEqual(region);
   });
 });
