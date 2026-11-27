@@ -130,7 +130,8 @@ class HybridAskFixtureTests(unittest.TestCase):
         self.generate.return_value = answer("가상 원문 [3], [1], [3]", ids=[2])
         with self.assertLogs("backend.rag.pipeline", level="WARNING"):
             response = self.ask()
-        self.assertEqual(response.answer, "가상 원문 [2], [1], [2]")
+        # 인용된 가상 정책 MISSING은 접수 unknown이라 합의 문구가 정책명과 함께 붙는다(#103·#147).
+        self.assertEqual(response.answer, "가상 원문 [2], [1], [2]\n\n가상 정책 MISSING: 현재 접수 여부는 공식 공고에서 확인해 주세요.")
         self.assertEqual([c.document_id for c in response.citations], ["D_PARTIAL", "D_MISSING"])
         self.generate.return_value = answer("없는 가상 원문 [5]", ids=[5])
         with self.assertRaisesRegex(AskError, "LLM_OUTPUT_INVALID"):

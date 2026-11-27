@@ -106,7 +106,8 @@ class Issue103GuidanceTests(unittest.TestCase):
                 self.assertEqual(body["policy_checks"][0]["reception_status"], "unknown")
                 self.assertEqual(body["citations"][0]["document_id"], "DOC_YC_065")
                 if question == QUESTIONS[-1]:
-                    self.assertEqual(body["answer"], text)
+                    # 원문 링크 안내는 그대로 두고, 접수 unknown 합의 문구만 덧붙는다(#147).
+                    self.assertEqual(body["answer"], text + "\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.")
                 else:
                     self.assertNotEqual(body["answer"], text)
 
@@ -138,7 +139,7 @@ class Issue103GuidanceTests(unittest.TestCase):
             with self.subTest(text=text):
                 response, _ = self.ask(text)
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json()["answer"], text)
+                self.assertEqual(response.json()["answer"], text + "\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.")
 
     def test_two_policies_keep_valid_application_and_citations(self):
         checks = [
@@ -153,7 +154,10 @@ class Issue103GuidanceTests(unittest.TestCase):
                 fixed, changed = align_application_links(text, contexts, checks)
                 self.assertTrue(changed)
                 self.assertIn(valid, fixed)
-                self.assertNotIn("https://example.org/apply", fixed.split(separator)[0])
+                # 보정 문장 뒤의 쉼표·세미콜론은 공백으로 바뀌므로(#122 후속, '주세요., ' 방지) 유효 문장 앞부분을 본다.
+                self.assertNotIn("https://example.org/apply", fixed.split(valid)[0])
+                self.assertNotIn(".,", fixed)
+                self.assertNotIn(".;", fixed)
                 self.assertIn("[1]", fixed)
                 self.assertIn("[2]", fixed)
 

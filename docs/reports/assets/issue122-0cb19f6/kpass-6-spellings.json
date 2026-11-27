@@ -1,0 +1,171 @@
+{
+ "dev_sha": "0cb19f6 (PR #151 병합)",
+ "date_kst": "2026-11-27",
+ "db": "R3D verify B2 (Neo4j :56787·Qdrant :56756), release 1.4.0-candidate, manifest b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+ "api": "GET http://127.0.0.1:18304/api/policies?q=…&limit=500",
+ "react": "React :18305 홈 '정책 둘러보기' 검색창에 직접 입력(내장 브라우저). 화면 캡처는 '모두의카드' 입력 상태",
+ "expected": "6표기 모두 POL_STG_MOLIT_001 포함. '모두의 카드' 계열은 이름에 '모두의카드'가 들어간 POL_BOK_075도 함께 나오는 것이 #136 보고서의 기대",
+ "extra_inputs_note": "K‐패스(U+2010)는 1건, 전각 'Ｋ－패스'는 0건(전각 문자 정규화 없음, 6표기 범위 밖 관찰), '-'만 입력은 0건(#136 설계)",
+ "api_results": [
+  {
+   "q": "K-패스",
+   "http": 200,
+   "count": 1,
+   "policy_ids": [
+    "POL_STG_MOLIT_001"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 1
+  },
+  {
+   "q": "K패스",
+   "http": 200,
+   "count": 1,
+   "policy_ids": [
+    "POL_STG_MOLIT_001"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 1
+  },
+  {
+   "q": "k패스",
+   "http": 200,
+   "count": 1,
+   "policy_ids": [
+    "POL_STG_MOLIT_001"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 1
+  },
+  {
+   "q": "k-패스",
+   "http": 200,
+   "count": 1,
+   "policy_ids": [
+    "POL_STG_MOLIT_001"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 1
+  },
+  {
+   "q": "모두의 카드",
+   "http": 200,
+   "count": 2,
+   "policy_ids": [
+    "POL_STG_MOLIT_001",
+    "POL_BOK_075"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)",
+    "대중교통비 환급 지원(모두의카드)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 2
+  },
+  {
+   "q": "모두의카드",
+   "http": 200,
+   "count": 2,
+   "policy_ids": [
+    "POL_STG_MOLIT_001",
+    "POL_BOK_075"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)",
+    "대중교통비 환급 지원(모두의카드)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 2
+  },
+  {
+   "q": "K‐패스",
+   "http": 200,
+   "count": 1,
+   "policy_ids": [
+    "POL_STG_MOLIT_001"
+   ],
+   "names": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ],
+   "dataset_version": "1.4.0-candidate",
+   "total": 1
+  },
+  {
+   "q": "Ｋ－패스",
+   "http": 200,
+   "count": 0,
+   "policy_ids": [],
+   "names": [],
+   "dataset_version": "1.4.0-candidate",
+   "total": 0
+  },
+  {
+   "q": "-",
+   "http": 200,
+   "count": 0,
+   "policy_ids": [],
+   "names": [],
+   "dataset_version": "1.4.0-candidate",
+   "total": 0
+  }
+ ],
+ "react_results": [
+  {
+   "q": "K-패스",
+   "status_text": "정책 1개 · 1개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ]
+  },
+  {
+   "q": "K패스",
+   "status_text": "정책 1개 · 1개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ]
+  },
+  {
+   "q": "k패스",
+   "status_text": "정책 1개 · 1개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ]
+  },
+  {
+   "q": "k-패스",
+   "status_text": "정책 1개 · 1개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)"
+   ]
+  },
+  {
+   "q": "모두의 카드",
+   "status_text": "정책 2개 · 2개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)",
+    "대중교통비 환급 지원(모두의카드)"
+   ]
+  },
+  {
+   "q": "모두의카드",
+   "status_text": "정책 2개 · 2개 표시",
+   "cards": [
+    "모두의 카드(K-패스) (대중교통비 환급지원)",
+    "대중교통비 환급 지원(모두의카드)"
+   ]
+  }
+ ],
+ "screenshot": "kpass-react-search.jpg"
+}

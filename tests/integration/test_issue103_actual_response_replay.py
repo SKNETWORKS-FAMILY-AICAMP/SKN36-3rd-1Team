@@ -46,7 +46,9 @@ class ActualMixedResponseReplayTests(unittest.TestCase):
         self.assertEqual(set(checks), set(data["expected_policy_ids"]))
         self.assertIsNone(checks["POL_YC_065"]["official_apply_url"])
         self.assertTrue(checks["POL_STG_SEOUL_001"]["official_apply_url"])
-        self.assertEqual(body["answer"], data["generator_output"]["answer"])
+        # 실제 생성 본문은 그대로 두고, 조사만 바뀐 접수 미확인 문장('여부도')을 합의 문구('여부는')로 맞춘다(#147).
+        self.assertEqual(body["answer"], data["generator_output"]["answer"].replace(
+            "현재 접수 여부도 공식 공고에서", "현재 접수 여부는 공식 공고에서"))
         self.assertEqual(len(body["citations"]), 3)
         self.assertTrue(all("chunk_id" not in c for c in body["citations"]))
 

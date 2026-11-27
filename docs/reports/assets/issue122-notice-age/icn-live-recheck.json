@@ -1,0 +1,604 @@
+{
+  "head": "0913fcd+미커밋 수정",
+  "date_kst": "2026-11-27",
+  "api": "http://127.0.0.1:18310/api/ask",
+  "db": "R3D verify B2 (Neo4j 56787, Qdrant 56756, 1.4.0-candidate)",
+  "note": "가상 프로필(sample_only). 같은 질문은 검증표 §13-2와 같다.",
+  "results": [
+    {
+      "age": 18,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "selected_policy_id": "POL_STG_ICN_001",
+      "profile_sample_only": {
+        "age": 18,
+        "region": "",
+        "income": null
+      },
+      "requested_at": "2026-11-27T17:21:41+09:00",
+      "seconds": 8.1,
+      "summary": {
+        "http": 200,
+        "is_sample": false,
+        "링크안내_횟수": 1,
+        "마침표_쉼표": false,
+        "접수문구_횟수": 1,
+        "18세_포함_오안내": false,
+        "apply_url": [
+          null
+        ]
+      },
+      "response": {
+        "status": "info",
+        "answer": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상 연령은 18세~39세로 안내돼 있습니다. 다만 현재 입력된 나이 18세는 판정 자료에서 19~39세 기준과 맞지 않아 자동으로 자격을 확정할 수 없고, 지역 정보도 없어 추가 확인이 필요합니다. [1][2]\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 문의처는 인천 서해구청 기업일자리정책과입니다. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]",
+        "citations": [
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          },
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 지원대상과 우선선발 기준은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      }
+    },
+    {
+      "age": 19,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "selected_policy_id": "POL_STG_ICN_001",
+      "profile_sample_only": {
+        "age": 19,
+        "region": "",
+        "income": null
+      },
+      "requested_at": "2026-11-27T17:21:44+09:00",
+      "seconds": 2.8,
+      "summary": {
+        "http": 200,
+        "is_sample": false,
+        "링크안내_횟수": 2,
+        "마침표_쉼표": false,
+        "접수문구_횟수": 2,
+        "18세_포함_오안내": false,
+        "apply_url": [
+          null
+        ]
+      },
+      "response": {
+        "status": "answered",
+        "answer": "이 정책은 **현재 접수 여부는 공식 공고에서 확인해 주세요**. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n연령 근거는 원문에 대상연령이 18세~39세로 제시되어 있고, 지원대상 설명에는 인천광역시 서해구·검단구 청년이라고 되어 있습니다 [2]. 다만 사용자의 만 19세는 연령 기준에는 들어가지만, 6개월 이상 재직 여부와 거주지 요건은 이번 입력만으로는 확인되지 않아 신청 가능 여부를 확정할 수 없습니다 [1][2].\n\n직접 신청 링크는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. [2]",
+        "citations": [
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          },
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 19세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 지원대상과 제외대상은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      }
+    },
+    {
+      "age": 38,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "selected_policy_id": "POL_STG_ICN_001",
+      "profile_sample_only": {
+        "age": 38,
+        "region": "",
+        "income": null
+      },
+      "requested_at": "2026-11-27T17:21:47+09:00",
+      "seconds": 3.4,
+      "summary": {
+        "http": 200,
+        "is_sample": false,
+        "링크안내_횟수": 1,
+        "마침표_쉼표": false,
+        "접수문구_횟수": 1,
+        "18세_포함_오안내": false,
+        "apply_url": [
+          null
+        ]
+      },
+      "response": {
+        "status": "info",
+        "answer": "이 정책은 **현재 접수 여부는 공식 공고에서 확인해 주세요**. 제공된 공식 원문에는 신청기간이 2026. 6. 29. ~ 7. 24.로 적혀 있지만, 현재 시점의 접수 상태는 별도 확인이 필요합니다. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. [2]\n\n연령 기준은 만 19~39세이며, 사용자의 만 38세는 이 범위에 들어갑니다. 다만 이 정책은 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하므로, 재직 요건과 거주지 요건까지 함께 확인해야 합니다. [1][2]\n\n정리하면, 연령은 맞지만 신청 가능 여부는 재직 요건과 거주지 요건, 그리고 현재 접수 상태를 추가로 확인해야 합니다. [1][2]",
+        "citations": [
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          },
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 38세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      }
+    },
+    {
+      "age": 40,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "selected_policy_id": "POL_STG_ICN_001",
+      "profile_sample_only": {
+        "age": 40,
+        "region": "",
+        "income": null
+      },
+      "requested_at": "2026-11-27T17:21:49+09:00",
+      "seconds": 2.3,
+      "summary": {
+        "http": 200,
+        "is_sample": false,
+        "링크안내_횟수": 1,
+        "마침표_쉼표": false,
+        "접수문구_횟수": 1,
+        "18세_포함_오안내": false,
+        "apply_url": [
+          null
+        ]
+      },
+      "response": {
+        "status": "answered",
+        "answer": "중소기업 재직청년 복지공유제 지원은 현재 접수 여부는 공식 공고에서 확인해 주세요. 신청 자격은 원문상 인천광역시 서해구·검단구 청년이면서 중소기업에 6개월 이상 재직 중이고, 19~39세여야 합니다[1][2]. 따라서 만 40세인 경우 연령 기준에는 해당하지 않습니다[1][2]. 공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. [2]",
+        "citations": [
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          },
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 40세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 지원사업의 제출서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 지원사업의 우선선발 대상은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      }
+    },
+    {
+      "age": null,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "selected_policy_id": "POL_STG_ICN_001",
+      "profile_sample_only": {
+        "age": null,
+        "region": "",
+        "income": null
+      },
+      "requested_at": "2026-11-27T17:21:52+09:00",
+      "seconds": 2.6,
+      "summary": {
+        "http": 200,
+        "is_sample": false,
+        "링크안내_횟수": 2,
+        "마침표_쉼표": false,
+        "접수문구_횟수": 1,
+        "18세_포함_오안내": false,
+        "apply_url": [
+          null
+        ]
+      },
+      "response": {
+        "status": "info",
+        "answer": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 지원대상으로 안내하고 있습니다. 연령 기준은 19~39세로 적혀 있고, 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 다만 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]\n\n사용자 정보만으로는 신청 가능 여부를 확정할 수 없습니다. 원문에 적힌 지원대상은 재직기간, 거주지, 연령을 함께 충족해야 하며, 현재는 나이와 거주지, 재직기간의 실제 충족 여부가 확인되지 않았습니다. [1][2]\n\n직접 신청 링크는 확인되지 않았어요. [2]",
+        "citations": [
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          },
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "사용자의 만 나이가 입력되지 않았습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 지원대상과 제외대상을 더 자세히 알려주세요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 신청기간과 접수기관을 다시 정리해 주세요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      }
+    }
+  ]
+}
