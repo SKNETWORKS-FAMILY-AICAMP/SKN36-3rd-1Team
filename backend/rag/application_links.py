@@ -3,6 +3,7 @@
 import re
 
 from backend.rag.context_builder import valid_source_url
+from backend.rag.reception_notice import NEAR_PHRASE
 
 CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
@@ -37,6 +38,8 @@ UNKNOWN_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주�
 GENERIC_NOTICE = "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."
 URL = re.compile(r"https?://|www\.", re.IGNORECASE)
 PLURAL = re.compile(rf"(?:각|각각|모든|두)\s*(?:정책|사업|신청|공식|기관|{SITE})")
+# 보정 문구 뒤에 원래 절의 쉼표·세미콜론이 남으면 '확인해 주세요., …'가 된다(#103 후속). 줄바꿈은 그대로 둔다.
+NOTICE_COMMA = re.compile(r"(확인해 주세요\.|확인되지 않았어요\.)((?:\s*\[\d+\])*)[ \t]*[,;][ \t]*(\r?\n)?")
 # '홈페이지 방문'과 구분하려고 오프라인 접수처가 있는 방문만 본다.
 OFFLINE_VISIT = re.compile(r"(주민센터|행정복지센터|동사무소|구청|시청|군청)\S{0,3}\s*(?:방문|내방)")
 
@@ -103,6 +106,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
     parts = BREAK.split(protected)
     changed = False
     paragraph_policy = None
+    # 같은 정책의 신청 안내는 한 답변에 한 번만 넣는다('…없고, …에서 신청' 두 절이 같은 문장으로 반복되지 않게).
+    noticed: set[str] = set()
     for index in range(0, len(parts), 2):
         parts[index] = PROTECTED.sub(lambda m: guarded[int(m.group(1))], parts[index])
         if index and re.search(r"\n\s*\n", parts[index - 1]):
@@ -158,13 +163,25 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
             continue
         pid = next(iter(targets))
         markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers) if policy_of[n] == pid)
+        if pid in noticed:
+            # 이미 같은 정책 안내를 넣었으면 이 절은 인용만 남긴다. 절이 비면 앞의 쉼표 구분자도 지운다.
+            parts[index] = head + markers
+            if not parts[index].strip() and "\n" not in parts[index - 1]:
+                parts[index - 1] = ""
+            changed = True
+            continue
+        noticed.add(pid)
         place = _verified_visit(plain, pid, contexts)
         # 원문 근거가 있는 방문 신청은 남기고, 확인되지 않은 온라인 신청 경로만 보정한다.
         text = f"{place} 방문 신청 방법은 확인되지만, {MISSING_LINK}" if place else NO_APPLICATION_LINK
-        if by_id[pid]["reception_status"] == "unknown":
+        # 답변에 이미 접수 미확인 안내가 있으면 같은 문구를 또 붙이지 않는다.
+        # 문구가 정책별로 빠짐없이 들어갔는지는 reception_notice가 다시 보장한다(#103·#147).
+        if by_id[pid]["reception_status"] == "unknown" and not NEAR_PHRASE.search(answer):
             text += f" {UNKNOWN_RECEPTION}"
         parts[index] = head + f"{by_id[pid]['policy_name']}: {text} {markers}".rstrip()
         changed = True
     fixed = "".join(parts)
+    if changed:
+        fixed = NOTICE_COMMA.sub(lambda m: m.group(1) + m.group(2) + (m.group(3) or " "), fixed)
     # 절을 뺀 경우 남은 구분자 공백만 정리한다.
     return (fixed.strip() if changed else fixed), changed

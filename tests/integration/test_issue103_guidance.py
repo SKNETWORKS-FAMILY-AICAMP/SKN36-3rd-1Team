@@ -154,7 +154,10 @@ class Issue103GuidanceTests(unittest.TestCase):
                 fixed, changed = align_application_links(text, contexts, checks)
                 self.assertTrue(changed)
                 self.assertIn(valid, fixed)
-                self.assertNotIn("https://example.org/apply", fixed.split(separator)[0])
+                # 보정 문장 뒤의 쉼표·세미콜론은 공백으로 바뀌므로(#122 후속, '주세요., ' 방지) 유효 문장 앞부분을 본다.
+                self.assertNotIn("https://example.org/apply", fixed.split(valid)[0])
+                self.assertNotIn(".,", fixed)
+                self.assertNotIn(".;", fixed)
                 self.assertIn("[1]", fixed)
                 self.assertIn("[2]", fixed)
 
