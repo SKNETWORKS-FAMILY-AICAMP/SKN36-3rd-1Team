@@ -263,7 +263,7 @@ python -m pytest tests/unit/test_official_requirements.py tests/unit/test_issue7
 
 Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SSR_REACT_BASE_URL`을 React 주소로 지정하고 `runserver 127.0.0.1:18301 --noreload --insecure`를 실행한다. 별도 장애 인스턴스 :18307은 상위 프록시 :18306을 사용한다. `frontend`에서 `VITE_POLICY_API_URL=http://127.0.0.1:18300/api/policies`, `VITE_ASK_API_URL=http://127.0.0.1:18304/api/ask`, `VITE_POLICY_DETAIL_BASE_URL=http://127.0.0.1:18301/policies/`를 지정하고 `npm run dev -- --port 18305 --strictPort`를 실행한다. 독립 시험에서는 상담 API URL을 비워도 된다. [브라우저 재현 스크립트](assets/issue122-befe2d0/README.md)
 
-## 8. 2026-11-27 KST · dev `8c40858` 즉시 착수 검증
+## 10. 2026-11-27 KST · dev `8c40858` 즉시 착수 검증
 
 기준 [dev `8c40858`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/8c40858) (PR #144 병합). 제품 코드·계약은 바꾸지 않았다. React :18305, FastAPI :18304(목록·상담 공용), R3D verify B2(Neo4j :56787·Qdrant :56756, 기존 컨테이너 재시작·초기화 없음), 릴리스 `1.4.0-candidate` 249개, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 헤드리스 Chrome CDP로 실행했고 프로필은 가상 나이·서울·소득 공란이다. 각 시나리오는 새 탭에서 시작했고, 30세 비교의 두 번째 상담(`POL_GOV_039`)에는 같은 세션의 첫 상담 2턴이 `history`로 함께 전송됐다. 실제 상담 호출은 5회(모두 HTTP 200, `is_sample=false`)다.
 
