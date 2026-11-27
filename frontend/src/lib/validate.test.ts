@@ -1,5 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { checkAge, safeHttpUrl } from './validate';
+import { checkAge, checkChildMonths, safeHttpUrl } from './validate';
+
+describe('checkChildMonths (#39)', () => {
+  it('빈 값은 미입력, 0은 유효한 값이다', () => {
+    expect(checkChildMonths('')).toEqual({ ok: true, value: null });
+    expect(checkChildMonths(' ')).toEqual({ ok: true, value: null });
+    expect(checkChildMonths('0')).toEqual({ ok: true, value: 0 });
+  });
+
+  it('0 이상 정수는 상한 없이 받는다(계약 §8.2)', () => {
+    for (const [text, value] of [['24', 24], ['25', 25], [' 10 ', 10], ['300', 300]] as const) {
+      expect(checkChildMonths(text)).toEqual({ ok: true, value });
+    }
+  });
+
+  it('음수·소수·문자·지수·정확히 보낼 수 없는 큰 수는 거부한다', () => {
+    for (const bad of ['-1', '24.5', '24.0', 'abc', '24개월', '1e2', '99999999999999999999']) {
+      expect(checkChildMonths(bad).ok).toBe(false);
+    }
+  });
+});
 
 describe('checkAge', () => {
   it('빈 값은 미입력으로 통과', () => {

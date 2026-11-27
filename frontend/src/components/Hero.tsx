@@ -12,6 +12,10 @@ interface Props {
   onIncome: (value: number | null) => void;
   onAge: (v: string) => void;
   onRegion: (v: string) => void;
+  /** #39 자녀 월령(개월) 입력칸 값. 확인하려는 자녀 한 명 기준이며 신청자 나이와 별개다 */
+  childMonths: string;
+  childMonthsError: string | null;
+  onChildMonths: (v: string) => void;
   categories: Category[];
   onAsk: (text: string, origin: HTMLElement | null) => boolean;
   askBoxRef: RefObject<HTMLDivElement>;
@@ -21,7 +25,7 @@ interface Props {
 
 const TITLE: [string, boolean, boolean][] = [['나에게', false, false], ['필요한', false, false], ['정부 지원 정책', true, false], ['을', false, true], ['물어보세요!', false, false]];
 
-export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
+export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, childMonths, childMonthsError, onChildMonths, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
   const heroRef = useRef<HTMLElement>(null);
   useParallax(heroRef, reduceMotion);
   const examples = useMemo(() => categories.map((c) => '예: ' + c.question), [categories]);
@@ -75,9 +79,19 @@ export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion,
               }} />
             <small>만 원</small>
           </label>
+          {/* #39: 자녀 한 명의 월령. 자녀가 여러 명이면 자녀별로 따로 확인한다(답변 본문에서 안내) */}
+          <label className={'cin' + (childMonthsError ? ' invalid' : childMonths ? ' filled' : '')}>
+            <Icon name="bottle" className="ic" /><span className="lbl">자녀 월령</span>
+            <input id="child-age-months" type="text" inputMode="numeric" placeholder="입력" value={childMonths}
+              onChange={(e) => onChildMonths(e.target.value)}
+              aria-invalid={!!childMonthsError} aria-describedby={childMonthsError ? 'child-age-months-error child-age-months-hint' : 'child-age-months-hint'} />
+            <small>개월</small>
+          </label>
         </div>
+        <p className="cond-note" id="child-age-months-hint">자녀 월령은 확인하려는 자녀 한 명 기준이에요. 자녀가 여러 명이면 한 명씩 따로 확인해 주세요.</p>
 
         {ageError && <p className="cond-error" id="age-error" role="alert">{ageError}</p>}
+        {childMonthsError && <p className="cond-error" id="child-age-months-error" role="alert">{childMonthsError}</p>}
 
         <div className="cats" id="cats">
           {categories.map((c, i) => (

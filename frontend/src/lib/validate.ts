@@ -16,6 +16,19 @@ export function checkAge(raw: string): AgeCheck {
 }
 
 /**
+ * 자녀 월령 입력(#39, ask_contract v1.8): 비어 있으면 '미입력', 0 이상 정수(개월)만 받는다.
+ * 0개월은 유효한 값이다. 상한은 정책 근거가 없어 두지 않는다(계약 §8.2).
+ * 숫자가 너무 길어 정확한 정수로 보낼 수 없는 값만 막는다.
+ */
+export function checkChildMonths(raw: string): AgeCheck {
+  const text = raw.trim();
+  if (text === '') return { ok: true, value: null };
+  const n = Number(text);
+  if (!/^\d+$/.test(text) || !Number.isSafeInteger(n)) return { ok: false, message: '자녀 월령은 0 이상의 정수(개월)로 적어 주세요' };
+  return { ok: true, value: n };
+}
+
+/**
  * 백엔드·원문에서 온 주소를 링크로 쓰기 전에 검사한다.
  * http/https만 허용하고, javascript: 등 다른 방식이나 잘못된 주소는 null을 돌려준다 (CODING_STYLE §12).
  */

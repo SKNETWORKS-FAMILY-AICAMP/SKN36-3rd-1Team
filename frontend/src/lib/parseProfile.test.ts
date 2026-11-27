@@ -78,4 +78,15 @@ describe('parseProfile', () => {
     expect(describeProfile({ age: 26, region: '서울', income: 4000 })).toBe('26세 · 서울 · 연 4,000만 원');
     expect(describeProfile({})).toBe('');
   });
+
+  it('자녀 월령은 신청자 나이와 구분해 적고, 0개월도 빠뜨리지 않는다 (#39)', () => {
+    expect(describeProfile({ age: 32, region: '전북', income: null, child_age_months: 10 })).toBe('32세 · 전북 · 자녀 10개월');
+    expect(describeProfile({ age: null, region: '', income: null, child_age_months: 0 })).toBe('자녀 0개월');
+    expect(describeProfile({ age: 2, region: '', income: null, child_age_months: null })).toBe('2세');
+  });
+
+  it('"N개월" 표현은 신청자 나이로 읽지 않는다 (#39)', () => {
+    expect(parseProfile('아기가 10개월이에요').age).toBeUndefined();
+    expect(readProfileReply('10개월이에요')).toBeNull();
+  });
 });
