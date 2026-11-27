@@ -56,7 +56,8 @@ HEDGED_CLAIM = re.compile(r"없|않|못|불가|어렵|여부|인지|단정|아�
 RECEPTION_NOTICE = {
     "closed": "접수가 마감됐어요.",
     "before": "아직 접수가 시작되지 않았어요.",
-    "unknown": "현재 접수 여부는 공식 공고에서 확인이 필요해요.",
+    # 팀 합의 #103 문구. ai/prompts/system_prompt.py의 unknown 안내와 같은 문장으로 맞춘다.
+    "unknown": "현재 접수 여부는 공식 공고에서 확인해 주세요.",
 }
 ELIGIBILITY_NOTICE = "신청 자격은 공식 공고에서 추가 확인이 필요해요."
 INELIGIBLE_NOTICE = "입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요."
