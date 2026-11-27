@@ -89,9 +89,10 @@ export function answerView(r: AskResponse): AnswerView {
   ) {
     view.warning = null;
   } else if (isHoldNotice && r.policy_checks.some(({ conditions }) => (
-    !isConfirmedIneligible(conditions) && conditions.some(({ status }) => status === 'needs_check')
+    !isConfirmedIneligible(conditions) && !isUnjudgedOnly(conditions)
+    && conditions.some(({ status }) => status === 'needs_check')
   ))) {
-    // 확인 필요 조건이 남은 정책이 없으면(불일치 확정·전부 적합 정책뿐) 합의 문구가 카드와 어긋나므로 서버 문장을 그대로 둔다.
+    // 확인 필요 조건이 남은 정책이 없으면(불일치 확정·전부 적합·'자동 판정 안 함' 정책뿐) 합의 문구가 카드와 어긋나므로 서버 문장을 그대로 둔다.
     view.warning = HOLD_NOTICE_DISPLAY;
   }
 

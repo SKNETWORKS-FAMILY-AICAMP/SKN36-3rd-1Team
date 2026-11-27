@@ -77,6 +77,13 @@ describe('자동 판정 보류 안내 문구 (#78 합의)', () => {
     expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80, allEligible] }).warning).toEqual(hold);
   });
 
+  it("불일치 확정 정책과 '자동 판정 안 함' 정책만 있으면 서버 문장을 그대로 둔다", () => {
+    const unjudged = { ...fromChecker.POL_GOV_002_70, conditions: [
+      { field: 'eligibility', status: 'needs_check', label: '자격 조건', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.' },
+    ] } as Check;
+    expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80, unjudged] }).warning).toEqual(hold);
+  });
+
   it('보류 안내가 아닌 경고(지역 확인 등)는 바꾸지 않는다', () => {
     const region = { kind: 'warn' as const, title: '추가 확인 필요', text: '입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요.' };
     expect(answerView({ ...base, answer: '답변[1]', notice: region, policy_checks: [age30] }).warning).toEqual(region);
