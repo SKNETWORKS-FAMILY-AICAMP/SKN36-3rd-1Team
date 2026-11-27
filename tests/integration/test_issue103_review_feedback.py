@@ -88,12 +88,12 @@ class ClosingPhraseTests(unittest.TestCase):
         fixed, changed = align_application_links("가상 안내입니다. 두 정책은 각 홈페이지에서 신청할 수 있습니다 [1][2].",
                                                  AB_CONTEXTS, [A, B])
         self.assertTrue(changed)
-        self.assertEqual(fixed, "가상 안내입니다. " + GENERIC_NOTICE + " 가상위원회: 현재 확인된 전용 신청 주소는 없습니다. [1][2]")
+        self.assertEqual(fixed, "가상 안내입니다. " + GENERIC_NOTICE + " 가상위원회: 직접 신청 링크는 확인되지 않았어요. [1][2]")
 
     def test_named_multi_policy_without_url_is_neutralized(self):
         fixed, changed = align_application_links("가상위원회와 가상수당은 각 누리집에서 신청할 수 있습니다.", AB_CONTEXTS, [A, B])
         self.assertTrue(changed)
-        self.assertEqual(fixed, GENERIC_NOTICE + " 가상위원회: 현재 확인된 전용 신청 주소는 없습니다.")
+        self.assertEqual(fixed, GENERIC_NOTICE + " 가상위원회: 직접 신청 링크는 확인되지 않았어요.")
         self.assertNotIn("가상수당:", fixed)
 
     def test_named_or_cited_multi_policy_with_url_is_still_rejected(self):
@@ -113,7 +113,7 @@ class ClosingPhraseTests(unittest.TestCase):
         tail = body["answer"][len(original):]
         self.assertNotIn("각 홈페이지에서 신청할 수 있습니다", tail)
         self.assertIn(GENERIC_NOTICE, tail)
-        self.assertIn("세종시 위원회 청년참여 확대: 현재 확인된 전용 신청 주소는 없습니다.", tail)
+        self.assertIn("세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요.", tail)
         self.assertTrue(tail.endswith("[1][2]"))
         checks = {p["policy_id"]: p for p in body["policy_checks"]}
         self.assertIsNone(checks[SEJONG]["official_apply_url"])
@@ -136,7 +136,7 @@ class HeadingCitationMismatchTests(unittest.TestCase):
                     heading + "신청 URL은 https://example.org/unverified 입니다 [2].", contexts, [A, B])
                 self.assertTrue(changed)
                 self.assertNotIn("https://example.org/unverified", fixed)
-                self.assertIn("가상위원회: 현재 확인된 전용 신청 주소는 없습니다.", fixed)
+                self.assertIn("가상위원회: 직접 신청 링크는 확인되지 않았어요.", fixed)
                 self.assertNotIn("[2]", fixed)  # 다른 정책 근거를 빌리지 않는다.
 
     def test_seoul_heading_with_sejong_citation_is_corrected_for_cited_policy(self):
@@ -145,8 +145,8 @@ class HeadingCitationMismatchTests(unittest.TestCase):
                                                  contexts, [A, B])
         self.assertTrue(changed)
         self.assertNotIn("https://example.org/unverified", fixed)
-        self.assertTrue(fixed.endswith("가상위원회: 현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요. "
-                                       "현재 모집 일정과 접수 여부도 공식 공고 확인이 필요합니다. [1]"))
+        self.assertTrue(fixed.endswith("가상위원회: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. "
+                                       "현재 접수 여부는 공식 공고에서 확인해 주세요. [1]"))
 
     def test_matching_heading_and_citation_with_valid_url_is_unchanged(self):
         contexts = [{"source_id": 1, "policy_id": "A", "text": "t"}, {"source_id": 2, "policy_id": "B", "text": "t"}]
@@ -163,7 +163,7 @@ class HeadingCitationMismatchTests(unittest.TestCase):
         self.assertTrue(body["answer"].startswith(original))
         tail = body["answer"][len(original):]
         self.assertNotIn("https://www.sejong.go.kr/apply", tail)
-        self.assertIn("세종시 위원회 청년참여 확대: 현재 확인된 전용 신청 주소는 없습니다.", tail)
+        self.assertIn("세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요.", tail)
         self.assertNotIn("[2]", tail)
         checks = {p["policy_id"]: p for p in body["policy_checks"]}
         self.assertIsNone(checks[SEJONG]["official_apply_url"])
@@ -182,7 +182,7 @@ class VisitNegationTests(unittest.TestCase):
                 fixed, changed = align_application_links(MIXED, contexts, [A])
                 self.assertTrue(changed)
                 self.assertNotIn("방문 신청 방법은 확인", fixed)
-                self.assertIn("전용 신청 주소는 없습니다", fixed)
+                self.assertIn("직접 신청 링크는 확인되지 않았어요", fixed)
 
     def test_negative_segment_does_not_hide_positive_segment_of_same_place(self):
         contexts = [{"source_id": 1, "policy_id": "A",
@@ -208,7 +208,7 @@ class VisitNegationTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         answer = response.json()["answer"]
         self.assertNotIn("방문 신청 방법은 확인", answer)
-        self.assertIn("전용 신청 주소는 없습니다", answer)
+        self.assertIn("직접 신청 링크는 확인되지 않았어요", answer)
 
 
 class NurijipSynonymTests(unittest.TestCase):
@@ -222,7 +222,7 @@ class NurijipSynonymTests(unittest.TestCase):
             with self.subTest(text=text):
                 fixed, changed = align_application_links(text, contexts, [A])
                 self.assertTrue(changed)
-                self.assertIn("전용 신청 주소는 없습니다", fixed)
+                self.assertIn("직접 신청 링크는 확인되지 않았어요", fixed)
 
     def test_nurijip_notice_and_caution_wording_is_preserved(self):
         for text in ("세종시 누리집에서 신청 관련 공고를 확인하세요 [1].", "신청 공고는 세종시 누리집에서 확인할 수 있습니다 [1].",
@@ -241,7 +241,7 @@ class NurijipSynonymTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         body = response.json()
         self.assertNotIn("누리집을 통해 신청할 수 있습니다", body["answer"])
-        self.assertIn("전용 신청 주소는 없습니다", body["answer"])
+        self.assertIn("직접 신청 링크는 확인되지 않았어요", body["answer"])
         self.assertIsNone(body["policy_checks"][0]["official_apply_url"])
         self.assertEqual(body["citations"][0]["document_id"], "DOC_YC_065")
 
@@ -280,7 +280,7 @@ class VisitGuidanceTests(unittest.TestCase):
         response, policy = self.ask(VISIT_POLICY, MIXED)
         self.assertEqual(response.status_code, 200, response.text)
         body = response.json()
-        self.assertIn("주민센터 방문 신청 방법은 확인되지만, 전용 온라인 신청 주소는 확인되지 않았습니다.", body["answer"])
+        self.assertIn("주민센터 방문 신청 방법은 확인되지만, 직접 신청 링크는 확인되지 않았어요.", body["answer"])
         self.assertNotIn("온라인으로 신청할 수 있습니다", body["answer"])
         self.assertTrue(body["answer"].endswith("[1]"))
         self.assertEqual(body["policy_checks"][0]["policy_id"], VISIT_POLICY)
@@ -298,7 +298,7 @@ class VisitGuidanceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         answer = response.json()["answer"]
         self.assertNotIn("주민센터", answer)
-        self.assertIn("전용 신청 주소는 없습니다", answer)
+        self.assertIn("직접 신청 링크는 확인되지 않았어요", answer)
 
     def test_homepage_visit_is_not_treated_as_offline_visit(self):
         contexts = [{"source_id": 1, "policy_id": "A", "text": "주민센터에 방문 신청"}]
@@ -310,7 +310,7 @@ class VisitGuidanceTests(unittest.TestCase):
         contexts = [{"source_id": 6, "policy_id": "A", "text": "거주지 관할 주민센터에 방문하여 신청"}]
         fixed, changed = align_application_links("주민센터 방문 또는 온라인으로 신청할 수 있습니다 [6]", contexts, [A])
         self.assertTrue(changed)
-        self.assertIn("주민센터 방문 신청 방법은 확인되지만, 전용 온라인 신청 주소는 확인되지 않았습니다.", fixed)
+        self.assertIn("주민센터 방문 신청 방법은 확인되지만, 직접 신청 링크는 확인되지 않았어요.", fixed)
         self.assertTrue(fixed.endswith("[6]"))
 
     def test_visit_with_other_policys_citation_is_not_borrowed(self):
@@ -322,6 +322,161 @@ class VisitGuidanceTests(unittest.TestCase):
     def test_policy_with_valid_online_url_is_unchanged(self):
         text = "가상수당은 주민센터 방문 또는 온라인으로 신청할 수 있습니다 [2]."
         self.assertEqual(align_application_links(text, AB_CONTEXTS, [A, B]), (text, False))
+
+
+# --- PR #136 4차 리뷰 회귀: 쉼표 분리, 겹치는 정책명, 합의 문구 통일, 하이픈 검색 ---
+
+RELEASE_POLICIES = Path(__file__).parents[2] / "data/releases/v1.4.0-candidate/neo4j/nodes_policy.jsonl"
+NULL_LINK = "직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요."
+
+
+def release_names():
+    rows = [json.loads(line) for line in RELEASE_POLICIES.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return {row["policy_id"]: row["policy_name"] for row in rows}
+
+
+def check(pid, name, url=None, reception="open"):
+    return {"policy_id": pid, "policy_name": name, "official_apply_url": url, "reception_status": reception}
+
+
+ONE = [{"source_id": 1, "policy_id": "X", "text": "가상 원문 (sample_only)"}]
+
+
+class CommaSplitTests(unittest.TestCase):
+    """필수 1: 숫자 사이 쉼표와 정책명 안의 쉼표에서 절이 잘리지 않는다."""
+
+    C = [check("X", "가상노인수당")]  # sample_only
+
+    def test_amount_comma_is_not_split_into_broken_text(self):
+        fixed, changed = align_application_links("월 1,000원이며 홈페이지에서 신청하세요 [1].", ONE, self.C)
+        self.assertTrue(changed)
+        self.assertNotIn("1,가상노인수당", fixed)
+        self.assertEqual(fixed, f"가상노인수당: {NULL_LINK} [1]")
+
+    def test_amount_in_other_sentence_is_kept_intact(self):
+        fixed, _ = align_application_links("가상노인수당은 월 1,000원을 지원해요 [1]. 홈페이지에서 신청하세요 [1].", ONE, self.C)
+        self.assertEqual(fixed, f"가상노인수당은 월 1,000원을 지원해요 [1]. 가상노인수당: {NULL_LINK} [1]")
+
+    def test_digits_around_spaced_comma_are_not_split(self):
+        for text in ("월 1, 000원이며 홈페이지에서 신청하세요 [1].", "1,2차 모집은 홈페이지에서 신청하세요 [1]."):
+            with self.subTest(text=text):
+                fixed, _ = align_application_links(text, ONE, self.C)
+                self.assertEqual(fixed, f"가상노인수당: {NULL_LINK} [1]")
+
+    def test_spaced_comma_between_words_still_splits_clauses(self):
+        # 쉼표 뒤 공백이 있으면 앞 절(서류 안내)은 그대로 두고 신청 경로 절만 보정한다.
+        fixed, _ = align_application_links("가상노인수당은 신분증이 필요하고, 홈페이지에서 신청하세요 [1].", ONE, self.C)
+        self.assertEqual(fixed, f"가상노인수당은 신분증이 필요하고, 가상노인수당: {NULL_LINK} [1]")
+
+    def test_real_release_policy_names_with_commas_stay_whole(self):
+        names = [name for name in release_names().values() if "," in name]
+        self.assertEqual(len(names), 4)
+        for name in names:
+            with self.subTest(name=name):
+                fixed, changed = align_application_links(f"{name}은 홈페이지에서 신청할 수 있어요 [1].", ONE, [check("X", name)])
+                self.assertTrue(changed)
+                self.assertEqual(fixed, f"{name}: {NULL_LINK} [1]")
+
+    def test_comma_policy_name_with_valid_url_is_unchanged(self):
+        name = "자활근로(기초, 차상위)"
+        text = f"{name}은 홈페이지에서 신청할 수 있어요 [1]."
+        fixed = align_application_links(text, ONE, [check("X", name, "https://example.org/apply")])
+        self.assertEqual(fixed, (text, False))
+
+
+class OverlappingNameTests(unittest.TestCase):
+    """필수 2: 긴 정책명 안에 들어 있는 짧은 정책명을 별도 후보로 보지 않는다."""
+
+    SHORT = check("S", "K-패스")  # sample_only, 신청 URL 없음
+    LONG = check("L", "K-패스 청년", "https://example.org/apply")  # sample_only, 신청 URL 있음
+    CONTEXTS = [{"source_id": 1, "policy_id": "S", "text": "가상 원문"}, {"source_id": 2, "policy_id": "L", "text": "가상 원문"}]
+
+    def align(self, text):
+        return align_application_links(text, self.CONTEXTS, [self.SHORT, self.LONG])
+
+    def test_long_name_with_valid_url_is_not_rewritten_as_short_name(self):
+        text = "K-패스 청년은 홈페이지에서 신청할 수 있어요 [2]."
+        self.assertEqual(self.align(text), (text, False))
+
+    def test_long_name_heading_keeps_its_own_policy(self):
+        text = "### K-패스 청년\n신청 페이지에서 신청하세요 [2]."
+        self.assertEqual(self.align(text), (text, False))
+
+    def test_short_name_alone_is_still_corrected(self):
+        fixed, changed = self.align("K-패스는 홈페이지에서 신청할 수 있어요 [1].")
+        self.assertTrue(changed)
+        self.assertEqual(fixed, f"K-패스: {NULL_LINK} [1]")
+
+    def test_short_name_outside_long_name_is_kept_as_candidate(self):
+        fixed, changed = self.align("K-패스와 K-패스 청년은 각 홈페이지에서 신청할 수 있어요 [1][2].")
+        self.assertTrue(changed)
+        self.assertEqual(fixed, GENERIC_NOTICE + " K-패스: 직접 신청 링크는 확인되지 않았어요. [1][2]")
+
+    def test_real_release_overlapping_pairs(self):
+        names = list(release_names().values())
+        pairs = [(short, long) for short in names for long in names if short != long and short in long]
+        self.assertEqual(len(pairs), 5)
+        for short, long in pairs:
+            with self.subTest(short=short, long=long):
+                checks = [check("S", short), check("L", long, "https://example.org/apply")]
+                text = f"{long}은 홈페이지에서 신청할 수 있어요 [2]."
+                self.assertEqual(align_application_links(text, self.CONTEXTS, checks), (text, False))
+
+
+class AgreedWordingTests(unittest.TestCase):
+    """필수 3: official_apply_url=null 안내를 #103 합의 문구(해요체)로 통일한다."""
+
+    def test_prompt_and_correction_use_agreed_phrase(self):
+        from ai.prompts.system_prompt import SYSTEM_PROMPT
+        from backend.rag.application_links import NO_APPLICATION_LINK
+
+        self.assertIn("null이면 “직접 신청 링크는 확인되지 않았어요”라고 안내하세요.", SYSTEM_PROMPT)
+        self.assertNotIn("전용 신청 주소가 없다고 안내", SYSTEM_PROMPT)
+        self.assertEqual(NO_APPLICATION_LINK, NULL_LINK)
+
+    def test_corrections_do_not_mix_hapnida_style(self):
+        visit = [{"source_id": 1, "policy_id": "A", "text": "주민센터에 방문 신청 (sample_only)"}]
+        cases = [
+            align_application_links("가상위원회는 홈페이지에서 신청할 수 있어요 [1].", AB_CONTEXTS, [A, B])[0],
+            align_application_links("가상위원회는 주민센터 방문 또는 온라인으로 신청할 수 있어요 [1].", visit, [A])[0],
+            align_application_links("가상위원회와 가상수당은 각 홈페이지에서 신청할 수 있어요 [1][2].", AB_CONTEXTS,
+                                    [A, {**B, "official_apply_url": None}])[0],
+        ]
+        for fixed in cases:
+            with self.subTest(fixed=fixed):
+                self.assertIn("직접 신청 링크는 확인되지 않았어요", fixed)
+                self.assertNotIn("습니다", fixed)
+        self.assertIn("현재 접수 여부는 공식 공고에서 확인해 주세요.", cases[0])  # A는 reception unknown
+        self.assertIn("주민센터 방문 신청 방법은 확인되지만, 직접 신청 링크는 확인되지 않았어요.", cases[1])
+
+    def test_correction_output_is_stable_when_applied_again(self):
+        fixed, _ = align_application_links("가상위원회는 홈페이지에서 신청할 수 있어요 [1].", AB_CONTEXTS, [A, B])
+        self.assertEqual(align_application_links(fixed, AB_CONTEXTS, [A, B]), (fixed, False))
+
+    def test_pipeline_unknown_reception_notice_matches_agreed_phrase(self):
+        from backend.rag.pipeline import RECEPTION_NOTICE
+
+        self.assertEqual(RECEPTION_NOTICE["unknown"], "현재 접수 여부는 공식 공고에서 확인해 주세요.")
+
+
+class HyphenOnlySearchTests(unittest.TestCase):
+    """선택: '-'처럼 하이픈만 입력하면 전체 목록이 아니라 결과 없음이다(sample_only 패키지)."""
+
+    def test_hyphen_only_query_returns_no_items(self):
+        import tempfile
+
+        from backend.api.policy_catalog import PolicyCatalog
+        from test_policy_catalog_api import write_package
+
+        with tempfile.TemporaryDirectory() as root:
+            write_package(Path(root))
+            catalog = PolicyCatalog(Path(root))
+            self.assertEqual(catalog.list().total, 5)
+            self.assertEqual(catalog.list(q="   ").total, 5)  # 공백만은 검색어 없음과 같다.
+            for query in ("-", "--", " - ", "—", "－"):
+                with self.subTest(query=query):
+                    self.assertEqual(catalog.list(q=query).total, 0)
+            self.assertEqual(catalog.list(q="P-OL_A").total, 1)  # 하이픈을 무시한 검색은 그대로 동작한다.
 
 
 if __name__ == "__main__":

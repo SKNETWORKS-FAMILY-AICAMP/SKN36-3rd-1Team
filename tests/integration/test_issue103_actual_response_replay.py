@@ -57,7 +57,7 @@ class ActualMixedResponseReplayTests(unittest.TestCase):
         text = "가상위원회 안내입니다. 해당 홈페이지에서 신청할 수 있습니다. [1]\n\n가상수당 안내입니다. 신청 주소는 https://example.org/apply 입니다. [2]"
         fixed, changed = align_application_links(text, contexts, checks)
         self.assertTrue(changed)
-        self.assertIn("전용 신청 주소는 없습니다", fixed)
+        self.assertIn("직접 신청 링크는 확인되지 않았어요", fixed)
         self.assertIn("신청 주소는 https://example.org/apply 입니다", fixed)
         self.assertIn("[1]", fixed)
         self.assertIn("[2]", fixed)

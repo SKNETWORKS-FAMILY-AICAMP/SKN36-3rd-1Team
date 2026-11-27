@@ -82,7 +82,7 @@ class Issue103GuidanceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertNotIn("신청 URL은 세종시 홈페이지", body["answer"])
-        self.assertIn("전용 신청 주소는 없습니다", body["answer"])
+        self.assertIn("직접 신청 링크는 확인되지 않았어요", body["answer"])
         self.assertIsNone(body["policy_checks"][0]["official_apply_url"])
         self.assertEqual(body["policy_checks"][0]["reception_status"], "unknown")
         self.assertEqual(body["citations"][0]["document_id"], "DOC_YC_065")
@@ -123,7 +123,7 @@ class Issue103GuidanceTests(unittest.TestCase):
             with self.subTest(text=text):
                 response, _ = self.ask(text)
                 self.assertEqual(response.status_code, 200)
-                self.assertIn("전용 신청 주소는 없습니다", response.json()["answer"])
+                self.assertIn("직접 신청 링크는 확인되지 않았어요", response.json()["answer"])
 
     def test_normal_homepage_source_and_offline_method_are_preserved(self):
         for text in (

@@ -638,7 +638,7 @@ class PipelineTests(unittest.TestCase):
             ("open", "needs_check", "모든 신청 자격을 충족했어요 [1].", "신청 자격은 공식 공고에서 추가 확인이 필요해요."),
             ("open", "ineligible", "신청 자격이 있어요 [1].", "맞지 않는 조건이 있어요"),
             ("before", "eligible", "현재 접수 중이에요 [1].", "아직 접수가 시작되지 않았어요."),
-            ("unknown", "eligible", "지금 바로 신청 가능해요 [1].", "현재 접수 여부는 공식 공고에서 확인이 필요해요."),
+            ("unknown", "eligible", "지금 바로 신청 가능해요 [1].", "현재 접수 여부는 공식 공고에서 확인해 주세요."),
         )
         for reception, condition, text, expected in cases:
             with self.subTest(text=text):

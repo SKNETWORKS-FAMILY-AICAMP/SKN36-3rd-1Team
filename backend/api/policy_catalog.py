@@ -100,7 +100,8 @@ class PolicyCatalog:
         for pid, node in policies.items():
             relation = relations[pid]
             name, agency = node["policy_name"], node.get("agency") or node.get("organization") or ""
-            if query and query not in policy_search_key(name + agency):
+            # 하이픈만 입력해 검색 키가 비면 전체 목록 대신 결과 없음으로 처리한다.
+            if q.strip() and (not query or query not in policy_search_key(name + agency)):
                 continue
             if region and region not in relation["regions"]:
                 continue

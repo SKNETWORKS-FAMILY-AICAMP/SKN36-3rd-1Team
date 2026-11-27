@@ -7,7 +7,13 @@ from backend.rag.context_builder import valid_source_url
 CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
 # URL 안의 마침표는 문장 경계가 아니다. 쉼표로 나눈 정책 설명도 독립 검증한다.
-BREAK = re.compile(r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|[,;]\s*|\s+(?:하지만|그러나|다만)\s+)")
+# 쉼표는 뒤에 공백이 있을 때만 나누고, 숫자 사이 쉼표('1,000원', '1, 2')는 나누지 않는다.
+BREAK = re.compile(
+    r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|(?<!\d),\s+|,\s+(?!\d)|;\s*|\s+(?:하지만|그러나|다만)\s+)"
+)
+# 정책명 안의 쉼표·세미콜론('자활근로(기초, 차상위)')에서 절이 끊기지 않도록 분리 전에 잠시 치환한다.
+PROTECT = "{}"
+PROTECTED = re.compile("(\\d+)")
 # '누리집'은 홈페이지와 같은 뜻의 공공기관 표기다. 같은 웹 신청 경로 표현으로 검사한다.
 SITE = r"(?:홈페이지|웹\s*사이트|누리집)"
 LINK_CLAIM = re.compile(
@@ -23,7 +29,10 @@ CAUTION = re.compile(
     rf"|(?:신청|모집)\s*(?:공고|공지).{{0,80}}(?:{SITE}|https?://).{{0,80}}확인",
 )
 WEB_ACTION = re.compile(r"(?:신청|접수)(?:할\s*수\s*있|이?\s*가능|하세요|해\s*주세요)")
-NO_APPLICATION_LINK = "현재 확인된 전용 신청 주소는 없습니다. 신청 방법은 공식 공고에서 확인해 주세요."
+# #103에서 합의한 official_apply_url=null 안내 문구. 답변 본문과 같은 해요체로 쓴다.
+MISSING_LINK = "직접 신청 링크는 확인되지 않았어요."
+NO_APPLICATION_LINK = f"{MISSING_LINK} 신청 방법은 공식 공고에서 확인해 주세요."
+UNKNOWN_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주세요."
 # 정책명·인용·주소 없이 여러 정책을 묶는 마무리 안내('각 신청 페이지에서 확인하세요')의 중립 문구.
 GENERIC_NOTICE = "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."
 URL = re.compile(r"https?://|www\.", re.IGNORECASE)
@@ -59,6 +68,22 @@ def _verified_visit(clause: str, pid: str, contexts: list[dict]) -> str | None:
     return None
 
 
+def _named_policies(text: str, by_id: dict[str, dict]) -> set[str]:
+    """절에 적힌 정책을 긴 이름부터 찾는다.
+
+    '포항시 장애수당'·'K-패스 청년'처럼 긴 정책명 안에 들어 있는 짧은 정책명은 그 위치에서는 후보로 보지 않는다.
+    짧은 정책명이 긴 이름 바깥에 따로 적혀 있으면 그대로 후보에 넣는다.
+    """
+    named = set()
+    rest = text
+    for pid, check in sorted(by_id.items(), key=lambda item: -len(item[1]["policy_name"])):
+        name = check["policy_name"]
+        if name and name in rest:
+            named.add(pid)
+            rest = rest.replace(name, "\u0000")
+    return named
+
+
 def align_application_links(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
     """같은 정책의 구조화 신청 주소가 없는 경우에만 웹 신청 단정을 보정한다.
 
@@ -70,10 +95,16 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
     """
     by_id = {check["policy_id"]: check for check in checks}
     policy_of = {str(ctx["source_id"]): ctx["policy_id"] for ctx in contexts}
-    parts = BREAK.split(answer)
+    guarded = sorted({c["policy_name"] for c in checks if re.search(r"[,;]", c["policy_name"] or "")},
+                     key=len, reverse=True)
+    protected = answer
+    for number, name in enumerate(guarded):
+        protected = protected.replace(name, PROTECT.format(number))
+    parts = BREAK.split(protected)
     changed = False
     paragraph_policy = None
     for index in range(0, len(parts), 2):
+        parts[index] = PROTECTED.sub(lambda m: guarded[int(m.group(1))], parts[index])
         if index and re.search(r"\n\s*\n", parts[index - 1]):
             paragraph_policy = None
         # '...확인해 주세요. [1][3] 다음 문장'처럼 절 맨 앞의 인용은 앞 문장의 출처이므로 그대로 둔다.
@@ -83,7 +114,7 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         plain = clause.replace("**", "").replace("`", "")
         # 정책명이 앞 문장/제목에만 나와도 같은 문단의 설명은 그 정책에 속한다.
         # 빈 문단이나 여러 정책의 동시 언급 뒤에는 이전 정책을 추측해서 빌리지 않는다.
-        named = {pid for pid, check in by_id.items() if check["policy_name"] in plain}
+        named = _named_policies(plain, by_id)
         if named:
             paragraph_policy = next(iter(named)) if len(named) == 1 else None
         if not LINK_CLAIM.search(plain) or (CAUTION.search(plain) and not WEB_ACTION.search(plain)):
@@ -119,7 +150,7 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 # 원래 인용은 각자 자기 정책 근거를 가리키므로 그대로 둔다.
                 missing = [pid for pid in by_id if pid in targets
                            and not valid_source_url(by_id[pid].get("official_apply_url"))]
-                notes = " ".join(f"{by_id[pid]['policy_name']}: 현재 확인된 전용 신청 주소는 없습니다." for pid in missing)
+                notes = " ".join(f"{by_id[pid]['policy_name']}: {MISSING_LINK}" for pid in missing)
                 markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers))
                 text = " ".join(filter(None, (text, notes, markers)))
             parts[index] = head + text
@@ -129,10 +160,9 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers) if policy_of[n] == pid)
         place = _verified_visit(plain, pid, contexts)
         # 원문 근거가 있는 방문 신청은 남기고, 확인되지 않은 온라인 신청 경로만 보정한다.
-        text = f"{place} 방문 신청 방법은 확인되지만, 전용 온라인 신청 주소는 확인되지 않았습니다." if place \
-            else NO_APPLICATION_LINK
+        text = f"{place} 방문 신청 방법은 확인되지만, {MISSING_LINK}" if place else NO_APPLICATION_LINK
         if by_id[pid]["reception_status"] == "unknown":
-            text += " 현재 모집 일정과 접수 여부도 공식 공고 확인이 필요합니다."
+            text += f" {UNKNOWN_RECEPTION}"
         parts[index] = head + f"{by_id[pid]['policy_name']}: {text} {markers}".rstrip()
         changed = True
     fixed = "".join(parts)

@@ -640,3 +640,28 @@ PR 본문·Git 명령 보조 파일(`issue103-pr-description.md`, `issue103-pr-c
 | `git merge-tree` 최신 dev `8c40858` | 충돌 없음 |
 
 신규 실패 0건. 실제 R3D·실제 LLM·React 브라우저 재검증과 GitHub CI 확인은 **미실행**.
+
+## PR #136 4차 리뷰 반영 — 2026-11-27 (최신 판정)
+
+기준: PR HEAD `dac94d8`(3차 리뷰 반영 커밋), 최신 dev `8c40858`. 변경 파일: `backend/rag/application_links.py`, `ai/prompts/system_prompt.py`(2-2절 문구), `backend/rag/pipeline.py`(unknown 문구), `backend/api/policy_catalog.py`(하이픈 검색), `docs/api/ask_contract.md`(unknown 문구 계약 갱신), 기존 문구를 검사하던 테스트 3개(`test_issue103_guidance.py`, `test_issue103_actual_response_replay.py`, `test_rag_pipeline.py`), `test_issue103_review_feedback.py`, 본 보고서.
+
+### 필수 수정
+1. **쉼표 분리**: `BREAK`가 모든 `,`에서 절을 나눠 "월 1,000원이며 홈페이지에서 신청하세요 [1]."이 "월 1,{정책명}: …"으로 깨졌다. 쉼표는 뒤에 공백이 있을 때만 나누고, 앞뒤가 모두 숫자인 쉼표('1, 000', '1,2차')는 나누지 않는다. 정책명 안의 쉼표(릴리스 4건, 예: `자활근로(기초, 차상위)`)는 분리 전에 정책명을 임시 토큰으로 바꿨다가 절마다 복원해 이름이 잘리지 않게 했다.
+2. **겹치는 정책명**: 단순 포함 비교로 "K-패스 청년"(신청 URL 있음)이 "K-패스"로 보정되고 인용도 다른 정책에 붙었다. `_named_policies`가 긴 정책명부터 찾고, 찾은 위치를 가린 뒤 짧은 정책명을 찾는다. 긴 이름 안의 짧은 이름은 후보에서 빠지고, 긴 이름 밖에 따로 적힌 짧은 이름은 후보로 남는다. 릴리스의 겹침 5쌍(장애수당/포항시 장애수당 등) 모두 확인.
+3. **합의 문구 통일**: `official_apply_url=null` 안내를 #103 합의 문구 "직접 신청 링크는 확인되지 않았어요"로 통일(프롬프트 2-2절, `NO_APPLICATION_LINK`, 다중 정책 보정 문구, 방문 신청 보정 문구). unknown 접수 상태 보정 문구를 "현재 접수 여부는 공식 공고에서 확인해 주세요."로 바꿔 보정 문구에서 합니다체를 없앴다. 합의 문구 원문은 공개 이슈 #103·#18 본문·댓글에서 찾지 못해 리뷰 코멘트의 표기를 그대로 사용했다.
+
+### 선택 수정
+- `policy_catalog.py`: 검색어가 하이픈만으로 이뤄져 검색 키가 비면 전체 목록 대신 결과 0건. 공백만 입력하면 기존처럼 검색어 없음으로 본다.
+- `pipeline.py` `RECEPTION_NOTICE["unknown"]`: "현재 접수 여부는 공식 공고에서 확인해 주세요."(프롬프트의 기존 합의 문구와 동일). 공통 계약 문서 `docs/api/ask_contract.md` §후처리 문구도 같은 값으로 갱신했다(공통 파일 변경, 문구 통일 목적).
+
+### 수정 후 테스트
+| 범위 | 결과 |
+|---|---|
+| 리뷰 회귀 `test_issue103_review_feedback.py` (1~4차, 4차 16건 추가) | 46 passed |
+| 4차 신규 테스트를 `dac94d8` 코드에 실행 | 수정 대상 테스트 모두 실패(쉼표·겹침·문구·하이픈), 가드 테스트 3건만 통과 |
+| #103 관련 4개 파일(review_feedback·guidance·replay·readonly verifier) | 61 passed, 90 subtests |
+| PR 브랜치 전체 unit+integration | 2331 passed, 129 skipped, **1 failed(기존 doc_gov_048 원본 누락)** |
+| `py_compile`, `git diff --check` | PASS |
+| 최신 dev `8c40858`와 작업 트리 스냅샷 `git merge-tree` | 충돌 없음(dev의 `system_prompt.py` #39 변경과 다른 줄) |
+
+신규 실패 0건. 실제 R3D·실제 LLM·React 브라우저 재검증과 GitHub CI 확인은 **미실행**. 남은 한계: `pipeline.py`의 `CLAUSE_BREAK`도 `,\s*`로 절을 나눠 숫자 쉼표에서 같은 유형의 분리가 생길 수 있으나 이번 리뷰 범위 밖이라 바꾸지 않았다.
