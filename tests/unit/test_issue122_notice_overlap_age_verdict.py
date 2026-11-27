@@ -304,15 +304,40 @@ class StatedMissingLinkTests(unittest.TestCase):
         text = f"{NAME}은 홈페이지에서 신청하세요. 가상 다른 정책은 서류가 필요해요 [3]. {NAME}은 온라인으로 신청할 수 있어요 [1]."
         fixed, _ = align_application_links(text, contexts, [self.OPEN, valid])
         self.assertNotIn("[3][1]", fixed)
-        self.assertTrue(fixed.endswith("가상 다른 정책은 서류가 필요해요 [3]. [1]"))
+        # [1]은 가상 정책 자신의 보정 안내 문장으로 가고, 다른 정책 문장은 [3]만 남는다.
+        # 보정 문구와 같은 형식('…주세요. [1]')이라 NOTICE_COMMA·인용 묶음 정리와도 맞는다(7차 리뷰).
+        self.assertTrue(fixed.endswith(f"{MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [1] 가상 다른 정책은 서류가 필요해요 [3]."))
 
-    def test_citation_anchor_skips_unrelated_sentence_and_leading_clause(self):
-        # PR #161 5차 리뷰 선택: 안내 문장 뒤 '인용만 있는 조각'만 대상으로 보고, 첫 절이 빠지면 '[2].'로 시작하지 않는다.
-        fixed, _ = align_application_links("신청 링크는 없어요. 서류는 신분증이에요 [1]. 기간은 상시예요 [1]. 홈페이지에서 신청하세요 [2].",
+    def test_citation_goes_to_notice_sentence_wherever_it_is(self):
+        # PR #161 5·6차 리뷰 선택: 인용은 같은 정책 안내 문장으로 간다. 안내 문장에 인용이 없거나 뒤에 있어도 같다.
+        cases = {
+            "신청 링크는 없어요. 서류는 신분증이에요 [1]. 기간은 상시예요 [1]. 홈페이지에서 신청하세요 [2].":
+                "신청 링크는 없어요. [2] 서류는 신분증이에요 [1]. 기간은 상시예요 [1].",
+            "홈페이지에서 신청하세요 [2]. 서류 [1]. 신청 링크는 없어요 [1].":
+                "서류 [1]. 신청 링크는 없어요 [1][2].",
+            "홈페이지에서 신청하세요 [2]\n신청 링크는 없어요 [1].":
+                "신청 링크는 없어요 [1][2].",
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, CONTEXTS, [self.OPEN])[0], expected)
+
+    def test_notice_citation_keeps_comma_cleanup_and_head_citation(self):
+        # PR #161 7차 리뷰 필수: 보정 안내 뒤 쉼표가 '주세요., '로 남지 않고, 다음 절 머리 인용은 '[1][2]'로 묶인다.
+        fixed, _ = align_application_links("홈페이지에서 신청하세요, 서류는 신분증이에요 [1]. 온라인으로 신청할 수 있어요 [2].",
                                            CONTEXTS, [self.OPEN])
-        self.assertEqual(fixed, "신청 링크는 없어요. 서류는 신분증이에요 [1]. 기간은 상시예요 [1][2].")
-        fixed, _ = align_application_links("홈페이지에서 신청하세요 [2]. 서류 [1]. 신청 링크는 없어요 [1].", CONTEXTS, [self.OPEN])
-        self.assertEqual(fixed, "[2] 서류 [1]. 신청 링크는 없어요 [1].")
+        self.assertNotIn(".,", fixed)
+        self.assertNotIn(".;", fixed)
+        fixed, _ = align_application_links("신청 링크는 없어요. [1] 홈페이지에서 신청하세요 [2].", CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 링크는 없어요. [1][2]")
+
+    def test_citation_not_moved_to_notice_in_other_paragraph(self):
+        # PR #161 7차 리뷰 선택: 안내 문장이 다른 문단이면 먼 문단으로 옮기지 않는다.
+        fixed, _ = align_application_links("신청 링크는 없어요.\n\n서류 [1].\n\n기간 [2].\n\n홈페이지에서 신청하세요 [2].",
+                                           CONTEXTS, [self.OPEN])
+        self.assertTrue(fixed.startswith("신청 링크는 없어요.\n\n"))
+        self.assertNotIn("없어요 [2]", fixed)
+        self.assertNotIn("없어요. [2]", fixed)
 
     def test_paragraph_break_after_dropped_line_is_kept(self):
         # PR #161 4차 리뷰 필수 2: 앞이 줄바꿈, 뒤가 문단 구분이면 문단 구분을 남긴다.

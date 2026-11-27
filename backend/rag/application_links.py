@@ -189,7 +189,7 @@ def _drop_one_separator(parts: list[str], index: int) -> None:
 
 
 def _citation_anchor(parts: list[str], index: int, notice: int | None, pid: str,
-                     policy_of: dict[str, str]) -> int | None:
+                     policy_of: dict[str, str], head_citations: bool = False) -> int | None:
     """빠진 절(index)의 인용을 옮길 절 위치. 같은 정책 링크 안내 문장을 먼저, 없으면 바로 앞 절을 본다.
 
     안내 문장 바로 뒤에 인용만 따로 있으면('…않았어요. [1]') 그 인용 조각을 쓴다.
@@ -198,26 +198,46 @@ def _citation_anchor(parts: list[str], index: int, notice: int | None, pid: str,
     def citations_only(at: int) -> bool:
         return bool(parts[at].strip()) and not CITATION.sub("", parts[at]).strip()
 
-    candidates = []
-    if notice is not None and notice < index:
-        candidates.append(notice)
-        if notice + 2 < index and citations_only(notice + 2):
-            candidates.append(notice + 2)
-    candidates.append(index - 2)
-    for at in candidates:
-        if not 0 <= at < index:
-            continue
-        group = re.search(r"((?:\[\d+\])+)[.!?。！？]?\s*$", parts[at])
-        if group and all(policy_of.get(n) == pid for n in CITATION.findall(group.group(1))):
-            return at
+    if head_citations:
+        # 빠진 절 머리에 앞 문장의 인용('없어요. [1] 홈페이지…')이 있으면 그 자리에 함께 남겨 '[1][2]'로 둔다(7차 리뷰).
+        return None
+    low, high = sorted((notice, index)) if notice is not None else (index, index)
+    same_paragraph = not any(re.search(r"\n[ \t]*\n", parts[i]) for i in range(low + 1, high, 2))
+    if notice is not None and notice != index and same_paragraph and not head_citations:
+        # 안내 문장 바로 뒤(같은 줄이나 다음 줄)에 인용만 따로 있으면 그 조각, 아니면 안내 문장 자체(인용이 없어도 붙인다).
+        # 안내 문장이 빠진 절보다 뒤에 있어도 옮긴다('[2] 서류 [1]…'처럼 답변이 인용으로 시작하지 않게, PR #161 6차 리뷰).
+        # 다른 문단의 안내 문장으로는 멀리 옮기지 않는다(7차 리뷰).
+        after_notice = notice + 2
+        if after_notice < len(parts) and after_notice != index and citations_only(after_notice) \
+                and not re.search(r"\n[ \t]*\n", parts[notice + 1]) \
+                and _same_policy_group(parts[after_notice], pid, policy_of):
+            return after_notice
+        if _same_policy_group(parts[notice], pid, policy_of, allow_empty=True):
+            return notice
+    at = index - 2
+    if at >= 0 and _same_policy_group(parts[at], pid, policy_of):
+        return at
     return None
+
+
+def _same_policy_group(part: str, pid: str, policy_of: dict[str, str], *, allow_empty: bool = False) -> bool:
+    """절 끝 인용 묶음의 출처가 모두 pid이면 True. allow_empty면 끝에 인용이 없어도 True."""
+    group = re.search(r"((?:\[\d+\])+)[.!?。！？]?\s*$", part)
+    if not group:
+        return allow_empty and bool(part.strip())
+    return all(policy_of.get(n) == pid for n in CITATION.findall(group.group(1)))
 
 
 def _append_citations(sentence: str, markers: str) -> str | None:
     """문장 끝 인용 묶음('…해요 [1].', '[2][1]')에 인용을 더한다. 끝에 인용 묶음이 없으면 None."""
     match = re.search(r"((?:\[\d+\])+)([.!?。！？]?)(\s*)$", sentence)
     if not match:
-        return None
+        if not markers:
+            return None
+        # 끝에 인용이 없는 안내 문장은 보정 문구와 같은 형식('…주세요. [2]')으로 문장부호 뒤에 붙인다.
+        # 이렇게 해야 NOTICE_COMMA가 뒤 쉼표를 정리하고, 다음 절 머리 인용과도 묶음으로 합쳐진다(PR #161 7차 리뷰).
+        stripped = sentence.rstrip()
+        return f"{stripped} {markers}" + sentence[len(stripped):]
     group = "".join(f"[{n}]" for n in dict.fromkeys(CITATION.findall(match.group(1) + markers)))
     return sentence[:match.start()] + group + match.group(2) + match.group(3)
 
@@ -358,7 +378,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
-                elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of)) is not None:
+                elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of,
+                                                               head_citations=bool(head.strip()))) is not None:
                     # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
                     # 옮긴다. 반복 안내 제거와 같은 기준이다(인용 번호 유지, PR #140 검증).
                     parts[anchor] = _append_citations(parts[anchor], markers)
