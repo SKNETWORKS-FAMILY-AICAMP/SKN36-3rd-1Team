@@ -16,7 +16,7 @@ from unittest.mock import Mock
 import pytest
 
 from pr140_verification_oracles import (
-    assert_age_outcomes, assert_replay_sources, bind_saved_completion, boundary_values,
+    MERGED_CITATION_RUNS, assert_age_outcomes, assert_replay_sources, bind_saved_completion, boundary_values,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -198,7 +198,8 @@ def test_saved_live_llm_contract_replay():
                 'selected_policy_id': run['policy_id'], 'history': []})
         assert response.status_code == 200
         assert {p['policy_id'] for p in response.json()['policy_checks']} == {run['policy_id']}
-        assert_replay_sources(saved, response.json(), run['policy_id'])
+        assert_replay_sources(saved, response.json(), run['policy_id'],
+                              merged_duplicates=(run['policy_id'], run['age']) in MERGED_CITATION_RUNS)
 
 
 def main():

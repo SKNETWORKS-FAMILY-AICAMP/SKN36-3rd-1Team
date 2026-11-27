@@ -10,7 +10,10 @@ LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
 # URL 안의 마침표는 문장 경계가 아니다. 쉼표로 나눈 정책 설명도 독립 검증한다.
 # 쉼표는 뒤에 공백이 있을 때만 나누고, 숫자 사이 쉼표('1,000원', '1, 2')는 나누지 않는다.
 BREAK = re.compile(
-    r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|(?<!\d),\s+|,\s+(?!\d)|;\s*|\s+(?:하지만|그러나|다만)\s+)"
+    r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|(?<!\d),\s+|,\s+(?!\d)|;\s*|\s+(?:하지만|그러나|다만)\s+"
+    # '서류는 신분증이에요 [1] 홈페이지에서 신청하세요 [2]'처럼 종결어미(요·다) 뒤 인용에서 마침표 없이 다음 문장이
+    # 이어지는 경우만 나눈다. '홈페이지에서 [1] 신청'·'가상정책 [1] 다른정책 [3]'처럼 문장 중간 인용은 나누지 않는다(PR #161).
+    r"|(?<=[요다])[ \t]*(?:\[\d+\])+[ \t]+(?=[^\s\[\].,!?;:)]))"
 )
 # 정책명 안의 쉼표·세미콜론('자활근로(기초, 차상위)')에서 절이 끊기지 않도록 분리 전에 잠시 치환한다.
 PROTECT = "{}"
@@ -113,42 +116,96 @@ def _states_missing_only(clause: str) -> bool:
     return not LINK_CLAIM.search(STATED_MISSING.sub("", clause))
 
 
+def _missing_notice_only(sentence: str) -> bool:
+    """문장이 '신청 주소·링크가 확인되지 않았다'는 말만 담고 있으면 True.
+
+    미확인 서술 뒤에는 어미('았어요', '습니다' 등)만 올 수 있다. '없고 주민센터 방문으로만 접수해요',
+    '없으며 신분증이 필요해요', '아직 없고 3월에 공개'처럼 다른 정보가 이어지면 False다(PR #161 재리뷰).
+    """
+    body = CITATION.sub("", sentence).replace("**", "").strip()
+    matches = list(STATED_MISSING.finditer(body))
+    if not body or len(body) > MAX_REPEAT_NOTICE or not matches or not _states_missing_only(body):
+        return False
+    gaps = [body[a.end():b.start()] for a, b in zip(matches, matches[1:])]
+    head, tail = body[:matches[0].start()], body[matches[-1].end():]
+    return (len(head) <= 20 and all(len(gap) <= 15 for gap in gaps)
+            and re.fullmatch(r"\s*(?:았|었)?(?:어요|습니다|어|다|요|음)?\s*[.!?。]?\s*", tail) is not None)
+
+
 def _drop_repeated_missing_notice(answer: str) -> tuple[str, bool]:
     """한 정책 답변에서 '신청 주소·링크가 확인되지 않았다'는 짧은 문장이 거듭 나오면 첫 문장만 남긴다.
 
     LLM이 '공식 신청 주소는 확인되지 않았어요. … 직접 신청 링크는 확인되지 않았습니다.'처럼 같은 안내를
-    연달아 쓰는 경우다(#122 1번 재검증 인천). 뒤 문장의 인용 번호는 남기고, 다른 내용이 섞인 긴 문장은 두지 않는다.
+    연달아 쓰는 경우다(#122 1번 재검증 인천). 다른 정보가 섞인 문장은 두고, 뺀 문장의 인용 번호는
+    같은 안내를 하는 첫 문장으로 옮긴다(엉뚱한 앞 문장의 근거처럼 보이지 않게).
     """
     pieces = re.split(r"((?<=[.!?。])\s+|\n+)", answer)
-    seen = False
-    changed = False
-    dropped = False
+    kept = None
+    moved: list[str] = []
+    last_dropped = None
     for index in range(0, len(pieces), 2):
         sentence = pieces[index]
-        body = CITATION.sub("", sentence).replace("**", "").strip()
-        if not body and dropped:
-            # 빠진 문장 뒤에 떨어져 있던 인용('…않았습니다. [2]')은 남기되 앞 문장에 붙인다.
-            if index and "\n" in pieces[index - 1]:
-                pieces[index - 1] = " "
+        citations_only = sentence.strip() and not CITATION.sub("", sentence).strip()
+        if citations_only and last_dropped == index - 2:
+            # 빠진 문장 뒤에 떨어져 있던 인용('…않았습니다. [2]')도 첫 문장으로 옮긴다.
+            moved += CITATION.findall(sentence)
+            pieces[index] = pieces[index - 1] = ""
             continue
-        dropped = False
-        if not body or len(body) > MAX_REPEAT_NOTICE or not _states_missing_only(body):
+        if not _missing_notice_only(sentence):
             continue
-        if seen:
-            # 인용 번호는 저장 응답과 같게 유지한다(PR #140 검증). 문장만 빼고 인용은 앞 문장에 붙인다.
-            pieces[index] = "".join(CITATION.findall(sentence) and re.findall(r"\[\d+\]", sentence))
-            if pieces[index] and index and "\n" in pieces[index - 1]:
-                pieces[index - 1] = " "
-            changed = dropped = True
-        seen = True
-    if not changed:
+        if kept is None:
+            kept = index
+            continue
+        moved += CITATION.findall(sentence)
+        pieces[index] = ""
+        if "\n" not in pieces[index - 1]:
+            pieces[index - 1] = ""
+        elif index + 1 < len(pieces):
+            # 문단 첫 문장이 빠지면 문단 구분은 두고 뒤 구분자만 지운다. 목록 항목 하나가 통째로 빠질 때도
+            # 줄바꿈 두 개가 겹쳐 빈 줄이 생기지 않는다.
+            pieces[index + 1] = ""
+        last_dropped = index
+    if last_dropped is None:
         return answer, False
+    # 첫 문장의 인용이 마침표 뒤에 따로 있으면('…않았어요. [1][2]') 그 인용 묶음에 붙인다.
+    target = kept
+    if (kept + 2 < len(pieces) and "\n" not in pieces[kept + 1] and pieces[kept + 2].strip()
+            and not CITATION.sub("", pieces[kept + 2]).strip()):
+        target = kept + 2
+    extra = "".join(f"[{n}]" for n in dict.fromkeys(moved) if n not in CITATION.findall(pieces[target]))
+    if extra:
+        # 첫 문장의 인용 묶음 끝(없으면 문장 끝)에 붙인다. 인용 번호는 문서 연결을 그대로 유지한다(PR #140 검증).
+        pieces[target] = re.sub(r"((?:\[\d+\])+)(?=[^\[]*$)|\s*$", lambda m: (m.group(1) or " ") + extra,
+                                pieces[target], count=1)
     fixed = "".join(pieces)
-    # 인용만 남은 문단('\n\n [2]')은 앞 문단 끝에 붙인다.
-    fixed = re.sub(r"\s*\n\s*\n\s*((?:\[\d+\]\s*)+)(?=\n|$)", lambda m: " " + m.group(1).strip(), fixed)
     fixed = re.sub(r"[ \t]+(?=\n|$)", "", fixed)
     fixed = re.sub(r"[ \t]{2,}", " ", fixed)
-    return re.sub(r"\n[ \t]*(?:\n[ \t]*){2,}", "\n\n", fixed).strip(), True
+    return _merge_adjacent_citations(re.sub(r"\n[ \t]*(?:\n[ \t]*){2,}", "\n\n", fixed).strip()), True
+
+
+def _append_citations(sentence: str, markers: str) -> str | None:
+    """문장 끝 인용 묶음('…해요 [1].', '[2][1]')에 인용을 더한다. 끝에 인용 묶음이 없으면 None."""
+    match = re.search(r"((?:\[\d+\])+)([.!?。！？]?)(\s*)$", sentence)
+    if not match:
+        return None
+    group = "".join(f"[{n}]" for n in dict.fromkeys(CITATION.findall(match.group(1) + markers)))
+    return sentence[:match.start()] + group + match.group(2) + match.group(3)
+
+
+def _merge_adjacent_citations(text: str) -> str:
+    """보정으로 붙은 인용 묶음이 바로 앞 묶음과 겹치면('[2] [2]', '[1][2] [2]') 새 번호만 남긴다."""
+    def merge(match: re.Match[str]) -> str:
+        first = CITATION.findall(match.group(1))
+        extra = [n for n in dict.fromkeys(CITATION.findall(match.group(2))) if n not in first]
+        return match.group(1) + "".join(f"[{n}]" for n in extra)
+    previous = None
+    while previous != text:
+        previous = text
+        text = re.sub(r"((?:\[\d+\])+)[ \t]+((?:\[\d+\])+)", merge, text)
+        # 한 묶음 안에서 같은 번호가 이어지면('[1][1]') 하나만 남긴다.
+        text = re.sub(r"(?:\[\d+\]){2,}", lambda m: "".join(
+            f"[{n}]" for n in dict.fromkeys(CITATION.findall(m.group(0)))), text)
+    return text
 
 
 def _named_policies(text: str, by_id: dict[str, dict]) -> set[str]:
@@ -267,9 +324,24 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
+                elif markers and index >= 2 and (joined := _append_citations(parts[index - 2], markers)):
+                    # 문장 전체가 빠지면 그 인용은 바로 앞 문장의 인용 묶음으로 옮긴다(인용 번호 유지, PR #140 검증).
+                    parts[index - 2] = joined
+                    parts[index] = head
+                    if "\n" not in before:
+                        parts[index - 1] = ""
+                    elif "\n" in after:
+                        parts[index + 1] = ""
+                elif markers and (punct := re.search(r"[.!?。！？]\s*$", clause)) and not re.match(r"\s*[,;]", after):
+                    # 빠진 절이 문장 끝이었으면 마침표를 남겨야 앞 절이 문장으로 끝난다('신분증이에요 [1][2].').
+                    parts[index] = head + markers + punct.group(0).strip()
+                    if "\n" in before:
+                        parts[index - 1] = " "
                 elif markers and "\n" in before:
-                    # 인용 번호는 저장 응답과 같게 유지한다(PR #140 검증). 인용만 남은 문단은 앞 문단 끝에 붙인다.
+                    # 인용만 남은 문단은 앞 문단 끝에 붙인다.
                     parts[index - 1] = " "
+                elif not markers and "\n" in before and "\n" in after:
+                    parts[index + 1] = ""  # 목록 항목 하나가 빠질 때 빈 줄이 생기지 않게 한다.
                 elif not markers and index and "\n" not in before:
                     parts[index - 1] = ""
             changed = True
@@ -293,5 +365,9 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         fixed = NOTICE_COMMA.sub(lambda m: m.group(1) + m.group(2) + (m.group(3) or " "), fixed)
         # 문단 하나가 통째로 빠지면 빈 줄이 겹친다(PR #161 리뷰).
         fixed = re.sub(r"\n[ \t]*(?:\n[ \t]*){2,}", "\n\n", fixed)
+        # 빠진 절의 인용을 앞에 붙이면서 같은 번호가 이어지면 하나로 합친다.
+        fixed = _merge_adjacent_citations(fixed)
+        # 문단 첫 절이 빠지면 줄 앞에 구분 공백 한 칸이 남는다. 들여쓰기(두 칸 이상)·인용문·코드는 건드리지 않는다.
+        fixed = re.sub(r"(\n) (?=[^\s>|`\-*+\d])", r"\1", fixed)
     # 절을 뺀 경우 남은 구분자 공백만 정리한다.
     return (fixed.strip() if changed else fixed), changed

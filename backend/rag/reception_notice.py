@@ -55,9 +55,12 @@ def ensure_unknown_reception_notice(answer: str, contexts: list[dict], checks: l
     normalized = NEAR_PHRASE.sub(PHRASE, answer)
     changed = normalized != answer
     parts = SENTENCE_BREAK.split(normalized)
+    # 한 정책 답변에 이미 합의 문구가 있으면 바꿔 쓴 문장을 또 합의 문구로 바꾸지 않는다.
+    # 바꾸면 같은 문구가 두 번 나오고 '신청기한 미확인' 같은 원래 정보도 사라진다(PR #161 재리뷰).
+    already = len(targets) == 1 and has_reception_notice(normalized)
     for index in range(0, len(parts), 2):
         sentence = parts[index]
-        if has_reception_notice(sentence) or not PARAPHRASE.search(sentence):
+        if already or has_reception_notice(sentence) or not PARAPHRASE.search(sentence):
             continue
         numbers = list(dict.fromkeys(CITATION.findall(sentence)))
         cited = {policy_of.get(n) for n in numbers}

@@ -157,8 +157,15 @@ class StatedMissingLinkTests(unittest.TestCase):
         self.assertEqual(fixed.count(PHRASE), 1)
         # 마지막 문단의 '신청 URL은 따로 제공되지 않았습니다'는 첫 문단과 같은 안내라 빠진다(PR #161 리뷰 후속).
         self.assertNotIn("제공되지 않았습니다", fixed)
-        # 인용 번호는 저장 응답과 같은 수로 유지하고(PR #140 검증), 인용만 남은 문단은 앞 문단에 붙인다.
-        self.assertEqual(fixed, "가상 정책은 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. [2] [2]")
+        # 인용만 남은 문단은 앞 문단에 붙이고, 같은 번호가 이어지면 하나로 합친다('[2] [2]' 방지).
+        self.assertEqual(fixed, "가상 정책은 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. [2]")
+
+    def test_attached_citations_merge_without_losing_new_numbers(self):
+        # 빠진 문장의 인용이 앞 묶음과 일부만 겹치면 새 번호만 덧붙인다.
+        text = "공식 신청 주소는 확인되지 않았어요. [1][2]\n\n직접 신청 링크는 확인되지 않았어요. [2][3]"
+        fixed, changed = align_application_links(text, CONTEXTS + [{"source_id": 3, "policy_id": "A", "text": "z"}], [self.OPEN])
+        self.assertTrue(changed)
+        self.assertEqual(fixed, "공식 신청 주소는 확인되지 않았어요. [1][2][3]")
 
     def test_online_method_verified_by_source_is_kept(self):
         # POL_005 형태: 원문에 온라인 신청서 작성 안내가 있으면 '온라인으로 신청'은 방법 설명이라 남긴다(#158 인계).
@@ -237,6 +244,88 @@ class StatedMissingLinkTests(unittest.TestCase):
         self.assertEqual(fixed, f"{stated} 서류는 신분증이 필요하고, 신청 방법은 공식 공고에서 확인해 주세요. [1] 기간은 상시예요 [1].")
         fixed, _ = align_application_links(f"{stated} [1]\n\n홈페이지에서 신청하세요.\n\n서류는 신분증 [1].", CONTEXTS, [self.OPEN])
         self.assertEqual(fixed, f"{stated} [1]\n\n서류는 신분증 [1].")
+
+    def test_repeated_missing_sentence_with_other_info_is_kept(self):
+        # PR #161 재리뷰 필수 1: 링크 미확인 뒤에 방문·서류·일정 정보가 이어지는 문장은 지우지 않는다.
+        for text in ("신청 링크는 확인되지 않았어요 [1]. 신청 주소는 없고 주민센터 방문으로만 접수해요 [1].",
+                     "신청 주소는 확인되지 않았어요 [1]. 신청 링크는 없으며 신분증과 통장 사본이 필요해요 [2].",
+                     "신청 링크는 없어요 [1]. 신청 주소는 아직 없고 3월에 공개될 예정이에요 [2]."):
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, CONTEXTS, [self.OPEN]), (text, False))
+
+    def test_dropped_sentence_citation_moves_to_first_notice(self):
+        # PR #161 재리뷰 선택 1: 뺀 문장의 인용은 같은 안내를 하는 첫 문장으로 옮긴다(무관한 앞 문장에 붙지 않음).
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "A", "text": "z"}]
+        cases = {
+            "**신청 링크는 확인되지 않았어요** [1]. 서류는 신분증. **신청 URL은 없습니다** [2].":
+                "**신청 링크는 확인되지 않았어요** [1][2]. 서류는 신분증.",
+            "지원금은 월 10만원이에요 [1]. 신청 링크는 없어요 [2]. 다만 신청 주소는 확인되지 않았어요 [3].":
+                "지원금은 월 10만원이에요 [1]. 신청 링크는 없어요 [2][3].",
+            "신청 링크는 확인되지 않았어요 [1].\n\n신청 주소는 따로 없어요. 서류는 신분증입니다 [1].":
+                "신청 링크는 확인되지 않았어요 [1].\n\n서류는 신분증입니다 [1].",
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, contexts, [self.OPEN])[0], expected)
+
+    def test_removed_claim_sentence_citation_joins_previous_group(self):
+        # 웹 신청 단정 문장 전체가 빠지면 그 인용은 앞 문장 인용 묶음으로 들어가고 같은 번호는 하나로 합친다.
+        fixed, _ = align_application_links("신청 주소는 따로 없어요 [1]. 가상 홈페이지에서 신청할 수 있어요 [1].", CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 주소는 따로 없어요 [1].")
+
+    def test_clause_after_citation_is_split_and_sentence_end_kept(self):
+        # 인용 뒤에 문장부호 없이 이어진 웹 신청 절만 빠지고, 앞 절(서류)과 마침표·인용은 남는다.
+        cases = {
+            "신청 링크는 없어요 [1]. 서류는 신분증이에요 [1] 홈페이지에서 신청하세요 [2].":
+                "신청 링크는 없어요 [1]. 서류는 신분증이에요 [1][2].",
+            "신청 주소는 따로 없어요 [1]. 가상 홈페이지에서 신청할 수 있어요 [2]. 기간은 상시예요 [1].":
+                "신청 주소는 따로 없어요 [1][2]. 기간은 상시예요 [1].",
+        }
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "A", "text": "z"}]
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(align_application_links(text, contexts, [self.OPEN])[0], expected)
+
+    def test_mid_sentence_citation_still_corrected(self):
+        # PR #161 3차 리뷰 필수 1: 문장 중간 인용 뒤에서 절을 나누지 않아 웹 신청 단정이 그대로 보정된다.
+        for text in ("가상 정책은 홈페이지에서 [1] 신청할 수 있어요.", "온라인 [1] 신청이 가능해요."):
+            with self.subTest(text=text):
+                fixed, changed = align_application_links(text, CONTEXTS, [self.OPEN])
+                self.assertTrue(changed)
+                self.assertTrue(fixed.startswith(f"{MISSING}."))
+
+    def test_multi_policy_citations_mid_sentence_keep_policy_scope(self):
+        # PR #161 3차 리뷰 필수 2: '정책A [1] 정책B [3] 모두 …'는 두 정책 기준으로 보정하고, 주소를 직접 쓰면 거절한다.
+        other = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": None, "reception_status": "open"}
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "B", "text": "신청방법"}]
+        text = f"{NAME} [1] 가상 다른 정책 [3] 모두 홈페이지에서 신청할 수 있어요."
+        fixed, _ = align_application_links(text, contexts, [self.OPEN, other])
+        self.assertIn(f"{NAME}: {MISSING}", fixed)
+        self.assertIn(f"가상 다른 정책: {MISSING}", fixed)
+        from backend.rag.pipeline import AskError
+        with self.assertRaises(AskError):
+            align_application_links(f"{NAME} [1] 가상 다른 정책 [3] 모두 https://example.org 에서 신청하세요.", contexts, [self.OPEN, other])
+
+    def test_unrelated_list_and_table_citations_are_not_moved(self):
+        # PR #161 3차 리뷰 필수 3: 보정과 무관한 목록·표의 인용은 옮기지 않는다. 들여쓰기·인용문도 유지한다.
+        text = ("신청 링크는 없어요 [1]. 홈페이지에서 신청하세요 [2].\n\n1. 서류 [1]. [2] 항목은 별도\n2. 기간\n\n"
+                "| 서류 | [1]. [2] |\n    들여쓴 문단\n  > 인용문")
+        fixed, _ = align_application_links(text, CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 링크는 없어요 [1][2].\n\n1. 서류 [1]. [2] 항목은 별도\n2. 기간\n\n"
+                                "| 서류 | [1]. [2] |\n    들여쓴 문단\n  > 인용문")
+
+    def test_dropped_list_item_leaves_no_blank_line(self):
+        # PR #161 3차 리뷰 선택 2: 목록에서 반복 안내 항목이 빠져도 빈 줄이 생기지 않는다.
+        text = "- 신청 링크는 확인되지 않았어요 [1]\n- 신청 주소는 없어요 [2]\n- 서류: 신분증 [1]"
+        fixed, _ = align_application_links(text, CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "- 신청 링크는 확인되지 않았어요 [1][2]\n- 서류: 신분증 [1]")
+
+    def test_existing_notice_keeps_paraphrased_deadline_sentence(self):
+        # PR #161 재리뷰 선택 3: 합의 문구(목적격)가 이미 있으면 '신청기한 미확인' 문장을 합의 문구로 또 바꾸지 않는다.
+        text = "이 정책은 **현재 접수 여부를 공식 공고에서 확인해 주세요**. 원문에는 신청기한이 확인되지 않고, 접수 상태도 알 수 없습니다. [1]"
+        fixed = aligned(text)
+        self.assertIn("신청기한이 확인되지 않고", fixed)
+        self.assertEqual(fixed.count("접수 여부"), 1)
 
     def test_multi_policy_answer_keeps_policy_name_label(self):
         other = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": None, "reception_status": "open"}

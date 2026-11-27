@@ -35,8 +35,17 @@ def bind_saved_completion(saved, contexts, policy_id):
             'follow_up_questions': saved['follow_up_questions']}
 
 
-def assert_replay_sources(saved, replayed, policy_id):
-    """Compare each textual citation occurrence to the independently saved API."""
+# PR #161: 저장 답변의 '공식 신청 URL … [1]' 문단을 링크 보정이 빼고, 그 인용을 바로 앞 같은 문서 인용
+# 묶음에 합치는 재생. 이 재생만 '연속된 같은 문서 인용'을 하나로 본 기대값과 비교한다.
+MERGED_CITATION_RUNS = {('POL_STG_ICN_001', 40)}
+
+
+def assert_replay_sources(saved, replayed, policy_id, *, merged_duplicates=False):
+    """Compare each textual citation occurrence to the independently saved API.
+
+    merged_duplicates=True는 MERGED_CITATION_RUNS처럼 보정이 인용을 합치는 재생에만 쓴다.
+    이때도 재생 쪽은 줄이지 않고, 저장 쪽의 연속 중복만 합친 목록과 정확히 같아야 한다.
+    """
     assert {p['policy_id'] for p in replayed['policy_checks']} == {policy_id}
     def linked_sources(response):
         linked = []
@@ -44,7 +53,10 @@ def assert_replay_sources(saved, replayed, policy_id):
             assert 1 <= number <= len(response['citations']), 'citation missing'
             linked.append(citation_identity(response['citations'][number - 1]))
         return linked
-    assert linked_sources(saved) == linked_sources(replayed), 'citation binding changed'
+    expected = linked_sources(saved)
+    if merged_duplicates:
+        expected = [s for i, s in enumerate(expected) if i == 0 or expected[i - 1] != s]
+    assert expected == linked_sources(replayed), 'citation binding changed'
     assert sorted(map(citation_identity, saved['citations']), key=repr) == sorted(
         map(citation_identity, replayed['citations']), key=repr), 'citation metadata changed'
 
