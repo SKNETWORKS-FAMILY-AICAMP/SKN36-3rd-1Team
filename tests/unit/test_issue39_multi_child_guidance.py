@@ -4,6 +4,8 @@
 중복 입력 요청으로 지우지 않고, 같은 자녀의 월령을 다시 묻는 문장만 지운다. ask_info 확장은 하지 않는다.
 """
 
+import re
+
 import pytest
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
@@ -39,6 +41,27 @@ def test_multi_child_guidance_is_kept_when_months_are_known(months, sentence):
 @pytest.mark.parametrize("sentence", ["자녀 월령을 알려 주세요.", "아기는 몇 개월인가요?"])
 def test_same_child_reask_is_still_removed(months, sentence):
     # 기존 동작 유지: 이미 입력된 같은 자녀의 월령을 다시 묻는 문장은 지운다(0개월 포함).
+    assert g._is_redundant_request(sentence, profile(months))
+    assert sentence not in g._remove_redundant_answer_requests(f"{BASE} {sentence}", profile(months))
+
+
+@pytest.mark.parametrize("text", ["둘째 자녀", "셋째 아이", "둘째아기", "셋째 자녀의 월령"])
+def test_ordinal_with_child_word_is_multi_child(text):
+    assert re.search(g.MULTI_CHILD_PATTERN, text)
+
+
+@pytest.mark.parametrize("text", [
+    "둘째 주", "셋째 주 월요일", "둘째 날", "셋째 항목", "둘째로", "매월 둘째 주까지 신청하세요.",
+])
+def test_ordinal_without_child_word_is_not_multi_child(text):
+    # 리뷰 반영: '둘째'·'셋째'만으로는 다자녀 안내로 보지 않는다.
+    assert not re.search(g.MULTI_CHILD_PATTERN, text)
+
+
+@pytest.mark.parametrize("months", [0, 24])
+def test_same_child_reask_with_unrelated_ordinal_is_still_removed(months):
+    # '둘째 주'가 들어 있어도 같은 자녀의 월령 재요청이면 다자녀 예외로 남기지 않는다.
+    sentence = "자녀 월령을 둘째 주까지 알려 주세요."
     assert g._is_redundant_request(sentence, profile(months))
     assert sentence not in g._remove_redundant_answer_requests(f"{BASE} {sentence}", profile(months))
 
