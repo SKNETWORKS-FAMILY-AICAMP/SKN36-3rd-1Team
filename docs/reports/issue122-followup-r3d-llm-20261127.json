@@ -1,0 +1,2039 @@
+{
+  "mode": "real_llm",
+  "llm_calls": 3,
+  "llm_errors": 0,
+  "model": "gpt-5.4-mini",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "cases": [
+    {
+      "scenario": "r1_required_and_fail",
+      "selected_policy_id": "POL_GOV_024",
+      "request_profile": {
+        "age": 45,
+        "region": "",
+        "income": null
+      },
+      "question": "이 정책의 자격 충족 여부와 신청 방법, 접수 상태를 알려줘",
+      "http": 200,
+      "response": {
+        "status": "info",
+        "answer": "청년 사업자 임대료 지원 사업은 공고일 기준으로 중구에 주민등록이 있고, 사업장 소재지도 중구 관내인 청년사업자(19세~39세)여야 합니다[2][3]. 현재 입력된 만 45세는 연령 기준에 맞지 않아 이 정책의 대상이 아닙니다[2][3].\n\n신청 방법은 방문신청(중구청 4층 혁신사업홍보과) 또는 담당자 이메일 접수로 안내되어 있습니다[1]. 다만 공식 신청 링크는 확인되지 않았어요. 신청기한은 '4월 중'으로만 확인되며, 현재 접수 여부는 공식 공고에서 확인해 주세요[1].",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 청년 사업자 임대료 지원 사업 (341000000312)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "document_id": "DOC_GOV_024",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 청년 사업자 임대료 지원 사업 (341000000312)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "document_id": "DOC_GOV_024",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 청년 사업자 임대료 지원 사업 (341000000312)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "document_id": "DOC_GOV_024",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_024",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "① 대구광역시 중구 청년사업자 임대료 지원 사업 참여 신청서 1부 [서식1]\r\n② 대구광역시 중구 청년사업자 임대료 지원 사업 참여 서약서 1부 [서식2] \r\n③ 개인정보 수집･활용 제공 동의서 1부 [서식3]\r\n④ 사업자 등록증 및 임대차 계약서 사본 1부\r\n⑤ 가족관계증명서 각1부(본인 및 부모, 배우자 및 배우자 부모)\r\n⑥ 주민등록 초본 1부, 국세납세증명서, 지방세납세 증명서\r\n⑦ 매출증명서류 1부\r\n ◦ 일반･간이 사업자 : 부가가치세 과세표준 증명원(직전년도 1년간)\r\n ◦ 면세사업자 : 부가가치세 면세사업자 수입금액 증명원(직전년도 1년간)\r\n⑧ 상시근로자 확인서류 1부\r\n ◦ 상시근로자가 없는 경우 : 건강보험 자격득실 확인서\r\n ◦ 상시근로자가 있는 경우 : 사업장 가입자 명부\r\n\r\n※공고일 이후 발급한 서류만 인정",
+                "document_id": "DOC_GOV_024",
+                "chunk_id": "CHK_B2_DOC_GOV_024_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312"
+              }
+            ],
+            "policy_name": "청년 사업자 임대료 지원 사업",
+            "agency": "대구광역시 중구",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "혁신사업홍보과",
+                "phone": "053-661-2184",
+                "document_id": "DOC_GOV_024",
+                "chunk_id": "CHK_B2_DOC_GOV_024_C003",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "공고일 기준 중구에 주민등록을 두고, 사업장 소재지가 중구 관내에 있는 청년사업자(19세 ~ 39세)",
+                "document_id": "DOC_GOV_024",
+                "chunk_id": "CHK_B2_DOC_GOV_024_C001",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 제출 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 문의처와 연락처를 알려줘?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_GOV_024",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "ineligible",
+              "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다."
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            }
+          ],
+          "reception_status": "unknown",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": {
+        "POL_GOV_024": {
+          "warnings": [
+            {
+              "code": "EXTRACTED_NOT_VERIFIED",
+              "level": "caution",
+              "count": 8,
+              "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+              "severity": "low",
+              "evidence_level": "graph_metadata",
+              "verification": "not_officially_checked",
+              "affects": [],
+              "blocks_auto_eligibility": false,
+              "official_source_checked": false
+            },
+            {
+              "code": "SUSPECTED_REGION_GRANULARITY_LOST",
+              "level": "suspected",
+              "organization": "대구광역시 중구",
+              "graph_regions": [
+                "대구광역시"
+              ],
+              "municipality_in_organization": "중구",
+              "message": "운영기관은 중구인데 그래프 지역은 ['대구광역시'](시·도 단위)뿐임. 시·군·구 거주 요건이 사라졌을 수 있으니 지역 판정은 원문으로 (확정 아님)",
+              "severity": "high",
+              "evidence_level": "graph_property_pattern",
+              "verification": "suspected",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "SEARCH_REGION_REQUIRES_REVIEW",
+              "level": "caution",
+              "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+              "stored_regions": [
+                "대구광역시",
+                "대구광역시",
+                "대구광역시"
+              ],
+              "severity": "medium",
+              "evidence_level": "stored_region_string",
+              "verification": "not_officially_checked",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "extracted": 8
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "SEARCH_REGION_REQUIRES_REVIEW",
+            "SUSPECTED_REGION_GRANULARITY_LOST"
+          ],
+          "affected_attributes": [
+            "region"
+          ],
+          "official_source_checked": false
+        }
+      },
+      "structure": {
+        "POL_GOV_024": {
+          "evaluated": false,
+          "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+          "condition_tree": [
+            {
+              "group_id": "GRP_POL_GOV_024_ROOT",
+              "logic": "AND",
+              "is_root": true,
+              "description": "청년 사업자 임대료 지원 사업 복합 자격 조건 루트 그룹 (AND 결합)",
+              "relationship": {
+                "target_name": "Root Condition Group (POL_GOV_024)",
+                "evidence_location": "기본자격요건",
+                "evidence_document_id": "DOC_GOV_024",
+                "review_status": "extracted"
+              },
+              "conditions": [
+                {
+                  "unit": "세",
+                  "evidence_location": "지원조건 JA0110/JA0111",
+                  "name": "연령조건: 만 19세~39세",
+                  "description": "정책 지원 자격 조건 (연령조건: 만 19세~39세)",
+                  "type": "AGE",
+                  "value": "19~39",
+                  "operator": "BETWEEN",
+                  "condition_id": "COND_AGE_19_39",
+                  "relationship": {
+                    "target_name": "연령조건: 만 19세~39세",
+                    "evidence_location": "필수조건",
+                    "evidence_document_id": "DOC_GOV_024",
+                    "review_status": "extracted"
+                  }
+                }
+              ],
+              "groups": []
+            }
+          ],
+          "requires_condition_ids": [
+            "COND_AGE_19_39"
+          ],
+          "tree_condition_ids": [
+            "COND_AGE_19_39"
+          ],
+          "tree_matches_requires_condition": true,
+          "unknown_logic_groups": [],
+          "structure_issues": []
+        }
+      },
+      "generator_checks": [
+        {
+          "policy_id": "POL_GOV_024",
+          "policy_name": "청년 사업자 임대료 지원 사업",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "agency": "대구광역시 중구",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": [
+            "agency='혁신사업홍보과' phone='053-661-2184' document_id='DOC_GOV_024' chunk_id='CHK_B2_DOC_GOV_024_C003' source_url='https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312'"
+          ],
+          "application_schedule": null,
+          "required_documents": [
+            {
+              "text": "① 대구광역시 중구 청년사업자 임대료 지원 사업 참여 신청서 1부 [서식1]\r\n② 대구광역시 중구 청년사업자 임대료 지원 사업 참여 서약서 1부 [서식2] \r\n③ 개인정보 수집･활용 제공 동의서 1부 [서식3]\r\n④ 사업자 등록증 및 임대차 계약서 사본 1부\r\n⑤ 가족관계증명서 각1부(본인 및 부모, 배우자 및 배우자 부모)\r\n⑥ 주민등록 초본 1부, 국세납세증명서, 지방세납세 증명서\r\n⑦ 매출증명서류 1부\r\n ◦ 일반･간이 사업자 : 부가가치세 과세표준 증명원(직전년도 1년간)\r\n ◦ 면세사업자 : 부가가치세 면세사업자 수입금액 증명원(직전년도 1년간)\r\n⑧ 상시근로자 확인서류 1부\r\n ◦ 상시근로자가 없는 경우 : 건강보험 자격득실 확인서\r\n ◦ 상시근로자가 있는 경우 : 사업장 가입자 명부\r\n\r\n※공고일 이후 발급한 서류만 인정",
+              "document_id": "DOC_GOV_024",
+              "chunk_id": "CHK_B2_DOC_GOV_024_C003",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "label": "지원대상",
+              "text": "공고일 기준 중구에 주민등록을 두고, 사업장 소재지가 중구 관내에 있는 청년사업자(19세 ~ 39세)",
+              "document_id": "DOC_GOV_024",
+              "chunk_id": "CHK_B2_DOC_GOV_024_C001",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312"
+            }
+          ]
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_024",
+          "document_id": "DOC_GOV_024",
+          "chunk_id": "CHK_B2_DOC_GOV_024_C003"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_024",
+          "document_id": "DOC_GOV_024",
+          "chunk_id": "CHK_B2_DOC_GOV_024_C001"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_024",
+          "document_id": "DOC_GOV_024",
+          "chunk_id": "CHK_B2_DOC_GOV_024_C002"
+        }
+      ],
+      "generator_output": {
+        "status": "info",
+        "answer": "청년 사업자 임대료 지원 사업은 공고일 기준으로 중구에 주민등록이 있고, 사업장 소재지도 중구 관내인 청년사업자(19세~39세)여야 합니다[2][3]. 현재 입력된 만 45세는 연령 기준에 맞지 않아 이 정책의 대상이 아닙니다[2][3].\n\n신청 방법은 방문신청(중구청 4층 혁신사업홍보과) 또는 담당자 이메일 접수로 안내되어 있습니다[1]. 다만 공식 신청 링크는 확인되지 않았어요. 신청기한은 '4월 중'으로만 확인되며, 현재 접수 여부는 공식 공고에서 확인해 주세요[1].",
+        "used_source_ids": [
+          1,
+          2,
+          3
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 제출 서류는 무엇인가요?"
+          },
+          {
+            "kind": "question",
+            "text": "이 정책의 문의처와 연락처를 알려줘?"
+          }
+        ]
+      },
+      "comparison": [
+        {
+          "policy_id": "POL_GOV_024",
+          "present_in_all_stages": true,
+          "rows": {
+            "checker": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ],
+            "pipeline": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ],
+            "api": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ]
+          },
+          "overall": {
+            "checker": "needs_check",
+            "pipeline": "needs_check",
+            "api": "needs_check"
+          },
+          "exclusion_reasons": {
+            "checker": null,
+            "pipeline": null,
+            "api": null
+          },
+          "reasons_equal": true,
+          "quality": {
+            "hold_auto_eligibility": true,
+            "affected_attributes": [
+              "region"
+            ],
+            "hold_reasons": [
+              "SEARCH_REGION_REQUIRES_REVIEW",
+              "SUSPECTED_REGION_GRANULARITY_LOST"
+            ]
+          },
+          "rows_equal": true,
+          "overall_equal": true,
+          "exclusion_rule_ok": true,
+          "has_needs_check": true
+        }
+      ],
+      "citation": {
+        "cited_document_ids": [
+          "DOC_GOV_024",
+          "DOC_GOV_024",
+          "DOC_GOV_024"
+        ],
+        "all_cited_in_contexts": true,
+        "cited_policies": [
+          "POL_GOV_024"
+        ],
+        "api_policies_subset_of_context_policies": true
+      },
+      "semantics": {
+        "final_overall": "needs_check",
+        "mismatch": null
+      }
+    },
+    {
+      "scenario": "r6_multi_youth_rent",
+      "selected_policy_id": null,
+      "request_profile": {
+        "age": 45,
+        "region": "",
+        "income": null
+      },
+      "question": "청년 임대료나 월세 지원 정책 자격 알려줘",
+      "http": 200,
+      "response": {
+        "status": "answered",
+        "answer": "두 정책이 확인됩니다. 먼저 **청년 사업자 임대료 지원 사업**은 공고일 기준 중구에 주민등록이 있고 사업장 소재지도 중구 관내인 청년사업자(19세~39세) 대상입니다. 다만 입력된 만 45세는 나이 기준에 맞지 않아 해당 정책은 지원 대상이 아닙니다. 현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요. [1]\n\n**국토교통부 청년월세 한시 특별지원**은 만 19~34세 청년이 부모님과 별도 거주하는 무주택자이고, 임차보증금 5천만원 이하이면서 월세 60만원 이하 주택 거주가 기본 대상입니다. 또한 원가구 소득은 기준 중위소득 100% 이하, 청년 독립가구 소득은 기준 중위소득 60% 이하여야 합니다. 입력된 만 45세는 연령 기준에 맞지 않아 이 정책도 현재 기준으로는 신청 자격을 충족한다고 보기 어렵습니다. 이 정책은 접수가 마감된 상태입니다. 직접 신청 링크는 확인되지 않았어요. [2][3][4][5]",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 청년 사업자 임대료 지원 사업 (341000000312)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "document_id": "DOC_GOV_024",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 지원사업 중앙부처복지서비스 상세원문 (WLF00004661)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "document_id": "DOC_MOLIT_001",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+            "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+            "document_id": "DOC_MOLIT_002",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+            "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+            "document_id": "DOC_MOLIT_002",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+            "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+            "document_id": "DOC_MOLIT_002",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_024",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "청년 사업자 임대료 지원 사업",
+            "agency": "대구광역시 중구",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_009",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~34세 기준에 입력한 만 45세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2024-02-26",
+              "end_date": "2025-02-25",
+              "is_ongoing": false,
+              "days_to_start": -1005,
+              "days_to_end": -640
+            },
+            "required_documents": null,
+            "policy_name": "국토교통부 청년월세 한시 특별지원",
+            "agency": "국토교통부 청년주거정책과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "국토교통부",
+                "phone": "044-201-3640",
+                "document_id": null,
+                "chunk_id": null,
+                "source_url": null
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002",
+                "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+                "label": "지원대상"
+              },
+              {
+                "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하고, 임차보증금 5천만원 + 월세 60만원 이하 주택**에 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n  ** 월세가 60만원을 초과하더라도 보증금 월세 환산액과 월세액을 합산하여 70만원 이하인 경우 지원 가능(주택임대차보호법 제7조의2제2호에 따라 2.5% 적용)\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲보증금 5천만원 초과 주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C004",
+                "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+                "label": "선정기준"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": [
+              {
+                "label": "대상",
+                "value": "｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002"
+              },
+              {
+                "label": "대상",
+                "value": "｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하고, 임차보증금 5천만원 + 월세 60만원 이하 주택**에 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능 ** 월세가 60만원을 초과하더라도 보증금 월세 환산액과 월세액을 합산하여 70만원 이하인 경우 지원 가능(주택임대차보호법 제7조의2제2호에 따라 2.5% 적용)",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C004"
+              }
+            ]
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "청년월세 한시 특별지원의 제외 대상은 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "청년 사업자 임대료 지원 사업의 신청 서류는 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_009",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "needs_check",
+              "reason": "만 19~34세 기준에 입력한 만 45세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다."
+            }
+          ],
+          "reception_status": "closed",
+          "exclusion_reasons": null
+        },
+        {
+          "policy_id": "POL_GOV_024",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "ineligible",
+              "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다."
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            }
+          ],
+          "reception_status": "unknown",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": {
+        "POL_009": {
+          "warnings": [
+            {
+              "code": "UNKNOWN_CONDITION_GROUP",
+              "level": "caution",
+              "group_ids": [
+                "GRP_POL_009_REST"
+              ],
+              "affects": [
+                "all"
+              ],
+              "message": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+              "severity": "high",
+              "evidence_level": "graph_structure",
+              "verification": "not_modeled",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "EXTRACTED_NOT_VERIFIED",
+              "level": "caution",
+              "count": 2,
+              "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+              "severity": "low",
+              "evidence_level": "graph_metadata",
+              "verification": "not_officially_checked",
+              "affects": [],
+              "blocks_auto_eligibility": false,
+              "official_source_checked": false
+            },
+            {
+              "code": "EXCLUSION_NOT_MODELED",
+              "level": "suspected",
+              "severity": "medium",
+              "evidence_level": "keyword_detected",
+              "verification": "not_modeled",
+              "affects": [
+                "exclusion"
+              ],
+              "evidence": {
+                "text": [
+                  {
+                    "source": "DOC_MOLIT_002",
+                    "char_start": 272,
+                    "line": "※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등"
+                  }
+                ]
+              },
+              "source": "static_flags",
+              "message": "원문의 제외·참여 제한 문구가 그래프 조건에 없음(키워드 탐지) → 제외 대상 여부는 추가 질문 (확정 아님)",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "MARRIAGE_CHILD_NOT_MODELED",
+              "level": "suspected",
+              "severity": "low",
+              "evidence_level": "keyword_detected",
+              "verification": "not_modeled",
+              "affects": [
+                "marriage"
+              ],
+              "evidence": {
+                "marriage": [
+                  {
+                    "source": "DOC_MOLIT_001",
+                    "char_start": 547,
+                    "line": "19세~34세 독립거주 무주택 청년 중 청년가구 소득이 기준 중위소득 60% 이하이면서, 원가구 소득이 중위소득 100% 이하인 청년을 지원합니다. ※ &#9312; 30세 이상, &#9313;혼인(이혼), &#9314;미혼부·모, &#9315; 30세 미만 미혼 청년"
+                  }
+                ],
+                "children": [],
+                "unmodeled_dimensions": [
+                  "marriage"
+                ],
+                "incomplete_dimensions": [],
+                "review_dimensions": [],
+                "dimension_assessment": {
+                  "marriage": {
+                    "related_conditions": [],
+                    "keyword_only": false,
+                    "requirement_lines": [
+                      {
+                        "source": "DOC_MOLIT_001",
+                        "char_start": 547,
+                        "line": "19세~34세 독립거주 무주택 청년 중 청년가구 소득이 기준 중위소득 60% 이하이면서, 원가구 소득이 중위소득 100% 이하인 청년을 지원합니다. ※ &#9312; 30세 이상, &#9313;혼인(이혼), &#9314;미혼부·모, &#9315; 30세 미만 미혼 청년"
+                      },
+                      {
+                        "source": "DOC_MOLIT_002",
+                        "char_start": 1018,
+                        "line": "※ 혼인(사실혼 포함) 또는 형제·자매 관계의 청년 2인 이상이 동일한 주택에 함께 거주하는 경우 가구당 1명에게만 지원"
+                      },
+                      {
+                        "source": "DOC_MOLIT_002",
+                        "char_start": 2138,
+                        "line": "※ 혼인(사실혼 포함) 또는 형제·자매 관계의 청년 2인 이상이 동일한 주택에 함께 거주하는 경우 가구당 1명에게만 지원"
+                      }
+                    ],
+                    "requirement_line_count": 3,
+                    "missing_details": {
+                      "marriage_status": [
+                        {
+                          "source": "DOC_MOLIT_002",
+                          "char_start": 1018,
+                          "line": "※ 혼인(사실혼 포함) 또는 형제·자매 관계의 청년 2인 이상이 동일한 주택에 함께 거주하는 경우 가구당 1명에게만 지원"
+                        },
+                        {
+                          "source": "DOC_MOLIT_002",
+                          "char_start": 2138,
+                          "line": "※ 혼인(사실혼 포함) 또는 형제·자매 관계의 청년 2인 이상이 동일한 주택에 함께 거주하는 경우 가구당 1명에게만 지원"
+                        }
+                      ]
+                    },
+                    "covered_details": {},
+                    "non_requirement_mentions": [],
+                    "classification": "unmodeled"
+                  },
+                  "children": {
+                    "classification": "no_text",
+                    "related_conditions": []
+                  }
+                },
+                "graph_related_conditions": {
+                  "marriage": [],
+                  "children": []
+                },
+                "eligibility_attributes.family_status_by_document": [
+                  {
+                    "document_id": "DOC_MOLIT_001",
+                    "source_type": "api",
+                    "attribute_source": null,
+                    "family_status": [
+                      "해당없음/미확인"
+                    ]
+                  },
+                  {
+                    "document_id": "DOC_MOLIT_002",
+                    "source_type": "api",
+                    "attribute_source": null,
+                    "family_status": [
+                      "해당없음/미확인"
+                    ]
+                  }
+                ],
+                "note": "자동 의심 후보·검토 대상. 확정된 정책 오류 아님, 공식 원문 미검증"
+              },
+              "source": "static_flags",
+              "message": "혼인·자녀 관련 문구가 있으나 해당 조건 타입이 그래프에 없음(키워드 탐지) → 추가 질문",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "verified": 9,
+            "extracted": 2
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "EXCLUSION_NOT_MODELED",
+            "MARRIAGE_CHILD_NOT_MODELED",
+            "UNKNOWN_CONDITION_GROUP"
+          ],
+          "affected_attributes": [
+            "all",
+            "exclusion",
+            "marriage"
+          ],
+          "official_source_checked": false
+        },
+        "POL_GOV_024": {
+          "warnings": [
+            {
+              "code": "EXTRACTED_NOT_VERIFIED",
+              "level": "caution",
+              "count": 8,
+              "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+              "severity": "low",
+              "evidence_level": "graph_metadata",
+              "verification": "not_officially_checked",
+              "affects": [],
+              "blocks_auto_eligibility": false,
+              "official_source_checked": false
+            },
+            {
+              "code": "SUSPECTED_REGION_GRANULARITY_LOST",
+              "level": "suspected",
+              "organization": "대구광역시 중구",
+              "graph_regions": [
+                "대구광역시"
+              ],
+              "municipality_in_organization": "중구",
+              "message": "운영기관은 중구인데 그래프 지역은 ['대구광역시'](시·도 단위)뿐임. 시·군·구 거주 요건이 사라졌을 수 있으니 지역 판정은 원문으로 (확정 아님)",
+              "severity": "high",
+              "evidence_level": "graph_property_pattern",
+              "verification": "suspected",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "SEARCH_REGION_REQUIRES_REVIEW",
+              "level": "caution",
+              "message": "지역 조건 확인 필요: 저장된 지역 문자열은 검색 후보를 찾는 근거이며 실제 지원 자격 충족을 보장하지 않습니다.",
+              "stored_regions": [
+                "대구광역시"
+              ],
+              "severity": "medium",
+              "evidence_level": "stored_region_string",
+              "verification": "not_officially_checked",
+              "affects": [
+                "region"
+              ],
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "extracted": 8
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "SEARCH_REGION_REQUIRES_REVIEW",
+            "SUSPECTED_REGION_GRANULARITY_LOST"
+          ],
+          "affected_attributes": [
+            "region"
+          ],
+          "official_source_checked": false
+        }
+      },
+      "structure": {
+        "POL_009": {
+          "evaluated": false,
+          "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+          "condition_tree": [
+            {
+              "group_id": "GRP_POL_009_ROOT",
+              "logic": "AND",
+              "is_root": true,
+              "description": "국토교통부 청년월세 한시 특별지원 기본 자격 조건 그룹 (원천 조건 미제공 또는 전 국민 개방형 / 3값 논리 UNKNOWN 평가)",
+              "relationship": {
+                "target_name": "Root Condition Group (POL_009)",
+                "evidence_location": "기본자격요건",
+                "evidence_document_id": "DOC_MOLIT_001",
+                "review_status": "verified"
+              },
+              "conditions": [
+                {
+                  "unit": "세",
+                  "evidence_location": "원문 대조 교정",
+                  "name": "연령조건: 만 19세~34세",
+                  "description": "정책 지원 자격 조건 (연령조건: 만 19세~34세)",
+                  "type": "AGE",
+                  "value": "19~34",
+                  "operator": "BETWEEN",
+                  "condition_id": "COND_AGE_19_34",
+                  "relationship": {
+                    "target_name": "연령조건: 만 19세~34세",
+                    "evidence_location": "원문 대조 교정",
+                    "evidence_document_id": "DOC_MOLIT_001",
+                    "review_status": "extracted"
+                  }
+                }
+              ],
+              "groups": [
+                {
+                  "group_id": "GRP_POL_009_REST",
+                  "logic": "UNKNOWN",
+                  "is_root": false,
+                  "description": "나이 외 자격 조건: 원천에 구조화된 조건이 없어 공식 원문 확인 필요 (3값 논리 UNKNOWN 평가)",
+                  "relationship": {
+                    "target_name": "나머지 조건 UNKNOWN 그룹 (GRP_POL_009_REST)",
+                    "evidence_location": "원문 대조 교정",
+                    "evidence_document_id": "DOC_MOLIT_001",
+                    "review_status": "extracted"
+                  },
+                  "conditions": [],
+                  "groups": []
+                }
+              ]
+            }
+          ],
+          "requires_condition_ids": [
+            "COND_AGE_19_34"
+          ],
+          "tree_condition_ids": [
+            "COND_AGE_19_34"
+          ],
+          "tree_matches_requires_condition": true,
+          "unknown_logic_groups": [
+            "GRP_POL_009_REST"
+          ],
+          "structure_issues": []
+        },
+        "POL_GOV_024": {
+          "evaluated": false,
+          "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+          "condition_tree": [
+            {
+              "group_id": "GRP_POL_GOV_024_ROOT",
+              "logic": "AND",
+              "is_root": true,
+              "description": "청년 사업자 임대료 지원 사업 복합 자격 조건 루트 그룹 (AND 결합)",
+              "relationship": {
+                "target_name": "Root Condition Group (POL_GOV_024)",
+                "evidence_location": "기본자격요건",
+                "evidence_document_id": "DOC_GOV_024",
+                "review_status": "extracted"
+              },
+              "conditions": [
+                {
+                  "unit": "세",
+                  "evidence_location": "지원조건 JA0110/JA0111",
+                  "name": "연령조건: 만 19세~39세",
+                  "description": "정책 지원 자격 조건 (연령조건: 만 19세~39세)",
+                  "type": "AGE",
+                  "value": "19~39",
+                  "operator": "BETWEEN",
+                  "condition_id": "COND_AGE_19_39",
+                  "relationship": {
+                    "target_name": "연령조건: 만 19세~39세",
+                    "evidence_location": "필수조건",
+                    "evidence_document_id": "DOC_GOV_024",
+                    "review_status": "extracted"
+                  }
+                }
+              ],
+              "groups": []
+            }
+          ],
+          "requires_condition_ids": [
+            "COND_AGE_19_39"
+          ],
+          "tree_condition_ids": [
+            "COND_AGE_19_39"
+          ],
+          "tree_matches_requires_condition": true,
+          "unknown_logic_groups": [],
+          "structure_issues": []
+        }
+      },
+      "generator_checks": [
+        {
+          "policy_id": "POL_GOV_024",
+          "policy_name": "청년 사업자 임대료 지원 사업",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19~39세 기준에 입력한 만 45세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "region",
+              "label": "거주 지역",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "unknown",
+          "agency": "대구광역시 중구",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2173527&bnefType=all&svcId=341000000312",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": null,
+          "application_schedule": null,
+          "required_documents": null,
+          "requirement_excerpts": null
+        },
+        {
+          "policy_id": "POL_009",
+          "policy_name": "국토교통부 청년월세 한시 특별지원",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 19~34세 기준에 입력한 만 45세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "closed",
+          "agency": "국토교통부 청년주거정책과",
+          "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": [
+            "agency='국토교통부' phone='044-201-3640' document_id=None chunk_id=None source_url=None"
+          ],
+          "application_schedule": {
+            "evaluated_on": "2026-11-27",
+            "start_date": "2024-02-26",
+            "end_date": "2025-02-25",
+            "is_ongoing": false,
+            "days_to_start": -1005,
+            "days_to_end": -640
+          },
+          "required_documents": null,
+          "requirement_excerpts": [
+            {
+              "label": "지원대상",
+              "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+              "document_id": "DOC_MOLIT_002",
+              "chunk_id": "CHK_B2_DOC_MOLIT_002_C002",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+            },
+            {
+              "label": "선정기준",
+              "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하고, 임차보증금 5천만원 + 월세 60만원 이하 주택**에 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n  ** 월세가 60만원을 초과하더라도 보증금 월세 환산액과 월세액을 합산하여 70만원 이하인 경우 지원 가능(주택임대차보호법 제7조의2제2호에 따라 2.5% 적용)\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲보증금 5천만원 초과 주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+              "document_id": "DOC_MOLIT_002",
+              "chunk_id": "CHK_B2_DOC_MOLIT_002_C004",
+              "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+            }
+          ]
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_024",
+          "document_id": "DOC_GOV_024",
+          "chunk_id": "CHK_B2_DOC_GOV_024_C002"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_009",
+          "document_id": "DOC_MOLIT_001",
+          "chunk_id": "CHK_B2_DOC_MOLIT_001_C006"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_009",
+          "document_id": "DOC_MOLIT_002",
+          "chunk_id": "CHK_B2_DOC_MOLIT_002_C002"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_009",
+          "document_id": "DOC_MOLIT_002",
+          "chunk_id": "CHK_B2_DOC_MOLIT_002_C004"
+        },
+        {
+          "source_id": 5,
+          "policy_id": "POL_009",
+          "document_id": "DOC_MOLIT_002",
+          "chunk_id": "CHK_B2_DOC_MOLIT_002_C003"
+        }
+      ],
+      "generator_output": {
+        "status": "answered",
+        "answer": "두 정책이 확인됩니다. 먼저 **청년 사업자 임대료 지원 사업**은 공고일 기준 중구에 주민등록이 있고 사업장 소재지도 중구 관내인 청년사업자(19세~39세) 대상입니다. 다만 입력된 만 45세는 나이 기준에 맞지 않아 해당 정책은 지원 대상이 아닙니다. 현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요. [1]\n\n**국토교통부 청년월세 한시 특별지원**은 만 19~34세 청년이 부모님과 별도 거주하는 무주택자이고, 임차보증금 5천만원 이하이면서 월세 60만원 이하 주택 거주가 기본 대상입니다. 또한 원가구 소득은 기준 중위소득 100% 이하, 청년 독립가구 소득은 기준 중위소득 60% 이하여야 합니다. 입력된 만 45세는 연령 기준에 맞지 않아 이 정책도 현재 기준으로는 신청 자격을 충족한다고 보기 어렵습니다. 이 정책은 접수가 마감된 상태입니다. 직접 신청 링크는 확인되지 않았어요. [2][3][4][5]",
+        "used_source_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "청년월세 한시 특별지원의 제외 대상은 무엇인가요?"
+          },
+          {
+            "kind": "question",
+            "text": "청년 사업자 임대료 지원 사업의 신청 서류는 무엇인가요?"
+          }
+        ]
+      },
+      "comparison": [
+        {
+          "policy_id": "POL_GOV_024",
+          "present_in_all_stages": true,
+          "rows": {
+            "checker": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ],
+            "pipeline": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ],
+            "api": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "region",
+                "needs_check"
+              ]
+            ]
+          },
+          "overall": {
+            "checker": "needs_check",
+            "pipeline": "needs_check",
+            "api": "needs_check"
+          },
+          "exclusion_reasons": {
+            "checker": null,
+            "pipeline": null,
+            "api": null
+          },
+          "reasons_equal": true,
+          "quality": {
+            "hold_auto_eligibility": true,
+            "affected_attributes": [
+              "region"
+            ],
+            "hold_reasons": [
+              "SEARCH_REGION_REQUIRES_REVIEW",
+              "SUSPECTED_REGION_GRANULARITY_LOST"
+            ]
+          },
+          "rows_equal": true,
+          "overall_equal": true,
+          "exclusion_rule_ok": true,
+          "has_needs_check": true
+        },
+        {
+          "policy_id": "POL_009",
+          "present_in_all_stages": true,
+          "rows": {
+            "checker": [
+              [
+                "age",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ]
+            ],
+            "pipeline": [
+              [
+                "age",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ]
+            ],
+            "api": [
+              [
+                "age",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ]
+            ]
+          },
+          "overall": {
+            "checker": "needs_check",
+            "pipeline": "needs_check",
+            "api": "needs_check"
+          },
+          "exclusion_reasons": {
+            "checker": null,
+            "pipeline": null,
+            "api": null
+          },
+          "reasons_equal": true,
+          "quality": {
+            "hold_auto_eligibility": true,
+            "affected_attributes": [
+              "all",
+              "exclusion",
+              "marriage"
+            ],
+            "hold_reasons": [
+              "EXCLUSION_NOT_MODELED",
+              "MARRIAGE_CHILD_NOT_MODELED",
+              "UNKNOWN_CONDITION_GROUP"
+            ]
+          },
+          "rows_equal": true,
+          "overall_equal": true,
+          "exclusion_rule_ok": true,
+          "has_needs_check": true
+        }
+      ],
+      "citation": {
+        "cited_document_ids": [
+          "DOC_GOV_024",
+          "DOC_MOLIT_001",
+          "DOC_MOLIT_002",
+          "DOC_MOLIT_002",
+          "DOC_MOLIT_002"
+        ],
+        "all_cited_in_contexts": true,
+        "cited_policies": [
+          "POL_009",
+          "POL_GOV_024"
+        ],
+        "api_policies_subset_of_context_policies": true
+      },
+      "semantics": null
+    },
+    {
+      "scenario": "r8_income_unknown_age_fail",
+      "selected_policy_id": "POL_GOV_007",
+      "request_profile": {
+        "age": 17,
+        "region": "",
+        "income": null
+      },
+      "question": "이 정책의 자격 충족 여부와 신청 방법, 접수 상태를 알려줘",
+      "http": 200,
+      "response": {
+        "status": "answered",
+        "answer": "북한이탈주민 자산형성 지원(미래행복통장)은 **현재 접수 중이에요**. 신청은 거주지 관할 지역적응센터(하나센터)에 방문해서 할 수 있고, 지원대상자로 선정되면 하나은행에 방문해 계좌를 개설합니다. 직접 신청 링크는 확인되지 않았어요. [2]\n\n자격은 원문상 2014년 11월 29일 이후 입국해 보호 결정을 받은 북한이탈주민이면서, 3개월 이상 취업·사업 등 경제활동 중이고, 가입 신청일 기준 만 18세 이상이며, 유사사업 중복 참여가 아니고, 가입신청일 기준 전월소득이 9분위 소득 미만이어야 합니다. 다만 입력된 나이가 만 17세라서 연령 요건은 충족하지 못합니다. 소득 기준은 원문에 요건이 있으나, 현재 제공된 정보만으로는 세부 금액 기준을 확정하기 어려워 추가 확인이 필요합니다. [1][2]\n\n필요 서류는 주민등록초본, 지원신청서, 약정서, 개인정보 제공·활용동의서, 3개월 이상 경제활동을 증명하는 서류, 소득 증빙 공적자료 등입니다. [2]",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 북한이탈주민 자산형성 지원 (미래행복통장) (125000000004)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+            "document_id": "DOC_GOV_007",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 북한이탈주민 자산형성 지원 (미래행복통장) (125000000004)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+            "document_id": "DOC_GOV_007",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_007",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 18세 이상(상한 없음) 기준에 입력한 만 17세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "housing",
+                "label": "가구·주거 조건",
+                "reason": "가구주거조건: 북한이탈주민은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+                "status": "ineligible"
+              },
+              {
+                "field": "income",
+                "label": "소득",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "income",
+                "label": "소득 요건",
+                "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 현행 지침과 적용되는 9분위 소득 금액 원문 검토 메모: 통일부 운영 지침(2021-01-04 시행, 연혁본)에 전월 임금소득이 근로자가구 소득 9분위 이상이면 제외, 고용보험 가입 사업장 근로소득 기준. 원화 금액 미기재 공식 공고의 해당 항목을 확인해 주세요.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": [
+              {
+                "text": "○ 다음 각호의 서류를 각 1부씩 제출\r\n - 주민등록초본\r\n - 미래행복통장 지원신청서\r\n - 미래행복통장 약정서 \r\n - 미래행복통장 개인정보 제공 및 활용동의서\r\n - 재직증명서, 사업자등록증명원, 농어업인확인서(농(어)업경영체등록증) 등 3개월 이상 경제활동 중임을 증명하는 서류\r\n - 소득 증빙 공적자료\r\n - 기타 통일부에서 제출이 필요하다고 판단하는 서류",
+                "document_id": "DOC_GOV_007",
+                "chunk_id": "CHK_B2_DOC_GOV_007_C004",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004"
+              }
+            ],
+            "policy_name": "북한이탈주민 자산형성 지원 (미래행복통장)",
+            "agency": "통일부",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "북한이탈주민지원재단",
+                "phone": "02-3215-5792",
+                "document_id": "DOC_GOV_007",
+                "chunk_id": "CHK_B2_DOC_GOV_007_C004",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "○ 아래 해당 요건 모두 충족하는 북한이탈주민\r\n\r\n - 2014년 11월 29일 이후 입국하여 보호 결정을 받은 자\r\n\r\n - 3개월 이상 취업, 사업 등의 경제활동 상태인 자\r\n\r\n - 가입 신청일 기준 만 18세 이상\r\n\r\n - 정부 및 지자체에서 시행 중인 유사사업 참여자는 중복 가입 불가\r\n\r\n - 가입신청일 기준 전월소득이 통계청 발표 전년도 소득 10분위별 근로자가구 가계수지의 9분위 소득 미만",
+                "document_id": "DOC_GOV_007",
+                "chunk_id": "CHK_B2_DOC_GOV_007_C002",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+                "label": "지원대상"
+              },
+              {
+                "text": "○ 아래 해당 요건 모두 충족하는 북한이탈주민\r\n\r\n - 2014년 11월 29일 이후 입국하여 보호 결정을 받은 자\r\n\r\n - 3개월 이상 취업, 사업 등의 경제활동 상태인 자\r\n\r\n - 가입 신청일 기준 만 18세 이상\r\n\r\n - 정부 및 지자체에서 시행 중인 유사사업 참여자는 중복 가입 불가\r\n\r\n - 가입신청일 기준 전월소득이 통계청 발표 전년도 소득 10분위별 근로자가구 가계수지의 9분위 소득 미만",
+                "document_id": "DOC_GOV_007",
+                "chunk_id": "CHK_B2_DOC_GOV_007_C002",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+                "label": "선정기준"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 지원대상 요건을 더 자세히 알려줘?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "미래행복통장 신청 서류를 항목별로 정리해줘?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "미래행복통장 신청 절차를 순서대로 알려줘?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "checker": [
+        {
+          "policy_id": "POL_GOV_007",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "status": "ineligible",
+              "reason": "만 18세 이상(상한 없음) 기준에 입력한 만 17세가 포함되지 않습니다."
+            },
+            {
+              "field": "housing",
+              "label": "가구·주거 조건",
+              "status": "needs_check",
+              "reason": "가구주거조건: 북한이탈주민은(는) 추가 확인이 필요합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "needs_check",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 일부 조건이 검증되지 않아 종합 판정을 보류합니다."
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "status": "ineligible",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과)."
+            },
+            {
+              "field": "income",
+              "label": "소득",
+              "status": "needs_check",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다."
+            },
+            {
+              "field": "income",
+              "label": "소득 요건",
+              "status": "needs_check",
+              "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 현행 지침과 적용되는 9분위 소득 금액 원문 검토 메모: 통일부 운영 지침(2021-01-04 시행, 연혁본)에 전월 임금소득이 근로자가구 소득 9분위 이상이면 제외, 고용보험 가입 사업장 근로소득 기준. 원화 금액 미기재 공식 공고의 해당 항목을 확인해 주세요."
+            }
+          ],
+          "reception_status": "open",
+          "exclusion_reasons": null
+        }
+      ],
+      "quality": {
+        "POL_GOV_007": {
+          "warnings": [
+            {
+              "code": "UNKNOWN_CONDITION_GROUP",
+              "level": "caution",
+              "group_ids": [
+                "GRP_POL_GOV_007_OR_INC"
+              ],
+              "affects": [
+                "income"
+              ],
+              "message": "logic=UNKNOWN 또는 조건 0개는 '자격 제한 없음'이 아니라 '구조화 조건 없음'이다. 공고 원문 확인이 필요하다.",
+              "severity": "high",
+              "evidence_level": "graph_structure",
+              "verification": "not_modeled",
+              "blocks_auto_eligibility": true,
+              "official_source_checked": false
+            },
+            {
+              "code": "EXTRACTED_NOT_VERIFIED",
+              "level": "caution",
+              "count": 17,
+              "message": "review_status=extracted는 자동 추출값이며 공식 검증 완료가 아니다.",
+              "severity": "low",
+              "evidence_level": "graph_metadata",
+              "verification": "not_officially_checked",
+              "affects": [],
+              "blocks_auto_eligibility": false,
+              "official_source_checked": false
+            }
+          ],
+          "review_status_counts": {
+            "extracted": 17
+          },
+          "graph_text_fields": [
+            "eligibility",
+            "benefit",
+            "application_period",
+            "application_method"
+          ],
+          "hold_auto_eligibility": true,
+          "hold_reasons": [
+            "UNKNOWN_CONDITION_GROUP"
+          ],
+          "affected_attributes": [
+            "income"
+          ],
+          "official_source_checked": false
+        }
+      },
+      "structure": {
+        "POL_GOV_007": {
+          "evaluated": false,
+          "note": "자격 충족 여부는 판정하지 않았다. condition_tree는 원본 ConditionGroup의 logic(AND/OR/NOT/UNKNOWN)과 계층을 그대로 보존한 것이며, UNKNOWN 그룹·review_status=extracted 근거는 공고문 확인이 필요하다.",
+          "condition_tree": [
+            {
+              "group_id": "GRP_POL_GOV_007_ROOT",
+              "logic": "AND",
+              "is_root": true,
+              "description": "북한이탈주민 자산형성 지원 (미래행복통장) 복합 자격 조건 루트 그룹 (AND 결합)",
+              "relationship": {
+                "target_name": "Root Condition Group (POL_GOV_007)",
+                "evidence_location": "기본자격요건",
+                "evidence_document_id": "DOC_GOV_007",
+                "review_status": "extracted"
+              },
+              "conditions": [
+                {
+                  "unit": "세",
+                  "evidence_location": "지원조건 JA0110/JA0111",
+                  "name": "연령조건: 만 18세~120세",
+                  "description": "정책 지원 자격 조건 (연령조건: 만 18세~120세)",
+                  "type": "AGE",
+                  "value": "18~120",
+                  "operator": "BETWEEN",
+                  "condition_id": "COND_AGE_18_120",
+                  "relationship": {
+                    "target_name": "연령조건: 만 18세~120세",
+                    "evidence_location": "필수조건",
+                    "evidence_document_id": "DOC_GOV_007",
+                    "review_status": "extracted"
+                  }
+                },
+                {
+                  "unit": "유형",
+                  "evidence_location": "지원조건 JA04",
+                  "name": "가구주거조건: 북한이탈주민",
+                  "description": "정책 지원 자격 조건 (가구주거조건: 북한이탈주민)",
+                  "type": "HOUSING_HOUSEHOLD",
+                  "value": "북한이탈주민",
+                  "operator": "EQUAL",
+                  "condition_id": "COND_HH_북한이탈주민",
+                  "relationship": {
+                    "target_name": "가구주거조건: 북한이탈주민",
+                    "evidence_location": "조건요건",
+                    "evidence_document_id": "DOC_GOV_007",
+                    "review_status": "extracted"
+                  }
+                }
+              ],
+              "groups": [
+                {
+                  "group_id": "GRP_POL_GOV_007_OR_INC",
+                  "logic": "UNKNOWN",
+                  "is_root": false,
+                  "description": "북한이탈주민 자산형성 지원 (미래행복통장) 소득선택조건그룹: 소득 구간 중 하나 충족 시 지원 가능 (OR) (자동 판정 보류: 원문은 전월소득이 근로자가구 소득 9분위 미만이라는 기준이라 중위소득 구간으로 옮길 수 없음)",
+                  "relationship": {
+                    "target_name": "소득선택조건그룹 (GRP_POL_GOV_007_OR_INC)",
+                    "evidence_location": "선택조건그룹",
+                    "evidence_document_id": "DOC_GOV_007",
+                    "review_status": "extracted"
+                  },
+                  "conditions": [
+                    {
+                      "unit": "%",
+                      "evidence_location": "지원조건 JA02",
+                      "name": "소득조건: 중위소득 0~50%",
+                      "description": "정책 지원 자격 조건 (소득조건: 중위소득 0~50%)",
+                      "type": "INCOME",
+                      "value": "중위소득_0_50_",
+                      "operator": "IN_RANGE",
+                      "condition_id": "COND_INC_중위소득_0_50_",
+                      "relationship": {
+                        "target_name": "소득조건: 중위소득 0~50%",
+                        "evidence_location": "선택조건",
+                        "evidence_document_id": "DOC_GOV_007",
+                        "review_status": "extracted"
+                      }
+                    },
+                    {
+                      "unit": "%",
+                      "evidence_location": "지원조건 JA02",
+                      "name": "소득조건: 중위소득 101~200%",
+                      "description": "정책 지원 자격 조건 (소득조건: 중위소득 101~200%)",
+                      "type": "INCOME",
+                      "value": "중위소득_101_200_",
+                      "operator": "IN_RANGE",
+                      "condition_id": "COND_INC_중위소득_101_200_",
+                      "relationship": {
+                        "target_name": "소득조건: 중위소득 101~200%",
+                        "evidence_location": "선택조건",
+                        "evidence_document_id": "DOC_GOV_007",
+                        "review_status": "extracted"
+                      }
+                    },
+                    {
+                      "unit": "%",
+                      "evidence_location": "지원조건 JA02",
+                      "name": "소득조건: 중위소득 200% 초과",
+                      "description": "정책 지원 자격 조건 (소득조건: 중위소득 200% 초과)",
+                      "type": "INCOME",
+                      "value": "중위소득_200_초과",
+                      "operator": "IN_RANGE",
+                      "condition_id": "COND_INC_중위소득_200_초과",
+                      "relationship": {
+                        "target_name": "소득조건: 중위소득 200% 초과",
+                        "evidence_location": "선택조건",
+                        "evidence_document_id": "DOC_GOV_007",
+                        "review_status": "extracted"
+                      }
+                    },
+                    {
+                      "unit": "%",
+                      "evidence_location": "지원조건 JA02",
+                      "name": "소득조건: 중위소득 51~75%",
+                      "description": "정책 지원 자격 조건 (소득조건: 중위소득 51~75%)",
+                      "type": "INCOME",
+                      "value": "중위소득_51_75_",
+                      "operator": "IN_RANGE",
+                      "condition_id": "COND_INC_중위소득_51_75_",
+                      "relationship": {
+                        "target_name": "소득조건: 중위소득 51~75%",
+                        "evidence_location": "선택조건",
+                        "evidence_document_id": "DOC_GOV_007",
+                        "review_status": "extracted"
+                      }
+                    },
+                    {
+                      "unit": "%",
+                      "evidence_location": "지원조건 JA02",
+                      "name": "소득조건: 중위소득 76~100%",
+                      "description": "정책 지원 자격 조건 (소득조건: 중위소득 76~100%)",
+                      "type": "INCOME",
+                      "value": "중위소득_76_100_",
+                      "operator": "IN_RANGE",
+                      "condition_id": "COND_INC_중위소득_76_100_",
+                      "relationship": {
+                        "target_name": "소득조건: 중위소득 76~100%",
+                        "evidence_location": "선택조건",
+                        "evidence_document_id": "DOC_GOV_007",
+                        "review_status": "extracted"
+                      }
+                    }
+                  ],
+                  "groups": []
+                }
+              ]
+            }
+          ],
+          "requires_condition_ids": [
+            "COND_AGE_18_120",
+            "COND_HH_북한이탈주민",
+            "COND_INC_중위소득_0_50_",
+            "COND_INC_중위소득_101_200_",
+            "COND_INC_중위소득_200_초과",
+            "COND_INC_중위소득_51_75_",
+            "COND_INC_중위소득_76_100_"
+          ],
+          "tree_condition_ids": [
+            "COND_AGE_18_120",
+            "COND_HH_북한이탈주민",
+            "COND_INC_중위소득_0_50_",
+            "COND_INC_중위소득_101_200_",
+            "COND_INC_중위소득_200_초과",
+            "COND_INC_중위소득_51_75_",
+            "COND_INC_중위소득_76_100_"
+          ],
+          "tree_matches_requires_condition": true,
+          "unknown_logic_groups": [
+            "GRP_POL_GOV_007_OR_INC"
+          ],
+          "structure_issues": []
+        }
+      },
+      "generator_checks": [
+        {
+          "policy_id": "POL_GOV_007",
+          "policy_name": "북한이탈주민 자산형성 지원 (미래행복통장)",
+          "conditions": [
+            {
+              "field": "age",
+              "label": "나이",
+              "reason": "만 18세 이상(상한 없음) 기준에 입력한 만 17세가 포함되지 않습니다.",
+              "status": "ineligible"
+            },
+            {
+              "field": "housing",
+              "label": "가구·주거 조건",
+              "reason": "가구주거조건: 북한이탈주민은(는) 추가 확인이 필요합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 일부 조건이 검증되지 않아 종합 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "eligibility",
+              "label": "자격 요건",
+              "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+              "status": "ineligible"
+            },
+            {
+              "field": "income",
+              "label": "소득",
+              "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+              "status": "needs_check"
+            },
+            {
+              "field": "income",
+              "label": "소득 요건",
+              "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 현행 지침과 적용되는 9분위 소득 금액 원문 검토 메모: 통일부 운영 지침(2021-01-04 시행, 연혁본)에 전월 임금소득이 근로자가구 소득 9분위 이상이면 제외, 고용보험 가입 사업장 근로소득 기준. 원화 금액 미기재 공식 공고의 해당 항목을 확인해 주세요.",
+              "status": "needs_check"
+            }
+          ],
+          "reception_status": "open",
+          "agency": "통일부",
+          "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004",
+          "official_apply_url": null,
+          "exclusion_reasons": null,
+          "contacts": [
+            "agency='북한이탈주민지원재단' phone='02-3215-5792' document_id='DOC_GOV_007' chunk_id='CHK_B2_DOC_GOV_007_C004' source_url='https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004'"
+          ],
+          "application_schedule": {
+            "evaluated_on": "2026-11-27",
+            "start_date": null,
+            "end_date": null,
+            "is_ongoing": true,
+            "days_to_start": null,
+            "days_to_end": null
+          },
+          "required_documents": [
+            {
+              "text": "○ 다음 각호의 서류를 각 1부씩 제출\r\n - 주민등록초본\r\n - 미래행복통장 지원신청서\r\n - 미래행복통장 약정서 \r\n - 미래행복통장 개인정보 제공 및 활용동의서\r\n - 재직증명서, 사업자등록증명원, 농어업인확인서(농(어)업경영체등록증) 등 3개월 이상 경제활동 중임을 증명하는 서류\r\n - 소득 증빙 공적자료\r\n - 기타 통일부에서 제출이 필요하다고 판단하는 서류",
+              "document_id": "DOC_GOV_007",
+              "chunk_id": "CHK_B2_DOC_GOV_007_C004",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004"
+            }
+          ],
+          "requirement_excerpts": [
+            {
+              "label": "지원대상",
+              "text": "○ 아래 해당 요건 모두 충족하는 북한이탈주민\r\n\r\n - 2014년 11월 29일 이후 입국하여 보호 결정을 받은 자\r\n\r\n - 3개월 이상 취업, 사업 등의 경제활동 상태인 자\r\n\r\n - 가입 신청일 기준 만 18세 이상\r\n\r\n - 정부 및 지자체에서 시행 중인 유사사업 참여자는 중복 가입 불가\r\n\r\n - 가입신청일 기준 전월소득이 통계청 발표 전년도 소득 10분위별 근로자가구 가계수지의 9분위 소득 미만",
+              "document_id": "DOC_GOV_007",
+              "chunk_id": "CHK_B2_DOC_GOV_007_C002",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004"
+            },
+            {
+              "label": "선정기준",
+              "text": "○ 아래 해당 요건 모두 충족하는 북한이탈주민\r\n\r\n - 2014년 11월 29일 이후 입국하여 보호 결정을 받은 자\r\n\r\n - 3개월 이상 취업, 사업 등의 경제활동 상태인 자\r\n\r\n - 가입 신청일 기준 만 18세 이상\r\n\r\n - 정부 및 지자체에서 시행 중인 유사사업 참여자는 중복 가입 불가\r\n\r\n - 가입신청일 기준 전월소득이 통계청 발표 전년도 소득 10분위별 근로자가구 가계수지의 9분위 소득 미만",
+              "document_id": "DOC_GOV_007",
+              "chunk_id": "CHK_B2_DOC_GOV_007_C002",
+              "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=999201&bnefType=all&svcId=125000000004"
+            }
+          ]
+        }
+      ],
+      "contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_007",
+          "document_id": "DOC_GOV_007",
+          "chunk_id": "CHK_B2_DOC_GOV_007_C002"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_007",
+          "document_id": "DOC_GOV_007",
+          "chunk_id": "CHK_B2_DOC_GOV_007_C004"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_007",
+          "document_id": "DOC_GOV_007",
+          "chunk_id": "CHK_B2_DOC_GOV_007_C001"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_GOV_007",
+          "document_id": "DOC_GOV_007",
+          "chunk_id": "CHK_B2_DOC_GOV_007_C003"
+        }
+      ],
+      "generator_output": {
+        "status": "answered",
+        "answer": "북한이탈주민 자산형성 지원(미래행복통장)은 **현재 접수 중이에요**. 신청은 거주지 관할 지역적응센터(하나센터)에 방문해서 할 수 있고, 지원대상자로 선정되면 하나은행에 방문해 계좌를 개설합니다. 직접 신청 링크는 확인되지 않았어요. [2]\n\n자격은 원문상 2014년 11월 29일 이후 입국해 보호 결정을 받은 북한이탈주민이면서, 3개월 이상 취업·사업 등 경제활동 중이고, 가입 신청일 기준 만 18세 이상이며, 유사사업 중복 참여가 아니고, 가입신청일 기준 전월소득이 9분위 소득 미만이어야 합니다. 다만 입력된 나이가 만 17세라서 연령 요건은 충족하지 못합니다. 소득 기준은 원문에 요건이 있으나, 현재 제공된 정보만으로는 세부 금액 기준을 확정하기 어려워 추가 확인이 필요합니다. [1][2]\n\n필요 서류는 주민등록초본, 지원신청서, 약정서, 개인정보 제공·활용동의서, 3개월 이상 경제활동을 증명하는 서류, 소득 증빙 공적자료 등입니다. [2]",
+        "used_source_ids": [
+          1,
+          2
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 지원대상 요건을 더 자세히 알려줘?"
+          },
+          {
+            "kind": "question",
+            "text": "미래행복통장 신청 서류를 항목별로 정리해줘?"
+          },
+          {
+            "kind": "question",
+            "text": "미래행복통장 신청 절차를 순서대로 알려줘?"
+          }
+        ]
+      },
+      "comparison": [
+        {
+          "policy_id": "POL_GOV_007",
+          "present_in_all_stages": true,
+          "rows": {
+            "checker": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "housing",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "ineligible"
+              ],
+              [
+                "income",
+                "needs_check"
+              ],
+              [
+                "income",
+                "needs_check"
+              ]
+            ],
+            "pipeline": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "housing",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "ineligible"
+              ],
+              [
+                "income",
+                "needs_check"
+              ],
+              [
+                "income",
+                "needs_check"
+              ]
+            ],
+            "api": [
+              [
+                "age",
+                "ineligible"
+              ],
+              [
+                "housing",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "needs_check"
+              ],
+              [
+                "eligibility",
+                "ineligible"
+              ],
+              [
+                "income",
+                "needs_check"
+              ],
+              [
+                "income",
+                "needs_check"
+              ]
+            ]
+          },
+          "overall": {
+            "checker": "ineligible",
+            "pipeline": "ineligible",
+            "api": "ineligible"
+          },
+          "exclusion_reasons": {
+            "checker": null,
+            "pipeline": null,
+            "api": null
+          },
+          "reasons_equal": true,
+          "quality": {
+            "hold_auto_eligibility": true,
+            "affected_attributes": [
+              "income"
+            ],
+            "hold_reasons": [
+              "UNKNOWN_CONDITION_GROUP"
+            ]
+          },
+          "rows_equal": true,
+          "overall_equal": true,
+          "exclusion_rule_ok": true,
+          "has_needs_check": true
+        }
+      ],
+      "citation": {
+        "cited_document_ids": [
+          "DOC_GOV_007",
+          "DOC_GOV_007"
+        ],
+        "all_cited_in_contexts": true,
+        "cited_policies": [
+          "POL_GOV_007"
+        ],
+        "api_policies_subset_of_context_policies": true
+      },
+      "semantics": {
+        "final_overall": "ineligible",
+        "mismatch": null
+      }
+    }
+  ],
+  "before": {
+    "graph": [
+      {
+        "nodes": 1147,
+        "relationships": 2702
+      }
+    ],
+    "points": 1249
+  },
+  "after": {
+    "graph": [
+      {
+        "nodes": 1147,
+        "relationships": 2702
+      }
+    ],
+    "points": 1249
+  },
+  "counts_unchanged": true
+}
