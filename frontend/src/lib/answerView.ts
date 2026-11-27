@@ -88,8 +88,10 @@ export function answerView(r: AskResponse): AnswerView {
     && r.policy_checks.length > 0 && r.policy_checks.every((policy) => isUnjudgedOnly(policy.conditions))
   ) {
     view.warning = null;
-  } else if (isHoldNotice && r.policy_checks.some((policy) => !isConfirmedIneligible(policy.conditions))) {
-    // 불일치가 확정된 정책만 있으면 "신청 자격은 추가 확인이 필요해요"가 카드의 '조건 불일치'와 어긋나므로 서버 문장을 그대로 둔다.
+  } else if (isHoldNotice && r.policy_checks.some(({ conditions }) => (
+    !isConfirmedIneligible(conditions) && conditions.some(({ status }) => status === 'needs_check')
+  ))) {
+    // 확인 필요 조건이 남은 정책이 없으면(불일치 확정·전부 적합 정책뿐) 합의 문구가 카드와 어긋나므로 서버 문장을 그대로 둔다.
     view.warning = HOLD_NOTICE_DISPLAY;
   }
 
