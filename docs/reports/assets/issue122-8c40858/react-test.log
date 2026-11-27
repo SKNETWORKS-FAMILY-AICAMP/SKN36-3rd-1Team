@@ -3,7 +3,7 @@
 > vitest run
 
 
- RUN  v2.1.8 C:/dev/project/SKN36-3rd-1Team/frontend
+ RUN  v2.1.8 <REPO>/frontend
 
  ✓ src/mock/mockAsk.test.ts (13 tests) 46ms
  ✓ src/lib/policyCompare.test.ts (9 tests) 67ms
