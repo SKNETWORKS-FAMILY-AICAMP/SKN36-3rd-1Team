@@ -7,9 +7,9 @@
 ## A. Git·worktree
 
 - 브랜치: `test/79-18-90-api-source-verification`
-- worktree: `C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue79-18-90-api-verify`
+- worktree: `<repo-root>`
 - `git fetch origin dev` 성공 후 기준: `befe2d026bb59511966f212dd40c968c0dcea5f2`.
-- 권장 `C:\dev\...` 대신 쓰기 허용 workspace에 별도 worktree 생성. 동일 목적 브랜치·worktree가 없음을 전체 목록으로 확인했다.
+- 쓰기 허용 workspace에 별도 worktree 생성. 동일 목적 브랜치·worktree가 없음을 전체 목록으로 확인했다.
 - 기존 등록 worktree 17개를 `git status --short`로 조사했다. 루트·Django SSR·final-eval·#39 작업 2개·과거 RAG PR 준비 2개에 미커밋 파일이 있었다. 그대로 보존했다.
 - #39(`feature/39-child-age-api-pipeline`)의 main.py·schemas.py·pipeline.py·계약·통합 테스트 수정은 읽기 전용 상태 조사만 했다. #103 `fix/103-sejong-apply-url-final`, #78 `feature/78-exclusion-reasons-api-integration`은 조사 시 clean이었다.
 - 다른 브랜치 checkout/rebase/merge, 기존 수정 이동·삭제, commit/push/PR/issue 변경을 수행하지 않았다. worktree 생성에 필요한 공유 Git 메타데이터·origin/dev fetch만 갱신했다.
@@ -131,45 +131,17 @@ FastAPI는 **TestClient만 사용**했다. 실제 HTTP 서버를 새로 띄우�
 | E2E-05-6 | 인천 근거·연령, #90 전후 상태 구분 | 실DB는 verified/2026공고 연결, UNKNOWN 보류 PASS; 충돌 설명 FAIL. 과거 needs_review 기대를 현재 DB에 덮어씌우지 않음 |
 | E2E-06-2 | POST 선택 정책·일정·서류·문의처 계약/null | 실제 DB 40건과 실응답 재생 7건 및 기존 계약 회귀 PASS; 실제 HTTP 서버 경로는 미실행 |
 
-## M. PR 초안·사용자 Git 명령
+## M. PR 증거 활용
 
-증거 공유용 PR **YES(권장)**. 서비스 코드 fix PR은 없음. 이슈 전체 완료/자동 종료 근거가 아니므로 Closes를 사용하지 않는다.
-
-제목: `test(#79,#18,#90): R3D 연령·출처·URL 검증과 실제 답변 실패 증거 추가`
-
-본문 초안:
-
-> 동결 R3D와 최신 dev에서 53개 교정 정책의 API 경계, 실제 DB 11정책 40건, Hybrid 검색 3건, 승인된 실제 LLM 7건을 검증했습니다. 원문 273개 해시와 동일 B2 청크 58개 본문·URL을 대조했습니다.
->
-> 구조화 판정/출처 계약은 유지되지만 실제 LLM에서 인천 18/19세 충돌 설명 누락과 null 신청 URL의 안내 주소 오설명을 재현했습니다. #136 URL 방어와 Generator/데이터 검토로 인계하며 서비스·데이터·DB는 변경하지 않았습니다. 실제 HTTP 서버 대신 TestClient를 사용했습니다.
->
-> 검증: 신규 테스트 5개 PASS, 기존 누락 원본 실패 1건은 변경 전후 동일, 신규 회귀 실패 0. 상세 수치는 보고서와 실행 로그 참고.
->
-> Related to #79, #18, #90, #122. #39/#103/#78 병행 작업 보존.
-
-사용자만 아래를 실행한다. 이 작업에서는 add/commit/push를 실행하지 않았다.
-
-```powershell
-Set-Location -LiteralPath 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue79-18-90-api-verify'
-git status --short
-git branch --show-current
-git diff --check
-git add -- tests/integration/test_issue79_18_90_verification.py docs/reports/issue79-18-90-verification-20261126.md docs/reports/issue79-18-90-e2e-20261126.json docs/reports/issue79-18-90-tests-20261126.txt
-git diff --cached --stat
-git diff --cached --check
-git commit -m 'test: verify issues 79 18 90 against frozen R3D'
-git push -u origin test/79-18-90-api-source-verification
-```
-
-GitHub 저장소의 Pull requests → New pull request에서 base `dev`, compare `test/79-18-90-api-source-verification`을 선택하고 위 제목·본문과 4파일의 차이를 확인해 생성한다. 자동 종료 키워드는 넣지 않는다.
+이 검증 증거는 기존 [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140)에 포함됐다. 후속 리뷰 반영 기준은 `d948819`이며, 상세 내용은 [리뷰 보고서](pr140-review-20261127.md)에 기록한다. 이슈 전체 종료 근거로 사용하지 않는다.
 
 ## 로컬 재현 명령
 
-기존 `.venv`를 사용했으며 패키지를 설치하지 않았다. 다음은 실제 실행한 범위의 재현 명령이다. `--llm`은 외부 호출이므로 별도 승인과 키 설정이 필요한 선택 실행이며 아래 읽기 전용 명령에는 포함하지 않았다. output 파일은 매번 새 이름이어야 한다.
+기존 `.venv`를 사용했으며 패키지를 설치하지 않았다. 다음은 실제 실행한 범위의 재현 명령이다. `--llm`은 외부 호출이므로 별도 승인과 키 설정이 필요한 선택 실행이며 아래 읽기 전용 명령에는 포함하지 않았다. output 파일은 매번 새 이름이어야 한다. `<repo-root>`와 인증·원문 폴더 자리표시는 사용자 환경에 맞게 바꾸며, 기존 가상환경 Python 경로도 확인한다. 개인 절대 경로는 공유 보고서에서 제외했다.
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\Playdata\Documents\ChatGPT\4th 단위 프로젝트\issue79-18-90-api-verify'
-$verifyPython = 'C:\dev\project\SKN36-3rd-1Team\SKN36-3rd-1Team\.venv\Scripts\python.exe'
+Set-Location -LiteralPath '<repo-root>'
+$verifyPython = '.\.venv\Scripts\python.exe'
 $verifyTests = @(
   'tests/unit/test_age_corrections_v140.py',
   'tests/unit/test_issue79_age_corrections_fullscan.py',
@@ -194,7 +166,8 @@ $verifyTests = @(
 & $verifyPython -m py_compile tests/integration/test_issue79_18_90_verification.py
 
 # Runbook과 같은 현재 사용자 DPAPI 절차. 값은 출력하지 않는다.
-$verifySecretDir = 'C:\dev\project\SKN36-3rd-1Team\restore-bundle\secrets-01'
+$verifySecretDir = '<R3D 전용 DPAPI 인증 폴더>'
+$verifySourceRoot = '<복원 번들의 원문 저장소>'
 try {
   foreach ($pair in @(@('qdrant.clixml','ISSUE105_R3D_VERIFY_QDRANT_API_KEY'), @('neo4j.clixml','ISSUE105_R3D_VERIFY_NEO4J_PASSWORD'))) {
     $secure = Import-Clixml -LiteralPath (Join-Path $verifySecretDir $pair[0])
@@ -203,7 +176,7 @@ try {
       [Environment]::SetEnvironmentVariable($pair[1], [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr), 'Process')
     } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
   }
-  & $verifyPython tests/integration/test_issue79_18_90_verification.py --live --hybrid --source-root 'C:\dev\project\SKN36-3rd-1Team\restore-bundle\repo-01' --output .cache/issue79-18-90-recheck-new.json
+  & $verifyPython tests/integration/test_issue79_18_90_verification.py --live --hybrid --source-root $verifySourceRoot --output .cache/issue79-18-90-recheck-new.json
 } finally {
   Remove-Item Env:ISSUE105_R3D_VERIFY_QDRANT_API_KEY -ErrorAction SilentlyContinue
   Remove-Item Env:ISSUE105_R3D_VERIFY_NEO4J_PASSWORD -ErrorAction SilentlyContinue

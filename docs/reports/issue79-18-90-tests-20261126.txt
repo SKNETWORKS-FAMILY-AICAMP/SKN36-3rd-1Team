@@ -23,7 +23,7 @@ self = <test_rag_pipeline.PipelineTests testMethod=test_regenerated_doc_gov_048_
                     / "data" / "raw" / "gov24" / "items" / "449000000108.json")
 >       with open(raw_path, encoding="utf-8") as f:
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Playdata\\Documents\\ChatGPT\\4th ���� ������Ʈ\\issue79-18-90-api-verify\\data\\raw\\gov24\\items\\449000000108.json'
+E       FileNotFoundError: [Errno 2] No such file or directory: '<repo-root>\\data\\raw\\gov24\\items\\449000000108.json'
 
 tests\integration\test_rag_pipeline.py:418: FileNotFoundError
 =========================== short test summary info ===========================
