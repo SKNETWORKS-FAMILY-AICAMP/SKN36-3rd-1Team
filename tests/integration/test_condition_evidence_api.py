@@ -10,11 +10,39 @@ from backend.api.schemas import AskRequest
 from backend.llm import generator
 from backend.rag import pipeline
 from backend.rag.context_builder import rank_citable_contexts, select_contexts
-from test_condition_evidence_completion import sample
+
+
+def sample_policy(policy_id: str) -> dict:
+    document_id = f"DOC_{policy_id}"
+    condition = {
+        "type": "AGE", "operator": "BETWEEN", "value": "65~120",
+        "name": "연령 조건", "relationship": {"evidence_document_id": document_id},
+    }
+    return {
+        "policy_id": policy_id,
+        "policy_name": "가상 정책",
+        "best_rank": 1,
+        "graph_status": "FOUND",
+        "data_quality": {},
+        "graph": {
+            "policy": {"application_period": "상시신청"},
+            "eligibility": {"condition_tree": [
+                {"logic": "NOT", "conditions": [condition], "groups": []},
+            ]},
+        },
+        "evidence_document_check": {document_id: "PASS"},
+        "evidence": [
+            {
+                "rank": rank, "chunk_id": f"{policy_id}_C{rank}", "document_id": document_id,
+                "text": "가상 신청 절차", "source_url": "https://example.org/sample",
+            }
+            for rank in range(1, 7)
+        ],
+    }
 
 
 def policy():
-    result = sample(pid="POL_SAMPLE_A")
+    result = sample_policy("POL_SAMPLE_A")
     result["data_quality"] = {"hold_auto_eligibility": True, "affected_attributes": ["employment"],
                               "warnings": [{"code": "SAMPLE_REVIEW", "affects": ["employment"],
                                             "blocks_auto_eligibility": True, "message": "가상 검수 보류"}]}
@@ -92,8 +120,10 @@ def test_confirmed_exclusion_is_preserved_with_added_evidence():
 
 
 def test_review_closed_priority_and_named_question_exception():
-    closed = sample(pid="POL_SAMPLE_CLOSED");closed["policy_name"] = "가상 마감 정책"
-    opened = sample(pid="POL_SAMPLE_OPEN");opened["policy_name"] = "가상 접수 정책"
+    closed = sample_policy("POL_SAMPLE_CLOSED")
+    closed["policy_name"] = "가상 마감 정책"
+    opened = sample_policy("POL_SAMPLE_OPEN")
+    opened["policy_name"] = "가상 접수 정책"
     for item in (closed, opened):
         item["evidence"][-1]["text"] = "지원 제외 대상: 65세 이상"
     # Open has no matching age candidate: all of its candidates fit before the
