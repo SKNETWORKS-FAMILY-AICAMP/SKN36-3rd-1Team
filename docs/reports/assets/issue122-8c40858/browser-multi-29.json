@@ -1,0 +1,302 @@
+{
+  "dev": "8c40858",
+  "date_kst": "2026-11-27T10:20:50.030+09:00",
+  "react": "http://127.0.0.1:18305/",
+  "api": "http://127.0.0.1:18304",
+  "db": "R3D verify B2 (Neo4j :56787, Qdrant :56756)",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "profile": "가상 나이·서울·소득 공란·이력 없음",
+  "cases": [
+    {
+      "id": "multi-29",
+      "age": 29,
+      "region": "서울",
+      "asks": [
+        {
+          "request": {
+            "question": "교육비·구직·교통 지원 정책이 있나요?",
+            "profile": {
+              "age": 29,
+              "region": "서울",
+              "income": null
+            },
+            "history": [],
+            "awaiting_field": null,
+            "selected_policy_id": null
+          },
+          "http": 200,
+          "body": {
+            "status": "answered",
+            "answer": "교육 관련 정책으로는 초중고 교육비 지원사업(고교학비 지원), 교육급여(맞춤형 급여), 초.중.고 학생 교육정보화 지원, 유아학비 지원(3~5세 누리과정 지원), 한부모가족자녀 교육비 지원이 확인됩니다. 다만 이번 자료에서는 각 정책의 신청 자격이 자동 판정 보류 상태라서, 사용자가 해당되는지까지는 확정할 수 없습니다. 접수 여부도 모두 공식 공고에서 확인이 필요합니다.[1][2][3][4][5]\n\n각 정책의 원문상 지원 내용은 다음과 같습니다. 초중고 교육비 지원사업(고교학비 지원)은 고등학교 입학금·수업료·학교운영지원비 납부 면제와 방과후 활동 이용권, PC·인터넷 설치 지원이 있습니다.[1] 교육급여(맞춤형 급여)는 초·중·고등학생 교육활동지원비와 입학금·수업료·교과서비를 지원합니다.[2] 초.중.고 학생 교육정보화 지원은 PC 1대, 인터넷 통신비, 유해차단서비스를 지원합니다.[3] 유아학비 지원(3~5세 누리과정 지원)은 국공립 및 사립유치원에 다니는 3~5세 유아를 지원하며, 대한민국 국적이 없는 유아, 가정 양육수당·어린이집 보육료를 지원받는 유아, 유치원 이용시간에 아이돌봄서비스 등과 중복지원되는 경우는 제외됩니다.[4] 한부모가족자녀 교육비 지원은 한부모가족보호대상자에게 고교비(학비)를 지원합니다.[5]\n\n현재 접수 상태는 모두 확인되지 않았습니다. 신청 가능 여부는 각 정책의 공식 공고에서 자격 요건과 접수 안내를 확인해 주세요.[1][2][3][4][5] 자녀 나이를 알려 주세요.",
+            "citations": [
+              {
+                "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+                "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+                "document_id": "DOC_BOK_024",
+                "page_number": null
+              },
+              {
+                "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+                "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+                "document_id": "DOC_BOK_020",
+                "page_number": null
+              },
+              {
+                "title": "[중앙부처복지서비스] 초.중.고 학생 교육정보화 지원 (WLF00003227)",
+                "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+                "document_id": "DOC_BOK_052",
+                "page_number": null
+              },
+              {
+                "title": "[중앙부처복지서비스] 유아학비 지원(3~5세 누리과정 지원) (WLF00000969)",
+                "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+                "document_id": "DOC_BOK_013",
+                "page_number": null
+              },
+              {
+                "title": "[중앙부처복지서비스] 한부모가족자녀 교육비 지원 (WLF00001104)",
+                "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+                "document_id": "DOC_BOK_025",
+                "page_number": null
+              }
+            ],
+            "policy_checks": [
+              {
+                "policy_id": "POL_BOK_024",
+                "conditions": [
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  }
+                ],
+                "reception_status": "unknown",
+                "application_schedule": null,
+                "required_documents": null,
+                "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+                "agency": "교육부 학생지원총괄과",
+                "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+                "official_apply_url": null,
+                "contacts": null,
+                "requirement_excerpts": null,
+                "exclusion_reasons": null,
+                "official_requirements": null
+              },
+              {
+                "policy_id": "POL_BOK_020",
+                "conditions": [
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  }
+                ],
+                "reception_status": "unknown",
+                "application_schedule": null,
+                "required_documents": null,
+                "policy_name": "교육급여(맞춤형 급여)",
+                "agency": "교육부 학생지원총괄과",
+                "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+                "official_apply_url": null,
+                "contacts": null,
+                "requirement_excerpts": null,
+                "exclusion_reasons": null,
+                "official_requirements": null
+              },
+              {
+                "policy_id": "POL_BOK_052",
+                "conditions": [
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  }
+                ],
+                "reception_status": "unknown",
+                "application_schedule": null,
+                "required_documents": null,
+                "policy_name": "초.중.고 학생 교육정보화 지원",
+                "agency": "교육부 디지털교육기반과",
+                "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+                "official_apply_url": null,
+                "contacts": null,
+                "requirement_excerpts": null,
+                "exclusion_reasons": null,
+                "official_requirements": null
+              },
+              {
+                "policy_id": "POL_BOK_013",
+                "conditions": [
+                  {
+                    "field": "children",
+                    "label": "자녀 월령",
+                    "reason": "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  },
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  },
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  }
+                ],
+                "reception_status": "unknown",
+                "application_schedule": null,
+                "required_documents": null,
+                "policy_name": "유아학비 지원(3~5세 누리과정 지원)",
+                "agency": "교육부 영유아재정과",
+                "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+                "official_apply_url": null,
+                "contacts": null,
+                "requirement_excerpts": null,
+                "exclusion_reasons": null,
+                "official_requirements": null
+              },
+              {
+                "policy_id": "POL_BOK_025",
+                "conditions": [
+                  {
+                    "field": "eligibility",
+                    "label": "자격 요건",
+                    "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                    "status": "needs_check"
+                  }
+                ],
+                "reception_status": "unknown",
+                "application_schedule": null,
+                "required_documents": null,
+                "policy_name": "한부모가족자녀 교육비 지원",
+                "agency": "교육부 학생지원총괄과",
+                "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+                "official_apply_url": null,
+                "contacts": null,
+                "requirement_excerpts": null,
+                "exclusion_reasons": null,
+                "official_requirements": null
+              }
+            ],
+            "follow_up_questions": [
+              {
+                "kind": "question",
+                "text": "각 정책의 신청 자격 기준도 알려 주세요?",
+                "field": null
+              },
+              {
+                "kind": "question",
+                "text": "유아학비 지원의 제외 조건을 더 자세히 설명해 주세요?",
+                "field": null
+              }
+            ],
+            "checked_at": null,
+            "notice": {
+              "kind": "warn",
+              "title": "추가 확인 필요",
+              "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+            },
+            "is_sample": false
+          }
+        }
+      ],
+      "dom": {
+        "cards": [
+          {
+            "name": "교육급여(맞춤형 급여)",
+            "hrefs": [
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+              ]
+            ]
+          },
+          {
+            "name": "유아학비 지원(3~5세 누리과정 지원)",
+            "hrefs": [
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969"
+              ]
+            ]
+          },
+          {
+            "name": "초.중.고 학생 교육정보화 지원",
+            "hrefs": [
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+              ]
+            ]
+          },
+          {
+            "name": "초중고 교육비 지원사업(고교학비 지원)",
+            "hrefs": [
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+              ]
+            ]
+          },
+          {
+            "name": "한부모가족자녀 교육비 지원",
+            "hrefs": [
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104"
+              ]
+            ]
+          }
+        ],
+        "srcs": [
+          [
+            "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)bokjiro.go.kr↗",
+            "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+          ],
+          [
+            "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)bokjiro.go.kr↗",
+            "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+          ],
+          [
+            "[중앙부처복지서비스] 초.중.고 학생 교육정보화 지원 (WLF00003227)bokjiro.go.kr↗",
+            "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+          ],
+          [
+            "[중앙부처복지서비스] 유아학비 지원(3~5세 누리과정 지원) (WLF00000969)bokjiro.go.kr↗",
+            "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969"
+          ],
+          [
+            "[중앙부처복지서비스] 한부모가족자녀 교육비 지원 (WLF00001104)bokjiro.go.kr↗",
+            "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104"
+          ]
+        ]
+      }
+    }
+  ]
+}
