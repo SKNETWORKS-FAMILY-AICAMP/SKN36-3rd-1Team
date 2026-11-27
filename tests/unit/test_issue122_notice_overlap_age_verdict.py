@@ -273,18 +273,37 @@ class StatedMissingLinkTests(unittest.TestCase):
         fixed, _ = align_application_links("신청 주소는 따로 없어요 [1]. 가상 홈페이지에서 신청할 수 있어요 [1].", CONTEXTS, [self.OPEN])
         self.assertEqual(fixed, "신청 주소는 따로 없어요 [1].")
 
-    def test_clause_after_citation_is_split_and_sentence_end_kept(self):
-        # 인용 뒤에 문장부호 없이 이어진 웹 신청 절만 빠지고, 앞 절(서류)과 마침표·인용은 남는다.
+    def test_removed_sentence_citation_goes_to_notice_sentence(self):
+        # 빠진 웹 신청 문장의 인용은 링크 안내 문장의 인용 묶음으로 간다(무관한 '기간' 문장에 붙지 않음, PR #161 4차 리뷰).
         cases = {
-            "신청 링크는 없어요 [1]. 서류는 신분증이에요 [1] 홈페이지에서 신청하세요 [2].":
-                "신청 링크는 없어요 [1]. 서류는 신분증이에요 [1][2].",
             "신청 주소는 따로 없어요 [1]. 가상 홈페이지에서 신청할 수 있어요 [2]. 기간은 상시예요 [1].":
                 "신청 주소는 따로 없어요 [1][2]. 기간은 상시예요 [1].",
+            "신청 링크는 없어요 [1]. 기간은 상시예요 [1]. 홈페이지에서 신청하세요 [2].":
+                "신청 링크는 없어요 [1][2]. 기간은 상시예요 [1].",
         }
         contexts = CONTEXTS + [{"source_id": 3, "policy_id": "A", "text": "z"}]
         for text, expected in cases.items():
             with self.subTest(text=text):
                 self.assertEqual(align_application_links(text, contexts, [self.OPEN])[0], expected)
+
+    def test_citation_inside_sentence_keeps_policy_scope(self):
+        # PR #161 4차 리뷰 필수 1: 인용 뒤 문장을 따로 나누지 않아 인용으로 정책을 정하는 기존 판정을 유지한다.
+        valid = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": "https://example.org/apply",
+                 "reception_status": "open"}
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "B", "text": "신청방법"}]
+        text = "홈페이지에서 신청할 수 있어요 [3] 서류는 신분증이에요."
+        self.assertEqual(align_application_links(text, contexts, [self.OPEN, valid]), (text, False))
+        self.assertEqual(align_application_links("홈페이지에서 신청할 수 있어요 [9] 서류는 신분증이에요.", CONTEXTS, [self.OPEN]),
+                         ("홈페이지에서 신청할 수 있어요 [9] 서류는 신분증이에요.", False))
+
+    def test_paragraph_break_after_dropped_line_is_kept(self):
+        # PR #161 4차 리뷰 필수 2: 앞이 줄바꿈, 뒤가 문단 구분이면 문단 구분을 남긴다.
+        fixed, _ = align_application_links("신청 링크는 없어요 [1].\n- 기간: 상시\n- 홈페이지에서 신청하세요\n\n다음 문단 [1].",
+                                           CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 링크는 없어요 [1].\n- 기간: 상시\n\n다음 문단 [1].")
+        fixed, _ = align_application_links("신청 링크는 확인되지 않았어요 [1].\n자격 설명입니다.\n신청 주소는 없어요.\n\n다음 문단 [1].",
+                                           CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 링크는 확인되지 않았어요 [1].\n자격 설명입니다.\n\n다음 문단 [1].")
 
     def test_mid_sentence_citation_still_corrected(self):
         # PR #161 3차 리뷰 필수 1: 문장 중간 인용 뒤에서 절을 나누지 않아 웹 신청 단정이 그대로 보정된다.
