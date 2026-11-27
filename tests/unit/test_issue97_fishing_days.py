@@ -86,6 +86,13 @@ def test_rq031_saved_answers(monkeypatch, recorded_cases, contexts, case_id, day
     ("11월 27일 기준으로 최소 조업일수는 며칠인가요?", "all", "해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다"),
     ("조업일수가 59일인데 신청 서류를 알려주세요.", "all", None),
     ("조업일수가 60일 이상이라고 적혀 있나요?", "all", None),
+    ("조업하지 않은 날이 59일입니다. 최소 조업일수 요건을 충족하나요?", "all", None),
+    ("조업일수가 59일을 넘으면 최소 조업일수 요건을 충족하나요?", "all", None),
+    ("조업일수가 59일보다 많으면 기준을 충족하나요?", "all", None),
+    ("미 조업일수가 59일입니다. 최소 조업일수는 충족하나요?", "all", None),
+    ("최소 조업일수가 59일입니다. 이 기준이 맞나요?", "all", None),
+    ("59일 조업했는지 알 수 없습니다. 최소 조업일수 요건을 충족하나요?", "all", None),
+    ("올해 60일 동안 조업했습니다. 최소 조업일수 요건을 충족하나요?", "all", "60일은 최소 조업일수 요건을 충족합니다"),
 ])
 def test_fishing_days_guard_respects_evidence_and_question_scope(contexts, question, evidence, expected):
     selected = contexts

@@ -10,8 +10,16 @@ _FISHING_TOPIC = re.compile(r"조업\s*일수|며칠\s*(?:이상\s*)?조업|\d+\
 _OTHER_TOPICS = re.compile(r"신청\s*(?:방법|절차|기간|서류|주소|링크)|서류|교육|어업\s*허가|접수|지급액")
 _CALENDAR_DATE = re.compile(r"\d{1,2}\s*월\s*\d{1,2}\s*일|\d{4}[-./]\d{1,2}[-./]\d{1,2}")
 _DAY_RANGE = re.compile(r"\d+\s*(?:일\s*)?[~～–—-]\s*\d+\s*일")
-_DAYS = re.compile(r"(?<![\d.,~～–—−-])(\d{1,3})\s*일(?![\d.]|\s*(?:이상|이하|초과|미만|[~～–—-]))")
 _DAY_MENTION = re.compile(r"\d\s*일")
+_STATED_DAYS = re.compile(
+    r"(?<!\w)조업\s*일수(?:가|는|이|은|[:：])?\s*(?:정확히\s*)?(\d{1,3})\s*일"
+    r"(?=\s*(?:입니다|이에요|이다(?!고)|이고|이며|이면|이라면|인데|[.!?,。！？]|$))"
+)
+_NON_ACTUAL_PREFIX = re.compile(r"(?<!\w)(?:최소|최대|필요한|미|비)\s*$")
+_WORKED_DAYS = re.compile(
+    r"(?<![\d.,~～–—−-])(\d{1,3})\s*일(?:을)?\s*(?:동안\s*)?조업\s*"
+    r"(?:했(?:습니다|어요|는데|고|으며|지만|다(?!고))|하였(?:습니다|고|으며))"
+)
 _TAC_STATUS = re.compile(
     r"(?:총허용어획량(?:\s*\(TAC\))?|TAC)(?:을)?\s*적용(?:하는)?\s*어종을\s*"
     r"주로\s*어획하는\s*어선(?:에\s*해당(?P<applies>합니다|해요|하고|하며|하므로|하지\s*않)|"
@@ -36,9 +44,11 @@ def ground_fishing_days(response: dict, question: str, contexts: list[dict]) -> 
         return response
 
     count_text = _CALENDAR_DATE.sub("", question)
-    values = _DAYS.findall(count_text)
-    # Do not turn a quoted threshold, range, or multi-value question into a
-    # comparison for one person's fishing days.
+    values = [match[1] for match in _STATED_DAYS.finditer(count_text)
+              if not _NON_ACTUAL_PREFIX.search(count_text[:match.start()])]
+    values.extend(_WORKED_DAYS.findall(count_text))
+    # A day count must be explicitly attached to a stated or completed amount
+    # of fishing. Unmatched days, thresholds, and ranges keep the model reply.
     if _DAY_RANGE.search(count_text) or len(values) > 1 or len(values) != len(_DAY_MENTION.findall(count_text)):
         return response
 
