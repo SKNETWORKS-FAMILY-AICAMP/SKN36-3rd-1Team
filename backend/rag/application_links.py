@@ -3,7 +3,7 @@
 import re
 
 from backend.rag.context_builder import valid_source_url
-from backend.rag.reception_notice import NEAR_PHRASE
+from backend.rag.reception_notice import NEAR_PHRASE, has_reception_notice
 
 CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
@@ -20,11 +20,15 @@ SITE = r"(?:홈페이지|웹\s*사이트|누리집)"
 LINK_CLAIM = re.compile(
     r"신청\s*(?:URL|url|주소|링크|페이지|사이트)"
     rf"|(?:{SITE}|https?://|온라인).{{0,100}}(?:신청|접수)"
-    rf"|(?:신청|접수).{{0,100}}(?:{SITE}|https?://)",
+    rf"|(?:신청|접수).{{0,100}}(?:{SITE}|https?://)"
+    # '신청은 온라인으로 ○○에서 하거나'처럼 '신청'이 '온라인' 앞에 오는 단정(#122 1번 재검증).
+    r"|(?:신청|접수)\S{0,2}\s*온라인",
 )
+# 주소·홈페이지를 가리키는 표현. 이런 절은 원문에 온라인 신청이 있어도 신청 주소 안내로 보고 보정한다.
+ADDRESS_WORD = re.compile(rf"{SITE}|https?://|www\.|신청\s*(?:URL|url|주소|링크|페이지|사이트)", re.IGNORECASE)
 CAUTION = re.compile(
     r"신청\s*(?:URL|url|주소|링크|페이지|사이트).{0,20}(?:없|미확인|확인되지|아닙|아니|확인.{0,4}필요)"
-    rf"|{SITE}.{{0,12}}(?:신청|접수).{{0,10}}(?:없|않|못|불가)"
+    rf"|(?:{SITE}|온라인).{{0,12}}(?:신청|접수).{{0,10}}(?:없|않|못|불가)"
     # '신청 공고는 홈페이지에서 확인'은 접수 경로 안내가 아니다.
     rf"|{SITE}.{{0,15}}(?:공고|공지).{{0,15}}확인"
     rf"|(?:신청|모집)\s*(?:공고|공지).{{0,80}}(?:{SITE}|https?://).{{0,80}}확인",
@@ -41,7 +45,11 @@ PLURAL = re.compile(rf"(?:각|각각|모든|두)\s*(?:정책|사업|신청|공�
 # 보정 문구 뒤에 원래 절의 쉼표·세미콜론이 남으면 '확인해 주세요., …'가 된다(#103 후속). 줄바꿈은 그대로 둔다.
 NOTICE_COMMA = re.compile(r"(확인해 주세요\.|확인되지 않았어요\.)((?:\s*\[\d+\])*)[ \t]*[,;][ \t]*(\r?\n)?")
 # '홈페이지 방문'과 구분하려고 오프라인 접수처가 있는 방문만 본다.
-OFFLINE_VISIT = re.compile(r"(주민센터|행정복지센터|동사무소|구청|시청|군청)\S{0,3}\s*(?:방문|내방)")
+# 답변이 스스로 '신청 주소·링크가 확인되지 않았다'고 밝힌 문장. 이 안내가 이미 있으면 같은 정책에 보정 안내를 또 넣지 않는다.
+STATED_MISSING = re.compile(
+    r"신청\s*(?:URL|url|주소|링크).{0,20}(?:없|미확인|확인되지\s*않|제공되지\s*않|나와\s*있지\s*않|적혀\s*있지\s*않)"
+)
+OFFLINE_VISIT = re.compile(r"(주민센터|행정복지센터|동사무소|구청|시청|군청|고용센터)\S{0,3}\s*(?:방문|내방)")
 
 
 # 방문 신청을 받지 않는다는 원문·답변을 '방문 신청 가능'으로 뒤집지 않도록 부정 조건을 함께 본다.
@@ -69,6 +77,22 @@ def _verified_visit(clause: str, pid: str, contexts: list[dict]) -> str | None:
                     and not VISIT_NEGATION.search(segment):
                 return place
     return None
+
+
+def _verified_online(clause: str, pid: str, contexts: list[dict]) -> bool:
+    """주소·홈페이지 없이 '온라인으로 신청'만 말한 절이 같은 정책 원문의 온라인 신청 안내와 맞으면 True.
+
+    신청 주소를 안내하는 것이 아니라 신청 방법 설명이므로 보정하지 않는다(#158 인계: 온라인 신청 절차 보존).
+    """
+    if "온라인" not in clause or ADDRESS_WORD.search(clause) or VISIT_NEGATION.search(clause):
+        return False
+    for ctx in contexts:
+        if ctx.get("policy_id") != pid:
+            continue
+        for segment in SEGMENT.split(str(ctx.get("text") or "")):
+            if "온라인" in segment and re.search(r"신청|접수", segment) and not VISIT_NEGATION.search(segment):
+                return True
+    return False
 
 
 def _named_policies(text: str, by_id: dict[str, dict]) -> set[str]:
@@ -108,6 +132,12 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
     paragraph_policy = None
     # 같은 정책의 신청 안내는 한 답변에 한 번만 넣는다('…없고, …에서 신청' 두 절이 같은 문장으로 반복되지 않게).
     noticed: set[str] = set()
+    # 한 정책만 다루는 답변은 정책명을 붙이지 않는다(접수 문구 보정과 같은 기준, 계약 §7 4·11번).
+    single = len(by_id) == 1
+    # 한 정책 답변이 이미 '신청 주소·링크는 확인되지 않았다'고 밝혔으면 보정 안내를 또 넣지 않고
+    # 웹 신청 단정 절만 뺀다(#122 후속: '직접 신청 링크는 확인되지 않았어요'가 두 번 나오던 문제).
+    if single and STATED_MISSING.search(answer.replace("**", "")):
+        noticed.update(by_id)
     for index in range(0, len(parts), 2):
         parts[index] = PROTECTED.sub(lambda m: guarded[int(m.group(1))], parts[index])
         if index and re.search(r"\n\s*\n", parts[index - 1]):
@@ -122,7 +152,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         named = _named_policies(plain, by_id)
         if named:
             paragraph_policy = next(iter(named)) if len(named) == 1 else None
-        if not LINK_CLAIM.search(plain) or (CAUTION.search(plain) and not WEB_ACTION.search(plain)):
+        cautious = CAUTION.search(plain) or STATED_MISSING.search(plain)
+        if not LINK_CLAIM.search(plain) or (cautious and not WEB_ACTION.search(plain)):
             continue
         numbers = CITATION.findall(clause)
         if any(number not in policy_of for number in numbers):
@@ -162,12 +193,19 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
             changed = True
             continue
         pid = next(iter(targets))
-        markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers) if policy_of[n] == pid)
+        if _verified_online(plain, pid, contexts):
+            continue  # 원문으로 확인되는 온라인 신청 방법 설명은 그대로 둔다.
+        markers ="".join(f"[{n}]" for n in dict.fromkeys(numbers) if policy_of[n] == pid)
         if pid in noticed:
-            # 이미 같은 정책 안내를 넣었으면 이 절은 인용만 남긴다. 절이 비면 앞의 쉼표 구분자도 지운다.
+            # 이미 같은 정책 안내가 있으면 이 절은 인용만 남긴다. 절이 비면 구분자 하나만 지운다.
+            # 뒤가 쉼표·세미콜론이면 그것을 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
             parts[index] = head + markers
-            if not parts[index].strip() and "\n" not in parts[index - 1]:
-                parts[index - 1] = ""
+            if not parts[index].strip():
+                after = parts[index + 1] if index + 1 < len(parts) else ""
+                if re.fullmatch(r"\s*[,;]\s*", after):
+                    parts[index + 1] = ""
+                elif index and "\n" not in parts[index - 1]:
+                    parts[index - 1] = ""
             changed = True
             continue
         noticed.add(pid)
@@ -176,9 +214,10 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         text = f"{place} 방문 신청 방법은 확인되지만, {MISSING_LINK}" if place else NO_APPLICATION_LINK
         # 답변에 이미 접수 미확인 안내가 있으면 같은 문구를 또 붙이지 않는다.
         # 문구가 정책별로 빠짐없이 들어갔는지는 reception_notice가 다시 보장한다(#103·#147).
-        if by_id[pid]["reception_status"] == "unknown" and not NEAR_PHRASE.search(answer):
+        if by_id[pid]["reception_status"] == "unknown" and not (NEAR_PHRASE.search(answer) or has_reception_notice(answer)):
             text += f" {UNKNOWN_RECEPTION}"
-        parts[index] = head + f"{by_id[pid]['policy_name']}: {text} {markers}".rstrip()
+        label = "" if single else f"{by_id[pid]['policy_name']}: "
+        parts[index] = head + f"{label}{text} {markers}".rstrip()
         changed = True
     fixed = "".join(parts)
     if changed:

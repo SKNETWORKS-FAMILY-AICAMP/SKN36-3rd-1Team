@@ -22,7 +22,18 @@ PARAPHRASE = re.compile(
 )
 # 조사·어순만 바꾼 합의 문구('접수 여부도 공식 공고에서…', '접수 여부는 현재 공식 공고에서…')는
 # 그 자리에서 합의 문구로 맞춘다.
-NEAR_PHRASE = re.compile(r"(?:현재\s*)?접수\s*여부(?:도|는)?\s*(?:현재\s*)?공식\s*공고에서\s*확인해\s*주세요")
+# '접수 여부도 현재는 공식 공고에서…'(#122 1번 재검증)도 같은 문구다.
+NEAR_PHRASE = re.compile(r"(?:현재\s*)?접수\s*여부(?:도|는)?\s*(?:현재는?\s*)?공식\s*공고에서\s*확인해\s*주세요")
+# '○○은 현재 접수 여부를 공식 공고에서 확인해 주세요'처럼 목적격으로 쓴 문장은 뜻이 같다. 합의 문구로 바꾸면
+# '○○은 … 여부는'으로 주제어가 겹치므로 그대로 두고, 이미 안내한 것으로만 본다(#122 후속).
+ACCEPTED = re.compile(r"(?:현재\s*)?접수\s*여부를\s*(?:현재\s*)?공식\s*공고에서\s*확인해\s*주세요")
+
+
+def has_reception_notice(text: str) -> bool:
+    """합의 문구 또는 목적격 표기(ACCEPTED)가 있으면 True."""
+    return PHRASE in text or bool(ACCEPTED.search(text))
+
+
 # 이보다 긴 문장은 다른 설명이 섞였을 수 있으므로 통째로 바꾸지 않고, 끝에 합의 문구만 덧붙인다.
 MAX_REWRITE_LENGTH = 60
 
@@ -46,7 +57,7 @@ def ensure_unknown_reception_notice(answer: str, contexts: list[dict], checks: l
     parts = SENTENCE_BREAK.split(normalized)
     for index in range(0, len(parts), 2):
         sentence = parts[index]
-        if PHRASE in sentence or not PARAPHRASE.search(sentence):
+        if has_reception_notice(sentence) or not PARAPHRASE.search(sentence):
             continue
         numbers = list(dict.fromkeys(CITATION.findall(sentence)))
         cited = {policy_of.get(n) for n in numbers}
@@ -61,13 +72,13 @@ def ensure_unknown_reception_notice(answer: str, contexts: list[dict], checks: l
         parts[index] = f"{UNKNOWN_RECEPTION} {markers}".rstrip()
         changed = True
     fixed = "".join(parts)
-    sentences = [s for s in SENTENCE_BREAK.split(fixed)[::2] if PHRASE in s]
+    sentences = [s for s in SENTENCE_BREAK.split(fixed)[::2] if has_reception_notice(s)]
     if len(targets) == 1:
         missing = [] if sentences else targets
     else:
         # 여러 unknown 정책이면 합의 문구와 같은 문단에 정책명이나 자기 인용이 있는 정책만 안내된 것으로 본다.
         # 문구 뒤에 붙은 인용('…확인해 주세요. [1]')은 문장 분리에서 떨어지므로 문단 단위로 본다.
-        paragraphs = [p for p in PARAGRAPH_BREAK.split(fixed) if PHRASE in p]
+        paragraphs = [p for p in PARAGRAPH_BREAK.split(fixed) if has_reception_notice(p)]
 
         def covered(pid: str) -> bool:
             own = {n for n, owner in policy_of.items() if owner == pid}

@@ -39,13 +39,18 @@ class NoticeOverlapTests(unittest.TestCase):
         self.assertEqual(fixed.count(MISSING), 1)
         self.assertEqual(fixed.count(PHRASE), 1)
         self.assertNotIn(".,", fixed)
-        self.assertIn(f"{NAME}: {MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [2]\n\n", fixed)
+        # 한 정책 답변이라 정책명 없이 안내한다(#122 후속).
+        self.assertIn(f"{MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [2]\n\n", fixed)
+        self.assertNotIn(f"{NAME}:", fixed)
 
-    def test_comma_after_notice_becomes_space(self):
+    def test_answer_that_already_says_no_link_gets_no_second_notice(self):
+        # 답변이 스스로 '신청 링크는 확인되지 않았어요'라고 밝혔으면 웹 신청 절만 빼고 보정 안내를 또 넣지 않는다(#122 후속).
         text = "만 19세는 연령 범위에 들어가요. 신청 URL은 정부24 페이지이며, 실제 신청 링크는 확인되지 않았어요. [1][2]"
         fixed = aligned(text)
         self.assertNotIn(".,", fixed)
-        self.assertIn(f"{PHRASE}. 실제 신청 링크는 확인되지 않았어요. [1][2]", fixed)
+        self.assertEqual(fixed.count("신청 링크는 확인되지 않았어요"), 1)
+        self.assertNotIn("정부24 페이지", fixed)
+        self.assertIn("만 19세는 연령 범위에 들어가요. 실제 신청 링크는 확인되지 않았어요. [1][2]", fixed)
 
     def test_paragraph_break_after_notice_is_kept(self):
         text = "신청 URL은 정부24 상세 페이지입니다 [2].\n\n서류는 가상 확인서입니다 [1]."
@@ -115,6 +120,78 @@ class AgeVerdictTests(unittest.TestCase):
                      "만 18세가 연령 기준에 포함되는지는 공식 공고에서 확인이 필요해요 [1]."):
             with self.subTest(text=text):
                 self.assertEqual(align_age_verdicts(text, CONTEXTS, [check], 18), (text, False))
+
+
+class StatedMissingLinkTests(unittest.TestCase):
+    """#122 1번 재검증(dev a58c516, R3D·gpt-5.4-mini)에서 잡은 실제 원본 답변을 줄인 형태. 정책은 가상(sample_only)."""
+
+    OPEN = {**UNKNOWN, "reception_status": "open"}
+
+    def test_online_clause_is_dropped_when_answer_already_says_no_link(self):
+        # POL_005 형태: 온라인 신청 절만 빼고, '직접 신청 링크는 확인되지 않았어요'는 한 번만 남는다.
+        text = ("가상 정책은 현재 접수 중이에요. 신청은 온라인으로 가상누리에서 신청서를 작성하거나, 관할 센터에 방문해서 할 수 있습니다. "
+                "다만 직접 신청 링크는 확인되지 않았어요. [1][2]\n\n"
+                "신청 방법은 원문에 확인됩니다. 가상누리에서 온라인 신청이 가능하고, 관할 센터 방문 신청도 가능합니다. [1]")
+        fixed, changed = align_application_links(text, CONTEXTS, [self.OPEN])
+        self.assertTrue(changed)
+        self.assertEqual(fixed.count(MISSING), 1)
+        self.assertNotIn("온라인", fixed)
+        self.assertNotIn(".,", fixed)
+        self.assertNotIn(f"{NAME}:", fixed)
+        self.assertIn("현재 접수 중이에요. 관할 센터에 방문해서 할 수 있습니다.", fixed)
+        self.assertIn("신청 방법은 원문에 확인됩니다. 관할 센터 방문 신청도 가능합니다. [1]", fixed)
+
+    def test_negated_online_application_is_not_rewritten(self):
+        # POL_GOV_016 형태: '온라인·우편 접수는 불가'는 웹 신청 단정이 아니다. 목적격 접수 문구도 이미 안내한 것으로 본다.
+        text = ("가상 정책은 현재 접수 여부를 공식 공고에서 확인해 주세요. 신청은 가상구청에 방문 접수만 가능하고, "
+                "온라인·우편 접수는 불가합니다. 다만 공식 신청 주소는 확인되지 않았어요. [1][2]")
+        self.assertEqual(aligned(text), text)
+
+    def test_heading_paragraph_notice_is_not_repeated_in_last_paragraph(self):
+        # 인천 형태: 첫 문단에 '신청 주소는 확인되지 않았어요'가 있으면 마지막 문단의 홈페이지 접수 절만 빼고 안내를 반복하지 않는다.
+        text = ("가상 정책은 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. [2]\n\n"
+                "신청 방법은 요약에 따르면 가상협의회 홈페이지 접수로 안내되어 있지만, 확인된 공식 신청 URL은 따로 제공되지 않았습니다. [2]")
+        fixed = aligned(text)
+        self.assertNotIn(MISSING, fixed)
+        self.assertNotIn("홈페이지 접수", fixed)
+        self.assertEqual(fixed.count(PHRASE), 1)
+        self.assertTrue(fixed.endswith("\n\n확인된 공식 신청 URL은 따로 제공되지 않았습니다. [2]"))
+
+    def test_online_method_verified_by_source_is_kept(self):
+        # POL_005 형태: 원문에 온라인 신청서 작성 안내가 있으면 '온라인으로 신청'은 방법 설명이라 남긴다(#158 인계).
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "PC나 휴대폰으로 온라인(가상누리) 신청서를 작성합니다.\n관할 고용센터에 방문해서 신청할 수도 있습니다."}]
+        text = "신청은 온라인으로 가상누리에서 하거나 관할 고용센터를 방문해서 할 수 있습니다. 다만 직접 신청 링크는 확인되지 않았어요. [1]"
+        self.assertEqual(align_application_links(text, contexts, [self.OPEN]), (text, False))
+
+    def test_online_claim_without_source_basis_is_corrected(self):
+        # '홈페이지'라는 말이 없어도, 원문에 온라인 신청 근거가 없으면 웹 신청 단정으로 보고 보정한다.
+        fixed, changed = align_application_links("신청은 온라인으로 가상누리에서 하면 됩니다 [1].", CONTEXTS, [self.OPEN])
+        self.assertTrue(changed)
+        self.assertEqual(fixed, f"{MISSING}. 신청 방법은 공식 공고에서 확인해 주세요. [1]")
+
+    def test_homepage_claim_is_corrected_even_if_source_mentions_online(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "온라인 신청서를 작성합니다."}]
+        fixed, changed = align_application_links("가상누리 홈페이지에서 온라인으로 신청하세요 [1].", contexts, [self.OPEN])
+        self.assertTrue(changed)
+        self.assertIn(MISSING, fixed)
+
+    def test_unverified_online_and_verified_job_center_visit_keeps_visit(self):
+        contexts = [{"source_id": 1, "policy_id": "A", "text": "관할 고용센터에 방문해서 신청할 수 있습니다."}]
+        fixed, _ = align_application_links("신청은 온라인으로 하거나 고용센터 방문으로 할 수 있어요 [1].", contexts, [self.OPEN])
+        self.assertTrue(fixed.startswith(f"고용센터 방문 신청 방법은 확인되지만, {MISSING}"))
+
+    def test_reception_phrase_with_hyeonjae_neun_is_not_appended_again(self):
+        # 인천 형태: '접수 여부도 현재는 공식 공고에서 확인해 주세요'를 합의 문구로 맞추고 끝에 다시 붙이지 않는다.
+        text = "가상 정책 자격은 추가 확인이 필요해요. 접수 여부도 현재는 공식 공고에서 확인해 주세요[1].\n\n공식 신청 주소는 확인되지 않았어요. [2]"
+        fixed = aligned(text)
+        self.assertEqual(fixed.count(PHRASE), 1)
+        self.assertNotIn("현재는", fixed)
+
+    def test_multi_policy_answer_keeps_policy_name_label(self):
+        other = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": None, "reception_status": "open"}
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "B", "text": "신청방법"}]
+        fixed, _ = align_application_links(f"{NAME}은 홈페이지에서 신청할 수 있어요 [1].", contexts, [self.OPEN, other])
+        self.assertTrue(fixed.startswith(f"{NAME}: {MISSING}."))
 
 
 if __name__ == "__main__":
