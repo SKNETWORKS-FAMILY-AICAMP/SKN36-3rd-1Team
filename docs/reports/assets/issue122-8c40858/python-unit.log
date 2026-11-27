@@ -1,0 +1,75 @@
+..................... [  0%]
+....................................... [  2%]
+......................................s..................................................................... [  5%]
+........................................................... [  7%]
+........................................................................ [ 10%]
+.......................................................s...s....................................s.................ss.............. [ 14%]
+............................................................ [ 16%]
+.................................................................. [ 18%]
+................................ssssssssssssssss.........s.s.s..........ss.ssssssss.....ss........ [ 22%]
+............................................... [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+............................................................................................................................. [ 35%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+......................................ssssssssssss.s.. [ 51%]
+....................................................... [ 53%]
+................................................................. [ 55%]
+...........................................................s. [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 67%]
+........................................................................ [ 70%]
+........................................................................ [ 72%]
+........................................................................ [ 75%]
+........................................................................ [ 77%]
+........................................................................ [ 79%]
+....................................................................................................................................s..................................................................................................................................................... [ 89%]
+................................................ [ 91%]
+........................................s.sssssssss................. [ 93%]
+...................................s.........................................................sss.......... [ 96%]
+..................................... [ 98%]
+...............sss..........sssssssss..........s...s [100%]
+================================== FAILURES ===================================
+_ TestFrontendCheckerWording.test_unjudged_prefixes_match_checker (reason='UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.') _
+
+self = <test_shared_constants.TestFrontendCheckerWording testMethod=test_unjudged_prefixes_match_checker>
+
+    def test_unjudged_prefixes_match_checker(self):
+        source = ts_source("src/lib/conditionGroups.ts")
+        prefixes = re.findall(r"'([^']+)'", ts_string(source, r"UNJUDGED_REASON_PREFIXES = \[([^\]]+)\]"))
+        unknown = checker.check_eligibility({"age": 25, "region": None, "income": None}, group_policy("UNKNOWN"))
+        missing = checker.check_eligibility({"age": 25, "region": None, "income": None},
+                                            {"policy_id": "POL_SAMPLE", "graph_status": "MISSING_IN_GRAPH"})
+        reasons = [unknown["conditions"][0]["reason"], missing["conditions"][0]["reason"]]
+        for reason in reasons:
+            with self.subTest(reason=reason):
+>               self.assertTrue(any(reason.startswith(prefix) for prefix in prefixes), reason)
+E               AssertionError: False is not true : UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.
+
+tests\unit\test_shared_constants.py:67: AssertionError
+============================== warnings summary ===============================
+tests/unit/test_build_restore_bundle_r3.py::BuildBundleTests::test_unsafe_zip_entries_are_refused_before_extraction
+  <USER_HOME>\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'a'
+    return self._open_to_write(zinfo, force_zip64=force_zip64)
+
+tests/unit/test_hybrid_search.py: 30 warnings
+  <REPO>\.venv\Lib\site-packages\neo4j\_meta.py:213: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(f):
+
+tests/unit/test_r3_write_gates.py::Stage1PinTests::test_cli_apply_with_stage1_pins_stops_at_the_plan_check_before_docker_or_writes
+  <REPO>\.venv\Lib\site-packages\qdrant_client\qdrant_remote.py:130: UserWarning: Api key is used with an insecure connection.
+    warnings.warn("Api key is used with an insecure connection.")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SUBFAILED(reason='UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.') tests/unit/test_shared_constants.py::TestFrontendCheckerWording::test_unjudged_prefixes_match_checker
+1 failed, 2869 passed, 80 skipped, 32 warnings, 17498 subtests passed in 183.72s (0:03:03)
+exit=1

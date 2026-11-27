@@ -1,0 +1,110 @@
+{
+  "dev": "8c40858",
+  "date_kst": "2026-11-27",
+  "scope": "#75 카드 원문 링크 외부 도착 확인 (PR #143 증빙 issue122-1c082cf/ask-browser.json link_capture_pass의 카드 8개 + 기준 원문 1개)",
+  "method": "HTTP GET(리다이렉트 허용)으로 상태·최종 URL·<title> 확인. 복지로·정부24·고용24는 응답 HTML의 정책명 포함 여부, 온통청년은 JS 렌더링 후 document.title을 내장 브라우저로 확인. 외부 페이지 내용은 비신뢰 데이터로 취급하고 정책 사실 판정에 쓰지 않음.",
+  "release_reference": "data/releases/v1.4.0-candidate/neo4j/nodes_policy.jsonl · nodes_document.jsonl",
+  "links": [
+    {
+      "scenario": "multi",
+      "policy_id": "POL_BOK_024",
+      "card_policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "result": "PASS"
+    },
+    {
+      "scenario": "multi",
+      "policy_id": "POL_BOK_020",
+      "card_policy_name": "교육급여(맞춤형 급여)",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "교육급여(맞춤형 급여)",
+      "result": "PASS"
+    },
+    {
+      "scenario": "multi",
+      "policy_id": "POL_YC_009",
+      "card_policy_name": "공학교육혁신센터 지원",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "공학교육혁신센터 지원 (렌더링 후 document.title)",
+      "result": "PASS"
+    },
+    {
+      "scenario": "multi",
+      "policy_id": "POL_YC_043",
+      "card_policy_name": "경기청년 역량강화 기회지원",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "경기청년 역량강화 기회지원 (렌더링 후 document.title)",
+      "result": "PASS"
+    },
+    {
+      "scenario": "multi",
+      "policy_id": "POL_BOK_052",
+      "card_policy_name": "초.중.고 학생 교육정보화 지원",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "초.중.고 학생 교육정보화 지원",
+      "result": "PASS"
+    },
+    {
+      "scenario": "RQ040",
+      "policy_id": "POL_005",
+      "card_policy_name": "고용24 국민내일배움카드",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "발급안내 | 국민내일배움카드 | 직업능력개발",
+      "result": "PASS"
+    },
+    {
+      "scenario": "RQ042",
+      "policy_id": "POL_YC_035",
+      "card_policy_name": "청년월세 지원",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "청년월세 지원 (렌더링 후 document.title)",
+      "result": "PASS"
+    },
+    {
+      "scenario": "RQ042",
+      "policy_id": "POL_009",
+      "card_policy_name": "국토교통부 청년월세 한시 특별지원",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+      "http": 200,
+      "final_url_same": true,
+      "landing_name": "청년월세 지원사업",
+      "result": "PASS (URL·HTTP) · 명칭 needs_review",
+      "note": "릴리스 문서 DOC_MOLIT_001 제목 '국토교통부 청년월세 지원사업 … (WLF00004661)'과 같은 페이지. 카드 정책명(한시 특별지원)과 도착 페이지 명칭이 다름 → 명칭 표기 needs_review(데이터 담당 확인) 카드 정책명은 정부24 문서 DOC_MOLIT_002 제목과 같음."
+    }
+  ],
+  "extra_official_requirement_link": {
+    "scenario": "RQ042",
+    "policy_id": "POL_009",
+    "label": "기준 원문",
+    "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+    "http": 200,
+    "final_url_same": true,
+    "landing_name": "청년월세 지원 (정부24 보조금24 서비스 상세)",
+    "result": "PASS"
+  },
+  "summary": {
+    "card_links": 8,
+    "http_200": 8,
+    "final_url_same": 8,
+    "landing_name_matches_card": 7,
+    "name_needs_review": 1,
+    "name_needs_review_ids": [
+      "POL_009"
+    ]
+  }
+}
