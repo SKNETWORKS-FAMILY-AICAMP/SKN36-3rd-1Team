@@ -1,0 +1,1106 @@
+{
+ "branch": "fix/122-age-verdict-alignment (base dev 0cb19f6)",
+ "date_kst": "2026-11-27",
+ "replay": {
+  "method": "저장된 실제 응답을 LLM·네트워크 호출 없이 backend.rag.age_verdict.align_age_verdicts에 재생. contexts는 인용 순서대로 같은 정책에 매핑.",
+  "repo_wide": "docs/reports·tests/fixtures의 실제 응답 중 입력 나이가 있는 79건 재생: 변경 3건(아래 오답 3건)·나머지 76건 변경 없음",
+  "results": [
+   {
+    "label": "인천 API(§13-2)",
+    "source": "docs/reports/assets/issue122-0cb19f6/icn-age-source.json (PR #152 브랜치)",
+    "policy_id": "POL_STG_ICN_001",
+    "age": 18,
+    "changed": true,
+    "before": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상연령은 18세~39세로 안내돼 있습니다. 다만 입력하신 만 18세는 연령 기준에 포함되지만, 지역과 재직 요건을 함께 충족해야 해서 신청 가능 여부는 추가 확인이 필요해요. [1]\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1]\n\n접수 여부는 공식 공고에서 확인해 주세요. [1]",
+    "after": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상연령은 18세~39세로 안내돼 있습니다. 다만 입력하신 만 18세는 확인된 연령 기준(만 19~39세)에 포함되지 않고, 지역과 재직 요건을 함께 충족해야 해서 신청 가능 여부는 추가 확인이 필요해요. [1]\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1]\n\n접수 여부는 공식 공고에서 확인해 주세요. [1]"
+   },
+   {
+    "label": "인천 API(§13-2)",
+    "source": "docs/reports/assets/issue122-0cb19f6/icn-age-source.json (PR #152 브랜치)",
+    "policy_id": "POL_STG_ICN_001",
+    "age": 19,
+    "changed": false,
+    "before": "이 정책은 **현재 접수 여부는 공식 공고에서 확인해 주세요**. 접수 상태가 공식 근거에서 확인되지 않았고, 신청 주소도 확인되지 않았습니다. 다만 원문에는 지원대상이 \"중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년\"으로 적혀 있고, 대상연령은 18세~39세로 정리되어 있습니다. 사용자가 만 19세이므로 연령 범위에는 들어가지만, 거주지와 재직 요건까지 충족하는지는 이 근거만으로 확정할 수 없습니다. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 실제 신청 링크는 확인되지 않았어요. [1][2]",
+    "after": "이 정책은 **현재 접수 여부는 공식 공고에서 확인해 주세요**. 접수 상태가 공식 근거에서 확인되지 않았고, 신청 주소도 확인되지 않았습니다. 다만 원문에는 지원대상이 \"중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년\"으로 적혀 있고, 대상연령은 18세~39세로 정리되어 있습니다. 사용자가 만 19세이므로 연령 범위에는 들어가지만, 거주지와 재직 요건까지 충족하는지는 이 근거만으로 확정할 수 없습니다. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 실제 신청 링크는 확인되지 않았어요. [1][2]"
+   },
+   {
+    "label": "인천 API(§13-2)",
+    "source": "docs/reports/assets/issue122-0cb19f6/icn-age-source.json (PR #152 브랜치)",
+    "policy_id": "POL_STG_ICN_001",
+    "age": 38,
+    "changed": false,
+    "before": "이 정책은 **신청 자격은 추가 확인이 필요해요**. 공식 원문에는 지원대상이 “중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년”이고, 신청 시작일 기준으로 이 기본요건을 동시에 충족해야 한다고 되어 있습니다[1][2]. 다만 현재 제공된 판정 정보는 나이만 일부 확인됐고, 지역·재직기간 등 전체 요건은 자동 확정이 보류되어 있습니다[1][2].\n\n공식 신청 주소는 확인되지 않았어요. 판정 정보의 공식 신청 URL이 비어 있어 직접 신청 링크는 확인되지 않았어요[2]. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로도 표시되어 있어 경계가 서로 다르게 보입니다[1][2]. 따라서 39세까지는 원문에 포함되지만, 시작 연령은 이번 근거만으로는 18세인지 19세인지 확정할 수 없습니다[1][2].",
+    "after": "이 정책은 **신청 자격은 추가 확인이 필요해요**. 공식 원문에는 지원대상이 “중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년”이고, 신청 시작일 기준으로 이 기본요건을 동시에 충족해야 한다고 되어 있습니다[1][2]. 다만 현재 제공된 판정 정보는 나이만 일부 확인됐고, 지역·재직기간 등 전체 요건은 자동 확정이 보류되어 있습니다[1][2].\n\n공식 신청 주소는 확인되지 않았어요. 판정 정보의 공식 신청 URL이 비어 있어 직접 신청 링크는 확인되지 않았어요[2]. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로도 표시되어 있어 경계가 서로 다르게 보입니다[1][2]. 따라서 39세까지는 원문에 포함되지만, 시작 연령은 이번 근거만으로는 18세인지 19세인지 확정할 수 없습니다[1][2]."
+   },
+   {
+    "label": "인천 API(§13-2)",
+    "source": "docs/reports/assets/issue122-0cb19f6/icn-age-source.json (PR #152 브랜치)",
+    "policy_id": "POL_STG_ICN_001",
+    "age": 40,
+    "changed": false,
+    "before": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상 연령은 18세~39세로 안내돼 있습니다. 따라서 현재 입력된 만 40세는 연령 기준에 맞지 않아 지원 대상에서 제외됩니다 [1][2].\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n다만 접수 여부는 현재 공식 공고에서 확인해 주세요. 원문에는 신청기한이 사업별 상이하다고만 되어 있고, 별도의 접수 상태가 확인되지 않았습니다 [2].",
+    "after": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상 연령은 18세~39세로 안내돼 있습니다. 따라서 현재 입력된 만 40세는 연령 기준에 맞지 않아 지원 대상에서 제외됩니다 [1][2].\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n다만 접수 여부는 현재 공식 공고에서 확인해 주세요. 원문에는 신청기한이 사업별 상이하다고만 되어 있고, 별도의 접수 상태가 확인되지 않았습니다 [2]."
+   },
+   {
+    "label": "인천 API(§13-2)",
+    "source": "docs/reports/assets/issue122-0cb19f6/icn-age-source.json (PR #152 브랜치)",
+    "policy_id": "POL_STG_ICN_001",
+    "age": null,
+    "changed": false,
+    "before": "중소기업 재직청년 복지공유제 지원은 원문상 **인천광역시 서해구·검단구 청년**이면서 중소기업에 6개월 이상 재직 중인 경우를 지원대상으로 적고 있습니다. 또한 대상연령은 18세~39세로 정리돼 있습니다. 다만 현재 입력된 정보만으로는 사용자의 나이·지역·재직 요건 충족 여부를 확정할 수 없고, 접수 여부도 공식 공고에서 확인해 주세요. [1][2]\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]",
+    "after": "중소기업 재직청년 복지공유제 지원은 원문상 **인천광역시 서해구·검단구 청년**이면서 중소기업에 6개월 이상 재직 중인 경우를 지원대상으로 적고 있습니다. 또한 대상연령은 18세~39세로 정리돼 있습니다. 다만 현재 입력된 정보만으로는 사용자의 나이·지역·재직 요건 충족 여부를 확정할 수 없고, 접수 여부도 공식 공고에서 확인해 주세요. [1][2]\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]"
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 76,
+    "changed": true,
+    "before": "고용24 국민내일배움카드는 **나이 기준만 보면** 만 76세인 현재 정보가 포함되는 것으로 보입니다. 다만 이 제도는 나이만으로 결정되지 않고, 원문에는 공무원·사립학교 교직원, 일정 소득의 근로자·자영업자·특수형태근로종사자, 생계급여 수급자, 다른 지원을 받는 사람 등 여러 제외 대상이 함께 제시되어 있습니다. 또한 “국민 누구나” 상시 신청 가능하다고 안내되어 있어 접수는 현재 진행 중입니다. 따라서 나이만으로 신청 가능 여부를 확정할 수는 없고, 다른 제외 조건 해당 여부를 함께 확인해야 합니다. [2][1]\n\n참고로 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있고, 신청은 고용센터 방문 또는 고용24를 통해 할 수 있다고 안내되어 있습니다. [2]",
+    "after": "입력하신 만 76세는 지원 제외 기준(만 75세 이상(상한 없음))에 해당돼요. 다만 이 제도는 나이만으로 결정되지 않고, 원문에는 공무원·사립학교 교직원, 일정 소득의 근로자·자영업자·특수형태근로종사자, 생계급여 수급자, 다른 지원을 받는 사람 등 여러 제외 대상이 함께 제시되어 있습니다. 또한 “국민 누구나” 상시 신청 가능하다고 안내되어 있어 접수는 현재 진행 중입니다. 따라서 나이만으로 신청 가능 여부를 확정할 수는 없고, 다른 제외 조건 해당 여부를 함께 확인해야 합니다. [2][1]\n\n참고로 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있고, 신청은 고용센터 방문 또는 고용24를 통해 할 수 있다고 안내되어 있습니다. [2]"
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 76,
+    "changed": true,
+    "before": "고용24 국민내일배움카드는 **나이 기준만 보면** 만 76세도 포함되는 것으로 안내됩니다. 공식 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있고, 나이 제한은 이번 근거에서 확인되지 않았습니다[2]. 다만 이 제도는 직업능력개발훈련이 필요한 국민에게 훈련비를 지원하는 제도이며, 공무원·사립학교 교직원, 일정 소득 이상의 일부 근로자·자영업자·특수형태근로종사자, 재학생 등은 제외 사유가 원문에 함께 제시되어 있습니다[1][2]. 또한 현재 접수는 진행 중입니다[2].\n\n정리하면, **나이만으로는 제외되지 않지만** 다른 제외 사유에 해당하는지는 별도로 확인해야 합니다[1][2].",
+    "after": "입력하신 만 76세는 지원 제외 기준(만 75세 이상(상한 없음))에 해당돼요. 공식 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있고, 나이 제한은 이번 근거에서 확인되지 않았습니다[2]. 다만 이 제도는 직업능력개발훈련이 필요한 국민에게 훈련비를 지원하는 제도이며, 공무원·사립학교 교직원, 일정 소득 이상의 일부 근로자·자영업자·특수형태근로종사자, 재학생 등은 제외 사유가 원문에 함께 제시되어 있습니다[1][2]. 또한 현재 접수는 진행 중입니다[2].\n\n정리하면, 입력하신 만 76세는 지원 제외 기준(만 75세 이상(상한 없음))에 해당하고 다른 제외 사유에 해당하는지는 별도로 확인해야 합니다[1][2]."
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 74,
+    "changed": false,
+    "before": "고용24 국민내일배움카드는 **나이 기준만으로는 적격 여부를 확정할 수 없습니다**. 공식 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있지만, 동시에 지원 제외 대상도 함께 제시되어 있어 나이만으로 전체 자격을 판단할 수는 없습니다 [2][1].\n\n현재 입력된 만 74세는, 제공된 판정 정보상 “만 75세 이상” 기준에는 해당하지 않는 것으로 처리되어 있습니다. 다만 이 기준만으로 신청 가능 여부가 확정되는 것은 아니고, 다른 제외 조건과 종합 요건을 함께 확인해야 합니다 [1].\n\n또한 이 제도는 현재 **접수 중**입니다. 신청은 가까운 고용센터 방문 또는 고용24를 통해 할 수 있다고 안내되어 있습니다 [2].",
+    "after": "고용24 국민내일배움카드는 **나이 기준만으로는 적격 여부를 확정할 수 없습니다**. 공식 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있지만, 동시에 지원 제외 대상도 함께 제시되어 있어 나이만으로 전체 자격을 판단할 수는 없습니다 [2][1].\n\n현재 입력된 만 74세는, 제공된 판정 정보상 “만 75세 이상” 기준에는 해당하지 않는 것으로 처리되어 있습니다. 다만 이 기준만으로 신청 가능 여부가 확정되는 것은 아니고, 다른 제외 조건과 종합 요건을 함께 확인해야 합니다 [1].\n\n또한 이 제도는 현재 **접수 중**입니다. 신청은 가까운 고용센터 방문 또는 고용24를 통해 할 수 있다고 안내되어 있습니다 [2]."
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 75,
+    "changed": false,
+    "before": "고용24 국민내일배움카드는 나이 기준만 보면 **충족하지 않습니다**. 공식 원문에는 국민내일배움카드가 “국민 누구나” 상시 신청 가능하다고 안내하면서도, 별도의 제외 대상에 “졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생”, “생계급여를 받고 있는 사람”, “다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람” 등이 적혀 있습니다. 또한 제공된 판정 정보에서는 만 75세가 지원 제외 기준에 해당한다고 되어 있어, 입력하신 만 75세는 제외 대상입니다. 따라서 이 정책은 현재 신청 대상으로 보기 어렵습니다. [2][1]\n\n접수는 현재 진행 중입니다. 접수 중이에요. 입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요. [2]",
+    "after": "고용24 국민내일배움카드는 나이 기준만 보면 **충족하지 않습니다**. 공식 원문에는 국민내일배움카드가 “국민 누구나” 상시 신청 가능하다고 안내하면서도, 별도의 제외 대상에 “졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생”, “생계급여를 받고 있는 사람”, “다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람” 등이 적혀 있습니다. 또한 제공된 판정 정보에서는 만 75세가 지원 제외 기준에 해당한다고 되어 있어, 입력하신 만 75세는 제외 대상입니다. 따라서 이 정책은 현재 신청 대상으로 보기 어렵습니다. [2][1]\n\n접수는 현재 진행 중입니다. 접수 중이에요. 입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요. [2]"
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 80,
+    "changed": false,
+    "before": "국민내일배움카드는 나이 기준으로는 **지원 제외 대상**에 해당합니다. 공식 원문에는 만 75세 이상이 제외 기준으로 제시되어 있고, 입력하신 만 80세가 그 기준에 포함됩니다. 따라서 나이 기준을 충족한다고 볼 수 없습니다 [1].\n\n다만 이 제도는 현재 접수 중이며, 신청 자격은 나이 외에도 다른 제외 조건들을 함께 확인해야 합니다. 예를 들어 법인대표·자영업자·특수형태근로종사자·재학생·생계급여 수급자·다른 지원을 받는 사람 등은 원문에 별도 제외 조건이 제시되어 있습니다 [1][2][3][4].",
+    "after": "국민내일배움카드는 나이 기준으로는 **지원 제외 대상**에 해당합니다. 공식 원문에는 만 75세 이상이 제외 기준으로 제시되어 있고, 입력하신 만 80세가 그 기준에 포함됩니다. 따라서 나이 기준을 충족한다고 볼 수 없습니다 [1].\n\n다만 이 제도는 현재 접수 중이며, 신청 자격은 나이 외에도 다른 제외 조건들을 함께 확인해야 합니다. 예를 들어 법인대표·자영업자·특수형태근로종사자·재학생·생계급여 수급자·다른 지원을 받는 사람 등은 원문에 별도 제외 조건이 제시되어 있습니다 [1][2][3][4]."
+   },
+   {
+    "label": "POL_005 직접 질문·선택 상담",
+    "source": "docs/reports/assets/issue122-befe2d0/ask-api.json",
+    "policy_id": "POL_005",
+    "age": 30,
+    "changed": false,
+    "before": "공무원은 **국민내일배움카드** 지원 제외 대상에 포함되어 발급받을 수 없습니다. 공식 원문에 “공무원, 사립학교 교직원”은 지원 제외 대상이라고 명시되어 있습니다[3]. 접수는 현재 진행 중이지만, 접수 중이라는 사실만으로 자격이 충족되지는 않습니다[1][2].",
+    "after": "공무원은 **국민내일배움카드** 지원 제외 대상에 포함되어 발급받을 수 없습니다. 공식 원문에 “공무원, 사립학교 교직원”은 지원 제외 대상이라고 명시되어 있습니다[3]. 접수는 현재 진행 중이지만, 접수 중이라는 사실만으로 자격이 충족되지는 않습니다[1][2]."
+   }
+  ]
+ },
+ "live": {
+  "db": "R3D verify B2 (Neo4j :56787·Qdrant :56756), release 1.4.0-candidate, manifest b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "api": "POST http://127.0.0.1:18304/api/ask (실제 OpenAI 생성, 이 브랜치 코드)",
+  "note": "가상 프로필(sample_only). 인천 18세 3회는 LLM이 처음부터 맞게 답해 보정이 작동할 일이 없었다. POL_005 76세는 현재 R3D에서 품질 보류로 exclusion_reasons가 전달되지 않아 설계대로 보정하지 않았다.",
+  "results": [
+   {
+    "case": "icn",
+    "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "selected_policy_id": "POL_STG_ICN_001",
+    "profile_sample_only": {
+     "age": 18,
+     "region": "",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:07:44+09:00",
+    "http": 200,
+    "seconds": 8.7,
+    "response": {
+     "status": "answered",
+     "answer": "이 정책은 현재 접수 여부를 공식 공고에서 확인해 주세요. 공식 근거에는 신청기한이 사업별 상이하다고만 되어 있고, 접수 상태는 확인되지 않았습니다. 직접 신청 링크도 확인되지 않았어요. [2]\n\n신청 자격은 이번 근거만으로는 추가 확인이 필요해요. 공식 원문에는 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년이 대상이고, 대상연령은 18세~39세로 제시되어 있습니다. 다만 사용자의 만 18세는 공고에 적힌 19~39세 기준과는 맞지 않는다고 판정 정보에 표시되어 있어, 자동 판정은 보류됩니다. [1][2]\n\n연령 근거는 18세~39세로 적힌 구조화 정보와, 19~39세로 적힌 공고 문구가 서로 달라 경계가 일치하지 않습니다. 그래서 연령 기준은 이번 자료만으로 확정하기 어렵습니다. [1][2]\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 공식 신청 URL은 확인되지 않았습니다. [2]",
+     "citations": [
+      {
+       "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+       "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+       "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+       "page_number": null
+      },
+      {
+       "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+       "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_STG_ICN_001",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "unknown",
+       "application_schedule": null,
+       "required_documents": [
+        {
+         "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "policy_name": "중소기업 재직청년 복지공유제 지원",
+       "agency": "인천광역시 서해구 기업일자리정책과",
+       "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+       "official_apply_url": null,
+       "contacts": [
+        {
+         "agency": "인천 서해구청 기업일자리정책과",
+         "phone": "032-560-0941",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "requirement_excerpts": [
+        {
+         "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+         "label": "지원대상"
+        }
+       ],
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "이 정책의 신청 서류는 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "이 정책의 지원대상과 우선선발 기준은 어떻게 되나요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "icn",
+    "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "selected_policy_id": "POL_STG_ICN_001",
+    "profile_sample_only": {
+     "age": 18,
+     "region": "",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:07:53+09:00",
+    "http": 200,
+    "seconds": 3.5,
+    "response": {
+     "status": "info",
+     "answer": "이 정책은 공식 원문상 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년을 대상으로 하며, 대상연령은 18세~39세로 안내돼 있습니다. 다만 현재 입력된 나이 18세는 판정 정보상 만 19~39세 기준과 맞지 않아 자동으로 자격을 확정할 수 없고, 공식 원문에도 연령 기준이 18세~39세로 적혀 있어 경계가 서로 달라 추가 확인이 필요합니다 [1][2].\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 실제 신청 페이지 주소는 별도로 확인되지 않았습니다 [2].\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. 신청기간은 사업별 상이로만 안내돼 있고, 원문에는 이 사업의 구체적인 접수 시작·마감일이 확인됩니다만, 판정 정보상 접수 여부는 확정되지 않았습니다 [2].",
+     "citations": [
+      {
+       "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+       "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+       "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+       "page_number": null
+      },
+      {
+       "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+       "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_STG_ICN_001",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "unknown",
+       "application_schedule": null,
+       "required_documents": [
+        {
+         "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "policy_name": "중소기업 재직청년 복지공유제 지원",
+       "agency": "인천광역시 서해구 기업일자리정책과",
+       "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+       "official_apply_url": null,
+       "contacts": [
+        {
+         "agency": "인천 서해구청 기업일자리정책과",
+         "phone": "032-560-0941",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "requirement_excerpts": [
+        {
+         "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+         "label": "지원대상"
+        }
+       ],
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "이 정책의 신청 서류는 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "이 정책의 우선선발 대상과 일반선발 대상은 어떻게 다른가요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "icn",
+    "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "selected_policy_id": "POL_STG_ICN_001",
+    "profile_sample_only": {
+     "age": 18,
+     "region": "",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:07:57+09:00",
+    "http": 200,
+    "seconds": 3.4,
+    "response": {
+     "status": "answered",
+     "answer": "중소기업 재직청년 복지공유제 지원은 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 주소는 확인되지 않았어요. 지원대상은 중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년이며, 신청 시작일 기준으로 이 기본요건을 모두 충족해야 합니다. 연령은 19~39세로 안내되어 있어 만 18세는 해당 기준에 포함되지 않습니다. [1][2]\n\n다만 원문에는 신청기간이 2026. 6. 29. ~ 7. 24.로 적혀 있고, 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]",
+     "citations": [
+      {
+       "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+       "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+       "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+       "page_number": null
+      },
+      {
+       "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+       "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_STG_ICN_001",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "unknown",
+       "application_schedule": null,
+       "required_documents": [
+        {
+         "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "policy_name": "중소기업 재직청년 복지공유제 지원",
+       "agency": "인천광역시 서해구 기업일자리정책과",
+       "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+       "official_apply_url": null,
+       "contacts": [
+        {
+         "agency": "인천 서해구청 기업일자리정책과",
+         "phone": "032-560-0941",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "requirement_excerpts": [
+        {
+         "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+         "label": "지원대상"
+        }
+       ],
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "이 지원사업의 구비서류는 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "우선선발 대상과 일반선발 대상의 차이는 무엇인가요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "icn",
+    "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "selected_policy_id": "POL_STG_ICN_001",
+    "profile_sample_only": {
+     "age": 19,
+     "region": "",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:08:00+09:00",
+    "http": 200,
+    "seconds": 3.2,
+    "response": {
+     "status": "answered",
+     "answer": "중소기업 재직청년 복지공유제 지원은 **신청할 수 있는 대상**으로 보이지만, 현재는 일부 조건이 추가 확인이 필요해요. 공식 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 인천광역시 서해구·검단구 청년(19~39세)이어야 한다고 되어 있습니다[1][2]. 다만 제공된 정보만으로는 거주지와 재직 요건을 모두 확정할 수 없어 전체 자격은 단정하지 못합니다[1][2].\n\n공식 신청 주소는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로도 표시되어 있어 경계값은 원문끼리 완전히 일치하지 않습니다[1][2]. 따라서 연령 기준은 이번 근거만으로는 18세부터인지 19세부터인지 확정할 수 없고, 원문 기준을 다시 확인해야 합니다[1][2].",
+     "citations": [
+      {
+       "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+       "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+       "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+       "page_number": null
+      },
+      {
+       "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+       "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_STG_ICN_001",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 19~39세 기준에 입력한 만 19세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "unknown",
+       "application_schedule": null,
+       "required_documents": [
+        {
+         "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "policy_name": "중소기업 재직청년 복지공유제 지원",
+       "agency": "인천광역시 서해구 기업일자리정책과",
+       "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+       "official_apply_url": null,
+       "contacts": [
+        {
+         "agency": "인천 서해구청 기업일자리정책과",
+         "phone": "032-560-0941",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        }
+       ],
+       "requirement_excerpts": [
+        {
+         "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+         "document_id": "DOC_STG_ICN_001_GOV24",
+         "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+         "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+         "label": "지원대상"
+        }
+       ],
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "이 사업의 신청 서류는 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "지원 제외 대상이 따로 있나요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "card",
+    "question": "국민내일배움카드의 나이 기준을 충족하나요?",
+    "selected_policy_id": "POL_005",
+    "profile_sample_only": {
+     "age": 76,
+     "region": "서울특별시",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:08:03+09:00",
+    "http": 200,
+    "seconds": 2.7,
+    "response": {
+     "status": "info",
+     "answer": "국민내일배움카드는 나이만으로는 신청 가능 여부를 확정할 수 없어요. 공식 원문에는 “국민 누구나” 상시 신청 가능하다고 되어 있지만, 동시에 지원 제외 대상이 여러 가지로 제시되어 있어 나이 외의 조건도 함께 확인해야 합니다[2][1].\n\n현재 입력된 만 76세는 원문에 확인된 나이 제한에 걸린다고 볼 근거가 없어서, 나이 때문에 제외된다고 말할 수는 없습니다[1]. 다만 생계급여 수급 여부, 다른 부처·지자체의 교육/훈련비 지원 여부, 부정수급·반환 미이행 여부, 재학 여부 같은 제외 조건은 추가 확인이 필요합니다[1].\n\n현재 접수는 진행 중이에요[2]. 직접 신청 링크는 확인되지 않았어요. 신청은 고용24 또는 가까운 고용센터 방문으로 안내되어 있습니다[2][3].",
+     "citations": [
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_005",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+         "status": "eligible"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "education",
+         "label": "기타 자격 조건",
+         "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "open",
+       "application_schedule": {
+        "evaluated_on": "2026-11-27",
+        "start_date": null,
+        "end_date": null,
+        "is_ongoing": true,
+        "days_to_start": null,
+        "days_to_end": null
+       },
+       "required_documents": null,
+       "policy_name": "고용24 국민내일배움카드",
+       "agency": "고용노동부 / 한국고용정보원",
+       "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "official_apply_url": null,
+       "contacts": null,
+       "requirement_excerpts": null,
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "국민내일배움카드의 신청 제외 대상은 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "국민내일배움카드는 어떻게 신청하나요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "국민내일배움카드의 훈련비 지원 내용은 어떻게 되나요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "card",
+    "question": "국민내일배움카드의 나이 기준을 충족하나요?",
+    "selected_policy_id": "POL_005",
+    "profile_sample_only": {
+     "age": 76,
+     "region": "서울특별시",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:08:06+09:00",
+    "http": 200,
+    "seconds": 2.2,
+    "response": {
+     "status": "info",
+     "answer": "국민내일배움카드의 나이 기준은 이번 공식 원문에서 **국민 누구나** 신청할 수 있다고만 확인되며, 별도의 연령 제한은 확인되지 않았습니다[2]. 다만 원문에는 신청 제외 대상이 여러 가지로 적혀 있어, 나이와 별개로 다른 제외 조건에 해당하면 신청이 제한될 수 있습니다[1][2]. 현재 입력된 만 76세만으로는 나이 때문에 제외된다고 볼 근거도, 나이만으로 자격이 확정된다고 볼 근거도 없습니다[1][2].\n\n신청은 현재 접수 중이에요[2]. 직접 신청 링크는 확인되지 않았어요[3][4].",
+     "citations": [
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_005",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+         "status": "eligible"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "education",
+         "label": "기타 자격 조건",
+         "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "open",
+       "application_schedule": {
+        "evaluated_on": "2026-11-27",
+        "start_date": null,
+        "end_date": null,
+        "is_ongoing": true,
+        "days_to_start": null,
+        "days_to_end": null
+       },
+       "required_documents": null,
+       "policy_name": "고용24 국민내일배움카드",
+       "agency": "고용노동부 / 한국고용정보원",
+       "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "official_apply_url": null,
+       "contacts": null,
+       "requirement_excerpts": null,
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "국민내일배움카드의 신청 제외 대상은 무엇인가요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "국민내일배움카드는 어떻게 신청하나요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   },
+   {
+    "case": "card",
+    "question": "국민내일배움카드의 나이 기준을 충족하나요?",
+    "selected_policy_id": "POL_005",
+    "profile_sample_only": {
+     "age": 74,
+     "region": "서울특별시",
+     "income": null
+    },
+    "requested_at": "2026-11-27T17:08:08+09:00",
+    "http": 200,
+    "seconds": 3.8,
+    "response": {
+     "status": "info",
+     "answer": "국민내일배움카드는 현재 접수 중이에요. 다만 나이 기준은 이번 근거만으로는 확정하기 어렵습니다. 제공된 판정에는 만 75세 이상은 제외로 표시되어 있지만, 동시에 데이터 품질 경고로 자동 판정이 보류되어 있어 나이 기준을 단정할 수 없습니다[1][2][3][4][5].\n\n공식 원문에서 확인되는 제외 대상은 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표, 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자, 월 소득이 300만원 이상인 비영리단체 대표, 졸업까지 남은 수업연한이 2년 이상인 대학·대학원 재학생과 고등학교 1~2학년생, 생계급여 수급자(조건부 수급자 또는 조건부과 유예자는 지원 가능), 다른 부처 또는 지방자치단체로부터 교육·훈련비를 지원받는 사람, 부정수급자, 부정행위에 따른 지원금을 반환하지 않은 사람, 기타 지원 필요성이 인정되지 않는 사람입니다[1]. 또한 국민내일배움카드는 직업능력개발훈련이 필요한 국민에게 훈련비를 지원하는 제도이며, 신청은 상시 가능하고 고용센터 방문 또는 고용24로 할 수 있습니다[2].\n\n직접 신청 링크는 확인되지 않았어요[2][4].",
+     "citations": [
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      },
+      {
+       "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+       "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "document_id": "DOC_WORK24_001",
+       "page_number": null
+      }
+     ],
+     "policy_checks": [
+      {
+       "policy_id": "POL_005",
+       "conditions": [
+        {
+         "field": "age",
+         "label": "나이",
+         "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 74세가 포함되지 않습니다.",
+         "status": "ineligible"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "target",
+         "label": "기타 자격 조건",
+         "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "employment",
+         "label": "기타 자격 조건",
+         "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "education",
+         "label": "기타 자격 조건",
+         "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        },
+        {
+         "field": "eligibility",
+         "label": "자격 요건",
+         "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+         "status": "needs_check"
+        }
+       ],
+       "reception_status": "open",
+       "application_schedule": {
+        "evaluated_on": "2026-11-27",
+        "start_date": null,
+        "end_date": null,
+        "is_ongoing": true,
+        "days_to_start": null,
+        "days_to_end": null
+       },
+       "required_documents": null,
+       "policy_name": "고용24 국민내일배움카드",
+       "agency": "고용노동부 / 한국고용정보원",
+       "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+       "official_apply_url": null,
+       "contacts": null,
+       "requirement_excerpts": null,
+       "exclusion_reasons": null,
+       "official_requirements": null
+      }
+     ],
+     "follow_up_questions": [
+      {
+       "kind": "question",
+       "text": "국민내일배움카드의 신청 방법은 어떻게 되나요?",
+       "field": null
+      },
+      {
+       "kind": "question",
+       "text": "국민내일배움카드의 제외 대상은 누구인가요?",
+       "field": null
+      }
+     ],
+     "checked_at": null,
+     "notice": {
+      "kind": "warn",
+      "title": "추가 확인 필요",
+      "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+     },
+     "is_sample": false
+    }
+   }
+  ]
+ }
+}
