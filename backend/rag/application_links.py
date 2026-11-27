@@ -188,18 +188,27 @@ def _drop_one_separator(parts: list[str], index: int) -> None:
         parts[index + 1] = ""
 
 
-def _citation_anchor(parts: list[str], index: int, notice: int | None) -> int | None:
+def _citation_anchor(parts: list[str], index: int, notice: int | None, pid: str,
+                     policy_of: dict[str, str]) -> int | None:
     """빠진 절(index)의 인용을 옮길 절 위치. 같은 정책 링크 안내 문장을 먼저, 없으면 바로 앞 절을 본다.
 
-    안내 문장 뒤 인용이 마침표 뒤에 따로 있으면('…않았어요. [1]') 그 인용 조각을 쓴다.
-    끝에 인용 묶음이 있는 절만 대상이다(없으면 None).
+    안내 문장 바로 뒤에 인용만 따로 있으면('…않았어요. [1]') 그 인용 조각을 쓴다.
+    끝 인용 묶음의 출처가 모두 같은 정책(pid)인 절만 대상이다. 다른 정책 문장의 근거에 섞이지 않게 한다(PR #161 5차 리뷰).
     """
+    def citations_only(at: int) -> bool:
+        return bool(parts[at].strip()) and not CITATION.sub("", parts[at]).strip()
+
     candidates = []
     if notice is not None and notice < index:
-        candidates += [notice, notice + 2]
+        candidates.append(notice)
+        if notice + 2 < index and citations_only(notice + 2):
+            candidates.append(notice + 2)
     candidates.append(index - 2)
     for at in candidates:
-        if 0 <= at < index and _append_citations(parts[at], "") is not None:
+        if not 0 <= at < index:
+            continue
+        group = re.search(r"((?:\[\d+\])+)[.!?。！？]?\s*$", parts[at])
+        if group and all(policy_of.get(n) == pid for n in CITATION.findall(group.group(1))):
             return at
     return None
 
@@ -349,13 +358,15 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
-                elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid))) is not None:
+                elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of)) is not None:
                     # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
                     # 옮긴다. 반복 안내 제거와 같은 기준이다(인용 번호 유지, PR #140 검증).
                     parts[anchor] = _append_citations(parts[anchor], markers)
                     parts[index] = head
                     _drop_one_separator(parts, index)
-                elif markers and (punct := re.search(r"[.!?。！？]\s*$", clause)) and not re.match(r"\s*[,;]", after):
+                elif index >= 2 and markers and (punct := re.search(r"[.!?。！？]\s*$", clause)) \
+                        and not re.match(r"\s*[,;]", after) \
+                        and not re.search(r"[.!?。！？](?:\s*\[\d+\])*\s*$", parts[index - 2]):
                     # 빠진 절이 문장 끝이었으면 마침표를 남겨야 앞 절이 문장으로 끝난다('신분증이에요 [1][2].').
                     parts[index] = head + markers + punct.group(0).strip()
                     if "\n" in before:

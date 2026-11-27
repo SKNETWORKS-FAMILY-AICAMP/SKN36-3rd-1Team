@@ -296,6 +296,24 @@ class StatedMissingLinkTests(unittest.TestCase):
         self.assertEqual(align_application_links("홈페이지에서 신청할 수 있어요 [9] 서류는 신분증이에요.", CONTEXTS, [self.OPEN]),
                          ("홈페이지에서 신청할 수 있어요 [9] 서류는 신분증이에요.", False))
 
+    def test_citation_never_joins_other_policy_sentence(self):
+        # PR #161 5차 리뷰 필수 1: 빠진 가상 정책 문장의 인용 [1]이 다른 정책 문장 근거 묶음([3])에 섞이지 않는다.
+        valid = {"policy_id": "B", "policy_name": "가상 다른 정책", "official_apply_url": "https://example.org/apply",
+                 "reception_status": "open"}
+        contexts = CONTEXTS + [{"source_id": 3, "policy_id": "B", "text": "신청방법"}]
+        text = f"{NAME}은 홈페이지에서 신청하세요. 가상 다른 정책은 서류가 필요해요 [3]. {NAME}은 온라인으로 신청할 수 있어요 [1]."
+        fixed, _ = align_application_links(text, contexts, [self.OPEN, valid])
+        self.assertNotIn("[3][1]", fixed)
+        self.assertTrue(fixed.endswith("가상 다른 정책은 서류가 필요해요 [3]. [1]"))
+
+    def test_citation_anchor_skips_unrelated_sentence_and_leading_clause(self):
+        # PR #161 5차 리뷰 선택: 안내 문장 뒤 '인용만 있는 조각'만 대상으로 보고, 첫 절이 빠지면 '[2].'로 시작하지 않는다.
+        fixed, _ = align_application_links("신청 링크는 없어요. 서류는 신분증이에요 [1]. 기간은 상시예요 [1]. 홈페이지에서 신청하세요 [2].",
+                                           CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "신청 링크는 없어요. 서류는 신분증이에요 [1]. 기간은 상시예요 [1][2].")
+        fixed, _ = align_application_links("홈페이지에서 신청하세요 [2]. 서류 [1]. 신청 링크는 없어요 [1].", CONTEXTS, [self.OPEN])
+        self.assertEqual(fixed, "[2] 서류 [1]. 신청 링크는 없어요 [1].")
+
     def test_paragraph_break_after_dropped_line_is_kept(self):
         # PR #161 4차 리뷰 필수 2: 앞이 줄바꿈, 뒤가 문단 구분이면 문단 구분을 남긴다.
         fixed, _ = align_application_links("신청 링크는 없어요 [1].\n- 기간: 상시\n- 홈페이지에서 신청하세요\n\n다음 문단 [1].",
