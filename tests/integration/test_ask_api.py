@@ -144,7 +144,7 @@ class AskApiTests(unittest.TestCase):
             self.assertEqual(client.post("/api/ask", json=request).status_code, 200)
         args, kwargs = generate.call_args
         self.assertEqual(len(args), 4)
-        self.assertEqual(kwargs, {"profile": {"age": 25, "region": "서울특별시", "income": 0}})
+        self.assertEqual(kwargs, {"profile": {"age": 25, "region": "서울특별시", "income": 0, "child_age_months": None}})
 
     def test_closed_policy_is_listed_after_open_policy(self):
         self.session.search_policy_context.return_value = {"policies": [policy("A", 1), policy("B", 2)]}
