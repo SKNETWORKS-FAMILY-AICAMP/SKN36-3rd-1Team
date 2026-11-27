@@ -1,0 +1,897 @@
+[
+ {
+  "policy_id": "POL_007",
+  "cond": "COND_AGE_19_34",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_009",
+  "cond": "COND_AGE_19_34",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_010",
+  "cond": "COND_AGE_15_69",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "14": [
+    "needs_check"
+   ],
+   "15": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_002",
+  "cond": "COND_AGE_19_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_004",
+  "cond": "COND_AGE_15_40",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "14": [
+    "needs_check"
+   ],
+   "15": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_018",
+  "cond": "COND_AGE_0_64",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "none": [
+    "needs_check"
+   ],
+   "0": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_027",
+  "cond": "COND_AGE_0_24",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "none": [
+    "needs_check"
+   ],
+   "0": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_034",
+  "cond": "COND_AGE_65_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "64": [
+    "needs_check"
+   ],
+   "65": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_053",
+  "cond": "COND_AGE_18_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_063",
+  "cond": "COND_AGE_18_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_075",
+  "cond": "COND_AGE_19_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_079",
+  "cond": "COND_AGE_20_49",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "19": [
+    "needs_check"
+   ],
+   "20": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_BOK_095",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_STG_ICN_001",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_STG_MOLIT_001",
+  "cond": "COND_AGE_19_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_002",
+  "cond": "COND_AGE_18_29",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "ineligible"
+   ],
+   "18": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_013",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_014",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "ineligible"
+   ],
+   "18": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_016",
+  "cond": "COND_AGE_18_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_019",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_020",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_021",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_023",
+  "cond": "COND_AGE_19_34",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_024",
+  "cond": "COND_AGE_7_120",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "6": [
+    "needs_check"
+   ],
+   "7": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_025",
+  "cond": "COND_AGE_18_20",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_030",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_031",
+  "cond": "COND_AGE_15_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "14": [
+    "needs_check"
+   ],
+   "15": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_032",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_034",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_035",
+  "cond": "COND_AGE_19_34",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_036",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_038",
+  "cond": "COND_AGE_15_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "14": [
+    "needs_check"
+   ],
+   "15": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_039",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_040",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_041",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_042",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_047",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_048",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "ineligible"
+   ],
+   "19": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_049",
+  "cond": "COND_AGE_18_45",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "ineligible"
+   ],
+   "18": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_050",
+  "cond": "COND_AGE_18_45",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_051",
+  "cond": "COND_AGE_19_24",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_052",
+  "cond": "COND_AGE_18_45",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_053",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_054",
+  "cond": "COND_AGE_18_45",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_055",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "needs_check"
+   ],
+   "18": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_056",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_057",
+  "cond": "COND_AGE_18_39",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "17": [
+    "ineligible"
+   ],
+   "18": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_058",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_061",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_062",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_063",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "ineligible"
+   ],
+   "19": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_064",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": false,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "ineligible"
+   ],
+   "19": [
+    "eligible"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ },
+ {
+  "policy_id": "POL_YC_065",
+  "cond": "COND_AGE_19_39",
+  "unknown_groups": true,
+  "structure_issues": false,
+  "age_status": {
+   "18": [
+    "needs_check"
+   ],
+   "19": [
+    "needs_check"
+   ],
+   "none": [
+    "needs_check"
+   ]
+  }
+ }
+]
