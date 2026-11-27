@@ -1,0 +1,131 @@
+{
+  "dev": "8c40858",
+  "date_kst": "2026-11-27T10:20:50.030+09:00",
+  "source": "browser-multi-29.json (React 제출, 가상 29세·서울)",
+  "question": "교육비·구직·교통 지원 정책이 있나요?",
+  "http": 200,
+  "is_sample": false,
+  "answer_refs": [
+    "[1]",
+    "[2]",
+    "[3]",
+    "[4]",
+    "[5]"
+  ],
+  "citations": [
+    {
+      "ref": "[1]",
+      "document_id": "DOC_BOK_024",
+      "owner_policy": "POL_BOK_024",
+      "citation_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "release_doc_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "rendered": true
+    },
+    {
+      "ref": "[2]",
+      "document_id": "DOC_BOK_020",
+      "owner_policy": "POL_BOK_020",
+      "citation_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "release_doc_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "rendered": true
+    },
+    {
+      "ref": "[3]",
+      "document_id": "DOC_BOK_052",
+      "owner_policy": "POL_BOK_052",
+      "citation_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "release_doc_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "rendered": true
+    },
+    {
+      "ref": "[4]",
+      "document_id": "DOC_BOK_013",
+      "owner_policy": "POL_BOK_013",
+      "citation_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+      "release_doc_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+      "rendered": true
+    },
+    {
+      "ref": "[5]",
+      "document_id": "DOC_BOK_025",
+      "owner_policy": "POL_BOK_025",
+      "citation_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+      "release_doc_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+      "rendered": true
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL_BOK_024",
+      "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "api_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "release_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "card_original_href": [
+        "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+      ],
+      "citations": [
+        "[1] DOC_BOK_024"
+      ],
+      "result": "PASS"
+    },
+    {
+      "policy_id": "POL_BOK_020",
+      "policy_name": "교육급여(맞춤형 급여)",
+      "api_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "release_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "card_original_href": [
+        "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+      ],
+      "citations": [
+        "[2] DOC_BOK_020"
+      ],
+      "result": "PASS"
+    },
+    {
+      "policy_id": "POL_BOK_052",
+      "policy_name": "초.중.고 학생 교육정보화 지원",
+      "api_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "release_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "card_original_href": [
+        "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+      ],
+      "citations": [
+        "[3] DOC_BOK_052"
+      ],
+      "result": "PASS"
+    },
+    {
+      "policy_id": "POL_BOK_013",
+      "policy_name": "유아학비 지원(3~5세 누리과정 지원)",
+      "api_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+      "release_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969",
+      "card_original_href": [
+        "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969"
+      ],
+      "citations": [
+        "[4] DOC_BOK_013"
+      ],
+      "result": "PASS"
+    },
+    {
+      "policy_id": "POL_BOK_025",
+      "policy_name": "한부모가족자녀 교육비 지원",
+      "api_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+      "release_source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104",
+      "card_original_href": [
+        "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001104"
+      ],
+      "citations": [
+        "[5] DOC_BOK_025"
+      ],
+      "result": "PASS"
+    }
+  ],
+  "summary": {
+    "policies": 5,
+    "pass": 5,
+    "citations": 5,
+    "citations_rendered": 5
+  },
+  "note": "citations 계약에는 policy_id·chunk_id가 없어 document_id → 릴리스 relationships의 Policy 소유로 대조(문서 단위). 정책 후보가 교육 분야뿐이고 구직·교통이 없는 것은 #75 기존 FAIL과 같은 현상(검색 수정 전)."
+}
