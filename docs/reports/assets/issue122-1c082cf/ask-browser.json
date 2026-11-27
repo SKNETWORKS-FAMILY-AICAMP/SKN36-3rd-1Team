@@ -1,0 +1,1504 @@
+{
+  "dev": "1c082cf542d3b7bf469c096a599d42ca7accce65",
+  "date_kst": "2026-11-27",
+  "dataset": "1.4.0-candidate R3D verify B2",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "first_pass": [
+    {
+      "id": "multi",
+      "request": {
+        "question": "교육비·구직·교통 지원 정책이 있나요?",
+        "profile": {
+          "age": 29,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "info",
+        "answer": "교육비 지원은 원문에서 확인됩니다. 초·중·고등학생에게 교육활동지원비와 입학금, 수업료, 교과서비를 지원하는 **교육급여(맞춤형 급여)**가 있고, 고등학교 입학금·수업료·학교운영지원비를 면제하는 **초중고 교육비 지원사업(고교학비 지원)**도 있습니다[2][1]. 다만 두 정책 모두 자격 요건은 자동 판정이 보류되어 있어, 현재 이 정보만으로 신청 가능 여부는 확정할 수 없습니다[2][1].\n\n구직 지원으로는 **경기청년 역량강화 기회지원**이 확인되며, 어학·자격시험 응시료를 1인 최대 30만원 실비 지원합니다[3]. 현재 접수 상태는 공식 공고에서 확인해 주세요[3]. 자격 요건도 추가 확인이 필요합니다[3].\n\n교통 지원은 이번 원문에서 확인되지 않았습니다. 제공된 자료에는 교통비 지원 정책의 내용이 없어, 이 근거만으로는 안내할 수 없습니다.",
+        "citations": [
+          {
+            "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+            "document_id": "DOC_BOK_024",
+            "page_number": null
+          },
+          {
+            "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+            "document_id": "DOC_BOK_020",
+            "page_number": null
+          },
+          {
+            "title": "[온통청년 정책] 경기청년 역량강화 기회지원 (20261030005400214634)",
+            "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+            "document_id": "DOC_YC_043",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_BOK_024",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+            "agency": "교육부 학생지원총괄과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_BOK_020",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "교육급여(맞춤형 급여)",
+            "agency": "교육부 학생지원총괄과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_YC_009",
+            "conditions": [
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대학 재학은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-06-01",
+              "end_date": "2026-12-31",
+              "is_ongoing": false,
+              "days_to_start": -179,
+              "days_to_end": 34
+            },
+            "required_documents": null,
+            "policy_name": "공학교육혁신센터 지원",
+            "agency": "대구광역시 인공지능혁신성장실 대학인재혁신과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+            "official_apply_url": "https://ceedin.knu.ac.kr",
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_YC_043",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "경기청년 역량강화 기회지원",
+            "agency": "경기도 미래평생교육국 청년기회과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_BOK_052",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "초.중.고 학생 교육정보화 지원",
+            "agency": "교육부 디지털교육기반과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "교육급여와 고교학비 지원의 신청 자격은 어떻게 확인하나요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "경기청년 역량강화 기회지원의 신청 방법은 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 5,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "공학교육혁신센터 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_009/",
+            "official": [],
+            "exclusions": null,
+            "text": "공학교육혁신센터 지원마감 D-34접수 중대구광역시 인공지능혁신성장실 대학인재혁신과신청 기간2026-06-01 ~ 2026-12-31캘린더에 추가종일 일정 · 알림은 캘린더 설정에 따라요신청 기관대구광역시 인공지능혁신성장실 대학인재혁신과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인추가 확인 필요기타 자격 조건 · 나이 · 거주 지역판정 사유 자세히 보기기타 자격 조건학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건학력조건: 대학 재학은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.추가 확인 필요나이신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요거주 지역신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요신청하기 ↗이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "경기청년 역량강화 기회지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_043/",
+            "official": [],
+            "exclusions": null,
+            "text": "경기청년 역량강화 기회지원일정 확인 필요경기도 미래평생교육국 청년기회과신청 기간공식 원문에서 확인해 주세요.신청 기관경기도 미래평생교육국 청년기회과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "교육급여(맞춤형 급여)",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_020/",
+            "official": [],
+            "exclusions": null,
+            "text": "교육급여(맞춤형 급여)일정 확인 필요교육부 학생지원총괄과신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 학생지원총괄과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "초.중.고 학생 교육정보화 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_052/",
+            "official": [],
+            "exclusions": null,
+            "text": "초.중.고 학생 교육정보화 지원일정 확인 필요교육부 디지털교육기반과신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 디지털교육기반과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "초중고 교육비 지원사업(고교학비 지원)",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_024/",
+            "official": [],
+            "exclusions": null,
+            "text": "초중고 교육비 지원사업(고교학비 지원)일정 확인 필요교육부 학생지원총괄과신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 학생지원총괄과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+          "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634"
+        ]
+      },
+      "returnState": null
+    },
+    {
+      "id": "RQ040",
+      "request": {
+        "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?",
+        "profile": {
+          "age": 30,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "answered",
+        "answer": "공무원은 국민내일배움카드를 발급받을 수 없습니다. 공식 안내에 지원 제외 대상으로 **공무원, 사립학교 교직원**이 명시되어 있습니다[2]. 다만 현재 접수는 진행 중이므로, 접수 여부와 별개로 공무원 해당 여부 때문에 신청 대상에서 제외됩니다[1][2].",
+        "citations": [
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_005",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": null,
+            "policy_name": "고용24 국민내일배움카드",
+            "agency": "고용노동부 / 한국고용정보원",
+            "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "국민내일배움카드의 다른 지원 제외 대상은 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "국민내일배움카드는 어떻게 신청하나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 1,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "고용24 국민내일배움카드",
+            "detail": "http://127.0.0.1:18301/policies/POL_005/",
+            "official": [],
+            "exclusions": null,
+            "text": "고용24 국민내일배움카드상시 접수접수 중고용노동부 / 한국고용정보원청소년청년중장년노년신청 기간상시 접수신청 기관고용노동부 / 한국고용정보원필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인개별 비교나이추가 확인 필요기타 자격 조건조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.판정 사유 자세히 보기나이만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.개별 비교기타 자격 조건제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+        ]
+      },
+      "returnState": null
+    },
+    {
+      "id": "RQ042",
+      "request": {
+        "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?",
+        "profile": {
+          "age": 25,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "answered",
+        "answer": "부모님 집에 월세를 내고 사는 경우는 **청년월세 한시 특별지원**에서 제외됩니다. 공식 원문에 직계존속·형제·자매 등 2촌 이내 주택 임차는 제외대상이라고 되어 있고, 부모님은 직계존속에 해당하므로 이 조건에 해당하면 지원에서 제외됩니다. 또한 이 사업은 부모님과 별도 거주하는 무주택자를 대상으로 합니다. [1]\n\n다만 현재 이 사업은 접수가 마감된 상태입니다. 2026년 신규 신청기간도 3.30(월) 09:00~5.29(금) 16:00으로 이미 종료되어 있습니다. [2]",
+        "citations": [
+          {
+            "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+            "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+            "document_id": "DOC_MOLIT_002",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 지원사업 중앙부처복지서비스 상세원문 (WLF00004661)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "document_id": "DOC_MOLIT_001",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_YC_035",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~34세 기준에 입력한 만 25세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-03-30",
+              "end_date": "2026-05-29",
+              "is_ongoing": false,
+              "days_to_start": -242,
+              "days_to_end": -182
+            },
+            "required_documents": null,
+            "policy_name": "청년월세 지원",
+            "agency": "경기도 도시주택실 주택정책과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_009",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~34세 기준에 입력한 만 25세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2024-02-26",
+              "end_date": "2025-02-25",
+              "is_ongoing": false,
+              "days_to_start": -1005,
+              "days_to_end": -640
+            },
+            "required_documents": null,
+            "policy_name": "국토교통부 청년월세 한시 특별지원",
+            "agency": "국토교통부 청년주거정책과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": [
+              {
+                "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002",
+                "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": [
+              {
+                "label": "대상",
+                "value": "｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002"
+              }
+            ]
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "청년월세 한시 특별지원의 신청대상과 제외대상은 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "청년월세 지원의 자격 요건은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 2,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "국토교통부 청년월세 한시 특별지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_009/",
+            "official": [
+              [
+                "대상｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능 · 기준 원문 ↗",
+                "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+              ]
+            ],
+            "exclusions": null,
+            "text": "국토교통부 청년월세 한시 특별지원접수 마감국토교통부 청년주거정책과청년신청 기간2024-02-26 ~ 2025-02-25신청 기관국토교통부 청년주거정책과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗공식 자격기준원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.대상｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능 · 기준 원문 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 19~34세 기준에 입력한 만 25세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "청년월세 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_035/",
+            "official": [],
+            "exclusions": null,
+            "text": "청년월세 지원접수 마감경기도 도시주택실 주택정책과청년신청 기간2026-03-30 ~ 2026-05-29신청 기관경기도 도시주택실 주택정책과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 19~34세 기준에 입력한 만 25세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661"
+        ]
+      },
+      "returnState": null
+    }
+  ],
+  "link_capture_pass": [
+    {
+      "id": "multi",
+      "requested_at": "2026-11-26T16:19:57.661Z",
+      "request": {
+        "question": "교육비·구직·교통 지원 정책이 있나요?",
+        "profile": {
+          "age": 29,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "answered",
+        "answer": "교육비 지원으로는 **교육급여(맞춤형 급여)**와 초중고 교육비 지원사업(고교학비 지원), 초.중.고 학생 교육정보화 지원이 확인됩니다. 교육급여는 초·중·고등학생의 교육활동지원비와 입학금·수업료·교과서비를 지원하고, 초중고 교육비 지원사업은 고등학교 입학금·수업료·학교운영지원비를 면제하며 방과후 활동 이용권과 PC·인터넷 설치를 지원합니다. 초.중.고 학생 교육정보화 지원은 초중고 1세대에 PC 1대와 인터넷 통신비, 유해차단서비스를 지원합니다[2][1][4]. 다만 세 정책 모두 자격 요건은 자동 판정이 보류되어 있고, 현재 접수 여부도 공식 공고에서 확인이 필요합니다[2][1][4].\n\n구직 지원으로는 **경기청년 역량강화 기회지원**이 확인됩니다. 어학·자격시험 응시료를 1인 최대 30만원까지 실비 지원합니다[3]. 현재 접수 상태는 공식 자료상 확인이 어렵고, 신청 자격도 자동 판정이 보류되어 있어 공고에서 확인이 필요합니다[3].\n\n교통 지원은 이번 공식 원문에서 확인되지 않았습니다. 제공된 자료에는 교통비 지원 내용이 없어서, 이 질문에 해당하는 정책은 확인되지 않았습니다.",
+        "citations": [
+          {
+            "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+            "document_id": "DOC_BOK_024",
+            "page_number": null
+          },
+          {
+            "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+            "document_id": "DOC_BOK_020",
+            "page_number": null
+          },
+          {
+            "title": "[온통청년 정책] 경기청년 역량강화 기회지원 (20261030005400214634)",
+            "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+            "document_id": "DOC_YC_043",
+            "page_number": null
+          },
+          {
+            "title": "[중앙부처복지서비스] 초.중.고 학생 교육정보화 지원 (WLF00003227)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+            "document_id": "DOC_BOK_052",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_BOK_024",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+            "agency": "교육부 학생지원총괄과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_BOK_020",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "교육급여(맞춤형 급여)",
+            "agency": "교육부 학생지원총괄과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_YC_009",
+            "conditions": [
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대학 재학은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "region",
+                "label": "거주 지역",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-06-01",
+              "end_date": "2026-12-31",
+              "is_ongoing": false,
+              "days_to_start": -179,
+              "days_to_end": 34
+            },
+            "required_documents": null,
+            "policy_name": "공학교육혁신센터 지원",
+            "agency": "대구광역시 인공지능혁신성장실 대학인재혁신과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+            "official_apply_url": "https://ceedin.knu.ac.kr",
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_YC_043",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "경기청년 역량강화 기회지원",
+            "agency": "경기도 미래평생교육국 청년기회과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_BOK_052",
+            "conditions": [
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "초.중.고 학생 교육정보화 지원",
+            "agency": "교육부 디지털교육기반과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "교육급여와 고교학비 지원의 지원 내용 차이가 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 5,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "공학교육혁신센터 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_009/",
+            "official": [],
+            "hrefs": [
+              [
+                "청년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679"
+              ],
+              [
+                "신청하기 ↗",
+                "https://ceedin.knu.ac.kr/"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_YC_009/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_YC_009"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679"
+              ]
+            ],
+            "exclusions": null,
+            "text": "공학교육혁신센터 지원마감 D-34접수 중대구광역시 인공지능혁신성장실 대학인재혁신과청년신청 기간2026-06-01 ~ 2026-12-31캘린더에 추가종일 일정 · 알림은 캘린더 설정에 따라요신청 기관대구광역시 인공지능혁신성장실 대학인재혁신과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인추가 확인 필요기타 자격 조건 · 나이 · 거주 지역판정 사유 자세히 보기기타 자격 조건학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건학력조건: 대학 재학은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.추가 확인 필요나이신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요거주 지역신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요신청하기 ↗이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "경기청년 역량강화 기회지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_043/",
+            "official": [],
+            "hrefs": [
+              [
+                "청년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_YC_043/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_YC_043"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634"
+              ]
+            ],
+            "exclusions": null,
+            "text": "경기청년 역량강화 기회지원일정 확인 필요경기도 미래평생교육국 청년기회과청년신청 기간공식 원문에서 확인해 주세요.신청 기관경기도 미래평생교육국 청년기회과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "교육급여(맞춤형 급여)",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_020/",
+            "official": [],
+            "hrefs": [
+              [
+                "아동",
+                "http://127.0.0.1:18305/#/life?stage=%EC%95%84%EB%8F%99"
+              ],
+              [
+                "청소년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EC%86%8C%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_BOK_020/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_BOK_020"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089"
+              ]
+            ],
+            "exclusions": null,
+            "text": "교육급여(맞춤형 급여)일정 확인 필요교육부 학생지원총괄과아동청소년신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 학생지원총괄과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "초.중.고 학생 교육정보화 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_052/",
+            "official": [],
+            "hrefs": [
+              [
+                "아동",
+                "http://127.0.0.1:18305/#/life?stage=%EC%95%84%EB%8F%99"
+              ],
+              [
+                "청소년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EC%86%8C%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_BOK_052/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_BOK_052"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+              ]
+            ],
+            "exclusions": null,
+            "text": "초.중.고 학생 교육정보화 지원일정 확인 필요교육부 디지털교육기반과아동청소년신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 디지털교육기반과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "초중고 교육비 지원사업(고교학비 지원)",
+            "detail": "http://127.0.0.1:18301/policies/POL_BOK_024/",
+            "official": [],
+            "hrefs": [
+              [
+                "아동",
+                "http://127.0.0.1:18305/#/life?stage=%EC%95%84%EB%8F%99"
+              ],
+              [
+                "청소년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EC%86%8C%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_BOK_024/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_BOK_024"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103"
+              ]
+            ],
+            "exclusions": null,
+            "text": "초중고 교육비 지원사업(고교학비 지원)일정 확인 필요교육부 학생지원총괄과아동청소년신청 기간공식 원문에서 확인해 주세요.신청 기관교육부 학생지원총괄과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인자동 판정 안 함이 상담에서는 신청 자격을 자동으로 확인하지 않았어요. 자세한 자격 요건은 공식 원문에서 확인해 주세요.이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+          "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214634",
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227"
+        ]
+      },
+      "returnState": null
+    },
+    {
+      "id": "RQ040",
+      "requested_at": "2026-11-26T16:20:07.195Z",
+      "request": {
+        "question": "공무원도 국민내일배움카드를 발급받을 수 있나요?",
+        "profile": {
+          "age": 30,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "answered",
+        "answer": "공무원은 **국민내일배움카드** 지원 제외 대상에 포함됩니다. 공식 원문에 “공무원, 사립학교 교직원”은 발급받을 수 없다고 되어 있어요[3]. 다만 현재 접수는 진행 중이므로, 접수 여부와 자격은 별개로 보셔야 합니다[1][2].",
+        "citations": [
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          },
+          {
+            "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+            "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "document_id": "DOC_WORK24_001",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_005",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "employment",
+                "label": "기타 자격 조건",
+                "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "education",
+                "label": "기타 자격 조건",
+                "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": null,
+            "policy_name": "고용24 국민내일배움카드",
+            "agency": "고용노동부 / 한국고용정보원",
+            "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "국민내일배움카드의 지원 제외 대상은 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 1,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "고용24 국민내일배움카드",
+            "detail": "http://127.0.0.1:18301/policies/POL_005/",
+            "official": [],
+            "hrefs": [
+              [
+                "청소년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EC%86%8C%EB%85%84"
+              ],
+              [
+                "청년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EB%85%84"
+              ],
+              [
+                "중장년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%A4%91%EC%9E%A5%EB%85%84"
+              ],
+              [
+                "노년",
+                "http://127.0.0.1:18305/#/life?stage=%EB%85%B8%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_005/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_005"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+              ]
+            ],
+            "exclusions": null,
+            "text": "고용24 국민내일배움카드상시 접수접수 중고용노동부 / 한국고용정보원청소년청년중장년노년신청 기간상시 접수신청 기관고용노동부 / 한국고용정보원필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인개별 비교나이추가 확인 필요기타 자격 조건조건이 어떻게 결합되는지 확인되지 않았어요. 각 조건의 비교 결과만으로 신청 자격을 판단할 수 없어요.판정 사유 자세히 보기나이만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.개별 비교기타 자격 조건제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.추가 확인 필요기타 자격 조건제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요기타 자격 조건제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do"
+        ]
+      },
+      "returnState": null
+    },
+    {
+      "id": "RQ042",
+      "requested_at": "2026-11-26T16:20:12.073Z",
+      "request": {
+        "question": "부모님 집에 월세를 내고 살면 청년월세 지원을 받을 수 있나요?",
+        "profile": {
+          "age": 25,
+          "region": "",
+          "income": null
+        },
+        "history": [],
+        "awaiting_field": null,
+        "selected_policy_id": null
+      },
+      "http": 200,
+      "body": {
+        "status": "answered",
+        "answer": "부모님 집에 월세를 내고 사는 경우는 **청년월세 한시 특별지원**의 제외대상에 해당합니다. 공식 원문에 “부모님과 별도 거주하는 무주택자”가 대상이라고 되어 있고, 제외대상에 “직계존속·형제·자매 등 2촌 이내 주택 임차”가 포함되어 있습니다. 따라서 부모님 집에 월세를 내고 거주하는 형태라면 이 정책으로는 지원받기 어렵습니다.[3]\n\n다만 같은 이름의 다른 정책인 청년월세 지원은 이번 원문에서 신청 방법이나 세부 제외 기준을 확인할 수 없어서, 부모님 집 거주가 가능한지까지는 확인되지 않았습니다.[1][2] 현재 접수 여부도 두 정책 모두 마감된 상태로 확인됩니다.[1][4]",
+        "citations": [
+          {
+            "title": "[온통청년 정책] 청년월세 지원 (20261030005400214649)",
+            "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+            "document_id": "DOC_YC_035",
+            "page_number": null
+          },
+          {
+            "title": "[온통청년 정책] 청년월세 지원 (20261030005400214649)",
+            "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+            "document_id": "DOC_YC_035",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+            "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+            "document_id": "DOC_MOLIT_002",
+            "page_number": null
+          },
+          {
+            "title": "국토교통부 청년월세 지원사업 중앙부처복지서비스 상세원문 (WLF00004661)",
+            "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "document_id": "DOC_MOLIT_001",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_YC_035",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~34세 기준에 입력한 만 25세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-03-30",
+              "end_date": "2026-05-29",
+              "is_ongoing": false,
+              "days_to_start": -242,
+              "days_to_end": -182
+            },
+            "required_documents": null,
+            "policy_name": "청년월세 지원",
+            "agency": "경기도 도시주택실 주택정책과",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          },
+          {
+            "policy_id": "POL_009",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~34세 기준에 입력한 만 25세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2024-02-26",
+              "end_date": "2025-02-25",
+              "is_ongoing": false,
+              "days_to_start": -1005,
+              "days_to_end": -640
+            },
+            "required_documents": null,
+            "policy_name": "국토교통부 청년월세 한시 특별지원",
+            "agency": "국토교통부 청년주거정책과",
+            "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": [
+              {
+                "text": "ㅇ (대상) ｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자\r\n    * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능\r\n※ 제외대상 : ▲주택 소유자(분양권, 입주권 포함) ▲직계존속·형제·자매 등 2촌 이내 주택 임차 ▲공공주택특별법에 따른 공공임대주택 거주 ▲1실(방)에 다수가 거주하는 방식의 전대차인 경우 등\r\n\r\n - 임대차계약서*와 함께 실제 임차료 지급사실(계좌입금 확인서 등, 최근 3개월 내) 확인을 위한 임차료 계좌입금 증빙내역 제출(전입신고 필수)\r\n   * (임대차계약 등 증빙 서류) 임대차계약서, 전대차계약서(등기부등본 또는 건축물대장 제출), 입실서, 기숙사비 납부 영수증 등(입실서, 기숙사비 납부 영수증인 경우 임대인과 임차인의 성명·생년월일, 서명날인, 임차보증금과 월세금액, 계약일자·기간 등 기재 필요)",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002",
+                "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": [
+              {
+                "label": "대상",
+                "value": "｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능",
+                "document_id": "DOC_MOLIT_002",
+                "chunk_id": "CHK_B2_DOC_MOLIT_002_C002"
+              }
+            ]
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "청년월세 한시 특별지원의 대상과 제외대상은 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "청년월세 지원의 신청 자격은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "dom": {
+        "cardCount": 2,
+        "openCount": 0,
+        "cards": [
+          {
+            "name": "국토교통부 청년월세 한시 특별지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_009/",
+            "official": [
+              [
+                "대상｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능 · 기준 원문 ↗",
+                "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+              ]
+            ],
+            "hrefs": [
+              [
+                "청년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661"
+              ],
+              [
+                "기준 원문 ↗",
+                "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_009/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_009"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661"
+              ]
+            ],
+            "exclusions": null,
+            "text": "국토교통부 청년월세 한시 특별지원접수 마감국토교통부 청년주거정책과청년신청 기간2024-02-26 ~ 2025-02-25신청 기관국토교통부 청년주거정책과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗공식 자격기준원문의 일부를 보여 드려요. 전체 조건·적용 연도는 원문에서 확인해 주세요. 내 신청 자격을 확정한 결과는 아니에요.대상｢청년기본법｣상 청년(만 19~34세 이하*)으로 부모님과 별도 거주하는 무주택자 * 월세지원 신청연령은 신청년도의 출생년을 기준(만 19〜34세가 되는 해의 1.1〜12.31일)으로 하고, 선정 이후 기준 연령을 초과하여도 계속지원 가능 · 기준 원문 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 19~34세 기준에 입력한 만 25세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          },
+          {
+            "name": "청년월세 지원",
+            "detail": "http://127.0.0.1:18301/policies/POL_YC_035/",
+            "official": [],
+            "hrefs": [
+              [
+                "청년",
+                "http://127.0.0.1:18305/#/life?stage=%EC%B2%AD%EB%85%84"
+              ],
+              [
+                "공식 원문에서 서류 확인 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649"
+              ],
+              [
+                "정책 상세보기 ↗",
+                "http://127.0.0.1:18301/policies/POL_YC_035/"
+              ],
+              [
+                "관계 지도",
+                "http://127.0.0.1:18305/#/map?policy=POL_YC_035"
+              ],
+              [
+                "원문 보기 ↗",
+                "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649"
+              ]
+            ],
+            "exclusions": null,
+            "text": "청년월세 지원접수 마감경기도 도시주택실 주택정책과청년신청 기간2026-03-30 ~ 2026-05-29신청 기관경기도 도시주택실 주택정책과필요 서류이 카드에는 확인된 서류 목록이 제공되지 않았어요. 공식 원문에서 서류 확인 ↗내 조건 확인추가 확인 필요나이 · 자격 요건판정 사유 자세히 보기나이만 19~34세 기준에 입력한 만 25세가 포함됩니다. 신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요자격 요건신청 자격은 공식 공고에서 확인해 주세요.추가 확인 필요조건 하나하나의 충족이 최종 자격을 뜻하지는 않아요이 정책 물어보기정책 상세보기 ↗관계 지도원문 보기 ↗☆ 관심 정책 저장"
+          }
+        ],
+        "links": [
+          "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261030005400214649",
+          "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+          "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661"
+        ]
+      },
+      "returnState": null
+    }
+  ]
+}

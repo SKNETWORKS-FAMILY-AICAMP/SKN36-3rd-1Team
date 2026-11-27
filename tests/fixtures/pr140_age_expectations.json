@@ -1,0 +1,1647 @@
+{
+  "basis_commit": "b19faf639f51b7a2599ceb813353187fc27af580",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+  "note": "Reviewed static expectations from correction IDs, relationship evidence, UNKNOWN remainder and mandatory quality holds. No Checker result is used to generate expected outcomes. 120 is an upper-limit sentinel, not a real policy maximum.",
+  "policies": [
+    {
+      "policy_id": "POL_YC_024",
+      "condition_id": "COND_AGE_7_120",
+      "lower": 7,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_024",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_024_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_7_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_024_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_047",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_047",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_047_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_047_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_053",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_053",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_053_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_053_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_025",
+      "condition_id": "COND_AGE_18_20",
+      "lower": 18,
+      "upper": 20,
+      "stored_upper": 20,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_025",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_025_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_20"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_025_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_002",
+      "condition_id": "COND_AGE_19_120",
+      "lower": 19,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_002",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_002_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_002_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_004",
+      "condition_id": "COND_AGE_15_40",
+      "lower": 15,
+      "upper": 40,
+      "stored_upper": 40,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_004",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_004_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_15_40"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_004_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_018",
+      "condition_id": "COND_AGE_0_64",
+      "lower": 0,
+      "upper": 64,
+      "stored_upper": 64,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_018",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_018_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_0_64"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_018_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_027",
+      "condition_id": "COND_AGE_0_24",
+      "lower": 0,
+      "upper": 24,
+      "stored_upper": 24,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_027",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_027_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_0_24"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_027_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_034",
+      "condition_id": "COND_AGE_65_120",
+      "lower": 65,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_034",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_034_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_65_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_034_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_053",
+      "condition_id": "COND_AGE_18_120",
+      "lower": 18,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_053",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_053_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_053_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_063",
+      "condition_id": "COND_AGE_18_120",
+      "lower": 18,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_063",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_063_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_063_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_075",
+      "condition_id": "COND_AGE_19_120",
+      "lower": 19,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_075",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_075_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_075_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_079",
+      "condition_id": "COND_AGE_20_49",
+      "lower": 20,
+      "upper": 49,
+      "stored_upper": 49,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_079",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_079_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_20_49"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_079_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_BOK_095",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_BOK_095",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_BOK_095_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_BOK_095_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_007",
+      "condition_id": "COND_AGE_19_34",
+      "lower": 19,
+      "upper": 34,
+      "stored_upper": 34,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_NHUF_008",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_007_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_34"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_007_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_009",
+      "condition_id": "COND_AGE_19_34",
+      "lower": 19,
+      "upper": 34,
+      "stored_upper": 34,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_MOLIT_001",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_009_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_34"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_009_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_STG_ICN_001",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "evidence_location": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) 지원대상 기본요건 ③ (DOC_STG_ICN_001_NOTICE_2026_P01_C01)",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_STG_ICN_001_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_STG_ICN_001_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_STG_MOLIT_001",
+      "condition_id": "COND_AGE_19_120",
+      "lower": 19,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_STG_MOLIT_001_GOV24",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_STG_MOLIT_001_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_STG_MOLIT_001_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_010",
+      "condition_id": "COND_AGE_15_69",
+      "lower": 15,
+      "upper": 69,
+      "stored_upper": 69,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_MOEL_002",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_010_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_15_69"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_010_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_002",
+      "condition_id": "COND_AGE_18_29",
+      "lower": 18,
+      "upper": 29,
+      "stored_upper": 29,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_002",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_002_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_29"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_002_OR_EDU",
+          "logic": "OR",
+          "condition_ids": [
+            "COND_EDU_고교_졸업",
+            "COND_EDU_대졸_예정",
+            "COND_EDU_대학_재학",
+            "COND_EDU_대학_졸업"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_013",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_013",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_013_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_013_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_014",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_014",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_014_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39",
+            "COND_JOB_자영업자",
+            "COND_SP_농업인"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_016",
+      "condition_id": "COND_AGE_18_120",
+      "lower": 18,
+      "upper": null,
+      "stored_upper": 120,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_016",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_016_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_120"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_016_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_019",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_019",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_019_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_019_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_020",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_020",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_020_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_020_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_021",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_021",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_021_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_021_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_023",
+      "condition_id": "COND_AGE_19_34",
+      "lower": 19,
+      "upper": 34,
+      "stored_upper": 34,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_023",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_023_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_34"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_023_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_030",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_030",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_030_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_030_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_031",
+      "condition_id": "COND_AGE_15_39",
+      "lower": 15,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_031",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_031_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_15_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_031_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_032",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_032",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_032_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_032_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_034",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_034",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_034_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_034_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_035",
+      "condition_id": "COND_AGE_19_34",
+      "lower": 19,
+      "upper": 34,
+      "stored_upper": 34,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_035",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_035_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_34"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_035_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_036",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_036",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_036_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_036_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_038",
+      "condition_id": "COND_AGE_15_39",
+      "lower": 15,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_038",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_038_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_15_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_038_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_039",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_039",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_039_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_039_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_040",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_040",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_040_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_040_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_041",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_041",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_041_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_041_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_042",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_042",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_042_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_042_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_048",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_048",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_048_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39",
+            "COND_EDU_기타",
+            "COND_JOB_기타"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_049",
+      "condition_id": "COND_AGE_18_45",
+      "lower": 18,
+      "upper": 45,
+      "stored_upper": 45,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_049",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_049_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_45"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_049_OR_JOB",
+          "logic": "OR",
+          "condition_ids": [
+            "COND_JOB__예비_창업자",
+            "COND_JOB_자영업자"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_050",
+      "condition_id": "COND_AGE_18_45",
+      "lower": 18,
+      "upper": 45,
+      "stored_upper": 45,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_050",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_050_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_45"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_050_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_051",
+      "condition_id": "COND_AGE_19_24",
+      "lower": 19,
+      "upper": 24,
+      "stored_upper": 24,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_051",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_051_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_24"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_051_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_052",
+      "condition_id": "COND_AGE_18_45",
+      "lower": 18,
+      "upper": 45,
+      "stored_upper": 45,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_052",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_052_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_45"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_052_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_054",
+      "condition_id": "COND_AGE_18_45",
+      "lower": 18,
+      "upper": 45,
+      "stored_upper": 45,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_054",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_054_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_45"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_054_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_055",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_055",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_055_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_055_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_056",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_056",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_056_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_056_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_057",
+      "condition_id": "COND_AGE_18_39",
+      "lower": 18,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_057",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_057_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_18_39",
+            "COND_JOB_미취업자"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_058",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_058",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_058_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_058_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_061",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_061",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_061_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_061_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_062",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_062",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_062_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_062_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    },
+    {
+      "policy_id": "POL_YC_063",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_063",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_063_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_063_OR_EDU",
+          "logic": "OR",
+          "condition_ids": [
+            "COND_EDU_고졸_예정",
+            "COND_EDU_대학_재학"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_064",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_064",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_064_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39",
+            "COND_EDU_대학_재학"
+          ]
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "Non-age scoped quality warnings preserve individual age in Checker and Pipeline; root is held because other mandatory requirements are unverified",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "numeric",
+      "api_age_expected": "numeric"
+    },
+    {
+      "policy_id": "POL_YC_065",
+      "condition_id": "COND_AGE_19_39",
+      "lower": 19,
+      "upper": 39,
+      "stored_upper": 39,
+      "operator": "BETWEEN",
+      "unit": "세",
+      "subject": "applicant",
+      "evidence_document_id": "DOC_YC_065",
+      "evidence_location": "원문 대조 교정",
+      "group_snapshot": [
+        {
+          "group_id": "GRP_POL_YC_065_ROOT",
+          "logic": "AND",
+          "condition_ids": [
+            "COND_AGE_19_39"
+          ]
+        },
+        {
+          "group_id": "GRP_POL_YC_065_REST",
+          "logic": "UNKNOWN",
+          "condition_ids": []
+        }
+      ],
+      "root_expected": "needs_check",
+      "hold_basis": "UNKNOWN remainder: whole-policy hold",
+      "source_scope": "Approved correction ledger / frozen structured condition; source fact disagreement is not resolved by this fixture",
+      "checker_age_expected": "needs_check",
+      "api_age_expected": "needs_check"
+    }
+  ]
+}
