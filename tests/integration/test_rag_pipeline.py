@@ -415,6 +415,9 @@ class PipelineTests(unittest.TestCase):
 
         raw_path = (Path(__file__).resolve().parents[2]
                     / "data" / "raw" / "gov24" / "items" / "449000000108.json")
+        if not raw_path.exists():
+            # data/raw는 .gitignore 대상이라 새 clone·worktree에는 없다. 없으면 실패 대신 건너뛴다.
+            self.skipTest("data/raw 원본(gov24 449000000108.json)이 없습니다.")
         with open(raw_path, encoding="utf-8") as f:
             item = json.load(f)
         pieces = [p for p in iter_document_chunks(format_gov24_item_text(item), 750, 80) if len(p) >= 50]

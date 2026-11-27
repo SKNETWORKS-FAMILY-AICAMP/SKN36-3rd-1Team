@@ -57,7 +57,11 @@ class TestFrontendCheckerWording(unittest.TestCase):
 
     def test_unjudged_prefixes_match_checker(self):
         source = ts_source("src/lib/conditionGroups.ts")
-        prefixes = re.findall(r"'([^']+)'", ts_string(source, r"UNJUDGED_REASON_PREFIXES = \[([^\]]+)\]"))
+        items = [item.strip() for item in ts_string(source, r"UNJUDGED_REASON_PREFIXES = \[([^\]]+)\]").split(",")]
+        # 목록 항목은 문자열이거나 같은 파일의 문자열 상수 이름이다(예: UNKNOWN_GROUP_REASON).
+        prefixes = [item.strip("'") if item.startswith("'")
+                    else ts_string(source, rf"const {re.escape(item)} = '([^']+)'")
+                    for item in items if item]
         unknown = checker.check_eligibility({"age": 25, "region": None, "income": None}, group_policy("UNKNOWN"))
         missing = checker.check_eligibility({"age": 25, "region": None, "income": None},
                                             {"policy_id": "POL_SAMPLE", "graph_status": "MISSING_IN_GRAPH"})
