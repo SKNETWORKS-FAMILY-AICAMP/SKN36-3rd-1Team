@@ -336,11 +336,50 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | #97 RQ031 5문항 | 소희·지인 답변 수정 대기 | 동일 5문항 재평가 |
 | #78 76세 직접 질문 | 소희·지인 후속 대기 (Checker `ineligible` ↔ 본문 불일치 2/2) | 수정 후 재검증 |
 | #39 자녀 월령 UI | [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 미병합, 다자녀·`ask_info` 팀 결정 | React 입력·타입 연동, 경계 0/23/24/25 검증 |
-| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합(`4708009`) · 세종·FAQ는 §11에서 재확인, 접수 미확인 문구 누락은 §11-1에서 수정·재확인, 보정 문구 겹침(Pipeline)은 후속 대기 · 6표기 API·UI는 미실행 | 후속 수정 후 §11 같은 질문으로 재확인, 6표기 목록 API·UI 재확인 |
+| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합(`4708009`) · 세종·FAQ는 §12에서 재확인, 접수 미확인 문구 누락은 §12-1에서 수정·재확인, 보정 문구 겹침(Pipeline)은 후속 대기 · 6표기 API·UI는 미실행 | 후속 수정 후 §12 같은 질문으로 재확인, 6표기 목록 API·UI 재확인 |
 | #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`, 2026-11-27) · 병합 후 재확인 미실행 | 최신 dev에서 인천 연령 경계·인용 출처 재검증 |
 | #40 30세 상담 마지막 요약 | 생성 답변 실행별 변동, 후속 관찰 | 재현 시 지인 Pipeline·소희 Generator 전달 |
 
-## 11. 2026-11-27 KST · dev `4708009` #103 세종·FAQ 상담·화면 재확인
+## 11. 2026-11-27 KST · 최종 현황 통합 (dev `4708009`)
+
+기준 [dev `4708009`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/4708009) (PR #147 병합). 이번 절은 **새 상담 실행 없이** 병합된 #143·#145·#150 증빙과 열린 PR #148·#139의 기록을 한 표로 모은 것이다. 실DB·실LLM 재실행은 하지 않았다. 제품 코드·계약·데이터는 바꾸지 않았다. 판정 기호는 §1과 같다.
+
+### 11-1. 병합 완료 근거
+
+| PR | 범위 | 판정 | 근거 |
+| --- | --- | --- | --- |
+| [#143](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/143) | #75 RQ040·RQ042 실제 React 상담, 07-1~07-5 상세 이동·탭 복귀, 08-1·08-2 Django 404 | RQ040 **PASS** · RQ042 **PASS** · 07/08 6개 시나리오 **PASS** · 29세 복수 분야 **FAIL**(아래 11-2) | §8 · §9 |
+| [#145](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/145) | #40 비교 화면 30·10세·390px, 카드 원문 링크 도착, 복수 정책 출처 | 비교 화면 **PASS** · 원문 URL·HTTP 8/8 **PASS**(명칭 7/8, `POL_009` `needs_review` 1) · 복수 정책 출처 5/5 **PASS** | §10 |
+| [#150](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/150) | §10에서 남긴 dev 기존 실패 `test_unjudged_prefixes_match_checker`, 원본 없는 환경의 `test_regenerated_doc_gov_048_…` | **PASS** — 이번 dev에서 두 파일 96 passed·1 skipped(사유: `data/raw` 원본 없음)·subtests 160 passed | 아래 11-4 |
+
+### 11-2. 남은 항목 판정
+
+| 항목 | 관련 | 판정 | 근거·재현 | 다음 조치 |
+| --- | --- | --- | --- | --- |
+| `POL_GOV_042` 45세 종합 판정 의미 불일치 | #40 후속 · #122 03-2 | **FAIL** | Checker·Pipeline·API 모두 종합 `ineligible`인데 실제 `gpt-5.4-mini` 답변이 “전체 신청 자격은 확정할 수 없습니다”로 미확정 안내. 구조화 상태 전달 불일치는 0건(실DB+Mock 11건, 실LLM 3건)이라 계산 오류가 아닌 **답변 의미 전달** 문제. 1회 관측, 반복 안정성 미검증. dev `8c40858` 기준 [PR #148](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/148)(열림·미병합) 보고서 `docs/reports/issue122-r3d-llm-e2e-consistency-20261127.md` §C | 소희·지인 Generator 문구 보정 → 같은 입력 재검증. §3 #40 절의 수용 기준(30세 문구)과 같은 유형 |
+| 29세 교육비·구직·교통 질문의 검색 후보 누락 | #75 · #122 02 | **FAIL** | 후보가 교육 분야 5개뿐이고 구직·교통 정책 없음. §8(지역 공란) 2/2 재현, §10(서울)에서도 같은 경향. 본문·카드·출처 연결 자체는 일치(카드 5/5·인용 5/5). 검색 수정 PR 없음 | 지인·민혁 검색 관련성 수정 → §8과 같은 질문·프로필(가상 29세·지역 공란)로 재검증 |
+| RQ031 조업일수 60일 경계 5문항 | #97 · #82 | **FAIL** | 2026-11-25 R3D 재검증: HTTP 200 5/5, 고시 인용 5/5, 판정 **통과 1 · 부분 통과 2 · 실패 2**(59일 충족/미충족 모순, 정확히 60일 포함 관계 오류). 공식 기준(고시 60일 이상·TAC 30일)은 확인 완료. Generator·Pipeline 수정은 dev에 없음. [재검증 보고서](issue97-rq031-r3d-retest-20261125.md) | 소희·지인 답변 수정 → 같은 5문항 재평가 |
+| `child_age_months` API 연결(04-3) | #39 | **BLOCKED** | 현재 dev의 `UserProfile`에 월령 필드가 없어 API가 값을 버린다(PR #148 §C에서 실DB로 확인). Checker 직접 비교는 24개월 포함·25개월 미포함이지만 #102 품질 보류(`MARRIAGE_CHILD_NOT_MODELED`)로 둘 다 `needs_check`. [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 열림, 2026-11-27 리뷰에서 수정 2건 요청(코멘트 자리표시자, 다자녀 패턴 범위) | #139 병합 후 24/25/생략/잘못된 값 422 재실행, React 입력 연결 |
+
+### 11-3. 그 밖의 상태 (변경 없음)
+
+| 항목 | 상태 |
+| --- | --- |
+| `POL_005` 76세 직접 질문 (04-1) | **FAIL** 유지(§8). 재실행 없음 |
+| #103 세종 신청 URL·목록 별칭(05-1·05-5) | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합. 세종·FAQ 상담·화면은 §12에서 재확인(PASS 6 · FAIL 2: 접수 미확인 문구 누락은 §12-1에서 수정 후 8/8 PASS, 보정 문구 겹침 `".,"`은 지인 후속). 6표기 목록 API·UI 재확인은 **미실행** |
+| #79·#90 인천 연령·출처(05-6) | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) 병합. 병합 후 재확인 **미실행** |
+| 08-4 실제 DB 중단·릴리스 손상 | **미실행** |
+| 05-4 #102 보류 누락 예시 | **BLOCKED** 유지 |
+
+### 11-4. 이번 회차 실행한 검증
+
+- `python -m pytest tests/unit/test_shared_constants.py tests/integration/test_rag_pipeline.py -q` → 96 passed, 1 skipped, subtests 160 passed.
+- `python -m pytest tests/unit -q` → **2,883 passed · 80 skipped · 실패 0** · subtests 17,518 passed (`GIT_CONFIG_COUNT` 제거한 프로세스, §7 09-1과 같은 방식). §10의 1 failed는 #150으로 해소됐다.
+- 실DB·실LLM 상담, 브라우저, React 테스트·빌드, Django 테스트, 린트는 이번 회차 **미실행**.
+
+**#122는 Open 유지.** FAIL 3건(#148 45세 의미, #75 검색 후보, #97 RQ031)과 BLOCKED 1건(#39)이 남아 있다. 각 수정이 dev에 병합되면 민지가 같은 입력으로 재검증하고 이 절의 판정을 갱신한다.
+
+## 12. 2026-11-27 KST · dev `4708009` #103 세종·FAQ 상담·화면 재확인
 
 기준 [dev `4708009`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/4708009db1ef479f29bd542f342da3d67cd9429f) (PR #136·#150·#147 병합, GitHub `dev`·`origin/dev`·실행 HEAD 일치). 제품 코드·계약은 바꾸지 않았다. 별도 worktree에서 FastAPI :18304(목록·상담 공용), React :18305를 띄웠다. R3D verify B2(Neo4j :56787·Qdrant :56756)는 꺼져 있던 기존 컨테이너를 `docker start`로만 다시 켰다(초기화·재생성 없음). 릴리스 `1.4.0-candidate`, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 프로필은 모두 가상(27세, 소득 공란)이다. 실제 상담 호출은 API 14회 + 브라우저 1회, **모두 HTTP 200, `is_sample=false`**.
 
@@ -350,7 +389,7 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | 세종 신청 버튼 미표시 (화면) | React 목록에서 '세종시 위원회' 검색 → 카드 펼침, 이어서 '내 조건으로 확인하기' 실제 상담 | 목록 카드: 신청하기류 버튼·링크 0개. 링크는 '원문 보기'·'공식 원문에서 서류 확인'(온통청년, 새 탭, `noopener noreferrer`)과 관계 지도뿐. 상담 화면에도 신청하기류 0개, `sejong.go.kr` 링크 0개. 응답 `official_apply_url=null`·`reception_status=unknown`. [DOM·응답](assets/issue103-4708009/browser-sejong.json) · [화면](assets/issue103-4708009/sejong-selected-browser.jpg) | PASS |
 | 홈페이지를 신청 주소로 오설명 방지 (실제 LLM) | 세종 정책이 검색된 응답 7건: 선택 상담(서울) 2, 선택 없이 질문(지역 공란 2·세종 2), 브라우저 1 | 7/7 모두 세종 홈페이지를 신청 주소·신청 경로로 단정하지 않음. "직접 신청 링크는 확인되지 않았어요" 6/7, 나머지 1건은 "신청 URL은 확인되지 않았어요"로 의미 같음 | PASS |
 | 보정 문구 겹침 (Pipeline) | 위 응답과 서울 프로필 세종 질문 | 4건에서 "…확인해 주세요., 실제 신청 페이지로…"처럼 **마침표 뒤 쉼표와 같은 안내 반복**이 그대로 답변·화면에 노출(세종 선택 상담 2회차, 브라우저, 서울 프로필의 `POL_009` 보정 2/2). 아래 재현처럼 LLM이 "~제시되어 있지만, 실제 신청 페이지로 확정할 수 없다"고 이미 유보한 문장도 `align_application_links`가 쉼표 앞 절만 바꾸고 쉼표는 남긴다. 사용자가 읽는 문장이 깨지지만 사실 오안내는 아님 | **FAIL** (Pipeline, 새 Generator 오류 아님) |
-| 접수 미확인 합의 문구 (#147) | `reception_status=unknown`인 세종·국세청 감면 응답 9건 | "현재 접수 여부는 공식 공고에서 확인해 주세요" 그대로 5/9(이 중 2건은 Pipeline 보정이 넣은 문장). 나머지 4/9는 **문구 없음 3건**(세종 프로필 2/2, 국세청 2회차) + **금지된 바꿔 쓰기 1건**(지역 공란 2회차 "현재 접수 여부도 공식 원문에서 확인되지 않았습니다"). 접수 중·마감·상시 신청으로 추정한 응답은 0건 | **FAIL** (Generator) → §11-1에서 수정 후 8/8 PASS |
+| 접수 미확인 합의 문구 (#147) | `reception_status=unknown`인 세종·국세청 감면 응답 9건 | "현재 접수 여부는 공식 공고에서 확인해 주세요" 그대로 5/9(이 중 2건은 Pipeline 보정이 넣은 문장). 나머지 4/9는 **문구 없음 3건**(세종 프로필 2/2, 국세청 2회차) + **금지된 바꿔 쓰기 1건**(지역 공란 2회차 "현재 접수 여부도 공식 원문에서 확인되지 않았습니다"). 접수 중·마감·상시 신청으로 추정한 응답은 0건 | **FAIL** (Generator) → §12-1에서 수정 후 8/8 PASS |
 | FAQ 적용 기간 | "모두의 카드 한시 상향 혜택은 언제까지 적용돼?" 2회 | 2/2 "2026년 4월 1일부터 2026년 9월 30일까지", 인용 `DOC_STG_MOLIT_001_FAQ_2026`. 신청 링크 없음 안내도 합의 문구 | PASS |
 | FAQ 2건 회귀 | 2011년 이전 중소기업 취업자 감면 2회 · 서울시 청년수당 공고 위치 2회 | 국세청: 2/2 "받을 수 없음", 인용 `DOC_STG_NTS_001_FAQ_2026`. 서울: 2/2 청년몽땅정보통 공지사항, 인용 `DOC_STG_SEOUL_001_FAQ_2026`, 정상 신청 주소·마감 상태 유지 | PASS |
 | #145 링크 도착 재사용 | 이번 응답의 세종·FAQ 정책 카드 `source_url`, 서울 `official_apply_url`, 세종·FAQ 인용 URL(중복 제거 10개) | 10/10 HTTP 200, 리다이렉트 없이 같은 URL. 온통청년 2개는 렌더링 후 제목에 정책명 확인, 국세청은 본문에 '중소기업취업자 소득세 감면' 확인. [도착 기록](assets/issue103-4708009/link-landing.json) | PASS |
@@ -362,16 +401,16 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 **기타 관찰(판정 제외).** 세종 프로필 2회차 답변이 다른 정책 `POL_GOV_059`(세종시 청년 행정인턴)를 "같은 이름의 다른 정책"이라고 표현했다(이름이 다름). `POL_GOV_059`의 `official_apply_url`이 `https://www.sejong.go.kr`(시 홈페이지)로 들어 있어 데이터 확인이 필요해 보인다. `POL_STG_SEOUL_001` 카드 `source_url`이 질문에 따라 청년몽땅정보통 소개 페이지·온통청년으로 다르게 나온다(둘 다 도착 PASS, 의도 여부 미확인).
 
 **후속 전달.**
-- 소희(Generator): `unknown` 합의 문구 누락 3건·바꿔 쓰기 1건. #147에서 "그대로 쓰세요"를 넣은 뒤의 새 오류다. 질문·프로필·응답 전문은 [live-ask.json](assets/issue103-4708009/live-ask.json)의 `checks.unknown_phrase_exact=false` 행. → 프롬프트만으로는 막지 못해 이 PR에서 Pipeline 보정으로 고쳤다(§11-1). 소희에게는 동작 변경 공유만 한다.
+- 소희(Generator): `unknown` 합의 문구 누락 3건·바꿔 쓰기 1건. #147에서 "그대로 쓰세요"를 넣은 뒤의 새 오류다. 질문·프로필·응답 전문은 [live-ask.json](assets/issue103-4708009/live-ask.json)의 `checks.unknown_phrase_exact=false` 행. → 프롬프트만으로는 막지 못해 이 PR에서 Pipeline 보정으로 고쳤다(§12-1). 소희에게는 동작 변경 공유만 한다.
 - 지인(Pipeline, #136 `application_links.py` 작성): 보정 문구 겹침 4건과 위 재현 입력. Generator 오류가 아니므로 소희 전달 대상에서 뺐다.
 
 **실행하지 않음.** K-패스 6표기 목록 API·UI(이번 범위 밖), 모바일·다크 모드, Django 상세, 전체 Python·React 테스트·빌드·린트. LLM 답변은 실행마다 달라지므로 위 비율은 이번 표본 기준이다.
 
 **재현.** [재현 명령](#재현-명령)과 같게 기동하되 React 목록·상담을 모두 :18304에 연결한다. 질문은 [live-ask.json](assets/issue103-4708009/live-ask.json)의 `question`·`selected_policy_id`·`profile_sample_only`를 그대로 `POST /api/ask`(`history: []`)로 보낸다.
 
-### 11-1. 접수 미확인 합의 문구 보정 (이 PR의 코드 수정)
+### 12-1. 접수 미확인 합의 문구 보정 (이 PR의 코드 수정)
 
-§11의 Generator FAIL은 프롬프트 규칙(#147)이 있는데도 실제 LLM이 문구를 빼거나 바꿔 쓴 경우다. 프롬프트를 더 세게 써도 실행마다 달라질 수 있어, 생성 직후 Pipeline에서 합의 문구를 보장하도록 고쳤다. 계약은 [ask_contract.md §7 9번](../api/ask_contract.md)에 적었다.
+§12의 Generator FAIL은 프롬프트 규칙(#147)이 있는데도 실제 LLM이 문구를 빼거나 바꿔 쓴 경우다. 프롬프트를 더 세게 써도 실행마다 달라질 수 있어, 생성 직후 Pipeline에서 합의 문구를 보장하도록 고쳤다. 계약은 [ask_contract.md §7 9번](../api/ask_contract.md)에 적었다.
 
 - **코드:** [`backend/rag/reception_notice.py`](../../backend/rag/reception_notice.py)의 `ensure_unknown_reception_notice`를 기존 신청 링크·Checker 보정 다음에 실행한다. 답변이 인용한 정책 중 `reception_status=unknown`인 정책에만 적용한다.
   - 접수 여부를 '확인할 수 없다'로 바꿔 쓴 짧은 문장(인용 번호 제외 60자 이하) → 합의 문구로 바꾸고 인용 번호 유지
@@ -382,7 +421,7 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 - **새 테스트:** [단위 12개](../../tests/unit/test_issue103_unknown_reception_notice.py) · [API 3개](../../tests/integration/test_issue103_unknown_reception_api.py). 모두 가상 정책 또는 동결 릴리스 + 가상 LLM 출력이다.
 - **회귀:** `pytest tests/unit tests/integration` — 수정 전(dev `4708009`, 별도 worktree) 3,229 passed · 130 skipped · 실패 0, 수정 후 3,245 passed · 129 skipped · 실패 0. skip 1개 차이는 실행 위치(별도 worktree ↔ 기본 작업 폴더)의 데이터 파일 차이로 보이며 원인은 확인하지 않았다.
 - **#139(자녀 월령, 미병합 `bafdf65`)와 함께:** 두 PR이 `pipeline.py`·`ask_contract.md`를 함께 고치지만 서로 다른 위치라 `git merge-tree` 충돌 0. 임시로 합친 상태에서 `pytest tests/unit tests/integration` 3,328 passed · 130 skipped · 실패 0.
-- **저장 응답 재생:** §11의 실패 4건(`live-ask.json`)을 새 함수에 다시 넣어 4/4 합의 문구가 들어가는 것을 확인했다.
+- **저장 응답 재생:** §12의 실패 4건(`live-ask.json`)을 새 함수에 다시 넣어 4/4 합의 문구가 들어가는 것을 확인했다.
 - **실제 LLM 재확인:** 같은 R3D·같은 질문·같은 가상 프로필로 8회(세종 지역 공란·세종 프로필 각 2, 국세청 2, 세종 선택 상담 2). **HTTP 200 8/8, 합의 문구 8/8**, '여부도' 잔존 0. [재확인 기록](assets/issue103-unknown-notice/live-recheck.json)
 - **남은 문제:** 보정 문구 겹침(`".,"`)이 재확인 8회 중 1회(세종 선택 상담) 다시 나왔다. #136 신청 링크 보정 쪽 문제라 이 PR에서는 고치지 않았다(지인 후속).
 
