@@ -238,6 +238,46 @@ def test_failed_quality_scope_still_holds_child_condition():
     assert body["notice"]["kind"] == "warn"
 
 
+
+# 2026-11-27 실제 R3D(verify) 검색 결과의 POL_GOV_050 data_quality를 그대로 옮긴 것(sample_only 정책 객체에 적용).
+# children 보류는 정적 플래그 MARRIAGE_CHILD_NOT_MODELED(S10, children incomplete)에서만 오고,
+# region 보류는 그래프 계산 경고 두 개에서 온다. Checker 비교는 그대로 하되 최종 상태는 보류(needs_check)여야 한다.
+R3D_POL_GOV_050_QUALITY = {
+    "hold_auto_eligibility": True,
+    "hold_reasons": ["MARRIAGE_CHILD_NOT_MODELED", "SEARCH_REGION_REQUIRES_REVIEW",
+                     "SUSPECTED_REGION_GRANULARITY_LOST"],
+    "affected_attributes": ["children", "region"],
+}
+CHILDREN_ONLY_QUALITY = {"hold_auto_eligibility": True, "hold_reasons": ["MARRIAGE_CHILD_NOT_MODELED"],
+                         "affected_attributes": ["children"]}
+
+
+@pytest.mark.parametrize("quality", [R3D_POL_GOV_050_QUALITY, CHILDREN_ONLY_QUALITY], ids=["r3d", "children_only"])
+@pytest.mark.parametrize("months,comparison", [(0, "포함됩니다"), (23, "포함됩니다"), (24, "포함됩니다"),
+                                               (25, "포함되지 않습니다"), (None, None)])
+def test_children_quality_hold_keeps_needs_check_but_keeps_checker_comparison(months, comparison, quality):
+    item = child_policy(LTE_24M)
+    item["data_quality"] = dict(quality)
+    h = Harness([item])
+    response = h.post({"child_age_months": months})
+    assert response.status_code == 200
+    body = response.json()
+    child = condition(body, "children")
+    assert child["status"] == "needs_check"
+    assert condition(body, "eligibility")["status"] == "needs_check"
+    if comparison is not None:
+        # 24와 25의 비교 결과는 사유에서 구분된다(보류여도 판정 근거는 지우지 않는다).
+        assert f"입력한 {months}개월은 {comparison}" in child["reason"]
+    else:
+        assert "자녀 월령(개월 수)을 확인해야" in child["reason"]
+    assert "데이터 품질 경고로 자동 판정을 보류합니다" in child["reason"]
+    # 보류는 확정 제외가 아니다.
+    assert body["policy_checks"][0]["exclusion_reasons"] is None
+    assert body["notice"]["kind"] == "warn"
+    # 같은 값이 Checker·Generator로 간다.
+    assert h.checks[0]["child_age_months"] == h.generator.call_args.kwargs["profile"]["child_age_months"] == months
+
+
 # ---------- ask_info 중복 질문·계약 유지 ----------
 
 def test_ask_info_age_is_kept_when_age_missing_and_dropped_when_present():
@@ -255,3 +295,24 @@ def test_ask_info_child_age_months_is_not_activated_in_api_contract(months):
     h = Harness([child_policy(LTE_24M)], generated=answer(follow_up_questions=follow))
     response = h.post({"child_age_months": months})
     assert (response.status_code, response.json()["detail"]["code"]) == (502, "LLM_OUTPUT_INVALID")
+
+
+def test_hold_omitted_child_months_is_still_unknown_not_zero():
+    """보류 상태에서도 생략과 0개월은 다르게 처리된다(0은 비교 결과가 사유에 남는다)."""
+    item = child_policy(LTE_24M)
+    item["data_quality"] = dict(R3D_POL_GOV_050_QUALITY)
+    omitted = condition(Harness([item]).post(omit_child=True).json(), "children")["reason"]
+    zero = condition(Harness([item]).post({"child_age_months": 0}).json(), "children")["reason"]
+    assert "자녀 월령(개월 수)을 확인해야" in omitted and "입력한 0개월은 포함됩니다" in zero
+
+
+@pytest.mark.parametrize("months,child,overall", [(24, "eligible", "needs_check"), (25, "ineligible", "ineligible")])
+def test_no_hold_with_unresolved_other_condition_keeps_overall_separate(months, child, overall):
+    """실제 R3D 보류 제거 사본(L3)과 같은 모양: 자녀 조건은 확정되고, 다른 미확인 조건은 충족 시 종합을 보류,
+    자녀 조건 미충족(AND 확정 실패)이면 종합은 ineligible."""
+    other = {"condition_id": "COND_SAMPLE_DISABLED", "type": "SPECIAL_TARGET",
+             "name": "장애인 가구(sample_only)", "operator": "EQ", "value": "true", "unit": None}
+    body = Harness([child_policy(LTE_24M, extra_conditions=[other])]).post({"child_age_months": months}).json()
+    assert condition(body, "children")["status"] == child
+    assert condition(body, "eligibility")["status"] == overall
+    assert body["policy_checks"][0]["exclusion_reasons"] is None

@@ -629,7 +629,8 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | T21 | Checker가 `needs_check`와 구체적 사유 반환 | 사유가 LLM 입력·응답에 그대로 유지 |
 | T22 | 정규화 프로필 | Generator에 `profile=` 키워드로 전달(서울→서울특별시, 소득 0 유지, 미입력 None) |
 | T23 (v1.8) | `child_age_months` 생략·`null`·`0`·`24` / `-1`·`24.5`·`"24"`·`true`·`false`·배열·객체 | 앞은 200, Checker·Generator에 같은 값 그대로(생략은 `None`, `0` 유지) / 뒤는 422, 입력값 미노출, 검색 미호출 |
-| T24 (v1.8) | 자녀 월령 조건(`POL_GOV_050`의 `COND_CHILD_AGE_LE_24M`, LTE 24) | 자녀 월령 조건 단독: 0·10·23·24 → `eligible`, 25 → `ineligible`, 미입력 → `needs_check`. 정책 종합 판정은 다른 조건과 함께 Checker가 정한다. 신청자 `age`로 대신 판정하지 않음 |
+| T24 (v1.8) | 자녀 월령 조건(`POL_GOV_050`의 `COND_CHILD_AGE_LE_24M`, LTE 24), 데이터 품질 보류 없음(fixture) | 자녀 월령 조건 단독: 0·10·23·24 → `eligible`, 25 → `ineligible`, 미입력 → `needs_check`. 정책 종합 판정은 다른 조건과 함께 Checker가 정한다. 신청자 `age`로 대신 판정하지 않음 |
+| T25 (v1.8) | 같은 조건 + 데이터 품질 보류(`data_quality.affected_attributes`에 `children`) | 월령과 관계없이 `children`·종합 모두 `needs_check`(보류), `exclusion_reasons`는 `null`(보류는 확정 제외가 아님). 사유에는 Checker의 비교 결과(24 "포함됩니다" / 25 "포함되지 않습니다")와 보류 문구가 함께 남는다. 2026-11-27 실제 R3D(verify) 읽기 전용 검증에서 `POL_GOV_050`은 이 경우였다: `children` 보류는 정적 플래그 `MARRIAGE_CHILD_NOT_MODELED`(S10, `children` incomplete)에서만 오고, `region`은 그래프 계산 경고로 함께 보류된다. 같은 정책 객체에서 보류만 메모리상 끈 사본은 24 → `children` `eligible`(종합은 가구 원문 확인 행 때문에 `needs_check`), 25 → `children`·종합 `ineligible`. 플래그 유지·해제는 데이터 담당 판단(`docs/reports/issue39-r3d-child-age-20261127.md`) |
 
 테스트는 **Mock/픽스처 단위 → 소희 실제 함수 → 실제 검색 데이터 → React 브라우저** 순서로 한다. 테스트가 통과하기 전에는 구현 완료라고 표시하지 않는다.
 
