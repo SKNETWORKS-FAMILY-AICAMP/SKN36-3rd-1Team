@@ -19,6 +19,11 @@ from test_issue103_guidance import SEJONG, release_policy
 FIXTURE = Path(__file__).parents[1] / "fixtures/issue103-r3d-mixed-url-response.json"
 VISIT_POLICY = "POL_GOV_020"  # 릴리스 원문: "거주지 관할 읍면동 주민센터에 방문 신청", official_apply_url=null
 CLOSING = "자세한 내용은 각 신청 페이지에서 확인하세요."
+
+
+def agreed(answer):
+    """기록된 실제 답변의 '접수 여부도 …확인해 주세요'는 Pipeline이 합의 문구('여부는')로 맞춘다(#147)."""
+    return answer.replace("현재 접수 여부도 공식 공고에서", "현재 접수 여부는 공식 공고에서")
 MIXED = "주민센터 방문 또는 온라인으로 신청할 수 있습니다 [1]."
 
 A = {"policy_id": "A", "policy_name": "가상위원회", "official_apply_url": None, "reception_status": "unknown"}
@@ -50,10 +55,11 @@ class ClosingPhraseTests(unittest.TestCase):
         return post(self.data["search_result"], generated, self.data["request"])
 
     def test_seoul_sejong_answer_with_closing_phrase_returns_200(self):
-        original = self.data["generator_output"]["answer"]
+        recorded = self.data["generator_output"]["answer"]
+        original = agreed(recorded)
         for separator in ("\n\n", " ", "\n"):
             with self.subTest(separator=repr(separator)):
-                response = self.ask_recorded(original + separator + CLOSING)
+                response = self.ask_recorded(recorded + separator + CLOSING)
                 self.assertEqual(response.status_code, 200, response.text)
                 body = response.json()
                 # 서울·세종 본문과 출처, 서울의 확인된 신청 주소는 그대로 남는다.
@@ -104,9 +110,10 @@ class ClosingPhraseTests(unittest.TestCase):
 
     def test_seoul_sejong_combined_application_sentence_returns_200(self):
         # 2차 리뷰 사례를 기록된 실제 R3D 서울·세종 응답 뒤에 붙여 API 전체로 확인한다.
-        original = self.data["generator_output"]["answer"]
+        recorded = self.data["generator_output"]["answer"]
+        original = agreed(recorded)
         sentence = "서울 정책과 세종 정책은 각 홈페이지에서 신청할 수 있습니다 [1][2]."
-        response = self.ask_recorded(original + "\n\n" + sentence)
+        response = self.ask_recorded(recorded + "\n\n" + sentence)
         self.assertEqual(response.status_code, 200, response.text)
         body = response.json()
         self.assertTrue(body["answer"].startswith(original))
@@ -114,7 +121,9 @@ class ClosingPhraseTests(unittest.TestCase):
         self.assertNotIn("각 홈페이지에서 신청할 수 있습니다", tail)
         self.assertIn(GENERIC_NOTICE, tail)
         self.assertIn("세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요.", tail)
+        # 본문 세종 문단에 합의 문구가 이미 있으므로 끝에 다시 붙이지 않는다(#147).
         self.assertTrue(tail.endswith("[1][2]"))
+        self.assertEqual(body["answer"].count("현재 접수 여부는 공식 공고에서 확인해 주세요"), 1)
         checks = {p["policy_id"]: p for p in body["policy_checks"]}
         self.assertIsNone(checks[SEJONG]["official_apply_url"])
         self.assertTrue(checks["POL_STG_SEOUL_001"]["official_apply_url"])
@@ -154,9 +163,10 @@ class HeadingCitationMismatchTests(unittest.TestCase):
         self.assertEqual(align_application_links(text, contexts, [A, B]), (text, False))
 
     def test_recorded_seoul_sejong_answer_with_mismatched_citation_via_api(self):
-        original = self.data["generator_output"]["answer"]
+        recorded = self.data["generator_output"]["answer"]
+        original = agreed(recorded)
         extra = "\n\n### 세종시 위원회 청년참여 확대\n신청 URL은 https://www.sejong.go.kr/apply 입니다 [2]."
-        generated = {**deepcopy(self.data["generator_output"]), "answer": original + extra}
+        generated = {**deepcopy(self.data["generator_output"]), "answer": recorded + extra}
         response = post(self.data["search_result"], generated, self.data["request"])
         self.assertEqual(response.status_code, 200, response.text)
         body = response.json()
@@ -291,7 +301,7 @@ class VisitGuidanceTests(unittest.TestCase):
         text = "거주지 관할 읍면동 주민센터에 방문 신청할 수 있습니다 [1]."
         response, _ = self.ask(VISIT_POLICY, text)
         self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json()["answer"], text)
+        self.assertEqual(response.json()["answer"], text + "\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.")
 
     def test_mixed_sentence_without_visit_evidence_does_not_invent_visit(self):
         response, _ = self.ask(SEJONG, MIXED)

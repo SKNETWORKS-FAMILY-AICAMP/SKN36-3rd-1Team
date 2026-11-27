@@ -106,7 +106,8 @@ class Issue103GuidanceTests(unittest.TestCase):
                 self.assertEqual(body["policy_checks"][0]["reception_status"], "unknown")
                 self.assertEqual(body["citations"][0]["document_id"], "DOC_YC_065")
                 if question == QUESTIONS[-1]:
-                    self.assertEqual(body["answer"], text)
+                    # 원문 링크 안내는 그대로 두고, 접수 unknown 합의 문구만 덧붙는다(#147).
+                    self.assertEqual(body["answer"], text + "\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.")
                 else:
                     self.assertNotEqual(body["answer"], text)
 
@@ -138,7 +139,7 @@ class Issue103GuidanceTests(unittest.TestCase):
             with self.subTest(text=text):
                 response, _ = self.ask(text)
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json()["answer"], text)
+                self.assertEqual(response.json()["answer"], text + "\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.")
 
     def test_two_policies_keep_valid_application_and_citations(self):
         checks = [
