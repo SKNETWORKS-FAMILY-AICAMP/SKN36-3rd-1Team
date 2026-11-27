@@ -1,0 +1,118 @@
+{
+ "dev_sha": "4708009db1ef479f29bd542f342da3d67cd9429f",
+ "date_kst": "2026-11-27",
+ "method": "PR #145(link-landing.json)과 같은 방식: curl GET(리다이렉트 허용)으로 상태·최종 URL·<title> 확인, 온통청년은 내장 브라우저에서 JS 렌더링 후 document.title 확인. 대상은 이번 실제 상담 응답의 세종·FAQ 정책 카드 source_url, official_apply_url, FAQ·세종 인용 URL(중복 제거). 외부 페이지 내용은 비신뢰 데이터로 취급하고 정책 사실 판정에 쓰지 않음.",
+ "observation": "POL_STG_SEOUL_001 카드 source_url이 질문에 따라 다름: 세종 질문(서울 프로필) 응답은 청년몽땅정보통 소개 페이지, FAQ 질문 응답은 릴리스 nodes_policy.source_url(온통청년). 둘 다 도착 PASS. 의도된 동작인지는 미확인.",
+ "links": [
+  {
+   "id": "POL_STG_SEOUL_001",
+   "kind": "card_source",
+   "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+   "name_in_response": "서울특별시 청년수당",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "금융복지 > 복지지원 > 청년수당 | 청년몽땅정보통",
+   "result": "PASS"
+  },
+  {
+   "id": "POL_STG_SEOUL_001",
+   "kind": "apply",
+   "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+   "name_in_response": "서울특별시 청년수당",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "금융복지 > 복지지원 > 청년수당 | 청년몽땅정보통",
+   "result": "PASS"
+  },
+  {
+   "id": "POL_YC_065",
+   "kind": "card_source",
+   "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+   "name_in_response": "세종시 위원회 청년참여 확대",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "세종시 위원회 청년참여 확대 - 청년정책 통합검색 < 청년정책 - 온통청년 (렌더링 후 document.title, 내장 브라우저)",
+   "result": "PASS"
+  },
+  {
+   "id": "DOC_YC_065",
+   "kind": "citation",
+   "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+   "name_in_response": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "세종시 위원회 청년참여 확대 - 청년정책 통합검색 < 청년정책 - 온통청년 (렌더링 후 document.title, 내장 브라우저)",
+   "result": "PASS"
+  },
+  {
+   "id": "POL_STG_MOLIT_001",
+   "kind": "card_source",
+   "url": "https://korea-pass.kr/notice/faqList.do",
+   "name_in_response": "모두의 카드(K-패스) (대중교통비 환급지원)",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "모두의카드",
+   "result": "PASS"
+  },
+  {
+   "id": "DOC_STG_MOLIT_001_FAQ_2026",
+   "kind": "citation",
+   "url": "https://korea-pass.kr/notice/faqList.do",
+   "name_in_response": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "모두의카드",
+   "result": "PASS"
+  },
+  {
+   "id": "POL_STG_NTS_001",
+   "kind": "card_source",
+   "url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+   "name_in_response": "중소기업 취업자 소득세 감면",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "(<title> 없음) 본문에 '중소기업취업자 소득세 감면' 포함",
+   "result": "PASS"
+  },
+  {
+   "id": "DOC_STG_NTS_001_FAQ_2026",
+   "kind": "citation",
+   "url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+   "name_in_response": "국세상담센터 연말정산 자주묻는 Q&A — 31.중소기업취업자 소득세 감면 (34건)",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "(<title> 없음) 본문에 '중소기업취업자 소득세 감면' 포함",
+   "result": "PASS"
+  },
+  {
+   "id": "POL_STG_SEOUL_001",
+   "kind": "card_source",
+   "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+   "name_in_response": "서울특별시 청년수당",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "2026 청년수당 지원 - 청년정책 통합검색 < 청년정책 - 온통청년 (렌더링 후 document.title, 내장 브라우저)",
+   "result": "PASS"
+  },
+  {
+   "id": "DOC_STG_SEOUL_001_FAQ_2026",
+   "kind": "citation",
+   "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+   "name_in_response": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+   "http": 200,
+   "redirects": 0,
+   "final_url_same": true,
+   "landing": "금융복지 > 복지지원 > 청년수당 | 청년몽땅정보통",
+   "result": "PASS"
+  }
+ ]
+}

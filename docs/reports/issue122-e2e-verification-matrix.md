@@ -326,7 +326,7 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | RQ031 실모델 평가 | [#142](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/142) | [#97 재검증 기록](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/issues/97#issuecomment-7156782019) |
 | #40 확정 미충족·확인 보류 카드 | [#144](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/144) | §3 #40 절 · [assets/issue40-c4749b3](assets/issue40-c4749b3/after-cause-browser.json) · 이번 비교 화면 [assets/issue40-8c40858](assets/issue40-8c40858/browser-compare-30.json) |
 | #75 잔여·React 상세 이동·Django 404 | [#143](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/143) | §8 · §9 · [assets/issue122-1c082cf](assets/issue122-1c082cf/ask-browser.json) · [assets/issue122-48a9828](assets/issue122-48a9828/browser.json) |
-| 카드 원문 링크·복수 정책 출처 | (이번 PR) | [assets/issue75-8c40858](assets/issue75-8c40858/link-landing.json) · [assets/issue122-8c40858](assets/issue122-8c40858/source-match.json) |
+| 카드 원문 링크·복수 정책 출처 | [#145](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/145) | [assets/issue75-8c40858](assets/issue75-8c40858/link-landing.json) · [assets/issue122-8c40858](assets/issue122-8c40858/source-match.json) |
 
 **대기 (완료 아님)**
 
@@ -336,6 +336,35 @@ Django `config.settings_test`의 런타임 `SSR_FASTAPI_BASE_URL`을 :18300, `SS
 | #97 RQ031 5문항 | 소희·지인 답변 수정 대기 | 동일 5문항 재평가 |
 | #78 76세 직접 질문 | 소희·지인 후속 대기 (Checker `ineligible` ↔ 본문 불일치 2/2) | 수정 후 재검증 |
 | #39 자녀 월령 UI | [PR #139](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/139) 미병합, 다자녀·`ask_info` 팀 결정 | React 입력·타입 연동, 경계 0/23/24/25 검증 |
-| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136) 미병합 | 6표기 API·UI, 세종 신청 버튼·FAQ 답변 대조 |
+| #103 세종·FAQ, 목록 별칭 API | [PR #136](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/136)·[#147](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/147) 병합(`4708009`) · 세종·FAQ는 §11에서 재확인, 보정 문구 겹침(Pipeline)·접수 미확인 문구 누락(Generator) 후속 대기 · 6표기 API·UI는 미실행 | 후속 수정 후 §11 같은 질문으로 재확인, 6표기 목록 API·UI 재확인 |
 | #79·#90 인천 연령·출처 | [PR #140](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/140) dev 병합(`3541a64`, 2026-11-27) · 병합 후 재확인 미실행 | 최신 dev에서 인천 연령 경계·인용 출처 재검증 |
 | #40 30세 상담 마지막 요약 | 생성 답변 실행별 변동, 후속 관찰 | 재현 시 지인 Pipeline·소희 Generator 전달 |
+
+## 11. 2026-11-27 KST · dev `4708009` #103 세종·FAQ 상담·화면 재확인
+
+기준 [dev `4708009`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/commit/4708009db1ef479f29bd542f342da3d67cd9429f) (PR #136·#150·#147 병합, GitHub `dev`·`origin/dev`·실행 HEAD 일치). 제품 코드·계약은 바꾸지 않았다. 별도 worktree에서 FastAPI :18304(목록·상담 공용), React :18305를 띄웠다. R3D verify B2(Neo4j :56787·Qdrant :56756)는 꺼져 있던 기존 컨테이너를 `docker start`로만 다시 켰다(초기화·재생성 없음). 릴리스 `1.4.0-candidate`, manifest `b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da`. 프로필은 모두 가상(27세, 소득 공란)이다. 실제 상담 호출은 API 14회 + 브라우저 1회, **모두 HTTP 200, `is_sample=false`**.
+
+| 범위 | 입력 | 결과 | 판정 |
+| --- | --- | --- | --- |
+| #130 저장 응답 재생 | [PR #130](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/pull/130) 저장 응답의 세종 1·FAQ 3건을 LLM·네트워크 호출 없이 `align_application_links`에 재생 | 세종: "신청 URL은 세종시 홈페이지로 제시되어 있습니다[1]" → "세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1]"로 바뀜. FAQ 3건은 바뀌지 않음(서울 청년수당의 정상 신청 안내도 유지). [재생 기록](assets/issue103-4708009/replay-130.json) | PASS |
+| 세종 신청 버튼 미표시 (화면) | React 목록에서 '세종시 위원회' 검색 → 카드 펼침, 이어서 '내 조건으로 확인하기' 실제 상담 | 목록 카드: 신청하기류 버튼·링크 0개. 링크는 '원문 보기'·'공식 원문에서 서류 확인'(온통청년, 새 탭, `noopener noreferrer`)과 관계 지도뿐. 상담 화면에도 신청하기류 0개, `sejong.go.kr` 링크 0개. 응답 `official_apply_url=null`·`reception_status=unknown`. [DOM·응답](assets/issue103-4708009/browser-sejong.json) · [화면](assets/issue103-4708009/sejong-selected-browser.jpg) | PASS |
+| 홈페이지를 신청 주소로 오설명 방지 (실제 LLM) | 세종 정책이 검색된 응답 7건: 선택 상담(서울) 2, 선택 없이 질문(지역 공란 2·세종 2), 브라우저 1 | 7/7 모두 세종 홈페이지를 신청 주소·신청 경로로 단정하지 않음. "직접 신청 링크는 확인되지 않았어요" 6/7, 나머지 1건은 "신청 URL은 확인되지 않았어요"로 의미 같음 | PASS |
+| 보정 문구 겹침 (Pipeline) | 위 응답과 서울 프로필 세종 질문 | 4건에서 "…확인해 주세요., 실제 신청 페이지로…"처럼 **마침표 뒤 쉼표와 같은 안내 반복**이 그대로 답변·화면에 노출(세종 선택 상담 2회차, 브라우저, 서울 프로필의 `POL_009` 보정 2/2). 아래 재현처럼 LLM이 "~제시되어 있지만, 실제 신청 페이지로 확정할 수 없다"고 이미 유보한 문장도 `align_application_links`가 쉼표 앞 절만 바꾸고 쉼표는 남긴다. 사용자가 읽는 문장이 깨지지만 사실 오안내는 아님 | **FAIL** (Pipeline, 새 Generator 오류 아님) |
+| 접수 미확인 합의 문구 (#147) | `reception_status=unknown`인 세종·국세청 감면 응답 9건 | "현재 접수 여부는 공식 공고에서 확인해 주세요" 그대로 5/9(이 중 2건은 Pipeline 보정이 넣은 문장). 나머지 4/9는 **문구 없음 3건**(세종 프로필 2/2, 국세청 2회차) + **금지된 바꿔 쓰기 1건**(지역 공란 2회차 "현재 접수 여부도 공식 원문에서 확인되지 않았습니다"). 접수 중·마감·상시 신청으로 추정한 응답은 0건 | **FAIL** (Generator) |
+| FAQ 적용 기간 | "모두의 카드 한시 상향 혜택은 언제까지 적용돼?" 2회 | 2/2 "2026년 4월 1일부터 2026년 9월 30일까지", 인용 `DOC_STG_MOLIT_001_FAQ_2026`. 신청 링크 없음 안내도 합의 문구 | PASS |
+| FAQ 2건 회귀 | 2011년 이전 중소기업 취업자 감면 2회 · 서울시 청년수당 공고 위치 2회 | 국세청: 2/2 "받을 수 없음", 인용 `DOC_STG_NTS_001_FAQ_2026`. 서울: 2/2 청년몽땅정보통 공지사항, 인용 `DOC_STG_SEOUL_001_FAQ_2026`, 정상 신청 주소·마감 상태 유지 | PASS |
+| #145 링크 도착 재사용 | 이번 응답의 세종·FAQ 정책 카드 `source_url`, 서울 `official_apply_url`, 세종·FAQ 인용 URL(중복 제거 10개) | 10/10 HTTP 200, 리다이렉트 없이 같은 URL. 온통청년 2개는 렌더링 후 제목에 정책명 확인, 국세청은 본문에 '중소기업취업자 소득세 감면' 확인. [도착 기록](assets/issue103-4708009/link-landing.json) | PASS |
+
+**세종 질문의 검색 차이.** #130과 같은 질문을 서울 프로필로 보내면 2/2 모두 세종 정책이 검색되지 않고 `POL_009`·`POL_STG_SEOUL_001`만 나온다. 답변은 "세종 정책 원문은 이번 입력에서 확인되지 않았다"고 정직하게 안내했다. 지역 필터(`filters={"region": 프로필 시·도}`)는 #130 당시 코드(`3970a97`)에도 있었으므로 현재 설계상 정상 동작으로 보인다. #130 기록은 요청별 프로필을 따로 남기지 않아 당시와 결과가 다른 이유는 확인하지 못했다. 그래서 세종 판정에는 지역 공란·세종 프로필과 선택 상담 결과를 썼다.
+
+**보정 문구 겹침 재현(가상 입력, LLM 호출 없음).** `align_application_links("또한 신청 URL은 세종시 홈페이지로 제시되어 있지만, 실제 신청 페이지로 확정할 수 있는 정보는 아닙니다[1].", …)` → "세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 실제 신청 페이지로 확정할 수 있는 정보는 아닙니다[1]." 브라우저 응답과 같은 문장이 나온다. `CAUTION`이 "확정할 수 없"을 유보 표현으로 보지 않고, 바꾼 절 뒤의 쉼표 구분자를 그대로 이어 붙이는 것이 원인으로 보인다(추정, 코드 미수정).
+
+**기타 관찰(판정 제외).** 세종 프로필 2회차 답변이 다른 정책 `POL_GOV_059`(세종시 청년 행정인턴)를 "같은 이름의 다른 정책"이라고 표현했다(이름이 다름). `POL_GOV_059`의 `official_apply_url`이 `https://www.sejong.go.kr`(시 홈페이지)로 들어 있어 데이터 확인이 필요해 보인다. `POL_STG_SEOUL_001` 카드 `source_url`이 질문에 따라 청년몽땅정보통 소개 페이지·온통청년으로 다르게 나온다(둘 다 도착 PASS, 의도 여부 미확인).
+
+**후속 전달.**
+- 소희(Generator): `unknown` 합의 문구 누락 3건·바꿔 쓰기 1건. #147에서 "그대로 쓰세요"를 넣은 뒤의 새 오류다. 질문·프로필·응답 전문은 [live-ask.json](assets/issue103-4708009/live-ask.json)의 `checks.unknown_phrase_exact=false` 행.
+- 지인(Pipeline, #136 `application_links.py` 작성): 보정 문구 겹침 4건과 위 재현 입력. Generator 오류가 아니므로 소희 전달 대상에서 뺐다.
+
+**실행하지 않음.** K-패스 6표기 목록 API·UI(이번 범위 밖), 모바일·다크 모드, Django 상세, 전체 Python·React 테스트·빌드·린트. LLM 답변은 실행마다 달라지므로 위 비율은 이번 표본 기준이다.
+
+**재현.** [재현 명령](#재현-명령)과 같게 기동하되 React 목록·상담을 모두 :18304에 연결한다. 질문은 [live-ask.json](assets/issue103-4708009/live-ask.json)의 `question`·`selected_policy_id`·`profile_sample_only`를 그대로 `POST /api/ask`(`history: []`)로 보낸다.

@@ -1,0 +1,1813 @@
+{
+ "dev_sha": "4708009db1ef479f29bd542f342da3d67cd9429f",
+ "date_kst": "2026-11-27",
+ "db": {
+  "project": "issue105-r3d-verify (기존 컨테이너 docker start, 초기화·재생성 없음)",
+  "qdrant": "127.0.0.1:56756",
+  "neo4j": "127.0.0.1:56787",
+  "collection": "exp_b2_qwen3emb06b_v140_v1 (alias)",
+  "release": "1.4.0-candidate",
+  "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da"
+ },
+ "api": "POST http://127.0.0.1:18304/api/ask (실제 OpenAI 생성, Ollama qwen3-embedding:0.6b 질의 임베딩)",
+ "note": "가상 프로필(sample_only). 비밀값·실사용자 정보 없음. 답변 전문 저장.",
+ "results": [
+  {
+   "run": 1,
+   "case": "sejong",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:42:44+09:00",
+   "http": 200,
+   "seconds": 14.2,
+   "response": {
+    "status": "answered",
+    "answer": "질문하신 **세종시 위원회 청년참여 확대**에 해당하는 공식 원문은 이번 입력에서 확인되지 않았습니다. 대신 제공된 근거에는 서울특별시 청년수당과 국토교통부 청년월세 한시 특별지원만 있습니다.\n\n서울특별시 청년수당은 신청 방법이 확인됩니다. 청년몽땅정보통 청년수당 신청 페이지에서 신청하며, 신청기간은 2026. 5. 27.(수) 10:00 ~ 2026. 5. 29.(금) 16:00입니다. 다만 현재 접수는 마감된 상태예요. [2][4]\n\n국토교통부 청년월세 한시 특별지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요., 현재 접수는 마감된 상태예요. 또한 공식 신청 링크는 확인되지 않았습니다. [1][3]\n\n세종시 위원회 청년참여 확대의 **신청 방법과 모집 일정**은 이번 근거로는 확인되지 않았습니다. 해당 정책의 공식 공고명이나 원문을 주시면 그 기준으로 다시 확인해 드릴게요.",
+    "citations": [
+     {
+      "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+      "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "document_id": "DOC_MOLIT_002",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     },
+     {
+      "title": "국토교통부 청년월세 지원사업 중앙부처복지서비스 상세원문 (WLF00004661)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+      "document_id": "DOC_MOLIT_001",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_009",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~34세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2024-02-26",
+       "end_date": "2025-02-25",
+       "is_ongoing": false,
+       "days_to_start": -1005,
+       "days_to_end": -640
+      },
+      "required_documents": null,
+      "policy_name": "국토교통부 청년월세 한시 특별지원",
+      "agency": "국토교통부 청년주거정책과",
+      "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "국토교통부",
+        "phone": "1599-0001",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_STG_SEOUL_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-05-27",
+       "end_date": "2026-05-29",
+       "is_ongoing": false,
+       "days_to_start": -184,
+       "days_to_end": -182
+      },
+      "required_documents": null,
+      "policy_name": "서울특별시 청년수당",
+      "agency": "서울특별시 미래청년기획관 청년정책담당관",
+      "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 모집 일정이 적힌 원문을 보내 주실 수 있나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_retrieved": false,
+    "comma_artifact": true
+   }
+  },
+  {
+   "run": 1,
+   "case": "sejong_selected",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": "POL_YC_065",
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:42:58+09:00",
+   "http": 200,
+   "seconds": 4.9,
+   "response": {
+    "status": "info",
+    "answer": "다만 거주 지역은 세종특별자치시로 안내되어 있어 입력하신 서울특별시와 달라 **신청 자격은 추가 확인이 필요해요**. [3] 신청 방법은 원문에 신청기간이 비어 있고 신청방법은 공고문 참조로만 적혀 있어, 이번 근거만으로는 구체적인 접수 절차를 확인하지 못했습니다. 또한 현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요. [1] 정책 설명상 세종시의 위원회 구성 시 청년 참여 확대를 추진하고, 세종 청년인재DB 인재풀 확충 및 참여 홍보를 한다고 되어 있습니다. [2]",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 세종특별자치시이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 신청 자격은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 공고문에서 신청 방법은 어떻게 안내되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 모집 일정은 어디에서 확인하나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": true,
+    "unknown_phrase_exact": true,
+    "comma_artifact": false
+   }
+  },
+  {
+   "run": 1,
+   "case": "faq_kpass_period",
+   "question": "모두의 카드 한시 상향 혜택은 언제까지 적용돼?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:03+09:00",
+   "http": 200,
+   "seconds": 1.8,
+   "response": {
+    "status": "answered",
+    "answer": "모두의 카드(K-패스) 혜택은 **2026년 4월 1일부터 2026년 9월 30일까지** 한시적으로 상향 적용됩니다. [1][2]\n\n현재 접수 중이에요. 다만 신청 자격은 공식 공고에서 확인해 주세요. 제공된 원문에는 만 19세 이상 기준이 보이지만, 다른 자격 요건은 자동 판정이 보류되어 있어 전체 신청 가능 여부는 확정할 수 없습니다. [1][3]\n\n직접 신청 링크는 확인되지 않았어요. [3]",
+    "citations": [
+     {
+      "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+      "url": "https://korea-pass.kr/notice/faqList.do",
+      "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+      "page_number": null
+     },
+     {
+      "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+      "url": "https://korea-pass.kr/notice/faqList.do",
+      "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+      "page_number": null
+     },
+     {
+      "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+      "url": "https://korea-pass.kr/notice/faqList.do",
+      "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_MOLIT_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "모두의 카드(K-패스) (대중교통비 환급지원)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://korea-pass.kr/notice/faqList.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "모두의 카드(K-패스) 혜택 상향 내용도 함께 알려줄 수 있나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "모두의 카드(K-패스) 신청 방법은 어떻게 되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "period_2026_04_01_09_30": true,
+    "faq_doc_cited": true
+   }
+  },
+  {
+   "run": 1,
+   "case": "faq_nts",
+   "question": "2011년 이전에 중소기업에 취업했는데 중소기업 취업자 소득세 감면 받을 수 있어?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:05+09:00",
+   "http": 200,
+   "seconds": 2.1,
+   "response": {
+    "status": "answered",
+    "answer": "2011년 12월 31일 이전에 중소기업에 취업해 계속 근무 중이라면 **중소기업 취업자 소득세 감면**을 받을 수 없습니다. 이 감면은 2012년 1월 1일 이후 중소기업에 취업하는 경우부터 적용되며, 2011년 12월 31일 이전부터 이미 중소기업에 취업해 계속 근무 중인 경우와 그 이후 같은 중소기업에 재취업하는 경우도 감면 대상이 아니라고 안내되어 있습니다. [1]\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요. [1]",
+    "citations": [
+     {
+      "title": "국세상담센터 연말정산 자주묻는 Q&A — 31.중소기업취업자 소득세 감면 (34건)",
+      "url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+      "document_id": "DOC_STG_NTS_001_FAQ_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_NTS_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "중소기업 취업자 소득세 감면",
+      "agency": "국세청 / 기획재정부",
+      "source_url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "2012년 1월 1일 이후 중소기업에 취업한 경우 감면 요건은 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "중소기업 취업자 소득세 감면의 신청 방법은 어떻게 되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "not_eligible_before_2012": true,
+    "faq_doc_cited": true,
+    "reception": "unknown",
+    "unknown_phrase_exact": true
+   }
+  },
+  {
+   "run": 1,
+   "case": "faq_seoul",
+   "question": "서울시 청년수당 사업 공고는 어디서 확인할 수 있어?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:07+09:00",
+   "http": 200,
+   "seconds": 2.1,
+   "response": {
+    "status": "answered",
+    "answer": "서울시 청년수당 사업 공고는 청년몽땅정보통 공지사항에서 확인할 수 있고, 사업신청에 대한 상세내용은 공고문을 통해 확인 가능합니다 [2]. 신청은 청년몽땅정보통 청년수당 신청 페이지에서 하도록 안내되어 있으며, 확인된 신청 링크도 제공되어 있습니다 [1]. 다만 이 사업은 접수가 마감된 상태입니다 [1].",
+    "citations": [
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_SEOUL_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-05-27",
+       "end_date": "2026-05-29",
+       "is_ongoing": false,
+       "days_to_start": -184,
+       "days_to_end": -182
+      },
+      "required_documents": null,
+      "policy_name": "서울특별시 청년수당",
+      "agency": "서울특별시 미래청년기획관 청년정책담당관",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+      "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "서울시 청년수당의 신청 자격은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "서울시 청년수당의 제출서류는 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "youth_seoul_named": true,
+    "faq_doc_cited": true
+   }
+  },
+  {
+   "run": 2,
+   "case": "sejong",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:09+09:00",
+   "http": 200,
+   "seconds": 2.5,
+   "response": {
+    "status": "answered",
+    "answer": "질문하신 **세종시 위원회 청년참여 확대**에 해당하는 공식 원문은 이번 입력에서 확인되지 않았습니다. 대신 제공된 근거에는 서울특별시 청년수당과 국토교통부 청년월세 한시 특별지원만 있습니다.\n\n서울특별시 청년수당은 신청 방법이 원문에 확인됩니다. 청년몽땅정보통 청년수당 신청 페이지에서 신청하며, 신청기간은 2026. 5. 27.(수) 10:00 ~ 2026. 5. 29.(금) 16:00입니다. 다만 현재 접수 상태는 마감된 것으로 표시되어 있어 지금은 신청할 수 없습니다. [2][4]\n\n국토교통부 청년월세 한시 특별지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요., 오프라인으로 주소지 관할 주민센터 또는 지방자치단체장이 정하는 기관에 신청하는 방식이 원문에 있습니다. 하지만 현재 접수 상태는 마감된 것으로 표시되어 있고, 공식 신청 링크도 확인되지 않았습니다. [1][3]\n\n원하시면 세종시의 해당 사업명을 정확히 알려 주시면, 그 정책의 신청 방법과 모집 일정을 다시 확인해 드릴게요.",
+    "citations": [
+     {
+      "title": "국토교통부 청년월세 한시 특별지원 정부24 공공서비스 상세원문 (161300000099)",
+      "url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "document_id": "DOC_MOLIT_002",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     },
+     {
+      "title": "국토교통부 청년월세 지원사업 중앙부처복지서비스 상세원문 (WLF00004661)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661",
+      "document_id": "DOC_MOLIT_001",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_009",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~34세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2024-02-26",
+       "end_date": "2025-02-25",
+       "is_ongoing": false,
+       "days_to_start": -1005,
+       "days_to_end": -640
+      },
+      "required_documents": null,
+      "policy_name": "국토교통부 청년월세 한시 특별지원",
+      "agency": "국토교통부 청년주거정책과",
+      "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "국토교통부",
+        "phone": "1599-0001",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_STG_SEOUL_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-05-27",
+       "end_date": "2026-05-29",
+       "is_ongoing": false,
+       "days_to_start": -184,
+       "days_to_end": -182
+      },
+      "required_documents": null,
+      "policy_name": "서울특별시 청년수당",
+      "agency": "서울특별시 미래청년기획관 청년정책담당관",
+      "source_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "해당 정책의 모집 공고 원문을 보내주실 수 있나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_retrieved": false,
+    "comma_artifact": true
+   }
+  },
+  {
+   "run": 2,
+   "case": "sejong_selected",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": "POL_YC_065",
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:12+09:00",
+   "http": 200,
+   "seconds": 2.0,
+   "response": {
+    "status": "info",
+    "answer": "세종시 위원회 청년참여 확대는 신청 방법이 원문에 **공고문 참조**로만 적혀 있어, 이번 근거로는 구체적인 신청 절차를 확인하지 못했습니다. 세종시 위원회 청년참여 확대: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요., 실제 신청 페이지로 확정할 수 있는 직접 신청 링크는 확인되지 않았어요. [1]\n\n모집 일정도 원문에 신청기간이 비어 있어 이번 근거로는 확인되지 않았습니다. [1]\n\n자격은 만 19~39세가 대상이고, 입력하신 만 27세는 연령 기준에 들어갑니다. 다만 거주 지역은 세종특별자치시 대상인데 입력 지역이 서울특별시라서 거주 요건은 추가 확인이 필요하고, 공식 판정도 현재는 추가 확인 상태입니다. [2]",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 세종특별자치시이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 모집 공고는 어디에서 확인하나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": true,
+    "unknown_phrase_exact": true,
+    "comma_artifact": true
+   }
+  },
+  {
+   "run": 2,
+   "case": "faq_kpass_period",
+   "question": "모두의 카드 한시 상향 혜택은 언제까지 적용돼?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:14+09:00",
+   "http": 200,
+   "seconds": 1.9,
+   "response": {
+    "status": "answered",
+    "answer": "모두의 카드(K-패스) 혜택은 **2026년 4월 1일부터 2026년 9월 30일까지** 한시적으로 상향 적용됩니다. [1]\n\n현재 접수 중이에요. 다만 신청 자격은 공식 공고에서 확인해 주세요. 제공된 원문에는 만 19세 이상 기준이 보이지만, 자동 판정은 보류되어 있어 최종 자격은 확정할 수 없습니다. [1]\n\n직접 신청 링크는 확인되지 않았어요. [1]",
+    "citations": [
+     {
+      "title": "모두의카드(K-패스) 자주묻는질문 (korea-pass.kr, 59건)",
+      "url": "https://korea-pass.kr/notice/faqList.do",
+      "document_id": "DOC_STG_MOLIT_001_FAQ_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_MOLIT_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "모두의 카드(K-패스) (대중교통비 환급지원)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://korea-pass.kr/notice/faqList.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "모두의 카드(K-패스) 혜택 상향 내용은 어떻게 바뀌나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "모두의 카드(K-패스) 신청 자격은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "period_2026_04_01_09_30": true,
+    "faq_doc_cited": true
+   }
+  },
+  {
+   "run": 2,
+   "case": "faq_nts",
+   "question": "2011년 이전에 중소기업에 취업했는데 중소기업 취업자 소득세 감면 받을 수 있어?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:16+09:00",
+   "http": 200,
+   "seconds": 3.0,
+   "response": {
+    "status": "answered",
+    "answer": "2011년 12월 31일 이전에 중소기업에 취업해 계속 근무 중이라면 **소득세 감면을 받을 수 없습니다**. 국세청 안내에 따르면 중소기업 취업자에 대한 소득세 감면은 2012년 1월 1일 이후 중소기업에 취업하는 경우부터 적용되며, 2011년 12월 31일 이전부터 이미 중소기업에 취업해 계속 근무 중인 경우와 그 중소기업에 재취업하는 경우에는 감면을 적용받을 수 없습니다. [1]\n\n다만 질문처럼 2011년 이전 취업 이력이 있더라도, 2012년 1월 1일 이후에 중소기업에 새로 취업한 경우에는 감면대상에 해당할 수 있다는 안내도 있습니다. [1] 현재는 자격 요건이 자동으로 확정되지 않아 신청 가능 여부를 단정할 수는 없고, 공식 안내상 감면 적용 시점과 취업 시점이 핵심입니다. [1]",
+    "citations": [
+     {
+      "title": "국세상담센터 연말정산 자주묻는 Q&A — 31.중소기업취업자 소득세 감면 (34건)",
+      "url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+      "document_id": "DOC_STG_NTS_001_FAQ_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_NTS_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "중소기업 취업자 소득세 감면",
+      "agency": "국세청 / 기획재정부",
+      "source_url": "https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1318",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "중소기업 취업자 소득세 감면의 적용 시점은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "중소기업 취업자 소득세 감면의 대상 업종 요건은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "not_eligible_before_2012": true,
+    "faq_doc_cited": true,
+    "reception": "unknown",
+    "unknown_phrase_exact": false
+   }
+  },
+  {
+   "run": 2,
+   "case": "faq_seoul",
+   "question": "서울시 청년수당 사업 공고는 어디서 확인할 수 있어?",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "서울특별시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:43:19+09:00",
+   "http": 200,
+   "seconds": 2.0,
+   "response": {
+    "status": "answered",
+    "answer": "서울시 청년수당 사업 공고는 청년몽땅정보통 공지사항에서 확인할 수 있고, 사업신청에 대한 상세내용은 공고문을 통해 확인 가능해요 [2]. 신청은 청년몽땅정보통 청년수당 신청 페이지에서 하도록 안내되어 있으며, 확인된 신청 링크도 제공돼 있어요 [1]. 다만 이 사업은 접수가 마감된 상태예요 [1].\n\n참고로 공고 원문에는 서울시 거주, 만 19세~34세, 중위소득 150% 이하, 미취업자 또는 주 30시간 이하·3개월 이하 단기근로자 등의 신청대상과 재학생·휴학생 제외가 안내돼 있지만 [3], 현재 자격은 자동 판정이 보류되어 있어 신청 가능 여부는 공고 기준으로 다시 확인해야 해요.",
+    "citations": [
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 FAQ (5개 분류, 41건)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=300&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "document_id": "DOC_STG_SEOUL_001_FAQ_2026",
+      "page_number": null
+     },
+     {
+      "title": "청년몽땅정보통 서울시 청년수당 소개 (2026)",
+      "url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&tabKind=100&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011",
+      "document_id": "DOC_STG_SEOUL_001_INTRO_2026",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_SEOUL_001",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-05-27",
+       "end_date": "2026-05-29",
+       "is_ongoing": false,
+       "days_to_start": -184,
+       "days_to_end": -182
+      },
+      "required_documents": null,
+      "policy_name": "서울특별시 청년수당",
+      "agency": "서울특별시 미래청년기획관 청년정책담당관",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261018005400213994",
+      "official_apply_url": "https://youth.seoul.go.kr/youthConts.do?key=2310100061&sc_pbancSeCd=012&sc_bbsStngSn=2212200001&sc_bbsCtgrySn=2310200011&sc_qnaCtgryCd=004&sc_faqCtgryCd=005",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "서울시 청년수당의 신청 자격은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "서울시 청년수당의 제출서류는 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "youth_seoul_named": true,
+    "faq_doc_cited": true
+   }
+  },
+  {
+   "run": 1,
+   "case": "sejong_free",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:44:30+09:00",
+   "http": 200,
+   "seconds": 2.5,
+   "response": {
+    "status": "info",
+    "answer": "세종시 위원회 청년참여 확대는 신청 방법이 공식 원문에서 **공고문 참조**로만 확인되고, 신청 URL은 확인되지 않았어요. 모집 일정도 원문에 신청기간이 비어 있어 이번 근거로는 확인되지 않았습니다. [1][2]\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. 신청 자격은 만 19~39세 기준에 입력한 만 27세가 포함된다고 판정 정보에 나오지만, 공식 원문에서 자격 요건이 구조화되어 확인되지 않아 전체 신청 가능 여부는 추가 확인이 필요해요. [1][2]",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_021",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기청년 기후특사단",
+      "agency": "경기도 국제협력국 국제협력정책과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214664",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_020",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기북부 청년 서포터즈 운영",
+      "agency": "경기도 경기북부특별자치도추진단 특례정책과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214665",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_022",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기청년공간 조성 및 운영",
+      "agency": "경기도 미래평생교육국 청년기회과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214663",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 공식 공고문에서 신청기간과 신청방법을 확인해 주실 수 있나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 자격 요건은 공고문에서 어떻게 안내되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": false,
+    "unknown_phrase_exact": true,
+    "comma_artifact": false
+   }
+  },
+  {
+   "run": 1,
+   "case": "sejong_free",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "세종특별자치시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:44:33+09:00",
+   "http": 200,
+   "seconds": 2.5,
+   "response": {
+    "status": "answered",
+    "answer": "세종시 위원회 청년참여 확대는 신청 방법이 원문에 **공고문 참조**로만 적혀 있고, 직접 신청 링크는 확인되지 않았어요. 모집 일정도 신청기간이 비어 있어 이번 근거로는 확인되지 않았습니다. [1][2]\n\n자격은 원문에 만 19~39세, 혼인상태 제한없음, 소득요건 무관, 취업상태 제한없음, 학력요건 제한없음, 전공요건 제한없음으로 적혀 있습니다. 다만 제공된 판정 정보는 자동 확인이 보류된 상태라, 실제 신청 가능 여부는 공고문에서 최종 확인이 필요합니다. [3]",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_GOV_059",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "eligible"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-06-15",
+       "end_date": "2026-06-21",
+       "is_ongoing": false,
+       "days_to_start": -165,
+       "days_to_end": -159
+      },
+      "required_documents": [
+       {
+        "text": "- (공통서류) 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집.이용(제공) 동의서, 재학증명서(세종시 관내 대학생 자격일 경우) \n- (해당자 추가제출) 우선선발의 경우,  해당 증빙서류 제출 필요 \n ※ 상기 서류는 공고일 기준으로 변경될 수 있으므로 매년 모집공고를 확인하시기 바랍니다.",
+        "document_id": "DOC_GOV_059",
+        "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+       }
+      ],
+      "policy_name": "세종시 청년 행정인턴",
+      "agency": "세종특별자치시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+      "official_apply_url": "https://www.sejong.go.kr",
+      "contacts": [
+       {
+        "agency": "청년정책담당관",
+        "phone": "044-300-6014",
+        "document_id": "DOC_GOV_059",
+        "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_009",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~34세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2024-02-26",
+       "end_date": "2025-02-25",
+       "is_ongoing": false,
+       "days_to_start": -1005,
+       "days_to_end": -640
+      },
+      "required_documents": null,
+      "policy_name": "국토교통부 청년월세 한시 특별지원",
+      "agency": "국토교통부 청년주거정책과",
+      "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "국토교통부",
+        "phone": "1599-0001",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 공고문에서 신청 절차를 더 확인해 줄 수 있나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 자격 요건을 항목별로 다시 정리해 줄 수 있나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": true,
+    "unknown_phrase_exact": false,
+    "comma_artifact": false
+   }
+  },
+  {
+   "run": 2,
+   "case": "sejong_free",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:44:35+09:00",
+   "http": 200,
+   "seconds": 2.2,
+   "response": {
+    "status": "answered",
+    "answer": "세종시 위원회 청년참여 확대는 신청기간이 원문에 비어 있어 모집 일정을 확인할 수 없고, 신청방법은 공고문 참조로만 안내되어 있어 **직접 신청 링크는 확인되지 않았어요** [1][2]. 현재 접수 여부도 공식 원문에서 확인되지 않았습니다 [1].\n\n이 정책은 세종특별자치시가 운영하는 청년참여 확대 정책으로, 시 위원회 구성 시 청년참여 확대 추진과 반기별 추진현황 점검, 세종 청년인재DB 인재풀 확충 및 참여 홍보가 원문에 적혀 있습니다 [2]. 다만 이번 근거에는 신청 자격의 세부 기준이나 모집 일정이 명시되어 있지 않아, 신청 가능 여부와 접수 시점은 공고문에서 추가 확인이 필요합니다 [1][2].",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_021",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기청년 기후특사단",
+      "agency": "경기도 국제협력국 국제협력정책과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214664",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_020",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기북부 청년 서포터즈 운영",
+      "agency": "경기도 경기북부특별자치도추진단 특례정책과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214665",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_022",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "경기청년공간 조성 및 운영",
+      "agency": "경기도 미래평생교육국 청년기회과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261031005400214663",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 공고문에서 신청 자격과 모집 일정을 확인해 줄 수 있나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 신청방법이 공고문에 어떻게 적혀 있나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": true,
+    "unknown_phrase_exact": false,
+    "comma_artifact": false
+   }
+  },
+  {
+   "run": 2,
+   "case": "sejong_free",
+   "question": "세종시 위원회 청년참여 확대 신청 방법이랑 모집 일정 알려줘",
+   "selected_policy_id": null,
+   "profile_sample_only": {
+    "age": 27,
+    "region": "세종특별자치시",
+    "income": null
+   },
+   "requested_at": "2026-11-27T15:44:37+09:00",
+   "http": 200,
+   "seconds": 2.2,
+   "response": {
+    "status": "answered",
+    "answer": "세종시 위원회 청년참여 확대는 신청 방법이 이번 원문에서 **공고문 참조**로만 확인되고, 직접 신청 링크는 확인되지 않았어요. 신청기간도 원문에 날짜가 비어 있어 모집 일정은 확인되지 않았습니다. [1][2]\n\n자격은 원문상 만 19~39세가 대상이고, 입력하신 만 27세는 연령 기준에 들어갑니다. 다만 공식 원문에 다른 세부 자격이 더 있는지 이번 근거만으로는 확정할 수 없어 신청 자격은 추가 확인이 필요해요. [3]\n\n참고로 같은 이름의 다른 정책인 세종시 청년 행정인턴은 접수가 마감됐고, 세종시 위원회 청년참여 확대와는 별개의 정책입니다. [4]",
+    "citations": [
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "document_id": "DOC_YC_065",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 세종시 청년 행정인턴 (569000000346)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+      "document_id": "DOC_GOV_059",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_YC_065",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "세종시 위원회 청년참여 확대",
+      "agency": "세종특별자치시",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_GOV_059",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "eligible"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2026-06-15",
+       "end_date": "2026-06-21",
+       "is_ongoing": false,
+       "days_to_start": -165,
+       "days_to_end": -159
+      },
+      "required_documents": [
+       {
+        "text": "- (공통서류) 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집.이용(제공) 동의서, 재학증명서(세종시 관내 대학생 자격일 경우) \n- (해당자 추가제출) 우선선발의 경우,  해당 증빙서류 제출 필요 \n ※ 상기 서류는 공고일 기준으로 변경될 수 있으므로 매년 모집공고를 확인하시기 바랍니다.",
+        "document_id": "DOC_GOV_059",
+        "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+       }
+      ],
+      "policy_name": "세종시 청년 행정인턴",
+      "agency": "세종특별자치시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+      "official_apply_url": "https://www.sejong.go.kr",
+      "contacts": [
+       {
+        "agency": "청년정책담당관",
+        "phone": "044-300-6014",
+        "document_id": "DOC_GOV_059",
+        "chunk_id": "CHK_B2_DOC_GOV_059_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_009",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~34세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "closed",
+      "application_schedule": {
+       "evaluated_on": "2026-11-27",
+       "start_date": "2024-02-26",
+       "end_date": "2025-02-25",
+       "is_ongoing": false,
+       "days_to_start": -1005,
+       "days_to_end": -640
+      },
+      "required_documents": null,
+      "policy_name": "국토교통부 청년월세 한시 특별지원",
+      "agency": "국토교통부 청년주거정책과",
+      "source_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/161300000099",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "국토교통부",
+        "phone": "1599-0001",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 공고문에서 확인해야 할 신청 절차는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "세종시 위원회 청년참여 확대의 자격 요건을 더 자세히 확인하려면 무엇을 봐야 하나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "checks": {
+    "sejong_apply_url_null": true,
+    "sejong_reception": "unknown",
+    "no_homepage_as_apply_claim": true,
+    "no_link_phrase_exact": true,
+    "unknown_phrase_exact": false,
+    "comma_artifact": false
+   }
+  }
+ ]
+}
