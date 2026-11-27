@@ -590,6 +590,8 @@ def run_ask_pipeline(
     requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
         항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
     """
+    # child_age_months(#39)는 값 그대로 Checker·Generator에 전달한다. None=미입력, 0=유효값.
+    # 신청자 age와 섞지 않고 검색 필터에도 쓰지 않는다.
     profile = request.profile.model_dump()
     supplied_region = profile["region"].strip()
     canonical = ALIASES.get(supplied_region, supplied_region)

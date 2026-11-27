@@ -178,7 +178,9 @@ class LatestGeneratorApiTests(unittest.TestCase):
         body = response.json()
         prompt = self.prompts[0]
         # 정규화 프로필이 Generator Prompt까지 도달한다(서울→서울특별시, 소득 0 유지).
-        self.assertEqual(prompt["user_profile"], {"age": 25, "region": "서울특별시", "income": 0})
+        # #39: 생략된 child_age_months는 정규화 프로필에 None으로 실려 Generator Prompt까지 간다.
+        self.assertEqual(prompt["user_profile"],
+                         {"age": 25, "region": "서울특별시", "income": 0, "child_age_months": None})
         # 마감(A)은 검색 1위여도 Context·출처·정책 카드에서 뒤로 간다.
         self.assertEqual([c["policy_id"] for c in prompt["official_evidence"]], ["B", "A"])
         self.assertEqual([(p["policy_id"], p["reception_status"]) for p in body["policy_checks"]],
@@ -284,6 +286,16 @@ class LatestGeneratorApiTests(unittest.TestCase):
                 response = self.ask(**kwargs)
                 self.assertEqual((response.status_code, response.json()["detail"]["code"]), expected)
                 self.assertNotIn("private-value", response.text)
+
+    def test_child_age_months_reaches_generator_prompt_separately_from_age(self):
+        # #39: 0개월은 미입력이 아니며, 신청자 age와 별개로 실제 Generator Prompt까지 그대로 간다.
+        for months in (0, 24):
+            with self.subTest(months=months):
+                self.prompts.clear()
+                request = {**REQUEST, "profile": {**REQUEST["profile"], "child_age_months": months}}
+                self.assertEqual(self.ask(llm_output(), request=request).status_code, 200)
+                user_profile = self.prompts[0]["user_profile"]
+                self.assertEqual((user_profile["age"], user_profile["child_age_months"]), (25, months))
 
 
 if __name__ == "__main__":

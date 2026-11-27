@@ -14,6 +14,10 @@ class UserProfile(BaseModel):
     age: Annotated[int, Field(strict=True, ge=0, le=120)] | None
     region: str
     income: Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)] | None
+    # #39: 자녀 월령(개월). 신청자 본인 나이(age)와 별개다. 생략·null은 미입력, 0은 유효값.
+    # strict라 "24"·24.5·24.0·true를 정수로 바꾸지 않고 422로 거부한다. 상한은 정책 근거가 없어 두지 않는다.
+    # 신청 여부를 확인하려는 자녀 한 명의 값만 받는다. 자녀가 여러 명이면 답변 본문에서 자녀별 확인을 안내한다.
+    child_age_months: Annotated[int, Field(strict=True, ge=0)] | None = None
 
 
 class ChatTurn(BaseModel):

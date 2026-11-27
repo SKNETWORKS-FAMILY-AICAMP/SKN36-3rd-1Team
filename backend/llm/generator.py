@@ -32,6 +32,14 @@ _UNDECIDED_ELIGIBILITY = re.compile(
     r"(?=(?:\*\*|__)?\s*(?:[.!。！]|\[\d+\]|$))"
 )
 
+# #39: child_age_months는 자녀 한 명의 값이다. 다른 자녀·자녀별 확인 안내를 식별한다.
+MULTI_CHILD_PATTERN = (
+    r"(?:자녀|아이|아기)(?:가|이)?\s*(?:여러\s*명|둘\s*이상|두\s*명\s*이상|여럿)"
+    r"|여러\s*(?:자녀|아이)|다른\s*(?:자녀|아이|아기)|(?:자녀|아이)\s*별|각\s*(?:자녀|아이)"
+    # '둘째 주'·'셋째 항목' 같은 자녀와 무관한 서수는 제외: 뒤에 자녀 표현이 올 때만 매칭한다.
+    r"|(?:둘째|셋째)\s*(?:자녀|아이|아기)"
+)
+
 # 연령 검사는 Checker의 단일 구현을 사용한다(순환 import 없음).
 # 전국 시·도 공식명/약칭은 검색 모듈에서 가져온다.
 _SIDO_VARIANTS: dict[str, frozenset[str]] = {}
@@ -943,6 +951,9 @@ def _is_redundant_request(
 
     #39 REVIEW: child request beats applicant age. '자녀 나이'는 profile.age로
     # 충족할 수 없다. child_age_months가 없으면 이 요청을 절대 지우지 않는다.
+    # 입력값은 자녀 한 명의 월령이라 다른 자녀·자녀별 확인 안내는 중복 요청이 아니다.
+    if re.search(MULTI_CHILD_PATTERN, text):
+        return False
     if _is_child_years_request(text) or re.search(
         r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|나이|연령|개월)",
         text,

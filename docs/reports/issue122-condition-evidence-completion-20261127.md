@@ -48,7 +48,7 @@
 | --- | --- |
 | [backend/rag/context_builder.py](../../backend/rag/context_builder.py) | 연령 조건과 인용 가능한 원문을 대조하고 누락 근거를 1개까지 추가 |
 | [backend/rag/pipeline.py](../../backend/rag/pipeline.py) | 기존 `select_contexts` 직후, 근거 기반 파생 필드 계산 전에 보강 호출 |
-| [docs/api/ask_contract.md](../api/ask_contract.md) | v1.8의 선정 상한과 출처 번호·인용 계약 기록 |
+| [docs/api/ask_contract.md](../api/ask_contract.md) | v1.9의 선정 상한과 출처 번호·인용 계약 기록 |
 | [tests/unit/test_condition_evidence_completion.py](../../tests/unit/test_condition_evidence_completion.py) | 경계, 문맥, 문서·정책 제한, 중복, 입력 보존 및 선택 순서 검증 |
 | [tests/integration/test_condition_evidence_api.py](../../tests/integration/test_condition_evidence_api.py) | 실제 Generator 검증 경로와 FastAPI 재번호, Checker 결과 및 파생 필드 검증 |
 | [frontend/src/components/TurnView.sixSources.test.tsx](../../frontend/src/components/TurnView.sixSources.test.tsx) | 출처 6개의 링크와 제목 렌더링 검증 |
@@ -63,7 +63,7 @@
 
 Checker는 보강 전에 계산하며 조건 배열·종합 판정·품질 경고·제외 사유 생성 규칙은 기존 코드를 따른다. 추가 청크의 원문에서 명시된 서류·문의처 등 파생 정보를 보완할 수 있으나, 실DB 21건에서는 비교한 파생 필드 차이가 없었다.
 
-v1.8은 기본 context 5개와 조건부 최대 6개를 명시한다. API 응답 구조는 유지하고 실제 사용한 근거만 `citations`로 내보낸다. 예를 들어 Generator가 1번과 6번만 인용하면 API는 이를 1번과 2번으로 연결한다. FastAPI 및 React 6개 출처 표시를 테스트했다. Django 정책 상세는 별도의 `GET /api/policies`를 사용한다는 점을 코드에서 확인했다.
+v1.9는 기본 context 5개와 조건부 최대 6개를 명시한다. API 응답 구조는 유지하고 실제 사용한 근거만 `citations`로 내보낸다. 예를 들어 Generator가 1번과 6번만 인용하면 API는 이를 1번과 2번으로 연결한다. FastAPI 및 React 6개 출처 표시를 테스트했다. Django 정책 상세는 별도의 `GET /api/policies`를 사용한다는 점을 코드에서 확인했다.
 
 ## 5. 코드 리뷰와 추가 보완
 
@@ -120,7 +120,7 @@ v1.8은 기본 context 5개와 조건부 최대 6개를 명시한다. API 응답
 | 소희 | GOV042에서 종합 `ineligible`과 답변의 전체 자격 미확정 표현이 충돌하는 문제. |
 | 소희 | POL005 L01·L04의 부수 제외 사유를 해당 청크에 연결하는 인용 검증. L02는 연령 제외 결론과 추가 확인의 대상이 서로 분명하게 읽히는지 검토. |
 | 지인 | L03의 링크 보정이 직접 신청 URL 확인과 온라인 신청 방법 설명을 구분하도록 검토. 온라인 절차를 보존하고 안내 중복을 방지하는 회귀 사례 필요. |
-| 팀 | API v1.8의 최대 6개 근거 및 인용 호환성 검수. |
+| 팀 | API v1.9의 최대 6개 근거 및 인용 호환성 검수. |
 
 이번 PR 범위는 조건부 연령 근거 선정과 연결 계약 개선이다. **Issue #122 전체 종료는 후속 통합 검증 범위로 남는다.**
 
