@@ -1,0 +1,64 @@
+# SSOK 자동 테스트. dev 대상 PR과 dev 푸시마다 실행한다.
+# - 실제 DB·LLM·API 키는 쓰지 않는다. DB 스모크(RUN_*_SMOKE)와 원본 파일이 필요한 테스트는 테스트 코드가 스스로 건너뛴다.
+# - Python은 팀 개발 환경과 같은 Windows에서 돌린다(줄바꿈·경로 처리를 로컬과 같게 맞춤).
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (pytest · Django)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      # 실수로라도 실제 LLM을 부르지 않게 키를 비운다.
+      OPENAI_API_KEY: ""
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            web_ssr/requirements.txt
+      - name: 의존성 설치
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r web_ssr/requirements.txt
+      - name: pytest
+        run: python -m pytest -q -p no:cacheprovider
+      - name: Django 정책 상세 테스트
+        working-directory: web_ssr
+        run: python manage.py test policies --settings=config.settings_test
+
+  frontend:
+    name: Frontend (vitest · typecheck · build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
