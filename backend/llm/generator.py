@@ -30,12 +30,25 @@ _UNDECIDED_ELIGIBILITY = re.compile(
     r"(?:\s*(?:과|와|및|·|,)\s*(?:거주\s*지역|지역|소득))*"
     r"(?:은|는|이|가)\s*(?:추가\s*)?확인이\s*필요)해\s+)?"
     r"(?P<emphasis>\*\*|__)?"
-    r"(?:전체|최종|종합)\s*(?:(?:신청|지원)\s*)?자격(?:은|이|을)\s*"
+    # '신청 자격은 추가 확인이 필요합니다'처럼 전체·최종·종합 없이 쓴 결론도 같은 뜻이다(#122 1번 재검증).
+    r"(?:(?:전체|최종|종합)\s*(?:(?:신청|지원)\s*)?|(?:신청|지원)\s*)자격(?:은|이|을)\s*"
     r"(?:(?:확정|판단)\s*할\s*수\s*없(?:습니다|어요)|"
     r"(?:확정|판단)\s*하기\s*어렵(?:습니다|어요)|"
     r"미확정(?:입니다|이에요)|추가\s*확인이\s*필요(?:합니다|해요))"
     r"(?=(?:\*\*|__)?(?:[ \t]*\[\d+\])*[ \t]*[.!。！]?[ \t]*$)"
 )
+# 문장 끝 절이 '(종합 판정도 추가 확인이 필요하다고 되어 있어) 현재 입력만으로는 자격을 확정할 수 없습니다'인 경우.
+# 쉼표 뒤에서 '현재 입력만으로는'으로 시작하는 절만 본다('소득 정보만으로는' 같은 조건절은 건드리지 않는다).
+_UNDECIDED_ELIGIBILITY_TAIL = re.compile(
+    r"(?P<sep>,\s*)"
+    r"(?:종합\s*판정(?:도|은|이)\s*(?:추가\s*)?확인이\s*필요하다고\s*(?:되어\s*)?있어\s*)?"
+    r"(?:현재\s*)?입력만으로는\s*(?:(?:전체|최종|종합)\s*)?(?:(?:신청|지원)\s*)?자격(?:은|이|을)\s*"
+    r"(?:(?:확정|판단)\s*할\s*수\s*없(?:습니다|어요)|(?:확정|판단)\s*하기\s*어렵(?:습니다|어요))"
+    r"(?=(?:[ \t]*\[\d+\])*[ \t]*[.!。！]?[ \t]*(?:\[\d+\][ \t]*)*$)"
+)
+# 쉼표 앞 절이 나열·대조로 끝날 때만 TAIL을 적용한다.
+_TAIL_LEAD = re.compile(r"(?:있고|있으며|있지만|있으나|이고|이며|되지만|이지만)\s*(?:\[\d+\]\s*)*$")
+_TAIL_MISSING_INPUT = re.compile(r"입력|비어\s*있|정보가\s*없|모르|미기재|알려\s*주지")
 
 # #39: child_age_months는 자녀 한 명의 값이다. 다른 자녀·자녀별 확인 안내를 식별한다.
 MULTI_CHILD_PATTERN = (
@@ -1194,8 +1207,20 @@ def _align_overall_eligibility(
 
     # Match complete summaries so a qualifier such as '소득만으로는' or
     # '나이를 입력하지 않으면' is never attached to a confirmed denial.
+    def replace_tail(match: re.Match[str]) -> str:
+        # 앞 절이 '…있고,'·'…이며,'처럼 나열로 이어질 때만 바꾼다. '나이를 입력하지 않아,'·'정보가 없어서,'
+        # 같은 원인·조건 절 뒤의 유보는 미입력 때문에 탈락한 것처럼 읽히므로 두지 않는다(PR #161 리뷰).
+        lead = match.string[:match.start()]
+        # '나이를 입력하지 않은 상태이고,'·'소득 정보가 비어 있으며,'처럼 나열형이어도 미입력을 말하면 두지 않는다(PR #161 재리뷰).
+        if not _TAIL_LEAD.search(lead) or _TAIL_MISSING_INPUT.search(lead):
+            return match.group(0)
+        return f"{match['sep']}현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
+
     sentences = re.split(r"((?<=[.!?。！？])\s+|\n+)", answer)
-    return "".join(_UNDECIDED_ELIGIBILITY.sub(replace_summary, sentence) for sentence in sentences)
+    return "".join(
+        _UNDECIDED_ELIGIBILITY_TAIL.sub(replace_tail, _UNDECIDED_ELIGIBILITY.sub(replace_summary, sentence))
+        for sentence in sentences
+    )
 
 
 def _validate_model_response(

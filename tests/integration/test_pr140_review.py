@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 import test_issue79_18_90_verification as verification
 from pr140_verification_oracles import (
-    assert_age_outcomes, assert_replay_sources, bind_saved_completion,
+    MERGED_CITATION_RUNS, assert_age_outcomes, assert_replay_sources, bind_saved_completion,
     boundary_values, expected_numeric_condition,
 )
 
@@ -40,7 +40,8 @@ def replay(run, *, reverse=False):
             'profile': {'age': run['age'], 'region': '', 'income': None},
             'selected_policy_id': run['policy_id'], 'history': []})
     assert response.status_code == 200, response.text
-    assert_replay_sources(run['response'], response.json(), run['policy_id'])
+    assert_replay_sources(run['response'], response.json(), run['policy_id'],
+                          merged_duplicates=(run['policy_id'], run['age']) in MERGED_CITATION_RUNS)
     return response.json(), captured
 
 

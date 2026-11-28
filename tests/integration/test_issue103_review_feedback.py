@@ -353,7 +353,10 @@ ONE = [{"source_id": 1, "policy_id": "X", "text": "가상 원문 (sample_only)"}
 
 
 class CommaSplitTests(unittest.TestCase):
-    """필수 1: 숫자 사이 쉼표와 정책명 안의 쉼표에서 절이 잘리지 않는다."""
+    """필수 1: 숫자 사이 쉼표와 정책명 안의 쉼표에서 절이 잘리지 않는다.
+
+    한 정책만 다루는 답변이라 보정 문구에 정책명을 붙이지 않는다(#122 후속, 계약 §7 11번).
+    """
 
     C = [check("X", "가상노인수당")]  # sample_only
 
@@ -361,22 +364,22 @@ class CommaSplitTests(unittest.TestCase):
         fixed, changed = align_application_links("월 1,000원이며 홈페이지에서 신청하세요 [1].", ONE, self.C)
         self.assertTrue(changed)
         self.assertNotIn("1,가상노인수당", fixed)
-        self.assertEqual(fixed, f"가상노인수당: {NULL_LINK} [1]")
+        self.assertEqual(fixed, f"{NULL_LINK} [1]")
 
     def test_amount_in_other_sentence_is_kept_intact(self):
         fixed, _ = align_application_links("가상노인수당은 월 1,000원을 지원해요 [1]. 홈페이지에서 신청하세요 [1].", ONE, self.C)
-        self.assertEqual(fixed, f"가상노인수당은 월 1,000원을 지원해요 [1]. 가상노인수당: {NULL_LINK} [1]")
+        self.assertEqual(fixed, f"가상노인수당은 월 1,000원을 지원해요 [1]. {NULL_LINK} [1]")
 
     def test_digits_around_spaced_comma_are_not_split(self):
         for text in ("월 1, 000원이며 홈페이지에서 신청하세요 [1].", "1,2차 모집은 홈페이지에서 신청하세요 [1]."):
             with self.subTest(text=text):
                 fixed, _ = align_application_links(text, ONE, self.C)
-                self.assertEqual(fixed, f"가상노인수당: {NULL_LINK} [1]")
+                self.assertEqual(fixed, f"{NULL_LINK} [1]")
 
     def test_spaced_comma_between_words_still_splits_clauses(self):
         # 쉼표 뒤 공백이 있으면 앞 절(서류 안내)은 그대로 두고 신청 경로 절만 보정한다.
         fixed, _ = align_application_links("가상노인수당은 신분증이 필요하고, 홈페이지에서 신청하세요 [1].", ONE, self.C)
-        self.assertEqual(fixed, f"가상노인수당은 신분증이 필요하고, 가상노인수당: {NULL_LINK} [1]")
+        self.assertEqual(fixed, f"가상노인수당은 신분증이 필요하고, {NULL_LINK} [1]")
 
     def test_real_release_policy_names_with_commas_stay_whole(self):
         names = [name for name in release_names().values() if "," in name]
@@ -385,7 +388,7 @@ class CommaSplitTests(unittest.TestCase):
             with self.subTest(name=name):
                 fixed, changed = align_application_links(f"{name}은 홈페이지에서 신청할 수 있어요 [1].", ONE, [check("X", name)])
                 self.assertTrue(changed)
-                self.assertEqual(fixed, f"{name}: {NULL_LINK} [1]")
+                self.assertEqual(fixed, f"{NULL_LINK} [1]")
 
     def test_comma_policy_name_with_valid_url_is_unchanged(self):
         name = "자활근로(기초, 차상위)"
