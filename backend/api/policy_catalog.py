@@ -13,6 +13,10 @@ from backend.rag.source_sections import application_details
 FILES = ("neo4j/nodes_policy.jsonl", "neo4j/nodes_region.jsonl", "neo4j/nodes_category.jsonl",
          "neo4j/nodes_document.jsonl", "neo4j/relationships.jsonl", "qdrant/payload_chunks.jsonl")
 # React policySearchKey(#125)와 같은 비교 규칙. 검색 별칭·정책 원문은 추가하지 않는다.
+# GET /api/policies 한 번에 돌려주는 최대 건수(web_ssr도 이 값을 기준으로 나눠 요청한다).
+MAX_LIST_LIMIT = 500
+# 목록 '마감 임박(soon)' 필터: 접수 중이고 마감까지 이 일수 이하로 남은 정책.
+SOON_WINDOW_DAYS = 7
 SEARCH_HYPHENS = "-‐‑–—－"
 
 
@@ -92,7 +96,7 @@ class PolicyCatalog:
             self._signature = signature
             return self._data
 
-    def list(self, *, q="", region="", category="", status="all", sort="deadline", offset=0, limit=500):
+    def list(self, *, q="", region="", category="", status="all", sort="deadline", offset=0, limit=MAX_LIST_LIMIT):
         today = datetime.now(KST).date()
         version, digest, policies, relations, details = self._snapshot()
         items = []
@@ -112,7 +116,7 @@ class PolicyCatalog:
             schedule = application_schedule(policy, reception, evaluated_on=today)
             remaining = schedule["days_to_end"] if schedule else None
             ongoing = bool(schedule and schedule["is_ongoing"])
-            if status == "soon" and not (reception == "open" and not ongoing and remaining is not None and 0 <= remaining <= 7):
+            if status == "soon" and not (reception == "open" and not ongoing and remaining is not None and 0 <= remaining <= SOON_WINDOW_DAYS):
                 continue
             if status == "ongoing" and not (reception == "open" and ongoing):
                 continue

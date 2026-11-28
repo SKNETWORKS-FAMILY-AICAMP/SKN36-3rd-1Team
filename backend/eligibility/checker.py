@@ -40,6 +40,8 @@ _GROUP_REASONS = {
 
 MAX_VALID_AGE = 120
 NO_UPPER_LIMIT_SENTINEL = 120
+# 원문 검토 메모는 화면 사유에 붙으므로 이 길이까지만 쓴다.
+MAX_REVIEW_TEXT_LENGTH = 300
 
 
 def _is_valid_age(age: object) -> bool:
@@ -678,7 +680,7 @@ def _safe_review_text(value: object) -> str:
     if not isinstance(value, str):
         return ""
 
-    return " ".join(value.split())[:300]
+    return " ".join(value.split())[:MAX_REVIEW_TEXT_LENGTH]
 
 
 def _source_review_conditions(

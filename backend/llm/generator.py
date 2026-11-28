@@ -11,6 +11,7 @@ from functools import lru_cache
 from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
+from backend.core.contract import MAX_HISTORY_TURNS
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
 from backend.llm.month_age_guard import ground_child_month_ranges
@@ -21,6 +22,14 @@ from database.region_search import ALIASES, SIDOS
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT_SECONDS = 25.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1000
+# 같은 질문에 같은 근거로 답하도록 무작위성을 끈다(평가 결과 재현용).
+TEMPERATURE = 0
+# SDK 자동 재시도는 끈다. 재시도하면 한 요청이 LLM_TIMEOUT_SECONDS를 넘겨 기다리고 비용도 늘어난다.
+SDK_MAX_RETRIES = 0
+# 계약 §5.1 follow_up_questions 0~3개.
+MAX_FOLLOW_UPS = 3
+# 이보다 긴 문장은 정책 설명이 섞였을 수 있어 중복 입력 요청으로 지우지 않는다.
+MAX_REDUNDANT_REQUEST_LENGTH = 75
 
 CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 ALLOWED_FIELDS = {"age", "region", "income"}
@@ -1032,7 +1041,7 @@ def _remove_redundant_answer_requests(
 
     for sentence in sentences:
         if (
-            len(sentence) <= 75
+            len(sentence) <= MAX_REDUNDANT_REQUEST_LENGTH
             and not CITATION_PATTERN.search(sentence)
             and _is_redundant_request(sentence, profile)
             and (
@@ -1133,7 +1142,7 @@ def _validated_contexts(
     return cleaned, ids
 
 
-def _limit_follow_ups(items: list[dict], limit: int = 3) -> list[dict]:
+def _limit_follow_ups(items: list[dict], limit: int = MAX_FOLLOW_UPS) -> list[dict]:
     """계약의 '0~3개 권장'을 지키되, 문장 분리로 늘어난 경우 프로필 입력 요청을 먼저 남긴다.
 
     프로필 입력은 판정에 필요한 값이고 question 버튼은 선택 사항이라서다.
@@ -1314,7 +1323,7 @@ def _validate_model_response(
 
     follows = raw.get("follow_up_questions")
 
-    if not isinstance(follows, list) or len(follows) > 3:
+    if not isinstance(follows, list) or len(follows) > MAX_FOLLOW_UPS:
         raise LLMOutputError(
             "follow_up_questions는 최대 3개의 리스트여야 합니다."
         )
@@ -1583,7 +1592,7 @@ def _get_openai_client(
     return openai_class(
         api_key=api_key,
         timeout=timeout,
-        max_retries=0,
+        max_retries=SDK_MAX_RETRIES,
     )
 
 
@@ -1648,7 +1657,7 @@ def _call_openai(
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            temperature=0,
+            temperature=TEMPERATURE,
             max_completion_tokens=max_tokens,
             response_format={
                 "type": "json_object",
@@ -1744,7 +1753,7 @@ def generate_answer(
             "role": item.get("role"),
             "text": item.get("text"),
         }
-        for item in (history or [])[-10:]
+        for item in (history or [])[-MAX_HISTORY_TURNS:]
         if (
             item.get("role") in {"user", "assistant"}
             and isinstance(item.get("text"), str)

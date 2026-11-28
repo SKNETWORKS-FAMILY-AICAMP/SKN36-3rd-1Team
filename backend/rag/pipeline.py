@@ -12,6 +12,7 @@ from pydantic import TypeAdapter, ValidationError
 from backend.api.schemas import (
     AskRequest, AskResponse, Contact, EligibilityOutput, ExclusionReason, GeneratorOutput,
 )
+from backend.core.contract import MAX_CONTEXTS, MAX_HISTORY_TURNS
 from backend.rag.context_builder import complete_condition_evidence, rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
 from backend.eligibility.checker import certain_required_and_failure, application_schedule
@@ -577,8 +578,8 @@ _TOPIC_SPLIT = re.compile(_TOPIC_SEPARATOR)
 # 분야 이름이 아닌 말은 나누지 않는다('취업 지원 및 창업 지원'의 '지원', '관련 및 기타' 등).
 _NOT_TOPIC = re.compile(r"^(?:관련|기타|그|이|저|모든|각|여러|다른|해당|어떤|무슨|그리고|함께|같이"
                         r"|지원|정책|혜택|제도|사업|서비스|수당|급여|바우처)$")
-# 근거는 최대 5개라 분야도 5개까지만 나눈다. 더 많으면 원래 질문 한 번으로 검색한다.
-MAX_TOPICS = 5
+# 근거는 최대 MAX_CONTEXTS개라 분야도 그만큼만 나눈다. 더 많으면 원래 질문 한 번으로 검색한다.
+MAX_TOPICS = MAX_CONTEXTS
 
 
 def _topic_searches(question: str) -> list[tuple[str, str]]:
@@ -775,7 +776,7 @@ def run_ask_pipeline(
                                                   by_id[pid].get("data_quality"),
                                                   by_id[pid].get("evidence_document_check"))
         checks.append(check)
-    history = [turn.model_dump() for turn in request.history[-10:]]
+    history = [turn.model_dump() for turn in request.history[-MAX_HISTORY_TURNS:]]
     try:
         raw = generate_fn(request.question, contexts, checks, history, profile=dict(profile))
     except JSONDecodeError as exc:
