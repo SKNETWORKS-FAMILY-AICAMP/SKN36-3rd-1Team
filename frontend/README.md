@@ -49,7 +49,13 @@ npm run dev
 
 `.env.example`을 `.env.local`로 복사하고 `VITE_ASK_API_URL`에 질문 API 주소를 넣으면 예시 응답 대신 백엔드를 호출합니다. `.env.local`은 커밋하지 않습니다.
 
-기본 FastAPI CORS 설정은 `http://127.0.0.1:5173`을 허용합니다. 실제 API에 연결할 때는 `npm run dev -- --host 127.0.0.1 --port 5173 --strictPort`로 실행합니다. 신청 상태는 API 응답에서, 화면의 신청 기간은 로컬 그래프에서 가져오므로 백엔드 DB와 프론트 그래프에 동일한 데이터 릴리스를 사용합니다.
+FastAPI는 같은 PC의 `http://127.0.0.1`·`http://localhost`를 포트와 무관하게 허용합니다(그 밖의 주소는 백엔드 `ASK_CORS_EXTRA_ORIGINS`에 추가). 실제 API에 연결할 때는 `npm run dev -- --host 127.0.0.1 --port 5173 --strictPort`로 실행합니다. 접수 상태와 신청 일정(`application_schedule`)은 모두 API 응답에서 받아 표시하고, 화면은 다시 계산하지 않습니다. 정책 관계 지도·생애주기의 그래프 데이터는 화면에 포함된 릴리스 파일을 쓰므로 백엔드와 같은 데이터 릴리스를 사용합니다.
+
+| 변수 | 내용 |
+| --- | --- |
+| `VITE_ASK_API_URL` | 질문 API 주소. 비우면 예시 응답 |
+| `VITE_POLICY_API_URL` | 전체 정책 목록 API 주소(`GET /api/policies`). 비우면 질문 API와 같은 서버, 그것도 없으면 화면에 포함된 배포 정책 목록(일정 필터 제한) |
+| `VITE_POLICY_DETAIL_BASE_URL` | Django 정책 상세 주소(예: `http://127.0.0.1:8001/policies/`). 비우면 '정책 상세보기' 링크를 숨김 |
 
 - 요청·응답 형식: [`src/api/types.ts`](src/api/types.ts) — `docs/api/ask_contract.md`와 백엔드 `backend/api/schemas.py`를 따릅니다. 추가 질문 중 정보 요청(`ask_info`)은 나이·지역·소득 세 가지뿐입니다.
 - 호출: [`src/api/client.ts`](src/api/client.ts) — `POST`로 `AskRequest`(질문, 내 조건, 최근 10개 대화 이력)를 보내고 `AskResponse`를 받습니다. 60초가 지나면 중단하고 오류 화면을 보여 줍니다. 서버 오류 응답(`{"detail": {"code", "message"}}`)은 `code`만 보고 화면이 정한 문구를 보여 줍니다. 서버 `message`는 계약에서 문장이 정해지지 않은 외부 데이터라 그대로 쓰지 않습니다.

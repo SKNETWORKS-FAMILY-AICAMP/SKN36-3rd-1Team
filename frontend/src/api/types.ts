@@ -3,7 +3,7 @@
  *
  * PRD §8.1·D-07의 전달 항목(answer, citations, status, follow_up_question, error)과
  * 조건 확인 결과(충족·불일치·미확인, 이유, 부족 항목, 모집 상태)를 담는다.
- * 기준: docs/api/ask_contract.md v1.1.
+ * 기준: docs/api/ask_contract.md(최신 버전, 2026-11-29 기준 v1.16). 필드별 도입 버전은 각 주석의 (v1.x) 표시를 본다.
  * 백엔드 backend/api/schemas.py와 필드 이름·값이 같다. 계약이 바뀌면 이 파일부터 맞춘다. JSON 필드는 snake_case.
  */
 

@@ -14,7 +14,7 @@ import { PolicyExplorer } from './components/PolicyExplorer';
 import type { ConsultedCheck } from './lib/policyCompare';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary, RegionError } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
 import { BottomBar, JumpButtons, Toast, burst, type ToastAction, type ToastMessage } from './components/Floating';
 import { useSavedPolicies } from './components/SavedPolicies';
@@ -48,6 +48,7 @@ export default function App() {
   const [age, setAge] = useState('');
   const [region, setRegion] = useState('');
   const [income, setIncome] = useState<number | null>(null);
+  const [conditionsOpen, setConditionsOpen] = useState(false);
   // #39: 자녀 월령(개월). 신청자 나이(age)와 따로 받는다. 확인하려는 자녀 한 명의 값이다.
   const [childMonths, setChildMonths] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -292,15 +293,19 @@ export default function App() {
       <div hidden={!onAskPage}>
       <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion}
         childMonths={childMonths} childMonthsError={childMonthsError} onChildMonths={setChildMonths} categories={CATEGORIES} showCategories={turns.length === 0}
-        onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
+        onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion}
+        conditionsOpen={conditionsOpen} onConditionsOpen={setConditionsOpen} />
 
       <section className="board" id="board" hidden={turns.length === 0}>
         <div className="wrap">
           <div className="board-h"><h2>상담 <span>결과</span></h2><p>답변마다 근거 출처를 함께 보여 드려요</p></div>
           {turns.map((t, i) => (
             <div className="consultation-turn" key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
-              <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}
-                onAskPolicy={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
+              {/* 답변 한 건을 그리다 오류가 나도 다른 답변과 질문 입력은 계속 쓸 수 있게 한 건씩 감싼다 */}
+              <ErrorBoundary resetKey={String(t.id)} fallback={<RegionError title="이 답변을 보여 드리지 못했어요" detail="응답 형식을 읽는 중에 문제가 생겼어요. 같은 질문을 다시 보내 주세요." />}>
+                <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}
+                  onAskPolicy={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
+              </ErrorBoundary>
             </div>
           ))}
           {awaiting && (
@@ -343,6 +348,7 @@ export default function App() {
       </section>
       {/* 질문하러 온 사람이 상담 결과를 먼저 보도록 둘러보기·일정은 상담 결과 아래에 둔다.
           최근 상담 일정은 완료된 상담이 있을 때만 보여 준다(빈 안내만 있는 섹션을 줄인다). */}
+      <ErrorBoundary resetKey={String(latestResponse?.id ?? 'none')} fallback={<RegionError title="정책 목록을 보여 드리지 못했어요" detail="목록 데이터를 읽는 중에 문제가 생겼어요. 위의 상담과 질문 입력은 그대로 쓸 수 있어요." section />}>
       {latestResponse?.kind === 'qa' && latestResponse.response && (
         <PolicyScheduleList onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse.response}
           onAsk={(question, origin) => { ask(question, origin); }} />
@@ -354,12 +360,18 @@ export default function App() {
         onSavedView={setExplorerSaved}
         consulted={consulted}
         onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
+      </ErrorBoundary>
       </div>
 
       <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
 
       <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder="이어서 물어보세요" inputRef={miniInputRef} onAsk={ask}
-        onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), FOCUS_AFTER_SCROLL_TOP_MS); }} />
+        onCondClick={() => {
+          // 패널이 닫혀 있으면 입력칸이 hidden 안에 있어 포커스가 가지 않으므로 먼저 연다
+          setConditionsOpen(true);
+          scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+          setTimeout(() => document.getElementById('age')?.focus(), FOCUS_AFTER_SCROLL_TOP_MS);
+        }} />
       <JumpButtons reduceMotion={reduceMotion} watch={turns} />
       <Toast message={toast} />
     </>

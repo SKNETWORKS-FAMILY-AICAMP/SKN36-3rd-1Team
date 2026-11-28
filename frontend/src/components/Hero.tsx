@@ -22,12 +22,14 @@ interface Props {
   askBoxRef: RefObject<HTMLDivElement>;
   inputRef: RefObject<HTMLInputElement>;
   reduceMotion: boolean;
+  /** 내 조건 패널 열림. 하단 바 '내 조건' 버튼이 패널을 열고 입력칸에 포커스를 줄 수 있게 App이 가진다 */
+  conditionsOpen: boolean;
+  onConditionsOpen: (open: boolean) => void;
 }
 
 const TITLE: [string, boolean, boolean][] = [['나에게', false, false], ['필요한', false, false], ['정부 지원 정책', true, false], ['을', false, true], ['물어보세요!', false, false]];
 
-export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, childMonths, childMonthsError, onChildMonths, categories, showCategories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
-  const [conditionsOpen, setConditionsOpen] = useState(false);
+export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, childMonths, childMonthsError, onChildMonths, categories, showCategories, onAsk, askBoxRef, inputRef, reduceMotion, conditionsOpen, onConditionsOpen }: Props) {
   const heroRef = useRef<HTMLElement>(null);
   useParallax(heroRef, reduceMotion);
   const examples = useMemo(() => categories.map((c) => '예: ' + c.question), [categories]);
@@ -62,7 +64,7 @@ export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion,
           {/* SSOK 캐릭터가 검색창 위 테두리에 두 손을 걸치고 빼꼼 내다본다 (장식) */}
           <MascotPeek />
           <AskForm examples={examples} onAsk={onAsk} inputRef={inputRef} reduceMotion={reduceMotion}
-            conditionsOpen={conditionsOpen} onToggleConditions={() => setConditionsOpen((open) => !open)} />
+            conditionsOpen={conditionsOpen} onToggleConditions={() => onConditionsOpen(!conditionsOpen)} />
         </div>
 
         <div id="profile-conditions" hidden={!conditionsOpen}>
