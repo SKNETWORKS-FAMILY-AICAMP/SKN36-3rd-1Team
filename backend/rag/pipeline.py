@@ -594,22 +594,21 @@ def _topic_searches(question: str) -> list[tuple[str, str]]:
     return [(topic, f"{head}{topic}{tail}") for topic in topics]
 
 
-def topic_queries(question: str) -> list[str]:
-    """질문에 나열된 분야별 검색 질문.
-
-    '교육비·구직·교통 지원 정책이 있나요?' → ['교육비 지원 정책이 있나요?', '구직 …', '교통 …']
-    """
-    return [query for _, query in _topic_searches(question)]
-
-
 # 정책명 낱말 중 기관 이름('국토교통부'·'교육부'·'경찰청')은 분야 낱말 일치로 보지 않는다(#75 리뷰).
 _AGENCY_WORD = re.compile(r"(?:부|청|처)$")
 
 
+_NAME_WORD_SPLIT = re.compile(r"[\s(),·ㆍ/]+")
+
+
+def _name_words(found: dict) -> list[str]:
+    """정책명을 띄어쓰기·괄호·가운뎃점·빗금으로 나눈 낱말."""
+    return [word for word in _NAME_WORD_SPLIT.split(str(found.get("policy_name") or "")) if word]
+
+
 def _name_has(found: dict, topic: str) -> bool:
     """정책명 낱말(기관 이름 제외)에 분야 낱말이 들어 있으면 True. '대중교통비'의 '교통'은 인정한다."""
-    words = re.split(r"[\s(),·ㆍ/]+", str(found.get("policy_name") or ""))
-    return any(topic in word and not _AGENCY_WORD.search(word) for word in words if word)
+    return any(topic in word and not _AGENCY_WORD.search(word) for word in _name_words(found))
 
 
 def _text_has(found: dict, topic: str) -> bool:
@@ -630,6 +629,8 @@ def _topic_pick(policies: list[dict], topic: str) -> dict | None:
 # 원래 질문 결과 상위 몇 개 정책을 보고 분야가 이미 다뤄졌는지 판단할지, 분야 검색 상위 몇 개를 그 분야 정책으로 볼지.
 COVERED_TOP = 5
 TOPIC_TOP = 3
+# 보충 순서로 근거 청크 rank를 다시 매길 때 정책 한 칸의 간격. 한 정책의 청크 rank보다 커야 순서가 섞이지 않는다.
+RANK_STRIDE = 1000
 
 
 def search_policies(search_fn: Callable[..., dict], question: str, filters: dict | None, k: int = 10) -> list[dict]:
@@ -645,18 +646,18 @@ def search_policies(search_fn: Callable[..., dict], question: str, filters: dict
     if not searches:
         return whole
     shown = {found["policy_id"] for found in whole[:COVERED_TOP]}
-    shown_words = [word for found in whole[:COVERED_TOP]
-                   for word in re.split(r"[\s(),·ㆍ/]+", str(found.get("policy_name") or "")) if word]
+    shown_words = [word for found in whole[:COVERED_TOP] for word in _name_words(found)]
     picks = []
     for topic, query in searches:
+        # 보이는 정책명에 분야 이름으로 시작하는 낱말('의료급여')이 있으면 검색하지 않고 다룬 분야로 본다.
+        # '국토교통부'처럼 낱말 중간에 든 '교통'은 다룬 것으로 보지 않는다.
+        if any(word.startswith(topic) for word in shown_words):
+            continue
         found = search_fn(query, filters=filters, k=k)["policies"]
-        # 그 분야 검색 상위 정책이 이미 보이거나, 보이는 정책명에 분야 이름으로 시작하는 낱말('의료급여')이 있으면
-        # 다룬 분야로 본다. '국토교통부'처럼 낱말 중간에 든 '교통'은 다룬 것으로 보지 않는다.
-        # 겹친 정책도 정책명에 분야 낱말이 있어야 한다. '긴급돌봄'처럼 어느 분야 검색에나 나오는 정책이 겹쳤다는
+        # 그 분야 검색 상위 정책이 이미 보여도 다룬 분야로 본다. 겹친 정책도 정책명에 분야 낱말이 있어야 한다. '긴급돌봄'처럼 어느 분야 검색에나 나오는 정책이 겹쳤다는
         # 이유만으로, 또 원문 어딘가에 '교통'이 들어 있다는 이유만으로 빠진 분야를 다룬 것으로 보지 않는다
         # (#75 리뷰 'R3D 의료·교통' 재현).
-        if any(item["policy_id"] in shown and _name_has(item, topic) for item in found[:TOPIC_TOP]) \
-                or any(word.startswith(topic) for word in shown_words):
+        if any(item["policy_id"] in shown and _name_has(item, topic) for item in found[:TOPIC_TOP]):
             continue
         pick = _topic_pick(found, topic)
         if pick and pick["policy_id"] not in shown and pick["policy_id"] not in {p["policy_id"] for p in picks}:
@@ -667,7 +668,7 @@ def search_policies(search_fn: Callable[..., dict], question: str, filters: dict
     ordered = whole[:1] + picks + [found for found in whole[1:] if found["policy_id"] not in picked]
     policies = []
     for order, found in enumerate(ordered, 1):
-        evidence = [{**hit, "rank": order * 1000 + hit["rank"]} for hit in found.get("evidence", [])]
+        evidence = [{**hit, "rank": order * RANK_STRIDE + hit["rank"]} for hit in found.get("evidence", [])]
         policies.append({**found, "best_rank": order, "evidence": evidence})
     logger.info("분야별 검색: 분야 %d개 중 %d개 보충", len(searches), len(picks))
     return policies

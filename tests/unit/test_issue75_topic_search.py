@@ -7,7 +7,11 @@
 import unittest
 
 from backend.rag.context_builder import rank_citable_contexts, select_contexts
-from backend.rag.pipeline import search_policies, topic_queries
+from backend.rag.pipeline import _topic_searches, search_policies
+
+
+def topic_queries(question):
+    return [query for _, query in _topic_searches(question)]
 
 
 # 가상 원문에 분야 낱말을 넣는다. 분야별 결과는 낱말이 실제로 든 정책만 남기기 때문이다.
@@ -90,7 +94,10 @@ class SearchPoliciesTests(unittest.TestCase):
     def test_topic_covered_by_name_word_is_not_filled(self):
         # 원래 결과 정책명에 분야 이름으로 시작하는 낱말('의료급여')이 있으면 이미 다룬 분야로 본다.
         # '국토교통부'처럼 낱말 중간에 든 '교통'은 다룬 것으로 보지 않는다(R3D '월세·교통' 재현).
+        calls = []
+
         def search(query, filters=None, k=10):
+            calls.append(query)
             if "·" in query:
                 return {"policies": [{**policy("MED", 1), "policy_name": "가상 의료급여 진료비 지원"},
                                      {**policy("RENT", 2), "policy_name": "국토교통부 가상 청년월세"}]}
@@ -99,6 +106,8 @@ class SearchPoliciesTests(unittest.TestCase):
             return {"policies": [{**policy("BUS", 1), "policy_name": "가상 대중교통비 환급"}]}
         found = search_policies(search, "의료·교통 지원 정책", None)
         self.assertEqual([p["policy_id"] for p in found], ["MED", "BUS", "RENT"])
+        # 정책명으로 이미 다룬 분야(의료)는 분야 검색을 하지 않는다.
+        self.assertEqual(calls, ["의료·교통 지원 정책", "교통 지원 정책"])
 
     def test_common_overlap_without_topic_name_does_not_cover_topic(self):
         # #75 3차 리뷰: '긴급돌봄'처럼 어느 분야 검색에나 나오는 정책이 겹쳐도, 정책명에 '교통'이 없으면 다룬 분야가 아니다.
