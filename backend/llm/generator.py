@@ -24,7 +24,7 @@ from database.region_search import ALIASES, SIDOS
 logger = logging.getLogger(__name__)
 
 
-# PRD D-06 적용 모델(3차 시연용). LLM_MODEL 환경변수로 변경 가능.
+# PRD D-06 적용 모델(시연용). LLM_MODEL 환경변수로 변경 가능.
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT_SECONDS = 25.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1000

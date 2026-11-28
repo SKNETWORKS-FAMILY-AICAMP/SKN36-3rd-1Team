@@ -363,7 +363,7 @@ export default function App() {
       </ErrorBoundary>
       </div>
 
-      <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
+      <footer><div className="wrap">SSOK · SKN36 3·4차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
 
       <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder="이어서 물어보세요" inputRef={miniInputRef} onAsk={ask}
         onCondClick={() => {
