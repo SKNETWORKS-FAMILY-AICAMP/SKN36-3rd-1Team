@@ -30,6 +30,11 @@ const LifeTimeline = lazy(() => import('./components/LifeTimeline'));
 const pendingKey = (question: string) => question.trim().replace(/\r\n?/g, '\n').replace(/[^\S\n]+/g, ' ');
 
 const THEME_KEY = 'lifepolicy-theme';
+// 화면 동작 지연 시간(ms). 새 답변이 그려진 뒤 스크롤하고, 맨 위로 스크롤이 끝난 뒤 나이 칸에 포커스한다
+const SCROLL_TO_NEW_TURN_MS = 80;
+const SCROLL_TO_LATEST_TURN_MS = 60;
+const TOAST_VISIBLE_MS = 2000;
+const FOCUS_AFTER_SCROLL_TOP_MS = 400;
 function readTheme(): 'light' | 'dark' {
   try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
 }
@@ -93,7 +98,7 @@ export default function App() {
     if (onAskPage && showLatestTurn.current) {
       showLatestTurn.current = false;
       explorerScroll.current = null;
-      const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 80);
+      const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), SCROLL_TO_NEW_TURN_MS);
       return () => clearTimeout(timer);
     } else if (onAskPage && explorerScroll.current !== null) {
       scrollTo({ top: explorerScroll.current, behavior: 'instant' });
@@ -106,7 +111,7 @@ export default function App() {
   // 새 대화가 생기면 그 위치로 스크롤
   useEffect(() => {
     if (!turns.length) return;
-    const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), 60);
+    const timer = setTimeout(() => lastTurnRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }), SCROLL_TO_LATEST_TURN_MS);
     return () => clearTimeout(timer);
   }, [turns.length, reduceMotion]);
 
@@ -115,7 +120,7 @@ export default function App() {
   const showToast = useCallback((text: string, icon: IconName = 'info') => {
     setToast({ text, icon });
     window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 2000);
+    toastTimer.current = window.setTimeout(() => setToast(null), TOAST_VISIBLE_MS);
   }, []);
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
@@ -354,7 +359,7 @@ export default function App() {
       <footer><div className="wrap">SSOK · SKN36 3차 프로젝트 학습용 시연. 최종 자격과 신청 가능 여부는 담당 기관의 공식 원문에서 확인해 주세요.</div></footer>
 
       <BottomBar visible={onAskPage && miniOn} condText={condText} placeholder="이어서 물어보세요" inputRef={miniInputRef} onAsk={ask}
-        onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), 400); }} />
+        onCondClick={() => { scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => document.getElementById('age')?.focus(), FOCUS_AFTER_SCROLL_TOP_MS); }} />
       <JumpButtons reduceMotion={reduceMotion} watch={turns} />
       <Toast message={toast} />
     </>
