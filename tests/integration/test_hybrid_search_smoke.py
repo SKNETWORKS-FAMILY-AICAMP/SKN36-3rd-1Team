@@ -7,7 +7,8 @@ Hybrid 검색(Qdrant + Neo4j + Ollama) 스모크 테스트 — 실제 서버에 
 
 결과 구분
 - RUN_HYBRID_SMOKE가 1이 아니면              → 모두 skip, 사유 "NOT_RUN" (서버에 접속하지 않음)
-- 서버 접속 불가·데이터 미적재                → 모두 skip, 사유 "DATA_NOT_READY: …"
+- 서버 접속 불가·인증 실패                    → 실패(CONNECTION_FAILED)
+- 컬렉션 없음·데이터 미적재                    → 모두 skip, 사유 "DATA_NOT_READY: …"
 - 데이터가 있는데 연결·원문이 기대와 다르면   → FAIL
 
 쓰기 없음: Qdrant는 count·scroll·query만, Neo4j는 읽기 전용 세션만 쓴다(쓰기 메서드는 막아 둔다).
@@ -44,6 +45,7 @@ class TestHybridSearchSmoke(unittest.TestCase):
         from database import handoff_data as hd
         from database import hybrid_search as hs
         from database.qdrant import store
+        from database.full_index import FullIndexError
 
         cls.hs, cls.store = hs, store
         try:
@@ -53,13 +55,17 @@ class TestHybridSearchSmoke(unittest.TestCase):
             cls.points_before = store.count_points(cls.client, hs.DEFAULT_COLLECTION)
         except unittest.SkipTest:
             raise
+        except (FullIndexError, hs.SearchProfileError, store.ConnectionSettingsError) as error:
+            # 접속 설정이 없거나 검색 프로필의 데이터가 현재 릴리스와 맞지 않음: 적재 전이라 미실행으로 둔다
+            raise unittest.SkipTest(f"DATA_NOT_READY: 검색 프로필·접속 설정 준비 안 됨 ({type(error).__name__})")
         except Exception as error:
-            raise unittest.SkipTest(f"DATA_NOT_READY: Qdrant 접속 불가 ({type(error).__name__})")
+            # RUN_*_SMOKE=1로 직접 켰으므로 접속·인증 실패는 건너뛰지 않고 실패로 보고한다(미검증이 통과처럼 보이지 않게)
+            raise AssertionError(f"CONNECTION_FAILED: Qdrant 접속 불가 ({type(error).__name__})") from None
         try:
             cls._runner_context = hs.open_neo4j_runner()
             runner = cls._runner_context.__enter__()
         except hs.HybridSearchBackendError as error:
-            raise unittest.SkipTest(f"DATA_NOT_READY: Neo4j 접속 불가 ({error.backend})")
+            raise AssertionError(f"CONNECTION_FAILED: Neo4j 접속 불가 ({error.backend})") from None
 
         class ReadOnlyRunner(type(runner)):
             def run_schema(self, statement):

@@ -6,7 +6,8 @@ Hybrid 검색 프로필·데이터 품질 경고 스모크 테스트 — 실제 
 
 결과 구분
 - RUN_HYBRID_SMOKE가 1이 아니면 → 모두 skip "NOT_RUN" (서버에 접속하지 않음)
-- 컬렉션·Neo4j가 준비되지 않았으면 → skip "DATA_NOT_READY: …"
+- 서버 접속 불가·인증 실패이면 → 실패(CONNECTION_FAILED)
+- 컬렉션이 없거나 Neo4j가 비어 있으면 → skip "DATA_NOT_READY: …"
 검사 내용
 - b2_06b_baseline(0.6B, 1024)·b2_4b_instruct(4B, 2560, instruct_v1) 실제 검색, 컬렉션 실제 차원
 - 모델·컬렉션 불일치 → 검색 전 SearchProfileError, 같은 프로필 재검색 결과 동일
@@ -39,6 +40,7 @@ class TestHybridProfilesSmoke(unittest.TestCase):
         warnings.filterwarnings("ignore", message="Api key is used with an insecure connection.")
         from database import hybrid_search as hs
         from database.qdrant import store
+        from database.full_index import FullIndexError
         cls.hs, cls.store = hs, store
         try:
             cls.client = store.get_client()
@@ -49,13 +51,17 @@ class TestHybridProfilesSmoke(unittest.TestCase):
             cls.points_before = {c: store.count_points(cls.client, c) for c in cls.collections.values()}
         except unittest.SkipTest:
             raise
+        except (FullIndexError, hs.SearchProfileError, store.ConnectionSettingsError) as error:
+            # 접속 설정이 없거나 검색 프로필의 데이터가 현재 릴리스와 맞지 않음: 적재 전이라 미실행으로 둔다
+            raise unittest.SkipTest(f"DATA_NOT_READY: 검색 프로필·접속 설정 준비 안 됨 ({type(error).__name__})")
         except Exception as error:
-            raise unittest.SkipTest(f"DATA_NOT_READY: Qdrant 접속 불가 ({type(error).__name__})")
+            # RUN_*_SMOKE=1로 직접 켰으므로 접속·인증 실패는 건너뛰지 않고 실패로 보고한다(미검증이 통과처럼 보이지 않게)
+            raise AssertionError(f"CONNECTION_FAILED: Qdrant 접속 불가 ({type(error).__name__})") from None
         try:
             cls._runner_context = hs.open_neo4j_runner()
             cls.runner = cls._runner_context.__enter__()
         except hs.HybridSearchBackendError as error:
-            raise unittest.SkipTest(f"DATA_NOT_READY: Neo4j 접속 불가 ({error.backend})")
+            raise AssertionError(f"CONNECTION_FAILED: Neo4j 접속 불가 ({error.backend})") from None
         cls.graph_before = cls.runner.read_rows(hs.lg.QUERY_TOTAL_COUNTS)[0]
         cls.results = {(name, question): hs.search_policy_context(question, k=5, client=cls.client, runner=cls.runner,
                                                                   profile=name)
