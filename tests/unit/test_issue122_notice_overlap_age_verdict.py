@@ -436,5 +436,47 @@ class MultiPolicyStatedLinkTests(unittest.TestCase):
         self.assertIn(f"가상 직업훈련 사업: {MISSING}", fixed)
 
 
+class ListLineLinkFixTests(unittest.TestCase):
+    """목록 줄의 링크 보정이 목록 기호·정책명을 지우거나 문장 중간에 정책명을 끼워 넣던 문제(#122 후속).
+
+    R3D·gpt-5.4-mini 실제 답변 4회 중 4회 재현(PR #163 실 LLM 확인)을 줄인 가상 사례다(sample_only).
+    """
+
+    A, B, CONTEXTS = MultiPolicyStatedLinkTests.A, MultiPolicyStatedLinkTests.B, MultiPolicyStatedLinkTests.CONTEXTS
+    align = MultiPolicyStatedLinkTests.align
+    EDU = "- **가상 교육비 지원**은 학비를 지원합니다. [1]\n"
+
+    def line(self, text):
+        return self.align(self.EDU + text).split("\n")[1]
+
+    def test_removed_front_clause_keeps_list_marker_and_policy_name(self):
+        line = self.line("- 가상 직업훈련 사업은 가상 누리집에서 수강 신청하며, 수시 모집으로 안내되어 있습니다. "
+                         "다만 자격은 추가 확인이 필요하고, 직접 신청 링크는 확인되지 않았어요. [2]")
+        self.assertTrue(line.startswith("- 가상 직업훈련 사업: 수시 모집으로"), line)
+        self.assertNotIn("누리집", line)
+        self.assertEqual(line.count("링크는 확인되지 않"), 1)
+
+    def test_replaced_front_sentence_keeps_list_marker(self):
+        line = self.line("- 가상 직업훈련 사업은 가상 누리집에서 수강 신청하며, 신청 URL은 확인됩니다. "
+                         "신청기간은 수시 모집으로 적혀 있습니다. [2]")
+        self.assertTrue(line.startswith(f"- 가상 직업훈련 사업: {MISSING}"), line)
+        self.assertIn("신청기간은 수시 모집", line)
+
+    def test_mid_line_fix_does_not_repeat_policy_name(self):
+        # 같은 줄 앞에서 이미 정책명이 나왔으면 문장 중간 보정 문구에 정책명을 다시 붙이지 않는다.
+        line = self.line("- **가상 직업훈련 사업**은 수시 모집으로 안내되어 있고, 가상 누리집에서 수강 신청할 수 있어요. [2]")
+        self.assertNotIn("가상 직업훈련 사업:", line)
+        self.assertIn(f"안내되어 있고, {MISSING}", line)
+
+    def test_missing_address_explained_with_reason_counts_as_stated(self):
+        # '신청 주소는 … 비어 있어 직접 신청 링크는 확인되지 않았어요'도 이미 밝힌 안내다. 보정 안내를 또 넣지 않는다.
+        line = self.line("- **가상 직업훈련 사업**은 수시 모집으로 안내되어 있고, 가상 누리집에서 수강 신청한다고 "
+                         "적혀 있습니다 [2]. 확인된 신청 주소는 이번 데이터에서 비어 있어 직접 신청 링크는 "
+                         "확인되지 않았어요 [2].")
+        self.assertEqual(line.count("링크는 확인되지 않"), 1, line)
+        self.assertNotIn("가상 직업훈련 사업:", line)
+        self.assertNotIn("누리집", line)
+
+
 if __name__ == "__main__":
     unittest.main()

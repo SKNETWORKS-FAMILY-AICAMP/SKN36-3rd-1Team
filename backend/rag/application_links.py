@@ -74,6 +74,13 @@ VISIT_NEGATION = re.compile(
     r"받지\s*않|하지\s*않|되지\s*않|않습니다|않음|불가|제외|안\s*됩|안\s*되|안\s*됨|할\s*수\s*없|없습니다|없음|금지|아닙니다"
 )
 SEGMENT = re.compile(r"[\r\n]+|(?<=[.!?。])\s+")
+# 줄 맨 앞 목록 기호('- ', '* ', '1) ', '2. '). 보정으로 절을 바꾸거나 지워도 목록 모양은 남긴다(#122 후속).
+LIST_MARKER = re.compile(r"[ \t]*(?:[-*+•]|\d{1,2}[.)])[ \t]+")
+# 절이 문장부호(뒤 인용 포함)로 끝나면 다음 절은 새 문장이다.
+SENTENCE_END = re.compile(r"[.!?。！？](?:\s*\[\d+\])*\s*$")
+# 이미 밝힌 미확인 안내 안의 주소 명사('확인된 신청 주소는 … 비어 있어 직접 신청 링크는 확인되지 않았어요').
+# 신청 행위나 홈페이지·URL 없이 명사만 있으면 웹 신청 단정이 아니다(#122 후속 실 LLM 재현).
+ADDRESS_NOUN = re.compile(r"신청\s*(?:URL|url|주소|링크)(?:은|는|이|가|도)?")
 
 
 def _verified_visit(clause: str, pid: str, contexts: list[dict]) -> str | None:
@@ -113,9 +120,9 @@ def _verified_online(clause: str, pid: str, contexts: list[dict]) -> bool:
 
 def _states_missing_only(clause: str) -> bool:
     """'신청 주소·링크가 확인되지 않았다'만 말하고 웹 신청 단정은 없는 절."""
-    if not STATED_MISSING.search(clause) or WEB_ACTION.search(clause):
+    if not STATED_MISSING.search(clause) or WEB_ACTION.search(clause) or URL.search(clause):
         return False
-    return not LINK_CLAIM.search(STATED_MISSING.sub("", clause))
+    return not LINK_CLAIM.search(ADDRESS_NOUN.sub("", STATED_MISSING.sub("", clause)))
 
 
 def _citations_only(text: str) -> bool:
@@ -337,18 +344,26 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
     # notice_at: 정책별 링크 안내 문장 위치. 뺀 문장의 인용을 이 문장으로 옮긴다.
     notice_at = _stated_notices(parts, by_id, policy_of, guarded)
     noticed.update(notice_at)
+    sentence_named: set[str] = set()
     for index in range(0, len(parts), 2):
         parts[index] = PROTECTED.sub(lambda m: guarded[int(m.group(1))], parts[index])
         if index and re.search(r"\n\s*\n", parts[index - 1]):
             paragraph_policy = None
+        line_start = not index or "\n" in parts[index - 1]
+        if line_start or SENTENCE_END.search(parts[index - 2]):
+            sentence_named = set()
         # '...확인해 주세요. [1][3] 다음 문장'처럼 절 맨 앞의 인용은 앞 문장의 출처이므로 그대로 둔다.
         lead = LEADING_CITATIONS.match(parts[index])
         head, clause = parts[index][:lead.end()], parts[index][lead.end():]
+        marker = LIST_MARKER.match(clause) if line_start else None
+        bullet = marker.group(0) if marker else ""
         # Markdown 강조가 키워드 사이에 들어와도 같은 의미로 검사한다.
         plain = clause.replace("**", "").replace("`", "")
         # 정책명이 앞 문장/제목에만 나와도 같은 문단의 설명은 그 정책에 속한다.
         # 빈 문단이나 여러 정책의 동시 언급 뒤에는 이전 정책을 추측해서 빌리지 않는다.
         named = _named_policies(plain, by_id)
+        # 같은 문장 앞 절에서 이미 이름이 나온 정책(문장 중간 보정 문구에는 정책명을 다시 붙이지 않는다).
+        earlier, sentence_named = sentence_named, sentence_named | named
         if named:
             paragraph_policy = next(iter(named)) if len(named) == 1 else None
         cautious = CAUTION.search(plain) or STATED_MISSING.search(plain)
@@ -388,7 +403,7 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 notes = " ".join(f"{by_id[pid]['policy_name']}: {MISSING_LINK}" for pid in missing)
                 markers = "".join(f"[{n}]" for n in dict.fromkeys(numbers))
                 text = " ".join(filter(None, (text, notes, markers)))
-            parts[index] = head + text
+            parts[index] = head + bullet + text
             changed = True
             continue
         pid = next(iter(targets))
@@ -409,6 +424,11 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
+                    # 줄 앞 목록 기호와, 빠진 앞절에만 있던 정책명은 남긴다. 여러 정책 답변에서 '- 수시 모집…'처럼
+                    # 어느 정책 설명인지 모르는 줄이 되지 않게 한다(#122 후속 실 LLM 재현).
+                    subject = (f"{by_id[pid]['policy_name']}: "
+                               if not single and pid in named and pid not in earlier else "")
+                    parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
                 elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of,
                                                                head_citations=bool(head.strip()))) is not None:
                     # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
@@ -441,8 +461,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         # 문구가 정책별로 빠짐없이 들어갔는지는 reception_notice가 다시 보장한다(#103·#147).
         if by_id[pid]["reception_status"] == "unknown" and not (NEAR_PHRASE.search(answer) or has_reception_notice(answer)):
             text += f" {UNKNOWN_RECEPTION}"
-        label = "" if single else f"{by_id[pid]['policy_name']}: "
-        parts[index] = head + f"{label}{text} {markers}".rstrip()
+        label = "" if single or pid in earlier else f"{by_id[pid]['policy_name']}: "
+        parts[index] = head + bullet + f"{label}{text} {markers}".rstrip()
         changed = True
     fixed = "".join(parts)
     if single and not valid_source_url(next(iter(by_id.values())).get("official_apply_url")):
