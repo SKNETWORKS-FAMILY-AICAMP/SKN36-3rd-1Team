@@ -49,6 +49,8 @@ _UNDECIDED_ELIGIBILITY_TAIL = re.compile(
 # 쉼표 앞 절이 나열·대조로 끝날 때만 TAIL을 적용한다.
 _TAIL_LEAD = re.compile(r"(?:있고|있으며|있지만|있으나|이고|이며|되지만|이지만)\s*(?:\[\d+\]\s*)*$")
 _TAIL_MISSING_INPUT = re.compile(r"입력|비어\s*있|정보가\s*없|모르|미기재|알려\s*주지")
+# 종합 판정 ineligible인 단일 정책에서 '자격 미확정' 결론을 바꿀 문구.
+_CONFIRMED_DENIAL = "현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
 
 # #39: child_age_months는 자녀 한 명의 값이다. 다른 자녀·자녀별 확인 안내를 식별한다.
 MULTI_CHILD_PATTERN = (
@@ -1201,8 +1203,7 @@ def _align_overall_eligibility(
     def replace_summary(match: re.Match[str]) -> str:
         pending = f"{match['pending']}하지만, " if match["pending"] else ""
         return (
-            f"{match['lead']}{pending}{match['emphasis'] or ''}"
-            "현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
+            f"{match['lead']}{pending}{match['emphasis'] or ''}{_CONFIRMED_DENIAL}"
         )
 
     # Match complete summaries so a qualifier such as '소득만으로는' or
@@ -1214,7 +1215,7 @@ def _align_overall_eligibility(
         # '나이를 입력하지 않은 상태이고,'·'소득 정보가 비어 있으며,'처럼 나열형이어도 미입력을 말하면 두지 않는다(PR #161 재리뷰).
         if not _TAIL_LEAD.search(lead) or _TAIL_MISSING_INPUT.search(lead):
             return match.group(0)
-        return f"{match['sep']}현재 입력 기준으로는 신청 자격을 충족하지 않습니다"
+        return f"{match['sep']}{_CONFIRMED_DENIAL}"
 
     sentences = re.split(r"((?<=[.!?。！？])\s+|\n+)", answer)
     return "".join(
