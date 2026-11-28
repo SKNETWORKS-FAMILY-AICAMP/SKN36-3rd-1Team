@@ -202,7 +202,7 @@ def test_no_upper_age_policies_never_reject_by_age(pid):
     for age in (0, 18, 64, 65, NO_UPPER):
         assert _condition(condition, {"age": age})["status"] == "eligible"
     assert _condition(condition, {"age": None})["status"] == "needs_check"
-    age_rows, overall = statuses(check_eligibility({"age": None, "region": "", "income": None}, item(pid)))
+    _, overall = statuses(check_eligibility({"age": None, "region": "", "income": None}, item(pid)))
     assert overall != "eligible"
 
 

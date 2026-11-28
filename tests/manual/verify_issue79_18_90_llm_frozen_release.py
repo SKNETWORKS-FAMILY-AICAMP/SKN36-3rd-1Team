@@ -24,6 +24,7 @@ from unittest.mock import Mock
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT), str(ROOT / "tests/integration")]
 
+from backend.rag.application_links import MISSING_LINK, UNKNOWN_RECEPTION  # noqa: E402
 from test_issue79_18_90_verification import DOCS, POLICIES, item  # noqa: E402
 
 ICN_Q = "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요."
@@ -38,8 +39,6 @@ SCENARIOS = [
 ]
 URL = re.compile(r"https?://[^\s)\]]+")
 APPLY_CLAIM = re.compile(r"(?:신청|접수)\s*(?:URL|url|주소|링크|페이지)[^.\n]{0,40}https?://|https?://[^\s]+[^.\n]{0,30}(?:에서|로)\s*(?:온라인\s*)?(?:신청|접수)(?:할\s*수\s*있|하세요|가능)")
-AGREED_LINK = "직접 신청 링크는 확인되지 않았어요"
-AGREED_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주세요"
 
 
 def load_llm_env(path):
@@ -92,9 +91,9 @@ def automatic_checks(scenario, payload):
     }
     if not policy.get("official_apply_url"):
         result["null_url_apply_claim_with_url"] = bool(APPLY_CLAIM.search(answer))
-        result["agreed_missing_link_phrase"] = AGREED_LINK in answer
+        result["agreed_missing_link_phrase"] = MISSING_LINK in answer
     if check.get("reception_status") == "unknown":
-        result["agreed_reception_phrase"] = AGREED_RECEPTION in answer
+        result["agreed_reception_phrase"] = UNKNOWN_RECEPTION in answer
         result["always_open_claim"] = bool(re.search(r"상시\s*(?:신청|접수)\s*(?:가능|할\s*수)", answer))
     statuses = {c["field"]: c["status"] for c in check.get("conditions", []) if c["field"] == "age"}
     overall = [c["status"] for c in check.get("conditions", []) if c["field"] == "eligibility"]
