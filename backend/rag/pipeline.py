@@ -561,6 +561,122 @@ def _named_policy_ids(question: str, policies: list[dict]) -> set[str]:
     return named
 
 
+# #75: '교육비·구직·교통 지원 정책이 있나요?'처럼 한 질문에 분야를 나열하면 질문 전체를 한 번 임베딩한 검색에서
+# 한 분야(교육) 결과가 상위를 다 차지한다. 나열된 분야가 지원·정책 같은 말 바로 앞에 올 때만 분야별로 나눠 검색한다.
+# 분야는 2글자 이상이다('K-패스'처럼 붙임표가 든 이름도 한 분야로 본다).
+_TOPIC_WORD = r"[가-힣A-Za-z0-9][가-힣A-Za-z0-9\-]{1,9}"
+# 가운뎃점(·, 한글 입력기의 ㆍ)·쉼표·빗금·'및/또는'으로 나열한 경우만 나눈다. '와·과·이나·랑' 같은 조사는
+# '산부인과 진료'·'아이와 함께'처럼 낱말 끝과 구분할 수 없어 실제 검색이 나빠졌으므로 나누지 않는다(#75 리뷰).
+_TOPIC_SEPARATOR = r"(?:\s*[·ㆍ,/]\s*|\s+(?:및|또는)\s+)"
+_TOPIC_LIST = re.compile(
+    rf"(?<![가-힣A-Za-z0-9\-])({_TOPIC_WORD}(?:{_TOPIC_SEPARATOR}{_TOPIC_WORD})+)"
+    # '부모급여'처럼 낱말 안의 '급여'를 끝말로 보지 않도록 끝말 앞에 띄어쓰기가 있어야 한다.
+    r"(?=\s+(?:지원|정책|혜택|제도|사업|서비스|수당|급여|바우처))"
+)
+_TOPIC_SPLIT = re.compile(_TOPIC_SEPARATOR)
+# 분야 이름이 아닌 말은 나누지 않는다('취업 지원 및 창업 지원'의 '지원', '관련 및 기타' 등).
+_NOT_TOPIC = re.compile(r"^(?:관련|기타|그|이|저|모든|각|여러|다른|해당|어떤|무슨|그리고|함께|같이"
+                        r"|지원|정책|혜택|제도|사업|서비스|수당|급여|바우처)$")
+# 근거는 최대 5개라 분야도 5개까지만 나눈다. 더 많으면 원래 질문 한 번으로 검색한다.
+MAX_TOPICS = 5
+
+
+def _topic_searches(question: str) -> list[tuple[str, str]]:
+    """(분야, 분야별 검색 질문) 목록. 분야가 둘 이상 나열된 경우만 돌려주고, 아니면 빈 목록이다."""
+    match = _TOPIC_LIST.search(question)
+    if not match:
+        return []
+    topics = [topic for topic in (part.strip() for part in _TOPIC_SPLIT.split(match.group(1))) if topic]
+    topics = list(dict.fromkeys(topics))
+    if not 2 <= len(topics) <= MAX_TOPICS or any(_NOT_TOPIC.match(topic) for topic in topics):
+        return []
+    head, tail = question[:match.start(1)], question[match.end(1):]
+    return [(topic, f"{head}{topic}{tail}") for topic in topics]
+
+
+# 정책명 낱말 중 기관 이름('국토교통부'·'교육부'·'경찰청')은 분야 낱말 일치로 보지 않는다(#75 리뷰).
+_AGENCY_WORD = re.compile(r"(?:부|청|처)$")
+_NAME_WORD_SPLIT = re.compile(r"[\s(),·ㆍ/]+")
+
+
+def _name_words(found: dict) -> list[str]:
+    """정책명을 띄어쓰기·괄호·가운뎃점·빗금으로 나눈 낱말."""
+    return [word for word in _NAME_WORD_SPLIT.split(str(found.get("policy_name") or "")) if word]
+
+
+def _name_has(found: dict, topic: str) -> bool:
+    """정책명 낱말(기관 이름 제외)에 분야 낱말이 들어 있으면 True. '대중교통비'의 '교통'은 인정한다."""
+    return any(topic in word and not _AGENCY_WORD.search(word) for word in _name_words(found))
+
+
+def _text_has(found: dict, topic: str) -> bool:
+    """근거 원문(띄어쓰기 무시)에 분야 낱말이 들어 있으면 True."""
+    key = topic.replace(" ", "")
+    return any(key in str(hit.get("text") or "").replace(" ", "") for hit in found.get("evidence", []))
+
+
+def _topic_pick(policies: list[dict], topic: str) -> dict | None:
+    """분야 검색 결과에서 채워 넣을 정책. 정책명에 분야 낱말이 든 첫 정책, 없으면 원문 근거에 든 첫 정책.
+
+    '교통 지원' 검색 1위가 의미만 비슷한 '이동통신요금감면'이고 '대중교통비 환급'이 3위였다(#75 R3D 재현).
+    정책명·원문 어디에도 분야 낱말이 없으면('기후동행카드'처럼 데이터에 없는 분야) 채우지 않는다.
+    """
+    return (next((found for found in policies if _name_has(found, topic)), None)
+            or next((found for found in policies if _text_has(found, topic)), None))
+
+
+# 검색 한 번에 가져올 청크 수(정책 수가 아니다, 계약 §1-1 1번).
+SEARCH_TOP_K = 10
+# 원래 질문 결과 상위 몇 개 정책을 보고 분야가 이미 다뤄졌는지 판단할지, 분야 검색 상위 몇 개를 그 분야 정책으로 볼지.
+COVERED_TOP = 5
+TOPIC_TOP = 3
+# 보충 순서로 근거 청크 rank를 다시 매길 때 정책 한 칸의 간격. 한 정책의 청크 rank보다 커야 순서가 섞이지 않는다.
+RANK_STRIDE = 1000
+
+
+def search_policies(search_fn: Callable[..., dict], question: str, filters: dict | None,
+                    k: int = SEARCH_TOP_K) -> list[dict]:
+    """정책 검색 결과. 분야를 나열한 질문이면 원래 질문 결과에서 빠진 분야만 채워 넣는다(#75).
+
+    원래 질문을 그대로 검색한 결과를 기본으로 쓴다. 분야마다 이미 다뤘는지 보고, 빠진 분야만
+    _topic_pick() 정책을 원래 1위 바로 뒤에 넣고 best_rank·근거 청크 rank를 이 순서로 다시 매긴다.
+    이미 다룬 분야: 원래 결과 상위 COVERED_TOP개 정책명에 분야 이름으로 시작하는 낱말이 있거나(검색 생략),
+    분야 검색 상위 TOPIC_TOP개 중 정책명에 분야 낱말이 든 정책이 원래 상위 COVERED_TOP개에 있는 경우.
+    빠진 분야가 없거나 채울 정책이 없으면 원래 결과를 그대로 돌려준다. 검색 결과 dict는 복사해서 바꾼다.
+    """
+    searches = _topic_searches(question)
+    whole = search_fn(question, filters=filters, k=k)["policies"]
+    if not searches:
+        return whole
+    shown = {found["policy_id"] for found in whole[:COVERED_TOP]}
+    shown_words = [word for found in whole[:COVERED_TOP] for word in _name_words(found)]
+    picks, picked = [], set()
+    for topic, query in searches:
+        # 보이는 정책명에 분야 이름으로 시작하는 낱말('의료급여')이 있으면 검색하지 않고 다룬 분야로 본다.
+        # '국토교통부'처럼 낱말 중간에 든 '교통'은 다룬 것으로 보지 않는다.
+        if any(word.startswith(topic) for word in shown_words):
+            continue
+        found = search_fn(query, filters=filters, k=k)["policies"]
+        # 그 분야 검색 상위 정책이 이미 보여도 다룬 분야로 본다. 겹친 정책도 정책명에 분야 낱말이 있어야 한다.
+        # '긴급돌봄'처럼 어느 분야 검색에나 나오는 정책이 겹쳤다는 이유만으로, 또 원문 어딘가에 '교통'이
+        # 들어 있다는 이유만으로 빠진 분야를 다룬 것으로 보지 않는다(#75 리뷰 'R3D 의료·교통' 재현).
+        if any(item["policy_id"] in shown and _name_has(item, topic) for item in found[:TOPIC_TOP]):
+            continue
+        pick = _topic_pick(found, topic)
+        if pick and pick["policy_id"] not in shown | picked:
+            picks.append(pick)
+            picked.add(pick["policy_id"])
+    if not picks:
+        return whole
+    ordered = whole[:1] + picks + [found for found in whole[1:] if found["policy_id"] not in picked]
+    policies = []
+    for order, found in enumerate(ordered, 1):
+        evidence = [{**hit, "rank": order * RANK_STRIDE + hit["rank"]} for hit in found.get("evidence", [])]
+        policies.append({**found, "best_rank": order, "evidence": evidence})
+    logger.info("분야별 검색: 분야 %d개 중 %d개 보충", len(searches), len(picks))
+    return policies
+
+
 def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) -> dict:
     """화면용 조건 요약. 원본 행만 고를 수 있고 필드·상태 조합을 바꿀 수 없다."""
     shown = display_fn([dict(condition) for condition in check["conditions"]])
@@ -604,11 +720,11 @@ def run_ask_pipeline(
     filters = {"region": profile["region"]} if profile["region"] else None
     if request.selected_policy_id:
         # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
-        filters = {"policy_id": request.selected_policy_id}
-    policies = search_fn(request.question, filters=filters, k=10)["policies"]
-    if request.selected_policy_id:
-        # 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
-        policies = [policy for policy in policies if policy["policy_id"] == request.selected_policy_id]
+        # 분야 나누기(#75)도 하지 않는다. 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
+        found = search_fn(request.question, filters={"policy_id": request.selected_policy_id}, k=SEARCH_TOP_K)
+        policies = [policy for policy in found["policies"] if policy["policy_id"] == request.selected_policy_id]
+    else:
+        policies = search_policies(search_fn, request.question, filters, k=SEARCH_TOP_K)
     # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
     ranked = rank_citable_contexts(policies)
     citable = {context["policy_id"] for context in ranked}
