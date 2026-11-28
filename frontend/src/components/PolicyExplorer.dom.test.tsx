@@ -88,25 +88,27 @@ it('처음 9개를 보여주고, 9개씩 추가한 뒤 검색이 바뀌면 표�
   expect(more()?.textContent).toBe('정책 1개 더 보기');
 });
 
-it('선택한 지역은 검색 버튼을 누르면 적용하고 전국 정책은 전체 지역에서 볼 수 있다', async () => {
+it('지역은 고르는 즉시 적용하고, 검색 버튼은 검색어 칸에만 붙어 있다', async () => {
   const regional = { ...item('POL_TEST_002'), regions: ['가상 지역'] };
   load.mockResolvedValueOnce({ ...page(), items: [page().items[0], regional] } as PolicyListResponse);
   await act(async () => {
     root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
 
+  const submit = host.querySelector<HTMLButtonElement>('.explorer-submit')!;
+  expect(submit.closest('form')?.querySelector('input[type="search"]')).not.toBeNull();
+  expect(submit.closest('.explorer-filters')).toBeNull();
+
   const region = host.querySelector<HTMLSelectElement>('.explorer-selects select')!;
   act(() => {
     region.value = '가상 지역';
     region.dispatchEvent(new Event('change', { bubbles: true }));
   });
-  expect(cards()).toHaveLength(2);
-  act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
   expect(cards()).toHaveLength(1);
   expect(cards()[0].textContent).toContain('POL_TEST_002');
 });
 
-it('정렬과 접수 상태도 검색 버튼을 눌러야 적용하고, 필터 초기화는 바로 적용한다', async () => {
+it('정렬·접수 상태는 바로 적용하고 검색어만 검색 버튼으로 적용하며, 필터 초기화는 정렬을 유지한다', async () => {
   const before = { ...item('POL_TEST_002'), policy_name: '하 가상 정책 (sample_only)', reception_status: 'before' as const, deadline_rank: 1 };
   const unknown = { ...item('POL_TEST_001'), policy_name: '가 가상 정책 (sample_only)', deadline_rank: 3 };
   load.mockResolvedValueOnce({ ...page(), items: [unknown, before] } as PolicyListResponse);
@@ -114,8 +116,8 @@ it('정렬과 접수 상태도 검색 버튼을 눌러야 적용하고, 필터 �
     root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
   const names = () => cards().map(card => card.textContent ?? '');
-  const submit = () => act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
-  // 기본은 마감 임박순: 접수 예정 정책이 일정 미확인 정책보다 먼저 온다(dev는 서버 deadline_rank, 이전 버전은 접수 상태로 순위를 정한다)
+  const chip = (text: string) => [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === text)!;
+  // 기본은 마감 임박순: 서버 deadline_rank가 작은 접수 예정 정책이 먼저 온다
   expect(names()[0]).toContain('하 가상 정책');
 
   const sort = host.querySelectorAll<HTMLSelectElement>('.explorer-selects select')[2];
@@ -123,27 +125,30 @@ it('정렬과 접수 상태도 검색 버튼을 눌러야 적용하고, 필터 �
     sort.value = 'name';
     sort.dispatchEvent(new Event('change', { bubbles: true }));
   });
-  expect(names()[0]).toContain('하 가상 정책');
-  submit();
   expect(names()[0]).toContain('가 가상 정책');
 
-  const chip = [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === '접수 예정')!;
-  act(() => chip.click());
-  expect(chip.getAttribute('aria-pressed')).toBe('true');
-  expect(cards()).toHaveLength(2);
-  submit();
+  act(() => chip('접수 예정').click());
+  expect(chip('접수 예정').getAttribute('aria-pressed')).toBe('true');
   expect(cards()).toHaveLength(1);
   expect(names()[0]).toContain('하 가상 정책');
 
-  // 결과가 없을 때 나오는 '필터 초기화'는 검색 버튼 없이 바로 적용한다
-  const open = [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === '접수 중')!;
-  act(() => open.click());
-  submit();
+  // 검색어는 입력만으로는 적용하지 않고, 검색 버튼을 누르면 적용한다(고른 접수 상태는 유지)
+  const search = host.querySelector<HTMLInputElement>('input[type="search"]')!;
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+  act(() => {
+    setter.call(search, '없는 정책');
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  expect(cards()).toHaveLength(1);
+  act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
   expect(cards()).toHaveLength(0);
+
+  // 결과가 없을 때 나오는 '필터 초기화'는 검색어 칸까지 비우고, 고른 정렬(이름순)은 그대로 둔다
   const reset = [...host.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === '필터 초기화')!;
   act(() => reset.click());
   expect(cards()).toHaveLength(2);
-  // 초기화해도 고른 정렬(이름순)은 그대로 둔다
+  expect(search.value).toBe('');
+  expect(chip('전체').getAttribute('aria-pressed')).toBe('true');
   expect(names()[0]).toContain('가 가상 정책');
 });
 
