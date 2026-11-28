@@ -149,10 +149,14 @@ export interface FollowUp {
   field?: string | null; // ask_info일 때: age | region | income
 }
 
+/** notice 종류(계약 v1.13). 화면은 문장 대신 이 값으로 안내를 알아본다. 예전 응답·예시 응답에는 없을 수 있다. */
+export type NoticeCode = 'unknown_region' | 'condition_hold' | 'answer_aligned';
+
 export interface Notice {
   kind: 'info' | 'warn';
   title: string;
   text: string;
+  code?: NoticeCode | null;
 }
 
 /**

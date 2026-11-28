@@ -76,8 +76,9 @@ class TestFrontendCheckerWording(unittest.TestCase):
         self.assertEqual(result["conditions"][0]["reason"], frontend)
 
     def test_hold_notice_matches_pipeline(self):
-        frontend = ts_string(ts_source("src/lib/answerView.ts"), r"HOLD_NOTICE_TEXT = '([^']+)'")
-        self.assertEqual(pipeline.HOLD_NOTICE_TEXT, frontend)
+        # v1.13: 화면은 보류 안내를 문장 대신 notice.code로 알아본다.
+        frontend = ts_string(ts_source("src/lib/answerView.ts"), r"HOLD_NOTICE_CODE = '([^']+)'")
+        self.assertIn(f'_warn_notice("{frontend}", HOLD_NOTICE_TEXT)', Path(pipeline.__file__).read_text(encoding="utf-8"))
 
     def test_fixture_group_rows_use_current_checker_wording(self):
         fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))

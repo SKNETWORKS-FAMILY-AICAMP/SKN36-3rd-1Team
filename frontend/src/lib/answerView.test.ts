@@ -57,7 +57,7 @@ describe('answerView 답변 상태별 표시', () => {
 
 describe('자동 판정 보류 안내 문구 (#78 합의)', () => {
   type Check = AskResponse['policy_checks'][number];
-  const hold = { kind: 'warn' as const, title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.' };
+  const hold = { kind: 'warn' as const, title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.', code: 'condition_hold' as const };
   const age30 = fromChecker.POL_005_30 as Check;
   const age80 = fromChecker.POL_005_80 as Check;
 
@@ -65,6 +65,17 @@ describe('자동 판정 보류 안내 문구 (#78 합의)', () => {
     expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age30] }).warning).toEqual(HOLD_NOTICE_DISPLAY);
     // 확정 불일치 정책이 함께 있어도 확인 필요 정책이 하나라도 있으면 합의 문구다.
     expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80, age30] }).warning).toEqual(HOLD_NOTICE_DISPLAY);
+  });
+
+  it('보류 안내는 문장이 아니라 notice.code로 알아본다 (#165, 계약 v1.13)', () => {
+    // 같은 문장이어도 code가 없으면 일반 경고로 그대로 보여 준다.
+    const sameTextWithoutCode = { kind: 'warn' as const, title: hold.title, text: hold.text };
+    expect(answerView({ ...base, answer: '답변[1]', notice: sameTextWithoutCode, policy_checks: [age30] }).warning)
+      .toEqual(sameTextWithoutCode);
+    // 문장이 달라도 code가 condition_hold면 보류 안내로 보고 합의 문구로 보여 준다.
+    const otherText = { ...hold, text: '다른 문장' };
+    expect(answerView({ ...base, answer: '답변[1]', notice: otherText, policy_checks: [age30] }).warning)
+      .toEqual(HOLD_NOTICE_DISPLAY);
   });
 
   it('제외 조건에 해당해 불일치가 확정된 정책만 있으면 서버 문장을 그대로 둔다', () => {

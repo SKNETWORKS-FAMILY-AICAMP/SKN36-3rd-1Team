@@ -36,7 +36,7 @@ SCOPED_CONDITION_FIELDS = SCOPED_ELIGIBILITY_FIELDS
 QUALITY_REASON = "데이터가 불확실하여 공식 공고에서 조건을 확인해야 합니다."
 MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했습니다. 정보를 입력하거나 공식 공고에서 확인해 주세요."
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
-# 화면(frontend/src/lib/answerView.ts)이 이 문장으로 일반 보류 안내를 알아본다. 바꾸면 화면도 함께 바꾼다.
+# 일반 보류 안내. 화면(frontend/src/lib/answerView.ts)은 문장이 아니라 notice.code(condition_hold)로 알아본다.
 HOLD_NOTICE_TEXT = "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
 UNKNOWN_REGION_NOTICE_TEXT = "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."
 ALIGNED_NOTICE_TEXT = "신청 주소·접수 상태·신청 자격은 확인된 정책 정보를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."
@@ -212,9 +212,9 @@ def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str 
 
 
 
-def _warn_notice(text: str) -> dict:
-    """화면 상단 '추가 확인 필요' 안내."""
-    return {"kind": "warn", "title": "추가 확인 필요", "text": text}
+def _warn_notice(code: str, text: str) -> dict:
+    """화면 상단 '추가 확인 필요' 안내. code는 계약 §8.3 notice.code 값이다."""
+    return {"kind": "warn", "title": "추가 확인 필요", "text": text, "code": code}
 
 
 def _root_index(conditions: list[dict]) -> int | None:
@@ -857,7 +857,7 @@ def run_ask_pipeline(
         항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
     """
     profile, unknown_region = _normalized_profile(request)
-    notice = _warn_notice(UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
+    notice = _warn_notice("unknown_region", UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
     policies = _search_request_policies(request, search_fn, profile["region"])
     # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
     ranked = rank_citable_contexts(policies)
@@ -892,9 +892,9 @@ def run_ask_pipeline(
         checks = []
     checks = [{**check, "official_requirements": requirements.get(check["policy_id"])} for check in checks]
     if notice is None and any(c["status"] == CHECK for p in checks for c in p["conditions"]):
-        notice = _warn_notice(HOLD_NOTICE_TEXT)
+        notice = _warn_notice("condition_hold", HOLD_NOTICE_TEXT)
     if notice is None and aligned:
-        notice = _warn_notice(ALIGNED_NOTICE_TEXT)
+        notice = _warn_notice("answer_aligned", ALIGNED_NOTICE_TEXT)
     if display_fn is not None:
         checks = [_display_check(check, display_fn) for check in checks]
     return AskResponse(

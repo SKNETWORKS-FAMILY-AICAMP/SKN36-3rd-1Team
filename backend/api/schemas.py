@@ -171,10 +171,15 @@ class GeneratorOutput(BaseModel):
     follow_up_questions: list[FollowUp]
 
 
+# notice 종류(v1.13). 화면은 문장(text) 대신 이 값으로 안내 종류를 알아본다. 모르는 안내는 null.
+NoticeCode = Literal["unknown_region", "condition_hold", "answer_aligned"]
+
+
 class Notice(BaseModel):
     kind: Literal["info", "warn"]
     title: str
     text: str
+    code: NoticeCode | None = None
 
 
 class AskResponse(BaseModel):

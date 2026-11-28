@@ -329,7 +329,7 @@ const unjudgedPolicy: AskResponse['policy_checks'][number] = {
   reception_status: 'open', source_url: 'https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007', official_apply_url: 'https://www.work24.go.kr',
   conditions: [{ field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: '조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.' }],
 };
-const holdNotice = { kind: 'warn', title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.' } as const;
+const holdNotice = { kind: 'warn', title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.', code: 'condition_hold' as const } as const;
 
 function renderAnswer(response: AskResponse) {
   const noop = () => {};
