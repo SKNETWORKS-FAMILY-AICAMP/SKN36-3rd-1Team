@@ -244,7 +244,7 @@ export default function App() {
         <div className="wrap">
           <a className="logo" href={askHref} aria-label="SSOK 홈"><Logo /></a>
           <nav className="tabs" aria-label="화면">
-            {/* 좁은 화면에서는 로고가 가려지지 않게 '하기'·'정책'을 줄여 보여 준다 */}
+            {/* 좁은 화면에서는 로고가 가려지지 않게 '정책'을 줄여 보여 준다 */}
             <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>맞춤 정책 찾기</a>
             <a href={lifeHref()} aria-current={route.page === 'life' ? 'page' : undefined}>생애주기</a>
             <a href={mapHref()} aria-current={route.page === 'map' ? 'page' : undefined}><span className="long">정책&nbsp;</span>관계 지도</a>

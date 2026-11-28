@@ -88,14 +88,14 @@ npm run dev
 src/
 ├── App.tsx              # 화면 상태(내 조건·대화·테마)와 질문 흐름
 ├── api/                 # 백엔드 계약(types)과 호출(client)
-├── config/              # 분야 카드(categories), 대표 상황(personas), 되물을 정보 항목(infoFields), 요청 설정값(request), 관계 지도 설정(graph)
+├── config/              # 분야 카드(categories), 대표 상황 질문(personas, 예시 응답·테스트용), 되물을 정보 항목(infoFields), 요청 설정값(request), 관계 지도 설정(graph)
 ├── mock/mockAsk.ts      # 예시 응답 (sample_only)
 ├── graph/               # 데이터 읽기(loadGraph), 그래프 색인·조건 트리(graphModel), 원형 배치·확대(graphLayout), 생애단계 묶기(lifeStages)
 ├── lib/route.ts         # 화면 전환 (#/, #/life, #/map)
 ├── lib/answerView.ts    # 답변 상태별로 화면에 보여 줄 내용 정하기
 ├── lib/parseProfile.ts  # 문장 속 나이·지역·소득 읽기
 ├── lib/validate.ts      # 나이 입력 검증(0~120 정수), 자녀 월령 검증(0 이상 정수), 외부 링크는 http/https만 허용
-├── components/          # Hero(첫 화면), PersonaStart(대표 상황), TurnView(질문·답변), LifeTimeline(생애주기), PolicyMap(관계 지도), Floating(하단 입력창·이동 버튼·알림), Icon(손그림 SVG)
+├── components/          # Hero(첫 화면), TurnView(질문·답변), LifeTimeline(생애주기), PolicyMap(관계 지도), Floating(하단 입력창·이동 버튼·알림), Icon(손그림 SVG)
 └── styles.css           # 색은 :root 토큰으로 관리, 다크는 테마 버튼으로만
 ```
 
