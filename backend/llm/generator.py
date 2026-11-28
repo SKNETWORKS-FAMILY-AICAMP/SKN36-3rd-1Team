@@ -17,6 +17,7 @@ from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURN
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
 from backend.llm.month_age_guard import QUOTED_WRONG_WORDING, ground_child_month_ranges
+from backend.llm.negation_guard import restore_negated_exclusions
 from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
@@ -1896,5 +1897,7 @@ def generate_answer(
     # The policy-specific guard uses selected source document IDs, which are
     # not needed in the model's normalized context payload.
     response = ground_fishing_days(response, question, contexts)
-    return ground_child_month_ranges(response, cleaned_contexts)
+    response = ground_child_month_ranges(response, cleaned_contexts)
+    # 제외 대상에서 '미·비·무·불' 접두어를 빠뜨려 뜻이 뒤집힌 표현만 인용 원문대로 되돌린다.
+    return restore_negated_exclusions(response, cleaned_contexts)
 
