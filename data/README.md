@@ -5,8 +5,9 @@
 > **담당자:** 데이터 / API / 전처리 담당 (장반석)  
 > **인계 대상:** DB 엔지니어(주민혁 님), RAG/검색·조건 확인 담당(나지인 님, 박소희 님), React 시연 UI/발표 담당(강민지 님)  
 > **상태:** **STEP 1~3 수집·정제·정합성 검증 완료 및 DB 인계 패키지 배포 완료 (파일·참조 무결성 100% PASS, Broken References = 0)**  
-> **3차 최종 사용 데이터셋:** `data/releases/v1.4.0-candidate/` (정책 246 · 문서 261 · 인계 청크 599 · Neo4j 노드 1,004 · 관계 2,431). v1.3.2 대비 문서 15건이 추가됐습니다. 서비스 Qdrant에는 B2 청킹 후 1,138개 포인트를 적재해 검증했습니다. [최종 DB 복원 가이드](../docs/development/ISSUE43_RESTORE_GUIDE.md)
-> **체크섬 기준:** `data/handoff/`, `data/releases/`는 `.gitattributes`로 줄바꿈 변환을 끄고 저장소 바이트(LF) 기준으로 SHA-256을 기록한다. Windows·Mac·Linux 어디서 내려받아도 `verify_handoff_package.py` 결과가 같다.
+> **3차 최종 사용 데이터셋:** `data/releases/v1.4.0-candidate/` (정책 249 · 문서 273 · 릴리스 청크 672 · Neo4j 노드 1,147 · 관계 2,702, manifest 기준). manifest 상태는 `CANDIDATE / PENDING_DB_REVIEW`(DB 담당 최종 승인 대기)이며, 서비스와 R3D 복원 번들은 이 후보 데이터를 그대로 사용합니다. 서비스 Qdrant에는 B2 청킹 1,249 Point(B3 1,338 Point)를 적재해 2026-11-25 독립 복원으로 검증했습니다. [R3 통합 복원 Runbook](../docs/development/ISSUE105_R3_RUNBOOK.md) · 이 문서의 아래 본문은 v1.3.2(2026-11-05) 인계 기준 기록입니다.
+> **체크섬 기준:** `data/handoff/`, `data/releases/`는 `.gitattributes`로 줄바꿈 변환을 끄고 저장소 바이트(LF) 기준으로 SHA-256을 기록한다. Windows·Mac·Linux 어디서 내려받아도 `verify_handoff_package.py` 결과가 같다.  
+> **CHANGELOG 표 정정 (2026-11-29):** `releases/v1.4.0-candidate/CHANGELOG.md` §1 표의 "그래프 관계 (전체) 3615 → 2702, +123"과 "ConditionGroup 343 → 354, +12"는 순증감이 아니라 새로 추가된 항목 수다. 실제 순증감은 관계 **−913**(조건 관계 교정으로 `CONTAINS_CONDITION` −511·`REQUIRES_CONDITION` −524 등), ConditionGroup **+11**이다. manifest의 `relationships_added: 123`·`condition_groups_added: 12`도 같은 뜻(추가 수)이다. 또 §1-2 절 번호가 두 번 쓰였다. CHANGELOG와 manifest는 manifest 해시와 R3D 복원 번들 기준값에 묶여 있어 파일은 고치지 않고 여기에만 기록한다.  
 
 ---
 

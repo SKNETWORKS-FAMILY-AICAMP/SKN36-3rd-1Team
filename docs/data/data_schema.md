@@ -3,6 +3,7 @@
 > **담당:** 데이터 수집/검증 담당 (장반석)  
 > **상태:** **3차 연동 및 전수 검증 완료**  
 > **근거:** [PRD §6](../product/PRD.md), [CODING_STYLE §8](../development/CODING_STYLE.md), 3차 작업 지시서 §6
+> **범위 안내 (2026-11-29):** 아래 §2의 건수(237·246·557)는 수집 단계 `data/processed/`(v1.3.2 기준) 파일의 건수다. 서비스가 쓰는 릴리스 `data/releases/v1.4.0-candidate/`는 정책 249 · 문서 273 · 청크 672이고, 필드 정본은 [data_contract.md](data_contract.md)다. 릴리스 청크 중 42개는 `CHK_DOC_STG_*` 형식이며 계약의 `chunk_id` 규칙(`CHK_` 허용)을 따른다.
 
 ---
 

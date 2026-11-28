@@ -25,7 +25,8 @@
 | [`product/PRD.md`](product/PRD.md) | 서비스 범위와 요구사항 |
 | [`api/ask_contract.md`](api/ask_contract.md) | 질문 API와 응답 계약 |
 | [`data/data_contract.md`](data/data_contract.md) | 데이터 필드와 해석 규칙 |
-| [`development/ISSUE43_RESTORE_GUIDE.md`](development/ISSUE43_RESTORE_GUIDE.md) | 최종 DB 복원 및 검증 |
+| [`development/ISSUE105_R3_RUNBOOK.md`](development/ISSUE105_R3_RUNBOOK.md) | 최종 DB 복원 및 검증 (현재 권장 R3D 번들) |
+| [`development/ISSUE43_RESTORE_GUIDE.md`](development/ISSUE43_RESTORE_GUIDE.md) | 이전 DB 복원 가이드 (r2 이전 기록, 문제 해결 절 참고용) |
 | [`development/ISSUE41_AB_RUN03_ANALYSIS.md`](development/ISSUE41_AB_RUN03_ANALYSIS.md) | 임베딩 모델 비교 기록 |
 
 ## 그 외 루트에 남아 있는 문서
@@ -38,4 +39,4 @@
 
 ## 관련 문서
 
-- [상세 가이드](../README.md#로컬에서-전체-실행하기)
+- [상세 가이드](../README.md#전체-로컬-실행--실제-검색과-답변)

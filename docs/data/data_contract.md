@@ -1,7 +1,9 @@
 # SSOK — 최종 통합 데이터 계약서 (data_contract.md)
 
 > **기준일시:** 2026-11-05 (KST)  
-> **버전:** `v1.3.0-final-contract`  
+> **버전:** `v1.4.0` (2026-11-29 표기 갱신. 이전 표기 `v1.3.0-final-contract`)  
+> **정본:** 이 파일이 현재 데이터 계약의 정본이다. `data/handoff/data_contract.md`는 v1.3.2 인계 패키지에 포함돼 manifest 해시로 고정된 당시 사본이라 수정하지 않는다.  
+> **개정 (2026-11-09~11-10, v1.4.0):** 정책 노드에 소득·가구 원문 확인 필드(`income_source_review` 등)와 신청 기간 필드(`application_start`·`application_end`·`application_is_ongoing`·`application_status_note`)를 추가하고, `chunk_id` 규칙에 `CHK_` 형식을 허용했다. 2026-11-29에는 내용 변경 없이 헤더 버전 표기만 본문에 맞췄다.  
 > **개정 (2026-11-06):** `Policy.official_apply_url`을 선택(Nullable)으로 변경 — 신청 주소가 확인된 경우에만 값이 있다. `Document`의 `doc_type`·`law_article`·`effective_date`·`version` 등 선택 속성 명시. v1.3.2 데이터 자체는 변경 없음(기존 값은 모두 채워져 있어 호환).  
 > **당사자:** 데이터 엔지니어링 파이프라인(생성) ↔ Neo4j Graph DB & Qdrant Vector DB(소비)  
 > **목적:** 데이터 파이프라인과 다운스트림 데이터베이스(Graph/Vector) 간의 무결성, 필드 타입, 제약조건 및 생명주기를 규정하는 공식 법적/기술적 계약

@@ -24,7 +24,7 @@
 
 | 파일 | 내용 |
 | --- | --- |
-| [`ISSUE43_RESTORE_GUIDE.md`](ISSUE43_RESTORE_GUIDE.md) | 팀원용 최종 DB 복원·검증 가이드 |
+| [`ISSUE43_RESTORE_GUIDE.md`](ISSUE43_RESTORE_GUIDE.md) | 팀원용 DB 복원·검증 가이드 (r2 이전 구버전, 현재는 [`ISSUE105_R3_RUNBOOK.md`](ISSUE105_R3_RUNBOOK.md)) |
 | [`FINAL_DB_RELOAD_20261110.md`](FINAL_DB_RELOAD_20261110.md) | 최종 DB 재적재 및 독립 인계 검증(2026-11-10) |
 | [`issue43_restore.compose.yaml`](issue43_restore.compose.yaml) | 복원용 docker-compose 설정 |
 

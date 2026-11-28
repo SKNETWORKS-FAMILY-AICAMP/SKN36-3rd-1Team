@@ -7,14 +7,14 @@
 1. [docs/product/PRD.md](docs/product/PRD.md) — 서비스 범위, 데이터 계약(§6), 결정 대기 항목(§13)
 2. [docs/development/CODING_STYLE.md](docs/development/CODING_STYLE.md) — 코딩 규칙 전반
 3. [README.md](README.md) — 폴더 구조와 팀별 담당 영역
-4. 작업 대상 폴더의 기존 코드와 `docs/api/`, `data/schemas/`의 계약 문서
+4. 작업 대상 폴더의 기존 코드와 계약 문서 — API는 `docs/api/`, 데이터는 [docs/data/data_contract.md](docs/data/data_contract.md)·[docs/data/data_schema.md](docs/data/data_schema.md) (`data/schemas/`에는 위치 안내만 있다)
 
 문서끼리 충돌하면 CODING_STYLE §2의 우선순위(보안·무결성 → PRD·계약 → 기존 구조 → 스타일)를 따르고, 충돌 내용을 사용자에게 보고한다.
 
 ## 2. 범위와 담당 경계
 
 - 요청받은 담당 영역(README "팀별 담당 영역")의 파일만 수정한다.
-- 공통 파일(`README.md`, `.env.example`, `AGENTS.md`, `docs/api/`, `data/schemas/`)이나 다른 담당 영역을 바꿔야 하면 **먼저 알리고** 변경 사유를 남긴다.
+- 공통 파일(`README.md`, `.env.example`, `AGENTS.md`, `docs/api/`, `docs/data/data_contract.md`, `data/schemas/`)이나 다른 담당 영역을 바꿔야 하면 **먼저 알리고** 변경 사유를 남긴다.
 - PRD §13·CODING_STYLE §17의 미확정 항목(LLM·임베딩 모델, 청킹 규칙, 브랜치 전략 등)을 임의로 확정하지 않는다.
 - 동일 기능 폴더를 중복 생성하지 않는다. 기존 구조를 재사용한다.
 - 기존 파일을 삭제하거나 통째로 덮어쓰지 않는다.
