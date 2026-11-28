@@ -4,7 +4,7 @@ import { policyQuestion } from '../config/request';
 import { loadGraphDataset, type GraphDataset } from '../graph/loadGraph';
 import { searchPolicies } from '../graph/graphModel';
 import {
-  formatAgeRange, groupByCategory, lifeStageSummary, stageForAge, type AgeRange, type LifeStage, type StagePolicy,
+  formatAgeRange, groupByCategory, lifeStageSummary, limitedAgeRanges, stageForAge, type AgeRange, type LifeStage, type StagePolicy,
 } from '../graph/lifeStages';
 import { lifeHref, mapHref } from '../lib/route';
 import type { RecentPolicies } from '../lib/recentPolicies';
@@ -74,7 +74,7 @@ function Timeline({ data, summary, stageName, myAge, onAsk, recent }: {
     ?? stages.find(hasRecent)
     ?? stages.find((s) => s.id === myStage)
     ?? [...stages].sort((a, b) => b.policies.length - a.policies.length)[0];
-  const withAge = selected.policies.filter((p) => limitedAges(p.ages).length > 0).length;
+  const withAge = selected.policies.filter((p) => limitedAgeRanges(p.ages).length > 0).length;
   const searching = query.trim().length > 0;
   const matches = useMemo(() => {
     if (!searching) return null;
@@ -150,7 +150,7 @@ function StagePanel({ stage, withAge, onAsk, recentIds, matches }: {
         <b>{stage.name}{stage.range ? ` (${formatAgeRange(stage.range)})` : ''}</b>
         <span className="map-count">정책 {stage.policies.length}개 · 나이 기준 확인 {withAge}개</span>
       </div>
-      <p className="life-caution">ⓘ 생애단계는 데이터 분류예요. 나이 배지가 있는 정책만 원문 나이 기준이 확인됐어요.</p>
+      <p className="life-caution">ⓘ 나이 배지가 있는 정책은 원문 나이 기준에 맞는 단계에, 나머지는 데이터 분류대로 넣었어요.</p>
 
       {matches !== null
         ? <p role="status" className="map-dim">{matches.length
@@ -185,8 +185,6 @@ function StagePanel({ stage, withAge, onAsk, recentIds, matches }: {
 /** 타임라인의 짧은 나이 표기: 0~5세, 65세 이상 */
 const stageRangeText = (r: AgeRange) => (r.max == null ? `${r.min}세 이상` : `${r.min}~${r.max}세`);
 
-/** 실제로 제한이 있는 나이 조건만 (데이터의 '0~120세'처럼 사실상 제한 없는 조건은 배지로 보여 주지 않는다) */
-const limitedAges = (ages: AgeRange[]) => ages.filter((a) => !(a.min === 0 && a.max == null));
 
 /**
  * 정책 한 줄. 누르면 그 자리에서 데이터에 정리된 요약(대상·내용·기간)과
@@ -196,7 +194,7 @@ function PolicyRow({ item, fromChat, open, onToggle, onAsk }: {
   item: StagePolicy; fromChat: boolean; open: boolean; onToggle: () => void; onAsk: (question: string) => void;
 }) {
   const { policy } = item;
-  const ages = [...new Set(limitedAges(item.ages).map((a) => formatAgeRange(a).replace('만 ', '')))];
+  const ages = [...new Set(limitedAgeRanges(item.ages).map((a) => formatAgeRange(a).replace('만 ', '')))];
   const text = (key: string) => (typeof policy.data[key] === 'string' && (policy.data[key] as string).trim() ? policy.data[key] as string : null);
   const region = text('region');
   const source = safeHttpUrl(text('source_url'));

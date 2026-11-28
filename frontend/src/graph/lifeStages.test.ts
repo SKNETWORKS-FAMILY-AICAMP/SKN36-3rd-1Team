@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { NODE_FILES, RELATIONSHIP_FILE } from '../config/graph';
 import { buildGraphIndex } from './graphModel';
 import {
-  formatAgeRange, groupByCategory, lifeStageSummary, parseAgeRange, policyLifeStages, stageForAge,
+  formatAgeRange, groupByCategory, lifeStageSummary, limitedAgeRanges, parseAgeRange, policyAgeRanges, policyLifeStages,
+  policyStageIds, stageForAge,
 } from './lifeStages';
 import { loadGraphDataset } from './loadGraph';
 
@@ -76,14 +77,83 @@ describe('생애단계 묶기 (가상 그래프)', () => {
   });
 });
 
+describe('나이 기준으로 생애단계 정하기 (가상 그래프)', () => {
+  /** 단계 6개와, 데이터 분류가 나이 기준과 어긋난 정책들 (sample_only) */
+  function ageIndex() {
+    const files: Record<string, string> = Object.fromEntries(Object.keys(NODE_FILES).map((f) => [f, '']));
+    files['nodes_policy.jsonl'] = jsonl([
+      { policy_id: 'A', policy_name: '가상 6~16세 정책' },
+      { policy_id: 'B', policy_name: '가상 18세 이상 정책' },
+      { policy_id: 'C', policy_name: '가상 나이 제한 없음 정책' },
+      { policy_id: 'D', policy_name: '가상 나이 조건 없는 정책' },
+    ]);
+    files['nodes_lifestage.jsonl'] = jsonl([
+      ['영유아', '0~5세'], ['아동', '6~12세'], ['청소년', '13~18세'], ['청년', '19~39세'], ['중장년', '40~64세'], ['노년', '65세 이상'],
+    ].map(([name, age_range]) => ({ stage_id: `LIFESTAGE_${name}`, name, age_range })));
+    files['nodes_eligibility_condition.jsonl'] = jsonl([
+      { condition_id: 'AGE_6_16', type: 'AGE', value: '6~16' },
+      { condition_id: 'AGE_18_120', type: 'AGE', value: '18~120' },
+      { condition_id: 'AGE_0_120', type: 'AGE', value: '0~120' },
+    ]);
+    files[RELATIONSHIP_FILE] = jsonl([
+      { source_id: 'A', relation: 'REQUIRES_CONDITION', target_id: 'AGE_6_16' },
+      { source_id: 'A', relation: 'APPLIES_TO_LIFESTAGE', target_id: 'LIFESTAGE_영유아' },
+      { source_id: 'B', relation: 'REQUIRES_CONDITION', target_id: 'AGE_18_120' },
+      { source_id: 'B', relation: 'APPLIES_TO_LIFESTAGE', target_id: 'LIFESTAGE_청년' },
+      { source_id: 'C', relation: 'REQUIRES_CONDITION', target_id: 'AGE_0_120' },
+      { source_id: 'C', relation: 'APPLIES_TO_LIFESTAGE', target_id: 'LIFESTAGE_노년' },
+      { source_id: 'D', relation: 'APPLIES_TO_LIFESTAGE', target_id: 'LIFESTAGE_중장년' },
+    ]);
+    return buildGraphIndex(files);
+  }
+
+  it('나이 기준이 있으면 데이터 분류 대신 그 나이와 겹치는 단계에 넣는다', () => {
+    const index = ageIndex();
+    expect(policyLifeStages(index, 'A')).toEqual(['아동', '청소년']); // 영유아 연결은 나이 기준 밖이라 빠진다
+    expect(policyLifeStages(index, 'B')).toEqual(['청소년', '청년', '중장년', '노년']);
+  });
+
+  it("나이 제한이 없거나('0~120') 나이 조건이 없으면 데이터 분류를 그대로 따른다", () => {
+    const index = ageIndex();
+    expect(policyLifeStages(index, 'C')).toEqual(['노년']);
+    expect(policyLifeStages(index, 'D')).toEqual(['중장년']);
+  });
+
+  it('타임라인 목록도 같은 기준으로 묶는다', () => {
+    const { stages, unclassified } = lifeStageSummary(ageIndex());
+    const names = (name: string) => stages.find((s) => s.name === name)!.policies.map((p) => p.policy.id);
+    expect(names('영유아')).toEqual([]);
+    expect(names('아동')).toEqual(['A']);
+    expect(names('노년').sort()).toEqual(['B', 'C']);
+    expect(unclassified).toBe(0);
+  });
+});
+
 describe('팀 기준 데이터', () => {
-  it('생애단계 정책 수가 그래프의 APPLIES_TO_LIFESTAGE 관계 수와 같고, 미분류와 합치면 전체 정책이 빠짐없이 들어간다', async () => {
+  it('나이 기준이 있는 정책은 그 나이와 겹치는 단계에만, 나머지는 데이터 분류대로 들어가고 빠지는 정책이 없다', async () => {
     const { index } = await loadGraphDataset();
     const { stages, unclassified } = lifeStageSummary(index);
-    const relations = [...index.outgoing.values()].flat().filter((e) => e.relation === 'APPLIES_TO_LIFESTAGE');
-    expect(stages.reduce((sum, s) => sum + s.policies.length, 0)).toBe(relations.length);
+    expect(stages.every((s) => s.range)).toBe(true);
+    for (const policy of index.policies) {
+      const ages = limitedAgeRanges(policyAgeRanges(index, policy.id));
+      const placed = stages.filter((s) => s.policies.some((p) => p.policy.id === policy.id)).map((s) => s.id);
+      expect(placed).toEqual(policyStageIds(index, policy.id));
+      if (ages.length === 0) continue;
+      for (const stage of stages) {
+        const fits = ages.some((a) => a.min <= (stage.range!.max ?? Infinity) && stage.range!.min <= (a.max ?? Infinity));
+        expect(placed.includes(stage.id)).toBe(fits);
+      }
+    }
     const classified = new Set(stages.flatMap((s) => s.policies.map((p) => p.policy.id)));
     expect(classified.size + unclassified).toBe(index.policies.length);
-    expect(stages.every((s) => s.range)).toBe(true);
+  });
+
+  it('공식 나이 기준 밖의 단계에 들어갔던 정책이 그 단계에서 빠진다', async () => {
+    const { index } = await loadGraphDataset();
+    expect(policyLifeStages(index, 'POL_GOV_049')).not.toContain('영유아'); // 열린교육바우처 6~16세
+    expect(policyLifeStages(index, 'POL_BOK_018')).not.toContain('노년'); // 가사·간병 방문 0~64세
+    const activity = policyLifeStages(index, 'POL_GOV_023'); // 장애인 활동지원(추가) 6~64세
+    expect(activity).not.toContain('영유아');
+    expect(activity).not.toContain('노년');
   });
 });
