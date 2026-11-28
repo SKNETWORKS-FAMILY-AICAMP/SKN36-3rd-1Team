@@ -296,9 +296,18 @@ class ApplicationUrlTests(unittest.TestCase):
 class CandidateIntegrityTests(unittest.TestCase):
     def test_chunk_texts_and_document_hashes_match_saved_bodies(self):
         report = verify_sources()
-        self.assertEqual(report["status"], "PASS")
+        # 저장된 본문 해시·청크 대조는 저장소 파일만으로 하므로 항상 확인한다.
         self.assertEqual(report["body_hashes_checked"], 273)
         self.assertEqual(report["chunks_checked_against_body"], 672)
+        self.assertEqual(report["body_hash_mismatches"], [])
+        self.assertEqual(report["unmatched_chunk_ids"], [])
+        self.assertEqual(report["raw_hash_mismatches"], [])
+        # 원본 파일은 Git에서 제외돼 복원한 환경에만 있다(README). 없으면 원본 대조만 건너뛴다.
+        missing = report["missing_raw_documents"]
+        if missing:
+            self.skipTest(f"Git 제외 원본 파일 {len(missing)}개가 없어 원본 대조만 건너뜀 "
+                          f"(저장된 본문·청크 대조는 통과): {', '.join(missing)}")
+        self.assertEqual(report["status"], "PASS")
 
     def test_package_is_valid_for_both_database_payloads(self):
         _, report, _, chunks = validate_package(PACKAGE)
