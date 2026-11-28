@@ -34,6 +34,10 @@ _LABELS = {
     "eligibility": "자격 요건",
 }
 
+# 결합 논리(logic)가 UNKNOWN인 그룹의 사유. 내부 값 'UNKNOWN'을 사용자 문구에 쓰지 않는다.
+# 화면(frontend/src/lib/conditionGroups.ts·TurnView.tsx)도 이 문구로 미판정 행을 알아본다.
+UNKNOWN_GROUP_REASON = "조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다."
+
 _GROUP_REASONS = {
     "AND": "모든 조건을 충족해야 합니다(종합 결과).",
     "OR": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
@@ -299,7 +303,7 @@ def _condition(condition: dict, profile: dict) -> dict:
     return _result(
         field,
         CHECK,
-        f"{condition.get('name') or condition.get('type') or '이 조건'}"
+        f"{condition.get('name') or '이 조건'}"
         "은(는) 추가 확인이 필요합니다.",
     )
 
@@ -377,7 +381,7 @@ def _walk(
             _result(
                 "eligibility",
                 CHECK,
-                "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.",
+                UNKNOWN_GROUP_REASON,
             )
         ]
 
@@ -695,6 +699,10 @@ def _safe_review_text(value: object) -> str:
     return " ".join(value.split())[:MAX_REVIEW_TEXT_LENGTH]
 
 
+# 원문 검토 안내 행의 라벨. 그래프 조건 행(가구·주거 조건 등)과 구분하는 데도 쓴다.
+_SOURCE_REVIEW_LABELS = {"income": "소득 요건", "household": "가구 요건"}
+
+
 def _source_review_conditions(
     policy_node: dict,
     profile: dict,
@@ -712,10 +720,8 @@ def _source_review_conditions(
 
     results = []
 
-    for prefix, field, label in (
-        ("income", "income", "소득 요건"),
-        ("household", "housing", "가구 요건"),
-    ):
+    for prefix, field in (("income", "income"), ("household", "housing")):
+        label = _SOURCE_REVIEW_LABELS[prefix]
         status = policy_node.get(
             f"{prefix}_source_review"
         )
@@ -1038,6 +1044,7 @@ _GROUP_ONLY_FIELDS = SCOPED_ELIGIBILITY_FIELDS - PROFILE_INPUT_FIELDS
 
 def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_failed_root: dict | None) -> None:
     """품질 경고가 걸린 조건과 종합 판정을 needs_check로 보류한다. 확정된 단일 루트 실패는 유지한다."""
+    quality_held: set[int] = set()
     if affected:
         for item in conditions:
             if item is safe_failed_root and item["status"] == NO:
@@ -1058,6 +1065,7 @@ def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_fail
                     " 데이터 품질 경고로 "
                     "자동 판정을 보류합니다."
                 )
+                quality_held.add(id(item))
 
     if affected and ALL_ELIGIBILITY_FIELDS not in affected:
         for item in conditions:
@@ -1066,7 +1074,7 @@ def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_fail
                     continue
                 item["status"] = CHECK
 
-                if "데이터 품질 경고" not in item["reason"]:
+                if id(item) not in quality_held:
                     item["reason"] += (
                         " 일부 조건이 검증되지 않아 "
                         "종합 판정을 보류합니다."
@@ -1242,8 +1250,7 @@ def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
         return (
             item.get("field") == "housing"
             and item.get("status") == CHECK
-            and isinstance(item.get("reason"), str)
-            and item["reason"].startswith("가구 요건의 공식 원문 기준을 추가 확인해야 합니다.")
+            and item.get("label") == _SOURCE_REVIEW_LABELS["household"]
         )
 
     # 가구 원문 검토 결과가 있을 때만, 같은 상태의 그래프 조건과 묶는다.

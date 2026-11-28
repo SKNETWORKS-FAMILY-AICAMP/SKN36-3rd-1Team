@@ -79,7 +79,7 @@ describe('자동 판정 보류 안내 문구 (#78 합의)', () => {
 
   it("불일치 확정 정책과 '자동 판정 안 함' 정책만 있으면 서버 문장을 그대로 둔다", () => {
     const unjudged = { ...fromChecker.POL_GOV_002_70, conditions: [
-      { field: 'eligibility', status: 'needs_check', label: '자격 조건', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.' },
+      { field: 'eligibility', status: 'needs_check', label: '자격 조건', reason: '조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.' },
     ] } as Check;
     expect(answerView({ ...base, answer: '답변[1]', notice: hold, policy_checks: [age80, unjudged] }).warning).toEqual(hold);
   });
