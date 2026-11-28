@@ -34,7 +34,7 @@
 
 ## 1. MVP 확정 규칙 요약
 
-1. **검색:** `HybridSearchSession.search_policy_context(question, filters=..., k=10)` 사용. `k`는 정책 수가 아니라 **청크 Top-K**다.
+1. **검색:** `HybridSearchSession.search_policy_context(question, filters=..., k=10)` 사용. `k`는 정책 수가 아니라 **청크 Top-K**다. (#75) `selected_policy_id`가 없고 질문이 "교육비·구직·교통 지원"처럼 2~5개 분야를 가운뎃점(·, ㆍ)·쉼표·빗금, 또는 앞뒤를 띄어 쓴 '및/또는'으로 나열한 뒤 띄어 쓴 "지원·정책·혜택·제도·사업·서비스·수당·급여·바우처"가 오면 분야별 질문도 따로 검색한다(같은 `filters`·`k`, 원래 질문 1회 + 분야 수만큼). 원래 질문 결과를 기본으로 쓰고, 분야 검색 상위 3개 정책 중 정책명에 분야 낱말이 든 정책이 원래 결과 상위 5개에 있거나 그 5개 정책명에 분야 이름으로 시작하는 낱말이 있으면 이미 다룬 분야로 본다. 빠진 분야만 그 분야 검색 결과에서 정책명(‘국토교통부’ 같은 기관 이름 낱말 제외, 없으면 원문 근거)에 분야 낱말이 든 첫 정책을 원래 1위 바로 뒤에 넣고, `best_rank`·근거 청크 `rank`를 이 순서로 다시 매긴다. 채울 분야가 없으면 원래 결과를 그대로 쓴다. 조사 '와·과·이나·랑' 나열은 낱말 끝과 구분할 수 없어 나누지 않는다. 검색 중 하나라도 실패하면 기존과 같이 요청 전체를 검색 오류로 처리한다.
 2. **조건 함수:** 동기 `def check_eligibility(profile: dict, policy: dict) -> dict`.
 3. **LLM 함수:** 동기 `def generate_answer(question: str, contexts: list[dict], policy_checks: list[dict], history: list[dict] | None = None, profile: dict | None = None) -> dict`. Pipeline은 §3.2 정규화 프로필을 `profile=` 키워드로 넘긴다(§5.1).
 4. **조건 상태:** `eligible`, `ineligible`, `needs_check` / **접수 상태:** `before`, `open`, `closed`, `unknown`.
@@ -54,7 +54,7 @@ React AskRequest
   └─ POST /api/ask (FastAPI)
       └─ run_ask_pipeline(request, search_session)
           1) 입력 검증 + 프로필 정규화
-          2) Hybrid 검색(Qdrant + Neo4j): 청크 Top-10
+          2) Hybrid 검색(Qdrant + Neo4j): 청크 Top-10 (분야 나열 질문은 원래 결과에서 빠진 분야만 분야별 검색으로 보충, §1-1)
           3) rank_citable_contexts()로 인용 가능 후보를 한 번 만들고, 후보 정책마다 check_eligibility(profile, policy) 1회
           4) closed 정책(질문에 정책명 전체가 있는 정책 제외)을 후순위로 select_contexts(): source_id 부여 → complete_condition_evidence(): 누락된 AGE 근거 최대 1개 보강
           5) 선택된 context의 policy_id에 해당하는 정책만 선별(3의 판정 결과 재사용)
