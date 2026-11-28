@@ -114,11 +114,18 @@ class TestDatasetVersionPaths(unittest.TestCase):
         folder = f"v{hd.RELEASE_V140_VERSION}"
         self.assertEqual(hd.DEFAULT_HANDOFF_DIR.name, folder)
         load_graph = ts_source("src/graph/loadGraph.ts")
+        dataset = ts_source("src/config/dataset.ts")
         vite = (FRONTEND / "vite.config.ts").read_text(encoding="utf-8")
-        # 주석이 아니라 코드의 문자열 경로만 본다 ('...data/releases/<버전>/...' 또는 '...data/releases/<버전>').
-        frontend_folders = re.findall(r"""['"][^'"]*data/releases/(v[^/'"]+)[^'"]*['"]""", load_graph + vite)
-        self.assertGreaterEqual(len(frontend_folders), 3)      # loadGraph glob 2곳 + vite fs.allow 1곳 이상
-        self.assertEqual(set(frontend_folders), {folder})
+        # 프론트 데이터 버전은 config/dataset.ts의 DATASET_VERSION 하나다(#170).
+        version = re.search(r"""DATASET_VERSION\s*=\s*['"](v[^'"]+)['"]""", dataset)
+        self.assertIsNotNone(version, "config/dataset.ts에서 DATASET_VERSION을 찾지 못했습니다")
+        # Vite import.meta.glob은 상수를 못 써서 loadGraph.ts에 경로 문자열 2곳이 남는다. 주석이 아닌 코드 문자열만 본다.
+        glob_folders = re.findall(r"""['"][^'"]*data/releases/(v[^/'"]+)[^'"]*['"]""", load_graph)
+        self.assertGreaterEqual(len(glob_folders), 2)          # loadGraph glob 2곳
+        # vite fs.allow는 같은 상수(DATASET_DIR)를 가져다 쓴다.
+        self.assertRegex(vite, r"""import\s*\{[^}]*\bDATASET_DIR\b[^}]*\}\s*from\s*['"]\./src/config/dataset['"]""")
+        self.assertIn("${DATASET_DIR}", vite)
+        self.assertEqual(set(glob_folders) | {version.group(1)}, {folder})
 
 
 if __name__ == "__main__":
