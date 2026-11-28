@@ -460,7 +460,7 @@ class ListLineLinkFixTests(unittest.TestCase):
         # 쉼표 없이 첫 문장 전체가 빠져도 줄이 '다만 …'으로 시작하지 않게 한다.
         line = self.line("- **가상 직업훈련 사업**은 가상 누리집에서 수강 신청하며 수시 모집으로 적혀 있습니다. "
                          "다만 자격은 추가 확인이 필요하고, 직접 신청 링크는 확인되지 않았어요. [2]")
-        self.assertTrue(line.startswith("- 가상 직업훈련 사업: 다만 자격은"), line)
+        self.assertTrue(line.startswith("- 가상 직업훈련 사업: 자격은"), line)  # 접속어 '다만'도 뺀다.
         self.assertEqual(line.count("링크는 확인되지 않"), 1)
 
     def test_replaced_front_sentence_keeps_list_marker(self):

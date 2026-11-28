@@ -76,6 +76,8 @@ VISIT_NEGATION = re.compile(
 SEGMENT = re.compile(r"[\r\n]+|(?<=[.!?。])\s+")
 # 줄 맨 앞 목록 기호('- ', '* ', '1) ', '2. '). 보정으로 절을 바꾸거나 지워도 목록 모양은 남긴다(#122 후속).
 LIST_MARKER = re.compile(r"[ \t]*(?:[-*+•]|\d{1,2}[.)])[ \t]+")
+# 빠진 앞 문장에 이어 붙던 접속어.
+LEADING_CONJUNCTION = re.compile(r"^\s*(?:다만|하지만|그러나|그런데)[,\s]+")
 # 절이 문장부호(뒤 인용 포함)로 끝나면 다음 절은 새 문장이다.
 SENTENCE_END = re.compile(r"[.!?。！？](?:\s*\[\d+\])*\s*$")
 # 이미 밝힌 미확인 안내 안의 주소 명사('확인된 신청 주소는 … 비어 있어 직접 신청 링크는 확인되지 않았어요').
@@ -428,6 +430,8 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
                     # (#122 후속 실 LLM 재현). 뒤 쉼표·문장 사이 공백은 지운다.
                     parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
                     parts[index + 1] = ""
+                    # 앞 문장이 빠졌으니 이어지는 접속어('다만', '하지만')도 뺀다('정책명: 다만 …' 방지).
+                    parts[index + 2] = LEADING_CONJUNCTION.sub("", parts[index + 2], count=1)
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
