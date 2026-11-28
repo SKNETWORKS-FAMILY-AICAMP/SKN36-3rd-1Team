@@ -107,15 +107,15 @@ it('선택한 지역은 검색 버튼을 누르면 적용하고 전국 정책은
 });
 
 it('정렬과 접수 상태도 검색 버튼을 눌러야 적용하고, 필터 초기화는 바로 적용한다', async () => {
-  const before = { ...item('POL_TEST_002'), policy_name: '하 가상 정책 (sample_only)', reception_status: 'before' as const };
-  const unknown = { ...item('POL_TEST_001'), policy_name: '가 가상 정책 (sample_only)' };
+  const before = { ...item('POL_TEST_002'), policy_name: '하 가상 정책 (sample_only)', reception_status: 'before' as const, deadline_rank: 1 };
+  const unknown = { ...item('POL_TEST_001'), policy_name: '가 가상 정책 (sample_only)', deadline_rank: 3 };
   load.mockResolvedValueOnce({ ...page(), items: [unknown, before] } as PolicyListResponse);
   await act(async () => {
     root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
   const names = () => cards().map(card => card.textContent ?? '');
   const submit = () => act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
-  // 기본은 마감 임박순: 접수 예정 정책이 일정 미확인 정책보다 먼저 온다
+  // 기본은 마감 임박순: 접수 예정 정책이 일정 미확인 정책보다 먼저 온다(dev는 서버 deadline_rank, 이전 버전은 접수 상태로 순위를 정한다)
   expect(names()[0]).toContain('하 가상 정책');
 
   const sort = host.querySelectorAll<HTMLSelectElement>('.explorer-selects select')[2];
