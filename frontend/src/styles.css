@@ -710,7 +710,8 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 /* #114 가독성: 검색 우선 배치, 필터 한 묶음, 상태 미확인 배지는 눈에 덜 띄게 */
 .explorer-search { display: flex; flex-direction: column; gap: 6px; margin: 18px 0 12px; }
 .explorer-search label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
-.explorer-search input { width: 100%; padding: 12px 14px; font-size: 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: inherit; }
+.explorer-search-row { display: flex; gap: 8px; }
+.explorer-search input { flex: 1; min-width: 0; padding: 12px 14px; font-size: 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: inherit; }
 .explorer-filters { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2); }
 .explorer-filters .schedule-tools { margin: 0; }
 .explorer-selects label { font-size: 13px; color: var(--ink-2); }

@@ -13,7 +13,7 @@ import { PolicyCompare } from './PolicyCompare';
 
 // 처음 표시하는 정책과 더 보기로 추가하는 정책의 개수
 const PAGE_SIZE = 9;
-// 검색어·지역·분야·접수 상태·정렬은 모두 '검색' 버튼을 눌렀을 때 함께 적용한다(입력 중인 값은 draft)
+// 지역·분야·접수 상태·정렬은 고르는 즉시 적용하고, 검색어만 '검색' 버튼이나 Enter로 적용한다(입력 중인 검색어는 queryDraft)
 interface ExplorerSearch { query: string; region: string; category: string; filter: ScheduleFilter; sort: 'deadline' | 'name' }
 const EMPTY_SEARCH: ExplorerSearch = { query: '', region: '', category: '', filter: 'all', sort: 'deadline' };
 /**
@@ -41,13 +41,14 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   const [loadedOnce, setLoadedOnce] = useState(false);
   const phase = explorerPhase(load, loadedOnce);
   const [tab, setTab] = useState<'all' | 'saved'>('all');
-  const [draft, setDraft] = useState(EMPTY_SEARCH);
+  const [queryDraft, setQueryDraft] = useState('');
   const [search, setSearch] = useState(EMPTY_SEARCH);
   const { query, region, category, filter, sort } = search;
-  /** 바로 적용하는 버튼(마감 임박 보기·필터 초기화)용: 입력칸과 적용 값을 같이 바꾼다. 정렬은 유지한다 */
-  const applySearch = (next: Partial<ExplorerSearch>) => {
-    const applied = { ...EMPTY_SEARCH, sort: search.sort, ...next };
-    setDraft(applied); setSearch(applied);
+  /** 필터 하나를 바로 적용한다 */
+  const updateSearch = (next: Partial<ExplorerSearch>) => setSearch(prev => ({ ...prev, ...next }));
+  /** 마감 임박 보기·필터 초기화: 검색어 칸까지 비우고 조건을 새로 정한다. 정렬은 유지한다 */
+  const resetSearch = (next: Partial<ExplorerSearch>) => {
+    setQueryDraft(''); setSearch(prev => ({ ...EMPTY_SEARCH, sort: prev.sort, ...next }));
   };
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [evaluatedOn, setEvaluatedOn] = useState('');
@@ -119,34 +120,34 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   }
   return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
     <div className="board-h"><h2>전체 <span>정책</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
-    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 {SOON_WINDOW_DAYS}일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); applySearch({ filter: 'soon' }); }}>마감 임박 정책 보기</button></div></div>}
-    {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다 */}
-    <form role="search" aria-label="정책 검색" onSubmit={event => {
+    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 {SOON_WINDOW_DAYS}일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); resetSearch({ filter: 'soon' }); }}>마감 임박 정책 보기</button></div></div>}
+    {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다. 검색 버튼은 검색어 칸에만 붙인다 */}
+    <form className="explorer-search" role="search" aria-label="정책 검색" onSubmit={event => {
       event.preventDefault();
-      setSearch(draft);
+      updateSearch({ query: queryDraft });
       setLimit(PAGE_SIZE);
     }}>
-      <div className="explorer-search">
-        <label htmlFor={`${group}-q`}>정책 검색</label>
-        <input id={`${group}-q`} value={draft.query} onChange={e => setDraft({ ...draft, query: e.target.value })} placeholder="정책명·기관명으로 찾기" type="search" />
-      </div>
-      <div className="explorer-filters">
-        <div className="schedule-tools" role="group" aria-label="정책 목록 범위">
-          <button className="chip" type="button" aria-pressed={tab === 'all'} onClick={() => setTab('all')}>전체 정책 {catalog.length}</button>
-          <button className="chip" type="button" aria-pressed={tab === 'saved'} onClick={() => setTab('saved')}>★ 관심 정책 {state?.saved.length ?? 0}</button>
-          {!picking
-            ? <button className="btn btn-o compare-start" type="button" onClick={() => setPicking(true)}>비교할 정책 고르기</button>
-            : <button className="btn btn-o compare-start" type="button" onClick={stopPicking}>비교 고르기 취소</button>}
-        </div>
-        <div className="schedule-tools explorer-selects">
-          <label>지역 <select value={draft.region} onChange={e => setDraft({ ...draft, region: e.target.value })}><option value="">전체 지역</option>{options.regions.map(x => <option key={x}>{x}</option>)}</select></label>
-          <label>분야 <select value={draft.category} onChange={e => setDraft({ ...draft, category: e.target.value })}><option value="">전체 분야</option>{options.categories.map(x => <option key={x}>{x}</option>)}</select></label>
-          <label>정렬 <select value={draft.sort} onChange={e => setDraft({ ...draft, sort: e.target.value as ExplorerSearch['sort'] })}><option value="deadline">마감 임박순</option><option value="name">이름순</option></select></label>
-          <button className="btn btn-p explorer-submit" type="submit">검색</button>
-        </div>
-        <div className="schedule-tools" role="group" aria-label="전체 정책 접수 상태">{SCHEDULE_FILTERS.map(([key, text]) => <button key={key} className="chip" type="button" aria-pressed={draft.filter === key} onClick={() => setDraft({ ...draft, filter: key })}>{text}</button>)}</div>
+      <label htmlFor={`${group}-q`}>정책 검색</label>
+      <div className="explorer-search-row">
+        <input id={`${group}-q`} value={queryDraft} onChange={e => setQueryDraft(e.target.value)} placeholder="정책명·기관명으로 찾기" type="search" />
+        <button className="btn btn-p explorer-submit" type="submit">검색</button>
       </div>
     </form>
+    <div className="explorer-filters">
+      <div className="schedule-tools" role="group" aria-label="정책 목록 범위">
+        <button className="chip" type="button" aria-pressed={tab === 'all'} onClick={() => setTab('all')}>전체 정책 {catalog.length}</button>
+        <button className="chip" type="button" aria-pressed={tab === 'saved'} onClick={() => setTab('saved')}>★ 관심 정책 {state?.saved.length ?? 0}</button>
+        {!picking
+          ? <button className="btn btn-o compare-start" type="button" onClick={() => setPicking(true)}>비교할 정책 고르기</button>
+          : <button className="btn btn-o compare-start" type="button" onClick={stopPicking}>비교 고르기 취소</button>}
+      </div>
+      <div className="schedule-tools explorer-selects">
+        <label>지역 <select value={region} onChange={e => updateSearch({ region: e.target.value })}><option value="">전체 지역</option>{options.regions.map(x => <option key={x}>{x}</option>)}</select></label>
+        <label>분야 <select value={category} onChange={e => updateSearch({ category: e.target.value })}><option value="">전체 분야</option>{options.categories.map(x => <option key={x}>{x}</option>)}</select></label>
+        <label>정렬 <select value={sort} onChange={e => updateSearch({ sort: e.target.value as ExplorerSearch['sort'] })}><option value="deadline">마감 임박순</option><option value="name">이름순</option></select></label>
+      </div>
+      <div className="schedule-tools" role="group" aria-label="전체 정책 접수 상태">{SCHEDULE_FILTERS.map(([key, text]) => <button key={key} className="chip" type="button" aria-pressed={filter === key} onClick={() => updateSearch({ filter: key })}>{text}</button>)}</div>
+    </div>
     <p className="schedule-scope">{version ? `배포 데이터 ${version} 기준` : '배포 정책 목록'} · {POLICY_API_URL ? `서버의 정책 파일 기준 · 일정 확인일 ${evaluatedOn || '확인 중'}. 검색 DB의 반영 상태와는 다를 수 있어요.` : '전체 일정 API 미연결 · 일정은 오늘 확인된 상담 응답이 있는 정책만 표시합니다.'} 목록은 신청 자격 판정이 아닙니다.</p>
     {tab === 'saved' && <p className="schedule-scope">저장은 이 브라우저·기기에서만 유지돼요. 재방문·탭 복귀 시 일정을 다시 확인하고, 확인에 실패하면 마감 안내를 숨겨요.</p>}
     {state?.error && <p role="alert">{state.error}</p>}
@@ -172,7 +173,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
           : region ? '선택한 조건에 해당하는 정책이 없어요. 전국 정책도 보려면 지역을 전체 지역으로 바꿔 주세요.'
           : '선택한 조건에 해당하는 정책이 없어요. 일정 미확인 정책은 전체에서 볼 수 있어요.'}
         {(query || region || category || filter !== 'all') && (
-          <button type="button" className="chip" onClick={() => applySearch({})}>필터 초기화</button>
+          <button type="button" className="chip" onClick={() => resetSearch({})}>필터 초기화</button>
         )}
       </div>}
       {rows.length > limit && <button className="btn btn-o explorer-more" type="button" onClick={() => setLimit(x => x + PAGE_SIZE)}>정책 {Math.min(PAGE_SIZE, rows.length - limit)}개 더 보기</button>}
