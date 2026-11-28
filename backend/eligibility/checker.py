@@ -948,6 +948,142 @@ def _should_add_missing_age_notice(
     )
 
 
+def _evaluate_trees(
+    trees: object, profile: dict, *, missing: bool, scoped_unknown: set[str] | None, affected: set[str],
+) -> tuple[list[dict], list[dict], set[str], list[bool], dict | None]:
+    """조건 트리를 순회해 조건 결과·루트 종합 결과·구조 문제·필수 AND 실패·제외 추적을 돌려준다."""
+    conditions: list[dict] = []
+    root_results: list[dict] = []
+    walk_issues: set[str] = set()
+    certain_failures = [False]
+    # One optional trace for the only supported unambiguous root.
+    exclusion_trace = {} if isinstance(trees, list) and len(trees) == 1 else None
+
+    if (
+        missing
+        or not isinstance(trees, list)
+        or not trees
+    ):
+        walk_issues.add("missing_tree")
+        conditions = [
+            _result(
+                "eligibility",
+                CHECK,
+                "확인 가능한 자격 조건 구조가 없어 "
+                "공식 공고 확인이 필요합니다.",
+            )
+        ]
+
+    else:
+        for tree in trees:
+            _, details = _walk(
+                tree, profile, issues=walk_issues,
+                required_and_path=scoped_unknown is not None and len(trees) == 1,
+                affected=affected, certain_failures=certain_failures,
+                exclusion_trace=exclusion_trace,
+            )
+            # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
+            # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
+            root_results.append(details[-1])
+            conditions.extend(details)
+
+        if len(root_results) > 1:
+            walk_issues.add("multiple_roots")
+            conditions.append(
+                _result(
+                    "eligibility",
+                    CHECK,
+                    "여러 루트 조건 그룹의 결합 논리가 "
+                    "확인되지 않았습니다.",
+                )
+            )
+    return conditions, root_results, walk_issues, certain_failures, exclusion_trace
+
+
+def _add_quality_placeholders(conditions: list[dict], affected: set[str]) -> None:
+    """품질 경고 필드(age·region·income)에 조건 행이 없으면 확인 필요 행을 추가한다."""
+    for field in sorted(affected - {"all"}):
+        if (
+            field in {"age", "region", "income"}
+            and not any(
+                item["field"] == field
+                for item in conditions
+            )
+        ):
+            conditions.append(
+                _result(
+                    field,
+                    CHECK,
+                    "데이터 품질 경고로 해당 자격 요건의 "
+                    "확인이 필요합니다.",
+                )
+            )
+
+
+def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_failed_root: dict | None) -> None:
+    """품질 경고가 걸린 조건과 종합 판정을 needs_check로 보류한다. 확정된 단일 루트 실패는 유지한다."""
+    if affected:
+        for item in conditions:
+            if item is safe_failed_root and item["status"] == NO:
+                continue
+            if (
+                "all" in affected
+                or item["field"] in affected
+                or (
+                    item["field"] == "eligibility"
+                    and any(
+                        value in affected
+                        for value in (
+                            "housing",
+                            "employment",
+                            "exclusion",
+                            "marriage",
+                            "children",
+                        )
+                    )
+                )
+            ):
+                item["status"] = CHECK
+                item["reason"] += (
+                    " 데이터 품질 경고로 "
+                    "자동 판정을 보류합니다."
+                )
+
+    if affected and "all" not in affected:
+        for item in conditions:
+            if item["field"] == "eligibility":
+                if item is safe_failed_root and item["status"] == NO:
+                    continue
+                item["status"] = CHECK
+
+                if "데이터 품질 경고" not in item["reason"]:
+                    item["reason"] += (
+                        " 일부 조건이 검증되지 않아 "
+                        "종합 판정을 보류합니다."
+                    )
+
+
+def _hold_roots_for_source_checks(root_results: list[dict], has_review_items: bool, missing_age_notice: bool) -> None:
+    """원문 확인 항목이 남으면 루트 종합 결과만 보류한다.
+
+    하위 그룹/개별 조건과 명확한 ineligible 결과는 유지한다.
+    """
+    if has_review_items or missing_age_notice:
+        for item in root_results:
+            if item["status"] == OK:
+                item["status"] = CHECK
+                if has_review_items:
+                    item["reason"] += (
+                        " 소득·가구 원문 확인이 남아 "
+                        "종합 판정을 보류합니다."
+                    )
+                if missing_age_notice:
+                    item["reason"] += (
+                        " 나이 기준이 데이터에 정리되지 않아 "
+                        "종합 판정을 보류합니다."
+                    )
+
+
 def check_eligibility(
     profile: dict,
     policy: dict,
@@ -1010,68 +1146,10 @@ def check_eligibility(
     affected = _affected_fields(
         quality, eligibility, missing, scoped_unknown=scoped_unknown,
     )
-    conditions: list[dict] = []
-    root_results: list[dict] = []
-    walk_issues: set[str] = set()
-    certain_failures = [False]
-    # One optional trace for the only supported unambiguous root.
-    exclusion_trace = {} if isinstance(trees, list) and len(trees) == 1 else None
-
-    if (
-        missing
-        or not isinstance(trees, list)
-        or not trees
-    ):
-        walk_issues.add("missing_tree")
-        conditions = [
-            _result(
-                "eligibility",
-                CHECK,
-                "확인 가능한 자격 조건 구조가 없어 "
-                "공식 공고 확인이 필요합니다.",
-            )
-        ]
-
-    else:
-        for tree in trees:
-            _, details = _walk(
-                tree, profile, issues=walk_issues,
-                required_and_path=scoped_unknown is not None and len(trees) == 1,
-                affected=affected, certain_failures=certain_failures,
-                exclusion_trace=exclusion_trace,
-            )
-            # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
-            # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
-            root_results.append(details[-1])
-            conditions.extend(details)
-
-        if len(root_results) > 1:
-            walk_issues.add("multiple_roots")
-            conditions.append(
-                _result(
-                    "eligibility",
-                    CHECK,
-                    "여러 루트 조건 그룹의 결합 논리가 "
-                    "확인되지 않았습니다.",
-                )
-            )
-
-    for field in sorted(affected - {"all"}):
-        if (
-            field in {"age", "region", "income"}
-            and not any(
-                item["field"] == field
-                for item in conditions
-            )
-        ):
-            conditions.append(
-                _result(
-                    field,
-                    CHECK,
-                    "데이터 품질 경고로 해당 자격 요건의 "
-                    "확인이 필요합니다.",
-                )
-            )
+    conditions, root_results, walk_issues, certain_failures, exclusion_trace = _evaluate_trees(
+        trees, profile, missing=missing, scoped_unknown=scoped_unknown, affected=affected,
+    )
+    _add_quality_placeholders(conditions, affected)
 
     # Preserve the *single root object* only when both the shared safety
     # gate and the already-evaluated mandatory AND condition prove failure.
@@ -1086,45 +1164,7 @@ def check_eligibility(
         )
     ) else None
 
-    if affected:
-        for item in conditions:
-            if item is safe_failed_root and item["status"] == NO:
-                continue
-            if (
-                "all" in affected
-                or item["field"] in affected
-                or (
-                    item["field"] == "eligibility"
-                    and any(
-                        value in affected
-                        for value in (
-                            "housing",
-                            "employment",
-                            "exclusion",
-                            "marriage",
-                            "children",
-                        )
-                    )
-                )
-            ):
-                item["status"] = CHECK
-                item["reason"] += (
-                    " 데이터 품질 경고로 "
-                    "자동 판정을 보류합니다."
-                )
-
-    if affected and "all" not in affected:
-        for item in conditions:
-            if item["field"] == "eligibility":
-                if item is safe_failed_root and item["status"] == NO:
-                    continue
-                item["status"] = CHECK
-
-                if "데이터 품질 경고" not in item["reason"]:
-                    item["reason"] += (
-                        " 일부 조건이 검증되지 않아 "
-                        "종합 판정을 보류합니다."
-                    )
+    _hold_quality_affected(conditions, affected, safe_failed_root)
 
     review_items = _source_review_conditions(
         policy_node,
@@ -1147,22 +1187,7 @@ def check_eligibility(
             )
         )
 
-    # 확인 항목은 정책 전체의 루트 종합 결과만 보류한다.
-    # 하위 그룹/개별 조건과 명확한 ineligible 결과는 유지한다.
-    if review_items or missing_age_notice:
-        for item in root_results:
-            if item["status"] == OK:
-                item["status"] = CHECK
-                if review_items:
-                    item["reason"] += (
-                        " 소득·가구 원문 확인이 남아 "
-                        "종합 판정을 보류합니다."
-                    )
-                if missing_age_notice:
-                    item["reason"] += (
-                        " 나이 기준이 데이터에 정리되지 않아 "
-                        "종합 판정을 보류합니다."
-                    )
+    _hold_roots_for_source_checks(root_results, bool(review_items), missing_age_notice)
 
     # #78: 종합 판정이 명확히 ineligible인 단일 조건 트리에서만
     # 표시용 제외 사유를 수집한다.

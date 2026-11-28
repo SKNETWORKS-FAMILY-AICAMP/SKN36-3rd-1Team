@@ -1240,34 +1240,8 @@ def _align_overall_eligibility(
     )
 
 
-def _validate_model_response(
-    raw: Any,
-    source_ids: set[int],
-    profile: dict | None = None,
-) -> dict:
-    if not isinstance(raw, dict):
-        raise LLMOutputError(
-            "LLM 출력이 JSON 객체가 아닙니다."
-        )
-
-    if raw.get("status") not in {"answered", "info"}:
-        raise LLMOutputError(
-            "LLM status는 answered/info 중 하나여야 합니다."
-        )
-
-    answer = raw.get("answer")
-
-    if not isinstance(answer, str) or not answer.strip():
-        raise LLMOutputError(
-            "LLM answer가 비어 있습니다."
-        )
-
-    answer = _normalize_child_month_bound_wording(answer)
-    answer = _remove_redundant_answer_requests(
-        answer,
-        profile,
-    )
-
+def _canonicalize_answer_citations(answer: str, source_ids: set[int]) -> tuple[str, list[int]]:
+    """본문 인용 번호를 제공된 source_id의 표준 형식으로 바꾸고, 인용한 ID를 순서대로 돌려준다."""
     # 허용된 출처 ID만 문자열로 검증하면서
     # 답변 본문 인용 번호도 표준 형식으로 정규화한다.
     #
@@ -1310,6 +1284,275 @@ def _validate_model_response(
         answer,
     )
 
+    return answer, cited
+
+
+def _expand_mixed_follow_ups(follows: list) -> list:
+    """후속 질문 한 항목에 물음표로 이어진 여러 문장이 있으면 문장마다 다시 판정하도록 나눈다."""
+    # 한 항목에 사용자 정보 요청과 정상 정책 질문이 섞여도 각각 판정한다.
+    expanded = []
+    for item in follows:
+        if isinstance(item, dict) and isinstance(item.get("text"), str):
+            text = re.sub(r"([?？])[!！.。]+(?=\s|$)", r"\1", item["text"].strip())
+            parts = [part for part in re.split(r"(?<=[?？])\s+", text) if part]
+            if len(parts) > 1:
+                # 혼합 문장은 모델의 최초 태그·필드를 버리고 각 문장을 재판정한다.
+                expanded.extend({"kind": "question", "text": part} for part in parts)
+            else:
+                expanded.append({**item, "text": text})
+        else:
+            expanded.append(item)
+    return expanded
+
+
+def _classify_follow_up(item: object, profile: dict | None, body_requests: list[str]) -> dict | None:
+    """후속 질문 한 개를 버튼(question·ask_info)으로 남길지 정한다.
+
+    버튼으로 남기면 그 항목을, 본문 안내로 옮기거나 버리면 None을 돌려준다.
+    본문으로 옮길 안내 문장은 body_requests에 덧붙인다.
+    """
+    if (
+        not isinstance(item, dict)
+        or item.get("kind") not in {
+            "question",
+            "ask_info",
+        }
+    ):
+        raise LLMOutputError(
+            "후속 질문 kind가 유효하지 않습니다."
+        )
+
+    if (
+        not isinstance(item.get("text"), str)
+        or not item["text"].strip()
+    ):
+        raise LLMOutputError(
+            "후속 질문 text가 비어 있습니다."
+        )
+
+    kind = item["kind"]
+    text = item["text"].strip()
+
+    detected_field = _personal_information_request(
+        text,
+        profile,
+    )
+
+    field = (
+        item.get("field")
+        if kind == "ask_info"
+        else None
+    )
+
+    # Keep the explicit month field through final conversion, including
+    # subjectless requests. Clear wording for another field still wins.
+    if (
+        kind == "ask_info"
+        and field == "child_age_months"
+        and detected_field in {None, "other"}
+        and not _is_child_age_policy_question(text)
+        and not _is_policy_criteria_question(text)
+        and (
+            _requests_profile_value(text, "child_age_months")
+            or re.search(r"몇\s*개월|월령|자녀\s*나이", text)
+        )
+    ):
+        if profile is None or profile.get("child_age_months") is None:
+            body_requests.append(_info_request_to_answer(text, field))
+        return None
+
+    # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
+    # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
+    if kind == "ask_info":
+        if _is_child_age_policy_question(text) or _is_profile_method_question(text):
+            kind = "question"
+        elif detected_field in ALLOWED_FIELDS:
+            field = detected_field
+        elif detected_field in {"detail_region", "other"}:
+            # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
+            kind = "question"
+        elif detected_field is None:
+            # 감지 정규식이 놓친 경우, 모델 field는 문장이 실제로 그 필드를
+            # 다룰 때만 쓴다. 정책 질문은 사용자에게 묻는 존칭 문장이 아니면 복구한다.
+            is_policy_question = bool(re.search(
+                r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|제한|조건|"
+                r"서류|신청|접수|발급|지급|혜택|절차|방법|문의처|공제|계산|"
+                r"거주\s*형태.*(?:대상|포함|허용|인정))",
+                text,
+            )) or _has_policy_action(text)
+            is_policy_question = is_policy_question and _normalize_followup_question(text) is not None
+            keeps_model_field = (
+                isinstance(field, str)
+                and field in ALLOWED_FIELDS
+                and _mentions_profile_field(text, field)
+                and not _is_policy_criteria_question(
+                    _compact_question(text)
+                )
+                and not _has_policy_action(text)
+                and (not is_policy_question or _addresses_user(text))
+            )
+            if keeps_model_field:
+                pass
+            elif is_policy_question:
+                kind = "question"
+            elif isinstance(field, str) and field not in ALLOWED_FIELDS:
+                # 지원하지 않는 프로필 입력은 버튼이 아닌 본문 안내로 보존한다.
+                if _is_redundant_request(text, profile):
+                    return None
+                request = _info_request_to_answer(text, field)
+                if request:
+                    body_requests.append(request)
+                return None
+            else:
+                # 미확인 ask_info.field를 개인정보 입력 버튼에 전달하지 않는다.
+                return None
+
+    if kind == "ask_info":
+        if (
+            not isinstance(field, str)
+            or field not in ALLOWED_FIELDS
+        ):
+            # 비허용 필드는 버튼으로 변환하지 않는다.
+            # 파악 가능한 정보 요청만 본문으로 옮긴다.
+            if _is_redundant_request(text, profile):
+                return None
+
+            request = _info_request_to_answer(
+                text,
+                field if isinstance(field, str) else None,
+            )
+
+            if request:
+                body_requests.append(request)
+
+            return None
+
+        if (
+            field == "region"
+            and _is_detail_region_request(
+                text,
+                (profile or {}).get("region"),
+            )
+        ):
+            # 시군구 확인은 기존 region 입력 UI의 범위를 벗어난다.
+            if (
+                profile
+                and profile.get("region")
+                and _region_has_detail(
+                    profile["region"]
+                )
+            ):
+                return None
+
+            request = _info_request_to_answer(
+                text,
+                "detail_region",
+            )
+
+            if request:
+                body_requests.append(request)
+
+            return None
+
+        if (
+            profile is not None
+            and profile[field] is not None
+        ):
+            return None
+
+        result = {
+            "kind": "ask_info",
+            "text": text,
+            "field": field,
+        }
+
+    else:
+        # question 버튼은 사용자→AI 질문만 허용한다.
+        if _is_ai_offer_question(text):
+            return None
+
+        if detected_field in ALLOWED_FIELDS:
+            if (
+                profile is not None
+                and profile[detected_field] is not None
+            ):
+                return None
+
+            result = {
+                "kind": "ask_info",
+                "text": text,
+                "field": detected_field,
+            }
+
+        elif detected_field in {
+            "detail_region",
+            "other",
+        }:
+            if _is_redundant_request(text, profile):
+                return None
+
+            request = _info_request_to_answer(
+                text,
+                detected_field,
+            )
+
+            if request:
+                body_requests.append(request)
+
+            return None
+
+        else:
+            question_text = (
+                _normalize_followup_question(text)
+            )
+
+            if (
+                question_text is None
+                or _is_redundant_request(
+                    question_text,
+                    profile,
+                )
+            ):
+                return None
+
+            result = {
+                "kind": "question",
+                "text": question_text,
+            }
+
+    return result
+
+
+def _validate_model_response(
+    raw: Any,
+    source_ids: set[int],
+    profile: dict | None = None,
+) -> dict:
+    if not isinstance(raw, dict):
+        raise LLMOutputError(
+            "LLM 출력이 JSON 객체가 아닙니다."
+        )
+
+    if raw.get("status") not in {"answered", "info"}:
+        raise LLMOutputError(
+            "LLM status는 answered/info 중 하나여야 합니다."
+        )
+
+    answer = raw.get("answer")
+
+    if not isinstance(answer, str) or not answer.strip():
+        raise LLMOutputError(
+            "LLM answer가 비어 있습니다."
+        )
+
+    answer = _normalize_child_month_bound_wording(answer)
+    answer = _remove_redundant_answer_requests(
+        answer,
+        profile,
+    )
+
+    answer, cited = _canonicalize_answer_citations(answer, source_ids)
+
     if raw["status"] == "answered" and not cited:
         raise LLMOutputError(
             "answered 응답에 원문 인용이 없습니다."
@@ -1341,229 +1584,12 @@ def _validate_model_response(
     normalized = []
     body_requests: list[str] = []
 
-    # 한 항목에 사용자 정보 요청과 정상 정책 질문이 섞여도 각각 판정한다.
-    expanded = []
-    for item in follows:
-        if isinstance(item, dict) and isinstance(item.get("text"), str):
-            text = re.sub(r"([?？])[!！.。]+(?=\s|$)", r"\1", item["text"].strip())
-            parts = [part for part in re.split(r"(?<=[?？])\s+", text) if part]
-            if len(parts) > 1:
-                # 혼합 문장은 모델의 최초 태그·필드를 버리고 각 문장을 재판정한다.
-                expanded.extend({"kind": "question", "text": part} for part in parts)
-            else:
-                expanded.append({**item, "text": text})
-        else:
-            expanded.append(item)
+    expanded = _expand_mixed_follow_ups(follows)
 
     for item in expanded:
-        if (
-            not isinstance(item, dict)
-            or item.get("kind") not in {
-                "question",
-                "ask_info",
-            }
-        ):
-            raise LLMOutputError(
-                "후속 질문 kind가 유효하지 않습니다."
-            )
-
-        if (
-            not isinstance(item.get("text"), str)
-            or not item["text"].strip()
-        ):
-            raise LLMOutputError(
-                "후속 질문 text가 비어 있습니다."
-            )
-
-        kind = item["kind"]
-        text = item["text"].strip()
-
-        detected_field = _personal_information_request(
-            text,
-            profile,
-        )
-
-        field = (
-            item.get("field")
-            if kind == "ask_info"
-            else None
-        )
-
-        # Keep the explicit month field through final conversion, including
-        # subjectless requests. Clear wording for another field still wins.
-        if (
-            kind == "ask_info"
-            and field == "child_age_months"
-            and detected_field in {None, "other"}
-            and not _is_child_age_policy_question(text)
-            and not _is_policy_criteria_question(text)
-            and (
-                _requests_profile_value(text, "child_age_months")
-                or re.search(r"몇\s*개월|월령|자녀\s*나이", text)
-            )
-        ):
-            if profile is None or profile.get("child_age_months") is None:
-                body_requests.append(_info_request_to_answer(text, field))
+        result = _classify_follow_up(item, profile, body_requests)
+        if result is None:
             continue
-
-        # 명확히 검출된 사용자 입력 항목이 모델의 field보다 우선한다.
-        # 반대로 정책 질문에는 모델이 임의 지정한 field를 적용하지 않는다.
-        if kind == "ask_info":
-            if _is_child_age_policy_question(text) or _is_profile_method_question(text):
-                kind = "question"
-            elif detected_field in ALLOWED_FIELDS:
-                field = detected_field
-            elif detected_field in {"detail_region", "other"}:
-                # 아래 question 분기에서 미지원 개인정보 요청을 본문으로 보낸다.
-                kind = "question"
-            elif detected_field is None:
-                # 감지 정규식이 놓친 경우, 모델 field는 문장이 실제로 그 필드를
-                # 다룰 때만 쓴다. 정책 질문은 사용자에게 묻는 존칭 문장이 아니면 복구한다.
-                is_policy_question = bool(re.search(
-                    r"(?:정책|공고|지원\s*(?:대상|액|금)|자격|요건|기준|제한|조건|"
-                    r"서류|신청|접수|발급|지급|혜택|절차|방법|문의처|공제|계산|"
-                    r"거주\s*형태.*(?:대상|포함|허용|인정))",
-                    text,
-                )) or _has_policy_action(text)
-                is_policy_question = is_policy_question and _normalize_followup_question(text) is not None
-                keeps_model_field = (
-                    isinstance(field, str)
-                    and field in ALLOWED_FIELDS
-                    and _mentions_profile_field(text, field)
-                    and not _is_policy_criteria_question(
-                        _compact_question(text)
-                    )
-                    and not _has_policy_action(text)
-                    and (not is_policy_question or _addresses_user(text))
-                )
-                if keeps_model_field:
-                    pass
-                elif is_policy_question:
-                    kind = "question"
-                elif isinstance(field, str) and field not in ALLOWED_FIELDS:
-                    # 지원하지 않는 프로필 입력은 버튼이 아닌 본문 안내로 보존한다.
-                    if _is_redundant_request(text, profile):
-                        continue
-                    request = _info_request_to_answer(text, field)
-                    if request:
-                        body_requests.append(request)
-                    continue
-                else:
-                    # 미확인 ask_info.field를 개인정보 입력 버튼에 전달하지 않는다.
-                    continue
-
-        if kind == "ask_info":
-            if (
-                not isinstance(field, str)
-                or field not in ALLOWED_FIELDS
-            ):
-                # 비허용 필드는 버튼으로 변환하지 않는다.
-                # 파악 가능한 정보 요청만 본문으로 옮긴다.
-                if _is_redundant_request(text, profile):
-                    continue
-
-                request = _info_request_to_answer(
-                    text,
-                    field if isinstance(field, str) else None,
-                )
-
-                if request:
-                    body_requests.append(request)
-
-                continue
-
-            if (
-                field == "region"
-                and _is_detail_region_request(
-                    text,
-                    (profile or {}).get("region"),
-                )
-            ):
-                # 시군구 확인은 기존 region 입력 UI의 범위를 벗어난다.
-                if (
-                    profile
-                    and profile.get("region")
-                    and _region_has_detail(
-                        profile["region"]
-                    )
-                ):
-                    continue
-
-                request = _info_request_to_answer(
-                    text,
-                    "detail_region",
-                )
-
-                if request:
-                    body_requests.append(request)
-
-                continue
-
-            if (
-                profile is not None
-                and profile[field] is not None
-            ):
-                continue
-
-            result = {
-                "kind": "ask_info",
-                "text": text,
-                "field": field,
-            }
-
-        else:
-            # question 버튼은 사용자→AI 질문만 허용한다.
-            if _is_ai_offer_question(text):
-                continue
-
-            if detected_field in ALLOWED_FIELDS:
-                if (
-                    profile is not None
-                    and profile[detected_field] is not None
-                ):
-                    continue
-
-                result = {
-                    "kind": "ask_info",
-                    "text": text,
-                    "field": detected_field,
-                }
-
-            elif detected_field in {
-                "detail_region",
-                "other",
-            }:
-                if _is_redundant_request(text, profile):
-                    continue
-
-                request = _info_request_to_answer(
-                    text,
-                    detected_field,
-                )
-
-                if request:
-                    body_requests.append(request)
-
-                continue
-
-            else:
-                question_text = (
-                    _normalize_followup_question(text)
-                )
-
-                if (
-                    question_text is None
-                    or _is_redundant_request(
-                        question_text,
-                        profile,
-                    )
-                ):
-                    continue
-
-                result = {
-                    "kind": "question",
-                    "text": question_text,
-                }
 
         if not any(
             existing["kind"] == result["kind"]

@@ -712,24 +712,12 @@ def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) 
     return {**check, "conditions": shown}
 
 
-def run_ask_pipeline(
-    request: AskRequest,
-    *,
-    search_fn: Callable[..., dict],
-    check_fn: Callable[[dict, dict], dict],
-    generate_fn: Callable[..., dict],
-    display_fn: Callable[[list[dict]], list[dict]] | None = None,
-    requirement_reviews: Collection[dict] = (),
-) -> AskResponse:
-    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
+def _normalized_profile(request: AskRequest) -> tuple[dict, bool]:
+    """요청 프로필을 Checker·Generator용으로 정규화한다. 지역은 시·도 정식명만 남긴다.
 
-    generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
-    display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
-    requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
-        항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
+    child_age_months(#39)는 값 그대로 Checker·Generator에 전달한다. None=미입력, 0=유효값.
+    신청자 age와 섞지 않고 검색 필터에도 쓰지 않는다. 두 번째 값은 입력 지역을 확인하지 못했는지다.
     """
-    # child_age_months(#39)는 값 그대로 Checker·Generator에 전달한다. None=미입력, 0=유효값.
-    # 신청자 age와 섞지 않고 검색 필터에도 쓰지 않는다.
     profile = request.profile.model_dump()
     supplied_region = profile["region"].strip()
     canonical = ALIASES.get(supplied_region, supplied_region)
@@ -737,31 +725,25 @@ def run_ask_pipeline(
     unknown_region = bool(supplied_region and profile["region"] is None)
     if unknown_region:
         logger.info("입력 지역을 시·도 이름으로 확인하지 못했습니다.")
-    notice = _warn_notice(UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
-    filters = {"region": profile["region"]} if profile["region"] else None
+    return profile, unknown_region
+
+
+def _search_request_policies(request: AskRequest, search_fn: Callable[..., dict], region: str | None) -> list[dict]:
+    """선택 정책이 있으면 그 정책만, 없으면 지역 필터·분야 나누기(#75)로 검색한다."""
     if request.selected_policy_id:
         # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
         # 분야 나누기(#75)도 하지 않는다. 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
         found = search_fn(request.question, filters={"policy_id": request.selected_policy_id}, k=SEARCH_TOP_K)
-        policies = [policy for policy in found["policies"] if policy["policy_id"] == request.selected_policy_id]
-    else:
-        policies = search_policies(search_fn, request.question, filters, k=SEARCH_TOP_K)
-    # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
-    ranked = rank_citable_contexts(policies)
-    citable = {context["policy_id"] for context in ranked}
-    # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
-    if not citable:
-        return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
+        return [policy for policy in found["policies"] if policy["policy_id"] == request.selected_policy_id]
+    filters = {"region": region} if region else None
+    return search_policies(search_fn, request.question, filters, k=SEARCH_TOP_K)
 
-    by_id = {policy["policy_id"]: policy for policy in policies}
-    # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
-    raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
-    closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
-    # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
-    named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
-    contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
-    contexts = complete_condition_evidence(contexts, ranked, policies, request.question, profile)
 
+def _selected_policy_checks(
+    request: AskRequest, profile: dict, by_id: dict[str, dict], raw_checks: dict[str, dict],
+    contexts: list[dict], ranked: list[dict], requirement_reviews: Collection[dict],
+) -> tuple[list[dict], dict[str, list | None]]:
+    """채택된 근거의 정책마다 판정·문의처·일정·원문 발췌를 조립한다. 공식 기준(#76)은 따로 돌려준다."""
     contexts_by_policy = {}
     for context in contexts:
         contexts_by_policy.setdefault(context["policy_id"], []).append(context)
@@ -796,6 +778,13 @@ def run_ask_pipeline(
                                                   by_id[pid].get("data_quality"),
                                                   by_id[pid].get("evidence_document_check"))
         checks.append(check)
+    return checks, requirements
+
+
+def _generate_output(
+    request: AskRequest, generate_fn: Callable[..., dict], contexts: list[dict], checks: list[dict], profile: dict,
+) -> GeneratorOutput:
+    """Generator를 호출하고 실패를 API 오류 코드로 바꾼 뒤 출력 형식을 검증한다."""
     history = [turn.model_dump() for turn in request.history[-MAX_HISTORY_TURNS:]]
     try:
         raw = generate_fn(request.question, contexts, checks, history, profile=dict(profile))
@@ -819,29 +808,78 @@ def run_ask_pipeline(
         output = GeneratorOutput.model_validate(raw)
     except ValidationError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
-    output = output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
-    aligned = False
-    if output.status != "no_evidence":
-        link_fixed, links_aligned = align_application_links(output.answer, contexts, checks)
-        checked, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
-        # 입력 나이에 대한 결론이 Checker 나이 판정과 반대면 판정 문장으로 맞춘다(#90·#78 후속, 인천 18세).
-        aged, age_aligned = align_age_verdicts(checked, contexts, checks, profile.get("age"))
-        # 자녀 월령 결론도 Checker 판정에 맞춘다(#39, 24개월 '포함' 사례).
-        aged, month_aligned = align_child_month_verdicts(aged, contexts, checks, profile.get("child_age_months"))
-        # 접수 상태 unknown 정책의 합의 문구가 빠졌거나 바꿔 쓴 경우 합의 문구로 맞춘다(#103·#147).
-        fixed, notice_aligned = ensure_unknown_reception_notice(aged, contexts, checks)
-        aligned = links_aligned or checks_aligned or age_aligned or month_aligned or notice_aligned
-        if aligned:
-            # 내용은 로그에 남기지 않는다.
-            logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")
-            # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
-            remaining = set(CITATION.findall(fixed))
-            output = output.model_copy(update={
-                "answer": fixed,
-                "status": "info" if output.status == "answered" and not remaining else output.status,
-                "used_source_ids": [context["source_id"] for context in contexts
-                                    if str(context["source_id"]) in remaining],
-            })
+    return output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
+
+
+def _align_output(
+    output: GeneratorOutput, contexts: list[dict], checks: list[dict], profile: dict,
+) -> tuple[GeneratorOutput, bool]:
+    """생성 본문의 신청 링크·접수·자격·나이·월령 안내를 구조화된 판정에 맞춘다. 두 번째 값은 바꿨는지다."""
+    if output.status == "no_evidence":
+        return output, False
+    link_fixed, links_aligned = align_application_links(output.answer, contexts, checks)
+    checked, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
+    # 입력 나이에 대한 결론이 Checker 나이 판정과 반대면 판정 문장으로 맞춘다(#90·#78 후속, 인천 18세).
+    aged, age_aligned = align_age_verdicts(checked, contexts, checks, profile.get("age"))
+    # 자녀 월령 결론도 Checker 판정에 맞춘다(#39, 24개월 '포함' 사례).
+    aged, month_aligned = align_child_month_verdicts(aged, contexts, checks, profile.get("child_age_months"))
+    # 접수 상태 unknown 정책의 합의 문구가 빠졌거나 바꿔 쓴 경우 합의 문구로 맞춘다(#103·#147).
+    fixed, notice_aligned = ensure_unknown_reception_notice(aged, contexts, checks)
+    aligned = links_aligned or checks_aligned or age_aligned or month_aligned or notice_aligned
+    if aligned:
+        # 내용은 로그에 남기지 않는다.
+        logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")
+        # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
+        remaining = set(CITATION.findall(fixed))
+        output = output.model_copy(update={
+            "answer": fixed,
+            "status": "info" if output.status == "answered" and not remaining else output.status,
+            "used_source_ids": [context["source_id"] for context in contexts
+                                if str(context["source_id"]) in remaining],
+        })
+    return output, aligned
+
+
+def run_ask_pipeline(
+    request: AskRequest,
+    *,
+    search_fn: Callable[..., dict],
+    check_fn: Callable[[dict, dict], dict],
+    generate_fn: Callable[..., dict],
+    display_fn: Callable[[list[dict]], list[dict]] | None = None,
+    requirement_reviews: Collection[dict] = (),
+) -> AskResponse:
+    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
+
+    generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
+    display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
+    requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
+        항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
+    """
+    profile, unknown_region = _normalized_profile(request)
+    notice = _warn_notice(UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
+    policies = _search_request_policies(request, search_fn, profile["region"])
+    # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
+    ranked = rank_citable_contexts(policies)
+    citable = {context["policy_id"] for context in ranked}
+    # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
+    if not citable:
+        return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
+
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
+    raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
+    closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
+    # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
+    named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
+    contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
+    contexts = complete_condition_evidence(contexts, ranked, policies, request.question, profile)
+
+    checks, requirements = _selected_policy_checks(
+        request, profile, by_id, raw_checks, contexts, ranked, requirement_reviews,
+    )
+    output = _generate_output(request, generate_fn, contexts, checks, profile)
+    output, aligned = _align_output(output, contexts, checks, profile)
     follow_ups = [
         item for item in output.follow_up_questions
         if item.kind != "ask_info" or profile.get(item.field) is None
