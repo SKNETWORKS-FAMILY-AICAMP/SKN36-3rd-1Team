@@ -1,7 +1,9 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.15 · 2026-11-29 (v1.14 · 2026-11-29, v1.13 · 2026-11-28, v1.12 · 2026-11-28, v1.11 · 2026-11-28, v1.10 · 2026-11-28, v1.9 · 2026-11-27, v1.8 · 2026-11-26, v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.16 · 2026-11-29 (v1.15 · 2026-11-29, v1.14 · 2026-11-29, v1.13 · 2026-11-28, v1.12 · 2026-11-28, v1.11 · 2026-11-28, v1.10 · 2026-11-28, v1.9 · 2026-11-27, v1.8 · 2026-11-26, v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.16 변경(2026-11-29 — 요청 전체 마감·문서 정리, 강민지, 팀 리뷰 대상):** 요청·응답 필드와 오류 코드는 바뀌지 않는다. Pipeline이 요청마다 전체 마감 55초(`backend/core/deadline.py`, 화면 제한 60초 − 여유 5초)를 둔다. 마감까지 30초 미만이면 분야 보충 검색(§1-1 1번)을 건너뛰고 원래 검색 결과로 답한다. LLM 호출 시간은 `LLM_TIMEOUT_SECONDS`와 '남은 시간 − 2초' 중 짧은 쪽이고, 남은 시간이 5초 미만이면 호출하지 않고 `LLM_TIMEOUT`(504)을 돌려준다. 공급자 5xx·연결 실패 재시도도 마감 안에 다음 시도가 들어올 때만 한다(아니면 `LLM_UNAVAILABLE`). §8.3 화면용 조건 요약은 같은 확인 사항의 원본 사유를 한 줄로 합친 행도 받아들인다(Checker `summarize_conditions_for_display`를 연결해도 502가 나지 않음). §10 체크리스트·참조 코드 링크를 기본 브랜치 `dev`로 바꿨다(`main`은 11/17 이후 갱신되지 않음).
+>
 > **v1.15 변경(2026-11-29 — 범위 밖 질문 처리, 강민지, 팀 리뷰 대상):** 요청·응답 필드는 바뀌지 않는다. 검색은 항상 가장 가까운 정책을 돌려주므로 "오늘 저녁 메뉴 추천해줘" 같은 질문에도 원문이 붙어 `answered`와 관계없는 정책 카드·출처가 나갔다. 이제 LLM이 질문이 정부 지원 정책과 관계없거나 제공된 원문이 질문과 관계없다고 판단하면 `status="no_evidence"`를 고른다(LLM 출력 상태가 `answered`/`info`에서 `answered`/`info`/`no_evidence`로 늘어남). 이때 인용·`used_source_ids`·`follow_up_questions`는 비우고, 인용이 있으면 `LLM_OUTPUT_INVALID`로 거부한다. Pipeline은 기존 규칙대로 `citations=[]`, `policy_checks=[]`로 응답하고 화면은 고정 '근거 없음' 안내를 보여 준다(§9 상태 표).
 >
 > **v1.14 변경(2026-11-29 — #167 단독 단정문 대상 판단, 강민지, 팀 리뷰 대상):** 요청·응답 필드는 바뀌지 않는다. §7 8번에 "인용 하나만 붙은 단독 단정문" 규칙을 적었다. 여러 정책 답변에서 정책명 없이 인용 하나만 붙은 단독 단정문은 #23부터 중립 문구로 바꾸고 인용을 뺐다. 이제는 같은 문단의 다른 문장들이 인용한 정책이 하나뿐이고 그 정책이 이 문장의 인용과 같으면 그 정책 이야기로 보고 판정과 비교한다. 접수 중 정책의 "현재 접수 중이에요[1]."가 "접수 여부를 확인해 주세요"로 바뀌던 문제를 고쳤다.
@@ -545,7 +547,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `status`: `answered`, `no_evidence`, `info` 중 하나. `no_evidence`인 경우 `citations=[]`, `policy_checks=[]`.
 - `citations`: 원문 Context에서 만든 실제 출처만 포함. `answer`의 `[n]`과 **배열 인덱스+1** 일치.
 - `policy_checks`: **Context에 채택된 정책만** 표시하며 순서는 Context 순서(마감 정책 후순위)를 따른다. 소희 `conditions` 결과를 보수적 재검증한 후 메타데이터를 덧붙인다.
-- 화면용 조건 요약(v1.1, 선택): Pipeline에 표시 함수(예: Checker의 `summarize_conditions_for_display`)가 연결되면 **응답의 `conditions`만** 정책별로 요약한다. 원본 행 중에서만 고를 수 있고 `field`·`status` 조합을 바꿀 수 없다(위반 시 `ELIGIBILITY_OUTPUT_INVALID`). LLM에는 요약 전 조건을 그대로 전달한다. 요약 전 원본 조건을 API로 별도 제공하는 필드는 없다(필요 시 별도 합의).
+- 화면용 조건 요약(v1.1, 선택): Pipeline에 표시 함수(예: Checker의 `summarize_conditions_for_display`)가 연결되면 **응답의 `conditions`만** 정책별로 요약한다. 원본 행 중에서만 고를 수 있고 `field`·`status` 조합을 바꿀 수 없다(위반 시 `ELIGIBILITY_OUTPUT_INVALID`). (v1.16) 같은 `field`·`status`·`label`의 원본 행 사유 2개 이상을 ` / `로 이어 한 줄로 합친 행도 허용한다(Checker의 가구 안내 병합). 원본에 없는 사유·라벨·상태는 계속 거부한다. LLM에는 요약 전 조건을 그대로 전달한다. 요약 전 원본 조건을 API로 별도 제공하는 필드는 없다(필요 시 별도 합의).
 - `policy_name`: 검색 결과의 `policy_name`.
 - `agency`: `graph.policy.agency` 또는 `graph.policy.organization` → `graph.organizations[]`의 실제 기관명 속성 → 없으면 `""`. **없는 기관명 생성 금지**.
 - `source_url`: 해당 정책의 인용 가능한 `evidence[].source_url` 우선 → 적합한 Graph 원문 URL → 없으면 `""`. 링크가 비어 있으면 프론트는 링크 버튼을 숨겨야 한다.
@@ -576,7 +578,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | 검색 요청 시간 초과 | 504 | `SEARCH_TIMEOUT` |
 | LLM 서비스 연결·호출 실패 | 502 | `LLM_UNAVAILABLE` (v1.13: 공급자 5xx·연결 실패는 0.5초 뒤 한 번만 다시 시도한 뒤에도 실패할 때. 401·403·400 등 그 밖의 상태 오류는 다시 보내지 않음) |
 | (v1.13) LLM 공급자 요청 한도 초과(429) | 503 | `LLM_RATE_LIMITED` ("답변 생성 요청이 많아 잠시 후 다시 시도해 주세요."). 다시 보내지 않음 |
-| LLM 호출 시간 초과 | 504 | `LLM_TIMEOUT` |
+| LLM 호출 시간 초과 | 504 | `LLM_TIMEOUT` (v1.16: 요청 마감까지 5초 미만이 남아 LLM을 호출하지 않은 경우 포함) |
 | LLM 출력 JSON·인용 번호·스키마 오류 | 502 | `LLM_OUTPUT_INVALID` |
 | 조건 함수 반환 구조 오류 | 502 | `ELIGIBILITY_OUTPUT_INVALID` |
 | 예기치 않은 서버 코드 오류 | 500 | 내부 오류, 상세 노출 금지 |
@@ -595,7 +597,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 ```
 
 - `HybridSearchInputError`는 입력 원인이면 422, `HybridSearchBackendError.kind=="timeout"`은 504, 기타 해당 백엔드 장애는 503으로 분류한다. 검색 프로필/컬렉션 설정 문제는 클라이언트 잘못이 아닐 수 있으므로 **내부 설정 오류를 422로 단정하지 않는다**.
-- LLM/provider의 타임아웃·연결 오류를 구분해 전달한다. 일반적인 프로그래밍 버그를 502로 일괄 은폐하지 않는다. (v1.13) SDK 자동 재시도는 끄고(`max_retries=0`) Generator가 오류 종류별로 정한다. 시간 초과는 이미 제한 시간을 다 썼으므로 다시 보내지 않는다. 두 번 시도해도 `LLM_TIMEOUT_SECONDS`(기본 25초) 두 번으로 화면 제한 60초 안이다.
+- LLM/provider의 타임아웃·연결 오류를 구분해 전달한다. 일반적인 프로그래밍 버그를 502로 일괄 은폐하지 않는다. (v1.13) SDK 자동 재시도는 끄고(`max_retries=0`) Generator가 오류 종류별로 정한다. 시간 초과는 이미 제한 시간을 다 썼으므로 다시 보내지 않는다. (v1.16) 재시도와 LLM 호출 시간은 요청 전체 마감 55초 안으로 제한한다(검색·보충 검색 시간까지 합쳐 화면 제한 60초를 넘지 않게 함).
 - 사용자에게 공개하는 오류에는 상세 스택, DB URI, API 키, 비밀번호를 넣지 않는다. 로그에도 민감한 프로필·키를 쓰지 않는다.
 - 현재 React `client.ts`는 HTTP 오류 본문을 읽지 않고 상태 코드로 안내한다. `detail.message`를 보여주고 싶다면 **민지 코드 수정**이 필요하다.
 - API 60초 목표에서도 초기 Ollama 로딩+검색+LLM 시간을 실제로 측정한다. 워밍업은 **첫 요청 지연을 줄일 뿐 성공·타임아웃 보장은 아니다.** 무제한 재시도는 금지하고, 실패 시 명확한 오류를 반환한다.
@@ -604,7 +606,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 **지인**
 
-- [ ] `main` 최신 상태 확인 후 `feature/rag-api-integration` 브랜치 생성
+- [ ] `dev` 최신 상태 확인 후 `feature/rag-api-integration` 브랜치 생성
 - [ ] 본 문서를 `docs/api/ask_contract.md`로 추가하고 PR 리뷰
 - [ ] `build_contexts()` 및 Mock 기반 `run_ask_pipeline()` 구현
 - [ ] 검색 Session 수명·동시성 보호·선택적 워밍업 구현
@@ -634,7 +636,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 **민혁**
 
-- [ ] `main`과 DB 인계 데이터셋/컬렉션/임베딩 모델 일치 여부 확인
+- [ ] `dev`와 DB 인계 데이터셋/컬렉션/임베딩 모델 일치 여부 확인
 - [ ] 검색 데이터 복원 절차와 지역 필터 동작 확인
 
 ## 11. 최소 통합 테스트 (T01~T18)
@@ -682,10 +684,10 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 ### 참조 코드
 
-- [Hybrid 검색 구현 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/database/hybrid_search.py)
-- [지역 검색/약칭 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/database/region_search.py)
-- [React 요청·응답 타입 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/frontend/src/api/types.ts)
-- [React API 클라이언트 (`main`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/main/frontend/src/api/client.ts)
+- [Hybrid 검색 구현 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/database/hybrid_search.py)
+- [지역 검색/약칭 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/database/region_search.py)
+- [React 요청·응답 타입 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/frontend/src/api/types.ts)
+- [React API 클라이언트 (`dev`)](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN36-3rd-1Team/blob/dev/frontend/src/api/client.ts)
 
 > **MVP 성공 기준:** 근거 없는 적격/부적격 판정 없음 · 실제 원문 출처만 표시 · React와 API 스키마 일치 · 검색/LLM 오류 분리 · 시연 전 통합 테스트 완료.
 

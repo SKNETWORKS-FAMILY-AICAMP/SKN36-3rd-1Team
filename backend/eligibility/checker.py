@@ -1251,6 +1251,10 @@ def check_eligibility(
     }
 
 
+# 화면용 요약에서 같은 확인 사항의 사유를 한 줄로 합칠 때 쓰는 구분자. Pipeline 검사(_display_check)도 같은 값을 쓴다.
+DISPLAY_REASON_JOINER = " / "
+
+
 def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
     """화면에 중복되는 소득·가구 안내를 합친다.
 
@@ -1292,7 +1296,7 @@ def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
             for item in [*graph_items, *review_items]
             if str(item.get("reason") or "").strip()
         ))
-        housing_summary["reason"] = " / ".join(reasons)
+        housing_summary["reason"] = DISPLAY_REASON_JOINER.join(reasons)
 
     displayed: list[dict] = []
     income_notices: set[tuple[str, str, str]] = set()
