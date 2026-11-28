@@ -416,19 +416,21 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
             if not CITATION.sub("", parts[index]).strip():
                 before = parts[index - 1] if index else ""
                 after = parts[index + 1] if index + 1 < len(parts) else ""
+                subject = f"{by_id[pid]['policy_name']}: " if not single and pid in named - earlier else ""
                 if re.fullmatch(r"\s*[,;]\s*", before):
                     # 문장 뒷절이 빠지면 앞절이 '필요하고,'로 끊긴다. 링크 안내는 이미 있으므로 방법 안내만 넣는다(PR #161 리뷰).
                     # 앞절이 방금 넣은 보정 안내면 인용만 붙인다(쉼표는 NOTICE_COMMA가 정리).
                     if REMAINING_METHOD not in parts[index - 2]:
                         parts[index] = head + f"{REMAINING_METHOD} {markers}".rstrip()
+                elif line_start and (bullet or subject) and index + 2 < len(parts) and "\n" not in after:
+                    # 줄 맨 앞 절·문장이 빠지고 같은 줄에 설명이 이어지면 목록 기호와 빠진 절에만 있던 정책명을 남긴다.
+                    # 여러 정책 답변에서 '- 수시 모집…', '다만 …'처럼 어느 정책 설명인지 모르는 줄이 되지 않게 한다
+                    # (#122 후속 실 LLM 재현). 뒤 쉼표·문장 사이 공백은 지운다.
+                    parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
+                    parts[index + 1] = ""
                 elif re.fullmatch(r"\s*[,;]\s*", after):
                     # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
                     parts[index + 1] = ""
-                    # 줄 앞 목록 기호와, 빠진 앞절에만 있던 정책명은 남긴다. 여러 정책 답변에서 '- 수시 모집…'처럼
-                    # 어느 정책 설명인지 모르는 줄이 되지 않게 한다(#122 후속 실 LLM 재현).
-                    subject = (f"{by_id[pid]['policy_name']}: "
-                               if not single and pid in named and pid not in earlier else "")
-                    parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
                 elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of,
                                                                head_citations=bool(head.strip()))) is not None:
                     # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
