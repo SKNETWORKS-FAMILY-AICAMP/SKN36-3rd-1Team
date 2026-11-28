@@ -798,10 +798,13 @@ def _generate_output(
     except Exception as exc:
         # Pipeline은 generate_fn을 주입받으므로 generator 모듈에 직접 의존하지 않는다.
         # 실제 generator의 예외인지 확인할 때만 늦게 import한다.
-        from backend.llm.generator import LLMOutputError, LLMUnavailableError
+        from backend.llm.generator import LLMOutputError, LLMRateLimitedError, LLMUnavailableError
 
         if isinstance(exc, LLMOutputError):
             raise AskError("LLM_OUTPUT_INVALID") from exc
+        # 한도 초과는 연결 장애의 한 종류라 먼저 확인한다.
+        if isinstance(exc, LLMRateLimitedError):
+            raise AskError("LLM_RATE_LIMITED") from exc
         if isinstance(exc, LLMUnavailableError):
             raise AskError("LLM_UNAVAILABLE") from exc
         raise

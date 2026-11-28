@@ -53,6 +53,7 @@ ERRORS = {
     "SEARCH_BACKEND_UNAVAILABLE": (503, "정책 검색 서비스를 잠시 이용할 수 없습니다."),
     "SEARCH_TIMEOUT": (504, "정책 검색 시간이 초과되었습니다."),
     "LLM_UNAVAILABLE": (502, "답변 생성 서비스를 잠시 이용할 수 없습니다."),
+    "LLM_RATE_LIMITED": (503, "답변 생성 요청이 많아 잠시 후 다시 시도해 주세요."),
     "LLM_TIMEOUT": (504, "답변 생성 시간이 초과되었습니다."),
     "LLM_OUTPUT_INVALID": (502, "답변 또는 출처를 검증할 수 없습니다."),
     "ELIGIBILITY_OUTPUT_INVALID": (502, "조건 판정 결과를 검증할 수 없습니다."),

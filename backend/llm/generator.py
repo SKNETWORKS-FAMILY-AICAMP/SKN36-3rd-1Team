@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
+import time
 from functools import lru_cache
 from typing import Any
 
@@ -17,6 +19,8 @@ from backend.llm.fishing_days_guard import ground_fishing_days
 from backend.llm.month_age_guard import QUOTED_WRONG_WORDING, ground_child_month_ranges
 from database.region_search import ALIASES, SIDOS
 
+logger = logging.getLogger(__name__)
+
 
 # D-06 모델·공급자 확정 전 임시 기본값. LLM_MODEL 환경변수로 변경 가능.
 DEFAULT_MODEL = "gpt-5.4-mini"
@@ -24,8 +28,15 @@ DEFAULT_TIMEOUT_SECONDS = 25.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1000
 # 같은 질문에 같은 근거로 답하도록 무작위성을 끈다(평가 결과 재현용).
 TEMPERATURE = 0
-# SDK 자동 재시도는 끈다. 재시도하면 한 요청이 LLM_TIMEOUT_SECONDS를 넘겨 기다리고 비용도 늘어난다.
+# SDK 자동 재시도는 끈다. 오류 종류를 구분하지 않고 다시 보내기 때문이다. 재시도는 _call_openai가 종류별로 정한다.
 SDK_MAX_RETRIES = 0
+# 일시 장애(연결 실패·공급자 5xx)만 한 번 더 보낸다. 시간 초과는 이미 제한 시간을 다 썼으므로 다시 보내지 않는다.
+# 두 번 모두 LLM_TIMEOUT_SECONDS(기본 25초)까지 기다려도 화면 제한(60초) 안에 끝난다.
+TRANSIENT_RETRIES = 1
+TRANSIENT_RETRY_DELAY_SECONDS = 0.5
+# 요청 한도 초과는 바로 다시 보내도 같은 결과라 재시도하지 않고 따로 알린다.
+RATE_LIMIT_STATUS = 429
+SERVER_ERROR_STATUS = 500
 # 계약 §5.1 follow_up_questions 0~3개.
 MAX_FOLLOW_UPS = 3
 # 이보다 긴 문장은 정책 설명이 섞였을 수 있어 중복 입력 요청으로 지우지 않는다.
@@ -1079,6 +1090,10 @@ class LLMUnavailableError(RuntimeError):
     """모델 공급자 연결·인증·요청 오류. Pipeline은 502로 처리."""
 
 
+class LLMRateLimitedError(LLMUnavailableError):
+    """공급자 요청 한도 초과(HTTP 429). Pipeline은 503 LLM_RATE_LIMITED로 처리."""
+
+
 class LLMTimeoutError(TimeoutError):
     """LLM 호출 시간 초과. Pipeline은 504로 처리."""
 
@@ -1689,16 +1704,61 @@ def _call_openai(
             api_key,
             timeout,
         )
+    except OpenAIError as error:
+        raise LLMUnavailableError(
+            "LLM 서비스 호출에 실패했습니다."
+        ) from error
 
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=TEMPERATURE,
-            max_completion_tokens=max_tokens,
-            response_format={
-                "type": "json_object",
-            },
-        )
+    for attempt in range(TRANSIENT_RETRIES + 1):
+        retry = attempt < TRANSIENT_RETRIES
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=TEMPERATURE,
+                max_completion_tokens=max_tokens,
+                response_format={
+                    "type": "json_object",
+                },
+            )
+
+        except APITimeoutError as error:
+            raise LLMTimeoutError(
+                "LLM 호출 시간이 초과되었습니다."
+            ) from error
+
+        except APIStatusError as error:
+            status = getattr(error, "status_code", None)
+            if status == RATE_LIMIT_STATUS:
+                logger.warning("LLM 요청 한도 초과(HTTP %s)", status)
+                raise LLMRateLimitedError(
+                    "LLM 요청 한도를 초과했습니다."
+                ) from error
+            if isinstance(status, int) and status >= SERVER_ERROR_STATUS and retry:
+                logger.warning("LLM 공급자 일시 오류(HTTP %s), 한 번 더 시도합니다.", status)
+                time.sleep(TRANSIENT_RETRY_DELAY_SECONDS)
+                continue
+            # 인증·권한·요청 형식 오류(4xx)는 다시 보내도 같으므로 바로 실패로 넘긴다. 키·본문은 기록하지 않는다.
+            logger.error("LLM 서비스 호출 실패(HTTP %s)", status)
+            raise LLMUnavailableError(
+                "LLM 서비스 호출에 실패했습니다."
+            ) from error
+
+        except APIConnectionError as error:
+            if retry:
+                logger.warning("LLM 공급자 연결 실패, 한 번 더 시도합니다.")
+                time.sleep(TRANSIENT_RETRY_DELAY_SECONDS)
+                continue
+            logger.error("LLM 공급자 연결 실패")
+            raise LLMUnavailableError(
+                "LLM 서비스 호출에 실패했습니다."
+            ) from error
+
+        except OpenAIError as error:
+            logger.error("LLM SDK 오류(%s)", type(error).__name__)
+            raise LLMUnavailableError(
+                "LLM 서비스 호출에 실패했습니다."
+            ) from error
 
         if (
             not response.choices
@@ -1717,19 +1777,7 @@ def _call_openai(
 
         return content
 
-    except APITimeoutError as error:
-        raise LLMTimeoutError(
-            "LLM 호출 시간이 초과되었습니다."
-        ) from error
-
-    except (
-        APIConnectionError,
-        APIStatusError,
-        OpenAIError,
-    ) as error:
-        raise LLMUnavailableError(
-            "LLM 서비스 호출에 실패했습니다."
-        ) from error
+    raise AssertionError("재시도 반복은 반환하거나 예외로 끝난다.")
 
 
 def generate_answer(
