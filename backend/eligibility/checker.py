@@ -136,139 +136,150 @@ def _field(condition: dict) -> str:
     }.get(kind, "eligibility")
 
 
+def _children_condition(condition: dict, profile: dict) -> dict:
+    """자녀 월령 조건(LT·LTE, 개월)을 입력한 child_age_months와 비교한다."""
+    # 신청자 나이(age)와 자녀 월령(child_age_months)을 구분한다.
+    raw = str(condition.get("value") or "").strip()
+    operator = str(
+        condition.get("operator") or ""
+    ).strip().upper()
+
+    match = re.fullmatch(
+        r"(\d{1,3})\s*(?:개월)?", raw
+    )
+
+    if (
+        operator not in {"LT", "LTE"}
+        or match is None
+        or int(match.group(1)) <= 0
+    ):
+        return _result(
+            "children",
+            CHECK,
+            "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다.",
+        )
+
+    limit = int(match.group(1))
+    comparison = "미만" if operator == "LT" else "이하"
+    months = profile.get("child_age_months")
+
+    if months is None:
+        return _result(
+            "children",
+            CHECK,
+            f"자녀 월령(개월 수)을 확인해야 합니다. "
+            f"기준: {limit}개월 {comparison}.",
+        )
+
+    if type(months) is not int or months < 0:
+        return _result(
+            "children",
+            CHECK,
+            "유효한 자녀 월령을 확인할 수 없습니다.",
+        )
+
+    eligible = (
+        months < limit
+        if operator == "LT"
+        else months <= limit
+    )
+
+    status = OK if eligible else NO
+
+    return _result(
+        "children",
+        status,
+        f"자녀 월령 {limit}개월 {comparison} 기준에 "
+        f"입력한 {months}개월은 "
+        + (
+            "포함됩니다."
+            if eligible
+            else "포함되지 않습니다."
+        ),
+    )
+
+
+def _age_condition(condition: dict, profile: dict) -> dict:
+    """신청자 만 나이 조건(BETWEEN)을 입력한 age와 비교한다."""
+    field = "age"
+    age = profile.get("age")
+
+    if age is None:
+        return _result(
+            field,
+            CHECK,
+            "사용자의 만 나이가 입력되지 않았습니다.",
+        )
+
+    if not _is_valid_age(age):
+        return _result(
+            field,
+            CHECK,
+            "유효한 만 나이를 확인할 수 없습니다.",
+        )
+
+    match = _AGE_RANGE.fullmatch(
+        str(condition.get("value") or "")
+    )
+
+    if (
+        condition.get("operator") != "BETWEEN"
+        or not match
+    ):
+        return _result(
+            field,
+            CHECK,
+            "연령 조건 형식을 해석할 수 없어 "
+            "원문 확인이 필요합니다.",
+        )
+
+    low, high = map(int, match.groups())
+
+    if not _is_valid_age_range(low, high):
+        return _result(
+            field,
+            CHECK,
+            "연령 범위가 유효하지 않아 확인이 필요합니다.",
+        )
+
+    status = OK if low <= age <= high else NO
+
+    if _is_unverified_full_age_range(low, high):
+        return _result(
+            field,
+            status,
+            f"입력한 만 {age}세는 데이터에 저장된 "
+            "연령 범위에 포함됩니다. "
+            "다만 실제 적용 연령 제한은 "
+            "공식 공고로 확인해야 합니다.",
+        )
+
+    age_rule = (
+        f"만 {low}세 이상(상한 없음)"
+        if _has_no_upper_limit(low, high)
+        else f"만 {low}~{high}세"
+    )
+
+    return _result(
+        field,
+        status,
+        f"{age_rule} 기준에 입력한 만 {age}세가 "
+        + (
+            "포함됩니다."
+            if status == OK
+            else "포함되지 않습니다."
+        ),
+    )
+
+
 def _condition(condition: dict, profile: dict) -> dict:
     field = _field(condition)
 
     if field == "children":
-        # 신청자 나이(age)와 자녀 월령(child_age_months)을 구분한다.
-        raw = str(condition.get("value") or "").strip()
-        operator = str(
-            condition.get("operator") or ""
-        ).strip().upper()
-
-        match = re.fullmatch(
-            r"(\d{1,3})\s*(?:개월)?", raw
-        )
-
-        if (
-            operator not in {"LT", "LTE"}
-            or match is None
-            or int(match.group(1)) <= 0
-        ):
-            return _result(
-                "children",
-                CHECK,
-                "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다.",
-            )
-
-        limit = int(match.group(1))
-        comparison = "미만" if operator == "LT" else "이하"
-        months = profile.get("child_age_months")
-
-        if months is None:
-            return _result(
-                "children",
-                CHECK,
-                f"자녀 월령(개월 수)을 확인해야 합니다. "
-                f"기준: {limit}개월 {comparison}.",
-            )
-
-        if type(months) is not int or months < 0:
-            return _result(
-                "children",
-                CHECK,
-                "유효한 자녀 월령을 확인할 수 없습니다.",
-            )
-
-        eligible = (
-            months < limit
-            if operator == "LT"
-            else months <= limit
-        )
-
-        status = OK if eligible else NO
-
-        return _result(
-            "children",
-            status,
-            f"자녀 월령 {limit}개월 {comparison} 기준에 "
-            f"입력한 {months}개월은 "
-            + (
-                "포함됩니다."
-                if eligible
-                else "포함되지 않습니다."
-            ),
-        )
+        return _children_condition(condition, profile)
 
     if field == "age":
-        age = profile.get("age")
-
-        if age is None:
-            return _result(
-                field,
-                CHECK,
-                "사용자의 만 나이가 입력되지 않았습니다.",
-            )
-
-        if not _is_valid_age(age):
-            return _result(
-                field,
-                CHECK,
-                "유효한 만 나이를 확인할 수 없습니다.",
-            )
-
-        match = _AGE_RANGE.fullmatch(
-            str(condition.get("value") or "")
-        )
-
-        if (
-            condition.get("operator") != "BETWEEN"
-            or not match
-        ):
-            return _result(
-                field,
-                CHECK,
-                "연령 조건 형식을 해석할 수 없어 "
-                "원문 확인이 필요합니다.",
-            )
-
-        low, high = map(int, match.groups())
-
-        if not _is_valid_age_range(low, high):
-            return _result(
-                field,
-                CHECK,
-                "연령 범위가 유효하지 않아 확인이 필요합니다.",
-            )
-
-        status = OK if low <= age <= high else NO
-
-        if _is_unverified_full_age_range(low, high):
-            return _result(
-                field,
-                status,
-                f"입력한 만 {age}세는 데이터에 저장된 "
-                "연령 범위에 포함됩니다. "
-                "다만 실제 적용 연령 제한은 "
-                "공식 공고로 확인해야 합니다.",
-            )
-
-        age_rule = (
-            f"만 {low}세 이상(상한 없음)"
-            if _has_no_upper_limit(low, high)
-            else f"만 {low}~{high}세"
-        )
-
-        return _result(
-            field,
-            status,
-            f"{age_rule} 기준에 입력한 만 {age}세가 "
-            + (
-                "포함됩니다."
-                if status == OK
-                else "포함되지 않습니다."
-            ),
-        )
+        return _age_condition(condition, profile)
 
     if field == "region":
         return _result(
