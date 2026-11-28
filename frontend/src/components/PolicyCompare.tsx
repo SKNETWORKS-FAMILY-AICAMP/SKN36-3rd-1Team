@@ -3,7 +3,7 @@ import {
   buildComparison, detailFromNode, MISSING_TEXT, orderByDeadline, PERSONAL_UNCHECKED_TEXT,
   type CompareCell, type CompareInput, type ConsultedCheck, type PolicyDetail,
 } from '../lib/policyCompare';
-import { scheduleView } from '../lib/applicationSchedule';
+import { scheduleView, SOON_WINDOW_DAYS } from '../lib/applicationSchedule';
 import { policyQuestion } from '../config/request';
 import { mapHref, policyDetailHref } from '../lib/route';
 import { useTheme } from '../lib/theme';
@@ -102,7 +102,7 @@ export function PolicyCompare({ inputs, consulted, onBack, onAsk, onOpenMap, ini
       <ul className="compare-stats" aria-label="비교 요약">
         <li><span>비교 중</span><b>{inputs.length}개</b></li>
         <li className="ok"><span>접수 중</span><b>{counts.open}개</b></li>
-        <li className="warn"><span>7일 이내 마감</span><b>{counts.soon}개</b></li>
+        <li className="warn"><span>{SOON_WINDOW_DAYS}일 이내 마감</span><b>{counts.soon}개</b></li>
         <li><span>일정 확인 필요</span><b>{counts.unknown}개</b></li>
         <li className={counts.consulted < inputs.length ? 'warn' : 'ok'}><span>내 조건 확인</span><b>{counts.consulted}/{inputs.length}개</b></li>
       </ul>

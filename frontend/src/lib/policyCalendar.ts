@@ -1,5 +1,5 @@
 import type { PolicyCheck } from '../api/types';
-import { scheduleView } from './applicationSchedule';
+import { DAY_MS, scheduleView } from './applicationSchedule';
 import { safeHttpUrl } from './validate';
 
 const escapeText = (text: string) => text.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
@@ -21,7 +21,7 @@ export function policyCalendar(policy: PolicyCheck, today: string, now = new Dat
   const view = scheduleView(policy, today);
   const end = policy.application_schedule?.end_date;
   if (!end || !['open', 'before'].includes(view.status) || view.ongoing) return null;
-  const next = new Date(Date.parse(end) + 86400000).toISOString().slice(0, 10);
+  const next = new Date(Date.parse(end) + DAY_MS).toISOString().slice(0, 10);
   const url = safeHttpUrl(policy.source_url);
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SSOK//Policy deadlines//KO', 'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT', `UID:${encodeURIComponent(policy.policy_id)}-${end}@ssok.local`,

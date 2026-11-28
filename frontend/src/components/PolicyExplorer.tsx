@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { AskResponse } from '../api/types';
 import { catalogPolicies, type CatalogPolicy } from '../lib/policyCatalog';
-import { scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
+import { SCHEDULE_FILTERS, SOON_WINDOW_DAYS, scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
 import { safeHttpUrl } from '../lib/validate';
 import { policySearchKey } from '../lib/policySearch';
 import { PolicyCard } from './TurnView';
@@ -22,7 +22,6 @@ export function explorerPhase(load: 'loading' | 'ready' | 'error', loadedOnce: b
   if (load === 'loading' && !loadedOnce) return 'loading';
   return 'list';
 }
-const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
 export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;
@@ -111,7 +110,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   }
   return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
     <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
-    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 7일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); setFilter('soon'); setQuery(''); setRegion(''); setCategory(''); }}>마감 임박 정책 보기</button></div></div>}
+    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 {SOON_WINDOW_DAYS}일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); setFilter('soon'); setQuery(''); setRegion(''); setCategory(''); }}>마감 임박 정책 보기</button></div></div>}
     {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다 */}
     <div className="explorer-search" role="search">
       <label htmlFor={`${group}-q`}>정책 검색</label>
@@ -130,7 +129,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
         <label>분야 <select value={category} onChange={e => setCategory(e.target.value)}><option value="">전체 분야</option>{options.categories.map(x => <option key={x}>{x}</option>)}</select></label>
         <label>정렬 <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}><option value="deadline">마감 임박순</option><option value="name">이름순</option></select></label>
       </div>
-      <div className="schedule-tools" role="group" aria-label="전체 정책 접수 상태">{filters.map(([key, text]) => <button key={key} className="chip" type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>{text}</button>)}</div>
+      <div className="schedule-tools" role="group" aria-label="전체 정책 접수 상태">{SCHEDULE_FILTERS.map(([key, text]) => <button key={key} className="chip" type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>{text}</button>)}</div>
     </div>
     <p className="schedule-scope">{version ? `배포 데이터 ${version} 기준` : '배포 정책 목록'} · {POLICY_API_URL ? `서버의 정책 파일 기준 · 일정 확인일 ${evaluatedOn || '확인 중'}. 검색 DB의 반영 상태와는 다를 수 있어요.` : '전체 일정 API 미연결 · 일정은 오늘 확인된 상담 응답이 있는 정책만 표시합니다.'} 목록은 신청 자격 판정이 아닙니다.</p>
     {tab === 'saved' && <p className="schedule-scope">저장은 이 브라우저·기기에서만 유지돼요. 재방문·탭 복귀 시 일정을 다시 확인하고, 확인에 실패하면 마감 안내를 숨겨요.</p>}

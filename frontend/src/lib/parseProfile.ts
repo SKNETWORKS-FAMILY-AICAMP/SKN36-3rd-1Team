@@ -1,4 +1,5 @@
 import type { UserProfile } from '../api/types';
+import { AGE_MAX } from './validate';
 
 export const REGIONS = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
 
@@ -19,7 +20,7 @@ export function parseProfile(text: string, awaitingField?: string | null): Parti
   const out: Partial<UserProfile> = {};
 
   const age = text.match(/(\d{1,3})\s*(?:살|세)/) ?? (awaitingField === 'age' ? text.match(/^\s*(\d{1,3})\s*$/) : null);
-  if (age && Number(age[1]) <= 120) out.age = Number(age[1]);
+  if (age && Number(age[1]) <= AGE_MAX) out.age = Number(age[1]);
 
   for (const region of REGIONS) {
     const names = REGION_ALIASES[region] ?? [region];
