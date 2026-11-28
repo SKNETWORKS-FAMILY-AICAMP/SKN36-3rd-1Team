@@ -854,14 +854,11 @@ def _info_request_to_answer(
 
     # 기존 child_age/"자녀 나이" 안내 문구는 기존 API 및 테스트와의
     # 하위 호환을 위해 그대로 둔다. 분류기가 field를 other로 바꾸기도 하므로
-    # 원래 필드뿐 아니라 문장도 확인한다. 명시된 child_age_months는 우선한다.
-    if field == "child_age" or (
-        field != "child_age_months"
-        and re.search(r"자녀\s*나이", text)
-    ):
+    # 원래 필드뿐 아니라 문장도 확인한다. 명시된 child_age_months는 함수 첫머리에서 먼저 처리했다.
+    if field == "child_age" or re.search(r"자녀\s*나이", text):
         return "자녀 나이를 알려 주세요."
 
-    if field == "child_age_months" or _is_child_years_request(text) or re.search(
+    if _is_child_years_request(text) or re.search(
         r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|개월)|"
         r"(?:아이|아기|영유아).{0,30}(?:나이|연령)", text
     ):
@@ -1799,10 +1796,10 @@ def generate_answer(
         source_ids,
         cleaned_profile,
     )
-    if response["status"] != "no_evidence":
-        response["answer"] = _align_overall_eligibility(
-            response["answer"], cleaned_contexts, policy_checks,
-        )
+    # _validate_model_response는 answered/info만 통과시키므로 여기서는 항상 정렬한다.
+    response["answer"] = _align_overall_eligibility(
+        response["answer"], cleaned_contexts, policy_checks,
+    )
     # The policy-specific guard uses selected source document IDs, which are
     # not needed in the model's normalized context payload.
     response = ground_fishing_days(response, question, contexts)

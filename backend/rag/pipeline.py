@@ -785,7 +785,8 @@ def run_ask_pipeline(
     except (ConnectionError, NetworkError) as exc:
         raise AskError("LLM_UNAVAILABLE") from exc
     except Exception as exc:
-        # 검색이 데이터셋을 선택하기 전에 generator의 load_dotenv()를 실행하지 않는다.
+        # Pipeline은 generate_fn을 주입받으므로 generator 모듈에 직접 의존하지 않는다.
+        # 실제 generator의 예외인지 확인할 때만 늦게 import한다.
         from backend.llm.generator import LLMOutputError, LLMUnavailableError
 
         if isinstance(exc, LLMOutputError):
