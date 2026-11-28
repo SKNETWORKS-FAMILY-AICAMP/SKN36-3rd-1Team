@@ -91,9 +91,9 @@ def automatic_checks(scenario, payload):
     }
     if not policy.get("official_apply_url"):
         result["null_url_apply_claim_with_url"] = bool(APPLY_CLAIM.search(answer))
-        result["agreed_missing_link_phrase"] = MISSING_LINK in answer
+        result["agreed_missing_link_phrase"] = MISSING_LINK.rstrip(".") in answer
     if check.get("reception_status") == "unknown":
-        result["agreed_reception_phrase"] = UNKNOWN_RECEPTION in answer
+        result["agreed_reception_phrase"] = UNKNOWN_RECEPTION.rstrip(".") in answer
         result["always_open_claim"] = bool(re.search(r"상시\s*(?:신청|접수)\s*(?:가능|할\s*수)", answer))
     statuses = {c["field"]: c["status"] for c in check.get("conditions", []) if c["field"] == "age"}
     overall = [c["status"] for c in check.get("conditions", []) if c["field"] == "eligibility"]
