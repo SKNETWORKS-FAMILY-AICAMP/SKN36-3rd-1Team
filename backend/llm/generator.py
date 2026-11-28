@@ -48,6 +48,8 @@ DETAIL_REGION_REQUEST = "거주하시는 시·군·구를 알려 주세요."
 HOUSEHOLD_SIZE_REQUEST = "가구원 수를 알려 주세요."
 # '…알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'처럼 AI가 사용자에게 하는 제안의 끝맺음.
 _AI_OFFER_ENDING = r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?)"
+# 요청 어미 뒤에 잘못 붙은 물음표. 예: '신청제외대상을 정리해 주세요?' → '…정리해 주세요'
+_REQUEST_WITH_QUESTION_MARK = re.compile(r"((?:주세요|주십시오|줘요|줘))\s*[?？]+$")
 
 
 def _compact_question(text: str) -> str:
@@ -539,7 +541,8 @@ def _normalize_followup_question(text: str) -> str | None:
         return None
 
     if original.endswith(("?", "？")):
-        return original
+        # '…정리해 주세요?'처럼 요청문에 붙은 물음표만 뗀다(버튼 문구가 어색해진다). '주실래요?'는 의문문이라 둔다.
+        return _REQUEST_WITH_QUESTION_MARK.sub(r"\1", original)
 
     # 명백한 정책 기준 안내 요청만 문장부호를 보존해 question으로 허용한다.
     # 개인 입력 요구나 지원하지 않는 정보 요청에는 적용하지 않는다.
