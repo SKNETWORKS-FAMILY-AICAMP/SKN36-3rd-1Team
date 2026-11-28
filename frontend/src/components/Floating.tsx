@@ -54,10 +54,15 @@ export function JumpButtons({ reduceMotion, watch }: { reduceMotion: boolean; wa
   );
 }
 
-export function Toast({ message }: { message: { text: string; icon: IconName } | null }) {
+/** 알림 문구 옆에 둘 버튼(예: 저장 직후 '관심 정책 보기') */
+export interface ToastAction { label: string; onClick: () => void }
+export interface ToastMessage { text: string; icon: IconName; action?: ToastAction }
+
+export function Toast({ message }: { message: ToastMessage | null }) {
   return (
     <div className={'toast' + (message ? ' on' : '')} role="status">
-      {message && <><img src={iconUrl(message.icon)} alt="" />{message.text}</>}
+      {message && <><img src={iconUrl(message.icon)} alt="" />{message.text}
+        {message.action && <button type="button" className="toast-action" onClick={message.action.onClick}>{message.action.label}</button>}</>}
     </div>
   );
 }

@@ -54,7 +54,7 @@ afterEach(() => {
 async function renderLoaded() {
   load.mockResolvedValueOnce(page());
   await act(async () => {
-    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+    root.render(<SavedPoliciesProvider><PolicyExplorer savedView={false} onSavedView={() => {}} response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
   expect(cards()).toHaveLength(2);
 }
@@ -63,7 +63,7 @@ it('처음 9개를 보여주고, 9개씩 추가한 뒤 검색이 바뀌면 표�
   const items = Array.from({ length: 20 }, (_, index) => item(`POL_TEST_${String(index).padStart(3, '0')}`));
   load.mockResolvedValueOnce({ ...page(), items, total: items.length });
   await act(async () => {
-    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+    root.render(<SavedPoliciesProvider><PolicyExplorer savedView={false} onSavedView={() => {}} response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
 
   const more = () => host.querySelector<HTMLButtonElement>('.explorer-more');
@@ -92,7 +92,7 @@ it('지역은 고르는 즉시 적용하고, 검색 버튼은 검색어 칸에�
   const regional = { ...item('POL_TEST_002'), regions: ['가상 지역'] };
   load.mockResolvedValueOnce({ ...page(), items: [page().items[0], regional] } as PolicyListResponse);
   await act(async () => {
-    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+    root.render(<SavedPoliciesProvider><PolicyExplorer savedView={false} onSavedView={() => {}} response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
 
   const submit = host.querySelector<HTMLButtonElement>('.explorer-submit')!;
@@ -113,7 +113,7 @@ it('정렬·접수 상태는 바로 적용하고 검색어만 검색 버튼으�
   const unknown = { ...item('POL_TEST_001'), policy_name: '가 가상 정책 (sample_only)', deadline_rank: 3 };
   load.mockResolvedValueOnce({ ...page(), items: [unknown, before] } as PolicyListResponse);
   await act(async () => {
-    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+    root.render(<SavedPoliciesProvider><PolicyExplorer savedView={false} onSavedView={() => {}} response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
   const names = () => cards().map(card => card.textContent ?? '');
   const chip = (text: string) => [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === text)!;

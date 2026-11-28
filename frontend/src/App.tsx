@@ -16,7 +16,8 @@ import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
-import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
+import { BottomBar, JumpButtons, Toast, burst, type ToastAction, type ToastMessage } from './components/Floating';
+import { useSavedPolicies } from './components/SavedPolicies';
 import type { IconName } from './components/Icon';
 
 // 관계 지도는 그 페이지를 열 때만 코드와 데이터를 내려받는다
@@ -32,6 +33,8 @@ const THEME_KEY = 'lifepolicy-theme';
 const SCROLL_TO_NEW_TURN_MS = 80;
 const SCROLL_TO_LATEST_TURN_MS = 60;
 const TOAST_VISIBLE_MS = 2000;
+// 버튼이 있는 알림은 누를 시간을 주려고 더 오래 보여 준다
+const TOAST_ACTION_VISIBLE_MS = 5000;
 const FOCUS_AFTER_SCROLL_TOP_MS = 400;
 function readTheme(): 'light' | 'dark' {
   try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
@@ -49,7 +52,10 @@ export default function App() {
   const [childMonths, setChildMonths] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [awaiting, setAwaiting] = useState<{ field: string; question: string; turnId: number } | null>(null);
-  const [toast, setToast] = useState<{ text: string; icon: IconName } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  // 정책 목록을 관심 정책 보기로 열었는지. 목록 칩과 저장 알림의 '관심 정책 보기'가 함께 쓴다
+  const [explorerSaved, setExplorerSaved] = useState(false);
+  const lastSaved = useSavedPolicies()?.lastSaved ?? null;
   const [miniOn, setMiniOn] = useState(false);
 
   const askBoxRef = useRef<HTMLDivElement>(null);
@@ -115,12 +121,22 @@ export default function App() {
 
   // 알림을 연달아 띄워도 앞 알림의 타이머가 새 알림을 일찍 끄지 않도록 타이머를 하나만 둔다
   const toastTimer = useRef<number>();
-  const showToast = useCallback((text: string, icon: IconName = 'info') => {
-    setToast({ text, icon });
+  const showToast = useCallback((text: string, icon: IconName = 'info', action?: ToastAction) => {
+    setToast({ text, icon, action });
     window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), TOAST_VISIBLE_MS);
+    toastTimer.current = window.setTimeout(() => setToast(null), action ? TOAST_ACTION_VISIBLE_MS : TOAST_VISIBLE_MS);
   }, []);
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  // 관심 정책은 상담 답변 카드에서도 저장하지만 모아 보는 곳은 아래 정책 목록이라, 저장한 순간에 보는 곳으로 가는 버튼을 알려 준다
+  const showSavedPolicies = useCallback(() => {
+    setExplorerSaved(true);
+    setToast(null);
+    document.getElementById('policy-explorer')?.scrollIntoView({ block: 'start' });
+  }, []);
+  useEffect(() => {
+    if (lastSaved) showToast('관심 정책에 저장했어요', 'star', { label: '관심 정책 보기', onClick: showSavedPolicies });
+  }, [lastSaved, showToast, showSavedPolicies]);
 
   /** 앞선 대화를 계약 형식으로 만든다. 최근 HISTORY_MAX_ITEMS개만 보낸다. */
   const history = (list: Turn[]): ChatTurnMessage[] => list.flatMap((t): ChatTurnMessage[] => {
@@ -334,6 +350,8 @@ export default function App() {
       <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
         onOpenMap={() => { explorerScroll.current = window.scrollY; }}
         active={onAskPage}
+        savedView={explorerSaved}
+        onSavedView={setExplorerSaved}
         consulted={consulted}
         onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
       </div>

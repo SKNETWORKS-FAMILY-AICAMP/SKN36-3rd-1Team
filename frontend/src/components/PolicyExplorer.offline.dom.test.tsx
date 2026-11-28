@@ -47,7 +47,7 @@ it('상담으로 마감일이 확인된 정책은 마감 임박순 맨 앞에 �
   const response: AskResponse = { status: 'answered', answer: 'sample_only [1]', citations: [], policy_checks: [consulted],
     follow_up_questions: [], checked_at: null, is_sample: false, notice: null };
   await act(async () => {
-    root.render(<SavedPoliciesProvider><PolicyExplorer response={response} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+    root.render(<SavedPoliciesProvider><PolicyExplorer savedView={false} onSavedView={() => {}} response={response} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
   });
   const names = [...host.querySelectorAll('details.pcard')].map(card => card.textContent ?? '');
   expect(names).toHaveLength(3);

@@ -25,13 +25,16 @@ export function explorerPhase(load: 'loading' | 'ready' | 'error', loadedOnce: b
   if (load === 'loading' && !loadedOnce) return 'loading';
   return 'list';
 }
-export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted }: {
+export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active = true, consulted, savedView, onSavedView }: {
   response: AskResponse | null; onAsk: (question: string, origin: HTMLElement, policyId?: string) => void;
   onDemoApply: () => void; onOpenMap?: () => void;
   /** 상담 화면이 보이는 중인지. false면 포커스·탭 복귀 갱신을 건너뛴다 */
   active?: boolean;
   /** 정책별 최근 상담 Checker 결과(정책 비교 카드에서만 쓴다) */
   consulted?: Map<string, ConsultedCheck>;
+  /** 관심 정책만 보는 중인지. 저장 알림의 '관심 정책 보기'로도 바꿀 수 있게 화면(App)이 들고 있다 */
+  savedView: boolean;
+  onSavedView: (saved: boolean) => void;
 }) {
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -40,7 +43,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   // 한 번이라도 목록을 받았는지. 탭 복귀·포커스로 다시 부르는 동안 카드를 지우지 않아 펼친 카드가 유지된다
   const [loadedOnce, setLoadedOnce] = useState(false);
   const phase = explorerPhase(load, loadedOnce);
-  const [tab, setTab] = useState<'all' | 'saved'>('all');
+  const tab: 'all' | 'saved' = savedView ? 'saved' : 'all';
   const [queryDraft, setQueryDraft] = useState('');
   const [search, setSearch] = useState(EMPTY_SEARCH);
   const { query, region, category, filter, sort } = search;
@@ -120,7 +123,7 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   }
   return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
     <div className="board-h"><h2>전체 <span>정책</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
-    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 {SOON_WINDOW_DAYS}일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); resetSearch({ filter: 'soon' }); }}>마감 임박 정책 보기</button></div></div>}
+    {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 {SOON_WINDOW_DAYS}일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { onSavedView(true); resetSearch({ filter: 'soon' }); }}>마감 임박 정책 보기</button></div></div>}
     {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다. 검색 버튼은 검색어 칸에만 붙인다 */}
     <form className="explorer-search" role="search" aria-label="정책 검색" onSubmit={event => {
       event.preventDefault();
@@ -135,8 +138,8 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
     </form>
     <div className="explorer-filters">
       <div className="schedule-tools" role="group" aria-label="정책 목록 범위">
-        <button className="chip" type="button" aria-pressed={tab === 'all'} onClick={() => setTab('all')}>전체 정책 {catalog.length}</button>
-        <button className="chip" type="button" aria-pressed={tab === 'saved'} onClick={() => setTab('saved')}>★ 관심 정책 {state?.saved.length ?? 0}</button>
+        <button className="chip" type="button" aria-pressed={tab === 'all'} onClick={() => onSavedView(false)}>전체 정책 {catalog.length}</button>
+        <button className="chip" type="button" aria-pressed={tab === 'saved'} onClick={() => onSavedView(true)}>★ 관심 정책 {state?.saved.length ?? 0}</button>
         {!picking
           ? <button className="btn btn-o compare-start" type="button" onClick={() => setPicking(true)}>비교할 정책 고르기</button>
           : <button className="btn btn-o compare-start" type="button" onClick={stopPicking}>비교 고르기 취소</button>}
