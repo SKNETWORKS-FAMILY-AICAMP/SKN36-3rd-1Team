@@ -67,6 +67,13 @@ class PolicyDetailViewTests(SimpleTestCase):
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;정책", html)
         self.assertIn("&lt;b&gt;기관&lt;/b&gt;", html)
 
+    def test_html_entities_are_shown_as_characters(self):
+        item = make_item()
+        item["required_documents"][0]["text"] = "&#9312; 가상 신청서"
+        html = _visible_text(self.get("POL_TEST_001", response(make_page([item]))).content.decode())
+        self.assertIn("① 가상 신청서", html)
+        self.assertNotIn("&amp;#9312;", html)
+
     def test_missing_optional_data_is_not_invented(self):
         item = make_item(agency="", source_url=None, application_schedule=None, required_documents=None,
                          requirement_excerpts=None, reception_status="unknown")

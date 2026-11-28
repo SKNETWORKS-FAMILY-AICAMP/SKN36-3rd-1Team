@@ -2,6 +2,7 @@ import type { AskRequest, AskResponse } from './types';
 import { isApplicationSchedule } from '../lib/applicationSchedule';
 import { mockAsk } from '../mock/mockAsk';
 import { ASK_TIMEOUT_MS } from '../config/request';
+import { decodeEntitiesDeep } from '../lib/htmlEntities';
 
 /** 백엔드 주소. 비어 있으면 예시 응답으로 동작한다(.env.example 참고). */
 export const ASK_API_URL = (import.meta.env.VITE_ASK_API_URL as string | undefined)?.trim() || '';
@@ -117,7 +118,8 @@ export async function askPolicy(request: AskRequest): Promise<AskResponse> {
       throw error;
     });
     if (!isAskResponse(body)) throw new Error(`답변을 불러오지 못했어요. ${RETRY}`);
-    return body;
+    // 정책 원문의 HTML 문자 코드(&#9312; 등)를 글자로 바꿔 보여 준다(데이터는 그대로)
+    return decodeEntitiesDeep(body);
   } catch (err) {
     throw new Error(requestErrorMessage(err));
   } finally {

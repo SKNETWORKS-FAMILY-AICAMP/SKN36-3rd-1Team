@@ -22,6 +22,17 @@ class FetchPolicyTests(SimpleTestCase):
         self.assertIsInstance(get.call_args.kwargs["timeout"], tuple)
         self.assertTrue(get.call_args.args[0].endswith("/api/policies"))
 
+    def test_html_entities_become_characters_but_urls_stay(self):
+        # 정책 원문에 남은 HTML 문자 코드(&#9312; 등)는 글자로 바꾸고, 주소는 원문 그대로 둔다.
+        item = make_item("POL_010", policy_name="가상 &lsquo;정책&rsquo;",
+                         source_url="https://example.org/notice?a=1&amp;b=2")
+        item["required_documents"][0]["text"] = "&#9312; 가상 신청서 &times; 1부"
+        with patch_get(response(make_page([item]))):
+            result = services.fetch_policy("POL_010")
+        self.assertEqual(result.policy["policy_name"], "가상 ‘정책’")
+        self.assertEqual(result.policy["required_documents"][0]["text"], "① 가상 신청서 × 1부")
+        self.assertEqual(result.policy["source_url"], "https://example.org/notice?a=1&amp;b=2")
+
     def test_not_found_when_absent(self):
         with patch_get(response(make_page([make_item("POL_010")]))):
             with self.assertRaises(services.PolicyNotFound):

@@ -128,6 +128,13 @@ describe('graphLayout', () => {
 });
 
 describe(`팀 기준 데이터 (${DATASET_DIR})`, () => {
+  it('정책 글에 HTML 문자 코드(&#9312;·&rsquo; 등)가 남지 않는다(원문 파일에는 있다)', async () => {
+    const { index } = await loadGraphDataset();
+    const leftover = [...index.nodes.values()].filter((node) => Object.entries(node.data)
+      .some(([key, value]) => !key.endsWith('url') && /&(#\d+|[a-zA-Z]+);/.test(JSON.stringify(value))));
+    expect(leftover.map((node) => node.id)).toEqual([]);
+  });
+
   it('실제 그래프 파일을 읽으면 manifest 건수와 같고, 끊긴 연결이 없다', async () => {
     const { index, expected } = await loadGraphDataset();
     expect(expected).not.toBeNull();

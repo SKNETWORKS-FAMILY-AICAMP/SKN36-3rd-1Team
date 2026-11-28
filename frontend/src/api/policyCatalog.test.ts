@@ -20,6 +20,15 @@ it.each(['manifest_sha256', 'dataset_version', 'evaluated_on', 'total'] as const
   vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: true, json: async () => page() }).mockResolvedValueOnce({ ok: true, json: async () => changed }));
   await expect(loadPolicyCatalog(new AbortController().signal, 'https://example.org/api/policies')).rejects.toThrow('데이터가 바뀌었어요');
 });
+it('받은 정책 글의 HTML 문자 코드를 글자로 바꾸고 주소는 그대로 둔다', async () => {
+  const coded = { ...item('POL_0'), policy_name: '가상 정책 &lsquo;sample_only&rsquo;', source_url: 'https://example.org/?a=1&amp;b=2',
+    requirement_excerpts: [{ label: '지원대상', text: '&#9312; 가상 조건', document_id: 'DOC_0', chunk_id: 'CHK_0', source_url: 'https://example.org/doc?a=1&amp;b=2' }] };
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ...page(), items: [coded], total: 1 }) }));
+  const result = await loadPolicyCatalog(new AbortController().signal, 'https://example.org/api/policies');
+  expect(result.items[0].policy_name).toBe('가상 정책 ‘sample_only’');
+  expect(result.items[0].source_url).toBe('https://example.org/?a=1&amp;b=2');
+  expect(result.items[0].requirement_excerpts?.[0]).toMatchObject({ text: '① 가상 조건', source_url: 'https://example.org/doc?a=1&amp;b=2' });
+});
 it('중복 ID·진행하지 않는 페이지를 거부한다', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: true, json: async () => page() }).mockResolvedValueOnce({ ok: true, json: async () => ({ ...page(1), items: [item('POL_0')] }) }));
   await expect(loadPolicyCatalog(new AbortController().signal, 'https://example.org/api/policies')).rejects.toThrow('중복');

@@ -1,6 +1,7 @@
 import type { PolicyListResponse } from './types';
 import { ASK_API_URL, isPolicyCheck } from './client';
 import { isoDay } from '../lib/applicationSchedule';
+import { decodeEntitiesDeep } from '../lib/htmlEntities';
 
 const PAGE_SIZE = 500;
 const CATALOG_TIMEOUT_MS = 10_000;
@@ -39,6 +40,7 @@ export async function loadPolicyCatalog(signal: AbortSignal, endpoint = POLICY_A
       else result = page;
     } while (result.items.length < result.total);
     if (new Set(result.items.map(p => p.policy_id)).size !== result.total) throw new Error('정책 목록에 중복이 있어요.');
-    return result;
+    // 정책 원문의 HTML 문자 코드(&#9312; 등)를 글자로 바꿔 보여 준다(데이터는 그대로)
+    return decodeEntitiesDeep(result);
   } finally { clearTimeout(timer); signal.removeEventListener('abort', abort); }
 }

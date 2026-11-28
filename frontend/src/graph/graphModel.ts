@@ -7,6 +7,7 @@
 import {
   CONDITION_TREE_MAX_DEPTH, NODE_FILES, RELATIONSHIP_FILE, type NodeKind,
 } from '../config/graph';
+import { decodeEntitiesDeep } from '../lib/htmlEntities';
 
 export type Row = Record<string, unknown>;
 
@@ -44,7 +45,8 @@ export function parseJsonl(content: string, fileName: string): Row[] {
     let value: unknown;
     try { value = JSON.parse(line); } catch { throw new Error(`${fileName} ${i + 1}번째 줄을 읽지 못했어요.`); }
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${fileName} ${i + 1}번째 줄이 객체가 아니에요.`);
-    rows.push(value as Row);
+    // 정책 원문의 HTML 문자 코드(&#9312; 등)를 글자로 바꿔 보여 준다(릴리스 파일은 그대로)
+    rows.push(decodeEntitiesDeep(value as Row));
   });
   return rows;
 }
