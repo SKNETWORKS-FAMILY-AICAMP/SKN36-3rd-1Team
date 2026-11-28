@@ -6,7 +6,8 @@
 
 | 경로 | 역할 |
 | --- | --- |
-| [`fetch_youth_api.py`](fetch_youth_api.py) | 온통청년 API 수집 실행 |
+| [`../collectors/api/youthcenter_collector.py`](../collectors/api/youthcenter_collector.py) | 온통청년 API 수집 실행 (`YOUTH_POLICY_API_KEY`). 예전 [`fetch_youth_api.py`](fetch_youth_api.py)는 옛 엔드포인트·변수명(`YOUTH_CENTER_API_KEY`)을 쓰는 초기 기록용이다 |
+| [`verify_youth_codes.py`](verify_youth_codes.py) | 온통청년 코드정의서 엑셀 대조. `openpyxl`이 필요하다(`requirements.txt`에 포함) |
 | [`build_processed_dataset.py`](build_processed_dataset.py) | 초기 데이터 정제에 사용. 원본(`data/raw`)은 `.gitignore` 대상이라 저장소에 포함되지 않습니다. 먼저 [`download_raw.py`](download_raw.py)로 받거나(이미 있는 원본은 건너뛰고 기록은 Git 제외 위치 `data/raw/download_manifest.latest.json`에 씁니다. 추적 중인 `data/metadata/download_manifest.json`은 `--update-manifest`를 줄 때만 바뀝니다) 원본 위치를 `--raw-dir`로 지정하세요. 경로는 `--raw-dir`, `--processed-dir`, `--metadata-dir`로 지정할 수 있습니다. |
 | [`verify_handoff_package.py`](verify_handoff_package.py) | 인계 데이터 검증 |
 | [`restore_final_v140.py`](restore_final_v140.py) | 최종 DB 복원 및 검증 |

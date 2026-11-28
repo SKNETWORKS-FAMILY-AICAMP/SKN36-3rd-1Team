@@ -8,6 +8,7 @@
 """
 import argparse
 import json
+import sys
 import time
 import hashlib
 import datetime
@@ -15,12 +16,17 @@ from pathlib import Path
 import requests
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from collectors.api._common import USER_AGENT  # noqa: E402
+
 RAW_DIR = BASE_DIR / "data" / "raw"
 METADATA_DIR = BASE_DIR / "data" / "metadata"
 
 HEADERS = {
-    # 브라우저로 위장하지 않고 학습용 프로젝트임을 밝힌다(collectors/api/_common.py와 같은 값).
-    "User-Agent": "LifePolicyAI-academic-project/0.3 (SKN36 bootcamp)",
+    # 브라우저로 위장하지 않고 학습용 프로젝트임을 밝힌다. 값은 API 수집기와 같은 상수를 쓴다.
+    "User-Agent": USER_AGENT,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
 }

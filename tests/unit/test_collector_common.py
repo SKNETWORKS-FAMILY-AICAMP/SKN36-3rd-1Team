@@ -1,6 +1,7 @@
 """수집기 공통 HTTP 재시도·인증키 가리기 테스트. 실제 공공 API에 접속하지 않는다 (가짜 키, sample_only)."""
 
 import logging
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -173,8 +174,8 @@ class TestWriteProcessedJsonl(unittest.TestCase):
 
     def test_errors_keep_existing_file(self):
         summary = {"errors": ["page 2 failed"]}
-        with mock.patch.dict("os.environ", {}, clear=False):
-            __import__("os").environ.pop(_common.ALLOW_PARTIAL_ENV, None)
+        with mock.patch.dict(os.environ):
+            os.environ.pop(_common.ALLOW_PARTIAL_ENV, None)
             written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
         self.assertEqual(written, self.partial)
         self.assertEqual(self.path.read_text(encoding="utf-8"), '{"old": true}\n')
@@ -183,10 +184,43 @@ class TestWriteProcessedJsonl(unittest.TestCase):
 
     def test_errors_overwrite_only_when_allowed(self):
         summary = {"errors": ["page 2 failed"]}
-        with mock.patch.dict("os.environ", {_common.ALLOW_PARTIAL_ENV: "1"}):
+        with mock.patch.dict(os.environ, {_common.ALLOW_PARTIAL_ENV: "1"}):
             written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
         self.assertEqual(written, self.path)
         self.assertEqual(self.path.read_text(encoding="utf-8"), '{"id": 1}\n')
+
+
+class TestGov24UrlEnvNames(unittest.TestCase):
+    """.env.example의 MOIS_BENEFITS_* 이름과 예전 MOIS_SERVICE_* 이름을 모두 읽는다. 주소는 가상 값이다 (sample_only)."""
+
+    NAMES = ("MOIS_BENEFITS_LIST_API_URL", "MOIS_BENEFITS_DETAIL_API_URL", "MOIS_BENEFITS_CONDITIONS_API_URL",
+             "MOIS_SERVICE_LIST_API_URL", "MOIS_SERVICE_DETAIL_API_URL", "MOIS_SUPPORT_CONDITIONS_API_URL",
+             "MOIS_BENEFITS_API_URL")
+
+    def urls(self, env):
+        with mock.patch.dict(os.environ):
+            for name in self.NAMES:
+                os.environ.pop(name, None)
+            os.environ.update(env)
+            return gov24_collector.get_gov24_urls()
+
+    def test_env_example_names_are_read(self):
+        self.assertEqual(self.urls({
+            "MOIS_BENEFITS_LIST_API_URL": "https://example.org/list",
+            "MOIS_BENEFITS_DETAIL_API_URL": "https://example.org/detail",
+            "MOIS_BENEFITS_CONDITIONS_API_URL": "https://example.org/cond",
+        }), ("https://example.org/list", "https://example.org/detail", "https://example.org/cond"))
+
+    def test_old_names_still_work(self):
+        self.assertEqual(self.urls({
+            "MOIS_SERVICE_LIST_API_URL": "https://example.org/old-list",
+            "MOIS_SERVICE_DETAIL_API_URL": "https://example.org/old-detail",
+            "MOIS_SUPPORT_CONDITIONS_API_URL": "https://example.org/old-cond",
+        }), ("https://example.org/old-list", "https://example.org/old-detail", "https://example.org/old-cond"))
+
+    def test_defaults_without_env(self):
+        self.assertEqual(self.urls({}), (gov24_collector.DEFAULT_LIST_URL, gov24_collector.DEFAULT_DETAIL_URL,
+                                         gov24_collector.DEFAULT_COND_URL))
 
 
 class TestCuratedYouthcenterIds(unittest.TestCase):
