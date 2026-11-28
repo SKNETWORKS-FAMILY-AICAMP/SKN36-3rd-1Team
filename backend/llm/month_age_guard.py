@@ -21,6 +21,10 @@ _NEGATIVE_ELIGIBILITY = re.compile(
     r"제외|불가|비대상|대상(?:이|에)\s*(?:아니|아닙|해당하지\s*않)|"
     r"(?:신청|이용|지원받)(?:을)?\s*할\s*수\s*없"
 )
+# 잘못된 표현을 설명하는 인용 문장("…라는 표현은 잘못")은 고치지 않는다. generator도 같은 기준을 쓴다.
+# 자녀 월령을 다루는 문장·문단인지 보는 단어. generator의 월령 표현 보정도 같은 목록을 쓴다(#165).
+CHILD_MONTH_TOPIC = re.compile(r"자녀|아이|아기|영유아|영아|아동|월령")
+QUOTED_WRONG_WORDING = re.compile(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)")
 _MARK = r"(?:\*\*|__)?"
 _RANGE = re.compile(
     r"(?<![\d.\-])" + _MARK + r"(?P<low>\d+)\s*(?:개월)?" + _MARK
@@ -38,6 +42,9 @@ _START_STATEMENT = re.compile(
     r"(?:시작|최소|최저)\s*월령(?:은|이|의\s*기준은)?\s*"
     + _MARK + r"(?P<low>\d+)\s*개월" + _MARK + r"\s*(?:입니다|이에요|로\s*확인됩니다)"
 )
+
+# 근거에 시작 월령이 없을 때 넣는 안내. 같은 문구로 이미 안내했는지도 이 값으로 확인한다.
+_UNKNOWN_START = "시작 월령은 이번 근거에서 확인되지 않았습니다"
 
 
 def _upper_only(contexts: list[dict]) -> tuple[str, str, int] | None:
@@ -89,12 +96,12 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
     added_sources = set()
     for index in range(0, len(parts), 2):
         paragraph = parts[index]
-        if not re.search(r"자녀|아이|아기|영유아|영아|아동|월령", paragraph):
+        if not CHILD_MONTH_TOPIC.search(paragraph):
             continue
         if not re.search(r"신청|지원|이용|대상|원문|범위|기준", paragraph):
             continue
         # Do not rewrite a quote explaining why a proposed range is wrong.
-        if re.search(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)", paragraph):
+        if QUOTED_WRONG_WORDING.search(paragraph):
             continue
         cited_policies = {source_policy[int(m.group(1))]
                           for m in re.finditer(r"\[(\d{1,9})\]", paragraph)
@@ -153,13 +160,13 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
             if not can_correct_start(match):
                 return match.group()
             changed = True
-            return "시작 월령은 이번 근거에서 확인되지 않았습니다"
+            return _UNKNOWN_START
 
         paragraph = _START.sub(replace_start, paragraph)
         paragraph = _START_STATEMENT.sub(replace_statement, paragraph)
         if changed:
-            if "시작 월령은 이번 근거에서 확인되지 않았습니다" not in paragraph:
-                paragraph += f" 시작 월령은 이번 근거에서 확인되지 않았습니다 [{source_id}]."
+            if _UNKNOWN_START not in paragraph:
+                paragraph += f" {_UNKNOWN_START} [{source_id}]."
             elif f"[{source_id}]" not in paragraph:
                 paragraph += f" [{source_id}]."
             parts[index] = paragraph

@@ -6,13 +6,15 @@ from pathlib import Path
 from threading import Lock
 
 from backend.api.schemas import PolicyListResponse, PolicySummary
-from backend.eligibility.checker import KST, _reception_status, application_schedule
+from backend.eligibility.checker import DATED_OPEN_RANK, KST, _reception_status, application_schedule, deadline_rank
 from backend.rag.context_builder import valid_source_url
 from backend.rag.source_sections import application_details
 
 FILES = ("neo4j/nodes_policy.jsonl", "neo4j/nodes_region.jsonl", "neo4j/nodes_category.jsonl",
          "neo4j/nodes_document.jsonl", "neo4j/relationships.jsonl", "qdrant/payload_chunks.jsonl")
 # React policySearchKey(#125)와 같은 비교 규칙. 검색 별칭·정책 원문은 추가하지 않는다.
+# GET /api/policies 한 번에 돌려주는 최대 건수(web_ssr도 이 값을 기준으로 나눠 요청한다).
+MAX_LIST_LIMIT = 500
 SEARCH_HYPHENS = "-‐‑–—－"
 
 
@@ -29,10 +31,10 @@ class PolicyCatalog:
         self._signature = None
         self._data = None
 
-    def _current_signature(self):
+    def _current_signature(self) -> tuple:
         return tuple(self.file_signature(self.package_dir / name) for name in ("manifest.json", *FILES))
 
-    def _snapshot(self):
+    def _snapshot(self) -> tuple[str, str, dict[str, dict], dict[str, dict], dict[str, dict]]:
         from database.handoff_data import manifest_checksum_match
 
         # 여러 요청이 동시에 와도 같은 파일을 중복 파싱하지 않는다. 실패한 갱신은 캐시하지 않는다.
@@ -53,7 +55,7 @@ class PolicyCatalog:
             if self._current_signature() != signature:
                 raise ValueError("목록을 읽는 동안 데이터가 변경됨")
 
-            def index(name, key):
+            def index(name: str, key: str) -> dict[str, dict]:
                 rows = tables[name]
                 result = {row[key]: row for row in rows}
                 if len(result) != len(rows) or any(not isinstance(value, str) or not value for value in result):
@@ -92,7 +94,8 @@ class PolicyCatalog:
             self._signature = signature
             return self._data
 
-    def list(self, *, q="", region="", category="", status="all", sort="deadline", offset=0, limit=500):
+    def list(self, *, q: str = "", region: str = "", category: str = "", status: str = "all",
+             sort: str = "deadline", offset: int = 0, limit: int = MAX_LIST_LIMIT) -> PolicyListResponse:
         today = datetime.now(KST).date()
         version, digest, policies, relations, details = self._snapshot()
         items = []
@@ -110,9 +113,8 @@ class PolicyCatalog:
             policy = {"graph": {"policy": node}}
             reception = _reception_status(policy, evaluated_on=today)
             schedule = application_schedule(policy, reception, evaluated_on=today)
-            remaining = schedule["days_to_end"] if schedule else None
             ongoing = bool(schedule and schedule["is_ongoing"])
-            if status == "soon" and not (reception == "open" and not ongoing and remaining is not None and 0 <= remaining <= 7):
+            if status == "soon" and not (schedule and schedule["closing_soon"]):
                 continue
             if status == "ongoing" and not (reception == "open" and ongoing):
                 continue
@@ -122,13 +124,12 @@ class PolicyCatalog:
             items.append(PolicySummary(policy_id=pid, policy_name=name, agency=agency, **relation,
                 source_url=url if valid_source_url(url) else "", official_apply_url=apply if valid_source_url(apply) else None,
                 reception_status=reception, application_schedule=schedule,
+                deadline_rank=deadline_rank(reception, schedule),
                 **details[pid]))
-        def order(item):
-            schedule = item.application_schedule
-            remaining = schedule.days_to_end if schedule else None
-            finite_open = item.reception_status == "open" and schedule and not schedule.is_ongoing and remaining is not None
-            rank = 0 if finite_open else {"before": 1, "open": 2, "unknown": 3, "closed": 4}[item.reception_status]
-            return (rank, remaining if finite_open else 0, item.policy_name, item.policy_id) if sort == "deadline" else (item.policy_name, item.policy_id)
+        def order(item: PolicySummary) -> tuple:
+            dated_open = item.deadline_rank == DATED_OPEN_RANK
+            remaining = item.application_schedule.days_to_end if dated_open else 0
+            return (item.deadline_rank, remaining, item.policy_name, item.policy_id) if sort == "deadline" else (item.policy_name, item.policy_id)
         items.sort(key=order)
         return PolicyListResponse(items=items[offset:offset + limit], total=len(items), offset=offset, limit=limit,
             dataset_version=version, manifest_sha256=digest, evaluated_on=today.isoformat(),

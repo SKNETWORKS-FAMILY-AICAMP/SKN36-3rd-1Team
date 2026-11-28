@@ -12,13 +12,14 @@ from pydantic import TypeAdapter, ValidationError
 from backend.api.schemas import (
     AskRequest, AskResponse, Contact, EligibilityOutput, ExclusionReason, GeneratorOutput,
 )
+from backend.core.contract import CITATION, MAX_CONTEXTS, MAX_HISTORY_TURNS, SENTENCE_BREAK
 from backend.rag.context_builder import complete_condition_evidence, rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from backend.eligibility.checker import certain_required_and_failure, application_schedule
+from backend.eligibility.checker import CHECK, NO, OK, certain_required_and_failure, application_schedule, deadline_rank
 from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from backend.rag.application_links import align_application_links
-from backend.rag.reception_notice import ensure_unknown_reception_notice
+from backend.rag.reception_notice import UNKNOWN_RECEPTION, ensure_unknown_reception_notice
 from backend.rag.age_verdict import align_age_verdicts, align_child_month_verdicts
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
@@ -29,23 +30,23 @@ from database.region_search import ALIASES, SIDOS
 
 logger = logging.getLogger(__name__)
 EXCLUSION_REASONS = TypeAdapter(list[ExclusionReason])
-CITATION = re.compile(r"\[(\d+)\]")
 # 검색 계층(data_quality.affected_attributes)·Checker와 같은 공통 상수("all" 제외).
 # 목록 밖의 값과 "all"은 영향 범위를 확정할 수 없으므로 정책 전체를 보류한다.
 SCOPED_CONDITION_FIELDS = SCOPED_ELIGIBILITY_FIELDS
 QUALITY_REASON = "데이터가 불확실하여 공식 공고에서 조건을 확인해야 합니다."
 MISSING_PROFILE_REASON = "입력한 정보가 없어 자동 판정을 보류했습니다. 정보를 입력하거나 공식 공고에서 확인해 주세요."
 INCOME_REASON = "소득 기준(개인·가구 구분)이 확정되지 않아 공식 공고에서 확인해야 합니다."
-# 화면(frontend/src/lib/answerView.ts)이 이 문장으로 일반 보류 안내를 알아본다. 바꾸면 화면도 함께 바꾼다.
+# 일반 보류 안내. 화면(frontend/src/lib/answerView.ts)은 문장이 아니라 notice.code(condition_hold)로 알아본다.
 HOLD_NOTICE_TEXT = "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+UNKNOWN_REGION_NOTICE_TEXT = "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."
+ALIGNED_NOTICE_TEXT = "신청 주소·접수 상태·신청 자격은 확인된 정책 정보를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."
 # 신청 상태(before/open/closed/unknown)는 Checker 단일 책임이다. Pipeline은 날짜를 판정하지 않는다.
 CLOSED = "closed"
 # 정책명 직접 언급 판별: 공백·문장부호를 지운 정책명 전체가 질문에 들어 있을 때만 인정한다.
 # 너무 짧은 이름은 일반 단어와 겹칠 수 있어 제외한다.
 NAME_NOISE = re.compile(r"[\W_]+")
 MIN_NAMED_POLICY_LENGTH = 4
-# 생성 본문의 접수·자격 단정이 Checker 판정과 충돌하면 확인된 상태 문구로 바꾼다(문장 단위).
-SENTENCE_BREAK = re.compile(r"((?<=[.!?。！？])\s+|\n+)")
+# 생성 본문의 접수·자격 단정이 Checker 판정과 충돌하면 확인된 상태 문구로 바꾼다(문장 단위, SENTENCE_BREAK).
 OPEN_CLAIM = re.compile(
     r"(?:지금|현재|바로|오늘|당장|언제든지)\s*\S{0,8}?\s*(?:신청|접수)\S{0,6}?\s*(?:수\s*)?(?:있|가능)"
     r"|접수\s*(?:중|하고\s*있)|신청\s*(?:기간|접수)\s*(?:중|입니다)"
@@ -61,7 +62,7 @@ HEDGED_CLAIM = re.compile(r"없|않|못|불가|어렵|여부|인지|단정|아�
 RECEPTION_NOTICE = {
     "closed": "접수가 마감됐어요.",
     "before": "아직 접수가 시작되지 않았어요.",
-    "unknown": "현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "unknown": UNKNOWN_RECEPTION,
 }
 ELIGIBILITY_NOTICE = "신청 자격은 공식 공고에서 추가 확인이 필요해요."
 INELIGIBLE_NOTICE = "입력하신 정보로는 맞지 않는 조건이 있어요. 신청 자격은 공식 공고에서 확인해 주세요."
@@ -192,22 +193,39 @@ def _hold_selected_policy_region(policy: dict, check: dict, profile_region: str 
         return
     conditions = check["conditions"]
     region_rows = [row for row in conditions if row["field"].lower() == "region"]
-    if any(row["status"] == "ineligible" for row in region_rows):
+    if any(row["status"] == NO for row in region_rows):
         return
     mismatch = (f"이 정책의 대상 지역은 {', '.join(sorted(names))}이고 입력한 지역({profile_region})과 달라요. "
                 "거주 요건을 공식 공고에서 확인해 주세요.")
     # 계약 §4.3: Checker가 needs_check로 준 사유는 바꾸지 않고, 확정 상태만 보류로 내리며 사유를 뒤에 덧붙인다.
-    eligible_rows = [row for row in region_rows if row["status"] == "eligible"]
+    eligible_rows = [row for row in region_rows if row["status"] == OK]
     for row in eligible_rows:
-        row["status"] = "needs_check"
+        row["status"] = CHECK
         row["reason"] += f" {mismatch}"
     if not eligible_rows:
         # 기존 지역 행이 없거나 needs_check뿐이면 그 사유는 그대로 두고 지역 불일치 행을 따로 앞에 둔다.
-        conditions.insert(0, {"field": "region", "label": "거주 지역", "status": "needs_check", "reason": mismatch})
-    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
-    if root is not None and root["status"] == "eligible":
-        root["status"] = "needs_check"
+        conditions.insert(0, {"field": "region", "label": "거주 지역", "status": CHECK, "reason": mismatch})
+    root = _root_row(conditions)
+    if root is not None and root["status"] == OK:
+        root["status"] = CHECK
         root["reason"] += " 거주 지역 확인이 필요해 종합 판정을 보류합니다."
+
+
+
+def _warn_notice(code: str, text: str) -> dict:
+    """화면 상단 '추가 확인 필요' 안내. code는 계약 §8.3 notice.code 값이다."""
+    return {"kind": "warn", "title": "추가 확인 필요", "text": text, "code": code}
+
+
+def _root_index(conditions: list[dict]) -> int | None:
+    """종합 판정 행(마지막 eligibility 행)의 위치."""
+    return next((i for i in range(len(conditions) - 1, -1, -1)
+                 if conditions[i]["field"].lower() == "eligibility"), None)
+
+
+def _root_row(conditions: list[dict]) -> dict | None:
+    index = _root_index(conditions)
+    return None if index is None else conditions[index]
 
 
 def _confirmed_exclusion_reasons(raw: dict, conditions: list[dict]) -> list[dict] | None:
@@ -226,8 +244,8 @@ def _confirmed_exclusion_reasons(raw: dict, conditions: list[dict]) -> list[dict
         reasons = EXCLUSION_REASONS.validate_python(reasons)
     except ValidationError as exc:
         raise AskError("ELIGIBILITY_OUTPUT_INVALID") from exc
-    root = next((row for row in reversed(conditions) if row["field"].lower() == "eligibility"), None)
-    if not reasons or root is None or root["status"] != "ineligible":
+    root = _root_row(conditions)
+    if not reasons or root is None or root["status"] != NO:
         return None
     before = Counter((row.field.lower(), row.status) for row in EligibilityOutput.model_validate(raw).conditions)
     after = Counter((row["field"].lower(), row["status"]) for row in conditions)
@@ -272,11 +290,7 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
         or structure.get("structure_issues")
     )
     conditions = [condition.model_dump() for condition in result.conditions]
-    root_index = next(
-        (i for i in range(len(conditions) - 1, -1, -1)
-         if conditions[i]["field"].lower() == "eligibility"),
-        None,
-    )
+    root_index = _root_index(conditions)
     # At this boundary `raw` is only schema-validated, not proof-validated.
     # Recheck an unaffected direct AND failure before preserving the root.
     preserve_root = (
@@ -295,7 +309,7 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
     for index, condition in enumerate(conditions):
         field = condition["field"].lower()
         # Checker가 이미 보류한 조건의 사유(원문 확인 결과·공고 확인 항목 등)는 그대로 둔다.
-        if condition["status"] == "needs_check":
+        if condition["status"] == CHECK:
             continue
         # Same strict safety gate as Checker; never preserve unrelated groups.
         if preserve_root and index == root_index:
@@ -311,7 +325,7 @@ def _policy_check(policy: dict, raw: dict, profile: dict, context: dict) -> dict
         else:
             continue
         # 확정 상태만 보수적으로 낮추고, Checker의 비교 근거는 지우지 않고 보류 사유를 덧붙인다.
-        condition["status"] = "needs_check"
+        condition["status"] = CHECK
         condition["reason"] = f"{condition['reason']} {reason}"
 
     agency = graph_policy.get("agency") or graph_policy.get("organization")
@@ -355,9 +369,9 @@ def _status_correction(claim: str, check: dict) -> str | None:
         status = check["reception_status"]
         return None if status == "open" else RECEPTION_NOTICE.get(status, RECEPTION_NOTICE["unknown"])
     statuses = {condition["status"] for condition in check["conditions"]}
-    if "ineligible" in statuses:
+    if NO in statuses:
         return INELIGIBLE_NOTICE
-    if not statuses or statuses - {"eligible"}:
+    if not statuses or statuses - {OK}:
         return ELIGIBILITY_NOTICE
     # 확인된 조건이 모두 eligible이어도 전체 신청 자격은 확정하지 않는다.
     return PARTIAL_ELIGIBLE_NOTICE
@@ -368,6 +382,19 @@ def _claims(clause: str) -> list[str]:
     if HEDGED_CLAIM.search(clause):
         return []
     return [name for name, pattern in (("open", OPEN_CLAIM), ("eligible", ELIGIBLE_CLAIM)) if pattern.search(clause)]
+
+
+
+def _neutral_notice(claims: list[str]) -> str:
+    """정책을 특정할 수 없을 때의 중립 문구: 접수 단정이면 접수 확인, 아니면 자격 확인 안내."""
+    return RECEPTION_NOTICE["unknown"] if "open" in claims else ELIGIBILITY_NOTICE
+
+
+def _named_correction(check: dict, claims: list[str]) -> str:
+    """정책 하나로 특정한 단정 절을 그 정책 판정 문구로 바꾼다("정책명: 문구")."""
+    fixes = [_status_correction(claim, check) for claim in claims]
+    text = " ".join(dict.fromkeys(fix or OPEN_CONFIRMED for fix in fixes))
+    return f"{check['policy_name']}: {text}"
 
 
 def _unattributed_correction(
@@ -381,11 +408,9 @@ def _unattributed_correction(
     named = _named_policy_ids(clause, list(by_policy.values()))
     if len(named) == 1:
         check = by_policy[named.pop()]
-        fixes = [_status_correction(claim, check) for claim in claims]
-        if all(fix is None for fix in fixes):
+        if all(_status_correction(claim, check) is None for claim in claims):
             return clause
-        text = " ".join(dict.fromkeys(fix or OPEN_CONFIRMED for fix in fixes))
-        return f"{check['policy_name']}: {text}"
+        return _named_correction(check, claims)
     if several_topics:
         conflict = any(_status_correction(claim, check) is not None for check in by_policy.values() for claim in claims)
         return "" if conflict else clause
@@ -414,17 +439,14 @@ def _clause_correction(
         cited = {policy_of[number] for number in numbers}
         if len(named) == 1 and named != cited:
             # 본문 대상이 명확한데 다른 정책의 출처를 붙였으면 출처 정책의 판정을 빌리지 않는다.
-            check = by_policy[named.pop()]
-            fixes = [_status_correction(claim, check) for claim in claims]
-            text = " ".join(dict.fromkeys(fix or OPEN_CONFIRMED for fix in fixes))
-            return f"{check['policy_name']}: {text}"
+            return _named_correction(by_policy[named.pop()], claims)
         if len(named) > 1 and named != cited:
             # 이름이 겹치거나 여러 정책을 지칭하는데 인용 집합이 맞지 않으면 특정 정책을 고르지 않는다.
-            return RECEPTION_NOTICE["unknown"] if "open" in claims else ELIGIBILITY_NOTICE
+            return _neutral_notice(claims)
         if not named and len(by_policy) > 1 and len(numbers) == 1 and whole_sentence:
             # 단독 단정문은 인용 하나만으로 여러 검색 정책 중 발화 대상을 확정할 수 없다.
             # 다른 설명 절이나 정책별 문장이 있는 경우는 아래 기존 절별 처리를 유지한다.
-            return RECEPTION_NOTICE["unknown"] if "open" in claims else ELIGIBILITY_NOTICE
+            return _neutral_notice(claims)
         grouped: dict[str, list[str]] = {}
         for number in numbers:
             grouped.setdefault(policy_of[number], []).append(number)
@@ -526,7 +548,7 @@ def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[di
         elif not keep:
             # 모든 절이 빠지면 출처를 잃지 않도록 확인 필요 안내로 대신한다.
             kinds = dict.fromkeys(kind for position in removed for kind in _claims(clauses[position]))
-            notice = " ".join(RECEPTION_NOTICE["unknown"] if kind == "open" else ELIGIBILITY_NOTICE for kind in kinds)
+            notice = " ".join(_neutral_notice([kind]) for kind in kinds)
             parts[index] = _inline(notice, "") + tail
         else:
             rebuilt = "".join(clauses[position] + (clauses[position + 1] if position != keep[-1] else "")
@@ -577,8 +599,8 @@ _TOPIC_SPLIT = re.compile(_TOPIC_SEPARATOR)
 # 분야 이름이 아닌 말은 나누지 않는다('취업 지원 및 창업 지원'의 '지원', '관련 및 기타' 등).
 _NOT_TOPIC = re.compile(r"^(?:관련|기타|그|이|저|모든|각|여러|다른|해당|어떤|무슨|그리고|함께|같이"
                         r"|지원|정책|혜택|제도|사업|서비스|수당|급여|바우처)$")
-# 근거는 최대 5개라 분야도 5개까지만 나눈다. 더 많으면 원래 질문 한 번으로 검색한다.
-MAX_TOPICS = 5
+# 근거는 최대 MAX_CONTEXTS개라 분야도 그만큼만 나눈다. 더 많으면 원래 질문 한 번으로 검색한다.
+MAX_TOPICS = MAX_CONTEXTS
 
 
 def _topic_searches(question: str) -> list[tuple[str, str]]:
@@ -690,24 +712,12 @@ def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) 
     return {**check, "conditions": shown}
 
 
-def run_ask_pipeline(
-    request: AskRequest,
-    *,
-    search_fn: Callable[..., dict],
-    check_fn: Callable[[dict, dict], dict],
-    generate_fn: Callable[..., dict],
-    display_fn: Callable[[list[dict]], list[dict]] | None = None,
-    requirement_reviews: Collection[dict] = (),
-) -> AskResponse:
-    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
+def _normalized_profile(request: AskRequest) -> tuple[dict, bool]:
+    """요청 프로필을 Checker·Generator용으로 정규화한다. 지역은 시·도 정식명만 남긴다.
 
-    generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
-    display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
-    requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
-        항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
+    child_age_months(#39)는 값 그대로 Checker·Generator에 전달한다. None=미입력, 0=유효값.
+    신청자 age와 섞지 않고 검색 필터에도 쓰지 않는다. 두 번째 값은 입력 지역을 확인하지 못했는지다.
     """
-    # child_age_months(#39)는 값 그대로 Checker·Generator에 전달한다. None=미입력, 0=유효값.
-    # 신청자 age와 섞지 않고 검색 필터에도 쓰지 않는다.
     profile = request.profile.model_dump()
     supplied_region = profile["region"].strip()
     canonical = ALIASES.get(supplied_region, supplied_region)
@@ -715,32 +725,25 @@ def run_ask_pipeline(
     unknown_region = bool(supplied_region and profile["region"] is None)
     if unknown_region:
         logger.info("입력 지역을 시·도 이름으로 확인하지 못했습니다.")
-    notice = {"kind": "warn", "title": "추가 확인 필요",
-              "text": "입력 지역을 확인하지 못했습니다. 시·도 이름을 확인해 주세요."} if unknown_region else None
-    filters = {"region": profile["region"]} if profile["region"] else None
+    return profile, unknown_region
+
+
+def _search_request_policies(request: AskRequest, search_fn: Callable[..., dict], region: str | None) -> list[dict]:
+    """선택 정책이 있으면 그 정책만, 없으면 지역 필터·분야 나누기(#75)로 검색한다."""
     if request.selected_policy_id:
         # 사용자가 고른 정책은 지역 필터로 빼지 않는다. 지역이 맞지 않으면 Checker가 지역 조건으로 판정한다.
         # 분야 나누기(#75)도 하지 않는다. 검색 어댑터가 필터를 무시해도 다른 정책으로 질문을 바꾸지 않는다.
         found = search_fn(request.question, filters={"policy_id": request.selected_policy_id}, k=SEARCH_TOP_K)
-        policies = [policy for policy in found["policies"] if policy["policy_id"] == request.selected_policy_id]
-    else:
-        policies = search_policies(search_fn, request.question, filters, k=SEARCH_TOP_K)
-    # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
-    ranked = rank_citable_contexts(policies)
-    citable = {context["policy_id"] for context in ranked}
-    # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
-    if not citable:
-        return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
+        return [policy for policy in found["policies"] if policy["policy_id"] == request.selected_policy_id]
+    filters = {"region": region} if region else None
+    return search_policies(search_fn, request.question, filters, k=SEARCH_TOP_K)
 
-    by_id = {policy["policy_id"]: policy for policy in policies}
-    # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
-    raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
-    closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
-    # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
-    named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
-    contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
-    contexts = complete_condition_evidence(contexts, ranked, policies, request.question, profile)
 
+def _selected_policy_checks(
+    request: AskRequest, profile: dict, by_id: dict[str, dict], raw_checks: dict[str, dict],
+    contexts: list[dict], ranked: list[dict], requirement_reviews: Collection[dict],
+) -> tuple[list[dict], dict[str, list | None]]:
+    """채택된 근거의 정책마다 판정·문의처·일정·원문 발췌를 조립한다. 공식 기준(#76)은 따로 돌려준다."""
     contexts_by_policy = {}
     for context in contexts:
         contexts_by_policy.setdefault(context["policy_id"], []).append(context)
@@ -768,6 +771,7 @@ def run_ask_pipeline(
             ]
         check["contacts"] = contacts or None
         check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
+        check["deadline_rank"] = deadline_rank(check["reception_status"], check["application_schedule"])
         check.update(application_details(selected))
         # 이 정책에 채택된 근거만 읽는다(정책 간 혼합 방지). Generator 입력은 바꾸지 않도록 생성 뒤에 붙인다.
         # 그래프상 이 정책의 근거 문서가 아닌 문서(evidence_document_check=MISMATCH)는 기준 추출에서 뺀다.
@@ -775,7 +779,14 @@ def run_ask_pipeline(
                                                   by_id[pid].get("data_quality"),
                                                   by_id[pid].get("evidence_document_check"))
         checks.append(check)
-    history = [turn.model_dump() for turn in request.history[-10:]]
+    return checks, requirements
+
+
+def _generate_output(
+    request: AskRequest, generate_fn: Callable[..., dict], contexts: list[dict], checks: list[dict], profile: dict,
+) -> GeneratorOutput:
+    """Generator를 호출하고 실패를 API 오류 코드로 바꾼 뒤 출력 형식을 검증한다."""
+    history = [turn.model_dump() for turn in request.history[-MAX_HISTORY_TURNS:]]
     try:
         raw = generate_fn(request.question, contexts, checks, history, profile=dict(profile))
     except JSONDecodeError as exc:
@@ -785,11 +796,15 @@ def run_ask_pipeline(
     except (ConnectionError, NetworkError) as exc:
         raise AskError("LLM_UNAVAILABLE") from exc
     except Exception as exc:
-        # 검색이 데이터셋을 선택하기 전에 generator의 load_dotenv()를 실행하지 않는다.
-        from backend.llm.generator import LLMOutputError, LLMUnavailableError
+        # Pipeline은 generate_fn을 주입받으므로 generator 모듈에 직접 의존하지 않는다.
+        # 실제 generator의 예외인지 확인할 때만 늦게 import한다.
+        from backend.llm.generator import LLMOutputError, LLMRateLimitedError, LLMUnavailableError
 
         if isinstance(exc, LLMOutputError):
             raise AskError("LLM_OUTPUT_INVALID") from exc
+        # 한도 초과는 연결 장애의 한 종류라 먼저 확인한다.
+        if isinstance(exc, LLMRateLimitedError):
+            raise AskError("LLM_RATE_LIMITED") from exc
         if isinstance(exc, LLMUnavailableError):
             raise AskError("LLM_UNAVAILABLE") from exc
         raise
@@ -797,29 +812,78 @@ def run_ask_pipeline(
         output = GeneratorOutput.model_validate(raw)
     except ValidationError as exc:
         raise AskError("LLM_OUTPUT_INVALID") from exc
-    output = output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
-    aligned = False
-    if output.status != "no_evidence":
-        link_fixed, links_aligned = align_application_links(output.answer, contexts, checks)
-        checked, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
-        # 입력 나이에 대한 결론이 Checker 나이 판정과 반대면 판정 문장으로 맞춘다(#90·#78 후속, 인천 18세).
-        aged, age_aligned = align_age_verdicts(checked, contexts, checks, profile.get("age"))
-        # 자녀 월령 결론도 Checker 판정에 맞춘다(#39, 24개월 '포함' 사례).
-        aged, month_aligned = align_child_month_verdicts(aged, contexts, checks, profile.get("child_age_months"))
-        # 접수 상태 unknown 정책의 합의 문구가 빠졌거나 바꿔 쓴 경우 합의 문구로 맞춘다(#103·#147).
-        fixed, notice_aligned = ensure_unknown_reception_notice(aged, contexts, checks)
-        aligned = links_aligned or checks_aligned or age_aligned or month_aligned or notice_aligned
-        if aligned:
-            # 내용은 로그에 남기지 않는다.
-            logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")
-            # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
-            remaining = set(CITATION.findall(fixed))
-            output = output.model_copy(update={
-                "answer": fixed,
-                "status": "info" if output.status == "answered" and not remaining else output.status,
-                "used_source_ids": [context["source_id"] for context in contexts
-                                    if str(context["source_id"]) in remaining],
-            })
+    return output.model_copy(update={"answer": _remove_redundant_status_tags(output.answer)})
+
+
+def _align_output(
+    output: GeneratorOutput, contexts: list[dict], checks: list[dict], profile: dict,
+) -> tuple[GeneratorOutput, bool]:
+    """생성 본문의 신청 링크·접수·자격·나이·월령 안내를 구조화된 판정에 맞춘다. 두 번째 값은 바꿨는지다."""
+    if output.status == "no_evidence":
+        return output, False
+    link_fixed, links_aligned = align_application_links(output.answer, contexts, checks)
+    checked, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
+    # 입력 나이에 대한 결론이 Checker 나이 판정과 반대면 판정 문장으로 맞춘다(#90·#78 후속, 인천 18세).
+    aged, age_aligned = align_age_verdicts(checked, contexts, checks, profile.get("age"))
+    # 자녀 월령 결론도 Checker 판정에 맞춘다(#39, 24개월 '포함' 사례).
+    aged, month_aligned = align_child_month_verdicts(aged, contexts, checks, profile.get("child_age_months"))
+    # 접수 상태 unknown 정책의 합의 문구가 빠졌거나 바꿔 쓴 경우 합의 문구로 맞춘다(#103·#147).
+    fixed, notice_aligned = ensure_unknown_reception_notice(aged, contexts, checks)
+    aligned = links_aligned or checks_aligned or age_aligned or month_aligned or notice_aligned
+    if aligned:
+        # 내용은 로그에 남기지 않는다.
+        logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")
+        # 교정으로 유일한 인용이 빠지면 answered의 필수 인용 계약을 지키기 위해 info로 낮춘다.
+        remaining = set(CITATION.findall(fixed))
+        output = output.model_copy(update={
+            "answer": fixed,
+            "status": "info" if output.status == "answered" and not remaining else output.status,
+            "used_source_ids": [context["source_id"] for context in contexts
+                                if str(context["source_id"]) in remaining],
+        })
+    return output, aligned
+
+
+def run_ask_pipeline(
+    request: AskRequest,
+    *,
+    search_fn: Callable[..., dict],
+    check_fn: Callable[[dict, dict], dict],
+    generate_fn: Callable[..., dict],
+    display_fn: Callable[[list[dict]], list[dict]] | None = None,
+    requirement_reviews: Collection[dict] = (),
+) -> AskResponse:
+    """실제 함수와 테스트 대역에 동일한 호출 계약을 적용한다.
+
+    generate_fn(question, contexts, policy_checks, history, profile=정규화 프로필)
+    display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
+    requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
+        항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
+    """
+    profile, unknown_region = _normalized_profile(request)
+    notice = _warn_notice("unknown_region", UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
+    policies = _search_request_policies(request, search_fn, profile["region"])
+    # 인용 가능한 근거 후보를 한 번만 만들고, 판정 대상 선정과 최종 근거 선택에 재사용한다.
+    ranked = rank_citable_contexts(policies)
+    citable = {context["policy_id"] for context in ranked}
+    # 인용 가능한 원문이 있는 정책만 판정 후보다. 원문이 없으면 Checker와 LLM을 호출하지 않는다.
+    if not citable:
+        return AskResponse(status="no_evidence", answer="인용할 수 있는 공식 원문을 찾지 못했습니다.", notice=notice)
+
+    by_id = {policy["policy_id"]: policy for policy in policies}
+    # 후보마다 한 번만 판정하고, Context에 채택된 정책은 이 결과를 재사용한다.
+    raw_checks = {pid: check_fn(profile, by_id[pid]) for pid in by_id if pid in citable}
+    closed = {pid for pid, raw in raw_checks.items() if _is_closed(by_id[pid], raw)}
+    # 사용자가 정책명을 직접 물은 마감 정책은 후순위에서 빼서 근거 자리를 확보한다(마감 여부는 그대로 응답).
+    named = _named_policy_ids(request.question, [by_id[pid] for pid in citable])
+    contexts = select_contexts(ranked, deprioritized_policy_ids=closed - named)
+    contexts = complete_condition_evidence(contexts, ranked, policies, request.question, profile)
+
+    checks, requirements = _selected_policy_checks(
+        request, profile, by_id, raw_checks, contexts, ranked, requirement_reviews,
+    )
+    output = _generate_output(request, generate_fn, contexts, checks, profile)
+    output, aligned = _align_output(output, contexts, checks, profile)
     follow_ups = [
         item for item in output.follow_up_questions
         if item.kind != "ask_info" or profile.get(item.field) is None
@@ -831,11 +895,10 @@ def run_ask_pipeline(
     if output.status == "no_evidence":
         checks = []
     checks = [{**check, "official_requirements": requirements.get(check["policy_id"])} for check in checks]
-    if notice is None and any(c["status"] == "needs_check" for p in checks for c in p["conditions"]):
-        notice = {"kind": "warn", "title": "추가 확인 필요", "text": HOLD_NOTICE_TEXT}
+    if notice is None and any(c["status"] == CHECK for p in checks for c in p["conditions"]):
+        notice = _warn_notice("condition_hold", HOLD_NOTICE_TEXT)
     if notice is None and aligned:
-        notice = {"kind": "warn", "title": "추가 확인 필요",
-                  "text": "신청 주소·접수 상태·신청 자격은 확인된 정책 정보를 기준으로 안내했습니다. 공식 공고를 확인해 주세요."}
+        notice = _warn_notice("answer_aligned", ALIGNED_NOTICE_TEXT)
     if display_fn is not None:
         checks = [_display_check(check, display_fn) for check in checks]
     return AskResponse(

@@ -3,9 +3,9 @@
 import re
 
 from backend.rag.context_builder import valid_source_url
-from backend.rag.reception_notice import NEAR_PHRASE, has_reception_notice
+from backend.core.contract import CITATION
+from backend.rag.reception_notice import NEAR_PHRASE, UNKNOWN_RECEPTION, has_reception_notice
 
-CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
 # URL 안의 마침표는 문장 경계가 아니다. 쉼표로 나눈 정책 설명도 독립 검증한다.
 # 쉼표는 뒤에 공백이 있을 때만 나누고, 숫자 사이 쉼표('1,000원', '1, 2')는 나누지 않는다.
@@ -13,8 +13,8 @@ BREAK = re.compile(
     r"((?<=[.!?。！？])\s+|\r?\n(?:[ \t]*\r?\n)*|(?<!\d),\s+|,\s+(?!\d)|;\s*|\s+(?:하지만|그러나|다만)\s+)"
 )
 # 정책명 안의 쉼표·세미콜론('자활근로(기초, 차상위)')에서 절이 끊기지 않도록 분리 전에 잠시 치환한다.
-PROTECT = "{}"
-PROTECTED = re.compile("(\\d+)")
+PROTECT = "\ue000{}\ue001"
+PROTECTED = re.compile("\ue000(\\d+)\ue001")
 # '누리집'은 홈페이지와 같은 뜻의 공공기관 표기다. 같은 웹 신청 경로 표현으로 검사한다.
 SITE = r"(?:홈페이지|웹\s*사이트|누리집)"
 LINK_CLAIM = re.compile(
@@ -42,7 +42,6 @@ WEB_ACTION = re.compile(r"(?:신청|접수)(?:할\s*수\s*있|이?\s*가능|하�
 MISSING_LINK = "직접 신청 링크는 확인되지 않았어요."
 REMAINING_METHOD = "신청 방법은 공식 공고에서 확인해 주세요."
 NO_APPLICATION_LINK = f"{MISSING_LINK} {REMAINING_METHOD}"
-UNKNOWN_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주세요."
 # 정책명·인용·주소 없이 여러 정책을 묶는 마무리 안내('각 신청 페이지에서 확인하세요')의 중립 문구.
 GENERIC_NOTICE = "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."
 URL = re.compile(r"https?://|www\.", re.IGNORECASE)
@@ -317,6 +316,68 @@ def _stated_notices(parts: list[str], by_id: dict[str, dict], policy_of: dict[st
     return found
 
 
+def _close_emptied_clause(
+    parts: list[str], index: int, *, head: str, bullet: str, markers: str, clause: str, line_start: bool,
+    pid: str, show_subject: bool, by_id: dict[str, dict], policy_of: dict[str, str], notice_at: dict[str, int],
+) -> None:
+    """이미 안내한 정책의 웹 신청 절을 빼서 인용만 남았을 때, 앞뒤 구분자와 인용 위치를 정리한다(parts를 바꾼다).
+
+    show_subject: 여러 정책 답변에서 빠진 절에만 정책명이 있었는지(줄 앞에 정책명을 남긴다).
+    """
+    before = parts[index - 1] if index else ""
+    after = parts[index + 1] if index + 1 < len(parts) else ""
+    subject = f"{by_id[pid]['policy_name']}: " if show_subject else ""
+    if re.fullmatch(r"\s*[,;]\s*", before):
+        # 문장 뒷절이 빠지면 앞절이 '필요하고,'로 끊긴다. 링크 안내는 이미 있으므로 방법 안내만 넣는다(PR #161 리뷰).
+        # 앞절이 방금 넣은 보정 안내면 인용만 붙인다(쉼표는 NOTICE_COMMA가 정리).
+        if REMAINING_METHOD not in parts[index - 2]:
+            parts[index] = head + f"{REMAINING_METHOD} {markers}".rstrip()
+    elif line_start and (bullet or subject) and index + 2 < len(parts) and "\n" not in after:
+        # 줄 맨 앞 절·문장이 빠지고 같은 줄에 설명이 이어지면 목록 기호와 빠진 절에만 있던 정책명을 남긴다.
+        # 여러 정책 답변에서 '- 수시 모집…', '다만 …'처럼 어느 정책 설명인지 모르는 줄이 되지 않게 한다
+        # (#122 후속 실 LLM 재현). 뒤 쉼표·문장 사이 공백은 지운다.
+        parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
+        parts[index + 1] = ""
+        # 앞 문장이 빠졌으니 이어지는 접속어('다만', '하지만')도 뺀다('정책명: 다만 …' 방지).
+        parts[index + 2] = LEADING_CONJUNCTION.sub("", parts[index + 2], count=1)
+    elif re.fullmatch(r"\s*[,;]\s*", after):
+        # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
+        parts[index + 1] = ""
+    elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of,
+                                                   head_citations=bool(head.strip()))) is not None:
+        # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
+        # 옮긴다. 반복 안내 제거와 같은 기준이다(인용 번호 유지, PR #140 검증).
+        parts[anchor] = _append_citations(parts[anchor], markers)
+        parts[index] = head
+        _drop_one_separator(parts, index)
+    elif index >= 2 and markers and (punct := re.search(r"[.!?。！？]\s*$", clause)) \
+            and not re.match(r"\s*[,;]", after) \
+            and not re.search(r"[.!?。！？](?:\s*\[\d+\])*\s*$", parts[index - 2]):
+        # 빠진 절이 문장 끝이었으면 마침표를 남겨야 앞 절이 문장으로 끝난다('신분증이에요 [1][2].').
+        parts[index] = head + markers + punct.group(0).strip()
+        if "\n" in before:
+            parts[index - 1] = " "
+    elif markers and "\n" in before:
+        # 인용만 남은 문단은 앞 문단 끝에 붙인다.
+        parts[index - 1] = " "
+    elif not markers and "\n" in before and "\n" in after:
+        _drop_one_separator(parts, index)  # 목록 항목이 빠질 때 빈 줄 없이, 문단 구분은 유지.
+    elif not markers and index and "\n" not in before:
+        parts[index - 1] = ""
+
+
+def _tidy_aligned_answer(fixed: str) -> str:
+    """절을 바꾸거나 뺀 뒤 남은 쉼표·빈 줄·겹친 인용·줄 앞 공백을 정리한다."""
+    fixed = NOTICE_COMMA.sub(lambda m: m.group(1) + m.group(2) + (m.group(3) or " "), fixed)
+    # 문단 하나가 통째로 빠지면 빈 줄이 겹친다(PR #161 리뷰).
+    fixed = EXTRA_BLANK_LINES.sub("\n\n", fixed)
+    # 빠진 절의 인용을 앞에 붙이면서 같은 번호가 이어지면 하나로 합친다.
+    fixed = _merge_adjacent_citations(fixed)
+    # 문단 첫 절이 빠지면 줄 앞에 구분 공백 한 칸이 남는다. 들여쓰기(두 칸 이상)·인용문·코드는 건드리지 않는다.
+    fixed = re.sub(r"(\n) (?=[^\s>|`\-*+\d])", r"\1", fixed)
+    return fixed
+
+
 def align_application_links(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
     """같은 정책의 구조화 신청 주소가 없는 경우에만 웹 신청 단정을 보정한다.
 
@@ -416,46 +477,11 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
             # 이미 같은 정책 안내가 있으면 이 절은 인용만 남긴다.
             parts[index] = head + markers
             if not CITATION.sub("", parts[index]).strip():
-                before = parts[index - 1] if index else ""
-                after = parts[index + 1] if index + 1 < len(parts) else ""
-                subject = f"{by_id[pid]['policy_name']}: " if not single and pid in named - earlier else ""
-                if re.fullmatch(r"\s*[,;]\s*", before):
-                    # 문장 뒷절이 빠지면 앞절이 '필요하고,'로 끊긴다. 링크 안내는 이미 있으므로 방법 안내만 넣는다(PR #161 리뷰).
-                    # 앞절이 방금 넣은 보정 안내면 인용만 붙인다(쉼표는 NOTICE_COMMA가 정리).
-                    if REMAINING_METHOD not in parts[index - 2]:
-                        parts[index] = head + f"{REMAINING_METHOD} {markers}".rstrip()
-                elif line_start and (bullet or subject) and index + 2 < len(parts) and "\n" not in after:
-                    # 줄 맨 앞 절·문장이 빠지고 같은 줄에 설명이 이어지면 목록 기호와 빠진 절에만 있던 정책명을 남긴다.
-                    # 여러 정책 답변에서 '- 수시 모집…', '다만 …'처럼 어느 정책 설명인지 모르는 줄이 되지 않게 한다
-                    # (#122 후속 실 LLM 재현). 뒤 쉼표·문장 사이 공백은 지운다.
-                    parts[index] = head + bullet + subject + (f"{markers} " if markers else "")
-                    parts[index + 1] = ""
-                    # 앞 문장이 빠졌으니 이어지는 접속어('다만', '하지만')도 뺀다('정책명: 다만 …' 방지).
-                    parts[index + 2] = LEADING_CONJUNCTION.sub("", parts[index + 2], count=1)
-                elif re.fullmatch(r"\s*[,;]\s*", after):
-                    # 앞절이 빠지면 뒤 쉼표를 지워야 '확인됩니다., 다음 절'이 되지 않는다(#122 후속).
-                    parts[index + 1] = ""
-                elif markers and (anchor := _citation_anchor(parts, index, notice_at.get(pid), pid, policy_of,
-                                                               head_citations=bool(head.strip()))) is not None:
-                    # 문장 전체가 빠지면 그 인용은 같은 정책의 링크 안내 문장(없으면 바로 앞 문장)의 인용 묶음으로
-                    # 옮긴다. 반복 안내 제거와 같은 기준이다(인용 번호 유지, PR #140 검증).
-                    parts[anchor] = _append_citations(parts[anchor], markers)
-                    parts[index] = head
-                    _drop_one_separator(parts, index)
-                elif index >= 2 and markers and (punct := re.search(r"[.!?。！？]\s*$", clause)) \
-                        and not re.match(r"\s*[,;]", after) \
-                        and not re.search(r"[.!?。！？](?:\s*\[\d+\])*\s*$", parts[index - 2]):
-                    # 빠진 절이 문장 끝이었으면 마침표를 남겨야 앞 절이 문장으로 끝난다('신분증이에요 [1][2].').
-                    parts[index] = head + markers + punct.group(0).strip()
-                    if "\n" in before:
-                        parts[index - 1] = " "
-                elif markers and "\n" in before:
-                    # 인용만 남은 문단은 앞 문단 끝에 붙인다.
-                    parts[index - 1] = " "
-                elif not markers and "\n" in before and "\n" in after:
-                    _drop_one_separator(parts, index)  # 목록 항목이 빠질 때 빈 줄 없이, 문단 구분은 유지.
-                elif not markers and index and "\n" not in before:
-                    parts[index - 1] = ""
+                _close_emptied_clause(
+                    parts, index, head=head, bullet=bullet, markers=markers, clause=clause, line_start=line_start,
+                    pid=pid, show_subject=not single and pid in named - earlier,
+                    by_id=by_id, policy_of=policy_of, notice_at=notice_at,
+                )
             changed = True
             continue
         noticed.add(pid)
@@ -475,12 +501,6 @@ def align_application_links(answer: str, contexts: list[dict], checks: list[dict
         fixed, deduped = _drop_repeated_missing_notice(fixed)
         changed = changed or deduped
     if changed:
-        fixed = NOTICE_COMMA.sub(lambda m: m.group(1) + m.group(2) + (m.group(3) or " "), fixed)
-        # 문단 하나가 통째로 빠지면 빈 줄이 겹친다(PR #161 리뷰).
-        fixed = EXTRA_BLANK_LINES.sub("\n\n", fixed)
-        # 빠진 절의 인용을 앞에 붙이면서 같은 번호가 이어지면 하나로 합친다.
-        fixed = _merge_adjacent_citations(fixed)
-        # 문단 첫 절이 빠지면 줄 앞에 구분 공백 한 칸이 남는다. 들여쓰기(두 칸 이상)·인용문·코드는 건드리지 않는다.
-        fixed = re.sub(r"(\n) (?=[^\s>|`\-*+\d])", r"\1", fixed)
+        fixed = _tidy_aligned_answer(fixed)
     # 절을 뺀 경우 남은 구분자 공백만 정리한다.
     return (fixed.strip() if changed else fixed), changed

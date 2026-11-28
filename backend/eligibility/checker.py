@@ -12,6 +12,8 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
+from backend.core.contract import MAX_VALID_AGE, PROFILE_INPUT_FIELDS
+from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -32,14 +34,19 @@ _LABELS = {
     "eligibility": "자격 요건",
 }
 
+# 결합 논리(logic)가 UNKNOWN인 그룹의 사유. 내부 값 'UNKNOWN'을 사용자 문구에 쓰지 않는다.
+# 화면(frontend/src/lib/conditionGroups.ts·TurnView.tsx)도 이 문구로 미판정 행을 알아본다.
+UNKNOWN_GROUP_REASON = "조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다."
+
 _GROUP_REASONS = {
     "AND": "모든 조건을 충족해야 합니다(종합 결과).",
     "OR": "조건 중 하나 이상 충족해야 합니다(종합 결과).",
     "NOT": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
 }
 
-MAX_VALID_AGE = 120
 NO_UPPER_LIMIT_SENTINEL = 120
+# 원문 검토 메모는 화면 사유에 붙으므로 이 길이까지만 쓴다.
+MAX_REVIEW_TEXT_LENGTH = 300
 
 
 def _is_valid_age(age: object) -> bool:
@@ -134,139 +141,150 @@ def _field(condition: dict) -> str:
     }.get(kind, "eligibility")
 
 
+def _children_condition(condition: dict, profile: dict) -> dict:
+    """자녀 월령 조건(LT·LTE, 개월)을 입력한 child_age_months와 비교한다."""
+    # 신청자 나이(age)와 자녀 월령(child_age_months)을 구분한다.
+    raw = str(condition.get("value") or "").strip()
+    operator = str(
+        condition.get("operator") or ""
+    ).strip().upper()
+
+    match = re.fullmatch(
+        r"(\d{1,3})\s*(?:개월)?", raw
+    )
+
+    if (
+        operator not in {"LT", "LTE"}
+        or match is None
+        or int(match.group(1)) <= 0
+    ):
+        return _result(
+            "children",
+            CHECK,
+            "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다.",
+        )
+
+    limit = int(match.group(1))
+    comparison = "미만" if operator == "LT" else "이하"
+    months = profile.get("child_age_months")
+
+    if months is None:
+        return _result(
+            "children",
+            CHECK,
+            f"자녀 월령(개월 수)을 확인해야 합니다. "
+            f"기준: {limit}개월 {comparison}.",
+        )
+
+    if type(months) is not int or months < 0:
+        return _result(
+            "children",
+            CHECK,
+            "유효한 자녀 월령을 확인할 수 없습니다.",
+        )
+
+    eligible = (
+        months < limit
+        if operator == "LT"
+        else months <= limit
+    )
+
+    status = OK if eligible else NO
+
+    return _result(
+        "children",
+        status,
+        f"자녀 월령 {limit}개월 {comparison} 기준에 "
+        f"입력한 {months}개월은 "
+        + (
+            "포함됩니다."
+            if eligible
+            else "포함되지 않습니다."
+        ),
+    )
+
+
+def _age_condition(condition: dict, profile: dict) -> dict:
+    """신청자 만 나이 조건(BETWEEN)을 입력한 age와 비교한다."""
+    field = "age"
+    age = profile.get("age")
+
+    if age is None:
+        return _result(
+            field,
+            CHECK,
+            "사용자의 만 나이가 입력되지 않았습니다.",
+        )
+
+    if not _is_valid_age(age):
+        return _result(
+            field,
+            CHECK,
+            "유효한 만 나이를 확인할 수 없습니다.",
+        )
+
+    match = _AGE_RANGE.fullmatch(
+        str(condition.get("value") or "")
+    )
+
+    if (
+        condition.get("operator") != "BETWEEN"
+        or not match
+    ):
+        return _result(
+            field,
+            CHECK,
+            "연령 조건 형식을 해석할 수 없어 "
+            "원문 확인이 필요합니다.",
+        )
+
+    low, high = map(int, match.groups())
+
+    if not _is_valid_age_range(low, high):
+        return _result(
+            field,
+            CHECK,
+            "연령 범위가 유효하지 않아 확인이 필요합니다.",
+        )
+
+    status = OK if low <= age <= high else NO
+
+    if _is_unverified_full_age_range(low, high):
+        return _result(
+            field,
+            status,
+            f"입력한 만 {age}세는 데이터에 저장된 "
+            "연령 범위에 포함됩니다. "
+            "다만 실제 적용 연령 제한은 "
+            "공식 공고로 확인해야 합니다.",
+        )
+
+    age_rule = (
+        f"만 {low}세 이상(상한 없음)"
+        if _has_no_upper_limit(low, high)
+        else f"만 {low}~{high}세"
+    )
+
+    return _result(
+        field,
+        status,
+        f"{age_rule} 기준에 입력한 만 {age}세가 "
+        + (
+            "포함됩니다."
+            if status == OK
+            else "포함되지 않습니다."
+        ),
+    )
+
+
 def _condition(condition: dict, profile: dict) -> dict:
     field = _field(condition)
 
     if field == "children":
-        # 신청자 나이(age)와 자녀 월령(child_age_months)을 구분한다.
-        raw = str(condition.get("value") or "").strip()
-        operator = str(
-            condition.get("operator") or ""
-        ).strip().upper()
-
-        match = re.fullmatch(
-            r"(\d{1,3})\s*(?:개월)?", raw
-        )
-
-        if (
-            operator not in {"LT", "LTE"}
-            or match is None
-            or int(match.group(1)) <= 0
-        ):
-            return _result(
-                "children",
-                CHECK,
-                "자녀 월령 조건의 정확한 비교 기준을 확인해야 합니다.",
-            )
-
-        limit = int(match.group(1))
-        comparison = "미만" if operator == "LT" else "이하"
-        months = profile.get("child_age_months")
-
-        if months is None:
-            return _result(
-                "children",
-                CHECK,
-                f"자녀 월령(개월 수)을 확인해야 합니다. "
-                f"기준: {limit}개월 {comparison}.",
-            )
-
-        if type(months) is not int or months < 0:
-            return _result(
-                "children",
-                CHECK,
-                "유효한 자녀 월령을 확인할 수 없습니다.",
-            )
-
-        eligible = (
-            months < limit
-            if operator == "LT"
-            else months <= limit
-        )
-
-        status = OK if eligible else NO
-
-        return _result(
-            "children",
-            status,
-            f"자녀 월령 {limit}개월 {comparison} 기준에 "
-            f"입력한 {months}개월은 "
-            + (
-                "포함됩니다."
-                if eligible
-                else "포함되지 않습니다."
-            ),
-        )
+        return _children_condition(condition, profile)
 
     if field == "age":
-        age = profile.get("age")
-
-        if age is None:
-            return _result(
-                field,
-                CHECK,
-                "사용자의 만 나이가 입력되지 않았습니다.",
-            )
-
-        if not _is_valid_age(age):
-            return _result(
-                field,
-                CHECK,
-                "유효한 만 나이를 확인할 수 없습니다.",
-            )
-
-        match = _AGE_RANGE.fullmatch(
-            str(condition.get("value") or "")
-        )
-
-        if (
-            condition.get("operator") != "BETWEEN"
-            or not match
-        ):
-            return _result(
-                field,
-                CHECK,
-                "연령 조건 형식을 해석할 수 없어 "
-                "원문 확인이 필요합니다.",
-            )
-
-        low, high = map(int, match.groups())
-
-        if not _is_valid_age_range(low, high):
-            return _result(
-                field,
-                CHECK,
-                "연령 범위가 유효하지 않아 확인이 필요합니다.",
-            )
-
-        status = OK if low <= age <= high else NO
-
-        if _is_unverified_full_age_range(low, high):
-            return _result(
-                field,
-                status,
-                f"입력한 만 {age}세는 데이터에 저장된 "
-                "연령 범위에 포함됩니다. "
-                "다만 실제 적용 연령 제한은 "
-                "공식 공고로 확인해야 합니다.",
-            )
-
-        age_rule = (
-            f"만 {low}세 이상(상한 없음)"
-            if _has_no_upper_limit(low, high)
-            else f"만 {low}~{high}세"
-        )
-
-        return _result(
-            field,
-            status,
-            f"{age_rule} 기준에 입력한 만 {age}세가 "
-            + (
-                "포함됩니다."
-                if status == OK
-                else "포함되지 않습니다."
-            ),
-        )
+        return _age_condition(condition, profile)
 
     if field == "region":
         return _result(
@@ -285,7 +303,7 @@ def _condition(condition: dict, profile: dict) -> dict:
     return _result(
         field,
         CHECK,
-        f"{condition.get('name') or condition.get('type') or '이 조건'}"
+        f"{condition.get('name') or '이 조건'}"
         "은(는) 추가 확인이 필요합니다.",
     )
 
@@ -363,7 +381,7 @@ def _walk(
             _result(
                 "eligibility",
                 CHECK,
-                "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.",
+                UNKNOWN_GROUP_REASON,
             )
         ]
 
@@ -463,7 +481,7 @@ def _is_confirmed_exclusion_match(
     if (
         required_status not in {OK, NO}
         or item["status"] != required_status
-        or "all" in affected
+        or ALL_ELIGIBILITY_FIELDS in affected
         or "exclusion" in affected
         or _field(condition) in affected
     ):
@@ -548,7 +566,7 @@ def _collect_exclusion_reasons(
     affected: set[str],
 ) -> list[dict]:
     """Format proven mandatory NOT exclusions, preserving nested negation."""
-    if "all" in affected or "exclusion" in affected:
+    if ALL_ELIGIBILITY_FIELDS in affected or "exclusion" in affected:
         return []
 
     proofs: list[list[tuple[dict, dict, str]]] = []
@@ -657,15 +675,15 @@ def _affected_fields(
 ) -> set[str]:
 
     if graph_missing:
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if eligibility.get("structure_issues"):
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if scoped_unknown is not None:
         return scoped_unknown
     if eligibility.get("unknown_logic_groups"):
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if not quality.get("hold_auto_eligibility"):
         return set()
@@ -678,7 +696,11 @@ def _safe_review_text(value: object) -> str:
     if not isinstance(value, str):
         return ""
 
-    return " ".join(value.split())[:300]
+    return " ".join(value.split())[:MAX_REVIEW_TEXT_LENGTH]
+
+
+# 원문 검토 안내 행의 라벨. 그래프 조건 행(가구·주거 조건 등)과 구분하는 데도 쓴다.
+_SOURCE_REVIEW_LABELS = {"income": "소득 요건", "household": "가구 요건"}
 
 
 def _source_review_conditions(
@@ -698,10 +720,8 @@ def _source_review_conditions(
 
     results = []
 
-    for prefix, field, label in (
-        ("income", "income", "소득 요건"),
-        ("household", "housing", "가구 요건"),
-    ):
+    for prefix, field in (("income", "income"), ("household", "housing")):
+        label = _SOURCE_REVIEW_LABELS[prefix]
         status = policy_node.get(
             f"{prefix}_source_review"
         )
@@ -861,6 +881,21 @@ def _reception_status(policy: dict, *, evaluated_on: date | None = None) -> str:
 
 
 
+# '마감 임박': 접수 중이고 상시 접수가 아니며 마감까지 이 일수 이하로 남은 정책(목록 필터·화면 배지 공통).
+SOON_WINDOW_DAYS = 7
+# 마감순 정렬 순위. 마감일이 있는 접수 중 정책을 맨 앞에 두고 마감이 가까운 순으로 본다.
+_DEADLINE_RANK = {"before": 1, "open": 2, "unknown": 3, "closed": 4}
+DATED_OPEN_RANK = 0
+
+
+def deadline_rank(reception_status: str, schedule: dict | None) -> int:
+    """마감순 정렬 순위: 0 마감일이 있는 접수 중, 1 접수 예정, 2 그 밖의 접수 중(상시 등), 3 미확인, 4 마감."""
+    if (reception_status == "open" and schedule and not schedule["is_ongoing"]
+            and schedule["days_to_end"] is not None):
+        return DATED_OPEN_RANK
+    return _DEADLINE_RANK[reception_status]
+
+
 def application_schedule(policy: dict, reception_status: str, *, evaluated_on: date | None = None) -> dict | None:
     """기존 접수 판정과 일치하는 구조화 날짜만 화면에 전달한다. 판정 규칙은 변경하지 않는다."""
     if reception_status == "unknown":
@@ -871,10 +906,14 @@ def application_schedule(policy: dict, reception_status: str, *, evaluated_on: d
     node = (policy.get("graph") or {}).get("policy") or {}
     start = (node.get("application_start") or "").strip() or None
     end = (node.get("application_end") or "").strip() or None
+    is_ongoing = node.get("application_is_ongoing") is True
+    days_to_end = (date.fromisoformat(end) - today).days if end else None
     return {"evaluated_on": today.isoformat(), "start_date": start, "end_date": end,
-            "is_ongoing": node.get("application_is_ongoing") is True,
+            "is_ongoing": is_ongoing,
             "days_to_start": (date.fromisoformat(start) - today).days if start else None,
-            "days_to_end": (date.fromisoformat(end) - today).days if end else None}
+            "days_to_end": days_to_end,
+            "closing_soon": (reception_status == "open" and not is_ongoing and days_to_end is not None
+                             and 0 <= days_to_end <= SOON_WINDOW_DAYS)}
 
 
 # #42: AGE 조건 미추출 안내는 설명 문구에 신청자 연령이 명시된 때만 추가한다.
@@ -932,7 +971,7 @@ def _should_add_missing_age_notice(
     구조 오류·UNKNOWN·전체 품질 보류는 이미 포괄적인 확인 안내가 있다.
     일반 소득·가구 원문 검토는 나이와 별개이므로 제외 조건이 아니다.
     """
-    if "all" in affected or walk_issues:
+    if ALL_ELIGIBILITY_FIELDS in affected or walk_issues:
         return False
 
     # _walk가 만든 필드만 재사용하여 AGE 중복과 자녀 월령 혼동을 막는다.
@@ -944,6 +983,142 @@ def _should_add_missing_age_notice(
     return isinstance(description, str) and _has_applicant_age_mention(
         description, has_child_condition="children" in fields,
     )
+
+
+def _evaluate_trees(
+    trees: object, profile: dict, *, missing: bool, scoped_unknown: set[str] | None, affected: set[str],
+) -> tuple[list[dict], list[dict], set[str], list[bool], dict | None]:
+    """조건 트리를 순회해 조건 결과·루트 종합 결과·구조 문제·필수 AND 실패·제외 추적을 돌려준다."""
+    conditions: list[dict] = []
+    root_results: list[dict] = []
+    walk_issues: set[str] = set()
+    certain_failures = [False]
+    # One optional trace for the only supported unambiguous root.
+    exclusion_trace = {} if isinstance(trees, list) and len(trees) == 1 else None
+
+    if (
+        missing
+        or not isinstance(trees, list)
+        or not trees
+    ):
+        walk_issues.add("missing_tree")
+        conditions = [
+            _result(
+                "eligibility",
+                CHECK,
+                "확인 가능한 자격 조건 구조가 없어 "
+                "공식 공고 확인이 필요합니다.",
+            )
+        ]
+
+    else:
+        for tree in trees:
+            _, details = _walk(
+                tree, profile, issues=walk_issues,
+                required_and_path=scoped_unknown is not None and len(trees) == 1,
+                affected=affected, certain_failures=certain_failures,
+                exclusion_trace=exclusion_trace,
+            )
+            # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
+            # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
+            root_results.append(details[-1])
+            conditions.extend(details)
+
+        if len(root_results) > 1:
+            walk_issues.add("multiple_roots")
+            conditions.append(
+                _result(
+                    "eligibility",
+                    CHECK,
+                    "여러 루트 조건 그룹의 결합 논리가 "
+                    "확인되지 않았습니다.",
+                )
+            )
+    return conditions, root_results, walk_issues, certain_failures, exclusion_trace
+
+
+def _add_quality_placeholders(conditions: list[dict], affected: set[str]) -> None:
+    """품질 경고 필드(age·region·income)에 조건 행이 없으면 확인 필요 행을 추가한다."""
+    for field in sorted(affected - {ALL_ELIGIBILITY_FIELDS}):
+        if (
+            field in PROFILE_INPUT_FIELDS
+            and not any(
+                item["field"] == field
+                for item in conditions
+            )
+        ):
+            conditions.append(
+                _result(
+                    field,
+                    CHECK,
+                    "데이터 품질 경고로 해당 자격 요건의 "
+                    "확인이 필요합니다.",
+                )
+            )
+
+
+# 품질 경고가 걸리면 종합(eligibility) 행도 함께 보류하는 프로필 입력 밖 항목(housing·employment·exclusion·marriage·children).
+_GROUP_ONLY_FIELDS = SCOPED_ELIGIBILITY_FIELDS - PROFILE_INPUT_FIELDS
+
+
+def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_failed_root: dict | None) -> None:
+    """품질 경고가 걸린 조건과 종합 판정을 needs_check로 보류한다. 확정된 단일 루트 실패는 유지한다."""
+    quality_held: set[int] = set()
+    if affected:
+        for item in conditions:
+            if item is safe_failed_root and item["status"] == NO:
+                continue
+            if (
+                ALL_ELIGIBILITY_FIELDS in affected
+                or item["field"] in affected
+                or (
+                    item["field"] == "eligibility"
+                    and any(
+                        value in affected
+                        for value in _GROUP_ONLY_FIELDS
+                    )
+                )
+            ):
+                item["status"] = CHECK
+                item["reason"] += (
+                    " 데이터 품질 경고로 "
+                    "자동 판정을 보류합니다."
+                )
+                quality_held.add(id(item))
+
+    if affected and ALL_ELIGIBILITY_FIELDS not in affected:
+        for item in conditions:
+            if item["field"] == "eligibility":
+                if item is safe_failed_root and item["status"] == NO:
+                    continue
+                item["status"] = CHECK
+
+                if id(item) not in quality_held:
+                    item["reason"] += (
+                        " 일부 조건이 검증되지 않아 "
+                        "종합 판정을 보류합니다."
+                    )
+
+
+def _hold_roots_for_source_checks(root_results: list[dict], has_review_items: bool, missing_age_notice: bool) -> None:
+    """원문 확인 항목이 남으면 루트 종합 결과만 보류한다.
+
+    하위 그룹/개별 조건과 명확한 ineligible 결과는 유지한다.
+    """
+    if has_review_items or missing_age_notice:
+        for item in root_results:
+            if item["status"] == OK:
+                item["status"] = CHECK
+                if has_review_items:
+                    item["reason"] += (
+                        " 소득·가구 원문 확인이 남아 "
+                        "종합 판정을 보류합니다."
+                    )
+                if missing_age_notice:
+                    item["reason"] += (
+                        " 나이 기준이 데이터에 정리되지 않아 "
+                        "종합 판정을 보류합니다."
+                    )
 
 
 def check_eligibility(
@@ -1008,68 +1183,10 @@ def check_eligibility(
     affected = _affected_fields(
         quality, eligibility, missing, scoped_unknown=scoped_unknown,
     )
-    conditions: list[dict] = []
-    root_results: list[dict] = []
-    walk_issues: set[str] = set()
-    certain_failures = [False]
-    # One optional trace for the only supported unambiguous root.
-    exclusion_trace = {} if isinstance(trees, list) and len(trees) == 1 else None
-
-    if (
-        missing
-        or not isinstance(trees, list)
-        or not trees
-    ):
-        walk_issues.add("missing_tree")
-        conditions = [
-            _result(
-                "eligibility",
-                CHECK,
-                "확인 가능한 자격 조건 구조가 없어 "
-                "공식 공고 확인이 필요합니다.",
-            )
-        ]
-
-    else:
-        for tree in trees:
-            _, details = _walk(
-                tree, profile, issues=walk_issues,
-                required_and_path=scoped_unknown is not None and len(trees) == 1,
-                affected=affected, certain_failures=certain_failures,
-                exclusion_trace=exclusion_trace,
-            )
-            # _walk는 마지막에 루트 그룹의 종합 결과를 추가한다.
-            # 참조를 그대로 저장하면 중첩 그룹을 다시 순회할 필요가 없다.
-            root_results.append(details[-1])
-            conditions.extend(details)
-
-        if len(root_results) > 1:
-            walk_issues.add("multiple_roots")
-            conditions.append(
-                _result(
-                    "eligibility",
-                    CHECK,
-                    "여러 루트 조건 그룹의 결합 논리가 "
-                    "확인되지 않았습니다.",
-                )
-            )
-
-    for field in sorted(affected - {"all"}):
-        if (
-            field in {"age", "region", "income"}
-            and not any(
-                item["field"] == field
-                for item in conditions
-            )
-        ):
-            conditions.append(
-                _result(
-                    field,
-                    CHECK,
-                    "데이터 품질 경고로 해당 자격 요건의 "
-                    "확인이 필요합니다.",
-                )
-            )
+    conditions, root_results, walk_issues, certain_failures, exclusion_trace = _evaluate_trees(
+        trees, profile, missing=missing, scoped_unknown=scoped_unknown, affected=affected,
+    )
+    _add_quality_placeholders(conditions, affected)
 
     # Preserve the *single root object* only when both the shared safety
     # gate and the already-evaluated mandatory AND condition prove failure.
@@ -1079,50 +1196,12 @@ def check_eligibility(
             eligibility, scoped_unknown, affected,
             root_status=root_results[0]["status"],
             has_certain_required_failure=certain_failures[0],
-            hold_all=missing or "all" in affected,
+            hold_all=missing or ALL_ELIGIBILITY_FIELDS in affected,
             walk_issues=walk_issues,
         )
     ) else None
 
-    if affected:
-        for item in conditions:
-            if item is safe_failed_root and item["status"] == NO:
-                continue
-            if (
-                "all" in affected
-                or item["field"] in affected
-                or (
-                    item["field"] == "eligibility"
-                    and any(
-                        value in affected
-                        for value in (
-                            "housing",
-                            "employment",
-                            "exclusion",
-                            "marriage",
-                            "children",
-                        )
-                    )
-                )
-            ):
-                item["status"] = CHECK
-                item["reason"] += (
-                    " 데이터 품질 경고로 "
-                    "자동 판정을 보류합니다."
-                )
-
-    if affected and "all" not in affected:
-        for item in conditions:
-            if item["field"] == "eligibility":
-                if item is safe_failed_root and item["status"] == NO:
-                    continue
-                item["status"] = CHECK
-
-                if "데이터 품질 경고" not in item["reason"]:
-                    item["reason"] += (
-                        " 일부 조건이 검증되지 않아 "
-                        "종합 판정을 보류합니다."
-                    )
+    _hold_quality_affected(conditions, affected, safe_failed_root)
 
     review_items = _source_review_conditions(
         policy_node,
@@ -1145,22 +1224,7 @@ def check_eligibility(
             )
         )
 
-    # 확인 항목은 정책 전체의 루트 종합 결과만 보류한다.
-    # 하위 그룹/개별 조건과 명확한 ineligible 결과는 유지한다.
-    if review_items or missing_age_notice:
-        for item in root_results:
-            if item["status"] == OK:
-                item["status"] = CHECK
-                if review_items:
-                    item["reason"] += (
-                        " 소득·가구 원문 확인이 남아 "
-                        "종합 판정을 보류합니다."
-                    )
-                if missing_age_notice:
-                    item["reason"] += (
-                        " 나이 기준이 데이터에 정리되지 않아 "
-                        "종합 판정을 보류합니다."
-                    )
+    _hold_roots_for_source_checks(root_results, bool(review_items), missing_age_notice)
 
     # #78: 종합 판정이 명확히 ineligible인 단일 조건 트리에서만
     # 표시용 제외 사유를 수집한다.
@@ -1205,8 +1269,7 @@ def summarize_conditions_for_display(conditions: list[dict]) -> list[dict]:
         return (
             item.get("field") == "housing"
             and item.get("status") == CHECK
-            and isinstance(item.get("reason"), str)
-            and item["reason"].startswith("가구 요건의 공식 원문 기준을 추가 확인해야 합니다.")
+            and item.get("label") == _SOURCE_REVIEW_LABELS["household"]
         )
 
     # 가구 원문 검토 결과가 있을 때만, 같은 상태의 그래프 조건과 묶는다.

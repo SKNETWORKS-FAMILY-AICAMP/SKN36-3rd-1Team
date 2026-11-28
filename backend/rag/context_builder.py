@@ -5,6 +5,7 @@ import logging
 import re
 from urllib.parse import urlsplit
 
+from backend.core.contract import MAX_CONTEXTS
 from backend.eligibility.checker import (
     _AGE_RANGE, _has_no_upper_limit, _is_unverified_full_age_range,
     _is_valid_age, _is_valid_age_range,
@@ -78,7 +79,7 @@ def rank_citable_contexts(policies: list[dict]) -> list[dict]:
 
 
 def select_contexts(
-    ranked: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
+    ranked: list[dict], max_contexts: int = MAX_CONTEXTS, deprioritized_policy_ids: Collection[str] = (),
 ) -> list[dict]:
     """rank_citable_contexts() 결과에서 최종 근거를 고르고 `source_id`를 1부터 붙인다.
 
@@ -94,7 +95,7 @@ def select_contexts(
 
 
 def build_contexts(
-    policies: list[dict], max_contexts: int = 5, deprioritized_policy_ids: Collection[str] = (),
+    policies: list[dict], max_contexts: int = MAX_CONTEXTS, deprioritized_policy_ids: Collection[str] = (),
 ) -> list[dict]:
     """검색 결과에서 인용 가능한 근거를 고른다(rank_citable_contexts + select_contexts)."""
     if max_contexts <= 0:
@@ -234,7 +235,7 @@ def complete_condition_evidence(
     Missing/unsupported data is a no-op. No DB calls or eligibility changes.
     """
     result = list(selected)
-    if type(limit) is not int or limit <= 0 or not selected or len(selected) > 5:
+    if type(limit) is not int or limit <= 0 or not selected or len(selected) > MAX_CONTEXTS:
         return result
     if not isinstance(question, str) or not isinstance(profile, dict):
         return result

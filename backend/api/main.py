@@ -1,6 +1,6 @@
 """질문 API와 프로세스별 Hybrid 검색 세션을 관리한다."""
 
-from collections.abc import Callable, Collection
+from collections.abc import AsyncIterator, Callable, Collection
 from contextlib import asynccontextmanager
 import logging
 import os
@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.schemas import AskRequest, AskResponse, PolicyListResponse
-from backend.api.policy_catalog import PolicyCatalog
+from backend.api.policy_catalog import MAX_LIST_LIMIT, PolicyCatalog
 from backend.rag.pipeline import AskError, run_ask_pipeline
 from database import embedding
 # handoff_data는 hybrid_search import 중 데이터셋 경로를 고정하므로 먼저 환경을 읽는다.
@@ -33,6 +33,9 @@ DEFAULT_CORS_ORIGINS = ("http://127.0.0.1:5173",)
 CORS_ORIGINS_ENV = "ASK_CORS_EXTRA_ORIGINS"
 # 같은 PC(루프백)의 개발 서버는 포트와 무관하게 허용한다. 5173이 차 있으면 Vite가 5174 등으로 옮겨 뜨기 때문이다.
 # 외부 주소는 허용하지 않는다(필요하면 ASK_CORS_EXTRA_ORIGINS에 명시).
+# 목록 검색어·필터 입력 길이 상한(긴 입력으로 목록 검색이 느려지지 않게).
+MAX_LIST_QUERY_LENGTH = 200
+MAX_LIST_FILTER_LENGTH = 100
 LOCAL_DEV_ORIGIN_REGEX = r"^http://(127\.0\.0\.1|localhost)(:\d{1,5})?$"
 
 
@@ -50,6 +53,7 @@ ERRORS = {
     "SEARCH_BACKEND_UNAVAILABLE": (503, "정책 검색 서비스를 잠시 이용할 수 없습니다."),
     "SEARCH_TIMEOUT": (504, "정책 검색 시간이 초과되었습니다."),
     "LLM_UNAVAILABLE": (502, "답변 생성 서비스를 잠시 이용할 수 없습니다."),
+    "LLM_RATE_LIMITED": (503, "답변 생성 요청이 많아 잠시 후 다시 시도해 주세요."),
     "LLM_TIMEOUT": (504, "답변 생성 시간이 초과되었습니다."),
     "LLM_OUTPUT_INVALID": (502, "답변 또는 출처를 검증할 수 없습니다."),
     "ELIGIBILITY_OUTPUT_INVALID": (502, "조건 판정 결과를 검증할 수 없습니다."),
@@ -94,10 +98,10 @@ def _generate_answer(
 def create_app(
     *,
     session_factory: Callable[[], HybridSearchSession] = _new_search_session,
-    check_fn: Callable = _check_eligibility,
-    generate_fn: Callable = _generate_answer,
+    check_fn: Callable[[dict, dict], dict] = _check_eligibility,
+    generate_fn: Callable[..., dict] = _generate_answer,
     display_fn: Callable[[list[dict]], list[dict]] | None = None,
-    catalog_factory: Callable = PolicyCatalog,
+    catalog_factory: Callable[[], PolicyCatalog] = PolicyCatalog,
     requirement_reviews: Collection[dict] = (),
 ) -> FastAPI:
     """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다.
@@ -107,7 +111,7 @@ def create_app(
     search_lock = Lock()
 
     @asynccontextmanager
-    async def lifespan(application: FastAPI):
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         application.state.search_ready = False
         application.state.session = None
         application.state.catalog = catalog_factory()
@@ -178,11 +182,11 @@ def create_app(
             raise HTTPException(status, detail={"code": "INTERNAL_ERROR", "message": message}) from exc
 
     @application.get("/api/policies", response_model=PolicyListResponse)
-    def policies(q: str = Query("", max_length=200), region: str = Query("", max_length=100),
-                 category: str = Query("", max_length=100),
+    def policies(q: str = Query("", max_length=MAX_LIST_QUERY_LENGTH), region: str = Query("", max_length=MAX_LIST_FILTER_LENGTH),
+                 category: str = Query("", max_length=MAX_LIST_FILTER_LENGTH),
                  status: Literal["all", "open", "before", "closed", "unknown", "soon", "ongoing"] = "all",
                  sort: Literal["deadline", "name"] = "deadline", offset: int = Query(0, ge=0),
-                 limit: int = Query(500, ge=1, le=500)) -> PolicyListResponse:
+                 limit: int = Query(MAX_LIST_LIMIT, ge=1, le=MAX_LIST_LIMIT)) -> PolicyListResponse:
         try:
             return application.state.catalog.list(q=q, region=region, category=category,
                 status=status, sort=sort, offset=offset, limit=limit)

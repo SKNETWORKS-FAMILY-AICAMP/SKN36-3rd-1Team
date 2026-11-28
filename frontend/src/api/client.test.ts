@@ -9,6 +9,11 @@ describe('오류 문구', () => {
     expect(text).not.toContain('서버 내부 문장');
   });
 
+  it('LLM 요청 한도 초과(LLM_RATE_LIMITED, #165)는 따로 안내한다', () => {
+    expect(serverErrorMessage(503, { detail: { code: 'LLM_RATE_LIMITED', message: '서버 내부 문장' } }))
+      .toBe('지금 질문이 많아 답변을 만들지 못했어요. 잠시 후 다시 시도해 주세요.');
+  });
+
   it('입력 오류는 다시 시도 대신 고쳐서 보내라고 안내한다', () => {
     expect(serverErrorMessage(422, { detail: { code: 'INVALID_REQUEST' } }))
       .toBe('질문이나 내 조건을 다시 확인해 주세요. 질문을 고쳐서 다시 보내 주세요.');

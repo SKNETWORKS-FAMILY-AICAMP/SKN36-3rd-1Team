@@ -21,6 +21,7 @@ const CODE_MESSAGES: Record<string, string> = {
   LLM_TIMEOUT: `답변 준비가 늦어지고 있어요. ${RETRY}`,
   SEARCH_BACKEND_UNAVAILABLE: `지금 답변 서버가 응답하지 않아요. ${RETRY}`,
   LLM_UNAVAILABLE: `지금 답변 서버가 응답하지 않아요. ${RETRY}`,
+  LLM_RATE_LIMITED: `지금 질문이 많아 답변을 만들지 못했어요. ${RETRY}`,
   LLM_OUTPUT_INVALID: `출처를 확인할 수 없는 답변이라 보여 드리지 않았어요. ${RETRY}`,
   ELIGIBILITY_OUTPUT_INVALID: `출처를 확인할 수 없는 답변이라 보여 드리지 않았어요. ${RETRY}`,
   INVALID_REQUEST: `질문이나 내 조건을 다시 확인해 주세요. ${FIX_INPUT}`,
@@ -53,6 +54,7 @@ export function isPolicyCheck(item: unknown): item is import('./types').PolicyCh
   return isObject(item) && isString(item.policy_id) && isString(item.policy_name) && isString(item.agency)
       && isString(item.source_url) && isNullableString(item.official_apply_url)
       && (item.application_schedule == null || isApplicationSchedule(item.application_schedule))
+      && (item.deadline_rank == null || (Number.isInteger(item.deadline_rank) && (item.deadline_rank as number) >= 0 && (item.deadline_rank as number) <= 4))
       && (item.official_requirements == null || (Array.isArray(item.official_requirements) && item.official_requirements.every((requirement: unknown) =>
         isObject(requirement) && isString(requirement.label) && !!requirement.label.trim()
         && isString(requirement.value) && !!requirement.value.trim()

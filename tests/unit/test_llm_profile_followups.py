@@ -112,6 +112,11 @@ def test_current_housing_fact_requests_still_are_not_questions(monkeypatch, text
     assert result["follow_up_questions"] == []
 
 
+def without_request_question_mark(text: str) -> str:
+    """요청문에 붙은 물음표는 버튼 문구에서 뗀다(#165, '…알려주세요?' → '…알려주세요'). 의문문은 그대로."""
+    return text[:-1] if text.endswith("주세요?") else text
+
+
 @pytest.mark.parametrize("text", [
     "주거급여의 2026년 1인 가구 기준 금액도 알려주세요?",
     "주거급여 기준금액은 얼마인가요?",
@@ -126,7 +131,7 @@ def test_policy_criteria_questions_do_not_request_personal_income(monkeypatch, t
         follow["field"] = "income"
     stub(monkeypatch, response(follows=[follow]))
     result = g.generate_answer("지원 조건을 알려주세요", CONTEXTS, CHECKS)
-    assert result["follow_up_questions"] == [{"kind": "question", "text": text}]
+    assert result["follow_up_questions"] == [{"kind": "question", "text": without_request_question_mark(text)}]
 
 
 @pytest.mark.parametrize("text", [
@@ -995,7 +1000,7 @@ def test_pr92_policy_criteria_mistagged_as_income_becomes_question(monkeypatch, 
     ]))
     actual = g.generate_answer("질문", CONTEXTS, CHECKS, profile={})
     assert actual["follow_up_questions"] == [
-        {"kind": "question", "text": policy_question}
+        {"kind": "question", "text": without_request_question_mark(policy_question)}
     ]
 
 

@@ -11,7 +11,7 @@ const age = row('만 9~24세 기준에 입력한 만 30세가 포함되지 않�
 it('recognizes group rows even when the checker appends a hold reason', () => {
   expect([AND, OR, NOT].every(isGroupRow)).toBe(true);
   expect(isGroupRow(age)).toBe(false);
-  expect(isGroupRow(row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.'))).toBe(false);
+  expect(isGroupRow(row('조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.'))).toBe(false);
 });
 
 it('confirms only AND-only structures and treats anything unclear as not confirmed', () => {
@@ -20,11 +20,11 @@ it('confirms only AND-only structures and treats anything unclear as not confirm
   expect(hasOnlyAndGroups([age, NOT, AND])).toBe(false);
   expect(hasOnlyAndGroups([age])).toBe(false);
   expect(hasOnlyAndGroups([age, AND, row('여러 루트 조건 그룹의 결합 논리가 확인되지 않았습니다.')])).toBe(false);
-  expect(hasOnlyAndGroups([age, row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.')])).toBe(false);
+  expect(hasOnlyAndGroups([age, row('조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.')])).toBe(false);
 });
 
 it('does not promote an ambiguous AND group failure to a policy verdict', () => {
-  const unknown = row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.');
+  const unknown = row('조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.');
   const failed = andGroupResult([{ ...age, status: 'ineligible' }]);
   expect(hasConfirmedAndFailureWithUnknown([unknown, failed])).toBe(true);
   for (const other of [OR, NOT, AND, row('여러 루트 조건 그룹의 결합 논리가 확인되지 않았습니다.')]) {
@@ -50,7 +50,7 @@ it('reports an exclusion match only when a NOT group row is ineligible', () => {
 });
 
 it('treats a policy as unjudged only when every row says there is nothing to compare', () => {
-  const unknown = row('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.');
+  const unknown = row('조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.');
   expect(isUnjudgedOnly([unknown])).toBe(true);
   expect(isUnjudgedOnly([row('확인 가능한 자격 조건 구조가 없어 공식 공고 확인이 필요합니다.')])).toBe(true);
   // 사용자가 확인·입력할 수 있는 구체적인 행이 있으면 미판정으로 묶지 않는다.

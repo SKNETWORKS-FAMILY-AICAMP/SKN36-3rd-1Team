@@ -268,7 +268,7 @@ it('keeps verdict badges for policies whose groups are all AND', () => {
 it.each(['ineligible', 'needs_check'] as const)('distinguishes an AND failure from UNKNOWN review (%s)', (status) => {
   const conditions: ConditionResult[] = [
     { field: 'age', label: '나이', status: status === 'ineligible' ? 'ineligible' : 'eligible', reason: '가상 나이 비교' },
-    { field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.' },
+    { field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: '조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.' },
     { field: 'eligibility', label: '자격 요건', status, reason: '모든 조건을 충족해야 합니다(종합 결과).' },
     { field: 'income', label: '소득', status: 'needs_check', reason: '소득 확인 필요' },
   ];
@@ -327,9 +327,9 @@ it('restores the region badge in sample mode without confirming overall eligibil
 const unjudgedPolicy: AskResponse['policy_checks'][number] = {
   policy_id: 'POL_010', policy_name: '고용노동부 국민취업지원제도 (Ⅰ·Ⅱ유형 및 청년특례)', agency: '고용노동부 국민취업지원기획팀',
   reception_status: 'open', source_url: 'https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007', official_apply_url: 'https://www.work24.go.kr',
-  conditions: [{ field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.' }],
+  conditions: [{ field: 'eligibility', label: '자격 요건', status: 'needs_check', reason: '조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.' }],
 };
-const holdNotice = { kind: 'warn', title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.' } as const;
+const holdNotice = { kind: 'warn', title: '추가 확인 필요', text: '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.', code: 'condition_hold' as const } as const;
 
 function renderAnswer(response: AskResponse) {
   const noop = () => {};

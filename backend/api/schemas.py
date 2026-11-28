@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
+from backend.core.contract import MAX_VALID_AGE, PROFILE_INPUT_FIELDS
+
 ConditionStatus = Literal["eligible", "ineligible", "needs_check"]
 ReceptionStatus = Literal["before", "open", "closed", "unknown"]
 AnswerStatus = Literal["answered", "no_evidence", "info"]
@@ -11,7 +13,7 @@ NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)
 
 
 class UserProfile(BaseModel):
-    age: Annotated[int, Field(strict=True, ge=0, le=120)] | None
+    age: Annotated[int, Field(strict=True, ge=0, le=MAX_VALID_AGE)] | None
     region: str
     income: Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)] | None
     # #39: 자녀 월령(개월). 신청자 본인 나이(age)와 별개다. 생략·null은 미입력, 0은 유효값.
@@ -96,10 +98,14 @@ class ApplicationSchedule(BaseModel):
     is_ongoing: bool
     days_to_start: int | None
     days_to_end: int | None
+    # v1.13: 접수 중·상시 아님·마감까지 7일 이하(Checker SOON_WINDOW_DAYS). 화면은 직접 계산하지 않는다.
+    closing_soon: bool = False
 
 
 class PolicyCheck(EligibilityOutput):
     application_schedule: ApplicationSchedule | None = None
+    # v1.13: 마감순 정렬 순위(Checker deadline_rank). 0 마감일 있는 접수 중 → 4 마감.
+    deadline_rank: int | None = None
     required_documents: list[SourceExcerpt] | None = None
     policy_name: str
     agency: str
@@ -126,6 +132,7 @@ class PolicySummary(BaseModel):
     official_apply_url: str | None
     reception_status: ReceptionStatus
     application_schedule: ApplicationSchedule | None
+    deadline_rank: int | None = None
     required_documents: list[SourceExcerpt] | None = None
     requirement_excerpts: list[RequirementExcerpt] | None = None
 
@@ -157,7 +164,7 @@ class FollowUp(BaseModel):
 
     @model_validator(mode="after")
     def check_profile_field(self) -> "FollowUp":
-        if self.kind == "ask_info" and self.field not in {"age", "region", "income"}:
+        if self.kind == "ask_info" and self.field not in PROFILE_INPUT_FIELDS:
             raise ValueError("지원하는 프로필 항목을 지정해야 합니다.")
         return self
 
@@ -169,10 +176,15 @@ class GeneratorOutput(BaseModel):
     follow_up_questions: list[FollowUp]
 
 
+# notice 종류(v1.13). 화면은 문장(text) 대신 이 값으로 안내 종류를 알아본다. 모르는 안내는 null.
+NoticeCode = Literal["unknown_region", "condition_hold", "answer_aligned"]
+
+
 class Notice(BaseModel):
     kind: Literal["info", "warn"]
     title: str
     text: str
+    code: NoticeCode | None = None
 
 
 class AskResponse(BaseModel):

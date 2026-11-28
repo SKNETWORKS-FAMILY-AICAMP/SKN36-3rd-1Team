@@ -50,7 +50,7 @@ export function hasOnlyAndGroups(conditions: ConditionResult[]): boolean {
 }
 
 /** Checker가 비교할 조건이 없을 때 쓰는 사유(UNKNOWN 그룹, 조건 구조 없음). 뒤에 데이터 품질 보류 문구가 붙을 수 있다. */
-const UNKNOWN_GROUP_REASON = 'UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.';
+const UNKNOWN_GROUP_REASON = '조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.';
 const UNJUDGED_REASON_PREFIXES = [UNKNOWN_GROUP_REASON, '확인 가능한 자격 조건 구조가 없어'];
 
 /**

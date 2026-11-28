@@ -15,7 +15,7 @@ function Preview() {
     const policy = catalogPolicies(data.index)[0].policy;
     const today = kstDay();
     setResponse({ status: 'answered', answer: 'sample_only', citations: [], follow_up_questions: [], checked_at: null, is_sample: false,
-      policy_checks: [{ ...policy, reception_status: 'open', application_schedule: { evaluated_on: today, start_date: null, end_date: today, is_ongoing: false, days_to_start: null, days_to_end: 0 } }] });
+      policy_checks: [{ ...policy, reception_status: 'open', deadline_rank: 0, application_schedule: { evaluated_on: today, start_date: null, end_date: today, is_ongoing: false, days_to_start: null, days_to_end: 0, closing_soon: true } }] });
   }); }, []);
   return <><h1>sample_only · 가상 일정 UI 검증 (실제 신청 정보 아님)</h1><button type="button" onClick={() => document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'}>테마 전환</button><PolicyExplorer response={response} onAsk={() => {}} onDemoApply={() => {}} /></>;
 }

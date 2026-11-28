@@ -17,8 +17,8 @@ export const NO_EVIDENCE_GUIDE = {
   text: '근거 없이 답하지 않을게요. 분야 카드를 눌러 보거나, 질문을 조금 더 구체적으로 적어 주세요.',
 };
 
-/** backend/rag/pipeline.py가 needs_check 조건이 있을 때 붙이는 일반 보류 안내 */
-const HOLD_NOTICE_TEXT = '자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.';
+/** backend/rag/pipeline.py가 needs_check 조건이 있을 때 붙이는 일반 보류 안내의 notice.code */
+const HOLD_NOTICE_CODE = 'condition_hold';
 
 /**
  * 팀 합의 #78: 종합 판정이 확인 필요(needs_check)일 때 화면 안내는 "신청 자격은 추가 확인이 필요해요"로 보여 준다.
@@ -82,7 +82,7 @@ export function answerView(r: AskResponse): AnswerView {
   };
   // 모든 정책의 보류 사유가 '비교할 조건 없음'뿐이면, 일반 보류 경고는 카드의 '자동 판정 안 함' 안내와 같은 내용이라 생략한다.
   // 다른 경고(지역 확인 등)나 구체적인 확인 사항이 있는 정책이 하나라도 있으면 경고를 그대로 둔다.
-  const isHoldNotice = notice?.kind === 'warn' && notice.text === HOLD_NOTICE_TEXT;
+  const isHoldNotice = notice?.kind === 'warn' && notice.code === HOLD_NOTICE_CODE;
   if (
     isHoldNotice
     && r.policy_checks.length > 0 && r.policy_checks.every((policy) => isUnjudgedOnly(policy.conditions))

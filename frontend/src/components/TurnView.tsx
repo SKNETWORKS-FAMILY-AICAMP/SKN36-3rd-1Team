@@ -342,7 +342,7 @@ function conditionBadge(status: ConditionStatus, showVerdict: boolean): [string,
 function conditionReasonForDisplay(reason: string) {
   if (reason === MISSING_INPUT_REASON.age) return '만 나이를 알려 주세요.';
   const detail = reason
-    .replace('UNKNOWN 조건 그룹은 자동 판정할 수 없습니다.', '')
+    .replace('조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다.', '')
     .replace('조건 그룹의 내부 구조가 올바르지 않습니다.', '')
     .replace('데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다.', '')
     .replace('데이터 품질 경고로 자동 판정을 보류합니다.', '')

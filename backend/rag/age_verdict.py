@@ -14,8 +14,8 @@ Checker 판정과 반대로 안내한 사례가 있었다(dev 0cb19f6 인천 18�
 
 import re
 
-CITATION = re.compile(r"\[(\d+)\]")
-SENTENCE_BREAK = re.compile(r"((?<=[.!?。！？])\s+|\n+)")
+from backend.core.contract import CITATION, SENTENCE_BREAK
+
 # 쉼표(숫자 사이 제외)와 '다만·하지만·그러나', '~지만' 뒤에서 절을 나눈다.
 CLAUSE_BREAK = re.compile(r"((?<!\d),\s+|\s+(?=(?:다만|하지만|그러나)\s)|(?<=지만)\s+)")
 AGE_REASON = re.compile(r"^(만 (\d+)~(\d+)세|만 (\d+)세 이상\(상한 없음\)) 기준에 입력한 만 (\d+)세가 (포함됩니다|포함되지 않습니다)\.")

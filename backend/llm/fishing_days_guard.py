@@ -1,4 +1,9 @@
-"""Ground focused POL_GOV_006 fishing-day answers in the selected notice."""
+"""Ground focused POL_GOV_006 fishing-day answers in the selected notice.
+
+#97(박소희)에서 추가한 POL_GOV_006 조업일수 답변 전용 보정이다.
+기준 일수는 코드에 적지 않고 아래 문서의 원문에서 읽는다. 데이터 릴리스에서 이 정책·문서 ID가 바뀌면
+보정이 조용히 꺼지므로 ID를 함께 갱신한다(tests/unit/test_issue97_fishing_days.py).
+"""
 
 import re
 
