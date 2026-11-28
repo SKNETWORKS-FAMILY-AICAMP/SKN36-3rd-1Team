@@ -35,11 +35,13 @@ export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion,
   let delay = 0;
   return (
     <section className="hero" id="top" ref={heroRef}>
-      <span className="blob a" /><span className="blob b" /><span className="blob c" />
-      <Deco name="sparkles" depth={18} style={{ left: '6%', top: 64, width: 54, height: 54 }} />
-      <Deco name="cloud" depth={26} style={{ left: '8%', top: 200, width: 72, height: 72 }} delay={-1.5} />
-      <Deco name="bulb" depth={22} style={{ right: '7%', top: 56, width: 66, height: 66 }} delay={-3} />
-      <Deco name="star" depth={14} style={{ right: '9%', top: 220, width: 46, height: 46 }} delay={-2} />
+      <div className="hero-decorations" aria-hidden="true">
+        <span className="blob a" /><span className="blob b" /><span className="blob c" />
+        <Deco name="sparkles" depth={18} style={{ left: '6%', top: 64, width: 54, height: 54 }} />
+        <Deco name="cloud" depth={26} style={{ left: '8%', top: 200, width: 72, height: 72 }} delay={-1.5} />
+        <Deco name="bulb" depth={22} style={{ right: '7%', top: 56, width: 66, height: 66 }} delay={-3} />
+        <Deco name="star" depth={14} style={{ right: '9%', top: 220, width: 46, height: 46 }} delay={-2} />
+      </div>
 
       <div className="wrap">
         <h1>

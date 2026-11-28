@@ -77,7 +77,8 @@ nav.menu a.on,nav.menu a:hover{color:var(--primary)}
 .ghost:hover .sp{transform:rotate(-360deg)}
 
 /* ===== Hero ===== */
-.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--hero-a),var(--hero-b) 70%,var(--bg));padding:clamp(32px,5vw,54px) 0 20px;text-align:center}
+.hero{position:relative;background:linear-gradient(180deg,var(--hero-a),var(--hero-b) 70%,var(--bg));padding:clamp(32px,5vw,54px) 0 20px;text-align:center}
+.hero-decorations{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .blob{position:absolute;border-radius:50%;filter:blur(40px);pointer-events:none;animation:drift 14s ease-in-out infinite alternate}
 .blob.a{width:380px;height:380px;background:var(--blob-a);left:-80px;top:-60px}
 .blob.b{width:420px;height:420px;background:var(--blob-b);right:-120px;top:20px;animation-duration:18s;animation-delay:-4s}
@@ -731,6 +732,7 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .explorer-filters { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2); }
 .explorer-filters .schedule-tools { margin: 0; }
 .explorer-selects label { font-size: 13px; color: var(--ink-2); }
+.explorer-submit { justify-content: center; }
 .explorer-more { display: flex; margin: 16px auto 0; }
 @media (max-width: 600px) {
   .explorer-selects { display: grid; grid-template-columns: 1fr 1fr; }

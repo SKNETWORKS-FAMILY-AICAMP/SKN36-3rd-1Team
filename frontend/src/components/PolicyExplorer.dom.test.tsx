@@ -82,8 +82,28 @@ it('처음 9개를 보여주고, 9개씩 추가한 뒤 검색이 바뀌면 표�
     setter.call(search, 'POL_TEST_01');
     search.dispatchEvent(new Event('input', { bubbles: true }));
   });
+  expect(cards()).toHaveLength(20);
+  act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
   expect(cards()).toHaveLength(9);
   expect(more()?.textContent).toBe('정책 1개 더 보기');
+});
+
+it('선택한 지역은 검색 버튼을 누르면 적용하고 전국 정책은 전체 지역에서 볼 수 있다', async () => {
+  const regional = { ...item('POL_TEST_002'), regions: ['가상 지역'] };
+  load.mockResolvedValueOnce({ ...page(), items: [page().items[0], regional] } as PolicyListResponse);
+  await act(async () => {
+    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+  });
+
+  const region = host.querySelector<HTMLSelectElement>('.explorer-selects select')!;
+  act(() => {
+    region.value = '가상 지역';
+    region.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  expect(cards()).toHaveLength(2);
+  act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
+  expect(cards()).toHaveLength(1);
+  expect(cards()[0].textContent).toContain('POL_TEST_002');
 });
 
 describe('정책 목록 다시 불러오기 중 펼친 카드 (#122)', () => {
