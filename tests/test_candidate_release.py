@@ -6,6 +6,7 @@ DB 서버·API 키·추가 테스트 패키지가 필요 없는 unittest를 사�
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 import unittest
 from unittest.mock import Mock
@@ -601,10 +602,23 @@ class CandidateIntegrityTests(unittest.TestCase):
                                     if source == "POL_005" and relation == "REQUIRES_CONDITION"})
 
     def test_frozen_manifests_match_actual_files(self):
+        # 큰 원천 파일(예: v1/gov24_public_services.jsonl 110MB)은 Git에서 제외돼 새로 받은 저장소에는 없다.
+        # Git이 추적하는 파일은 항상 해시를 확인하고, 추적하지 않는 파일만 없을 때 그 대조를 건너뛴다.
+        tracked = set(subprocess.run(["git", "ls-files", "data/handoff", "data/releases/v1"], cwd=ROOT,
+                                     capture_output=True, text=True, check=True).stdout.splitlines())
+        missing_untracked = []
         for directory in [ROOT / "data/handoff", ROOT / "data/releases/v1"]:
             manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
             for name, metadata in manifest["files"].items():
-                self.assertEqual(hashlib.sha256((directory / name).read_bytes()).hexdigest(), metadata["sha256"])
+                path = directory / name
+                if not path.is_file() and path.relative_to(ROOT).as_posix() not in tracked:
+                    missing_untracked.append(path.relative_to(ROOT).as_posix())
+                    continue
+                with self.subTest(file=path.relative_to(ROOT).as_posix()):
+                    self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), metadata["sha256"])
+        if missing_untracked:
+            self.skipTest(f"Git 제외 파일 {len(missing_untracked)}개가 없어 그 해시 대조만 건너뜀 "
+                          f"(추적 파일은 모두 확인): {', '.join(missing_untracked)}")
 
     def test_invalid_graph_property_is_rejected(self):
         for value in [{"nested": "object"}, ["a", 1], [None], [[1]], float("nan")]:
