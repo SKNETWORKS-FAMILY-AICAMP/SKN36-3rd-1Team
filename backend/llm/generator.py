@@ -1552,9 +1552,11 @@ def _validate_model_response(
             "LLM 출력이 JSON 객체가 아닙니다."
         )
 
-    if raw.get("status") not in {"answered", "info"}:
+    # no_evidence: 질문이 정책과 관계없거나 원문이 질문과 관계없다고 모델이 판단한 경우(v1.15).
+    # Pipeline은 이 상태면 정책 카드와 출처를 비운다.
+    if raw.get("status") not in {"answered", "info", "no_evidence"}:
         raise LLMOutputError(
-            "LLM status는 answered/info 중 하나여야 합니다."
+            "LLM status는 answered/info/no_evidence 중 하나여야 합니다."
         )
 
     answer = raw.get("answer")
@@ -1576,6 +1578,19 @@ def _validate_model_response(
         raise LLMOutputError(
             "answered 응답에 원문 인용이 없습니다."
         )
+
+    if raw["status"] == "no_evidence":
+        if cited:
+            raise LLMOutputError(
+                "no_evidence 응답에는 원문 인용이 없어야 합니다."
+            )
+        # 근거가 없다고 한 답변에는 정책 후속 질문을 붙이지 않는다.
+        return {
+            "status": "no_evidence",
+            "answer": answer.strip(),
+            "used_source_ids": [],
+            "follow_up_questions": [],
+        }
 
     used = raw.get("used_source_ids")
 
