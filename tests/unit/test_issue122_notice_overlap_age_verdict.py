@@ -396,5 +396,45 @@ class StatedMissingLinkTests(unittest.TestCase):
         self.assertTrue(fixed.startswith(f"{NAME}: {MISSING}."))
 
 
+class MultiPolicyStatedLinkTests(unittest.TestCase):
+    """여러 정책 답변에서 LLM이 쓴 '신청 링크 미확인'과 보정 안내가 같은 정책 줄에 겹치던 문제(#122 후속).
+
+    R3D·gpt-5.4-mini 원본 답변('- **재직자 직업훈련 사업**은 … 누리집에서 수강 신청한다고 적혀 있습니다.
+    다만 신청 링크는 확인되지 않았고, …')을 줄인 가상 사례다(sample_only).
+    """
+
+    A = {"policy_id": "A", "policy_name": "가상 직업훈련 사업", "official_apply_url": None, "reception_status": "open"}
+    B = {"policy_id": "B", "policy_name": "가상 교육비 지원", "official_apply_url": None, "reception_status": "open"}
+    CONTEXTS = [{"source_id": 1, "policy_id": "B", "text": "지원대상"}, {"source_id": 2, "policy_id": "A", "text": "신청"}]
+
+    def align(self, text):
+        return align_application_links(text, self.CONTEXTS, [self.A, self.B])[0]
+
+    def test_policy_line_that_already_says_no_link_gets_no_second_notice(self):
+        text = ("- **가상 교육비 지원**은 학비를 지원합니다. [1]\n"
+                "- **가상 직업훈련 사업**은 수시 모집으로 안내되어 있고, 가상 누리집에서 수강 신청한다고 적혀 있습니다. "
+                "다만 신청 링크는 확인되지 않았고, 자격은 추가 확인이 필요합니다. [2]")
+        fixed = self.align(text)
+        line = fixed.split("\n")[1]
+        self.assertNotIn(MISSING, line)
+        self.assertNotIn("가상 직업훈련 사업:", line)
+        self.assertEqual(line.count("신청 링크는 확인되지 않았"), 1)
+        self.assertNotIn("누리집", line)
+
+    def test_other_policy_still_gets_its_own_notice(self):
+        # A가 링크 미확인을 밝혔다고 B의 웹 신청 단정이 그대로 남지 않는다.
+        text = ("- **가상 직업훈련 사업**은 신청 링크는 확인되지 않았어요. [2]\n"
+                "- **가상 교육비 지원**은 가상 홈페이지에서 신청할 수 있어요. [1]")
+        fixed = self.align(text)
+        self.assertIn(f"가상 교육비 지원: {MISSING}", fixed)
+
+    def test_statement_for_two_policies_does_not_cover_either(self):
+        # 대상이 둘인 안내는 어느 한 정책의 안내로 보지 않는다.
+        text = ("두 정책 모두 신청 링크는 확인되지 않았어요. [1][2]\n\n"
+                "가상 직업훈련 사업은 가상 홈페이지에서 신청할 수 있어요. [2]")
+        fixed = self.align(text)
+        self.assertIn(f"가상 직업훈련 사업: {MISSING}", fixed)
+
+
 if __name__ == "__main__":
     unittest.main()
