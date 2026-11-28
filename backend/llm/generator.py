@@ -11,10 +11,10 @@ from functools import lru_cache
 from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
-from backend.core.contract import MAX_HISTORY_TURNS
+from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURNS
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
-from backend.llm.month_age_guard import ground_child_month_ranges
+from backend.llm.month_age_guard import QUOTED_WRONG_WORDING, ground_child_month_ranges
 from database.region_search import ALIASES, SIDOS
 
 
@@ -30,8 +30,18 @@ SDK_MAX_RETRIES = 0
 MAX_FOLLOW_UPS = 3
 # 이보다 긴 문장은 정책 설명이 섞였을 수 있어 중복 입력 요청으로 지우지 않는다.
 MAX_REDUNDANT_REQUEST_LENGTH = 75
+# 허용되지 않은 정보 요청을 본문 안내로 바꿀 때 쓰는 문구. 중복 안내를 거를 때도 같은 값과 비교한다.
+CHILD_MONTHS_REQUEST = "자녀의 월령(개월 수)을 알려 주세요."
+DETAIL_REGION_REQUEST = "거주하시는 시·군·구를 알려 주세요."
+HOUSEHOLD_SIZE_REQUEST = "가구원 수를 알려 주세요."
+# '…알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'처럼 AI가 사용자에게 하는 제안의 끝맺음.
+_AI_OFFER_ENDING = r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?)"
 
-CITATION_PATTERN = re.compile(r"\[(\d+)\]")
+
+def _compact_question(text: str) -> str:
+    """공백을 하나로 줄이고 끝 문장부호를 뗀다(질문 문장 비교용)."""
+    return " ".join(text.split()).rstrip("?？!！.。")
+
 ALLOWED_FIELDS = {"age", "region", "income"}
 _UNDECIDED_ELIGIBILITY = re.compile(
     r"^(?P<lead>[ \t]*(?:[-*+]\s+)?(?:(?:다만|따라서|정리하면|종합하면)[,]?\s+)?)"
@@ -499,7 +509,7 @@ def _is_ai_offer_question(text: str) -> bool:
             r"\s*(?:해\s*)?볼까요|"
             # '소득 기준도 알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'도
             # AI가 사용자에게 하는 제안이라 사용자 발화 버튼이 될 수 없다(ask_contract).
-            r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?))$",
+            + _AI_OFFER_ENDING + r")$",
             candidate,
         )
     )
@@ -591,7 +601,7 @@ def _user_state_confirmation(text: str) -> str | None:
     가족 구성원의 값이나 소득 종류('근로소득이 있으신가요?')는 본인 입력 필드가 아니므로
     other를 돌려준다. 해당 없으면 None.
     """
-    text = " ".join(text.split()).rstrip("?？!！.。")
+    text = _compact_question(text)
     family = re.search(
         _FAMILY_SUBJECT + r".{0,20}(?:만\s*\d+\s*세|\d+\s*세|나이|연령|소득|수입)"
         r".{0,20}(?:인가요|인지요?|" + _USER_STATE_ENDINGS + r")$",
@@ -602,7 +612,7 @@ def _user_state_confirmation(text: str) -> str | None:
     if not re.search(_USER_STATE_ENDING, text):
         return None
     # '…알고 싶으신가요?', '…궁금하신가요?', '…원하시나요?'는 AI의 안내 제안이지 상태 확인이 아니다.
-    if re.search(r"(?:싶으|궁금하|원하)(?:신가요|세요|시나요|신지요?)$", text):
+    if re.search(_AI_OFFER_ENDING + r"$", text):
         return None
     if re.search(r"(?:근로|사업|재산|이자|배당|연금|기타)\s*소득", text):
         return "other"
@@ -713,7 +723,7 @@ def _personal_information_request(
     반환값: age/region/income/detail_region/other 또는 None.
     정책의 기준·지원금·서류 등을 묻는 사용자 질문은 None이어야 한다.
     """
-    text = " ".join(text.split()).rstrip("?？!！.。")
+    text = _compact_question(text)
 
     if _is_policy_criteria_question(text):
         return None
@@ -798,8 +808,8 @@ def _personal_information_request(
 
     # 다른 가족 구성원의 나이·소득·거주지는 본인 프로필 필드가 아니다.
     if re.search(
-        r"(?:자녀|배우자|부모(?:님)?|가구원|가족|세대원)"
-        r".{0,30}(?:나이|연령|소득|수입|급여|거주\s*지역|주소|몇\s*(?:살|세))",
+        _FAMILY_SUBJECT
+        + r".{0,30}(?:나이|연령|소득|수입|급여|거주\s*지역|주소|몇\s*(?:살|세))",
         text,
     ):
         return "other"
@@ -845,7 +855,7 @@ def _info_request_to_answer(
     # This field has already been classified; incidental place-like suffixes
     # in verbs (e.g. '지원받으려면') must not change it into a region request.
     if field == "child_age_months":
-        return "자녀의 월령(개월 수)을 알려 주세요."
+        return CHILD_MONTHS_REQUEST
 
     if field == "detail_region" or (field != "other" and _is_detail_region_request(text)):
         named_gu = re.search(
@@ -856,10 +866,10 @@ def _info_request_to_answer(
         if named_gu and "주민등록" in text:
             return f"{named_gu.group(1)} 주민등록 여부를 알려 주세요."
 
-        return "거주하시는 시·군·구를 알려 주세요."
+        return DETAIL_REGION_REQUEST
 
     if "가구원" in text or field == "household_size":
-        return "가구원 수를 알려 주세요."
+        return HOUSEHOLD_SIZE_REQUEST
 
     # 기존 child_age/"자녀 나이" 안내 문구는 기존 API 및 테스트와의
     # 하위 호환을 위해 그대로 둔다. 분류기가 field를 other로 바꾸기도 하므로
@@ -871,7 +881,7 @@ def _info_request_to_answer(
         r"(?:자녀|아이|아기|영유아).{0,30}(?:월령|개월)|"
         r"(?:아이|아기|영유아).{0,30}(?:나이|연령)", text
     ):
-        return "자녀의 월령(개월 수)을 알려 주세요."
+        return CHILD_MONTHS_REQUEST
 
     if "자녀" in text:
         return "자녀 나이를 알려 주세요."
@@ -922,7 +932,7 @@ def _append_info_requests(
             continue
 
         if (
-            request == "거주하시는 시·군·구를 알려 주세요."
+            request == DETAIL_REGION_REQUEST
             and re.search(
                 r"(?:어느\s*(?:시|군|구)|시[·\s-]?군[·\s-]?구).{0,22}(?:거주|알려)",
                 answer,
@@ -931,7 +941,7 @@ def _append_info_requests(
             continue
 
         if (
-            request == "가구원 수를 알려 주세요."
+            request == HOUSEHOLD_SIZE_REQUEST
             and re.search(
                 r"가구원\s*수.{0,18}(?:알려|입력|몇\s*명)",
                 answer,
@@ -1167,7 +1177,7 @@ def _normalize_child_month_bound_wording(answer: str) -> str:
     for sentence in sentences:
         if not re.search(r"자녀|아이|아기|영유아|월령", sentence):
             continue
-        if re.search(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)", sentence):
+        if QUOTED_WRONG_WORDING.search(sentence):
             continue
         corrected = re.sub(
             r"(\d+\s*개월\s*(?:이하|미만)(?:\*\*|__)?)[ \t]*부터"
@@ -1421,7 +1431,7 @@ def _validate_model_response(
                     and field in ALLOWED_FIELDS
                     and _mentions_profile_field(text, field)
                     and not _is_policy_criteria_question(
-                        " ".join(text.split()).rstrip("?？!！.。")
+                        _compact_question(text)
                     )
                     and not _has_policy_action(text)
                     and (not is_policy_question or _addresses_user(text))

@@ -3,9 +3,9 @@
 import re
 
 from backend.rag.context_builder import valid_source_url
-from backend.rag.reception_notice import NEAR_PHRASE, has_reception_notice
+from backend.core.contract import CITATION
+from backend.rag.reception_notice import NEAR_PHRASE, UNKNOWN_RECEPTION, has_reception_notice
 
-CITATION = re.compile(r"\[(\d+)\]")
 LEADING_CITATIONS = re.compile(r"\s*(?:\[\d+\]\s*)*")
 # URL 안의 마침표는 문장 경계가 아니다. 쉼표로 나눈 정책 설명도 독립 검증한다.
 # 쉼표는 뒤에 공백이 있을 때만 나누고, 숫자 사이 쉼표('1,000원', '1, 2')는 나누지 않는다.
@@ -42,7 +42,6 @@ WEB_ACTION = re.compile(r"(?:신청|접수)(?:할\s*수\s*있|이?\s*가능|하�
 MISSING_LINK = "직접 신청 링크는 확인되지 않았어요."
 REMAINING_METHOD = "신청 방법은 공식 공고에서 확인해 주세요."
 NO_APPLICATION_LINK = f"{MISSING_LINK} {REMAINING_METHOD}"
-UNKNOWN_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주세요."
 # 정책명·인용·주소 없이 여러 정책을 묶는 마무리 안내('각 신청 페이지에서 확인하세요')의 중립 문구.
 GENERIC_NOTICE = "자세한 신청 방법과 일정은 각 정책의 공식 안내를 확인해 주세요."
 URL = re.compile(r"https?://|www\.", re.IGNORECASE)

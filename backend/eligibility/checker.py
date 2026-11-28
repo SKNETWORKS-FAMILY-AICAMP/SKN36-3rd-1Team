@@ -12,6 +12,7 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
+from backend.core.contract import MAX_VALID_AGE
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -38,7 +39,6 @@ _GROUP_REASONS = {
     "NOT": "해당 조건이 충족되지 않아야 합니다(종합 결과).",
 }
 
-MAX_VALID_AGE = 120
 NO_UPPER_LIMIT_SENTINEL = 120
 # 원문 검토 메모는 화면 사유에 붙으므로 이 길이까지만 쓴다.
 MAX_REVIEW_TEXT_LENGTH = 300

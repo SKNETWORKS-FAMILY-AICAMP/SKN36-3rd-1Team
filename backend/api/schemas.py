@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
+from backend.core.contract import MAX_VALID_AGE
+
 ConditionStatus = Literal["eligible", "ineligible", "needs_check"]
 ReceptionStatus = Literal["before", "open", "closed", "unknown"]
 AnswerStatus = Literal["answered", "no_evidence", "info"]
@@ -11,7 +13,7 @@ NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)
 
 
 class UserProfile(BaseModel):
-    age: Annotated[int, Field(strict=True, ge=0, le=120)] | None
+    age: Annotated[int, Field(strict=True, ge=0, le=MAX_VALID_AGE)] | None
     region: str
     income: Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)] | None
     # #39: 자녀 월령(개월). 신청자 본인 나이(age)와 별개다. 생략·null은 미입력, 0은 유효값.

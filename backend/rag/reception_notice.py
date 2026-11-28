@@ -9,10 +9,10 @@
 
 import re
 
-CITATION = re.compile(r"\[(\d+)\]")
+from backend.core.contract import CITATION, SENTENCE_BREAK
+
 UNKNOWN_RECEPTION = "현재 접수 여부는 공식 공고에서 확인해 주세요."
 PHRASE = UNKNOWN_RECEPTION.rstrip(".")
-SENTENCE_BREAK = re.compile(r"((?<=[.!?。！？])\s+|\n+)")
 PARAGRAPH_BREAK = re.compile(r"\r?\n[ \t]*\r?\n")
 # 접수 여부를 '확인할 수 없다'는 뜻으로 바꿔 쓴 표현. 접수 시점·일정 설명은 대상이 아니다.
 PARAPHRASE = re.compile(
