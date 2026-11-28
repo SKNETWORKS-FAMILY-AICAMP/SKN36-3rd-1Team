@@ -38,7 +38,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_processed_jsonl, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -545,9 +545,8 @@ def run_collection(
             (raw_items_dir / f"{pno}.json").write_text(json.dumps(it, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 4. JSONL 파일 저장
-    with open(OUT_PROCESSED_JSONL, "w", encoding="utf-8") as f:
-        for r in refined_records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    # 수집 오류가 있으면 기존 정제 파일을 덮어쓰지 않는다(_common.write_processed_jsonl).
+    written_path = write_processed_jsonl(OUT_PROCESSED_JSONL, refined_records, summary, logger)
 
     summary["refined_jsonl_written"] = len(refined_records)
     summary["field_missing_rates"] = {
@@ -570,7 +569,7 @@ def run_collection(
     summary["finished_at"] = now_kst()
     write_run_log("youthcenter", summary)
 
-    logger.info("YouthCenter collection complete: %d records written to %s", len(refined_records), OUT_PROCESSED_JSONL)
+    logger.info("YouthCenter collection complete: %d records written to %s", len(refined_records), written_path)
     return summary
 
 

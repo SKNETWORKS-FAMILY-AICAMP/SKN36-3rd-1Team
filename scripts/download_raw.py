@@ -1,20 +1,32 @@
-import os
-import sys
+"""공식 원문(LH 공고·주택도시기금·온통청년 안내 등) 원본 다운로드.
+
+- 인증서를 검증하고, 프로젝트를 밝히는 User-Agent로 요청 사이 1초씩 쉰다.
+- 받은 내용이 예상 형식(PDF/HTML)이 아니면 저장하지 않는다(오류 HTML을 .pdf로 저장하는 문제 방지).
+- 이미 있는 원본 파일은 덮어쓰지 않는다(--force로만 덮어씀).
+- 다운로드 기록은 기본으로 data/raw/download_manifest.latest.json(Git 제외)에 쓰고,
+  추적 중인 data/metadata/download_manifest.json은 --update-manifest를 줄 때만 바꾼다.
+"""
+import argparse
 import json
+import sys
+import time
 import hashlib
 import datetime
 from pathlib import Path
 import requests
-import urllib3
-
-urllib3.disable_warnings()
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from collectors.api._common import USER_AGENT  # noqa: E402
+
 RAW_DIR = BASE_DIR / "data" / "raw"
 METADATA_DIR = BASE_DIR / "data" / "metadata"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    # 브라우저로 위장하지 않고 학습용 프로젝트임을 밝힌다. 값은 API 수집기와 같은 상수를 쓴다.
+    "User-Agent": USER_AGENT,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
 }
@@ -150,11 +162,20 @@ DOWNLOAD_TARGETS = [
     },
 ]
 
-manifest = []
-session = requests.Session()
+REQUEST_DELAY_SECONDS = 1.0
 
-print("=== Starting Official Document Downloads ===")
-for item in DOWNLOAD_TARGETS:
+
+def looks_like(item_type: str, content_type: str, content: bytes) -> bool:
+    """응답이 기대한 형식인지. 서버가 200으로 오류 페이지를 돌려주는 경우를 거른다."""
+    content_type = (content_type or "").lower()
+    if item_type == "pdf":
+        return content.startswith(b"%PDF") or "application/pdf" in content_type
+    if item_type == "html":
+        return "html" in content_type or content.lstrip()[:15].lower().startswith((b"<!doctype", b"<html"))
+    return True
+
+
+def download(item: dict, session: requests.Session, force: bool) -> dict:
     provider = item["provider"]
     dest_dir = RAW_DIR / provider
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -164,14 +185,13 @@ for item in DOWNLOAD_TARGETS:
     if "referer" in item:
         req_headers["Referer"] = item["referer"]
 
-    download_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    status_entry = {
+    entry = {
         "raw_id": item["doc_id"],
         "title": item["title"],
         "provider": provider,
         "type": item["type"],
         "url": item["url"],
-        "downloaded_at": download_time,
+        "downloaded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "http_status": None,
         "success": False,
         "file_path": str(dest_path.relative_to(BASE_DIR)).replace("\\", "/"),
@@ -179,32 +199,63 @@ for item in DOWNLOAD_TARGETS:
         "sha256": None,
         "error_message": None,
     }
+    if dest_path.exists() and not force:
+        content = dest_path.read_bytes()
+        entry.update(success=True, file_size_bytes=len(content), sha256=hashlib.sha256(content).hexdigest(),
+                     error_message="skipped: file exists (use --force to re-download)")
+        print(f"[SKIP] {item['doc_id']} ({item['file_name']}) - 이미 있음")
+        return entry
 
     try:
-        r = session.get(item["url"], headers=req_headers, timeout=15, verify=False)
-        status_entry["http_status"] = r.status_code
-        if r.status_code == 200:
-            content = r.content
-            with open(dest_path, "wb") as f:
-                f.write(content)
-            h = hashlib.sha256(content).hexdigest()
-            status_entry["success"] = True
-            status_entry["file_size_bytes"] = len(content)
-            status_entry["sha256"] = h
-            print(f"[SUCCESS] {item['doc_id']} ({item['file_name']}) - {len(content)} bytes - SHA256: {h[:12]}...")
-        else:
-            status_entry["error_message"] = f"HTTP {r.status_code}"
+        r = session.get(item["url"], headers=req_headers, timeout=15)
+        entry["http_status"] = r.status_code
+        if r.status_code != 200:
+            entry["error_message"] = f"HTTP {r.status_code}"
             print(f"[FAIL] {item['doc_id']} ({item['file_name']}) - HTTP {r.status_code}")
-    except Exception as e:
-        status_entry["error_message"] = str(e)
-        print(f"[ERROR] {item['doc_id']} ({item['file_name']}) - {e}")
+            return entry
+        content = r.content
+        if not looks_like(item["type"], r.headers.get("Content-Type", ""), content):
+            entry["error_message"] = f"unexpected content-type: {r.headers.get('Content-Type', '')}"
+            print(f"[FAIL] {item['doc_id']} ({item['file_name']}) - 예상한 {item['type']} 형식이 아님")
+            return entry
+        tmp = dest_path.with_name(dest_path.name + ".tmp")
+        tmp.write_bytes(content)
+        tmp.replace(dest_path)
+        h = hashlib.sha256(content).hexdigest()
+        entry.update(success=True, file_size_bytes=len(content), sha256=h)
+        print(f"[SUCCESS] {item['doc_id']} ({item['file_name']}) - {len(content)} bytes - SHA256: {h[:12]}...")
+    except requests.RequestException as e:
+        entry["error_message"] = type(e).__name__
+        print(f"[ERROR] {item['doc_id']} ({item['file_name']}) - {type(e).__name__}")
+    return entry
 
-    manifest.append(status_entry)
 
-# Write download manifest
-manifest_path = METADATA_DIR / "download_manifest.json"
-with open(manifest_path, "w", encoding="utf-8") as f:
-    json.dump(manifest, f, indent=2, ensure_ascii=False)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="공식 원문 원본 다운로드")
+    parser.add_argument("--force", action="store_true", help="이미 있는 원본 파일도 다시 받아 덮어쓴다")
+    parser.add_argument("--update-manifest", action="store_true",
+                        help="추적 중인 data/metadata/download_manifest.json을 이번 결과로 바꾼다")
+    args = parser.parse_args()
 
-print(f"\nManifest written to {manifest_path}")
-print(f"Total targets: {len(manifest)}, Succeeded: {sum(1 for m in manifest if m['success'])}, Failed: {sum(1 for m in manifest if not m['success'])}")
+    session = requests.Session()
+    manifest = []
+    print("=== Starting Official Document Downloads ===")
+    for index, item in enumerate(DOWNLOAD_TARGETS):
+        if index:
+            time.sleep(REQUEST_DELAY_SECONDS)
+        manifest.append(download(item, session, args.force))
+
+    manifest_path = (METADATA_DIR / "download_manifest.json" if args.update_manifest
+                     else RAW_DIR / "download_manifest.latest.json")
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+    print()
+    print(f"Manifest written to {manifest_path}")
+    print(f"Total targets: {len(manifest)}, Succeeded: {sum(1 for m in manifest if m['success'])}, "
+          f"Failed: {sum(1 for m in manifest if not m['success'])}")
+
+
+if __name__ == "__main__":
+    main()

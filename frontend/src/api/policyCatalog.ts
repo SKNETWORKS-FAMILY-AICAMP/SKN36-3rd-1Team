@@ -6,7 +6,22 @@ import { decodeEntitiesDeep } from '../lib/htmlEntities';
 const PAGE_SIZE = 500;
 const CATALOG_TIMEOUT_MS = 10_000;
 const configured = (import.meta.env.VITE_POLICY_API_URL as string | undefined)?.trim();
-export const POLICY_API_URL = configured || (ASK_API_URL ? new URL('policies', ASK_API_URL).href : '');
+export const POLICY_API_URL = configured || policiesUrlFrom(ASK_API_URL);
+
+/**
+ * 질문 API 주소(…/api/ask)와 같은 서버의 정책 목록 주소(…/api/policies).
+ * 상대 주소(/api/ask)도 현재 페이지 기준으로 풀고, 끝의 '/'는 지운 뒤 계산한다.
+ * 주소가 잘못돼도 모듈을 불러오는 단계에서 화면 전체가 멈추지 않게 빈 값(배포 목록 사용)으로 둔다.
+ */
+export function policiesUrlFrom(askUrl: string | undefined, base = globalThis.location?.href): string {
+  if (!askUrl) return '';
+  try {
+    const absolute = new URL(askUrl.replace(/\/+$/, ''), base);
+    return new URL('policies', absolute).href;
+  } catch {
+    return '';
+  }
+}
 const strings = (v: unknown): v is string[] => Array.isArray(v) && v.every(x => typeof x === 'string');
 export function isPolicyListResponse(value: unknown): value is PolicyListResponse {
   if (!value || typeof value !== 'object') return false;

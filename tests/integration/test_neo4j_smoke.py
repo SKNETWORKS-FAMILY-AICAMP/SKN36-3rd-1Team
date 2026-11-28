@@ -7,7 +7,8 @@ Neo4j 적재 결과 스모크 테스트 — 실제 서버에 "읽기 전용"으�
 
 결과 구분
 - RUN_NEO4J_SMOKE가 1이 아니면          → 모두 skip, 사유 "NOT_RUN"           (서버에 접속하지 않음)
-- 서버 접속 불가·DB가 비어 있으면       → 모두 skip, 사유 "DATA_NOT_READY: …" (실패가 아니라 미실행)
+- 서버 접속 불가·인증 실패이면          → 실패(CONNECTION_FAILED). 직접 켠 검증이 조용히 넘어가지 않게 한다
+- 접속 설정이 없거나 DB가 비어 있으면   → 모두 skip, 사유 "DATA_NOT_READY: …" (적재 전이라 미실행)
 - 데이터가 있는데 원본과 다르면         → FAIL                                (실제 문제)
 
 이 테스트는 노드·관계·스키마를 만들거나 바꾸거나 지우지 않는다.
@@ -63,7 +64,8 @@ class TestNeo4jLoadedGraphSmoke(unittest.TestCase):
             cls.driver.verify_connectivity()
             cls.server_agent = cls.driver.get_server_info().agent
         except Exception as error:   # 서버 꺼짐·인증 실패 등 (메시지에 비밀값을 넣지 않는다)
-            raise unittest.SkipTest(f"DATA_NOT_READY: Neo4j 서버에 접속할 수 없음 ({type(error).__name__})")
+            # RUN_*_SMOKE=1로 직접 켰으므로 접속·인증 실패는 건너뛰지 않고 실패로 보고한다(미검증이 통과처럼 보이지 않게)
+            raise AssertionError(f"CONNECTION_FAILED: Neo4j 서버에 접속할 수 없음 ({type(error).__name__})") from None
         cls.runner = _read_only_runner_class(lg.Neo4jDriverRunner)(cls.driver)
         cls.graph = lg.read_graph_input()
         totals = cls.runner.read_rows(lg.QUERY_TOTAL_COUNTS)[0]

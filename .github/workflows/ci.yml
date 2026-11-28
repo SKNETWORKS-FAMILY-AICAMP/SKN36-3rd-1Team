@@ -1,0 +1,92 @@
+# SSOK 자동 테스트. dev 대상 PR과 dev 푸시마다 실행한다.
+# - 실제 DB·LLM·API 키는 쓰지 않는다. DB 스모크(RUN_*_SMOKE)와 원본 파일이 필요한 테스트는 테스트 코드가 스스로 건너뛴다.
+# - Python은 팀 개발 환경과 같은 Windows에서 돌린다(줄바꿈·경로 처리를 로컬과 같게 맞춤).
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (pytest · Django)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      # 실수로라도 실제 LLM을 부르지 않게 키를 비운다.
+      OPENAI_API_KEY: ""
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 일부 테스트가 예전 커밋의 릴리스 파일을 git show로 읽어 대조하므로 전체 이력을 받는다(기본값 1이면 실패).
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            web_ssr/requirements.txt
+      - name: 의존성 설치
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r web_ssr/requirements.txt
+      - name: 설치된 주요 패키지 버전
+        run: python -m pip list --format=freeze
+      - name: pytest
+        run: python -m pytest -q -p no:cacheprovider --junitxml=pytest-report.xml
+      - name: 실패한 테스트를 주석으로 남김
+        # 로그는 로그인해야 보이지만 주석(annotation)은 PR 화면·API에서 바로 보인다. 테스트 이름과 메시지 앞부분만 남긴다.
+        if: failure()
+        shell: python
+        run: |
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          report = Path("pytest-report.xml")
+          if not report.exists():
+              print("::error title=pytest::pytest-report.xml이 없음(수집 단계 오류일 수 있음)")
+          else:
+              shown = 0
+              for case in ET.parse(report).iter("testcase"):
+                  for kind in ("failure", "error"):
+                      node = case.find(kind)
+                      if node is None or shown >= 20:
+                          continue
+                      shown += 1
+                      name = f"{case.get('classname')}::{case.get('name')}"
+                      message = (node.get("message") or (node.text or ""))[:400]
+                      message = message.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+                      print(f"::error title={kind} {name}::{message}")
+      - name: Django 정책 상세 테스트
+        working-directory: web_ssr
+        run: python manage.py test policies --settings=config.settings_test
+
+  frontend:
+    name: Frontend (vitest · typecheck · build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build

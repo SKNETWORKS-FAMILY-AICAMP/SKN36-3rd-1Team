@@ -102,6 +102,11 @@ class TestYouthcenterFlow(CollectorFlowBase):
         self.assert_no_key(json.dumps(summary, ensure_ascii=False))
         self.assert_no_key(self.run_log("youthcenter"))
         self.assertEqual(sum(1 for s in self.sleeps if s in (0.5, 1.0)), 2)   # 재시도 대기 0.5초 → 1초
+        # 중간 실패한 수집은 기존 정제 파일을 덮어쓰지 않고 .partial.jsonl에 쓴다.
+        out = Path(youth.OUT_PROCESSED_JSONL)
+        self.assertFalse(out.exists())
+        self.assertTrue(out.with_name(out.stem + ".partial" + out.suffix).is_file())
+        self.assertTrue(summary["refined_jsonl_partial"])
 
 
 class TestGov24Flow(CollectorFlowBase):

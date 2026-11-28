@@ -47,7 +47,7 @@ import requests
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, load_env_value, mask_secrets, now_kst, write_processed_jsonl, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import first_application_url
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -467,6 +467,8 @@ def run_collection(
             if b"<wantedDtl>" not in raw_bytes:
                 continue
             pol_idx += 1
+            # 주의: ID를 정렬된 원본 파일 순서로 매긴다. 서비스가 추가·삭제되면 뒤 번호가 밀려 기존 릴리스의
+            # policy_id·document_id와 어긋난다. 재수집 결과는 새 릴리스를 만들 때 기존 servId↔ID 매핑과 대조해야 한다.
             pol_id = f"POL_BOK_{pol_idx:03d}"
             doc_id = f"DOC_BOK_{pol_idx:03d}"
             meta = list_items_map.get(serv_id)
@@ -475,9 +477,8 @@ def run_collection(
         except Exception as e:
             logger.warning("Failed to parse detail XML %s: %s", xml_file.name, e)
 
-    with open(OUT_PROCESSED_JSONL, "w", encoding="utf-8") as f:
-        for r in refined_records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    # 수집 오류가 있으면 기존 정제 파일을 덮어쓰지 않는다(_common.write_processed_jsonl).
+    written_path = write_processed_jsonl(OUT_PROCESSED_JSONL, refined_records, summary, logger)
 
     summary["refined_jsonl_written"] = len(refined_records)
     summary["finished_at"] = now_kst()

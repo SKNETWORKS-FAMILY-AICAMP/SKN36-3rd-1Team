@@ -140,3 +140,34 @@ def write_run_log(source: str, summary: dict[str, Any]) -> Path:
         f.write(json.dumps(summary, ensure_ascii=False) + "\n")
     return p
 
+
+
+# 수집 중 오류가 있었는데도 정제 JSONL을 덮어쓰려면 이 환경변수를 1로 둔다(기본은 덮어쓰지 않음).
+ALLOW_PARTIAL_ENV = "COLLECTOR_ALLOW_PARTIAL"
+
+
+def write_processed_jsonl(path: Path, records: list[dict[str, Any]], summary: dict[str, Any],
+                          logger: logging.Logger) -> Path:
+    """정제 JSONL을 안전하게 쓴다. 실제로 쓴 파일 경로를 돌려준다.
+
+    - 수집 중 오류(summary["errors"])가 있으면 기존 정제 파일을 덮어쓰지 않고 `<이름>.partial.jsonl`에 쓴다.
+      중간 실패·쿼터 초과로 일부만 받은 결과가 추적 중인 data/processed 파일을 대체하지 않게 하기 위해서다.
+      오류가 있어도 덮어써야 하면 COLLECTOR_ALLOW_PARTIAL=1로 실행한다.
+    - 쓰기는 임시 파일에 먼저 한 뒤 교체한다. 쓰는 도중 멈춰도 기존 파일이 반쯤 잘린 채로 남지 않는다.
+    """
+    errors = summary.get("errors") or []
+    allow_partial = os.getenv(ALLOW_PARTIAL_ENV) == "1"
+    target = path
+    if errors and not allow_partial:
+        target = path.with_name(path.stem + ".partial" + path.suffix)
+        logger.warning("수집 오류 %d건이 있어 %s를 덮어쓰지 않고 %s에 씁니다. 덮어쓰려면 %s=1로 다시 실행하세요.",
+                       len(errors), path.name, target.name, ALLOW_PARTIAL_ENV)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_name(target.name + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        for record in records:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    os.replace(tmp, target)
+    summary["refined_jsonl_path"] = str(target)
+    summary["refined_jsonl_partial"] = target != path
+    return target

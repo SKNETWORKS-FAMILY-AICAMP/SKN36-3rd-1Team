@@ -14,4 +14,4 @@ Qdrant 원문 검색과 Neo4j 정책 관계 조회를 결합합니다. 기본 �
 
 ## 관련 문서
 
-- [상세 가이드](../docs/development/ISSUE43_RESTORE_GUIDE.md)
+- [최종 DB 복원 Runbook (R3D)](../docs/development/ISSUE105_R3_RUNBOOK.md) · [이전 복원 가이드 (r2 이전)](../docs/development/ISSUE43_RESTORE_GUIDE.md)

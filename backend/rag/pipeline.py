@@ -13,9 +13,12 @@ from backend.api.schemas import (
     AskRequest, AskResponse, Contact, EligibilityOutput, ExclusionReason, GeneratorOutput,
 )
 from backend.core.contract import CITATION, MAX_CONTEXTS, MAX_HISTORY_TURNS, SENTENCE_BREAK
+from backend.core.deadline import ask_deadline, remaining_seconds
 from backend.rag.context_builder import complete_condition_evidence, rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from backend.eligibility.checker import CHECK, NO, OK, certain_required_and_failure, application_schedule, deadline_rank
+from backend.eligibility.checker import (
+    CHECK, DISPLAY_REASON_JOINER, NO, OK, certain_required_and_failure, application_schedule, deadline_rank,
+)
 from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from backend.rag.application_links import align_application_links
@@ -682,6 +685,8 @@ SEARCH_TOP_K = 10
 # 원래 질문 결과 상위 몇 개 정책을 보고 분야가 이미 다뤄졌는지 판단할지, 분야 검색 상위 몇 개를 그 분야 정책으로 볼지.
 COVERED_TOP = 5
 TOPIC_TOP = 3
+# 분야 보충 검색(#75)은 요청 마감까지 이만큼 남았을 때만 한다. LLM 한 번(기본 25초)과 후처리 여유를 남긴다.
+TOPIC_SEARCH_MIN_REMAINING_SECONDS = 30.0
 # 보충 순서로 근거 청크 rank를 다시 매길 때 정책 한 칸의 간격. 한 정책의 청크 rank보다 커야 순서가 섞이지 않는다.
 RANK_STRIDE = 1000
 
@@ -708,6 +713,11 @@ def search_policies(search_fn: Callable[..., dict], question: str, filters: dict
         # '국토교통부'처럼 낱말 중간에 든 '교통'은 다룬 것으로 보지 않는다.
         if any(word.startswith(topic) for word in shown_words):
             continue
+        remaining = remaining_seconds()
+        if remaining is not None and remaining < TOPIC_SEARCH_MIN_REMAINING_SECONDS:
+            # 보충 검색은 선택 단계다. 남은 시간이 부족하면 원래 결과와 지금까지 채운 분야로 답한다.
+            logger.warning("요청 마감이 가까워 분야 보충 검색을 건너뜁니다.")
+            break
         found = search_fn(query, filters=filters, k=k)["policies"]
         # 그 분야 검색 상위 정책이 이미 보여도 다룬 분야로 본다. 겹친 정책도 정책명에 분야 낱말이 있어야 한다.
         # '긴급돌봄'처럼 어느 분야 검색에나 나오는 정책이 겹쳤다는 이유만으로, 또 원문 어딘가에 '교통'이
@@ -729,13 +739,46 @@ def search_policies(search_fn: Callable[..., dict], question: str, filters: dict
     return policies
 
 
+def _joins_original_reasons(reason: object, reasons: list[str]) -> bool:
+    """reason이 원본 사유 여러 개를 DISPLAY_REASON_JOINER로 이어 붙인 것인지(각 사유는 한 번만, 2개 이상)."""
+    if not isinstance(reason, str):
+        return False
+
+    def consume(rest: str, unused: frozenset[str], count: int) -> bool:
+        for candidate in unused:
+            if rest == candidate:
+                return count + 1 >= 2
+            prefix = candidate + DISPLAY_REASON_JOINER
+            if rest.startswith(prefix) and consume(rest[len(prefix):], unused - {candidate}, count + 1):
+                return True
+        return False
+
+    return consume(reason, frozenset(r for r in reasons if r), 0)
+
+
+def _is_display_row(item: object, original: list[dict]) -> bool:
+    """화면용 행으로 허용되는지. 원본 행 그대로이거나, 같은 field·status·label 원본 행들의 사유만 합친 행이다.
+
+    합친 행은 Checker summarize_conditions_for_display의 가구 안내 병합(같은 확인 사항을 한 줄로)에 쓴다.
+    원본에 없는 사유·상태·라벨은 만들 수 없다.
+    """
+    if item in original:
+        return True
+    if not isinstance(item, dict) or set(item) != {"field", "label", "reason", "status"}:
+        return False
+    same = [c for c in original if c["field"] == item["field"] and c["status"] == item["status"]]
+    if not any(c["label"] == item["label"] for c in same):
+        return False
+    return _joins_original_reasons(item["reason"], [c["reason"] for c in same])
+
+
 def _display_check(check: dict, display_fn: Callable[[list[dict]], list[dict]]) -> dict:
-    """화면용 조건 요약. 원본 행만 고를 수 있고 필드·상태 조합을 바꿀 수 없다."""
+    """화면용 조건 요약. 원본 행을 고르거나 같은 필드·상태의 원본 사유를 합칠 수만 있고, 필드·상태 조합을 바꿀 수 없다."""
     shown = display_fn([dict(condition) for condition in check["conditions"]])
     original = check["conditions"]
     if (
         not isinstance(shown, list) or not shown
-        or any(item not in original for item in shown)
+        or any(not _is_display_row(item, original) for item in shown)
         or {(c["field"], c["status"]) for c in shown} != {(c["field"], c["status"]) for c in original}
     ):
         raise AskError("ELIGIBILITY_OUTPUT_INVALID")
@@ -889,7 +932,22 @@ def run_ask_pipeline(
     display_fn: 정책 한 건의 conditions를 화면용으로 요약한다(선택). LLM에는 요약 전 조건을 전달한다.
     requirement_reviews: 값·단위·연도 검수 기록(#76, 선택). 없어도 채택 근거의 자격 블록에서 원문이 직접
         항목명을 붙인 기준은 원문 그대로 official_requirements에 담는다(backend/rag/official_requirements.py).
+    요청 전체에 마감 시각(backend/core/deadline.py)을 두어 보충 검색·LLM 재시도가 화면 제한 60초를 넘지 않게 한다.
     """
+    with ask_deadline():
+        return _run_ask_pipeline(request, search_fn=search_fn, check_fn=check_fn, generate_fn=generate_fn,
+                                 display_fn=display_fn, requirement_reviews=requirement_reviews)
+
+
+def _run_ask_pipeline(
+    request: AskRequest,
+    *,
+    search_fn: Callable[..., dict],
+    check_fn: Callable[[dict, dict], dict],
+    generate_fn: Callable[..., dict],
+    display_fn: Callable[[list[dict]], list[dict]] | None,
+    requirement_reviews: Collection[dict],
+) -> AskResponse:
     profile, unknown_region = _normalized_profile(request)
     notice = _warn_notice("unknown_region", UNKNOWN_REGION_NOTICE_TEXT) if unknown_region else None
     policies = _search_request_policies(request, search_fn, profile["region"])

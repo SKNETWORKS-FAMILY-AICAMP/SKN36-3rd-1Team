@@ -7,7 +7,8 @@ Qdrant 실험 컬렉션 스모크 테스트 — 실제 서버에 "읽기 전용"
 
 결과 구분
 - RUN_QDRANT_SMOKE가 1이 아니면     → 모두 skip, 사유 "NOT_RUN"           (서버에 접속하지 않음)
-- 서버·컬렉션이 아직 준비되지 않았으면 → 모두 skip, 사유 "DATA_NOT_READY: …" (실패가 아니라 미실행)
+- 서버 접속 불가·인증 실패이면       → 실패(CONNECTION_FAILED). 직접 켠 검증이 조용히 넘어가지 않게 한다
+- 접속 설정·컬렉션이 아직 없으면      → 모두 skip, 사유 "DATA_NOT_READY: …" (적재 전이라 미실행)
 - 준비되어 있는데 값이 기대와 다르면   → FAIL                                (실제 문제)
 
 이 테스트는 컬렉션을 만들거나, point를 쓰거나, 지우지 않는다.
@@ -56,8 +57,9 @@ class TestQdrantExperimentCollectionSmoke(unittest.TestCase):
             names = [item.name for item in cls.client.get_collections().collections]
         except store.ConnectionSettingsError as error:
             raise unittest.SkipTest(f"DATA_NOT_READY: 접속 설정 없음 ({error})")
-        except Exception as error:   # 서버가 꺼져 있음 등
-            raise unittest.SkipTest(f"DATA_NOT_READY: Qdrant 서버에 접속할 수 없음 ({type(error).__name__})")
+        except Exception as error:   # 서버가 꺼져 있음·인증 실패 등
+            # RUN_*_SMOKE=1로 직접 켰으므로 접속·인증 실패는 건너뛰지 않고 실패로 보고한다(미검증이 통과처럼 보이지 않게)
+            raise AssertionError(f"CONNECTION_FAILED: Qdrant 서버에 접속할 수 없음 ({type(error).__name__})") from None
         if cls.collection not in names:
             raise unittest.SkipTest(f"DATA_NOT_READY: 컬렉션 {cls.collection} 없음")
 

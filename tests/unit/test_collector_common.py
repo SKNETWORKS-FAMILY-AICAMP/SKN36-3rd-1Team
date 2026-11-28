@@ -1,6 +1,7 @@
 """수집기 공통 HTTP 재시도·인증키 가리기 테스트. 실제 공공 API에 접속하지 않는다 (가짜 키, sample_only)."""
 
 import logging
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -150,6 +151,76 @@ class TestCollectorErrorSinks(unittest.TestCase):
                 bokjiro_collector.make_api_request("https://example.invalid/bokjiro", {"serviceKey": FAKE_KEY}, LOGGER)
         self.assertNotIn(quote_plus(FAKE_KEY), str(raised.exception))
         self.assertNotIn(FAKE_KEY, str(raised.exception))
+
+
+class TestWriteProcessedJsonl(unittest.TestCase):
+    """수집 오류가 있으면 추적 중인 정제 파일을 덮어쓰지 않는다. 임시 폴더만 쓴다 (sample_only)."""
+
+    def setUp(self):
+        import tempfile
+        self.dir = Path(tempfile.mkdtemp(prefix="write_processed_"))
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.dir, ignore_errors=True))
+        self.path = self.dir / "sample.jsonl"
+        self.path.write_text('{"old": true}\n', encoding="utf-8")
+        self.partial = self.dir / "sample.partial.jsonl"
+
+    def test_success_replaces_file(self):
+        summary = {"errors": []}
+        written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.path)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"id": 1}\n')
+        self.assertFalse(summary["refined_jsonl_partial"])
+        self.assertFalse(list(self.dir.glob("*.tmp")))
+
+    def test_errors_keep_existing_file(self):
+        summary = {"errors": ["page 2 failed"]}
+        with mock.patch.dict(os.environ):
+            os.environ.pop(_common.ALLOW_PARTIAL_ENV, None)
+            written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.partial)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"old": true}\n')
+        self.assertEqual(self.partial.read_text(encoding="utf-8"), '{"id": 1}\n')
+        self.assertTrue(summary["refined_jsonl_partial"])
+
+    def test_errors_overwrite_only_when_allowed(self):
+        summary = {"errors": ["page 2 failed"]}
+        with mock.patch.dict(os.environ, {_common.ALLOW_PARTIAL_ENV: "1"}):
+            written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.path)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"id": 1}\n')
+
+
+class TestGov24UrlEnvNames(unittest.TestCase):
+    """.env.example의 MOIS_BENEFITS_* 이름과 예전 MOIS_SERVICE_* 이름을 모두 읽는다. 주소는 가상 값이다 (sample_only)."""
+
+    NAMES = ("MOIS_BENEFITS_LIST_API_URL", "MOIS_BENEFITS_DETAIL_API_URL", "MOIS_BENEFITS_CONDITIONS_API_URL",
+             "MOIS_SERVICE_LIST_API_URL", "MOIS_SERVICE_DETAIL_API_URL", "MOIS_SUPPORT_CONDITIONS_API_URL",
+             "MOIS_BENEFITS_API_URL")
+
+    def urls(self, env):
+        with mock.patch.dict(os.environ):
+            for name in self.NAMES:
+                os.environ.pop(name, None)
+            os.environ.update(env)
+            return gov24_collector.get_gov24_urls()
+
+    def test_env_example_names_are_read(self):
+        self.assertEqual(self.urls({
+            "MOIS_BENEFITS_LIST_API_URL": "https://example.org/list",
+            "MOIS_BENEFITS_DETAIL_API_URL": "https://example.org/detail",
+            "MOIS_BENEFITS_CONDITIONS_API_URL": "https://example.org/cond",
+        }), ("https://example.org/list", "https://example.org/detail", "https://example.org/cond"))
+
+    def test_old_names_still_work(self):
+        self.assertEqual(self.urls({
+            "MOIS_SERVICE_LIST_API_URL": "https://example.org/old-list",
+            "MOIS_SERVICE_DETAIL_API_URL": "https://example.org/old-detail",
+            "MOIS_SUPPORT_CONDITIONS_API_URL": "https://example.org/old-cond",
+        }), ("https://example.org/old-list", "https://example.org/old-detail", "https://example.org/old-cond"))
+
+    def test_defaults_without_env(self):
+        self.assertEqual(self.urls({}), (gov24_collector.DEFAULT_LIST_URL, gov24_collector.DEFAULT_DETAIL_URL,
+                                         gov24_collector.DEFAULT_COND_URL))
 
 
 class TestCuratedYouthcenterIds(unittest.TestCase):

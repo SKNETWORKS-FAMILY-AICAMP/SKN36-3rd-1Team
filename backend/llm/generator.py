@@ -13,6 +13,7 @@ from functools import lru_cache
 from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
+from backend.core.deadline import remaining_seconds
 from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURNS, PROFILE_INPUT_FIELDS
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
@@ -23,7 +24,7 @@ from database.region_search import ALIASES, SIDOS
 logger = logging.getLogger(__name__)
 
 
-# D-06 모델·공급자 확정 전 임시 기본값. LLM_MODEL 환경변수로 변경 가능.
+# PRD D-06 적용 모델(시연용). LLM_MODEL 환경변수로 변경 가능.
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT_SECONDS = 25.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1000
@@ -32,9 +33,14 @@ TEMPERATURE = 0
 # SDK 자동 재시도는 끈다. 오류 종류를 구분하지 않고 다시 보내기 때문이다. 재시도는 _call_openai가 종류별로 정한다.
 SDK_MAX_RETRIES = 0
 # 일시 장애(연결 실패·공급자 5xx)만 한 번 더 보낸다. 시간 초과는 이미 제한 시간을 다 썼으므로 다시 보내지 않는다.
-# 두 번 모두 LLM_TIMEOUT_SECONDS(기본 25초)까지 기다려도 화면 제한(60초) 안에 끝난다.
+# 재시도는 요청 전체 마감(backend/core/deadline.py, 55초) 안에 다음 시도가 들어올 때만 한다.
 TRANSIENT_RETRIES = 1
 TRANSIENT_RETRY_DELAY_SECONDS = 0.5
+# 요청 전체 마감(backend/core/deadline.py)이 있으면 남은 시간 안에서만 호출한다.
+# 남은 시간이 이보다 짧으면 새로 보내지 않는다(첫 호출은 시간 초과, 재시도는 원래 오류로 끝낸다).
+MIN_LLM_ATTEMPT_SECONDS = 5.0
+# LLM 응답 뒤 후처리·응답 전송에 남겨 둘 시간.
+LLM_POST_PROCESS_MARGIN_SECONDS = 2.0
 # 요청 한도 초과는 바로 다시 보내도 같은 결과라 재시도하지 않고 따로 알린다.
 RATE_LIMIT_STATUS = 429
 SERVER_ERROR_STATUS = 500
@@ -1056,15 +1062,24 @@ def _remove_redundant_answer_requests(
     if profile is None:
         return answer.strip()
 
-    sentences = re.split(
-        r"(?<=[.!?])\s+|(?<=\])\s+|\n+",
+    # 구분자를 함께 잘라 두었다가 남은 문장 사이에 원래 구분자(줄바꿈·공백)를 되돌린다.
+    # 공백으로만 다시 이으면 답변의 문단과 목록이 한 줄로 합쳐진다.
+    parts = re.split(
+        r"((?<=[.!?])\s+|(?<=\])\s+|\n+)",
         answer.strip(),
     )
+    sentences = parts[0::2]
+    separators = parts[1::2]
 
-    kept = []
+    kept: list[tuple[str, str]] = []
     removed = False
+    # 지운 문장 앞의 구분자. 지운 문장이 문단 끝에 있었으면 다음 문장 앞에 그 줄바꿈을 살린다.
+    pending = ""
 
-    for sentence in sentences:
+    for index, sentence in enumerate(sentences):
+        before = separators[index - 1] if index else ""
+        if pending and "\n" in pending and "\n" not in before:
+            before = pending
         if (
             len(sentence) <= MAX_REDUNDANT_REQUEST_LENGTH
             and not CITATION_PATTERN.search(sentence)
@@ -1080,14 +1095,22 @@ def _remove_redundant_answer_requests(
             )
         ):
             removed = True
+            # 다음 문장 앞에 줄바꿈이 없으면 이 문장 앞의 줄바꿈을 대신 쓴다(문단 경계 유지).
+            pending = before if "\n" in before else pending
             continue
 
-        kept.append(sentence)
+        pending = ""
+        kept.append((before, sentence))
 
     if not removed or not kept:
         return answer.strip()
 
-    return " ".join(kept).strip()
+    joined = []
+    for position, (before, sentence) in enumerate(kept):
+        if position:
+            joined.append(before or " ")
+        joined.append(sentence)
+    return "".join(joined).strip()
 
 
 class LLMUnavailableError(RuntimeError):
@@ -1666,6 +1689,22 @@ def _get_openai_client(
     )
 
 
+def _attempt_budget(timeout: float) -> float | None:
+    """이번 LLM 호출에 쓸 수 있는 시간. 요청 마감이 없으면 None(설정된 timeout을 그대로 쓴다)."""
+    remaining = remaining_seconds()
+    if remaining is None:
+        return None
+    return min(timeout, remaining - LLM_POST_PROCESS_MARGIN_SECONDS)
+
+
+def _can_retry_within_deadline() -> bool:
+    """재시도 대기 후에도 최소 호출 시간이 남는지. 요청 마감이 없으면 기존처럼 재시도한다."""
+    remaining = remaining_seconds()
+    if remaining is None:
+        return True
+    return remaining - TRANSIENT_RETRY_DELAY_SECONDS - LLM_POST_PROCESS_MARGIN_SECONDS >= MIN_LLM_ATTEMPT_SECONDS
+
+
 def _call_openai(
     messages: list[dict[str, str]],
 ) -> str:
@@ -1729,7 +1768,15 @@ def _call_openai(
         ) from error
 
     for attempt in range(TRANSIENT_RETRIES + 1):
+        budget = _attempt_budget(timeout)
+        if budget is not None and budget < MIN_LLM_ATTEMPT_SECONDS:
+            # 요청 마감이 가까워 새로 보내면 화면 제한을 넘는다. 키·본문은 기록하지 않는다.
+            logger.warning("요청 마감이 가까워 LLM을 호출하지 않습니다(시도 %s).", attempt + 1)
+            raise LLMTimeoutError(
+                "LLM 호출 시간이 초과되었습니다."
+            )
         retry = attempt < TRANSIENT_RETRIES
+        extra = {} if budget is None or budget >= timeout else {"timeout": budget}
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -1739,6 +1786,7 @@ def _call_openai(
                 response_format={
                     "type": "json_object",
                 },
+                **extra,
             )
 
         except APITimeoutError as error:
@@ -1753,7 +1801,7 @@ def _call_openai(
                 raise LLMRateLimitedError(
                     "LLM 요청 한도를 초과했습니다."
                 ) from error
-            if isinstance(status, int) and status >= SERVER_ERROR_STATUS and retry:
+            if isinstance(status, int) and status >= SERVER_ERROR_STATUS and retry and _can_retry_within_deadline():
                 logger.warning("LLM 공급자 일시 오류(HTTP %s), 한 번 더 시도합니다.", status)
                 time.sleep(TRANSIENT_RETRY_DELAY_SECONDS)
                 continue
@@ -1764,7 +1812,7 @@ def _call_openai(
             ) from error
 
         except APIConnectionError as error:
-            if retry:
+            if retry and _can_retry_within_deadline():
                 logger.warning("LLM 공급자 연결 실패, 한 번 더 시도합니다.")
                 time.sleep(TRANSIENT_RETRY_DELAY_SECONDS)
                 continue
