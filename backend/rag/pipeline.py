@@ -19,7 +19,7 @@ from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from backend.rag.application_links import align_application_links
 from backend.rag.reception_notice import ensure_unknown_reception_notice
-from backend.rag.age_verdict import align_age_verdicts
+from backend.rag.age_verdict import align_age_verdicts, align_child_month_verdicts
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -804,9 +804,11 @@ def run_ask_pipeline(
         checked, checks_aligned = _align_answer_with_checks(link_fixed, contexts, checks)
         # 입력 나이에 대한 결론이 Checker 나이 판정과 반대면 판정 문장으로 맞춘다(#90·#78 후속, 인천 18세).
         aged, age_aligned = align_age_verdicts(checked, contexts, checks, profile.get("age"))
+        # 자녀 월령 결론도 Checker 판정에 맞춘다(#39, 24개월 '포함' 사례).
+        aged, month_aligned = align_child_month_verdicts(aged, contexts, checks, profile.get("child_age_months"))
         # 접수 상태 unknown 정책의 합의 문구가 빠졌거나 바꿔 쓴 경우 합의 문구로 맞춘다(#103·#147).
         fixed, notice_aligned = ensure_unknown_reception_notice(aged, contexts, checks)
-        aligned = links_aligned or checks_aligned or age_aligned or notice_aligned
+        aligned = links_aligned or checks_aligned or age_aligned or month_aligned or notice_aligned
         if aligned:
             # 내용은 로그에 남기지 않는다.
             logger.warning("생성 본문의 신청·자격 안내를 구조화된 정책 정보에 맞춰 바꿨습니다.")

@@ -443,7 +443,9 @@ class AgreedWordingTests(unittest.TestCase):
         from ai.prompts.system_prompt import SYSTEM_PROMPT
         from backend.rag.application_links import NO_APPLICATION_LINK
 
-        self.assertIn("null이면 “직접 신청 링크는 확인되지 않았어요”라고 안내하세요.", SYSTEM_PROMPT)
+        self.assertIn("null이면 “직접 신청 링크는 확인되지 않았어요”라고 정책마다 한 번만 안내하세요.", SYSTEM_PROMPT)
+        # 입력 데이터의 값 표기(null 등)는 사용자 문장에 쓰지 않는다(#122 최종 재검증: '신청 주소가 null이라' 2/5).
+        self.assertIn("null·None·true·false 같은 입력 데이터의 값 표기를 쓰지 마세요", SYSTEM_PROMPT)
         self.assertNotIn("전용 신청 주소가 없다고 안내", SYSTEM_PROMPT)
         self.assertEqual(NO_APPLICATION_LINK, NULL_LINK)
 

@@ -1,0 +1,2325 @@
+[
+ {
+  "id": "GOV050 24 run1",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 24
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 7.35,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청은 전주시 관내 주민등록을 두고 거주하면서 24개월 이하의 영아를 양육하는 장애인가정이 대상이고, 지원금은 자녀 1인당 월 10만원입니다. 신청은 주소지 관할 동 주민센터 방문신청이며, 구비서류는 신분증입니다 [1][2][3].\n\n다만 현재 입력된 거주지는 서울특별시라서, 원문에 나온 전주시 관내 거주 요건과는 맞지 않아 신청 자격은 추가 확인이 필요해요 [1][3]. 자녀 월령 24개월은 원문 기준에 포함됩니다 [1][3].\n\n공식 신청 링크는 확인되지 않았어요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 24개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "전주시 관내 거주 요건과 관련해 어떤 기준을 확인해야 하나요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 지원의 신청 서류와 방문 신청 절차는 어떻게 되나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 10 run1",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 10
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.97,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인 가정이 대상이고, 지원금액은 자녀 1인당 월 10만원입니다. 신청은 주소지 관할 동 주민센터 방문으로 안내되어 있고, 신청기한은 상시신청으로 확인됩니다. [1][2][3]\n\n다만 입력하신 거주지는 서울특별시라서, 전주시 관내 거주 요건은 충족 여부를 공식 공고로 다시 확인해야 해요. 자녀 월령 10개월은 24개월 미만 기준에는 들어갑니다. [1][3]\n\n직접 신청 링크는 확인되지 않았어요. [1][2][3] 거주하시는 시·군·구를 알려 주세요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 10개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 지원의 신청 서류는 무엇인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 25 run1",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 25
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.28,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문에는 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인 가정이 대상이라고 되어 있고, 지원금은 자녀 1인당 월 10만원, 지원기간은 생후 24개월까지입니다 [1][3].\n\n현재 입력된 정보만 보면 자녀 월령은 24개월 미만 기준에 맞지 않아 보이고, 거주지는 전주시 관내 요건과 달라 보여서 자격 충족을 바로 확정할 수 없습니다. 또한 신청 방법은 주소지 관할 동 주민센터 방문신청이며, 상시신청으로 안내되어 있습니다 [1][2]. 직접 신청 링크는 확인되지 않았어요 [2].\n\n필요한 확인 사항은 전주시 관내 주민등록 요건과 24개월 미만 자녀 양육 요건입니다 [1][3]. 거주하시는 시·군·구를 알려 주세요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 25개월은 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "장애인가정 양육비용 지원의 신청 서류는 무엇인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 24 run2",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 24
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.93,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인 가정이면서 24개월 미만 아이를 양육해야 합니다. 지원금은 자녀 1인당 월 10만원이고, 생후 24개월까지 최대 2년 지원됩니다. [1][2][3]\n\n다만 입력하신 지역은 서울특별시라서, 전주시 관내 거주 요건은 충족 여부를 여기서 확정할 수 없습니다. 자녀 월령 24개월은 원문 기준의 상한에 포함되지만, 24개월 미만이라는 문구와는 경계가 달라서 실제 대상 여부는 공고 기준으로 다시 확인이 필요합니다. 신청은 주소지 관할 동 주민센터 방문신청이며, 직접 신청 링크는 확인되지 않았어요. [1][2][3]\n\n구비서류는 신분증입니다. 문의처는 전주시 장애인복지과 063-281-2358입니다. [1][2]",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 24개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 자격을 더 자세히 확인해 줄 수 있나요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "방문 신청할 때 필요한 서류가 더 있나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 10 run2",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 10
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 1.96,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 다만 공식 원문상 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인이고 24개월 미만 아이를 양육하는 경우가 대상입니다 [1][3]. 입력하신 지역은 서울특별시라서 거주 요건은 맞지 않을 수 있어요. 자녀 월령 10개월은 24개월 미만 기준에는 들어갑니다 [1][3].\n\n신청 방법은 주소지 관할 동 주민센터 방문신청이며, 구비서류는 신분증입니다 [1][2]. 직접 신청 링크는 확인되지 않았어요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 10개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 지원금액과 지원기간은 어떻게 되나요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 25 run2",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 25
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.15,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 다만 공식 원문상 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인 가정이 대상입니다 [1][3]. 입력하신 지역은 서울특별시이고, 자녀 월령은 25개월이라 원문 기준인 24개월 미만에는 해당하지 않습니다 [1][3].\n\n직접 신청 링크는 확인되지 않았어요. 신청은 주소지 관할 동 주민센터 방문신청으로 안내되어 있고, 구비서류는 신분증입니다 [1][2].",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 25개월은 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 지원사업의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 24 run3",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 24
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.12,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인 가정이 대상이고, 지원금은 자녀 1인당 월 10만원입니다. 신청은 주소지 관할 동 주민센터 방문으로 안내되어 있지만, 공식 신청 링크는 확인되지 않았어요. [1][2][3]\n\n다만 입력하신 거주지는 서울특별시라서, 원문에 나온 전주시 관내 거주 요건과는 맞지 않습니다. 자녀 월령 24개월 기준은 포함되지만, 거주 요건 때문에 현재 입력 기준으로는 대상 여부를 충족한다고 보기 어렵습니다. [1][3]\n\n필요 서류는 신분증입니다. [1][2]",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 24개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 10 run3",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 10
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.1,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 다만 공식 원문상 지원대상은 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인으로 안내되어 있고, 신청은 주소지 관할 동 주민센터 방문신청입니다. [1][2][3]\n\n현재 입력된 정보만 보면 자녀 월령 10개월은 기준에 들어가지만, 거주지는 전주시 관내 요건과 달라 보여 신청 자격은 추가 확인이 필요해요. 또한 공식 신청 링크는 확인되지 않았어요. [1][3] 거주하시는 시·군·구를 알려 주세요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 10개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 지원사업의 신청 서류는 무엇인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "GOV050 25 run3",
+  "request": {
+   "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+   "profile": {
+    "age": 32,
+    "region": "서울",
+    "income": null,
+    "child_age_months": 25
+   },
+   "history": [],
+   "selected_policy_id": "POL_GOV_050"
+  },
+  "status": 200,
+  "seconds": 2.21,
+  "response": {
+   "status": "answered",
+   "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문에는 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인 가정이 대상이라고 되어 있고, 지원금은 자녀 1인당 월 10만원, 지원기간은 생후 24개월까지입니다 [1][3].\n\n현재 입력된 정보로는 거주지가 서울특별시라서 전주시 관내 거주 요건과 맞는지 확인이 필요하고, 자녀 월령 25개월은 원문 기준인 24개월 미만에 해당하지 않습니다 [1][3]. 신청 방법은 주소지 관할 동 주민센터 방문신청이며, 신청기한은 상시신청으로 안내되어 있습니다 [2]. 직접 신청 링크는 확인되지 않았어요. 거주하시는 시·군·구를 알려 주세요.",
+   "citations": [
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    },
+    {
+     "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "document_id": "DOC_GOV_050",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_GOV_050",
+     "conditions": [
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+       "status": "needs_check"
+      },
+      {
+       "field": "children",
+       "label": "자녀 월령",
+       "reason": "자녀 월령 24개월 이하 기준에 입력한 25개월은 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "region",
+       "label": "거주 지역",
+       "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "housing",
+       "label": "가구 요건",
+       "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "open",
+     "application_schedule": {
+      "evaluated_on": "2026-11-28",
+      "start_date": null,
+      "end_date": null,
+      "is_ongoing": true,
+      "days_to_start": null,
+      "days_to_end": null
+     },
+     "required_documents": [
+      {
+       "text": "신분증",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "policy_name": "장애인가정 양육비용 지원",
+     "agency": "전북특별자치도 전주시",
+     "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "장애인복지과",
+       "phone": "063-281-2358",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+       "document_id": "DOC_GOV_050",
+       "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "자녀가 24개월 미만인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 18 run1",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 18,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 1.85,
+  "response": {
+   "status": "info",
+   "answer": "**중소기업 재직청년 복지공유제 지원**은 현재 접수 여부를 공식 공고에서 확인해 주세요. 신청 자격은 추가 확인이 필요해요. 공고에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년이며 19~39세인 경우를 지원대상으로 적고 있습니다[1]. 다만 제공된 판정 정보에서는 나이 조건이 추가 확인 필요로 표시되어 있어, 현재 입력만으로는 자격 충족을 확정할 수 없습니다[1]. 공식 신청 URL은 확인되지 않았어요[2].",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 정책의 접수 기간은 언제인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 19 run1",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 19,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.12,
+  "response": {
+   "status": "info",
+   "answer": "중소기업 재직청년 복지공유제 지원은 원문상 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 합니다. 다만 현재 입력 기준으로는 종합 자격이 추가 확인 필요하고, 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]\n\n공식 신청 URL은 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로 표시되어 있어 경계값은 원문끼리 완전히 일치하지 않습니다. 따라서 19세는 원문 기준에 포함되지만, 시작 연령은 이번 근거만으로 확정하기 어렵습니다. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 19세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 정책의 접수 기간과 신청 방법을 다시 확인해 줄 수 있나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 38 run1",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 38,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.37,
+  "response": {
+   "status": "info",
+   "answer": "이 정책은 신청 대상이 **추가 확인이 필요해요**. 공식 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년(19~39세)이어야 한다고 되어 있고, 신청기간은 2026. 6. 29. ~ 7. 24.로 안내돼 있습니다. 다만 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2] 공식 신청 URL은 확인되지 않았어요. [2] 다만 나이만으로 전체 자격이 확정되지는 않고, 거주지와 재직 요건도 함께 확인돼야 합니다. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 38세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 40 run1",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 40,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.3,
+  "response": {
+   "status": "info",
+   "answer": "중소기업 재직청년 복지공유제 지원은 현재 접수 여부는 공식 공고에서 확인해 주세요. 신청 자격은 추가 확인이 필요해요. 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년, 만 19~39세가 대상이라고 되어 있습니다[1]. 다만 제공된 판정 정보에서는 나이 조건이 추가 확인 필요로 표시되어 있고, 사용자의 만 40세가 원문 연령 범위에 들어가는지와 종합 자격은 이 근거만으로 확정할 수 없습니다[1][2]. 공식 신청 URL도 확인되지 않았어요[2].",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 40세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 지원사업의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 지원사업의 접수 기간은 어떻게 되나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN None run1",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": null,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.46,
+  "response": {
+   "status": "info",
+   "answer": "현재 이 정책은 접수 여부를 공식 공고에서 확인해 주세요. 신청 자격도 추가 확인이 필요해요. 원문에는 신청기간이 2026. 6. 29. ~ 7. 24.로 적혀 있고, 지원대상은 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년(19~39세)입니다. 우선선발은 인천 서해구·검단구 소재 중소기업 재직 서해구·검단구 청년, 일반선발은 기본요건 충족자입니다. 또한 2025년 제2호, 제3호 중소기업 재직청년 복지공유제 선정자는 지원불가로 적혀 있습니다. [1]\n\n공식 신청 URL은 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 정부24 요약에는 대상연령 18세 ~ 39세로 적혀 있어 경계가 서로 달라 확정할 수 없습니다. 따라서 연령 기준은 이번 근거만으로는 하나로 단정하기 어렵습니다. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "사용자의 만 나이가 입력되지 않았습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "우선선발과 일반선발 기준이 어떻게 다른가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 18 run2",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 18,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.31,
+  "response": {
+   "status": "info",
+   "answer": "현재 이 정책은 신청 자격을 추가 확인해야 해요. 공식 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 한다고 되어 있습니다[1][2]. 다만 제공된 정보만으로는 만 18세가 연령 기준에 맞는지 확정할 수 없고, 지역과 세부 판정도 공식 공고 기준으로 다시 확인이 필요합니다[1][2].\n\n신청 방법은 공식 신청 URL이 확인되지 않았어요. [2] \n\n현재 접수 여부는 공식 공고에서 확인해 주세요[1][2].",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "연령 기준과 지역 기준을 원문 기준으로 더 자세히 알려주세요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 19 run2",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 19,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.3,
+  "response": {
+   "status": "info",
+   "answer": "중소기업 재직청년 복지공유제 지원은 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년이며, 연령은 19~39세여야 합니다. 다만 현재 입력 기준으로는 지역과 종합 자격을 공식 원문만으로 확정하기 어려워 신청 가능 여부는 추가 확인이 필요해요. [1][2]\n\n신청 기간은 2026. 6. 29. ~ 7. 24.로 안내되어 있고, 현재 접수 여부는 공식 공고에서 확인해 주세요. [1]\n\n공식 신청 URL은 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로도 표시되어 있어 경계 기준은 원문끼리 완전히 일치하지 않습니다. 따라서 이번 근거만으로는 연령 기준을 단정하기 어렵고, 공고 원문에서 최종 기준을 확인해 주세요. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 19세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 정책의 우선선발 대상은 누구인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 38 run2",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 38,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.31,
+  "response": {
+   "status": "info",
+   "answer": "중소기업 재직청년 복지공유제 지원은 신청 대상이 **만 19~39세** 청년으로 안내되어 있고, 중소기업에 6개월 이상 재직 중이며 인천광역시 서해구·검단구 청년이어야 합니다. 다만 현재 자격 판정은 추가 확인이 필요하고, 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]\n\n공식 신청 URL은 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화된 요약에는 18세~39세로 표시되어 있어 경계값은 원문끼리 완전히 일치한다고 보기 어렵습니다. 따라서 이번 근거만으로는 연령 기준을 18세부터로 확정하지 않고, 원문에 적힌 19~39세 기준을 우선 확인해 보셔야 합니다. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 38세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 지원사업의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 지원사업의 접수 기간은 언제인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN 40 run2",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": 40,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.19,
+  "response": {
+   "status": "info",
+   "answer": "중소기업 재직청년 복지공유제 지원은 현재 접수 여부는 공식 공고에서 확인해 주세요. 신청 자격도 추가 확인이 필요합니다. 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년, 그리고 19~39세가 기본요건으로 적혀 있습니다[1]. 다만 제공된 판정 정보에서는 나이 조건이 추가 확인 필요로 표시되어 있어, 현재 입력만으로는 자격 충족을 확정할 수 없습니다. 공식 신청 URL도 확인되지 않았어요. [2]원문에 신청기간은 2026. 6. 29. ~ 7. 24.로 적혀 있습니다[1].",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "만 19~39세 기준에 입력한 만 40세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "이 정책의 우선선발 대상은 누구인가요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ },
+ {
+  "id": "ICN None run2",
+  "request": {
+   "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+   "profile": {
+    "age": null,
+    "region": "",
+    "income": null
+   },
+   "history": [],
+   "selected_policy_id": "POL_STG_ICN_001"
+  },
+  "status": 200,
+  "seconds": 2.23,
+  "response": {
+   "status": "info",
+   "answer": "현재 이 정책은 신청 자격을 추가 확인해야 해요. 공식 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 한다고 되어 있습니다. 또한 신청기간은 2026. 6. 29. ~ 7. 24.로 적혀 있지만, 현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]\n\n공식 신청 URL은 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 정부24 요약에는 대상연령이 18세 ~ 39세로 표시되어 있어 경계가 서로 달라 확정할 수 없습니다. 따라서 연령 기준은 원문과 요약이 일치하지 않는 범위가 있어 추가 확인이 필요합니다. [1][2]",
+   "citations": [
+    {
+     "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+     "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+     "page_number": null
+    },
+    {
+     "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+     "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+     "document_id": "DOC_STG_ICN_001_GOV24",
+     "page_number": null
+    }
+   ],
+   "policy_checks": [
+    {
+     "policy_id": "POL_STG_ICN_001",
+     "conditions": [
+      {
+       "field": "age",
+       "label": "나이",
+       "reason": "사용자의 만 나이가 입력되지 않았습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      },
+      {
+       "field": "eligibility",
+       "label": "자격 요건",
+       "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+       "status": "needs_check"
+      }
+     ],
+     "reception_status": "unknown",
+     "application_schedule": null,
+     "required_documents": [
+      {
+       "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "policy_name": "중소기업 재직청년 복지공유제 지원",
+     "agency": "인천광역시 서해구 기업일자리정책과",
+     "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+     "official_apply_url": null,
+     "contacts": [
+      {
+       "agency": "인천 서해구청 기업일자리정책과",
+       "phone": "032-560-0941",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+      }
+     ],
+     "requirement_excerpts": [
+      {
+       "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+       "document_id": "DOC_STG_ICN_001_GOV24",
+       "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+       "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+       "label": "지원대상"
+      }
+     ],
+     "exclusion_reasons": null,
+     "official_requirements": null
+    }
+   ],
+   "follow_up_questions": [
+    {
+     "kind": "question",
+     "text": "이 정책의 신청 서류는 무엇인가요?",
+     "field": null
+    },
+    {
+     "kind": "question",
+     "text": "지원 제외 대상은 어떻게 되나요?",
+     "field": null
+    }
+   ],
+   "checked_at": null,
+   "notice": {
+    "kind": "warn",
+    "title": "추가 확인 필요",
+    "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+   },
+   "is_sample": false
+  }
+ }
+]
