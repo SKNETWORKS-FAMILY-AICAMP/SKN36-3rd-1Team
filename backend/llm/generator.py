@@ -16,7 +16,7 @@ from ai.prompts.system_prompt import SYSTEM_PROMPT
 from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURNS, PROFILE_INPUT_FIELDS
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
-from backend.llm.month_age_guard import QUOTED_WRONG_WORDING, ground_child_month_ranges
+from backend.llm.month_age_guard import CHILD_MONTH_TOPIC, QUOTED_WRONG_WORDING, ground_child_month_ranges
 from backend.llm.negation_guard import restore_negated_exclusions
 from database.region_search import ALIASES, SIDOS
 
@@ -1194,7 +1194,7 @@ def _normalize_child_month_bound_wording(answer: str) -> str:
     """
     sentences = re.split(r"(?<=[.!?])\s+|\n+", answer)
     for sentence in sentences:
-        if not re.search(r"자녀|아이|아기|영유아|월령", sentence):
+        if not CHILD_MONTH_TOPIC.search(sentence):
             continue
         if QUOTED_WRONG_WORDING.search(sentence):
             continue

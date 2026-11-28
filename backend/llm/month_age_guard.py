@@ -22,6 +22,8 @@ _NEGATIVE_ELIGIBILITY = re.compile(
     r"(?:신청|이용|지원받)(?:을)?\s*할\s*수\s*없"
 )
 # 잘못된 표현을 설명하는 인용 문장("…라는 표현은 잘못")은 고치지 않는다. generator도 같은 기준을 쓴다.
+# 자녀 월령을 다루는 문장·문단인지 보는 단어. generator의 월령 표현 보정도 같은 목록을 쓴다(#165).
+CHILD_MONTH_TOPIC = re.compile(r"자녀|아이|아기|영유아|영아|아동|월령")
 QUOTED_WRONG_WORDING = re.compile(r"(?:표현|문구).{0,15}(?:잘못|오류|쓰지|사용하지)")
 _MARK = r"(?:\*\*|__)?"
 _RANGE = re.compile(
@@ -94,7 +96,7 @@ def ground_child_month_ranges(response: dict, contexts: list[dict]) -> dict:
     added_sources = set()
     for index in range(0, len(parts), 2):
         paragraph = parts[index]
-        if not re.search(r"자녀|아이|아기|영유아|영아|아동|월령", paragraph):
+        if not CHILD_MONTH_TOPIC.search(paragraph):
             continue
         if not re.search(r"신청|지원|이용|대상|원문|범위|기준", paragraph):
             continue
