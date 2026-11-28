@@ -30,6 +30,15 @@ frontend/build/
 frontend/.next/
 # data/samples/ssok-policy-preview.config.mjs가 만드는 단일 HTML 미리보기(빌드 산출물)
 data/samples/ssok-full-preview.html
+# 홈 화면 시안·단일 HTML 빌드 미리보기. 실제 정책 데이터가 들어 있어 samples(가상 값 전용)에 커밋하지 않는다
+data/samples/ssok-home-*.html
+# 수집 오류로 기존 정제 파일 대신 쓴 결과와 쓰기 중 임시 파일 (collectors/api/_common.write_processed_jsonl)
+data/processed/*.partial.jsonl
+data/processed/*.jsonl.tmp
+
+# ===== AI 코딩 도구 로컬 설정 =====
+# Claude Code가 쓰는 폴더(개인 권한 설정 settings.local.json, 미리보기 launch.json, 작업 메모 등). 사람마다 달라 커밋하지 않는다
+.claude/
 frontend/.vite/
 
 # ===== DB 로컬 저장 파일 =====
