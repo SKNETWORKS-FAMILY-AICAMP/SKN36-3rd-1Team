@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
-from backend.core.contract import MAX_VALID_AGE
+from backend.core.contract import MAX_VALID_AGE, PROFILE_INPUT_FIELDS
 
 ConditionStatus = Literal["eligible", "ineligible", "needs_check"]
 ReceptionStatus = Literal["before", "open", "closed", "unknown"]
@@ -159,7 +159,7 @@ class FollowUp(BaseModel):
 
     @model_validator(mode="after")
     def check_profile_field(self) -> "FollowUp":
-        if self.kind == "ask_info" and self.field not in {"age", "region", "income"}:
+        if self.kind == "ask_info" and self.field not in PROFILE_INPUT_FIELDS:
             raise ValueError("지원하는 프로필 항목을 지정해야 합니다.")
         return self
 

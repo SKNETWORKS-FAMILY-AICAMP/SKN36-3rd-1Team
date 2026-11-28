@@ -10,6 +10,8 @@ import re
 MAX_HISTORY_TURNS = 10
 # §6-4 select_contexts 기본 근거 수(source_id 1~5). AGE 근거 보강은 그 뒤 최대 1개.
 MAX_CONTEXTS = 5
+# §5.1 ask_info.field 허용값: 화면에서 직접 입력받는 프로필 필드(age·region·income).
+PROFILE_INPUT_FIELDS = frozenset({"age", "region", "income"})
 # §3.2 정규화 프로필 age 상한(API 입력 검증과 Checker 판정이 같은 값을 쓴다).
 MAX_VALID_AGE = 120
 # §7-1 본문 인용 번호 [n]. 번호는 문자열로만 다룬다.

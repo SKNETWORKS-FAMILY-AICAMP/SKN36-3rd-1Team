@@ -11,7 +11,7 @@ from functools import lru_cache
 from typing import Any
 
 from ai.prompts.system_prompt import SYSTEM_PROMPT
-from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURNS
+from backend.core.contract import CITATION as CITATION_PATTERN, MAX_HISTORY_TURNS, PROFILE_INPUT_FIELDS
 from backend.eligibility.checker import _is_valid_age
 from backend.llm.fishing_days_guard import ground_fishing_days
 from backend.llm.month_age_guard import QUOTED_WRONG_WORDING, ground_child_month_ranges
@@ -42,7 +42,7 @@ def _compact_question(text: str) -> str:
     """공백을 하나로 줄이고 끝 문장부호를 뗀다(질문 문장 비교용)."""
     return " ".join(text.split()).rstrip("?？!！.。")
 
-ALLOWED_FIELDS = {"age", "region", "income"}
+ALLOWED_FIELDS = PROFILE_INPUT_FIELDS
 _UNDECIDED_ELIGIBILITY = re.compile(
     r"^(?P<lead>[ \t]*(?:[-*+]\s+)?(?:(?:다만|따라서|정리하면|종합하면)[,]?\s+)?)"
     r"(?:(?P<pending>(?:거주\s*지역|지역|소득)"

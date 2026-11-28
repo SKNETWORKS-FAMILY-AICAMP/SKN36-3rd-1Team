@@ -12,7 +12,8 @@ import math
 import re
 from datetime import date, datetime, timedelta, timezone
 
-from backend.core.contract import MAX_VALID_AGE
+from backend.core.contract import MAX_VALID_AGE, PROFILE_INPUT_FIELDS
+from database.eligibility_fields import ALL_ELIGIBILITY_FIELDS, SCOPED_ELIGIBILITY_FIELDS
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
     normalize_quality_affected_attributes,
@@ -476,7 +477,7 @@ def _is_confirmed_exclusion_match(
     if (
         required_status not in {OK, NO}
         or item["status"] != required_status
-        or "all" in affected
+        or ALL_ELIGIBILITY_FIELDS in affected
         or "exclusion" in affected
         or _field(condition) in affected
     ):
@@ -561,7 +562,7 @@ def _collect_exclusion_reasons(
     affected: set[str],
 ) -> list[dict]:
     """Format proven mandatory NOT exclusions, preserving nested negation."""
-    if "all" in affected or "exclusion" in affected:
+    if ALL_ELIGIBILITY_FIELDS in affected or "exclusion" in affected:
         return []
 
     proofs: list[list[tuple[dict, dict, str]]] = []
@@ -670,15 +671,15 @@ def _affected_fields(
 ) -> set[str]:
 
     if graph_missing:
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if eligibility.get("structure_issues"):
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if scoped_unknown is not None:
         return scoped_unknown
     if eligibility.get("unknown_logic_groups"):
-        return {"all"}
+        return {ALL_ELIGIBILITY_FIELDS}
 
     if not quality.get("hold_auto_eligibility"):
         return set()
@@ -945,7 +946,7 @@ def _should_add_missing_age_notice(
     구조 오류·UNKNOWN·전체 품질 보류는 이미 포괄적인 확인 안내가 있다.
     일반 소득·가구 원문 검토는 나이와 별개이므로 제외 조건이 아니다.
     """
-    if "all" in affected or walk_issues:
+    if ALL_ELIGIBILITY_FIELDS in affected or walk_issues:
         return False
 
     # _walk가 만든 필드만 재사용하여 AGE 중복과 자녀 월령 혼동을 막는다.
@@ -1013,9 +1014,9 @@ def _evaluate_trees(
 
 def _add_quality_placeholders(conditions: list[dict], affected: set[str]) -> None:
     """품질 경고 필드(age·region·income)에 조건 행이 없으면 확인 필요 행을 추가한다."""
-    for field in sorted(affected - {"all"}):
+    for field in sorted(affected - {ALL_ELIGIBILITY_FIELDS}):
         if (
-            field in {"age", "region", "income"}
+            field in PROFILE_INPUT_FIELDS
             and not any(
                 item["field"] == field
                 for item in conditions
@@ -1031,6 +1032,10 @@ def _add_quality_placeholders(conditions: list[dict], affected: set[str]) -> Non
             )
 
 
+# 품질 경고가 걸리면 종합(eligibility) 행도 함께 보류하는 프로필 입력 밖 항목(housing·employment·exclusion·marriage·children).
+_GROUP_ONLY_FIELDS = SCOPED_ELIGIBILITY_FIELDS - PROFILE_INPUT_FIELDS
+
+
 def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_failed_root: dict | None) -> None:
     """품질 경고가 걸린 조건과 종합 판정을 needs_check로 보류한다. 확정된 단일 루트 실패는 유지한다."""
     if affected:
@@ -1038,19 +1043,13 @@ def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_fail
             if item is safe_failed_root and item["status"] == NO:
                 continue
             if (
-                "all" in affected
+                ALL_ELIGIBILITY_FIELDS in affected
                 or item["field"] in affected
                 or (
                     item["field"] == "eligibility"
                     and any(
                         value in affected
-                        for value in (
-                            "housing",
-                            "employment",
-                            "exclusion",
-                            "marriage",
-                            "children",
-                        )
+                        for value in _GROUP_ONLY_FIELDS
                     )
                 )
             ):
@@ -1060,7 +1059,7 @@ def _hold_quality_affected(conditions: list[dict], affected: set[str], safe_fail
                     "자동 판정을 보류합니다."
                 )
 
-    if affected and "all" not in affected:
+    if affected and ALL_ELIGIBILITY_FIELDS not in affected:
         for item in conditions:
             if item["field"] == "eligibility":
                 if item is safe_failed_root and item["status"] == NO:
@@ -1170,7 +1169,7 @@ def check_eligibility(
             eligibility, scoped_unknown, affected,
             root_status=root_results[0]["status"],
             has_certain_required_failure=certain_failures[0],
-            hold_all=missing or "all" in affected,
+            hold_all=missing or ALL_ELIGIBILITY_FIELDS in affected,
             walk_issues=walk_issues,
         )
     ) else None
