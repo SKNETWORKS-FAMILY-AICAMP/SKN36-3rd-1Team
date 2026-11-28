@@ -7,7 +7,7 @@
 | 경로 | 역할 |
 | --- | --- |
 | [`fetch_youth_api.py`](fetch_youth_api.py) | 온통청년 API 수집 실행 |
-| [`build_processed_dataset.py`](build_processed_dataset.py) | 초기 데이터 정제에 사용. 원본(`data/raw`)은 `.gitignore` 대상이라 저장소에 포함되지 않습니다. 먼저 [`download_raw.py`](download_raw.py)로 받거나(`data/metadata/download_manifest.json`이 다시 쓰입니다) 원본 위치를 `--raw-dir`로 지정하세요. 경로는 `--raw-dir`, `--processed-dir`, `--metadata-dir`로 지정할 수 있습니다. |
+| [`build_processed_dataset.py`](build_processed_dataset.py) | 초기 데이터 정제에 사용. 원본(`data/raw`)은 `.gitignore` 대상이라 저장소에 포함되지 않습니다. 먼저 [`download_raw.py`](download_raw.py)로 받거나(이미 있는 원본은 건너뛰고 기록은 Git 제외 위치 `data/raw/download_manifest.latest.json`에 씁니다. 추적 중인 `data/metadata/download_manifest.json`은 `--update-manifest`를 줄 때만 바뀝니다) 원본 위치를 `--raw-dir`로 지정하세요. 경로는 `--raw-dir`, `--processed-dir`, `--metadata-dir`로 지정할 수 있습니다. |
 | [`verify_handoff_package.py`](verify_handoff_package.py) | 인계 데이터 검증 |
 | [`restore_final_v140.py`](restore_final_v140.py) | 최종 DB 복원 및 검증 |
 
@@ -17,4 +17,4 @@
 
 ## 관련 문서
 
-- [상세 가이드](../docs/development/ISSUE43_RESTORE_GUIDE.md)
+- [최종 DB 복원 Runbook (R3D)](../docs/development/ISSUE105_R3_RUNBOOK.md) · [이전 복원 가이드 (r2 이전)](../docs/development/ISSUE43_RESTORE_GUIDE.md)

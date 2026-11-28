@@ -152,6 +152,43 @@ class TestCollectorErrorSinks(unittest.TestCase):
         self.assertNotIn(FAKE_KEY, str(raised.exception))
 
 
+class TestWriteProcessedJsonl(unittest.TestCase):
+    """수집 오류가 있으면 추적 중인 정제 파일을 덮어쓰지 않는다. 임시 폴더만 쓴다 (sample_only)."""
+
+    def setUp(self):
+        import tempfile
+        self.dir = Path(tempfile.mkdtemp(prefix="write_processed_"))
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.dir, ignore_errors=True))
+        self.path = self.dir / "sample.jsonl"
+        self.path.write_text('{"old": true}\n', encoding="utf-8")
+        self.partial = self.dir / "sample.partial.jsonl"
+
+    def test_success_replaces_file(self):
+        summary = {"errors": []}
+        written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.path)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"id": 1}\n')
+        self.assertFalse(summary["refined_jsonl_partial"])
+        self.assertFalse(list(self.dir.glob("*.tmp")))
+
+    def test_errors_keep_existing_file(self):
+        summary = {"errors": ["page 2 failed"]}
+        with mock.patch.dict("os.environ", {}, clear=False):
+            __import__("os").environ.pop(_common.ALLOW_PARTIAL_ENV, None)
+            written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.partial)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"old": true}\n')
+        self.assertEqual(self.partial.read_text(encoding="utf-8"), '{"id": 1}\n')
+        self.assertTrue(summary["refined_jsonl_partial"])
+
+    def test_errors_overwrite_only_when_allowed(self):
+        summary = {"errors": ["page 2 failed"]}
+        with mock.patch.dict("os.environ", {_common.ALLOW_PARTIAL_ENV: "1"}):
+            written = _common.write_processed_jsonl(self.path, [{"id": 1}], summary, LOGGER)
+        self.assertEqual(written, self.path)
+        self.assertEqual(self.path.read_text(encoding="utf-8"), '{"id": 1}\n')
+
+
 class TestCuratedYouthcenterIds(unittest.TestCase):
     def test_curated_ids_get_verified_status(self):
         item = {"plcyNo": "20260710005400113256", "plcyNm": "가상 정책 (sample_only)"}

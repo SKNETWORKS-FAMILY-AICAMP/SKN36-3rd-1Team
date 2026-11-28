@@ -6,9 +6,9 @@
   - 공공데이터포털 공공서비스(혜택) 등록번호 15113968
 
 설정:
-  - 목록 URL: MOIS_SERVICE_LIST_API_URL (기본: https://api.odcloud.kr/api/gov24/v3/serviceList)
-  - 상세 URL: MOIS_SERVICE_DETAIL_API_URL (기본: https://api.odcloud.kr/api/gov24/v3/serviceDetail)
-  - 조건 URL: MOIS_SUPPORT_CONDITIONS_API_URL (기본: https://api.odcloud.kr/api/gov24/v3/supportConditions)
+  - 목록 URL: MOIS_BENEFITS_LIST_API_URL (예전 이름 MOIS_SERVICE_LIST_API_URL도 허용, 기본: https://api.odcloud.kr/api/gov24/v3/serviceList)
+  - 상세 URL: MOIS_BENEFITS_DETAIL_API_URL (예전 이름 MOIS_SERVICE_DETAIL_API_URL도 허용, 기본: https://api.odcloud.kr/api/gov24/v3/serviceDetail)
+  - 조건 URL: MOIS_BENEFITS_CONDITIONS_API_URL (예전 이름 MOIS_SUPPORT_CONDITIONS_API_URL도 허용, 기본: https://api.odcloud.kr/api/gov24/v3/supportConditions)
   - 공통 인증키: DATA_GO_KR_API_KEY (.env 공통 키)
 
 처리 흐름:
@@ -39,7 +39,7 @@ from urllib.parse import unquote
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_run_log  # noqa: E402
+from _common import RAW_ROOT, get_logger, http_get, load_env_value, mask_secrets, now_kst, write_processed_jsonl, write_run_log  # noqa: E402
 from collectors.preprocessing.application_urls import application_url_or_none
 
 PROCESSED_ROOT = BASE_DIR / "data" / "processed"
@@ -107,9 +107,23 @@ JA_CODE_DEFINITIONS: Dict[str, Tuple[str, str, str]] = {
 
 
 def get_gov24_urls() -> Tuple[str, str, str]:
-    list_url = os.getenv("MOIS_SERVICE_LIST_API_URL") or os.getenv("MOIS_BENEFITS_API_URL") or DEFAULT_LIST_URL
-    detail_url = os.getenv("MOIS_SERVICE_DETAIL_API_URL") or DEFAULT_DETAIL_URL
-    cond_url = os.getenv("MOIS_SUPPORT_CONDITIONS_API_URL") or DEFAULT_COND_URL
+    # .env.example의 MOIS_BENEFITS_* 이름을 먼저 읽고, 예전 이름(MOIS_SERVICE_* 등)도 계속 받는다.
+    list_url = (
+        os.getenv("MOIS_BENEFITS_LIST_API_URL")
+        or os.getenv("MOIS_SERVICE_LIST_API_URL")
+        or os.getenv("MOIS_BENEFITS_API_URL")
+        or DEFAULT_LIST_URL
+    )
+    detail_url = (
+        os.getenv("MOIS_BENEFITS_DETAIL_API_URL")
+        or os.getenv("MOIS_SERVICE_DETAIL_API_URL")
+        or DEFAULT_DETAIL_URL
+    )
+    cond_url = (
+        os.getenv("MOIS_BENEFITS_CONDITIONS_API_URL")
+        or os.getenv("MOIS_SUPPORT_CONDITIONS_API_URL")
+        or DEFAULT_COND_URL
+    )
     return list_url.strip(), detail_url.strip(), cond_url.strip()
 
 
@@ -551,9 +565,8 @@ def run_collection(per_page: int = 1000, max_pages: Optional[int] = None, use_ca
         refined_records.append(normalized)
 
     # 4. JSONL 파일 저장
-    with open(OUT_PROCESSED_JSONL, "w", encoding="utf-8") as f:
-        for r in refined_records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    # 수집 오류가 있으면 기존 정제 파일을 덮어쓰지 않는다(_common.write_processed_jsonl).
+    written_path = write_processed_jsonl(OUT_PROCESSED_JSONL, refined_records, summary, logger)
 
     summary["refined_jsonl_written"] = len(refined_records)
 
@@ -564,7 +577,7 @@ def run_collection(per_page: int = 1000, max_pages: Optional[int] = None, use_ca
     summary["finished_at"] = now_kst()
     write_run_log("gov24", summary)
 
-    logger.info("Gov24 collection complete: %d records written to %s", len(refined_records), OUT_PROCESSED_JSONL)
+    logger.info("Gov24 collection complete: %d records written to %s", len(refined_records), written_path)
     return summary
 
 
