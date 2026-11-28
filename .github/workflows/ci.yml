@@ -28,6 +28,9 @@ jobs:
       PYTHONUTF8: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 일부 테스트가 예전 커밋의 릴리스 파일을 git show로 읽어 대조하므로 전체 이력을 받는다(기본값 1이면 실패).
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
