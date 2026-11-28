@@ -90,3 +90,6 @@ desktop.ini
 
 # Temporary backup archives
 *.zip
+
+# CI가 만드는 pytest 보고서
+pytest-report.xml
