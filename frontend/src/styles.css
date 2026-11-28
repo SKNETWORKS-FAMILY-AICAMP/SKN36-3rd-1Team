@@ -252,6 +252,8 @@ footer .wrap{padding:22px 24px}
 .toast{position:fixed;left:50%;bottom:28px;display:flex;align-items:center;gap:8px;transform:translate(-50%,20px) scale(.9);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);font-size:14px;padding:10px 16px;border-radius:14px;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:40}
 .toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
 .toast img{width:22px;height:22px}
+/* 알림 자체는 클릭을 막지 않고(pointer-events:none) 버튼만 누를 수 있게 한다 */
+.toast.on .toast-action{pointer-events:auto;margin-left:4px;padding:2px 2px;border-radius:6px;color:inherit;text-decoration:underline;text-underline-offset:3px;font:inherit}
 .burst{position:fixed;pointer-events:none;z-index:50;width:22px;height:22px;animation:burst .9s cubic-bezier(.22,1,.36,1) forwards}
 @keyframes burst{0%{opacity:1;transform:translate(0,0) scale(.4) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1) rotate(var(--r))}}
 
@@ -669,7 +671,8 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 
 /* 최근 상담 응답의 신청 일정: 기존 카드·색상 토큰 재사용 */
 .schedule-section{padding:30px 0 38px;border-top:1px solid var(--line)}
-#policy-explorer{padding-top:18px}
+#policy-explorer{padding-top:18px;scroll-margin-top:68px} /* '관심 정책 보기'로 이동할 때 고정 헤더(68px)에 제목이 가리지 않게 */
+@media (max-width:600px){ #policy-explorer{scroll-margin-top:105px} } /* 탭이 둘째 줄로 내려간 좁은 화면의 헤더 높이 */
 .schedule-section .board-h{margin-bottom:10px}
 .schedule-scope,.schedule-count{font-size:13px;color:var(--ink-3);margin:10px 0}
 .schedule-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0}
