@@ -3,7 +3,6 @@ import { askPolicy, usingSample } from './api/client';
 import type { AskRequest, ChatTurnMessage, FollowUp, UserProfile } from './api/types';
 import { CATEGORIES } from './config/categories';
 import { infoField } from './config/infoFields';
-import { PERSONAS, type Persona } from './config/personas';
 import { HISTORY_MAX_ITEMS, QUESTION_MAX_LENGTH } from './config/request';
 import { describeProfile, readProfileReply, REGIONS } from './lib/parseProfile';
 import { planProfileReply } from './lib/profileReply';
@@ -15,7 +14,6 @@ import { PolicyExplorer } from './components/PolicyExplorer';
 import type { ConsultedCheck } from './lib/policyCompare';
 import { Hero } from './components/Hero';
 import { TurnView, type Turn } from './components/TurnView';
-import { PersonaStart } from './components/PersonaStart';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
 import { BottomBar, JumpButtons, Toast, burst } from './components/Floating';
@@ -211,19 +209,6 @@ export default function App() {
     }
   };
 
-  /**
-   * 대표 상황 카드: PRD 시나리오의 조건을 '내 조건'에 넣고 대표 질문을 바로 보낸다 (소득은 비운다).
-   * 자녀 월령은 PRD에 값이 없어 지어내지 않고 비운다(#39).
-   */
-  const startPersona = useCallback((p: Persona, origin: HTMLElement | null) => {
-    const base: UserProfile = { age: p.profile.age, region: p.profile.region, income: null, child_age_months: null };
-    setAge(base.age != null ? String(base.age) : '');
-    setRegion(base.region);
-    setIncome(null);
-    setChildMonths('');
-    ask(p.question, origin, base);
-  }, [ask]);
-
   /** 생애주기·관계 지도의 '물어보기': 상담 화면으로 넘어가 질문을 보내고, 그 답변 위치를 보여 준다 */
   const askFromOtherPage = useCallback((question: string) => {
     showLatestTurn.current = true;
@@ -260,8 +245,8 @@ export default function App() {
           <a className="logo" href={askHref} aria-label="SSOK 홈"><Logo /></a>
           <nav className="tabs" aria-label="화면">
             {/* 좁은 화면에서는 로고가 가려지지 않게 '하기'·'정책'을 줄여 보여 준다 */}
-            <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>상담<span className="long">하기</span></a>
-            <a href={lifeHref()} aria-current={route.page === 'life' ? 'page' : undefined}>생애주기</a>
+            <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>맞춤 정책 찾기</a>
+            <a href={lifeHref()} aria-current={route.page === 'life' ? 'page' : undefined}>상황별 정책</a>
             <a href={mapHref()} aria-current={route.page === 'map' ? 'page' : undefined}><span className="long">정책&nbsp;</span>관계 지도</a>
           </nav>
           <div className="right">
@@ -285,15 +270,12 @@ export default function App() {
       )}
       <div hidden={!onAskPage}>
       <Hero age={age} ageError={ageError} region={region} income={income} onIncome={setIncome} onAge={setAge} onRegion={setRegion}
-        childMonths={childMonths} childMonthsError={childMonthsError} onChildMonths={setChildMonths} categories={CATEGORIES}
+        childMonths={childMonths} childMonthsError={childMonthsError} onChildMonths={setChildMonths} categories={CATEGORIES} showCategories={turns.length === 0}
         onAsk={ask} askBoxRef={askBoxRef} inputRef={heroInputRef} reduceMotion={reduceMotion} />
 
-      <section className="board" id="board">
+      <section className="board" id="board" hidden={turns.length === 0}>
         <div className="wrap">
           <div className="board-h"><h2>상담 <span>결과</span></h2><p>답변마다 근거 출처를 함께 보여 드려요</p></div>
-          {turns.length === 0 && (
-            <PersonaStart personas={PERSONAS} onPersona={startPersona} />
-          )}
           {turns.map((t, i) => (
             <div className="consultation-turn" key={t.id} ref={i === turns.length - 1 ? lastTurnRef : undefined}>
               <TurnView turn={t} onFollowUp={(f, origin) => { if (t.kind === 'qa') followUp(f, origin, t.question, t.id); }} onRetry={retry} onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} sampleMode={usingSample}

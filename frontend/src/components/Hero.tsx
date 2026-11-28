@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type RefObject } from 'react';
 import { REGIONS } from '../lib/parseProfile';
 import { Icon, type IconName } from './Icon';
 import { MascotPeek } from './Logo';
@@ -17,6 +17,7 @@ interface Props {
   childMonthsError: string | null;
   onChildMonths: (v: string) => void;
   categories: Category[];
+  showCategories: boolean;
   onAsk: (text: string, origin: HTMLElement | null) => boolean;
   askBoxRef: RefObject<HTMLDivElement>;
   inputRef: RefObject<HTMLInputElement>;
@@ -25,7 +26,8 @@ interface Props {
 
 const TITLE: [string, boolean, boolean][] = [['나에게', false, false], ['필요한', false, false], ['정부 지원 정책', true, false], ['을', false, true], ['물어보세요!', false, false]];
 
-export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, childMonths, childMonthsError, onChildMonths, categories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
+export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion, childMonths, childMonthsError, onChildMonths, categories, showCategories, onAsk, askBoxRef, inputRef, reduceMotion }: Props) {
+  const [conditionsOpen, setConditionsOpen] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   useParallax(heroRef, reduceMotion);
   const examples = useMemo(() => categories.map((c) => '예: ' + c.question), [categories]);
@@ -57,49 +59,55 @@ export function Hero({ age, ageError, region, income, onIncome, onAge, onRegion,
         <div className="ask" ref={askBoxRef}>
           {/* SSOK 캐릭터가 검색창 위 테두리에 두 손을 걸치고 빼꼼 내다본다 (장식) */}
           <MascotPeek />
-          <AskForm examples={examples} onAsk={onAsk} inputRef={inputRef} reduceMotion={reduceMotion} />
+          <AskForm examples={examples} onAsk={onAsk} inputRef={inputRef} reduceMotion={reduceMotion}
+            conditionsOpen={conditionsOpen} onToggleConditions={() => setConditionsOpen((open) => !open)} />
         </div>
 
-        <p className="cond-hint"><b>내 조건</b>을 넣으면 정책 조건과 바로 비교해 드려요 <span>(선택)</span></p>
-        <div className="conds-in" aria-label="내 조건">
-          <label className={'cin' + (ageError ? ' invalid' : age ? ' filled' : '')}>
-            <Icon name="cake" className="ic" /><span className="lbl">나이</span>
-            <input id="age" type="text" inputMode="numeric" maxLength={3} placeholder="입력" value={age} onChange={(e) => onAge(e.target.value)}
-              aria-invalid={!!ageError} aria-describedby={ageError ? 'age-error' : undefined} />
-            <small>세</small>
-          </label>
-          <RegionPicker region={region} onRegion={onRegion} />
-          <label className={'cin' + (income != null ? ' filled' : '')}>
-            <span className="lbl">연 소득</span>
-            <input type="number" min={0} step="any" placeholder="입력" value={income ?? ''}
-              onChange={(event) => {
-                const value = event.currentTarget.valueAsNumber;
-                if (!Number.isFinite(value)) onIncome(null);
-                else if (value >= 0) onIncome(value);
-              }} />
-            <small>만 원</small>
-          </label>
-          {/* #39: 자녀 한 명의 월령. 자녀가 여러 명이면 자녀별로 따로 확인한다(답변 본문에서 안내) */}
-          <label className={'cin' + (childMonthsError ? ' invalid' : childMonths ? ' filled' : '')}>
-            <Icon name="bottle" className="ic" /><span className="lbl">자녀 월령</span>
-            <input id="child-age-months" type="text" inputMode="numeric" placeholder="입력" value={childMonths}
-              onChange={(e) => onChildMonths(e.target.value)}
-              aria-invalid={!!childMonthsError} aria-describedby={childMonthsError ? 'child-age-months-error child-age-months-hint' : 'child-age-months-hint'} />
-            <small>개월</small>
-          </label>
-        </div>
-        <p className="cond-note" id="child-age-months-hint">자녀 월령은 확인하려는 자녀 한 명 기준이에요. 자녀가 여러 명이면 한 명씩 따로 확인해 주세요.</p>
+        <div id="profile-conditions" hidden={!conditionsOpen}>
+          <p className="cond-hint"><b>내 조건</b>을 넣으면 정책 조건과 바로 비교해 드려요 <span>(선택)</span></p>
+          <div className="conds-in" aria-label="내 조건">
+            <label className={'cin' + (ageError ? ' invalid' : age ? ' filled' : '')}>
+              <Icon name="cake" className="ic" /><span className="lbl">나이</span>
+              <input id="age" type="text" inputMode="numeric" maxLength={3} placeholder="입력" value={age} onChange={(e) => onAge(e.target.value)}
+                aria-invalid={!!ageError} aria-describedby={ageError ? 'age-error' : undefined} />
+              <small>세</small>
+            </label>
+            <RegionPicker region={region} onRegion={onRegion} />
+            <label className={'cin' + (income != null ? ' filled' : '')}>
+              <span className="lbl">연 소득</span>
+              <input type="number" min={0} step="any" placeholder="입력" value={income ?? ''}
+                onChange={(event) => {
+                  const value = event.currentTarget.valueAsNumber;
+                  if (!Number.isFinite(value)) onIncome(null);
+                  else if (value >= 0) onIncome(value);
+                }} />
+              <small>만 원</small>
+            </label>
+            {/* #39: 자녀 한 명의 월령. 자녀가 여러 명이면 자녀별로 따로 확인한다(답변 본문에서 안내) */}
+            <label className={'cin' + (childMonthsError ? ' invalid' : childMonths ? ' filled' : '')}>
+              <Icon name="bottle" className="ic" /><span className="lbl">자녀 월령</span>
+              <input id="child-age-months" type="text" inputMode="numeric" placeholder="입력" value={childMonths}
+                onChange={(e) => onChildMonths(e.target.value)}
+                aria-invalid={!!childMonthsError} aria-describedby={childMonthsError ? 'child-age-months-error child-age-months-hint' : 'child-age-months-hint'} />
+              <small>개월</small>
+            </label>
+          </div>
+          <p className="cond-note" id="child-age-months-hint">자녀 월령은 확인하려는 자녀 한 명 기준이에요. 자녀가 여러 명이면 한 명씩 따로 확인해 주세요.</p>
 
-        {ageError && <p className="cond-error" id="age-error" role="alert">{ageError}</p>}
-        {childMonthsError && <p className="cond-error" id="child-age-months-error" role="alert">{childMonthsError}</p>}
-
-        <div className="cats" id="cats">
-          {categories.map((c, i) => (
-            <TiltCard key={c.key} className={`cat k${i + 1}`} reduceMotion={reduceMotion} onClick={(el) => onAsk(c.question, el.querySelector('.em'))}>
-              <small>{c.sub}</small><b>{c.title}</b><span className="go-arr">질문하기 →</span><Icon name={c.icon} className="em" hideFace />
-            </TiltCard>
-          ))}
+          {ageError && <p className="cond-error" id="age-error" role="alert">{ageError}</p>}
+          {childMonthsError && <p className="cond-error" id="child-age-months-error" role="alert">{childMonthsError}</p>}
         </div>
+
+        {showCategories && (
+          <div className="cats" id="cats">
+            {categories.map((c, i) => (
+              <button key={c.key} type="button" className={`cat k${i + 1}`} aria-label={`${c.title} 정책 질문하기`}
+                onClick={(event) => onAsk(c.question, event.currentTarget.querySelector('.em'))}>
+                <b>{c.title}</b><Icon name={c.icon} className="em" hideFace />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -140,8 +148,10 @@ function RegionPicker({ region, onRegion }: Pick<Props, 'region' | 'onRegion'>) 
  * 큰 질문 입력창. 안내 문구가 한 글자씩 바뀌어도 이 입력창만 다시 그리도록
  * 입력값과 타자 효과 상태를 첫 화면 전체(Hero)와 분리해 둔다.
  */
-function AskForm({ examples, onAsk, inputRef, reduceMotion }: {
+function AskForm({ examples, onAsk, inputRef, reduceMotion, conditionsOpen, onToggleConditions }: {
   examples: string[]; onAsk: Props['onAsk']; inputRef: RefObject<HTMLInputElement>; reduceMotion: boolean;
+  conditionsOpen: boolean;
+  onToggleConditions: () => void;
 }) {
   const [text, setText] = useState('');
   const placeholder = useTypewriter(examples, reduceMotion || text.length > 0);
@@ -152,7 +162,11 @@ function AskForm({ examples, onAsk, inputRef, reduceMotion }: {
   };
   return (
     <form onSubmit={submit}>
-      <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} aria-label="정책 질문" autoComplete="off" />
+      <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder || examples[0]} aria-label="정책 질문" autoComplete="off" />
+      <button className="chip conditions-toggle" type="button" aria-label="내 조건 (선택)"
+        aria-expanded={conditionsOpen} aria-controls="profile-conditions" onClick={onToggleConditions}>
+        내 조건
+      </button>
       <button className="go" type="submit" aria-label="질문하기" disabled={!text.trim()}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
       </button>
@@ -165,25 +179,6 @@ function Deco({ name, depth, style, delay = 0 }: { name: IconName; depth: number
     <span className="deco" data-depth={depth} style={style} aria-hidden="true">
       <Icon name={name} style={{ animationDelay: `${delay}s` }} hideFace />
     </span>
-  );
-}
-
-/** 마우스 방향으로 살짝 기우는 카드 */
-function TiltCard({ className, onClick, reduceMotion, children }: { className: string; onClick: (el: HTMLButtonElement) => void; reduceMotion: boolean; children: ReactNode }) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [entered, setEntered] = useState(false);
-  const move = (e: ReactMouseEvent) => {
-    if (reduceMotion || !entered || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-    ref.current.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 12}deg) translateY(-4px)`;
-  };
-  const leave = () => { if (ref.current) ref.current.style.transform = 'none'; };
-  return (
-    <button ref={ref} type="button" className={className + (entered ? ' entered' : '')} onAnimationEnd={() => setEntered(true)}
-      onMouseMove={move} onMouseLeave={leave} onClick={() => ref.current && onClick(ref.current)}>
-      {children}
-    </button>
   );
 }
 

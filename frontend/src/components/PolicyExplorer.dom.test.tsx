@@ -59,6 +59,33 @@ async function renderLoaded() {
   expect(cards()).toHaveLength(2);
 }
 
+it('처음 9개를 보여주고, 9개씩 추가한 뒤 검색이 바뀌면 표시 수를 초기화한다', async () => {
+  const items = Array.from({ length: 20 }, (_, index) => item(`POL_TEST_${String(index).padStart(3, '0')}`));
+  load.mockResolvedValueOnce({ ...page(), items, total: items.length });
+  await act(async () => {
+    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+  });
+
+  const more = () => host.querySelector<HTMLButtonElement>('.explorer-more');
+  expect(cards()).toHaveLength(9);
+  expect(more()?.textContent).toBe('정책 9개 더 보기');
+  act(() => more()?.click());
+  expect(cards()).toHaveLength(18);
+  expect(more()?.textContent).toBe('정책 2개 더 보기');
+  act(() => more()?.click());
+  expect(cards()).toHaveLength(20);
+  expect(more()).toBeNull();
+
+  const search = host.querySelector<HTMLInputElement>('input[type="search"]')!;
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+  act(() => {
+    setter.call(search, 'POL_TEST_01');
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  expect(cards()).toHaveLength(9);
+  expect(more()?.textContent).toBe('정책 1개 더 보기');
+});
+
 describe('정책 목록 다시 불러오기 중 펼친 카드 (#122)', () => {
   it('탭으로 돌아와 목록을 다시 불러오는 동안과 끝난 뒤에도 같은 카드가 펼쳐져 있다', async () => {
     await renderLoaded();

@@ -12,7 +12,7 @@ import { COMPARE_MAX, COMPARE_MIN, type ConsultedCheck } from '../lib/policyComp
 import { PolicyCompare } from './PolicyCompare';
 
 // 상담 화면이 너무 길어지지 않도록 처음엔 두 줄(데스크톱 3열 기준)만 보여 준다
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 9;
 /**
  * 목록 영역에 무엇을 보여 줄지. 처음 불러올 때만 '불러오는 중'을 보여 주고,
  * 이미 받은 목록을 다시 확인하는 동안에는 카드를 그대로 둔다(카드가 다시 만들어지면 펼침이 닫힌다).
@@ -103,13 +103,13 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
   const soon = load === 'ready' && (!POLICY_API_URL || evaluatedOn === today) ? scheduledPolicies(policies.filter(row => savedIds.has(row.policy.policy_id)).map(row => row.policy), today, 'soon', 'deadline') : [];
   if (comparing && compareInputs.length >= COMPARE_MIN) {
     return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
-      <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2></div>
+      <div className="board-h"><h2>전체 <span>정책</span></h2></div>
       <PolicyCompare inputs={compareInputs} consulted={consulted} onAsk={onAsk} onOpenMap={onOpenMap}
         onBack={() => { setComparing(false); sectionRef.current?.scrollIntoView({ block: 'start' }); }} />
     </div></section>;
   }
   return <section className="schedule-section" id="policy-explorer" ref={sectionRef}><div className="wrap">
-    <div className="board-h"><h2>놓치지 않도록 <span>정책 둘러보기</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
+    <div className="board-h"><h2>전체 <span>정책</span></h2><p>관심 정책을 찾고, 내 조건은 상담에서 확인해 보세요.</p></div>
     {soon.length > 0 && <div className="notice info" role="status"><div><b>저장한 정책 {soon.length}개가 7일 이내 마감돼요</b><p>{soon.map(row => row.policy.policy_name).join(' · ')}</p><button className="chip" type="button" onClick={() => { setTab('saved'); setFilter('soon'); setQuery(''); setRegion(''); setCategory(''); }}>마감 임박 정책 보기</button></div></div>}
     {/* 검색을 가장 먼저, 범위·조건 필터는 그 아래 한 묶음으로 둔다 */}
     <div className="explorer-search" role="search">
