@@ -23,8 +23,9 @@ const CONDITION_LABEL: Record<ConditionStatus, [string, string]> = {
   needs_check: ['b-warn', '추가 확인 필요'],
   ineligible: ['b-bad', '조건 불일치'],
 };
-const RECEPTION_LABEL: Record<ReceptionStatus, [string, string]> = {
-  before: ['b-muted', '접수 전'], open: ['b-ok', '접수 중'], closed: ['b-bad', '마감'], unknown: ['b-muted', '모집 상태 미확인'],
+/** 접수 상태 배지 색. 문구는 scheduleView의 label(applicationSchedule.receptionLabels)을 쓴다 */
+const RECEPTION_CLASS: Record<ReceptionStatus, string> = {
+  before: 'b-muted', open: 'b-ok', closed: 'b-bad', unknown: 'b-muted',
 };
 
 interface Props {
@@ -402,7 +403,7 @@ export function PolicyCard({ p, group, period, stages, sample, onDemoApply, onAs
   const { unjudged, displayedConditions, hidesVerdict, confirmedFailure, badgeFor, labelsByBadge } = summarizeConditions(p.conditions);
   const failureCause = labelsByBadge.has(CONDITION_LABEL.ineligible[1]);
   const schedule = scheduleView(p, useScheduleDay());
-  const [rcls] = RECEPTION_LABEL[schedule.status];
+  const rcls = RECEPTION_CLASS[schedule.status];
   const rlabel = schedule.label;
   const sourceHref = safeHttpUrl(p.source_url);
   const applyHref = safeHttpUrl(p.official_apply_url);

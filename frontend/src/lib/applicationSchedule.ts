@@ -4,6 +4,14 @@ export const receptionLabels: Record<ReceptionStatus, string> = {
   before: '접수 예정', open: '접수 중', closed: '접수 마감', unknown: '모집 상태 미확인',
 };
 export type ScheduleFilter = 'all' | 'open' | 'soon' | 'before' | 'ongoing';
+/**
+ * '마감 임박' 문구에 보여 주는 일수. 판정은 서버 closing_soon만 쓰고 화면은 다시 계산하지 않는다
+ * (Checker SOON_WINDOW_DAYS와 같은 값, ask 계약 v1.13). 서버 값이 바뀌면 이 문구 값도 함께 고친다.
+ */
+export const SOON_WINDOW_DAYS = 7;
+export const SCHEDULE_FILTERS: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', `${SOON_WINDOW_DAYS}일 이내 마감`], ['before', '접수 예정'], ['ongoing', '상시 접수']];
+/** 하루(밀리초). 날짜만 있는 값(YYYY-MM-DD)끼리 일수를 셀 때 쓴다 */
+export const DAY_MS = 24 * 60 * 60 * 1000;
 export const kstDay = (now = new Date()) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(now);
 export const isoDay = (value: unknown): value is string => typeof value === 'string'
   && /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -36,7 +44,7 @@ export function scheduleView(p: PolicyCheck, today: string) {
     return { ...untrusted, label: '일정 재확인 필요', period: '이전 접수 안내입니다. 다시 질문하거나 공식 공고에서 현재 일정을 확인해 주세요.' };
   }
   const matchingDays = (date: string | null, days: number | null) => date === null ? days === null
-    : days === (Date.parse(date) - Date.parse(s.evaluated_on)) / (24 * 60 * 60 * 1000);
+    : days === (Date.parse(date) - Date.parse(s.evaluated_on)) / DAY_MS;
   const datesMatch = matchingDays(s.start_date, s.days_to_start) && matchingDays(s.end_date, s.days_to_end);
   const consistent = !datesMatch ? false : p.reception_status === 'before' ? s.days_to_start !== null && s.days_to_start > 0
     : p.reception_status === 'open' ? (s.days_to_start === null || s.days_to_start <= 0) && (s.is_ongoing || (s.days_to_end !== null && s.days_to_end >= 0))

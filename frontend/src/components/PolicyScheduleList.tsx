@@ -1,10 +1,9 @@
 import { useId, useState } from 'react';
 import type { AskResponse } from '../api/types';
-import { scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
+import { SCHEDULE_FILTERS, scheduledPolicies, type ScheduleFilter } from '../lib/applicationSchedule';
 import { PolicyCard } from './TurnView';
 import { useScheduleDay } from './ScheduleClock';
 
-const filters: [ScheduleFilter, string][] = [['all', '전체'], ['open', '접수 중'], ['soon', '7일 이내 마감'], ['before', '접수 예정'], ['ongoing', '상시 접수']];
 /** 전체 정책 검색이 아니라 이미 받은 최근 상담 응답만 사용한다. 필터·정렬에는 API 호출이 없다. */
 export function PolicyScheduleList({ response, onAsk, onDemoApply }: { onDemoApply: () => void; response: AskResponse | null; onAsk: (question: string, origin: HTMLElement) => void }) {
   const [filter, setFilter] = useState<ScheduleFilter>('all');
@@ -15,7 +14,7 @@ export function PolicyScheduleList({ response, onAsk, onDemoApply }: { onDemoApp
     <div className="board-h"><h2>최근 상담의 <span>신청 일정</span></h2><p>접수 일정과 신청 자격은 별도로 확인해 주세요.</p></div>
     <p className="schedule-scope">최근 완료된 상담에 나온 정책만 표시합니다. 전체 정책 목록이 아닙니다.{response?.is_sample && ' · 시연용 가상 응답'}</p>
     <div className="schedule-tools" role="group" aria-label="신청 일정 필터">
-      {filters.map(([key, text]) => <button className="chip" type="button" key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{text}</button>)}
+      {SCHEDULE_FILTERS.map(([key, text]) => <button className="chip" type="button" key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{text}</button>)}
       <label className="schedule-sort">정렬 <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}><option value="deadline">마감 임박순</option><option value="name">이름순</option></select></label>
     </div>
     <p className="schedule-count" role="status" aria-live="polite">정책 {rows.length}개</p>

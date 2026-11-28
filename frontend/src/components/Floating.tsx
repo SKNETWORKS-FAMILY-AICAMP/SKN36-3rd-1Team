@@ -62,6 +62,9 @@ export function Toast({ message }: { message: { text: string; icon: IconName } |
   );
 }
 
+// styles.css의 .burst 애니메이션(0.9초)이 끝난 뒤 조각을 지운다
+const BURST_REMOVE_MS = 950;
+
 /** 보낸 자리에서 반짝이가 터지는 효과 (화면 장식이라 DOM에 잠깐 붙였다 뗀다) */
 export function burst(from: HTMLElement | null, reduceMotion: boolean) {
   if (!from || reduceMotion) return;
@@ -75,6 +78,6 @@ export function burst(from: HTMLElement | null, reduceMotion: boolean) {
     b.style.setProperty('--dy', `${Math.sin(a) * dist}px`);
     b.style.setProperty('--r', `${Math.random() * 120 - 60}deg`);
     document.body.append(b);
-    setTimeout(() => b.remove(), 950);
+    setTimeout(() => b.remove(), BURST_REMOVE_MS);
   });
 }

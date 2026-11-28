@@ -21,6 +21,9 @@ export function readSavedPolicies(raw: string | null): SavedPolicy[] {
     });
   } catch { return []; }
 }
+// 브라우저가 내려받기를 시작할 시간을 둔 뒤 임시 파일 주소를 해제한다
+const DOWNLOAD_URL_REVOKE_MS = 1000;
+
 const SavedContext = createContext<{ saved: SavedPolicy[]; toggle: (p: SavedPolicy) => void; error: string } | null>(null);
 export const useSavedPolicies = () => useContext(SavedContext);
 export function SavedPoliciesProvider({ children }: { children: ReactNode }) {
@@ -56,7 +59,7 @@ export function PolicyPersonalActions({ policy, sample = false, show = 'all' }: 
       url = URL.createObjectURL(new Blob([calendar], { type: 'text/calendar;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url; link.download = 'ssok-deadline.ics'; document.body.append(link); link.click(); link.remove();
-      const fileUrl = url; window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000); setError('');
+      const fileUrl = url; window.setTimeout(() => URL.revokeObjectURL(fileUrl), DOWNLOAD_URL_REVOKE_MS); setError('');
     } catch { if (url) URL.revokeObjectURL(url); setError('캘린더 파일을 만들지 못했어요. 다시 시도해 주세요.'); }
   }
   const showSave = show !== 'calendar', showCalendar = show !== 'save' && !!calendar;

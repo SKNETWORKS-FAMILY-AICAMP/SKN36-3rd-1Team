@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DATASET_DIR } from '../config/dataset';
 import { loadGraphDataset } from '../graph/loadGraph';
 import { catalogPolicies } from './policyCatalog';
 import { policySearchKey } from './policySearch';
@@ -32,7 +33,7 @@ describe('정책 목록 검색 정규화 (#103)', () => {
   });
 });
 
-describe('팀 기준 데이터 (data/releases/v1.4.0-candidate)', () => {
+describe(`팀 기준 데이터 (${DATASET_DIR})`, () => {
   it('여섯 표기는 실제 목록에서 K-패스 정책만 찾고, 붙임표 없는 검색어 결과는 이전 규칙과 같다', async () => {
     const rows = catalogPolicies((await loadGraphDataset()).index).map(r => ({ id: r.policy.policy_id, text: `${r.policy.policy_name} ${r.policy.agency}` }));
     expect(rows.length).toBeGreaterThan(200);

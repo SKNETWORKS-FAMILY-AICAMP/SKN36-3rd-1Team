@@ -187,6 +187,8 @@ function Deco({ name, depth, style, delay = 0 }: { name: IconName; depth: number
 /** 입력창 안내 문구를 예시 질문으로 한 글자씩 바꿔 보여 준다. */
 function useTypewriter(lines: string[], paused: boolean) {
   const [value, setValue] = useState(lines[0] ?? '');
+  // 타자 효과 속도(ms): 다 쓴 문장을 보여 주는 시간, 한 글자 지우기, 한 글자 쓰기
+  const TYPE_HOLD_MS = 1800, TYPE_DELETE_MS = 22, TYPE_WRITE_MS = 55;
   const linesKey = lines.join('|'); // 문구 목록이 실제로 바뀔 때만 다시 시작한다
   useEffect(() => {
     if (paused) return;
@@ -195,10 +197,10 @@ function useTypewriter(lines: string[], paused: boolean) {
       const s = lines[li];
       setValue(s.slice(0, ci));
       if (!del && ci < s.length) ci++;
-      else if (!del) { del = true; timer = window.setTimeout(tick, 1800); return; }
+      else if (!del) { del = true; timer = window.setTimeout(tick, TYPE_HOLD_MS); return; }
       else if (ci > 0) ci--;
       else { del = false; li = (li + 1) % lines.length; }
-      timer = window.setTimeout(tick, del ? 22 : 55);
+      timer = window.setTimeout(tick, del ? TYPE_DELETE_MS : TYPE_WRITE_MS);
     };
     tick();
     return () => clearTimeout(timer);
