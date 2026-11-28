@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DATASET_DIR } from '../config/dataset';
 import { NODE_FILES, RELATIONSHIP_FILE } from '../config/graph';
 import {
   buildGraphIndex, conditionTrees, countConditions, parseJsonl, policyNeighbors, searchPolicies,
@@ -126,7 +127,7 @@ describe('graphLayout', () => {
   });
 });
 
-describe('팀 기준 데이터 (data/releases/v1.4.0-candidate)', () => {
+describe(`팀 기준 데이터 (${DATASET_DIR})`, () => {
   it('실제 그래프 파일을 읽으면 manifest 건수와 같고, 끊긴 연결이 없다', async () => {
     const { index, expected } = await loadGraphDataset();
     expect(expected).not.toBeNull();

@@ -1,11 +1,12 @@
 /**
  * 정책 관계 지도 데이터 불러오기.
  *
- * 데이터 위치: 저장소의 data/releases/v1.4.0-candidate (팀 기준 데이터, 백엔드 LIFEPOLICY_DATASET_DIR 기본값과 같다).
- * import.meta.glob은 경로를 문자열로 직접 써야 해서 데이터 버전이 바뀌면 이 파일의 경로 두 곳과
- * vite.config.ts의 server.fs.allow를 함께 고친다.
+ * 데이터 위치: config/dataset.ts의 DATASET_DIR (팀 기준 데이터, 백엔드 LIFEPOLICY_DATASET_DIR 기본값과 같다).
+ * import.meta.glob은 경로를 문자열로 직접 써야 해서 데이터 버전이 바뀌면 아래 경로 두 곳도 함께 고친다
+ * (vite.config.ts의 server.fs.allow는 DATASET_DIR을 그대로 쓴다).
  * 지도 페이지를 열 때만 내려받도록 나눠 불러온다(첫 화면 용량에 포함되지 않는다).
  */
+import { DATASET_DIR, DATASET_VERSION } from '../config/dataset';
 import { buildGraphIndex, type GraphIndex } from './graphModel';
 
 const GRAPH_FILES = import.meta.glob('../../../data/releases/v1.4.0-candidate/neo4j/*.jsonl', {
@@ -15,6 +16,9 @@ const GRAPH_FILES = import.meta.glob('../../../data/releases/v1.4.0-candidate/ne
 const MANIFEST_FILES = import.meta.glob('../../../data/releases/v1.4.0-candidate/manifest.json', {
   query: '?raw', import: 'default',
 }) as Record<string, () => Promise<string>>;
+
+/** glob 경로가 DATASET_DIR과 같은지 테스트에서 확인한다 */
+export const GRAPH_SOURCE_PATHS = [...Object.keys(GRAPH_FILES), ...Object.keys(MANIFEST_FILES)];
 
 export interface GraphDataset {
   index: GraphIndex;
@@ -38,13 +42,13 @@ export function loadGraphDataset(): Promise<GraphDataset> {
 async function readGraphDataset(): Promise<GraphDataset> {
   const entries = Object.entries(GRAPH_FILES);
   if (entries.length === 0) {
-    throw new Error('그래프 데이터 폴더(data/releases/v1.4.0-candidate/neo4j)를 찾지 못했어요. 최신 dev를 받았는지 확인해 주세요.');
+    throw new Error(`그래프 데이터 폴더(${DATASET_DIR}/neo4j)를 찾지 못했어요. 최신 dev를 받았는지 확인해 주세요.`);
   }
   const files: Record<string, string> = {};
   await Promise.all(entries.map(async ([path, load]) => { files[fileName(path)] = await load(); }));
   const index = buildGraphIndex(files);
 
-  let version = 'v1.4.0-candidate', status: string | null = null, expected: GraphDataset['expected'] = null;
+  let version = DATASET_VERSION, status: string | null = null, expected: GraphDataset['expected'] = null;
   const manifestLoad = Object.values(MANIFEST_FILES)[0];
   if (manifestLoad) {
     const manifest = JSON.parse(await manifestLoad()) as {
