@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import html
 import logging
 import re
 from dataclasses import dataclass
@@ -174,6 +175,26 @@ def normalize_policy(item: dict[str, Any]) -> dict[str, Any]:
 # FastAPI 호출
 # ---------------------------------------------------------------------------
 
+def _is_url_key(key: str) -> bool:
+    return key == "url" or key.endswith("_url")
+
+
+def _unescape_entities(value: Any) -> Any:
+    """정책 원문 글에 남은 HTML 문자 코드(&#9312; → ① 등)를 글자로 바꾼다.
+
+    수집한 웹 원문이 코드가 풀리지 않은 채 저장됐다(v1.4.0-candidate 정책 29개). 데이터는 #18 데이터 동결에
+    따라 고치지 않고 화면에 쓰기 직전에만 바꾼다. 템플릿이 자동으로 이스케이프하므로 '<'가 나와도 HTML이 아니다.
+    주소 필드(url, *_url)는 원문 주소 그대로 둔다. React(frontend/src/lib/htmlEntities.ts)와 같은 기준이다.
+    """
+    if isinstance(value, str):
+        return html.unescape(value) if "&" in value else value
+    if isinstance(value, list):
+        return [_unescape_entities(item) for item in value]
+    if isinstance(value, dict):
+        return {key: item if _is_url_key(key) else _unescape_entities(item) for key, item in value.items()}
+    return value
+
+
 def _get_page(offset: int) -> dict[str, Any]:
     url = f"{settings.SSR_FASTAPI_BASE_URL}/api/policies"
     timeout = (settings.SSR_FASTAPI_CONNECT_TIMEOUT_SECONDS, settings.SSR_FASTAPI_READ_TIMEOUT_SECONDS)
@@ -192,7 +213,7 @@ def _get_page(offset: int) -> dict[str, Any]:
         raise PolicyServiceUnavailable("정책 API JSON 해석 실패") from exc
     if not isinstance(body, dict):
         raise PolicyServiceUnavailable("정책 API 응답 형식 오류")
-    return body
+    return _unescape_entities(body)
 
 
 def _check_page(page: dict[str, Any], expected_offset: int) -> None:
