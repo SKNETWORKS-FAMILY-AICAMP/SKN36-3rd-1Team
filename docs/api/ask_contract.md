@@ -1,7 +1,9 @@
 # SSOK — RAG·조건 판정·LLM·API 공통 인터페이스 명세서
 
-> **버전:** v1.12 · 2026-11-28 (v1.11 · 2026-11-28, v1.10 · 2026-11-28, v1.9 · 2026-11-27, v1.8 · 2026-11-26, v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
+> **버전:** v1.13 · 2026-11-28 (v1.12 · 2026-11-28, v1.11 · 2026-11-28, v1.10 · 2026-11-28, v1.9 · 2026-11-27, v1.8 · 2026-11-26, v1.7 · 2026-11-26, v1.6 · 2026-11-26, v1.5 · 2026-11-22, v1.4 · 2026-11-17, v1.3 · 2026-11-17, v1.2 · 2026-11-17, v1.1 · 2026-11-10, v1.0 · 2026-11-07)
 > **상태:** **MVP 통합 개발 기준(지인 정리본)**. 이 문서로 개발을 시작하되, 팀 전원 승인·구현·테스트 완료를 의미하지 않는다. 구현 중 변경이 필요하면 변경 사유와 영향 범위를 공유하고 문서·타입·테스트를 함께 수정한다.
+> **v1.13 변경(2026-11-28 — #165 backend 코드 규칙 정리, 강민지, 팀 리뷰 대상):** 응답에 선택 필드 3개와 오류 코드 1개를 더했다. 모두 선택 필드라 기존 응답과 호환된다. ① `notice.code`(`unknown_region`·`condition_hold`·`answer_aligned`·`null`): 화면은 안내 종류를 문장(`text`) 대신 이 값으로 알아본다(§8.3). ② `application_schedule.closing_soon`과 `policy_checks[]`·목록 `items[]`의 `deadline_rank`: '마감 임박(7일 이하)'과 마감순 순위를 Checker가 계산하고 화면은 다시 계산하지 않는다(§8.3, 끝 절 「신청 일정」). ③ 오류 코드 `LLM_RATE_LIMITED`(503): LLM 공급자 요청 한도 초과(429). 공급자 5xx·연결 실패는 한 번만 다시 시도하고, 그 밖의 상태 오류·시간 초과는 다시 보내지 않는다(§9). UNKNOWN 그룹 사유 문구를 내부 값 없이 "조건을 묶는 방식이 확인되지 않아 자동 판정할 수 없습니다."로 바꾸고, 이름 없는 조건은 type 코드 대신 "이 조건"으로 안내한다(판정은 그대로). 조건 그룹 구조를 API로 따로 내보내는 필드는 #80 합의(새 그룹 API 구조 없음)에 따라 추가하지 않았다.
+>
 > **v1.12 변경(2026-11-28 — #122 최종 재검증 후속, 강민지, PR #164):** 요청·응답 필드는 바뀌지 않는다. §7 10번에 자녀 월령 결론 보정을 추가했다(Checker 판정과 반대인 '입력한 월령' 결론 절만 판정 문장으로 바꿈). Generator 시스템 프롬프트에 입력 데이터의 값 표기(null 등)를 답변에 쓰지 않고, 신청 링크 미확인은 정책마다 한 번만 안내하라는 규칙을 더했다.
 >
 > **v1.11 변경(2026-11-28 — #75 분야 나열 질문 검색 보충, 강민지, PR #162):** 요청·응답 필드는 바뀌지 않는다. `selected_policy_id`가 없고 "교육비·구직·교통 지원"처럼 2~5개 분야를 나열한 질문은 원래 질문 검색 결과를 그대로 쓰되, 그 결과에서 빠진 분야만 분야별 검색으로 1개씩 채워 원래 1위 바로 뒤에 넣는다(§1-1 1번, §2 흐름 2). 빠진 분야가 없으면 결과는 이전과 같다.
@@ -527,7 +529,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
     {"kind": "ask_info", "text": "거주 지역을 알려주세요.", "field": "region"}
   ],
   "checked_at": null,
-  "notice": {"kind": "warn", "title": "추가 확인 필요", "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."},
+  "notice": {"kind": "warn", "title": "추가 확인 필요", "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요.", "code": "condition_hold"},
   "is_sample": false
 }
 ```
@@ -545,12 +547,13 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 - `contacts`(선택, v1.2 추가·v1.3 필드 보완): 해당 정책의 **채택 청크 전체**(`contexts`에 선택된 이 정책의 모든 청크)에서 `[문의처]` 블록을 모으고, 그중 유효한 문의처가 하나도 없을 때만 같은 정책의 **인용 가능하지만 채택되지 않은 후보**로 보완한다. `{agency, phone, document_id, chunk_id, source_url}` 목록이며, 원문에 없으면 `null`(빈 배열 아님). 기관명·전화번호가 모두 같은 항목은 첫 등장 순서로 한 번만 남기고, 같은 기관이라도 전화번호가 다르면 둘 다 유지한다. `document_id`·`chunk_id`·`source_url`은 그 문의처가 실제로 나온 청크를 가리키며, `source_url`이 유효한 http(s) 주소가 아니면 `null`이다. `phone`은 원문 숫자·구분자 그대로이며, 번호 뒤에 설명이 더 있으면(예: "각 기관 120 센터") 맥락을 잃지 않도록 구절 전체를 담을 수 있다 — 항상 전화번호 단독 형식은 아니다. 프론트에서 그대로 노출할 때 이 점을 감안한다.
 - `exclusion_reasons`(선택, v1.4 자리 예약 · v1.7 실제 값 전달 — #78): NOT 제외 조건 중 사용자가 실제로 걸린 사유 목록. `{field, label, reason}` — `field`·`label`은 `conditions[].field`/`.label`과 같은 체계를 쓰고(복합 제외 조건은 `field: "eligibility"`일 수 있다), `reason`은 Checker가 만든 문구 그대로다. 사유 생성은 Checker(`check_eligibility`) 단일 책임이며, Pipeline은 같은 정책의 Checker 결과를 다시 계산하지 않고 순서·문구 그대로 전달한다. 종합 판정이 `ineligible`이 아니거나 Pipeline이 보류로 낮춘 필드의 사유는 전달하지 않는다. 없으면 `null`이며, `null`은 '제외 조건 없음'이 아니라 '확정된 제외 사유가 전달되지 않음'이다. Generator 입력의 같은 정책 `policy_checks`에도 같은 값이 들어간다. 세부 규칙은 문서 끝 「#78 제외 사유 전달」 절. #107의 원문 블록 발췌는 조건 트리 기반 제외 사유 생성과 구분한다.
 - `official_requirements`(선택, v1.4 자리 예약 · v1.6 채움 규칙 — #76): 정책이 요구하는 공식 자격 기준과 "내 조건 판정"을 화면에서 분리해 보여주기 위한 목록. `{label, value, document_id, chunk_id}` — `value`는 원문 그대로의 값이며, 중위소득 비율의 임의 금액 환산이나 기준연도 변경을 금지한다. `document_id`·`chunk_id`는 그 기준이 실제로 나온 같은 정책의 채택 근거를 가리킨다. 검수 기록이 있으면 우선 쓰고, 없으면 채택 근거에서 명확한 항목만 제한적으로 원문 그대로 담는다. 자동 추출한 항목은 검수 완료 기준이 아니다. 확인 가능한 기준이 없으면 `null`이며, `null`은 '조건 없음'이 아니라 '확인 가능한 기준이 없음'이다. 사용자의 충족 여부는 `conditions`(Checker)만 나타낸다. 세부 규칙은 문서 끝 「#76 공식 자격기준」 절.
-- `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」).
+- `application_schedule`(선택, v1.5): Checker `reception_status`와 같은 기준으로 계산한 날짜 정보 `{evaluated_on, start_date, end_date, is_ongoing, days_to_start, days_to_end}`. 상태가 `unknown`이거나 다시 계산한 상태가 다르면 `null`. 임의 마감 시각·예산 소진일을 만들지 않는다(끝 절 「신청 일정」). (v1.13) `closing_soon`: 접수 중(`open`)이고 상시 접수가 아니며 마감까지 0~7일 남았으면 `true`(Checker `SOON_WINDOW_DAYS`). 화면은 남은 일수로 다시 계산하지 않는다.
+- `deadline_rank`(선택, v1.13): 마감순 정렬 순위. 0 마감일이 있는 접수 중, 1 접수 예정, 2 그 밖의 접수 중(상시 등), 3 접수 상태 미확인, 4 마감. Checker `deadline_rank()`가 계산하며 `GET /api/policies`의 `items[]`에도 같은 값이 있다. 순위 0끼리는 `days_to_end`가 작은 순서다. 값이 없는 예전 응답이나 화면에서 일정을 믿을 수 없다고 본 정책(지난 날짜 응답 등)은 3으로 둔다.
 - `required_documents`(선택, v1.5): 원문 `[구비서류]`·`[제출서류]` 블록 발췌 `{text, document_id, chunk_id, source_url}` 목록. 완전한 서류 목록을 보증하지 않는다. 없으면 `null`.
 - `requirement_excerpts`(선택, v1.5): 원문 `[지원대상]`·`[선정기준]`·`[지원대상 및 선정기준]` 블록 발췌 `{label, text, document_id, chunk_id, source_url}` 목록. 항목 단위 공식 기준(`official_requirements`)이 아니며 값·단위·연도를 환산하지 않는다. 없으면 `null`.
 - 선택 정책 지역 보류(v1.5): `selected_policy_id` 요청에서 정책의 대상 지역(`graph.regions`)에 입력 지역도 전국도 없으면, §4.3 Pipeline 방어 규칙대로 처리한다. Checker의 `region` 행이 `eligible`이면 `needs_check`로 내리고 기존 사유 뒤에 지역 불일치 사유를 덧붙인다. `region` 행이 없거나 `needs_check`뿐이면 그 사유는 바꾸지 않고 `{"field": "region", "status": "needs_check"}` 행(대상 지역·입력 지역을 적은 사유)을 따로 앞에 둔다. `ineligible` 행이 있으면 그대로 둔다. 종합(`eligibility`) 행이 `eligible`이면 `needs_check`로 내리고 사유를 덧붙인다. 불충족으로 단정하지 않는다.
 - `checked_at`: **공식 원문 재확인 시간**을 검증 가능할 때만 ISO 8601 문자열. 데이터 수집시각/오늘 날짜를 임의로 넣지 않는다. MVP 기본은 `null`.
-- `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`).
+- `notice`: 하나라도 보류된 조건이 있으면 `warn`, 그렇지 않으면 `null`(또는 의미 있는 `info`). (v1.13) `code`: `unknown_region`(입력 지역을 시·도로 확인하지 못함), `condition_hold`(보류된 조건 있음), `answer_aligned`(생성 본문을 구조화된 정책 정보에 맞춰 바꿈), 그 밖은 `null`. 화면은 문장이 아니라 `code`로 안내 종류를 알아본다.
 - `is_sample`: 실제 검색·실제 LLM 응답은 `false`; **프론트 Mock 등 가상 응답만 `true`**.
 - `kind="ask_info"`의 `field`는 `age/region/income`만 허용. 화면과 연결되지 않은 필드를 새로 만들지 않는다.
 
@@ -564,7 +567,8 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 | 요청 형식·값 오류 | 422 | Pydantic/입력 검증 오류 |
 | 검색 DB·Ollama 연결/설정 장애 | 503 | `SEARCH_BACKEND_UNAVAILABLE` |
 | 검색 요청 시간 초과 | 504 | `SEARCH_TIMEOUT` |
-| LLM 서비스 연결·호출 실패 | 502 | `LLM_UNAVAILABLE` |
+| LLM 서비스 연결·호출 실패 | 502 | `LLM_UNAVAILABLE` (v1.13: 공급자 5xx·연결 실패는 0.5초 뒤 한 번만 다시 시도한 뒤에도 실패할 때. 401·403·400 등 그 밖의 상태 오류는 다시 보내지 않음) |
+| (v1.13) LLM 공급자 요청 한도 초과(429) | 503 | `LLM_RATE_LIMITED` ("답변 생성 요청이 많아 잠시 후 다시 시도해 주세요."). 다시 보내지 않음 |
 | LLM 호출 시간 초과 | 504 | `LLM_TIMEOUT` |
 | LLM 출력 JSON·인용 번호·스키마 오류 | 502 | `LLM_OUTPUT_INVALID` |
 | 조건 함수 반환 구조 오류 | 502 | `ELIGIBILITY_OUTPUT_INVALID` |
@@ -584,7 +588,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 ```
 
 - `HybridSearchInputError`는 입력 원인이면 422, `HybridSearchBackendError.kind=="timeout"`은 504, 기타 해당 백엔드 장애는 503으로 분류한다. 검색 프로필/컬렉션 설정 문제는 클라이언트 잘못이 아닐 수 있으므로 **내부 설정 오류를 422로 단정하지 않는다**.
-- LLM/provider의 타임아웃·연결 오류를 구분해 전달한다. 일반적인 프로그래밍 버그를 502로 일괄 은폐하지 않는다.
+- LLM/provider의 타임아웃·연결 오류를 구분해 전달한다. 일반적인 프로그래밍 버그를 502로 일괄 은폐하지 않는다. (v1.13) SDK 자동 재시도는 끄고(`max_retries=0`) Generator가 오류 종류별로 정한다. 시간 초과는 이미 제한 시간을 다 썼으므로 다시 보내지 않는다. 두 번 시도해도 `LLM_TIMEOUT_SECONDS`(기본 25초) 두 번으로 화면 제한 60초 안이다.
 - 사용자에게 공개하는 오류에는 상세 스택, DB URI, API 키, 비밀번호를 넣지 않는다. 로그에도 민감한 프로필·키를 쓰지 않는다.
 - 현재 React `client.ts`는 HTTP 오류 본문을 읽지 않고 상태 코드로 안내한다. `detail.message`를 보여주고 싶다면 **민지 코드 수정**이 필요하다.
 - API 60초 목표에서도 초기 Ollama 로딩+검색+LLM 시간을 실제로 측정한다. 워밍업은 **첫 요청 지연을 줄일 뿐 성공·타임아웃 보장은 아니다.** 무제한 재시도는 금지하고, 실패 시 명확한 오류를 반환한다.
@@ -704,6 +708,7 @@ React는 답변 본문 `[1]`을 **`citations[0]`**에 대응시킨다.
 
 `policy_checks[].application_schedule`: 선택 객체 또는 null. `evaluated_on`, `start_date/end_date`, `is_ongoing`, `days_to_start/days_to_end`. 기존 Checker 상태와 일치하는 구조화 날짜만 사용한다. 날짜만 있는 계약이며 임의 마감 시각·예산 소진일을 생성하지 않는다.
 필드가 없는 기존 응답의 접수 상태는 표시하되 D-day·캘린더를 만들지 않는다. 오래되거나 일수가 불일치하면 재확인 안내 및 신청 버튼 숨김.
+(v1.13) '마감 임박' 필터·배지와 마감순 정렬은 `application_schedule.closing_soon`·`deadline_rank`만 쓴다. 화면은 7일 기준이나 순위 표를 따로 두지 않는다.
 
 ### 원문 발췌
 
