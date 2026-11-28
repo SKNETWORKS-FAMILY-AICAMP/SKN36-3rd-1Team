@@ -8,7 +8,7 @@
 
 | 화면 | 주소 | 내용 |
 |---|---|---|
-| 상담하기 | `#/` | 질문·내 조건 입력, 분야 카드, 답변·조건 확인·출처. 첫 질문 전 '상담 결과' 빈 자리에 **대표 상황 카드**(PRD §2 시나리오의 가상 인물 3명) |
+| 맞춤 정책 찾기 | `#/` | 질문창의 '내 조건' 버튼으로 선택 입력을 펼치고, 분야 카드나 전체 정책 목록에서 탐색을 시작합니다. 전체 정책은 처음 9개를 표시하며 '더 보기'로 9개씩 추가합니다. 질문을 보내면 목록 위에 상담 결과가 나타납니다. |
 | 생애주기 | `#/life`, `#/life?stage=청년` | 영유아 → 노년 생애단계 타임라인. 단계를 고르면 분야 칩만 먼저 보이고, 누른 분야 하나의 정책만 한 줄 목록으로 펼침. 원문 나이 기준이 확인된 정책에만 '나이' 배지(데이터의 '0~120세'처럼 사실상 제한 없는 조건은 배지 없음). 정책을 누르면 그 자리에서 요약(대상·내용·기간)과 '이 정책 물어보기'(상담 화면으로 가서 바로 질문)·'원문 보기'·'관계 지도 보기'가 펼쳐짐. 상담 화면에 나이를 넣었으면 해당 단계에 '지금 나' 표시 |
 | 정책 관계 지도 | `#/map`, `#/map?policy=POL_001` | Graph DB(Neo4j)에 저장된 정책 연결 구조: 정책을 가운데 두고 기관·지역·분야·대상·생애단계·근거 문서·자격 조건 묶음(AND/OR)을 보여 줌 |
 
@@ -88,14 +88,14 @@ npm run dev
 src/
 ├── App.tsx              # 화면 상태(내 조건·대화·테마)와 질문 흐름
 ├── api/                 # 백엔드 계약(types)과 호출(client)
-├── config/              # 분야 카드(categories), 대표 상황(personas), 되물을 정보 항목(infoFields), 요청 설정값(request), 관계 지도 설정(graph)
+├── config/              # 분야 카드(categories), 대표 상황 질문(personas, 예시 응답·테스트용), 되물을 정보 항목(infoFields), 요청 설정값(request), 관계 지도 설정(graph)
 ├── mock/mockAsk.ts      # 예시 응답 (sample_only)
 ├── graph/               # 데이터 읽기(loadGraph), 그래프 색인·조건 트리(graphModel), 원형 배치·확대(graphLayout), 생애단계 묶기(lifeStages)
 ├── lib/route.ts         # 화면 전환 (#/, #/life, #/map)
 ├── lib/answerView.ts    # 답변 상태별로 화면에 보여 줄 내용 정하기
 ├── lib/parseProfile.ts  # 문장 속 나이·지역·소득 읽기
 ├── lib/validate.ts      # 나이 입력 검증(0~120 정수), 자녀 월령 검증(0 이상 정수), 외부 링크는 http/https만 허용
-├── components/          # Hero(첫 화면), PersonaStart(대표 상황), TurnView(질문·답변), LifeTimeline(생애주기), PolicyMap(관계 지도), Floating(하단 입력창·이동 버튼·알림), Icon(손그림 SVG)
+├── components/          # Hero(첫 화면), TurnView(질문·답변), LifeTimeline(생애주기), PolicyMap(관계 지도), Floating(하단 입력창·이동 버튼·알림), Icon(손그림 SVG)
 └── styles.css           # 색은 :root 토큰으로 관리, 다크는 테마 버튼으로만
 ```
 

@@ -4,7 +4,7 @@
  * - 입력한 월령이 profile.child_age_months로 그대로 간다(0개월 포함).
  * - 빈칸·잘못된 값은 null로 보내고 입력칸에 안내한다.
  * - 신청자 나이(age)와 자녀 월령은 서로 영향을 주지 않는다.
- * - 대표 상황 카드는 PRD에 값이 없으므로 자녀 월령을 비운다.
+ * - 분야 카드로 질문해도 접어 둔 조건을 그대로 보낸다.
  * 서버 호출은 가짜 함수로 바꾸고, 응답은 sample_only 가상 값이다.
  */
 import { act } from 'react';
@@ -52,6 +52,8 @@ function type(input: HTMLInputElement, value: string) {
 
 const childInput = () => host.querySelector<HTMLInputElement>('#child-age-months')!;
 const ageInput = () => host.querySelector<HTMLInputElement>('#age')!;
+const conditionsToggle = () => host.querySelector<HTMLButtonElement>('.conditions-toggle')!;
+const toggleConditions = () => act(() => conditionsToggle().click());
 
 /** 큰 검색창으로 질문을 보내고, 서버로 간 요청을 돌려준다 */
 async function askAndCapture(question: string): Promise<AskRequest> {
@@ -64,6 +66,14 @@ async function askAndCapture(question: string): Promise<AskRequest> {
 
 describe('자녀 월령 입력 (#39)', () => {
   it('입력칸이 있고, 자녀 한 명 기준 안내를 함께 보여 준다', () => {
+    const panel = host.querySelector<HTMLElement>('#profile-conditions')!;
+    expect(panel.hidden).toBe(true);
+    expect(conditionsToggle().getAttribute('aria-expanded')).toBe('false');
+    expect(conditionsToggle().getAttribute('aria-controls')).toBe(panel.id);
+    toggleConditions();
+    expect(panel.hidden).toBe(false);
+    expect(conditionsToggle().getAttribute('aria-expanded')).toBe('true');
+    expect(askPolicy).not.toHaveBeenCalled();
     expect(childInput()).not.toBeNull();
     expect(host.querySelector('#child-age-months-hint')?.textContent).toContain('자녀 한 명 기준');
   });
@@ -100,13 +110,25 @@ describe('자녀 월령 입력 (#39)', () => {
     expect(onlyAge.profile).toMatchObject({ age: 32, child_age_months: null });
   });
 
-  it('대표 상황 카드를 누르면 자녀 월령을 비운다(PRD에 값이 없음)', async () => {
+  it('조건을 접었다 펼쳐도 자녀 월령이 유지되고 분야 카드의 상담에 전달된다', async () => {
+    toggleConditions();
     type(childInput(), '10');
-    const parent = [...host.querySelectorAll<HTMLButtonElement>('button.persona')].find((b) => b.textContent?.includes('출산·육아'))!;
-    await act(async () => { parent.click(); });
+    toggleConditions();
+    toggleConditions();
+    expect(childInput().value).toBe('10');
+    toggleConditions();
+    const board = host.querySelector<HTMLElement>('#board')!;
+    const explorer = host.querySelector<HTMLElement>('#policy-explorer')!;
+    expect(board.hidden).toBe(true);
+    expect(explorer.hidden).toBe(false);
+    const cards = host.querySelectorAll<HTMLButtonElement>('.cats .cat');
+    expect(cards).toHaveLength(5);
+    await act(async () => cards[0].click());
     const request = askPolicy.mock.lastCall![0] as AskRequest;
-    expect(request.profile.child_age_months).toBeNull();
-    expect(childInput().value).toBe('');
+    expect(request.profile.child_age_months).toBe(10);
+    expect(board.hidden).toBe(false);
+    expect(board.compareDocumentPosition(explorer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(host.querySelector('.cats')).toBeNull();
   });
 
   it('"10개월이에요" 같은 말은 신청자 나이로 읽지 않는다', async () => {
