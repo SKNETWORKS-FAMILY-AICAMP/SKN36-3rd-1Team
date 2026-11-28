@@ -31,6 +31,9 @@ describe('Django 정책 상세 주소', () => {
 
   it('주소가 없거나 http(s)가 아니면, 또는 정책 ID 형식이 아니면 만들지 않는다', () => {
     expect(policyDetailHref('POL_010', '')).toBeNull();
+    // 주소를 넘기지 않으면 VITE_POLICY_DETAIL_BASE_URL을 읽는다. PC의 frontend/.env.local 설정과 상관없이
+    // '설정하지 않은 환경'을 확인하도록 이 테스트 안에서만 비운다(README대로 상세 주소를 넣은 PC에서도 통과해야 한다).
+    vi.stubEnv('VITE_POLICY_DETAIL_BASE_URL', '');
     expect(policyDetailHref('POL_010', undefined)).toBeNull();
     expect(policyDetailHref('POL_010', 'javascript:alert(1)')).toBeNull();
     for (const id of ['sample_only_unknown', 'pol_010', '../POL_1', 'POL_<x>', 'POL_' + 'A'.repeat(200)]) {
