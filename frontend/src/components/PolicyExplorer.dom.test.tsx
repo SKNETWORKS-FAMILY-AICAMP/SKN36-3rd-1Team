@@ -106,6 +106,47 @@ it('선택한 지역은 검색 버튼을 누르면 적용하고 전국 정책은
   expect(cards()[0].textContent).toContain('POL_TEST_002');
 });
 
+it('정렬과 접수 상태도 검색 버튼을 눌러야 적용하고, 필터 초기화는 바로 적용한다', async () => {
+  const before = { ...item('POL_TEST_002'), policy_name: '하 가상 정책 (sample_only)', reception_status: 'before' as const };
+  const unknown = { ...item('POL_TEST_001'), policy_name: '가 가상 정책 (sample_only)' };
+  load.mockResolvedValueOnce({ ...page(), items: [unknown, before] } as PolicyListResponse);
+  await act(async () => {
+    root.render(<SavedPoliciesProvider><PolicyExplorer response={null} onAsk={() => {}} onDemoApply={() => {}} /></SavedPoliciesProvider>);
+  });
+  const names = () => cards().map(card => card.textContent ?? '');
+  const submit = () => act(() => host.querySelector<HTMLButtonElement>('.explorer-submit')!.click());
+  // 기본은 마감 임박순: 접수 예정 정책이 일정 미확인 정책보다 먼저 온다
+  expect(names()[0]).toContain('하 가상 정책');
+
+  const sort = host.querySelectorAll<HTMLSelectElement>('.explorer-selects select')[2];
+  act(() => {
+    sort.value = 'name';
+    sort.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  expect(names()[0]).toContain('하 가상 정책');
+  submit();
+  expect(names()[0]).toContain('가 가상 정책');
+
+  const chip = [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === '접수 예정')!;
+  act(() => chip.click());
+  expect(chip.getAttribute('aria-pressed')).toBe('true');
+  expect(cards()).toHaveLength(2);
+  submit();
+  expect(cards()).toHaveLength(1);
+  expect(names()[0]).toContain('하 가상 정책');
+
+  // 결과가 없을 때 나오는 '필터 초기화'는 검색 버튼 없이 바로 적용한다
+  const open = [...host.querySelectorAll<HTMLButtonElement>('[aria-label="전체 정책 접수 상태"] button')].find(b => b.textContent === '접수 중')!;
+  act(() => open.click());
+  submit();
+  expect(cards()).toHaveLength(0);
+  const reset = [...host.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === '필터 초기화')!;
+  act(() => reset.click());
+  expect(cards()).toHaveLength(2);
+  // 초기화해도 고른 정렬(이름순)은 그대로 둔다
+  expect(names()[0]).toContain('가 가상 정책');
+});
+
 describe('정책 목록 다시 불러오기 중 펼친 카드 (#122)', () => {
   it('탭으로 돌아와 목록을 다시 불러오는 동안과 끝난 뒤에도 같은 카드가 펼쳐져 있다', async () => {
     await renderLoaded();
