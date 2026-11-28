@@ -83,8 +83,9 @@ export function PolicyExplorer({ response, onAsk, onDemoApply, onOpenMap, active
     return catalog.map(row => {
       const fresh = latest.get(row.policy.policy_id);
       // 개인 판정은 목록에 복사하지 않는다. 일정·문의처만 서버 응답을 사용한다.
+      // 마감순 순위(deadline_rank, 계약 v1.13)도 같은 응답의 일정과 짝이라 함께 가져온다(#165).
       return { ...row, policy: fresh ? { ...row.policy, reception_status: fresh.reception_status,
-        application_schedule: fresh.application_schedule, contacts: fresh.contacts } : row.policy };
+        application_schedule: fresh.application_schedule, deadline_rank: fresh.deadline_rank, contacts: fresh.contacts } : row.policy };
     });
   }, [catalog, response]);
   const compareInputs = useMemo(() => picked.flatMap(id => policies.find(row => row.policy.policy_id === id) ?? []), [picked, policies]);
