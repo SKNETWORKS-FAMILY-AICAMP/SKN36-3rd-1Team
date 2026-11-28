@@ -1,7 +1,7 @@
 {% extends "policies/base.html" %}{% load static %}
 {% block title %}{{ policy.policy_name }} · SSOK 정책 상세{% endblock %}
 {% block content %}
-<p class="crumb">정책 둘러보기 <span aria-hidden="true">›</span> 정책 상세정보</p>
+<p class="crumb">전체 정책 <span aria-hidden="true">›</span> 정책 상세정보</p>
 
 <section class="detail-hero" aria-labelledby="policy-title">
   <div class="pills">
@@ -67,10 +67,10 @@
     <a class="btn {% if policy.official_apply_url %}btn-o{% else %}btn-p{% endif %}" href="{{ policy.source_url }}" target="_blank" rel="noopener noreferrer">공식 원문 보기 ↗</a>
     {% endif %}
     {% if links.map %}<a class="btn btn-o" href="{{ links.map }}">정책 관계 지도</a>{% endif %}
-    {% if links.home %}<a class="btn btn-o" href="{{ links.home }}">상담 화면으로</a>{% endif %}
+    {% if links.home %}<a class="btn btn-o" href="{{ links.home }}">맞춤 정책 찾기로</a>{% endif %}
     {% if not policy.official_apply_url %}<p>확인된 별도 신청 주소가 없어 공식 원문으로 안내해요.</p>{% endif %}
     {% if not policy.source_url %}<p>확인된 공식 원문 주소가 없어요.</p>{% endif %}
-    <p>내 조건으로 자격을 확인하려면 상담 화면에서 이 정책을 물어보세요.</p>
+    <p>내 조건으로 자격을 확인하려면 맞춤 정책 찾기에서 이 정책을 물어보세요.</p>
   </aside>
 </div>
 {% endblock %}
