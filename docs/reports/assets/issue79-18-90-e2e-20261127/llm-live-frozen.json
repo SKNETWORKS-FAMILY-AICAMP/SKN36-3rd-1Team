@@ -1,0 +1,1022 @@
+{
+  "kind": "issue79-18-90 real LLM on frozen release (no Neo4j/Qdrant)",
+  "executed_at": "2026-11-27T21:39:21+09:00",
+  "model": "gpt-5.4-mini",
+  "env_names_loaded": [
+    "LLM_MAX_OUTPUT_TOKENS",
+    "LLM_MODEL",
+    "LLM_TIMEOUT_SECONDS",
+    "OPENAI_API_KEY"
+  ],
+  "calls": 7,
+  "records": [
+    {
+      "id": "icn-18",
+      "pid": "POL_STG_ICN_001",
+      "age": 18,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "http_status": 200,
+      "seconds": 5.19,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_01",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_02",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "DOC_STG_ICN_001_NOTICE_2026_P01_C01",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice"
+        }
+      ],
+      "response": {
+        "status": "info",
+        "answer": "현재 이 정책은 접수 여부를 공식 공고에서 확인해 주세요. 신청 자격은 추가 확인이 필요해요. 공식 원문에는 지원대상이 “중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년”으로 적혀 있고, 구조화된 요약에는 대상연령이 18세~39세로 표시돼 있습니다. 다만 신청 시작일 기준으로 기본요건을 동시 충족해야 한다고 되어 있어, 만 18세인 경우 연령 기준과의 관계를 원문만으로는 확정하기 어렵습니다 [1][2]. 공식 신청 링크는 확인되지 않았어요. 중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. [1]",
+        "citations": [
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          },
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "지원 제외 대상은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "agreed_reception_phrase": true,
+        "always_open_claim": false,
+        "api_age_status": "needs_check",
+        "api_overall_status": "needs_check",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "icn-40",
+      "pid": "POL_STG_ICN_001",
+      "age": 40,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "http_status": 200,
+      "seconds": 3.59,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_01",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_02",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "DOC_STG_ICN_001_NOTICE_2026_P01_C01",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice"
+        }
+      ],
+      "response": {
+        "status": "info",
+        "answer": "중소기업 재직청년 복지공유제 지원은 공식 원문상 지원대상이 “중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년”이고, 구조화된 기준에는 대상연령이 18세~39세로 적혀 있습니다. 다만 입력하신 만 40세는 연령 기준(만 19~39세)에 포함되지 않고, 연령 기준만 보면 해당되지 않습니다. [1][2]\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. 확인된 공식 신청 링크는 없습니다. 따라서 직접 신청 링크는 확인되지 않았어요. 접수 여부는 공식 원문에서 확인해 주세요. [1]\n\n참고로 신청기간은 2026. 6. 29. ~ 7. 24.로 안내되어 있습니다. [2]",
+        "citations": [
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          },
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 40세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 지원사업의 구비서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "이 지원사업의 지원대상과 제외대상은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "agreed_reception_phrase": true,
+        "always_open_claim": false,
+        "api_age_status": "needs_check",
+        "api_overall_status": "needs_check",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "icn-none",
+      "pid": "POL_STG_ICN_001",
+      "age": null,
+      "question": "중소기업 재직청년 복지공유제 지원 지원할 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+      "http_status": 200,
+      "seconds": 2.86,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_01",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_ORD",
+          "chunk_id": "CHK_DOC_STG_ICN_001_ORD_02",
+          "url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_GOV24",
+          "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_STG_ICN_001",
+          "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+          "chunk_id": "DOC_STG_ICN_001_NOTICE_2026_P01_C01",
+          "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice"
+        }
+      ],
+      "response": {
+        "status": "info",
+        "answer": "이 정책은 공식 원문상 **중소기업에 6개월 이상 재직 중인 인천광역시 서해구·검단구 청년**을 지원대상으로 적고 있고, 구조화된 요약에는 **18세~39세**로 표시돼 있습니다. 다만 현재 입력된 사용자 정보가 없어 신청 가능 여부는 추가 확인이 필요합니다. [1][2]\n\n중소기업 재직청년 복지공유제 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 현재 접수 여부는 공식 공고에서 확인해 주세요. 확인된 신청 링크는 제공되지 않아 직접 신청 URL은 확인되지 않았어요. 접수 상태도 공식 공고 기준으로는 현재 확인이 필요합니다. [1]\n\n연령 근거는 원문 신청 안내의 기본요건에 있는 **19~39세**와, 구조화 요약의 18세~39세 표기가 함께 보이지만, 두 기준이 서로 달라 경계값은 이 근거만으로 확정하기 어렵습니다. [1][2]",
+        "citations": [
+          {
+            "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+            "document_id": "DOC_STG_ICN_001_GOV24",
+            "page_number": null
+          },
+          {
+            "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+            "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+            "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_STG_ICN_001",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "사용자의 만 나이가 입력되지 않았습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "policy_name": "중소기업 재직청년 복지공유제 지원",
+            "agency": "인천광역시 서해구 기업일자리정책과",
+            "source_url": "https://www.law.go.kr/자치법규/인천광역시서해구청년기본조례",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "인천 서해구청 기업일자리정책과",
+                "phone": "032-560-0941",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+                "document_id": "DOC_STG_ICN_001_GOV24",
+                "chunk_id": "CHK_DOC_STG_ICN_001_GOV24_01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "이 정책의 신청 서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "지원 제외 대상이 따로 있나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "agreed_reception_phrase": true,
+        "always_open_claim": false,
+        "api_age_status": "needs_check",
+        "api_overall_status": "needs_check",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "sejong-intern-link",
+      "pid": "POL_GOV_059",
+      "age": 25,
+      "question": "세종시 청년 행정인턴 신청 링크랑 신청 방법 알려줘.",
+      "http_status": 200,
+      "seconds": 4.03,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059",
+          "chunk_id": "DOC_GOV_059_C01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059",
+          "chunk_id": "DOC_GOV_059_C02",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_059",
+          "document_id": "DOC_GOV_059_SEJONG_NOTICE_2026",
+          "chunk_id": "DOC_GOV_059_SEJONG_NOTICE_2026_C01",
+          "url": "https://www.sejong.go.kr/bbs/R0071/view.do?nttId=B000000155492Et9lO7u"
+        }
+      ],
+      "response": {
+        "status": "answered",
+        "answer": "세종시 청년 행정인턴은 현재 접수가 마감된 상태예요. 모집공고상 신청기간은 2026. 6. 15. ~ 2026. 6. 21.이고, 별도로 2026. 6. 24. ~ 2026. 6. 26.은 최종선발자 21명의 서류 제출 기한으로 안내돼 있습니다 [3][1].\n\n신청 방법은 공고에 따르면 온라인 접수(정부24 혜택알리미), 이메일 접수, 방문 접수(세종시청 청년정책담당관 4층 408호) 중 하나로 제출하는 방식이지만, 이 안내는 2026년 하계 청년 행정인턴 최종선발자 21명에 한한 접수 화면이라고 명시돼 있어 일반 신청 링크로 보기는 어렵습니다 [1]. 따라서 직접 신청 링크는 확인되지 않았어요. 공식 안내 페이지는 확인할 수 있지만, 실제 신청 경로는 공고의 접수 대상과 함께 확인해야 합니다 [2].\n\n지원대상은 세종시에 주민등록이 되어 있는 19세 이상 39세 이하 청년 또는 세종시에 소재한 대학 재학 중인 사람입니다 [1].",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 세종시 청년 행정인턴 (569000000346)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "document_id": "DOC_GOV_059",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 세종시 청년 행정인턴 (569000000346)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "document_id": "DOC_GOV_059",
+            "page_number": null
+          },
+          {
+            "title": "세종특별자치시 공지사항 「2026년 하계 청년 행정인턴 모집접수(6.15~6.21)」 — 모집 신청기간",
+            "url": "https://www.sejong.go.kr/bbs/R0071/view.do?nttId=B000000155492Et9lO7u",
+            "document_id": "DOC_GOV_059_SEJONG_NOTICE_2026",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_059",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 25세가 포함됩니다.",
+                "status": "eligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+                "status": "eligible"
+              }
+            ],
+            "reception_status": "closed",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": "2026-06-15",
+              "end_date": "2026-06-21",
+              "is_ongoing": false,
+              "days_to_start": -165,
+              "days_to_end": -159
+            },
+            "required_documents": [
+              {
+                "text": "- (공통서류) 주민등록초본(전입일 포함), 본인통장 사본, 신분증 사본, 개인정보 수집.이용(제공) 동의서, 재학증명서(세종시 관내 대학생 자격일 경우) \r\n- (해당자 추가제출) 우선선발의 경우,  해당 증빙서류 제출 필요 \r\n ※ 상기 서류는 공고일 기준으로 변경될 수 있으므로 매년 모집공고를 확인하시기 바랍니다.",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "DOC_GOV_059_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+              }
+            ],
+            "policy_name": "세종시 청년 행정인턴",
+            "agency": "세종특별자치시",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+            "official_apply_url": "https://www.sejong.go.kr",
+            "contacts": [
+              {
+                "agency": "청년정책담당관",
+                "phone": "044-300-6014",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "DOC_GOV_059_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "ㅇ 세종시에 주민등록이 되어 있는 19세 이상 39세 이하인 청년 또는 세종시에 소재한 대학에 재학중인 자",
+                "document_id": "DOC_GOV_059",
+                "chunk_id": "DOC_GOV_059_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1003137&bnefType=all&svcId=569000000346",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "세종시 청년 행정인턴의 지원대상과 제출서류를 자세히 알려주세요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "세종시 청년 행정인턴 공고에서 우선선발 기준은 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": null,
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "api_age_status": "eligible",
+        "api_overall_status": "eligible",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "sejong-committee-link",
+      "pid": "POL_YC_065",
+      "age": 27,
+      "question": "세종시 위원회 청년참여 확대 신청 링크 알려줘. 지금 신청할 수 있어?",
+      "http_status": 200,
+      "seconds": 2.81,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_YC_065",
+          "document_id": "DOC_YC_065",
+          "chunk_id": "DOC_YC_065_C01",
+          "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581"
+        }
+      ],
+      "response": {
+        "status": "info",
+        "answer": "세종시 위원회 청년참여 확대는 공식 원문상 대상연령이 만 19~39세로 적혀 있어, 입력된 만 27세는 연령 기준에 들어갑니다[1]. 다만 종합 신청 자격은 자동 판정이 보류되어 있고, 신청기간도 비어 있어 현재 신청 가능 여부는 확정할 수 없습니다[1]. 신청방법은 공고문 참조로만 안내되어 있으며, 직접 신청 링크는 확인되지 않았어요[1]. 현재 접수 여부는 공식 공고에서 확인해 주세요.",
+        "citations": [
+          {
+            "title": "[온통청년 정책] 세종시 위원회 청년참여 확대 (20261029005400214581)",
+            "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "document_id": "DOC_YC_065",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_YC_065",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19~39세 기준에 입력한 만 27세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": null,
+            "policy_name": "세종시 위원회 청년참여 확대",
+            "agency": "세종특별자치시",
+            "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261029005400214581",
+            "official_apply_url": null,
+            "contacts": null,
+            "requirement_excerpts": null,
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "세종시 위원회 청년참여 확대의 신청방법은 어떻게 확인하나요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "세종시 위원회 청년참여 확대의 자격 요건은 무엇인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "agreed_reception_phrase": true,
+        "always_open_claim": false,
+        "api_age_status": "needs_check",
+        "api_overall_status": "needs_check",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "visit-only-online",
+      "pid": "POL_GOV_016",
+      "age": 30,
+      "question": "장애인 자립생활주택 지원 온라인으로 신청할 수 있어?",
+      "http_status": 200,
+      "seconds": 3.11,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_016",
+          "document_id": "DOC_GOV_016",
+          "chunk_id": "DOC_GOV_016_C01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+        },
+        {
+          "source_id": 2,
+          "policy_id": "POL_GOV_016",
+          "document_id": "DOC_GOV_016",
+          "chunk_id": "DOC_GOV_016_C02",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+        },
+        {
+          "source_id": 3,
+          "policy_id": "POL_GOV_016",
+          "document_id": "DOC_GOV_016",
+          "chunk_id": "DOC_GOV_016_C03",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+        },
+        {
+          "source_id": 4,
+          "policy_id": "POL_GOV_016",
+          "document_id": "DOC_GOV_016",
+          "chunk_id": "DOC_GOV_016_C04",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+        }
+      ],
+      "response": {
+        "status": "answered",
+        "answer": "장애인 자립생활주택 지원: 직접 신청 링크는 확인되지 않았어요. 신청 방법은 공식 공고에서 확인해 주세요. 신청방법도 종로구청 사회복지과 장애인정책팀 방문 접수로 안내돼 있습니다[1][2]. 다만 신청 자격은 19세 이상이라는 점은 확인되지만, 서울시 관할 장애인거주시설 이용인인지 또는 서울시에 거주하는 재가장애인(기초생활수급자·차상위계층)인지 여부는 추가 확인이 필요합니다[1][2]. 현재 접수 여부는 공식 공고에서 확인해 주세요.",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 장애인 자립생활주택 지원 (300000000103)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+            "document_id": "DOC_GOV_016",
+            "page_number": null
+          },
+          {
+            "title": "[정부24 공공서비스] 장애인 자립생활주택 지원 (300000000103)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+            "document_id": "DOC_GOV_016",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_016",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 30세가 포함됩니다.",
+                "status": "eligible"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "특화조건: 서울시 관할 장애인거주시설 이용인은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "특화조건: 서울시 주민등록 재가 장애인은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "특화조건: 기초생활수급자은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "target",
+                "label": "기타 자격 조건",
+                "reason": "특화조건: 차상위계층은(는) 추가 확인이 필요합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "unknown",
+            "application_schedule": null,
+            "required_documents": [
+              {
+                "text": "1.입주신청서\r\n2.자기소개서\r\n3.생활요약서\r\n4.개인정보 동의서  ※ (주의) 동의서 미제출시 신청·접수가 거부됨\r\n5.건강진단서\r\n • 최근3개월 이내 발급분, 일반검진(A형•B형 간염검사 포함)\r\n6.기초생활수급자, 차상위계층 증명서(재가장애인만 제출)\r\n7.위임",
+                "document_id": "DOC_GOV_016",
+                "chunk_id": "DOC_GOV_016_C03",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+              }
+            ],
+            "policy_name": "장애인 자립생활주택 지원",
+            "agency": "서울특별시 종로구",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "사회복지과",
+                "phone": "02-2148-2568",
+                "document_id": "DOC_GOV_016",
+                "chunk_id": "DOC_GOV_016_C04",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "○ 서울시 관할 장애인거주시설 이용인 중 지역자립욕구가 있는 19세 이상인 자 \r\n○ 서울시에 거주하는 19세이상인 재가장애인(차상위계층 또는 기초생활수급자)",
+                "document_id": "DOC_GOV_016",
+                "chunk_id": "DOC_GOV_016_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "장애인 자립생활주택 지원의 신청 자격은 어떻게 되나요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "장애인 자립생활주택 지원의 구비서류는 무엇인가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "장애인 자립생활주택 지원의 문의처는 어디인가요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "agreed_reception_phrase": true,
+        "always_open_claim": false,
+        "api_age_status": "eligible",
+        "api_overall_status": "needs_check",
+        "exclusion_reasons_is_null": true
+      }
+    },
+    {
+      "id": "guardian-45",
+      "pid": "POL_GOV_042",
+      "age": 45,
+      "question": "발달재활서비스 지원(시자체) 우리 아이가 받을 수 있나요?",
+      "http_status": 200,
+      "seconds": 3.3,
+      "generator_contexts": [
+        {
+          "source_id": 1,
+          "policy_id": "POL_GOV_042",
+          "document_id": "DOC_GOV_042",
+          "chunk_id": "DOC_GOV_042_C01",
+          "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+        }
+      ],
+      "response": {
+        "status": "info",
+        "answer": "발달재활서비스 지원(시자체)는 **현재 접수 중이에요** [1]. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문상 지원대상은 만 18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동, 또는 만 9세 미만의 장애가 예견되는 아동입니다 [1]. 현재 입력된 나이 45세는 이 지원대상에 해당하지 않아 보이지만, 자녀의 나이와 장애 여부(또는 장애예견 여부)가 확인되지 않아 최종 판단은 할 수 없습니다 [1].\n\n신청 방법은 거주지 관할 읍면동 행정복지센터 방문 신청이며, 직접 신청 링크는 확인되지 않았어요 [1]. 필요한 서류는 발달재활서비스 신청서이고, 만 9세 미만 장애예견아동(장애미등록아동)은 발달재활서비스 의뢰서와 검사자료가 추가로 필요합니다 [1].",
+        "citations": [
+          {
+            "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+            "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "document_id": "DOC_GOV_042",
+            "page_number": null
+          }
+        ],
+        "policy_checks": [
+          {
+            "policy_id": "POL_GOV_042",
+            "conditions": [
+              {
+                "field": "age",
+                "label": "나이",
+                "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+                "status": "ineligible"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "eligibility",
+                "label": "자격 요건",
+                "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+                "status": "ineligible"
+              },
+              {
+                "field": "income",
+                "label": "소득",
+                "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+                "status": "needs_check"
+              },
+              {
+                "field": "income",
+                "label": "소득 요건",
+                "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+                "status": "needs_check"
+              }
+            ],
+            "reception_status": "open",
+            "application_schedule": {
+              "evaluated_on": "2026-11-27",
+              "start_date": null,
+              "end_date": null,
+              "is_ongoing": true,
+              "days_to_start": null,
+              "days_to_end": null
+            },
+            "required_documents": [
+              {
+                "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "DOC_GOV_042_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+              }
+            ],
+            "policy_name": "발달재활서비스 지원(시자체)",
+            "agency": "강원특별자치도 춘천시",
+            "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+            "official_apply_url": null,
+            "contacts": [
+              {
+                "agency": "장애인복지과",
+                "phone": "033-250-4326",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "DOC_GOV_042_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+              }
+            ],
+            "requirement_excerpts": [
+              {
+                "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+                "document_id": "DOC_GOV_042",
+                "chunk_id": "DOC_GOV_042_C01",
+                "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+                "label": "지원대상"
+              }
+            ],
+            "exclusion_reasons": null,
+            "official_requirements": null
+          }
+        ],
+        "follow_up_questions": [
+          {
+            "kind": "question",
+            "text": "발달재활서비스 신청 서류는 무엇이 필요한가요?",
+            "field": null
+          },
+          {
+            "kind": "question",
+            "text": "발달재활서비스 지원대상은 어떻게 되나요?",
+            "field": null
+          }
+        ],
+        "checked_at": null,
+        "notice": {
+          "kind": "warn",
+          "title": "추가 확인 필요",
+          "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+        },
+        "is_sample": false
+      },
+      "automatic": {
+        "apply_url_preserved": true,
+        "citations_same_policy": true,
+        "citation_urls_match_documents": true,
+        "foreign_urls_in_answer": [],
+        "null_url_apply_claim_with_url": false,
+        "agreed_missing_link_phrase": true,
+        "api_age_status": "ineligible",
+        "api_overall_status": "ineligible",
+        "exclusion_reasons_is_null": true
+      }
+    }
+  ]
+}
