@@ -104,6 +104,23 @@ def _statement(verdict: dict, age: int, last: bool) -> str:
     return stem + ("되지 않아요." if last else "되지 않고")
 
 
+def _target(plain: str, numbers: list[str], policy_of: dict, names: dict, verdicts: dict, single: bool) -> str | None:
+    """절이 가리키는 정책: 절의 정책명 → 인용 → (판정 정책이 하나뿐인) 답변 전체 순서로 하나로 특정될 때만."""
+    cited = {policy_of.get(n) for n in numbers} - {None}
+    named = {pid for pid, name in names.items() if name and name in plain}
+    targets = named or cited or (set(verdicts) if single else set())
+    return next(iter(targets)) if len(targets) == 1 else None
+
+
+def _rewrite(clause: str, text: str, is_last: bool) -> str:
+    """절의 머리(인용·'다만' 등)와 인용 번호는 남기고 내용만 판정 문장으로 바꾼다."""
+    lead = LEAD.match(clause)
+    prefix = (lead.group(1) or "") + (lead.group(2) or "")
+    markers = "".join(f"[{n}]" for n in dict.fromkeys(CITATION.findall(clause)))
+    tail = re.search(r"\s*$", clause).group()
+    return f"{prefix}{text}{' ' + markers if markers else ''}" + (tail if not is_last else "")
+
+
 def align_age_verdicts(answer: str, contexts: list[dict], checks: list[dict], age: int | None) -> tuple[str, bool]:
     """Checker 나이 판정과 반대인 나이 결론 절만 판정 문장으로 바꾼다. (고친 답변, 변경 여부)"""
     if age is None or isinstance(age, bool):
@@ -133,15 +150,9 @@ def align_age_verdicts(answer: str, contexts: list[dict], checks: list[dict], ag
             claim = _claim(plain, age)
             if claim is None:
                 continue
-            numbers = CITATION.findall(clause) or sentence_numbers
-            cited = {policy_of.get(n) for n in numbers} - {None}
-            named = {pid for pid, name in names.items() if name and name in plain}
-            # 대상 정책: 절의 정책명 → 인용 → (판정 정책이 하나뿐인) 답변 전체 순서로 하나로 특정될 때만.
-            targets = named or cited or (set(verdicts) if len(checks) == 1 else set())
-            if len(targets) != 1:
-                continue
-            pid = next(iter(targets))
-            verdict = verdicts.get(pid)
+            pid = _target(plain, CITATION.findall(clause) or sentence_numbers, policy_of, names, verdicts,
+                          len(checks) == 1)
+            verdict = verdicts.get(pid) if pid else None
             if verdict is None:
                 continue
             if claim == "member":
@@ -149,16 +160,130 @@ def align_age_verdicts(answer: str, contexts: list[dict], checks: list[dict], ag
                 claim = not (verdict["exclusion"] and mentions_exclusion)
             if claim == verdict["ok"]:
                 continue
-            lead = LEAD.match(clause)
-            prefix = (lead.group(1) or "") + (lead.group(2) or "")
-            markers = "".join(f"[{n}]" for n in dict.fromkeys(CITATION.findall(clause)))
             is_last = position == last
             text = _statement(verdict, age, is_last)
             if len(checks) > 1:
                 text = f"{names[pid]}: {text}"
-            tail = re.search(r"\s*$", clause).group()
-            clauses[position] = f"{prefix}{text}{' ' + markers if markers else ''}" + (tail if not is_last else "")
+            clauses[position] = _rewrite(clause, text, is_last)
             sentence_changed = changed = True
         if sentence_changed:
             parts[index] = "".join(clauses)
     return "".join(parts), changed
+
+
+# ---- 자녀 월령(#39) ----
+# 원문에 '24개월 미만 아이'와 '생후 24개월까지 지원'이 함께 있어 LLM이 24개월을 '제외'로 답한 사례가 있었다
+# (dev b5617b2 POL_GOV_050 24개월, Checker는 #39 합의대로 LTE 24 '포함'). 나이와 같은 기준으로 고친다.
+CHILD_REASON = re.compile(r"^자녀 월령 (\d+)개월 (이하|미만) 기준에 입력한 (\d+)개월은 (포함됩니다|포함되지 않습니다)\.")
+MONTH_TOPIC = re.compile(r"월령|개월")
+# 앞 절의 월령 결론을 이어 받기만 하는 절('이 기준만 보면 대상에서 제외됩니다').
+CONTINUATION = re.compile(r"^\s*(?:(?:이|그)\s*기준(?:만|으로|에서|상)|따라서|그래서|이\s*경우)")
+
+
+def _month_verdicts(checks: list[dict], months: int) -> dict[str, dict]:
+    """정책별 자녀 월령 판정. 월령 조건이 하나이고 OR·NOT 그룹이 없는 정책만 다룬다."""
+    verdicts = {}
+    for check in checks:
+        rows = check.get("conditions") or []
+        children = [row for row in rows if str(row.get("field", "")).lower() == "children"]
+        if len(children) != 1:
+            continue
+        match = CHILD_REASON.match(str(children[0].get("reason") or ""))
+        if not match or int(match.group(3)) != months:
+            continue
+        reasons = {str(row.get("reason") or "") for row in rows}
+        if any(r.startswith(GROUP_REASON["NOT"]) or r.startswith(GROUP_REASON["OR"]) for r in reasons):
+            continue
+        verdicts[check["policy_id"]] = {"ok": match.group(4) == "포함됩니다",
+                                        "rule": f"{match.group(1)}개월 {match.group(2)}"}
+    return verdicts
+
+
+def _month_claim(plain: str, months: int) -> bool | None:
+    """절이 입력한 자녀 월령에 대해 단정한 결론. True=월령으로는 가능, False=불가, None=단정 아님.
+
+    '자녀 월령 24개월은', '입력한 24개월' 같은 표현이 있어야 한다. '24개월 미만 아이'처럼 기준 숫자는 보지 않는다.
+    """
+    if not MONTH_TOPIC.search(plain):
+        return None
+    if not (re.search(r"입력", plain)
+            or re.search(rf"(?<![\d~∼\-]){months}\s*개월\s*(?:은|는|이|가|이라|이므로|이면|인\s)", plain)):
+        return None
+    if HEDGE.search(plain):
+        return None
+    if POSITIVE_EXCEPTION.search(plain):
+        return True
+    if NEGATIVE.search(plain):
+        return False
+    if POSITIVE.search(plain) or MEMBERSHIP.search(plain):
+        return True
+    return None
+
+
+def align_child_month_verdicts(answer: str, contexts: list[dict], checks: list[dict],
+                               months: int | None) -> tuple[str, bool]:
+    """Checker 자녀 월령 판정과 반대인 월령 결론 절을 판정 문장으로 바꾼다. (고친 답변, 변경 여부)
+
+    바꾼 절 바로 뒤에서 그 결론만 이어 받는 절('이 기준만 보면 대상에서 제외됩니다')도 같은 결론이므로 뺀다.
+    """
+    if months is None or isinstance(months, bool):
+        return answer, False
+    verdicts = _month_verdicts(checks, months)
+    if not verdicts:
+        return answer, False
+    policy_of = {str(ctx["source_id"]): ctx["policy_id"] for ctx in contexts}
+    names = {check["policy_id"]: check.get("policy_name") or "" for check in checks}
+    parts = SENTENCE_BREAK.split(answer)
+    changed = False
+    for index in range(0, len(parts), 2):
+        original = parts[index]
+        if not MONTH_TOPIC.search(original):
+            continue
+        clauses = CLAUSE_BREAK.split(original.replace("**", ""))
+        sentence_numbers = CITATION.findall(original)
+        last = len(clauses) - 1
+        replaced = None  # 바로 앞에서 바꾼 절 위치와 판정
+        sentence_changed = False
+        for position in range(0, len(clauses), 2):
+            clause = clauses[position]
+            plain = CITATION.sub("", clause).replace("`", "")
+            if replaced is not None and CONTINUATION.match(plain):
+                at, verdict, pid = replaced
+                follow = False if NEGATIVE.search(plain) else (True if POSITIVE.search(plain) else None)
+                if follow is not None and follow != verdict["ok"]:
+                    # 이어 받은 절을 빼고, 앞에서 바꾼 절을 문장 끝 형태로 다시 쓴다(인용은 모두 남긴다).
+                    markers = "".join(f"[{n}]" for n in dict.fromkeys(
+                        CITATION.findall(clauses[at]) + CITATION.findall(clause)))
+                    lead = LEAD.match(clauses[at])
+                    prefix = (lead.group(1) or "") + (lead.group(2) or "")
+                    text = _month_statement(verdict, months, True, names[pid] if len(checks) > 1 else "")
+                    clauses[at] = f"{prefix}{text}{' ' + markers if markers else ''}"
+                    for gone in range(at + 1, position + 1):
+                        clauses[gone] = ""
+                    replaced = None
+                    continue
+            replaced = None
+            claim = _month_claim(plain, months)
+            if claim is None:
+                continue
+            pid = _target(plain, CITATION.findall(clause) or sentence_numbers, policy_of, names, verdicts,
+                          len(checks) == 1)
+            verdict = verdicts.get(pid) if pid else None
+            if verdict is None or claim == verdict["ok"]:
+                continue
+            is_last = position == last
+            text = _month_statement(verdict, months, is_last, names[pid] if len(checks) > 1 else "")
+            clauses[position] = _rewrite(clause, text, is_last)
+            replaced = (position, verdict, pid)
+            sentence_changed = changed = True
+        if sentence_changed:
+            parts[index] = "".join(clauses)
+    return "".join(parts), changed
+
+
+def _month_statement(verdict: dict, months: int, last: bool, name: str = "") -> str:
+    """Checker 자녀 월령 판정을 그대로 옮긴 문장. 문장 끝이 아니면 연결형으로 쓴다."""
+    stem = f"{name + ': ' if name else ''}입력하신 자녀 월령 {months}개월은 월령 기준({verdict['rule']})에 포함"
+    if verdict["ok"]:
+        return stem + ("돼요." if last else "되고")
+    return stem + ("되지 않아요." if last else "되지 않고")

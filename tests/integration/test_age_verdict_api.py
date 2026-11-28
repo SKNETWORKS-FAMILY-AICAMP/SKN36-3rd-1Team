@@ -10,13 +10,14 @@ from backend.api.main import create_app
 from test_issue79_18_90_verification import item
 
 
-def ask(policy, age, answer, question):
+def ask(policy, age, answer, question, **profile):
     session = Mock()
     session.search_policy_context.side_effect = lambda *a, **kw: {"policies": [copy.deepcopy(policy)]}
     generated = {"status": "answered", "answer": answer, "used_source_ids": [1], "follow_up_questions": []}
     with TestClient(create_app(session_factory=lambda: session, generate_fn=Mock(return_value=generated))) as client:
         response = client.post("/api/ask", json={"question": question, "selected_policy_id": policy["policy_id"],
-                                                 "profile": {"age": age, "region": "", "income": None}, "history": []})
+                                                 "profile": {"age": age, "region": "", "income": None, **profile},
+                                                 "history": []})
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -73,6 +74,29 @@ class EmploymentCardAgeTests(unittest.TestCase):
         text = "현재 입력된 만 74세는 만 75세 이상 제외 기준에는 해당하지 않는 것으로 처리되어 있습니다 [1]."
         body = ask(self.policy, 74, text, "국민내일배움카드의 나이 기준을 충족하나요?")
         self.assertEqual(body["answer"], text)
+
+
+class ChildMonthTests(unittest.TestCase):
+    """POL_GOV_050: 자녀 월령 24개월 이하(LTE 24, #39 합의). 원문은 '24개월 미만 아이'와 '생후 24개월까지'를 함께 쓴다."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.policy = item("POL_GOV_050")
+
+    def test_24_month_exclusion_claim_is_corrected(self):
+        # dev b5617b2 실제 LLM 답변 문장(가상 프로필 32세·24개월).
+        body = ask(self.policy, 32, "또한 자녀 월령 24개월은 원문 기준인 24개월 미만에 포함되지 않으므로, "
+                                    "이 기준만 보면 대상에서 제외됩니다. [1]",
+                   "장애인가정 양육비용 지원 받을 수 있나요?", child_age_months=24)
+        months = next(c for c in body["policy_checks"][0]["conditions"] if c["field"] == "children")
+        self.assertIn("입력한 24개월은 포함됩니다", months["reason"])
+        self.assertIn("입력하신 자녀 월령 24개월은 월령 기준(24개월 이하)에 포함돼요.", body["answer"])
+        self.assertNotIn("제외됩니다", body["answer"])
+
+    def test_25_month_answer_is_kept(self):
+        text = "자녀 월령이 25개월이라, 원문에 적힌 대상 요건과는 맞지 않습니다. [1]"
+        body = ask(self.policy, 32, text, "장애인가정 양육비용 지원 받을 수 있나요?", child_age_months=25)
+        self.assertTrue(body["answer"].startswith(text))
 
 
 if __name__ == "__main__":
