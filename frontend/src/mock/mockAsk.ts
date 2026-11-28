@@ -93,7 +93,7 @@ function build(ex: Example, profile: UserProfile, answer = ex.answer): AskRespon
   };
 }
 
-/** 대표 상황 카드(config/personas)의 질문은 같은 분야 예시 답변을 쓴다 */
+/** 대표 상황(config/personas)의 질문은 같은 분야 예시 답변을 쓴다 */
 const PERSONA_EXAMPLE: Record<string, string> = { job: 'work', newlywed: 'housing', parent: 'welfare' };
 const personaExampleKey = (q: string) => {
   const persona = PERSONAS.find((p) => p.question === q.trim());

@@ -19,7 +19,7 @@ from backend.eligibility.checker import CHECK, NO, OK, certain_required_and_fail
 from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from backend.rag.application_links import align_application_links
-from backend.rag.reception_notice import UNKNOWN_RECEPTION, ensure_unknown_reception_notice
+from backend.rag.reception_notice import PARAGRAPH_BREAK, UNKNOWN_RECEPTION, ensure_unknown_reception_notice
 from backend.rag.age_verdict import align_age_verdicts, align_child_month_verdicts
 from database.unknown_group_scope import (
     can_preserve_scoped_failed_root,
@@ -425,9 +425,12 @@ def _inline(text: str, later: str) -> str:
 
 def _clause_correction(
     clause: str, numbers: list[str], policy_of: dict[str, str], by_policy: dict[str, dict],
-    whole_sentence: bool,
+    whole_sentence: bool, paragraph_policy: str | None = None,
 ) -> str | None:
-    """단정 절 하나를 판정에 맞게 고친 문구. 충돌이 없거나 출처를 확정할 수 없으면 None."""
+    """단정 절 하나를 판정에 맞게 고친 문구. 충돌이 없거나 출처를 확정할 수 없으면 None.
+
+    paragraph_policy: 같은 문단의 다른 문장들이 인용한 정책이 하나뿐이면 그 정책 ID(#167).
+    """
     claims = _claims(clause)
     if not claims:
         return None
@@ -443,9 +446,11 @@ def _clause_correction(
         if len(named) > 1 and named != cited:
             # 이름이 겹치거나 여러 정책을 지칭하는데 인용 집합이 맞지 않으면 특정 정책을 고르지 않는다.
             return _neutral_notice(claims)
-        if not named and len(by_policy) > 1 and len(numbers) == 1 and whole_sentence:
+        if (not named and len(by_policy) > 1 and len(numbers) == 1 and whole_sentence
+                and paragraph_policy != policy_of[numbers[0]]):
             # 단독 단정문은 인용 하나만으로 여러 검색 정책 중 발화 대상을 확정할 수 없다.
             # 다른 설명 절이나 정책별 문장이 있는 경우는 아래 기존 절별 처리를 유지한다.
+            # 단, 같은 문단의 다른 문장이 모두 같은 정책만 인용하면 그 정책 이야기로 보고 아래에서 판정과 비교한다(#167).
             return _neutral_notice(claims)
         grouped: dict[str, list[str]] = {}
         for number in numbers:
@@ -497,6 +502,29 @@ def _has_internal_status(text: str) -> bool:
     return _INTERNAL_STATUS.search(text) is not None
 
 
+
+def _paragraph_policies(parts: list[str], policy_of: dict[str, str]) -> dict[int, str]:
+    """문장 위치마다 같은 문단의 다른 문장들이 인용한 정책이 하나뿐이면 그 정책 ID를 돌려준다(#167).
+
+    parts는 SENTENCE_BREAK.split 결과(짝수 위치가 문장, 홀수 위치가 구분자)다. 빈 줄이 문단 경계다.
+    다른 문장에 인용이 없거나 여러 정책이 섞여 있으면 그 위치는 결과에 넣지 않는다.
+    """
+    paragraphs: list[list[int]] = [[]]
+    for index in range(0, len(parts), 2):
+        paragraphs[-1].append(index)
+        if index + 1 < len(parts) and PARAGRAPH_BREAK.search(parts[index + 1]):
+            paragraphs.append([])
+    cited = {index: {policy_of[n] for n in CITATION.findall(parts[index]) if n in policy_of}
+             for index in range(0, len(parts), 2)}
+    result: dict[int, str] = {}
+    for members in paragraphs:
+        for index in members:
+            others = set().union(*(cited[other] for other in members if other != index))
+            if len(others) == 1:
+                result[index] = next(iter(others))
+    return result
+
+
 def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[dict]) -> tuple[str, bool]:
     """접수 상태·자격은 Checker 판정을 기준으로 안내한다.
 
@@ -507,6 +535,7 @@ def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[di
     policy_of = {str(context["source_id"]): context["policy_id"] for context in contexts}
     by_policy = {check["policy_id"]: check for check in checks}
     parts = SENTENCE_BREAK.split(answer)
+    paragraph_policies = _paragraph_policies(parts, policy_of)
     changed = False
     for index in range(0, len(parts), 2):
         sentence = parts[index]
@@ -538,7 +567,8 @@ def _align_answer_with_checks(answer: str, contexts: list[dict], checks: list[di
                         changed = True
                     continue
             numbers = list(dict.fromkeys(CITATION.findall(clause))) or sentence_numbers
-            fixed = _clause_correction(clause, numbers, policy_of, by_policy, last == 0)
+            fixed = _clause_correction(clause, numbers, policy_of, by_policy, last == 0,
+                                       paragraph_policy=paragraph_policies.get(index))
             if fixed is not None:
                 clauses[position] = fixed if position == last else _inline(fixed, later)
                 changed = True
