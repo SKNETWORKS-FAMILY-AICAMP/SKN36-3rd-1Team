@@ -1,8 +1,12 @@
 /**
  * 생애주기 타임라인용 계산.
- * - 생애단계 소속: 그래프의 APPLIES_TO_LIFESTAGE 관계 (데이터의 분류. 넓게 붙은 정책도 있다)
  * - 나이 조건: 정책 → REQUIRES_CONDITION → type이 AGE인 조건 (실제 나이 기준이 확인된 정책만 있다)
- * 화면은 둘을 구분해서 보여 주고, 어느 쪽도 자격 확정으로 표현하지 않는다.
+ * - 생애단계 소속: 실제로 제한이 있는 나이 조건이 있으면 그 나이와 겹치는 단계(단계 노드의 age_range 기준)에 넣고,
+ *   없으면 그래프의 APPLIES_TO_LIFESTAGE 관계(데이터 분류)를 따른다.
+ *   데이터 분류가 공식 나이 기준과 어긋난 정책(예: 6~64세 정책이 영유아·노년에 연결)이 있어서다.
+ *   릴리스 데이터는 #18 데이터 동결로 고치지 않고 화면에서만 계산한다.
+ *   나이 기준을 그대로 겹쳐 보므로 '0~65세'처럼 하한이 0으로 적힌 정책은 영유아·아동에도 들어간다.
+ * 화면은 어느 쪽도 자격 확정으로 표현하지 않는다.
  */
 import { AGE_NO_UPPER, LIFE_STAGES, SHARED_GROUP_DEFAULT, ungroupedLabel } from '../config/graph';
 import type { GraphIndex, GraphNode } from './graphModel';
@@ -51,17 +55,37 @@ export function policyAgeRanges(index: GraphIndex, policyId: string): AgeRange[]
     .filter((r): r is AgeRange => !!r);
 }
 
-/** 생애단계별 정책 목록과, 어느 단계에도 연결되지 않은 정책 수 */
+/** 실제로 제한이 있는 나이 조건만 (데이터의 '0~120세'처럼 사실상 제한 없는 조건은 빼고 본다) */
+export const limitedAgeRanges = (ages: AgeRange[]) => ages.filter((a) => !(a.min === 0 && a.max == null));
+
+const overlaps = (a: AgeRange, b: AgeRange) =>
+  a.min <= (b.max ?? Infinity) && b.min <= (a.max ?? Infinity);
+
+/**
+ * 정책이 들어갈 생애단계 ID (타임라인 순서).
+ * 제한 있는 나이 조건이 있으면 그 나이와 겹치는 단계, 없으면(또는 단계 나이 범위를 못 읽으면) 데이터 분류.
+ */
+export function policyStageIds(index: GraphIndex, policyId: string): string[] {
+  const ages = limitedAgeRanges(policyAgeRanges(index, policyId));
+  const stageRanges = LIFE_STAGES.map((s) => ({ id: s.id, range: parseAgeRange(index.nodes.get(s.id)?.data.age_range) }));
+  if (ages.length > 0 && stageRanges.every((s) => s.range)) {
+    return stageRanges.filter((s) => ages.some((age) => overlaps(age, s.range!))).map((s) => s.id);
+  }
+  const linked = new Set((index.outgoing.get(policyId) ?? [])
+    .filter((e) => e.relation === 'APPLIES_TO_LIFESTAGE')
+    .map((e) => e.target));
+  return LIFE_STAGES.filter((s) => linked.has(s.id)).map((s) => s.id);
+}
+
+/** 생애단계별 정책 목록과, 어느 단계에도 들어가지 않은 정책 수 */
 export function lifeStageSummary(index: GraphIndex): { stages: LifeStage[]; unclassified: number } {
   const byStage = new Map<string, StagePolicy[]>(LIFE_STAGES.map((s) => [s.id, []]));
   let unclassified = 0;
   for (const policy of index.policies) {
-    const stageIds = (index.outgoing.get(policy.id) ?? [])
-      .filter((e) => e.relation === 'APPLIES_TO_LIFESTAGE' && byStage.has(e.target))
-      .map((e) => e.target);
+    const stageIds = policyStageIds(index, policy.id);
     if (stageIds.length === 0) { unclassified += 1; continue; }
     const entry = { policy, ages: policyAgeRanges(index, policy.id) };
-    for (const id of new Set(stageIds)) byStage.get(id)!.push(entry);
+    for (const id of stageIds) byStage.get(id)!.push(entry);
   }
   const stages = LIFE_STAGES.map((s) => {
     const node = index.nodes.get(s.id);
@@ -75,12 +99,10 @@ export function lifeStageSummary(index: GraphIndex): { stages: LifeStage[]; uncl
   return { stages, unclassified };
 }
 
-/** 정책 하나가 연결된 생애단계 이름 (타임라인 순서). 데이터에 없는 정책이면 빈 배열 */
+/** 정책 하나가 들어가는 생애단계 이름 (타임라인 순서, 기준은 policyStageIds). 데이터에 없는 정책이면 빈 배열 */
 export function policyLifeStages(index: GraphIndex, policyId: string): string[] {
-  const linked = new Set((index.outgoing.get(policyId) ?? [])
-    .filter((e) => e.relation === 'APPLIES_TO_LIFESTAGE')
-    .map((e) => e.target));
-  return LIFE_STAGES.filter((s) => linked.has(s.id)).map((s) => s.name);
+  const ids = new Set(policyStageIds(index, policyId));
+  return LIFE_STAGES.filter((s) => ids.has(s.id)).map((s) => s.name);
 }
 
 /** 입력한 나이가 들어가는 생애단계 (데이터의 나이 범위 기준). 없으면 null */
