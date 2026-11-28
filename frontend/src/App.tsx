@@ -6,7 +6,8 @@ import { infoField } from './config/infoFields';
 import { HISTORY_MAX_ITEMS, QUESTION_MAX_LENGTH } from './config/request';
 import { describeProfile, readProfileReply, REGIONS } from './lib/parseProfile';
 import { planProfileReply } from './lib/profileReply';
-import { askHref, lifeHref, mapHref, useRoute } from './lib/route';
+import { askHref, isHomeRoute, lifeHref, mapHref, savedHref, useRoute } from './lib/route';
+import { useSavedPolicies } from './components/SavedPolicies';
 import { recentPoliciesFromTurns } from './lib/recentPolicies';
 import { AGE_MAX, checkAge, checkChildMonths } from './lib/validate';
 import { PolicyScheduleList } from './components/PolicyScheduleList';
@@ -39,7 +40,9 @@ function readTheme(): 'light' | 'dark' {
 
 export default function App() {
   const route = useRoute();
-  const onAskPage = route.page === 'ask';
+  // 관심 정책 보기(#/saved)도 첫 화면 그대로이고 정책 목록만 관심 정책으로 바뀐다
+  const onAskPage = isHomeRoute(route);
+  const savedCount = useSavedPolicies()?.saved.length ?? 0;
   const reduceMotion = useMemo(() => matchMedia('(prefers-reduced-motion: reduce)').matches, []);
   const [theme, setTheme] = useState<'light' | 'dark'>(readTheme);
   const [age, setAge] = useState('');
@@ -92,7 +95,12 @@ export default function App() {
   // 화면을 바꾸면 맨 위에서 시작한다. 다른 화면에서 질문을 보내고 넘어온 경우엔 그 답변 위치로 간다
   const showLatestTurn = useRef(false);
   const explorerScroll = useRef<number | null>(null);
+  // 첫 화면 안에서 전체·관심 보기만 바꿀 때는 맨 위로 올리지 않는다(목록이 스스로 위치를 잡는다)
+  const wasHome = useRef(onAskPage);
   useEffect(() => {
+    const stayedHome = wasHome.current && onAskPage;
+    wasHome.current = onAskPage;
+    if (stayedHome && !showLatestTurn.current) return;
     if (onAskPage && showLatestTurn.current) {
       showLatestTurn.current = false;
       explorerScroll.current = null;
@@ -250,9 +258,11 @@ export default function App() {
           <a className="logo" href={askHref} aria-label="SSOK 홈"><Logo /></a>
           <nav className="tabs" aria-label="화면">
             {/* 좁은 화면에서는 로고가 가려지지 않게 '정책'을 줄여 보여 준다 */}
-            <a href={askHref} aria-current={onAskPage ? 'page' : undefined}>맞춤 정책 찾기</a>
+            <a href={askHref} aria-current={route.page === 'ask' ? 'page' : undefined}>맞춤 정책 찾기</a>
             <a href={lifeHref()} aria-current={route.page === 'life' ? 'page' : undefined}>생애주기</a>
             <a href={mapHref()} aria-current={route.page === 'map' ? 'page' : undefined}><span className="long">정책&nbsp;</span>관계 지도</a>
+            {/* 저장한 정책을 첫 화면 목록 아래까지 내려가지 않고 바로 찾게 한다. 개수는 이 브라우저에 저장된 수 */}
+            <a href={savedHref} aria-current={route.page === 'saved' ? 'page' : undefined}>★ 관심<span className="long">&nbsp;정책</span>{savedCount > 0 && <> {savedCount}</>}</a>
           </nav>
           <div className="right">
             <button className="ghost" type="button" onClick={restart}><span className="sp" aria-hidden="true">↺</span><span className="t">처음으로</span></button>
@@ -261,7 +271,7 @@ export default function App() {
         </div>
       </header>
 
-      {route.page !== 'ask' && (
+      {!onAskPage && (
         <ErrorBoundary resetKey={location.hash}>
           {route.page === 'map' && explorerScroll.current !== null && (
             <div className="wrap"><a className="btn btn-o" href={askHref}>← 보던 정책으로</a></div>
@@ -334,6 +344,8 @@ export default function App() {
       <PolicyExplorer onDemoApply={() => showToast('시연용 버튼이에요. 실제 신청 주소로 연결되지 않아요.')} response={latestResponse?.kind === 'qa' ? latestResponse.response ?? null : null}
         onOpenMap={() => { explorerScroll.current = window.scrollY; }}
         active={onAskPage}
+        savedView={route.page === 'saved'}
+        onSavedView={(saved) => { location.hash = saved ? savedHref : askHref; }}
         consulted={consulted}
         onAsk={(question, origin, policyId) => { ask(question, origin, profile, null, policyId); }} />
       </div>

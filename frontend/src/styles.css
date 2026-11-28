@@ -480,7 +480,7 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 .gn.k-policy:not(.center) circle{fill:var(--primary-soft)}
 
 @media (max-width:600px){
-  /* 좁은 화면: 탭이 3개라 로고를 가리지 않게 두 번째 줄로 내린다 */
+  /* 좁은 화면: 탭이 4개라 로고를 가리지 않게 두 번째 줄로 내린다 */
   header.gnb .wrap{flex-wrap:wrap;gap:6px 8px;height:auto;padding-top:8px;padding-bottom:8px}
   .logo-svg{height:32px}
   nav.tabs{order:3;width:100%;justify-content:center}
@@ -669,7 +669,8 @@ nav.tabs a[aria-current="page"]{background:var(--card);color:var(--primary);box-
 
 /* 최근 상담 응답의 신청 일정: 기존 카드·색상 토큰 재사용 */
 .schedule-section{padding:30px 0 38px;border-top:1px solid var(--line)}
-#policy-explorer{padding-top:18px}
+#policy-explorer{padding-top:18px;scroll-margin-top:68px} /* '관심 정책' 탭으로 이동할 때 고정 헤더(68px)에 제목이 가리지 않게 */
+@media (max-width:600px){ #policy-explorer{scroll-margin-top:105px} } /* 탭이 둘째 줄로 내려간 좁은 화면의 헤더 높이 */
 .schedule-section .board-h{margin-bottom:10px}
 .schedule-scope,.schedule-count{font-size:13px;color:var(--ink-3);margin:10px 0}
 .schedule-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0}

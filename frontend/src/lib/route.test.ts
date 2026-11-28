@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lifeHref, mapHref, parseRoute } from './route';
+import { isHomeRoute, lifeHref, mapHref, parseRoute, savedHref } from './route';
 
 describe('화면 주소', () => {
   it('#/map과 정책 ID를 읽는다', () => {
@@ -7,6 +7,14 @@ describe('화면 주소', () => {
     expect(parseRoute('#/')).toEqual({ page: 'ask' });
     expect(parseRoute('#/map')).toEqual({ page: 'map', policyId: null });
     expect(parseRoute(mapHref('POL_GOV_011'))).toEqual({ page: 'map', policyId: 'POL_GOV_011' });
+  });
+
+  it('#/saved는 첫 화면의 관심 정책 보기이고, 첫 화면으로 본다', () => {
+    expect(parseRoute(savedHref)).toEqual({ page: 'saved' });
+    expect(isHomeRoute(parseRoute(savedHref))).toBe(true);
+    expect(isHomeRoute(parseRoute('#/'))).toBe(true);
+    expect(isHomeRoute(parseRoute('#/map'))).toBe(false);
+    expect(isHomeRoute(parseRoute(lifeHref()))).toBe(false);
   });
 
   it('#/life와 생애단계 이름을 읽고, 목록에 없는 이름은 받지 않는다', () => {

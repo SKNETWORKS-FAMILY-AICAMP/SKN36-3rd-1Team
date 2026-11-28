@@ -36,6 +36,8 @@ class PolicyDetailViewTests(SimpleTestCase):
         # React 첫 화면 탭 이름(#168 '맞춤 정책 찾기', 목록 제목 '전체 정책')과 같은 이름을 쓴다
         html = _visible_text(self.get("POL_TEST_001", response(make_page([make_item()]))).content.decode())
         self.assertIn('#/">맞춤 정책 찾기</a>', html)
+        # 관심 정책은 브라우저에 저장돼 서버가 개수를 모르므로, React 첫 화면의 관심 보기(#/saved)로만 보낸다
+        self.assertIn('href="http://127.0.0.1:5173/#/saved">★ 관심 정책</a>', html)
         self.assertIn("전체 정책 <span", html)
         self.assertIn("맞춤 정책 찾기로</a>", html)
         for old in ("상담하기", "정책 둘러보기", "상담 화면"):

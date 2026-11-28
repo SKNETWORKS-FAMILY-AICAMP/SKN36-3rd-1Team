@@ -1,6 +1,7 @@
 /**
  * 화면 전환(주소의 # 부분만 사용). 라우터 패키지를 새로 설치하지 않는다 (AGENTS.md §5).
- *   #/                     상담 화면
+ *   #/                     맞춤 정책 찾기(첫 화면)
+ *   #/saved                첫 화면의 정책 목록을 관심 정책 보기로 연 상태
  *   #/life                 생애주기 타임라인
  *   #/life?stage=청년       해당 생애단계를 연 타임라인
  *   #/map                  정책 관계 지도
@@ -12,6 +13,7 @@ import type { Theme } from './theme';
 
 export type Route =
   | { page: 'ask' }
+  | { page: 'saved' }
   | { page: 'life'; stage: string | null }
   | { page: 'map'; policyId: string | null };
 
@@ -30,10 +32,14 @@ export function parseRoute(hash: string): Route {
     const stage = params.get('stage');
     return { page: 'life', stage: stage && LIFE_STAGES.some((s) => s.name === stage) ? stage : null };
   }
+  if (path === '/saved') return { page: 'saved' };
   return { page: 'ask' };
 }
 
 export const askHref = '#/';
+export const savedHref = '#/saved';
+/** 첫 화면(맞춤 정책 찾기)에 그려지는 화면인지. 관심 정책 보기도 같은 화면의 목록만 바꾼다 */
+export const isHomeRoute = (route: Route) => route.page === 'ask' || route.page === 'saved';
 export const mapHref = (policyId?: string | null) => (policyId ? `#/map?policy=${encodeURIComponent(policyId)}` : '#/map');
 export const lifeHref = (stage?: string | null) => (stage ? `#/life?stage=${encodeURIComponent(stage)}` : '#/life');
 
