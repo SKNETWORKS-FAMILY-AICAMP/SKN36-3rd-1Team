@@ -98,10 +98,14 @@ class ApplicationSchedule(BaseModel):
     is_ongoing: bool
     days_to_start: int | None
     days_to_end: int | None
+    # v1.13: 접수 중·상시 아님·마감까지 7일 이하(Checker SOON_WINDOW_DAYS). 화면은 직접 계산하지 않는다.
+    closing_soon: bool = False
 
 
 class PolicyCheck(EligibilityOutput):
     application_schedule: ApplicationSchedule | None = None
+    # v1.13: 마감순 정렬 순위(Checker deadline_rank). 0 마감일 있는 접수 중 → 4 마감.
+    deadline_rank: int | None = None
     required_documents: list[SourceExcerpt] | None = None
     policy_name: str
     agency: str
@@ -128,6 +132,7 @@ class PolicySummary(BaseModel):
     official_apply_url: str | None
     reception_status: ReceptionStatus
     application_schedule: ApplicationSchedule | None
+    deadline_rank: int | None = None
     required_documents: list[SourceExcerpt] | None = None
     requirement_excerpts: list[RequirementExcerpt] | None = None
 

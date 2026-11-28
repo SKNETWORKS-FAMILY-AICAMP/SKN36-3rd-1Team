@@ -5,7 +5,9 @@ import type { PolicyCheck } from '../api/types';
 import { scheduleView, scheduledPolicies, kstDay, isApplicationSchedule } from './applicationSchedule';
 import { PolicyScheduleList } from '../components/PolicyScheduleList';
 const day='2026-11-22';
-const policy=(id:string,days:number,status:PolicyCheck['reception_status']='open'):PolicyCheck=>({policy_id:id,policy_name:'가상 정책 '+id,agency:'sample_only',conditions:[],source_url:'https://example.org/',official_apply_url:null,reception_status:status,application_schedule:{evaluated_on:day,start_date:'2026-11-01',end_date:`2026-11-${22+days}`,is_ongoing:false,days_to_start:-21,days_to_end:days}});
+// 서버(v1.13)처럼 closing_soon·deadline_rank를 함께 보낸다(backend/eligibility/checker.py application_schedule·deadline_rank).
+const rankOf={open:0,before:1,unknown:3,closed:4} as const;
+const policy=(id:string,days:number,status:PolicyCheck['reception_status']='open'):PolicyCheck=>({policy_id:id,policy_name:'가상 정책 '+id,agency:'sample_only',conditions:[],source_url:'https://example.org/',official_apply_url:null,reception_status:status,deadline_rank:rankOf[status],application_schedule:{evaluated_on:day,start_date:'2026-11-01',end_date:`2026-11-${22+days}`,is_ongoing:false,days_to_start:-21,days_to_end:days,closing_soon:status==='open'&&days>=0&&days<=7}});
 afterEach(()=>vi.useRealTimers());
 it.each([[3,'마감 D-3'],[0,'오늘 마감'],[-1,'']])('남은 %s일 표시',(days,badge)=>expect(scheduleView(policy('A',days,days<0?'closed':'open'),day).badge).toBe(badge));
 it('시작 예정과 상시는 별도 표시',()=>{const p=policy('A',7,'before');Object.assign(p.application_schedule!,{start_date:'2026-11-25',days_to_start:3});expect(scheduleView(p,day).badge).toBe('시작 D-3');p.reception_status='open';Object.assign(p.application_schedule!,{start_date:null,end_date:null,days_to_start:null,days_to_end:null,is_ongoing:true});expect(scheduleView(p,day).badge).toBe('상시 접수');expect(scheduledPolicies([p],day,'soon','deadline')).toHaveLength(0);expect(scheduledPolicies([p],day,'ongoing','deadline')).toHaveLength(1);});
@@ -19,3 +21,15 @@ it('만료된 응답은 D-day와 신청 링크를 숨기지만 출처와 조건�
 it('날짜와 서버 남은 일수가 다르면 확정 표시하지 않는다',()=>{const p=policy('A',3);p.application_schedule!.days_to_end=4;expect(scheduleView(p,day).status).toBe('unknown');expect(scheduleView(p,day).badge).toBe('');});
 
 it('기존 API의 일정 필드 생략 시 접수 상태만 보존하고 D-day는 생성하지 않는다',()=>{for(const status of ['open','before','closed','unknown'] as const){const p=policy('legacy',3,status);delete p.application_schedule;const s=scheduleView(p,day);expect(s.status).toBe(status);expect(s.badge).toBe('');expect(s.remaining).toBeNull();expect(scheduledPolicies([p],day,'soon','deadline')).toEqual([]);}});
+
+it('마감 임박·마감순 순위는 서버 값(closing_soon·deadline_rank)을 그대로 쓴다 (#165, 계약 v1.13)',()=>{
+  // 남은 일수가 7일 이내여도 서버가 closing_soon=false로 보내면 마감 임박으로 보지 않는다(화면이 다시 계산하지 않음).
+  const notSoon=policy('A',3);notSoon.application_schedule!.closing_soon=false;
+  expect(scheduledPolicies([notSoon],day,'soon','deadline')).toEqual([]);
+  // 정렬은 서버 순위를 따르고, 순위가 없는 예전 응답은 '모집 상태 미확인'(3) 자리에 둔다.
+  // 화면이 직접 계산하면 2일 남은 C가 앞이지만, 서버 순위(B=0, C=없음→3)를 따르면 B가 앞이다.
+  const first=policy('B',5);
+  const legacy=policy('C',2);delete legacy.deadline_rank;
+  const closed=policy('D',-1,'closed');
+  expect(scheduledPolicies([closed,legacy,first],day,'all','deadline').map(x=>x.policy.policy_id)).toEqual(['B','C','D']);
+});

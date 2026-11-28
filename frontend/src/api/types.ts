@@ -93,11 +93,15 @@ export interface ApplicationSchedule {
   is_ongoing: boolean;
   days_to_start: number | null;
   days_to_end: number | null;
+  /** v1.13: 접수 중·상시 아님·마감까지 7일 이하. 서버(Checker)가 계산한다. */
+  closing_soon?: boolean;
 }
 
 export interface PolicyCheck {
   required_documents?: SourceExcerpt[] | null;
   application_schedule?: ApplicationSchedule | null;
+  /** v1.13: 마감순 정렬 순위(0 마감일 있는 접수 중, 1 예정, 2 상시 등 접수 중, 3 미확인, 4 마감). 서버가 계산한다. */
+  deadline_rank?: number | null;
   policy_id: string;
   policy_name: string;
   agency: string;

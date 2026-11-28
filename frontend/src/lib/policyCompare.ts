@@ -79,7 +79,7 @@ export function buildComparison(inputs: CompareInput[], details: Map<string, Pol
   const counts = { open: 0, soon: 0, unknown: 0, consulted: 0 };
   views.forEach((v, i) => {
     if (v.status === 'open') counts.open++;
-    if (v.status === 'open' && !v.ongoing && v.remaining !== null && v.remaining >= 0 && v.remaining <= 7) counts.soon++;
+    if (v.closingSoon) counts.soon++;
     if (v.status === 'unknown') counts.unknown++;
     if (personal.has(inputs[i].policy.policy_id)) counts.consulted++;
   });

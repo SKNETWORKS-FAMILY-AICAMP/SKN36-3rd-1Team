@@ -6,7 +6,7 @@ from pathlib import Path
 from threading import Lock
 
 from backend.api.schemas import PolicyListResponse, PolicySummary
-from backend.eligibility.checker import KST, _reception_status, application_schedule
+from backend.eligibility.checker import DATED_OPEN_RANK, KST, _reception_status, application_schedule, deadline_rank
 from backend.rag.context_builder import valid_source_url
 from backend.rag.source_sections import application_details
 
@@ -15,8 +15,6 @@ FILES = ("neo4j/nodes_policy.jsonl", "neo4j/nodes_region.jsonl", "neo4j/nodes_ca
 # React policySearchKey(#125)와 같은 비교 규칙. 검색 별칭·정책 원문은 추가하지 않는다.
 # GET /api/policies 한 번에 돌려주는 최대 건수(web_ssr도 이 값을 기준으로 나눠 요청한다).
 MAX_LIST_LIMIT = 500
-# 목록 '마감 임박(soon)' 필터: 접수 중이고 마감까지 이 일수 이하로 남은 정책.
-SOON_WINDOW_DAYS = 7
 SEARCH_HYPHENS = "-‐‑–—－"
 
 
@@ -115,9 +113,8 @@ class PolicyCatalog:
             policy = {"graph": {"policy": node}}
             reception = _reception_status(policy, evaluated_on=today)
             schedule = application_schedule(policy, reception, evaluated_on=today)
-            remaining = schedule["days_to_end"] if schedule else None
             ongoing = bool(schedule and schedule["is_ongoing"])
-            if status == "soon" and not (reception == "open" and not ongoing and remaining is not None and 0 <= remaining <= SOON_WINDOW_DAYS):
+            if status == "soon" and not (schedule and schedule["closing_soon"]):
                 continue
             if status == "ongoing" and not (reception == "open" and ongoing):
                 continue
@@ -127,13 +124,12 @@ class PolicyCatalog:
             items.append(PolicySummary(policy_id=pid, policy_name=name, agency=agency, **relation,
                 source_url=url if valid_source_url(url) else "", official_apply_url=apply if valid_source_url(apply) else None,
                 reception_status=reception, application_schedule=schedule,
+                deadline_rank=deadline_rank(reception, schedule),
                 **details[pid]))
         def order(item: PolicySummary) -> tuple:
-            schedule = item.application_schedule
-            remaining = schedule.days_to_end if schedule else None
-            finite_open = item.reception_status == "open" and schedule and not schedule.is_ongoing and remaining is not None
-            rank = 0 if finite_open else {"before": 1, "open": 2, "unknown": 3, "closed": 4}[item.reception_status]
-            return (rank, remaining if finite_open else 0, item.policy_name, item.policy_id) if sort == "deadline" else (item.policy_name, item.policy_id)
+            dated_open = item.deadline_rank == DATED_OPEN_RANK
+            remaining = item.application_schedule.days_to_end if dated_open else 0
+            return (item.deadline_rank, remaining, item.policy_name, item.policy_id) if sort == "deadline" else (item.policy_name, item.policy_id)
         items.sort(key=order)
         return PolicyListResponse(items=items[offset:offset + limit], total=len(items), offset=offset, limit=limit,
             dataset_version=version, manifest_sha256=digest, evaluated_on=today.isoformat(),

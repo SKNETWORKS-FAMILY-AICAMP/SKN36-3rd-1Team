@@ -53,6 +53,7 @@ export function isPolicyCheck(item: unknown): item is import('./types').PolicyCh
   return isObject(item) && isString(item.policy_id) && isString(item.policy_name) && isString(item.agency)
       && isString(item.source_url) && isNullableString(item.official_apply_url)
       && (item.application_schedule == null || isApplicationSchedule(item.application_schedule))
+      && (item.deadline_rank == null || (Number.isInteger(item.deadline_rank) && (item.deadline_rank as number) >= 0 && (item.deadline_rank as number) <= 4))
       && (item.official_requirements == null || (Array.isArray(item.official_requirements) && item.official_requirements.every((requirement: unknown) =>
         isObject(requirement) && isString(requirement.label) && !!requirement.label.trim()
         && isString(requirement.value) && !!requirement.value.trim()

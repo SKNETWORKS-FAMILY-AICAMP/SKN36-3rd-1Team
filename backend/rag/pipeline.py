@@ -15,7 +15,7 @@ from backend.api.schemas import (
 from backend.core.contract import CITATION, MAX_CONTEXTS, MAX_HISTORY_TURNS, SENTENCE_BREAK
 from backend.rag.context_builder import complete_condition_evidence, rank_citable_contexts, select_contexts, valid_source_url
 from database.eligibility_fields import SCOPED_ELIGIBILITY_FIELDS
-from backend.eligibility.checker import CHECK, NO, OK, certain_required_and_failure, application_schedule
+from backend.eligibility.checker import CHECK, NO, OK, certain_required_and_failure, application_schedule, deadline_rank
 from backend.rag.official_requirements import official_requirements
 from backend.rag.source_sections import application_details
 from backend.rag.application_links import align_application_links
@@ -771,6 +771,7 @@ def _selected_policy_checks(
             ]
         check["contacts"] = contacts or None
         check["application_schedule"] = application_schedule(by_id[pid], check["reception_status"])
+        check["deadline_rank"] = deadline_rank(check["reception_status"], check["application_schedule"])
         check.update(application_details(selected))
         # 이 정책에 채택된 근거만 읽는다(정책 간 혼합 방지). Generator 입력은 바꾸지 않도록 생성 뒤에 붙인다.
         # 그래프상 이 정책의 근거 문서가 아닌 문서(evidence_document_check=MISMATCH)는 기준 추출에서 뺀다.

@@ -881,6 +881,21 @@ def _reception_status(policy: dict, *, evaluated_on: date | None = None) -> str:
 
 
 
+# '마감 임박': 접수 중이고 상시 접수가 아니며 마감까지 이 일수 이하로 남은 정책(목록 필터·화면 배지 공통).
+SOON_WINDOW_DAYS = 7
+# 마감순 정렬 순위. 마감일이 있는 접수 중 정책을 맨 앞에 두고 마감이 가까운 순으로 본다.
+_DEADLINE_RANK = {"before": 1, "open": 2, "unknown": 3, "closed": 4}
+DATED_OPEN_RANK = 0
+
+
+def deadline_rank(reception_status: str, schedule: dict | None) -> int:
+    """마감순 정렬 순위: 0 마감일이 있는 접수 중, 1 접수 예정, 2 그 밖의 접수 중(상시 등), 3 미확인, 4 마감."""
+    if (reception_status == "open" and schedule and not schedule["is_ongoing"]
+            and schedule["days_to_end"] is not None):
+        return DATED_OPEN_RANK
+    return _DEADLINE_RANK[reception_status]
+
+
 def application_schedule(policy: dict, reception_status: str, *, evaluated_on: date | None = None) -> dict | None:
     """기존 접수 판정과 일치하는 구조화 날짜만 화면에 전달한다. 판정 규칙은 변경하지 않는다."""
     if reception_status == "unknown":
@@ -891,10 +906,14 @@ def application_schedule(policy: dict, reception_status: str, *, evaluated_on: d
     node = (policy.get("graph") or {}).get("policy") or {}
     start = (node.get("application_start") or "").strip() or None
     end = (node.get("application_end") or "").strip() or None
+    is_ongoing = node.get("application_is_ongoing") is True
+    days_to_end = (date.fromisoformat(end) - today).days if end else None
     return {"evaluated_on": today.isoformat(), "start_date": start, "end_date": end,
-            "is_ongoing": node.get("application_is_ongoing") is True,
+            "is_ongoing": is_ongoing,
             "days_to_start": (date.fromisoformat(start) - today).days if start else None,
-            "days_to_end": (date.fromisoformat(end) - today).days if end else None}
+            "days_to_end": days_to_end,
+            "closing_soon": (reception_status == "open" and not is_ongoing and days_to_end is not None
+                             and 0 <= days_to_end <= SOON_WINDOW_DAYS)}
 
 
 # #42: AGE 조건 미추출 안내는 설명 문구에 신청자 연령이 명시된 때만 추가한다.
