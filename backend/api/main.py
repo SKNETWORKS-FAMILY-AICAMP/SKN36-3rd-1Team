@@ -1,6 +1,6 @@
 """질문 API와 프로세스별 Hybrid 검색 세션을 관리한다."""
 
-from collections.abc import Callable, Collection
+from collections.abc import AsyncIterator, Callable, Collection
 from contextlib import asynccontextmanager
 import logging
 import os
@@ -97,10 +97,10 @@ def _generate_answer(
 def create_app(
     *,
     session_factory: Callable[[], HybridSearchSession] = _new_search_session,
-    check_fn: Callable = _check_eligibility,
-    generate_fn: Callable = _generate_answer,
+    check_fn: Callable[[dict, dict], dict] = _check_eligibility,
+    generate_fn: Callable[..., dict] = _generate_answer,
     display_fn: Callable[[list[dict]], list[dict]] | None = None,
-    catalog_factory: Callable = PolicyCatalog,
+    catalog_factory: Callable[[], PolicyCatalog] = PolicyCatalog,
     requirement_reviews: Collection[dict] = (),
 ) -> FastAPI:
     """서버 수명 동안 검색 세션을 재사용한다. 검색 호출만 직렬화한다.
@@ -110,7 +110,7 @@ def create_app(
     search_lock = Lock()
 
     @asynccontextmanager
-    async def lifespan(application: FastAPI):
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         application.state.search_ready = False
         application.state.session = None
         application.state.catalog = catalog_factory()
