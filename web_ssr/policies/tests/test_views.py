@@ -32,6 +32,15 @@ class PolicyDetailViewTests(SimpleTestCase):
         self.assertIn("<title>가상 정책 POL_TEST_001 · SSOK 정책 상세</title>", html)
         self.assertIn('name="ssok-render" content="django-ssr"', html)
 
+    def test_screen_names_match_react_tabs(self):
+        # React 첫 화면 탭 이름(#168 '맞춤 정책 찾기', 목록 제목 '전체 정책')과 같은 이름을 쓴다
+        html = _visible_text(self.get("POL_TEST_001", response(make_page([make_item()]))).content.decode())
+        self.assertIn('#/">맞춤 정책 찾기</a>', html)
+        self.assertIn("전체 정책 <span", html)
+        self.assertIn("맞춤 정책 찾기로</a>", html)
+        for old in ("상담하기", "정책 둘러보기", "상담 화면"):
+            self.assertNotIn(old, html)
+
     def test_reverse_url_and_trailing_slash(self):
         self.assertEqual(reverse("policies:detail", args=["POL_010"]), "/policies/POL_010/")
 

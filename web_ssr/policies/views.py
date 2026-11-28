@@ -97,7 +97,7 @@ def page_theme(request: HttpRequest) -> str:
 def _error(request: HttpRequest, status: int) -> HttpResponse:
     messages = {
         404: ("정책을 찾을 수 없어요", "주소가 올바른지 확인해 주세요. 정책이 목록에서 빠졌을 수도 있어요."),
-        503: ("정책 정보를 잠시 불러올 수 없어요", "잠시 후 다시 시도해 주세요. 상담 화면에서는 계속 정책을 둘러볼 수 있어요."),
+        503: ("정책 정보를 잠시 불러올 수 없어요", "잠시 후 다시 시도해 주세요. 맞춤 정책 찾기에서는 계속 정책을 둘러볼 수 있어요."),
         500: ("일시적인 문제가 생겼어요", "잠시 후 다시 시도해 주세요."),
     }
     title, message = messages[status]
