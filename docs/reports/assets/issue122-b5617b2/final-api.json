@@ -1,0 +1,4820 @@
+{
+ "note": "sample_only 가상 프로필. dev b5617b2, R3D verify B2(Neo4j :56787·Qdrant :56756), 실제 LLM. 08-4는 잘못된 DB 포트 서버(:18362)와 손상 릴리스 사본 서버(:18363).",
+ "runs": [
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": null
+    }
+   },
+   "status": 422,
+   "seconds": 0.04,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 history 누락",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "  ",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 422,
+   "seconds": 0.01,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 question 빈 값",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": "스물",
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 422,
+   "seconds": 0.02,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 age 문자열",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": 121,
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 age 범위 밖",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": -1
+    },
+    "history": []
+   },
+   "status": 422,
+   "seconds": 0.02,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 income 음수",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "pol_x'; DROP"
+   },
+   "status": 422,
+   "seconds": 0.01,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 selected_policy_id 형식",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "가상 질문",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": null
+    },
+    "history": [
+     {
+      "role": "system",
+      "text": "x"
+     }
+    ]
+   },
+   "status": 422,
+   "seconds": 0.02,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 history role 잘못",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": "{not json",
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "06-3 JSON 문법 오류",
+   "echo": false
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18362/api/ask",
+   "request": {
+    "question": "청년 월세 지원 알려줘",
+    "profile": {
+     "age": 29,
+     "region": "서울",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 503,
+   "seconds": 2.77,
+   "response": {
+    "detail": {
+     "code": "SEARCH_BACKEND_UNAVAILABLE",
+     "message": "정책 검색 서비스를 잠시 이용할 수 없습니다."
+    }
+   },
+   "id": "08-4 검색 DB 중단 POST /api/ask"
+  },
+  {
+   "method": "GET",
+   "url": "http://127.0.0.1:18362/api/policies?limit=1",
+   "request": null,
+   "status": 200,
+   "seconds": 0.08,
+   "response": {
+    "total": 249,
+    "dataset_version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "evaluated_on": "2026-11-28",
+    "items_shown": 1
+   },
+   "id": "08-4 검색 DB 중단 중 GET /api/policies(목록은 릴리스 파일)"
+  },
+  {
+   "method": "GET",
+   "url": "http://127.0.0.1:18363/api/policies?limit=1",
+   "request": null,
+   "status": 200,
+   "seconds": 0.1,
+   "response": {
+    "total": 249,
+    "dataset_version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "evaluated_on": "2026-11-28",
+    "items_shown": 1
+   },
+   "id": "08-4 손상 전 GET"
+  },
+  {
+   "method": "GET",
+   "url": "http://127.0.0.1:18363/api/policies?limit=1",
+   "request": null,
+   "status": 503,
+   "seconds": 0.01,
+   "response": {
+    "detail": {
+     "code": "POLICY_CATALOG_UNAVAILABLE",
+     "message": "정책 목록을 잠시 불러올 수 없습니다."
+    }
+   },
+   "id": "08-4 손상 후 GET(해시 불일치)"
+  },
+  {
+   "method": "GET",
+   "url": "http://127.0.0.1:18363/api/policies?limit=1",
+   "request": null,
+   "status": 200,
+   "seconds": 0.06,
+   "response": {
+    "total": 249,
+    "dataset_version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "evaluated_on": "2026-11-28",
+    "items_shown": 1
+   },
+   "id": "08-4 복구 후 GET"
+  },
+  {
+   "method": "GET",
+   "url": "http://127.0.0.1:18360/api/policies?limit=500",
+   "request": null,
+   "status": 200,
+   "seconds": 0.09,
+   "response": {
+    "total": 249,
+    "dataset_version": "1.4.0-candidate",
+    "manifest_sha256": "b31307223f7334ffb7588d55670318d07d36e3fc18a78f62e8c961fdad04f3da",
+    "evaluated_on": "2026-11-28",
+    "items_shown": 249
+   },
+   "id": "01-1 GET /api/policies"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "발달재활서비스 지원(시자체) 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+    "profile": {
+     "age": 45,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_042"
+   },
+   "status": 200,
+   "seconds": 6.4,
+   "response": {
+    "status": "answered",
+    "answer": "발달재활서비스 지원(시자체)는 현재 접수 중이에요. 신청은 거주지 관할 읍면동 행정복지센터에 방문해서 하면 됩니다. 직접 신청 링크는 확인되지 않았어요. [1]\n\n지원 대상은 원문상 만 18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동, 또는 만 9세 미만의 장애가 예견되는 아동입니다. 다만 현재 입력된 만 45세는 이 대상 연령에 해당하지 않아, 신청 대상로 보기 어렵습니다. [3]\n\n필요한 서류는 발달재활서비스 신청서이고, 만 9세 미만 장애예견아동(장애미등록아동)은 발달재활서비스 의뢰서와 검사자료도 필요합니다. [1]\n\n소득 기준은 원문에 국비사업 소득기준(중위소득 180% 초과자)라고만 적혀 있어, 실제 적용 방식은 추가 확인이 필요합니다. [2]\n\n문의처는 장애인복지과 033-250-4326입니다. [1]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "ineligible"
+       },
+       {
+        "field": "income",
+        "label": "소득",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "income",
+        "label": "소득 요건",
+        "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "policy_name": "발달재활서비스 지원(시자체)",
+      "agency": "강원특별자치도 춘천시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "033-250-4326",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원의 소득 기준은 어떻게 적용되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원의 지원대상 범위를 더 자세히 알려주세요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "03-2 GOV042 45세 run1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "만 45세인데 발달재활서비스 지원(시자체) 신청할 수 있나요?",
+    "profile": {
+     "age": 45,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_042"
+   },
+   "status": 200,
+   "seconds": 2.31,
+   "response": {
+    "status": "answered",
+    "answer": "발달재활서비스 지원(시자체)는 **만 45세는 신청 대상에 해당하지 않습니다**. 공식 원문 지원대상은 만 18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동, 또는 만 9세 미만의 장애가 예견되는 아동으로 되어 있어요[3]. 따라서 현재 입력된 나이 기준으로는 신청할 수 없습니다[3].\n\n접수는 현재 접수 중이에요[1]. 다만 신청 주소는 확인되지 않았어요. 공식 원문에는 방문 신청과 거주지 관할 읍면동 행정복지센터 방문이 안내되어 있지만, 실제 온라인/직접 신청 링크는 제공되지 않았습니다[1].\n\n소득 기준은 원문에 국비사업 소득기준(중위소득 180%) 초과자라는 문구가 있으나, 이 사업의 정확한 적용 기준과 본인 해당 여부는 추가 확인이 필요합니다[2].",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "ineligible"
+       },
+       {
+        "field": "income",
+        "label": "소득",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "income",
+        "label": "소득 요건",
+        "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "policy_name": "발달재활서비스 지원(시자체)",
+      "agency": "강원특별자치도 춘천시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "033-250-4326",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원(시자체)의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원(시자체)의 신청 방법은 어떻게 되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "03-2 GOV042 45세 run1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "발달재활서비스 지원(시자체) 지원 대상이랑 신청 방법, 필요한 서류 알려줘",
+    "profile": {
+     "age": 45,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_042"
+   },
+   "status": 200,
+   "seconds": 2.41,
+   "response": {
+    "status": "answered",
+    "answer": "발달재활서비스 지원(시자체)는 현재 접수 중이에요. 신청은 거주지 관할 읍면동 행정복지센터를 방문해서 하면 됩니다. 직접 신청 링크는 확인되지 않았어요. [1]\n\n지원 대상은 원문상 만 18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동, 또는 만 9세 미만의 장애가 예견되는 아동입니다. 또한 국비사업 소득기준(중위소득 180%) 초과자는 지원내용에 해당한다고 적혀 있어, 소득 기준은 원문에서 추가 확인이 필요합니다. [3][2]\n\n현재 입력된 만 45세는 원문에 나온 지원 대상 연령과 맞지 않아, 이 정책의 지원 대상로 보기 어렵습니다. 다만 소득·거주지·장애 여부 등은 추가 확인이 필요합니다. [3][2]\n\n필요 서류는 발달재활서비스 신청서이며, 만 9세 미만 장애예견아동(장애미등록아동)은 발달재활서비스 의뢰서와 검사자료도 필요합니다. [1]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "ineligible"
+       },
+       {
+        "field": "income",
+        "label": "소득",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "income",
+        "label": "소득 요건",
+        "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "policy_name": "발달재활서비스 지원(시자체)",
+      "agency": "강원특별자치도 춘천시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "033-250-4326",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원의 소득 기준은 어떻게 확인하나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원의 방문 신청 절차는 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원의 지원 대상 장애 유형은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "03-2 GOV042 45세 run2"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "만 45세인데 발달재활서비스 지원(시자체) 신청할 수 있나요?",
+    "profile": {
+     "age": 45,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_042"
+   },
+   "status": 200,
+   "seconds": 2.04,
+   "response": {
+    "status": "answered",
+    "answer": "발달재활서비스 지원(시자체)는 **만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동** 또는 **만9세 미만의 장애가 예견되는 아동**이 지원대상이라서, 만 45세인 경우에는 해당 대상에 포함되지 않아 신청할 수 없습니다. [3]\n\n접수는 현재 접수 중이에요. 다만 신청은 거주지 관할 읍면동 행정복지센터를 방문해서 해야 하고, 직접 신청 링크는 확인되지 않았어요. [1]\n\n소득 기준은 원문에 국비사업 소득기준(중위소득 180%) 초과자라는 문구가 보이지만, 이 사업의 공식 원문만으로는 세부 판정 기준을 확정하기 어렵습니다. [2]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 발달재활서비스 지원(시자체) (418000000233)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "document_id": "DOC_GOV_042",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_042",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 0~17세 기준에 입력한 만 45세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "ineligible"
+       },
+       {
+        "field": "income",
+        "label": "소득",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "income",
+        "label": "소득 요건",
+        "reason": "소득 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 기준중위소득 180% 초과 여부 원문 검토 메모: 춘천시 시자체 사업. 복지로(2025-06-19 수정) 지원대상·선정기준 기준중위소득 180% 초과 필요한 소득 정보를 추가로 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "○ 발달재활서비스 신청서\r\n○ 만9세 미만 장애예견아동(장애미등록아동)의 경우, 발달재활서비스 의뢰서 및 검사자료",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "policy_name": "발달재활서비스 지원(시자체)",
+      "agency": "강원특별자치도 춘천시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "033-250-4326",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 만18세 미만의 시각·청각·언어·지적·자폐성·뇌병변 장애아동 \r\n\r\n○ 만9세 미만의 장애가 예견되는 아동",
+        "document_id": "DOC_GOV_042",
+        "chunk_id": "CHK_B2_DOC_GOV_042_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1001979&bnefType=all&svcId=418000000233",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원(시자체)의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "발달재활서비스 지원(시자체)의 지원대상은 어떻게 되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "03-2 GOV042 45세 run2"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "profile": {
+     "income": null,
+     "age": null,
+     "region": ""
+    },
+    "question": "수산자원보호 직접지불제는 1년에 며칠 이상 조업해야 하나요?",
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.58,
+   "response": {
+    "status": "answered",
+    "answer": "해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다. TAC 적용 어종을 주로 어획하는 어선은 30일 이상이면 됩니다 [1].\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+      "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "page_number": 1
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_006",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침 별지 제1호 서식), 수산자원보호 의무 이행계획서 및 증빙자료(지침 별지 제2호 서식)와 필요 구비서류를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출\r\n\r\n▸ 선정신청서 제출시 구비서류\r\n  ① 직접지불금 입금 통장 사본\r\n  ② 수산물 판매 영수증 사본 등 어업 생산실적 증명자료(위판실적 등 확인되는 경우는 제출 불필요)\r\n  ③ 수산자원보호의무 이행계획서(지침 별지 제2호 서식)\r\n\r\nㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등이 포함된 단체(협회, 단체, 조합 등)는 수산자원보호 직접지불금 지급대상단체 선정신청서(지침 별지 제3호 서식)와 수산자원보호의무 이행 세부계획서(지침 별지 제4호 서식) 각 1부를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194"
+       }
+      ],
+      "policy_name": "수산자원보호 직접지불제",
+      "agency": "해양수산부",
+      "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "해양수산부 수산직불제팀",
+        "phone": "051-773-5454",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 지급요건은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "RQ031 RQ031"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "profile": {
+     "income": null,
+     "age": null,
+     "region": ""
+    },
+    "question": "수산자원보호 직접지불제에서 해당 연도 조업일수가 정확히 60일이면 지급요건을 충족하나요? 원문의 지급요건과 지급제한 기준을 구분해서 알려주세요.",
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.18,
+   "response": {
+    "status": "answered",
+    "answer": "60일은 최소 조업일수 요건을 충족합니다. 해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다. TAC 적용 어종을 주로 어획하는 어선은 30일 이상이면 됩니다 [1]. 정부24의 지급제한 안내에 적힌 ‘60일 이하’에는 60일이 포함됩니다 [2]. 실제 지급제한과 최종 지급 자격은 별도 확인이 필요합니다.\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+      "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "page_number": 1
+     },
+     {
+      "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+      "document_id": "DOC_GOV_006",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_006",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "ㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등은 본인이 직접 작성하여 서명한 수산자원보호 직접지불금 지급대상자 선정신청서(지침 별지 제1호 서식), 수산자원보호 의무 이행계획서 및 증빙자료(지침 별지 제2호 서식)와 필요 구비서류를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출\r\n\r\n▸ 선정신청서 제출시 구비서류\r\n  ① 직접지불금 입금 통장 사본\r\n  ② 수산물 판매 영수증 사본 등 어업 생산실적 증명자료(위판실적 등 확인되는 경우는 제출 불필요)\r\n  ③ 수산자원보호의무 이행계획서(지침 별지 제2호 서식)\r\n\r\nㅇ 수산자원보호 직불금을 신청하고자 하는 어업인 등이 포함된 단체(협회, 단체, 조합 등)는 수산자원보호 직접지불금 지급대상단체 선정신청서(지침 별지 제3호 서식)와 수산자원보호의무 이행 세부계획서(지침 별지 제4호 서식) 각 1부를 해당 어업허가 처분권 소재 시‧도 또는 시‧군‧구에 제출",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C009",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194"
+       }
+      ],
+      "policy_name": "수산자원보호 직접지불제",
+      "agency": "해양수산부",
+      "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "해양수산부 수산직불제팀",
+        "phone": "051-773-5454",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "선정기준"
+       },
+       {
+        "text": "□ 지원 대상\r\n\r\n  ㅇ 수산자원의 지속가능한 이용을 위하여 휴어 등 강화된 자원보호 의무를 이행하는 어업인등과 「수산업법」제41조에 따라 허가를 받은 「상법」상 회사 \r\n\r\n□ 제외 대상\r\n\r\n  ㅇ 신청일 이전 3년 이내에 거짓이나 그 밖의 부정한 방법으로 어업경영체에 등록하거나, 수산자원보호 직접지불금을 수령한 경우 \r\n\r\n  ㅇ 신청일 이전 1년 이내에 거짓이나 그 밖의 부정한 방법으로 수산자원보호 직접지불금을 신청한 경우 \r\n\r\n  ㅇ ｢해양수산부 국고보조금 관리에 관한 규정｣ 제13조제4항 및 제23조제1항의 각호에 해당하는 사람은 선정 및 보조금 교부 제외",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C002",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 제외 대상은 어떤 경우인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "RQ031 RQ031_EXACT60"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "profile": {
+     "income": null,
+     "age": null,
+     "region": ""
+    },
+    "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 59일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.95,
+   "response": {
+    "status": "answered",
+    "answer": "59일은 최소 조업일수 요건을 충족하지 않습니다. 해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다. TAC 적용 어종을 주로 어획하는 어선은 30일 이상이면 됩니다 [1]. 정부24의 지급제한 안내에 적힌 ‘60일 이하’에는 59일이 포함됩니다 [2]. 실제 지급제한과 최종 지급 자격은 별도 확인이 필요합니다.\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+      "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "page_number": 1
+     },
+     {
+      "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+      "document_id": "DOC_GOV_006",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_006",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "수산자원보호 직접지불제",
+      "agency": "해양수산부",
+      "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "해양수산부 수산직불제팀",
+        "phone": "051-773-5454",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "조업일수 59일일 때 미지급 비율이 어떻게 적용되는지 더 자세히 볼까요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "RQ031 BOUNDARY_59"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "profile": {
+     "income": null,
+     "age": null,
+     "region": ""
+    },
+    "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 60일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.45,
+   "response": {
+    "status": "answered",
+    "answer": "60일은 최소 조업일수 요건을 충족합니다. 해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다. TAC 적용 어종을 주로 어획하는 어선은 30일 이상이면 됩니다 [1]. 정부24의 지급제한 안내에 적힌 ‘60일 이하’에는 60일이 포함됩니다 [2]. 실제 지급제한과 최종 지급 자격은 별도 확인이 필요합니다.\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+      "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "page_number": 1
+     },
+     {
+      "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+      "document_id": "DOC_GOV_006",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_006",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "수산자원보호 직접지불제",
+      "agency": "해양수산부",
+      "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "해양수산부 수산직불제팀",
+        "phone": "051-773-5454",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 최종 지급 자격에 필요한 다른 요건은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "RQ031 BOUNDARY_60"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "profile": {
+     "income": null,
+     "age": null,
+     "region": ""
+    },
+    "question": "수산자원보호 직접지불제에서 2026년 조업일수가 정확히 61일이고, 총허용어획량(TAC) 적용 어종을 주로 어획하는 어선에 해당하지 않습니다. 최소 조업일수 요건을 충족하나요? 그 요건과 지급제한 및 최종 지급 자격을 구분해서 알려주세요.",
+    "history": []
+   },
+   "status": 200,
+   "seconds": 4.56,
+   "response": {
+    "status": "answered",
+    "answer": "61일은 최소 조업일수 요건을 충족합니다. 해양수산부 고시의 최소 조업일수는 해당 연도 60일 이상입니다. TAC 적용 어종을 주로 어획하는 어선은 30일 이상이면 됩니다 [1]. 정부24의 지급제한 안내에 적힌 ‘60일 이하’에는 61일이 포함되지 않습니다 [2]. 실제 지급제한과 최종 지급 자격은 별도 확인이 필요합니다.\n\n현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "수산자원보호 직접지불금의 준수의무 및 총톤수 구분 기준 고시 [별표] — 최소조업일수 (해양수산부고시 제2024-6호)",
+      "url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "document_id": "DOC_GOV_006_MOF_NOTICE_2024",
+      "page_number": 1
+     },
+     {
+      "title": "[정부24 공공서비스] 수산자원보호 직접지불제 (119200000194)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+      "document_id": "DOC_GOV_006",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_006",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "수산자원보호 직접지불제",
+      "agency": "해양수산부",
+      "source_url": "https://www.law.go.kr/행정규칙/수산자원보호직접지불금의준수의무및총톤수구분기준고시",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "해양수산부 수산직불제팀",
+        "phone": "051-773-5454",
+        "document_id": null,
+        "chunk_id": null,
+        "source_url": null
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "□ 지급요건\r\n\r\n  ㅇ 직불금 신청년도에 수산업·어촌의 공익기능 증진을 위한 관련 교육을 이수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 직불금 신청년도에 「수산업법」, 「어선법」, 「수산자원관리법」등 수산관계법령을 준수할 것(직불금 지급일 이전까지)\r\n\r\n  ㅇ 「농어업경영체 육성 및 지원에 관한 법률」 제4조제1항제2호에 따라 어업경영 관련 정보 등을 등록하고, 등록된 어업경영정보의 중요한 사항이 변경된 경우에는 14일 이내에 변경등록을 할 것\r\n\r\n  ㅇ 직불금 신청일로부터 이행점검 절차 종료일까지 어업허가가 유효할 것\r\n\r\n  ㅇ 직불금 신청년도에 아래의 준수의무 중 기본의무를 준수함과 동시에 선택의무 2개 이상을 준수(기준 및 준수방법 등은 해양수산부와 사전 협의하여 정할 수 있다)하고, 해당 연도 조업일수가 60일 이상일 것\r\n\r\n\r\n<수산자원보호 준수의무>\r\n\r\n1. 기본의무 : 총허용어획량 할당 / 「수산자원관리법」제36조\r\n\r\n 가. 근해어업 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수할 것(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함)\r\n 나. 연안어업 등 : 해양수산부장관 또는 시ㆍ도지사가 정하는 총허용어획량을 할당받아 준수하거나(총허용어획량 시범사업을 통해 할당받아 준수한 경우도 포함), 일일어획량 제한 등 어획량을 규제할 것",
+        "document_id": "DOC_GOV_006",
+        "chunk_id": "CHK_B2_DOC_GOV_006_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=798789&bnefType=all&svcId=119200000194",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 제도의 신청 요건 중 교육 이수와 어업허가 요건은 어떻게 확인하나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "수산자원보호 직접지불제의 지원대상과 지급방식은 어떻게 구분되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "조업일수 60일 이하 미지급 기준은 어떤 방식으로 적용되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "RQ031 BOUNDARY_61"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": 10
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 200,
+   "seconds": 1.84,
+   "response": {
+    "status": "answered",
+    "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청은 상시 가능하고, 방문 신청으로 전주시 동 주민센터에서 접수합니다. 직접 신청 링크는 확인되지 않았어요. [2]\n\n지원대상은 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인입니다. 지원금액은 자녀 1인당 월 10만원이고, 생후 24개월까지 지원됩니다. [1][3]\n\n다만 입력하신 지역은 서울특별시라서, 전주시 관내 거주 요건은 충족 여부를 이 원문만으로는 확인할 수 없습니다. 자녀 월령 10개월은 24개월 미만 기준에는 들어갑니다. [1][3]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_050",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "children",
+        "label": "자녀 월령",
+        "reason": "자녀 월령 24개월 이하 기준에 입력한 10개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "housing",
+        "label": "가구 요건",
+        "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "신분증",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "policy_name": "장애인가정 양육비용 지원",
+      "agency": "전북특별자치도 전주시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "063-281-2358",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "장애인가정 양육비용 지원의 구비서류는 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-3 GOV050 10"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": 24
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 200,
+   "seconds": 1.99,
+   "response": {
+    "status": "answered",
+    "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청은 동 주민센터 방문으로 안내되어 있고, 직접 신청 링크는 확인되지 않았어요. [2]\n\n지원대상은 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인가정입니다. 원문에는 지원금액이 월 10만원(자녀 1인당), 지원기간은 생후 24개월까지로 적혀 있습니다. [1][3]\n\n다만 입력하신 거주지는 서울특별시라서, 전주시 관내 거주 요건과는 맞지 않아 보입니다. 또한 자녀 월령 24개월은 원문 기준인 24개월 미만에 포함되지 않으므로, 이 기준만 보면 대상에서 제외됩니다. [1][3]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_050",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "children",
+        "label": "자녀 월령",
+        "reason": "자녀 월령 24개월 이하 기준에 입력한 24개월은 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "housing",
+        "label": "가구 요건",
+        "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "신분증",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "policy_name": "장애인가정 양육비용 지원",
+      "agency": "전북특별자치도 전주시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "063-281-2358",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "전주시 관내 거주 요건은 어떻게 확인하나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "장애인가정 양육비용 지원의 신청 서류는 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-3 GOV050 24"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": 25
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 200,
+   "seconds": 1.92,
+   "response": {
+    "status": "answered",
+    "answer": "**장애인가정 양육비용 지원**은 현재 접수 중이에요. 신청은 주소지 관할 동 주민센터를 방문해서 할 수 있고, 공식 원문에는 신청기한이 상시신청으로 안내돼 있습니다. 다만 신청 주소는 별도로 확인되지 않았어요. [2]\n\n지원대상은 신청일 현재 전주시 관내에 주민등록을 두고 거주하면서 24개월 미만 아이를 양육하는 장애인가정입니다. 지원금액은 자녀 1인당 월 10만원이고, 지원기간은 생후 24개월까지입니다. [1][3]\n\n현재 입력된 정보 기준으로는 거주지가 서울특별시이고 자녀 월령이 25개월이라, 원문에 적힌 대상 요건과는 맞지 않습니다. 따라서 이 정책은 지금 입력 기준으로는 신청 대상이 아니에요. [1][3]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_050",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "children",
+        "label": "자녀 월령",
+        "reason": "자녀 월령 24개월 이하 기준에 입력한 25개월은 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "housing",
+        "label": "가구 요건",
+        "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "신분증",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "policy_name": "장애인가정 양육비용 지원",
+      "agency": "전북특별자치도 전주시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "063-281-2358",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-3 GOV050 25"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 200,
+   "seconds": 1.97,
+   "response": {
+    "status": "info",
+    "answer": "**장애인가정 양육비용 지원**은 전주시 관내에 주민등록을 두고 거주하는 장애인 가정이면서 24개월 미만 아이를 양육하는 경우를 대상으로 하고, 지원금액은 월 10만원(자녀 1인당)입니다 [1][3]. 현재 접수는 진행 중이지만, 입력된 지역이 서울특별시라서 전주시 관내 거주 요건은 충족 여부를 확인할 수 없고, 자녀 월령도 입력되지 않아 자격을 확정할 수 없습니다 [1][2][3]. 신청은 동 주민센터 방문신청이며, 직접 신청 링크는 확인되지 않았어요 [2].",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인가정 양육비용 지원 (464000000119)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "document_id": "DOC_GOV_050",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_050",
+      "conditions": [
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "이 정책의 대상 지역은 전북특별자치도이고 입력한 지역(서울특별시)과 달라요. 거주 요건을 공식 공고에서 확인해 주세요.",
+        "status": "needs_check"
+       },
+       {
+        "field": "children",
+        "label": "자녀 월령",
+        "reason": "자녀 월령(개월 수)을 확인해야 합니다. 기준: 24개월 이하. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "housing",
+        "label": "가구 요건",
+        "reason": "가구 요건의 공식 원문 기준을 추가 확인해야 합니다. 확인할 항목: 장애인가정 해당 여부 원문 검토 메모: 장애인가정 요건이 있으나 그래프에 해당 가구 유형이 없음 가구 관련 추가 정보를 답변 본문에서 확인해 주세요.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": [
+       {
+        "text": "신분증",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "policy_name": "장애인가정 양육비용 지원",
+      "agency": "전북특별자치도 전주시",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "장애인복지과",
+        "phone": "063-281-2358",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 24개월 미만 아이를 양육하면서, 신청일 현재 전주시 관내에 주민등록을 두고 거주하는 장애인",
+        "document_id": "DOC_GOV_050",
+        "chunk_id": "CHK_B2_DOC_GOV_050_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1004747&bnefType=all&svcId=464000000119",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 지원사업의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "전주시 장애인가정 양육비용 지원의 문의처는 어디인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-3 GOV050 omit"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": -1
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 422,
+   "seconds": 0.01,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "04-3 GOV050 bad -1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": 1.5
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "04-3 GOV050 bad 1.5"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": "a"
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "04-3 GOV050 bad 'a'"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": "24"
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "04-3 GOV050 bad '24'"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인가정 양육비용 지원 받을 수 있나요?",
+    "profile": {
+     "age": 32,
+     "region": "서울",
+     "income": null,
+     "child_age_months": true
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_050"
+   },
+   "status": 422,
+   "seconds": 0.0,
+   "response": {
+    "detail": {
+     "code": "INVALID_REQUEST",
+     "message": "질문 및 프로필 입력 형식을 확인해 주세요."
+    }
+   },
+   "id": "04-3 GOV050 bad True"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "북한이탈주민 정착금 지원(가산금) 지원 대상이랑 신청 방법 알려줘",
+    "profile": {
+     "age": 30,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_008"
+   },
+   "status": 200,
+   "seconds": 2.09,
+   "response": {
+    "status": "answered",
+    "answer": "북한이탈주민 정착금 지원(가산금)은 **통일부 장관의 보호 결정을 받은 북한이탈주민**이 대상입니다. 또한 보호결정 당시 만 60세 이상이거나, 보호결정 당시 한부모가정으로서 북한이탈주민 자녀가 있거나, 제3국출생 아동 자녀가 있거나, 중증질환으로 장기치료를 받거나, 장애등급을 받은 경우가 선정기준으로 제시되어 있습니다. [2]\n\n신청 방법은 남북하나재단에 신청하는 것으로 안내되어 있고, 접수기관은 남북하나재단 교육지원부입니다. 다만 직접 신청 링크는 확인되지 않았어요. [1]\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. [1]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 북한이탈주민 정착금 지원(가산금) (125000000015)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+      "document_id": "DOC_GOV_008",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 북한이탈주민 정착금 지원(가산금) (125000000015)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+      "document_id": "DOC_GOV_008",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_008",
+      "conditions": [
+       {
+        "field": "housing",
+        "label": "가구·주거 조건",
+        "reason": "가구주거조건: 북한이탈주민은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "이 정책의 나이 기준이 데이터에 정리되지 않아 공식 원문에서 확인이 필요합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "북한이탈주민 정착금 지원(가산금)",
+      "agency": "통일부",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "북한이탈주민정착지원사무소 교육기획과",
+        "phone": "031-670-9323",
+        "document_id": "DOC_GOV_008",
+        "chunk_id": "CHK_B2_DOC_GOV_008_C004",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015"
+       },
+       {
+        "agency": "북한이탈주민정착지원사무소 교육기획과",
+        "phone": "031-670-9350",
+        "document_id": "DOC_GOV_008",
+        "chunk_id": "CHK_B2_DOC_GOV_008_C004",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015"
+       },
+       {
+        "agency": "남북하나재단 교육기획부",
+        "phone": "02-3215-5853",
+        "document_id": "DOC_GOV_008",
+        "chunk_id": "CHK_B2_DOC_GOV_008_C004",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 북한이탈주민의 보호 및 정착 지원에 관한 법률 제8조 제1항에 따른 통일부 장관의 보호 결정을 받은 북한이탈주민",
+        "document_id": "DOC_GOV_008",
+        "chunk_id": "CHK_B2_DOC_GOV_008_C002",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+        "label": "지원대상"
+       },
+       {
+        "text": "○ 보호결정 당시 만 60세 이상인 자\r\n\r\n○ 보호결정 당시 한부모가정으로서 북한이탈주민 자녀가 있는 북한이탈주민\r\n\r\n○ 제3국출생 아동 자녀가 있는 북한이탈주민\r\n\r\n○ 중증질환으로 장기치료를 받는 북한이탈주민\r\n\r\n○ 장애등급을 받은 북한이탈주민",
+        "document_id": "DOC_GOV_008",
+        "chunk_id": "CHK_B2_DOC_GOV_008_C002",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=736419&bnefType=all&svcId=125000000015",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 지원 내용과 금액도 알려주세요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "북한이탈주민 정착금 지원(가산금)의 문의처는 어디인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-4 Q102 POL_GOV_008"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 지원 대상이랑 신청 방법 알려줘",
+    "profile": {
+     "age": 30,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_011"
+   },
+   "status": 200,
+   "seconds": 2.86,
+   "response": {
+    "status": "answered",
+    "answer": "이 정책은 **만 12세~만 24세**의 소년원 출원생, 보호관찰 대상자 등 소외계층 청소년이 지원대상입니다. 따라서 입력된 만 30세는 선정기준에 맞지 않아 현재 기준으로는 대상이 아닙니다. [2]\n\n신청 방법은 방문, 우편, 전화, FAX, 이메일이며, 접수기관은 (재)한국소년보호협회입니다. 방문은 강원, 대구, 대전, 의왕, 안양, 광주, 부산, 전북청소년자립생활관 및 화성, 안산청소년창업비전센터에서 가능하다고 안내되어 있습니다. [1]\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. 직접 신청 링크는 확인되지 않았어요. [1]",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 (127000000037)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+      "document_id": "DOC_GOV_011",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원 (127000000037)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+      "document_id": "DOC_GOV_011",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_011",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 12~24세 기준에 입력한 만 30세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과).",
+        "status": "ineligible"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "○ 제출서류\r\n- 입주(이용)신청서\r\n- 주민등록등본\r\n- 보건소 건강진단서 1부(소년원 건강검진표 가능)\r\n- 반명함사진 2장\r\n- 입주(서약서)규정\r\n- 입주추천서 등",
+        "document_id": "DOC_GOV_011",
+        "chunk_id": "CHK_B2_DOC_GOV_011_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037"
+       }
+      ],
+      "policy_name": "소년원 출원생 등 소외계층 청소년을 위한 청소년자립생활관 운영 지원",
+      "agency": "법무부",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "(재)한국소년보호협회 보호사업팀",
+        "phone": "02-323-2770",
+        "document_id": "DOC_GOV_011",
+        "chunk_id": "CHK_B2_DOC_GOV_011_C003",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 소년원 출원생, 보호관찰 대상자 등 소외계층 청소년",
+        "document_id": "DOC_GOV_011",
+        "chunk_id": "CHK_B2_DOC_GOV_011_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+        "label": "지원대상"
+       },
+       {
+        "text": "지원대상과 동일(만 12세 ~ 만 24세)",
+        "document_id": "DOC_GOV_011",
+        "chunk_id": "CHK_B2_DOC_GOV_011_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=589801&bnefType=all&svcId=127000000037",
+        "label": "선정기준"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 구비서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "청소년자립생활관의 지원내용은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": null,
+    "is_sample": false
+   },
+   "id": "05-4 Q102 POL_GOV_011"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "장애인 자립생활주택 지원 지원 대상이랑 신청 방법 알려줘",
+    "profile": {
+     "age": 30,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_GOV_016"
+   },
+   "status": 200,
+   "seconds": 2.5,
+   "response": {
+    "status": "answered",
+    "answer": "**장애인 자립생활주택 지원**은 신청 대상이 두 갈래로 확인됩니다. 공고일 기준 만 19세 이상이어야 하고, ① 서울시 관할 장애인거주시설 이용인 중 지역자립욕구가 있는 사람 또는 ② 서울시에 거주하는 재가장애인 중 기초생활수급자나 차상위계층이어야 합니다 [1][3]. 다만 현재 입력만으로는 사용자가 이 두 대상 중 어디에 해당하는지, 그리고 거주 지역 요건을 공식 기준대로 충족하는지까지는 확정되지 않아 신청 자격은 추가 확인이 필요해요 [1][3].\n\n신청 방법은 방문 신청입니다. 종로구청 사회복지과 장애인정책팀에 직접 접수해야 하고, 온라인·우편 접수는 불가합니다 [1]. 신청 기간은 모집공고 시 지정된 기간이며, 주택 공실 시 별도 신청기간과 방법이 안내된다고 되어 있어 현재 접수 여부는 공식 공고에서 확인해 주세요 [1][2]. 직접 신청 링크는 확인되지 않았어요 [1].\n\n필요 서류로는 입주신청서, 자기소개서, 생활요약서, 개인정보 동의서, 건강진단서가 안내되어 있고, 재가장애인은 기초생활수급자·차상위계층 증명서를 제출해야 합니다 [2].",
+    "citations": [
+     {
+      "title": "[정부24 공공서비스] 장애인 자립생활주택 지원 (300000000103)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+      "document_id": "DOC_GOV_016",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인 자립생활주택 지원 (300000000103)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+      "document_id": "DOC_GOV_016",
+      "page_number": null
+     },
+     {
+      "title": "[정부24 공공서비스] 장애인 자립생활주택 지원 (300000000103)",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+      "document_id": "DOC_GOV_016",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_GOV_016",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 30세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "특화조건: 서울시 관할 장애인거주시설 이용인은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "특화조건: 서울시 주민등록 재가 장애인은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "특화조건: 기초생활수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "특화조건: 차상위계층은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "1.입주신청서\r\n2.자기소개서\r\n3.생활요약서\r\n4.개인정보 동의서  ※ (주의) 동의서 미제출시 신청·접수가 거부됨\r\n5.건강진단서\r\n • 최근3개월 이내 발급분, 일반검진(A형•B형 간염검사 포함)\r\n6.기초생활수급자, 차상위계층 증명서(재가장애인만 제출)\r\n7.위임장\r\n • 해당자만 제출",
+        "document_id": "DOC_GOV_016",
+        "chunk_id": "CHK_B2_DOC_GOV_016_C005",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+       }
+      ],
+      "policy_name": "장애인 자립생활주택 지원",
+      "agency": "서울특별시 종로구",
+      "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "사회복지과",
+        "phone": "02-2148-2568",
+        "document_id": "DOC_GOV_016",
+        "chunk_id": "CHK_B2_DOC_GOV_016_C005",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "○ 서울시 관할 장애인거주시설 이용인 중 지역자립욕구가 있는 19세 이상인 자 \r\n○ 서울시에 거주하는 19세이상인 재가장애인(차상위계층 또는 기초생활수급자)",
+        "document_id": "DOC_GOV_016",
+        "chunk_id": "CHK_B2_DOC_GOV_016_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=1000850&bnefType=all&svcId=300000000103",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 기간은 어떻게 안내되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-4 Q102 POL_GOV_016"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "고용24 국민내일배움카드 지원 대상이랑 신청 방법 알려줘",
+    "profile": {
+     "age": 30,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_005"
+   },
+   "status": 200,
+   "seconds": 3.11,
+   "response": {
+    "status": "info",
+    "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 다만 신청 자격은 추가 확인이 필요합니다. 공식 원문에는 국민 누구나 신청할 수 있다고 안내하면서도, 공무원·사립학교 교직원, 75세 이상, 대규모 기업 근로자 중 월 임금 300만원 이상이면서 만 45세 미만인 사람, 월 소득 500만원 이상의 특수형태근로종사자 등은 지원 제외 대상이라고 적혀 있습니다[3][6]. 또한 실업 상태라면 구직 신청이 필요하고, 재직자·자영업자·특수형태근로종사자는 원칙적으로 구직 신청이 필요하지 않지만 국가기간‧전략산업직종훈련, K-디지털 트레이닝, 일반고 특화훈련 등 일부 훈련은 구직 신청이 필요합니다[1][2].\n\n신청 방법은 온라인으로 고용24에서 신청서를 작성하거나, 거주지 관할 고용센터에 방문해 신청할 수 있습니다[1][3][4]. 다만 공식 신청 링크는 확인되지 않았어요. 수강 신청도 고용24에서 할 수 있고, 140시간 이상 장기 과정은 수강 신청 전에 훈련 진단·상담이 필요합니다[4][5]. 근로 형태를 알려 주세요.",
+    "citations": [
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_005",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 30세가 포함되지 않습니다.",
+        "status": "ineligible"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "고용24 국민내일배움카드",
+      "agency": "고용노동부 / 한국고용정보원",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 지원 제외 대상은 더 있나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "140시간 이상 장기 과정은 어떤 상담이 필요한가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-4 Q102 POL_005"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "profile": {
+     "age": 18,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_STG_ICN_001"
+   },
+   "status": 200,
+   "seconds": 2.3,
+   "response": {
+    "status": "info",
+    "answer": "현재 이 정책은 접수 여부를 공식 공고에서 확인해 주세요. 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 한다고 원문에 적혀 있습니다 [1][2]. 다만 입력된 만 18세는 원문 연령 기준인 19~39세에 포함되지 않아, 연령만 보면 대상에 해당하지 않습니다 [1][2]. 공식 신청 URL은 확인되지 않았어요. 정책 카드의 신청 주소도 null이라 직접 신청 링크는 확인되지 않았습니다 [2].",
+    "citations": [
+     {
+      "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+      "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "page_number": null
+     },
+     {
+      "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_ICN_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 18세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "policy_name": "중소기업 재직청년 복지공유제 지원",
+      "agency": "인천광역시 서해구 기업일자리정책과",
+      "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "인천 서해구청 기업일자리정책과",
+        "phone": "032-560-0941",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "이 정책의 접수 기간과 연장 여부를 더 자세히 알려주세요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-6 ICN 18"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "profile": {
+     "age": 19,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_STG_ICN_001"
+   },
+   "status": 200,
+   "seconds": 2.62,
+   "response": {
+    "status": "info",
+    "answer": "중소기업 재직청년 복지공유제 지원은 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 한다고 원문에 적혀 있습니다. 다만 현재 입력 기준으로는 지역과 종합 자격이 자동 판정 보류라서, 신청 가능 여부를 확정할 수는 없습니다. [1][2]\n\n따라서 직접 신청 링크는 확인되지 않았어요. [2]\n\n연령 근거는 원문에 19~39세로 적혀 있고, 구조화 요약에는 18세~39세로도 표시되어 있어 경계값은 원문끼리 완전히 일치하지 않습니다. 다만 이번 입력의 만 19세는 두 표현 모두에 포함됩니다. [1][2]\n\n현재 접수 여부는 공식 공고에서 확인해 주세요. [1][2]",
+    "citations": [
+     {
+      "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+      "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "page_number": null
+     },
+     {
+      "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_ICN_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 19세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "policy_name": "중소기업 재직청년 복지공유제 지원",
+      "agency": "인천광역시 서해구 기업일자리정책과",
+      "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "인천 서해구청 기업일자리정책과",
+        "phone": "032-560-0941",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "이 정책의 우선선발 대상은 누구인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-6 ICN 19"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "profile": {
+     "age": 38,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_STG_ICN_001"
+   },
+   "status": 200,
+   "seconds": 2.92,
+   "response": {
+    "status": "info",
+    "answer": "중소기업 재직청년 복지공유제 지원은 신청기간이 2026. 6. 29. ~ 7. 24.로 안내되어 있고, 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이며 서해구·검단구 청년이어야 합니다. 연령은 원문에 19~39세로 적혀 있고, 정부24 요약에는 18세~39세로 적혀 있어 경계값은 원문끼리 일치하지 않아 확정할 수 없습니다. 또한 현재 접수 여부는 공식 공고에서 확인해 주세요. 공식 신청 URL은 확인되지 않았어요. [1][2]\n\n연령 근거는 원문에 19~39세로 적혀 있고 [1], 정부24 요약에는 대상연령 18세~39세로 적혀 있습니다 [2]. 두 근거가 달라서 만 38세가 연령 요건에 해당하는지는 이번 자료만으로 단정하지 않겠습니다. [2]확인된 신청 주소는 공식 신청 URL이 null이라 직접 신청 링크는 확인되지 않았어요. [2]",
+    "citations": [
+     {
+      "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+      "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "page_number": null
+     },
+     {
+      "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_ICN_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 38세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "policy_name": "중소기업 재직청년 복지공유제 지원",
+      "agency": "인천광역시 서해구 기업일자리정책과",
+      "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "인천 서해구청 기업일자리정책과",
+        "phone": "032-560-0941",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "이 정책의 접수처와 문의처는 어디인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-6 ICN 38"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "profile": {
+     "age": 40,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_STG_ICN_001"
+   },
+   "status": 200,
+   "seconds": 3.43,
+   "response": {
+    "status": "answered",
+    "answer": "중소기업 재직청년 복지공유제 지원은 현재 접수 여부는 공식 공고에서 확인해 주세요. 신청 자격은 공식 원문상 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중인 서해구·검단구 청년이며, 19~39세로 안내돼 있습니다 [1][2]. 다만 입력된 만 40세는 이 연령 범위에 포함되지 않아, 연령 기준만 보면 해당되지 않습니다 [1][2].\n\n공식 신청 URL은 확인되지 않았어요. 실제 신청 주소는 제공된 공식 신청 URL 항목이 비어 있어 확정할 수 없습니다 [2].",
+    "citations": [
+     {
+      "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+      "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "page_number": null
+     },
+     {
+      "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_ICN_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19~39세 기준에 입력한 만 40세가 포함되지 않습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "policy_name": "중소기업 재직청년 복지공유제 지원",
+      "agency": "인천광역시 서해구 기업일자리정책과",
+      "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "인천 서해구청 기업일자리정책과",
+        "phone": "032-560-0941",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "이 정책의 접수 기간은 언제인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-6 ICN 40"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "중소기업 재직청년 복지공유제 지원 받을 수 있나요? 공식 신청 URL과 연령 근거를 알려주세요.",
+    "profile": {
+     "age": null,
+     "region": "",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_STG_ICN_001"
+   },
+   "status": 200,
+   "seconds": 2.26,
+   "response": {
+    "status": "info",
+    "answer": "현재 이 정책의 신청 자격은 추가 확인이 필요해요. 공식 원문에는 신청 시작일 기준으로 인천 소재 중소기업에서 6개월 이상 재직 중이고, 서해구·검단구 청년(19~39세)이어야 한다고 적혀 있습니다[1][2]. 다만 사용자님의 나이·지역 정보가 입력되지 않았고, 종합 자격도 자동 판정이 보류되어 있어 지금 입력만으로는 가능 여부를 확정할 수 없습니다[1].\n\n다만 실제 신청 링크는 확인되지 않았어요. [2] 현재 접수 여부는 공식 공고에서 확인해 주세요[1][2].",
+    "citations": [
+     {
+      "title": "「제4호 중소기업 재직청년 복지공유제」 기업안내문(연장, 2026) — 지원대상 기본요건",
+      "url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "document_id": "DOC_STG_ICN_001_NOTICE_2026",
+      "page_number": null
+     },
+     {
+      "title": "정부24 공공서비스 상세 — 중소기업 재직청년 복지공유제 지원",
+      "url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+      "document_id": "DOC_STG_ICN_001_GOV24",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_STG_ICN_001",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "사용자의 만 나이가 입력되지 않았습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "중소기업 확인서, 4대보험 가입자 가입내역 확인서, 주민등록 초본 및 외국인등록 사실증명서 등",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "policy_name": "중소기업 재직청년 복지공유제 지원",
+      "agency": "인천광역시 서해구 기업일자리정책과",
+      "source_url": "https://youth.incheon.go.kr/bbs/bbsMsgDetail.do?msg_seq=491&bcd=notice",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "인천 서해구청 기업일자리정책과",
+        "phone": "032-560-0941",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004"
+       }
+      ],
+      "requirement_excerpts": [
+       {
+        "text": "중소기업에 6개월 이상 재직 중인 인천광역시 서해구, 검단구 청년",
+        "document_id": "DOC_STG_ICN_001_GOV24",
+        "chunk_id": "CHK_B2_DOC_STG_ICN_001_GOV24_C001",
+        "source_url": "https://plus.gov.kr/portal/benefitV2/benefitTotalSrvcList/benefitSrvcDtl?svcSeq=2186923&bnefType=all&svcId=356100000004",
+        "label": "지원대상"
+       }
+      ],
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "이 정책의 신청 서류는 무엇인가요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "지원 제외 대상은 어떻게 되나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "05-6 ICN None"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "국민내일배움카드의 나이 기준을 충족하나요?",
+    "profile": {
+     "age": 76,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_005"
+   },
+   "status": 200,
+   "seconds": 2.5,
+   "response": {
+    "status": "info",
+    "answer": "국민내일배움카드는 **현재 접수 중이에요**. 다만 나이 기준만으로 신청 가능 여부를 확정할 수는 없고, 공식 원문에는 75세 이상은 지원 제외 대상이라고 되어 있습니다 [2]. 따라서 만 76세인 경우에는 나이 기준상 제외에 해당합니다 [2].\n\n또한 공무원·사립학교 교직원, 대규모 기업 근로자 중 월 임금 300만원 이상이면서 만 45세 미만인 사람, 75세 이상인 사람, 월 소득 500만원 이상의 특수형태근로종사자 등은 지원 제외 대상입니다 [2]. 신청 자격은 직업능력개발훈련이 필요한 국민에게 훈련비를 지원하는 제도라는 설명과 함께 안내되지만, 세부 자격은 제외 대상 여부까지 함께 확인해야 합니다 [1][2].\n\n직접 신청 링크는 확인되지 않았어요. 신청은 가까운 고용센터 방문 또는 고용24를 통해 가능하다고 안내되어 있습니다 [1].",
+    "citations": [
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_005",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "고용24 국민내일배움카드",
+      "agency": "고용노동부 / 한국고용정보원",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 신청 방법은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 지원 제외 대상은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-1 POL_005 76세 run1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "만 76세도 국민내일배움카드를 신청할 수 있나요?",
+    "profile": {
+     "age": 76,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_005"
+   },
+   "status": 200,
+   "seconds": 1.99,
+   "response": {
+    "status": "answered",
+    "answer": "만 76세는 **국민내일배움카드**의 나이 기준에서 제외 대상에 해당합니다. 공식 원문에는 75세 이상인 사람은 지원 제외라고 되어 있어, 입력하신 만 76세는 해당 제외 기준에 포함됩니다 [3].\n\n다만 이 제도는 현재 접수 중이며, 신청은 온라인(고용24) 또는 가까운 고용센터 방문으로 안내되어 있습니다 [1][2]. 직접 신청 링크는 확인되지 않았어요 [1][2].\n\n또한 공무원·사립학교 교직원, 부정수급자, 다른 부처나 지방자치단체의 교육·훈련비 지원을 받는 사람 등은 제외 대상입니다 [3].",
+    "citations": [
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_005",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "고용24 국민내일배움카드",
+      "agency": "고용노동부 / 한국고용정보원",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "국민내일배움카드 신청 방법은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 제외 대상은 더 있나요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-1 POL_005 76세 run1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "국민내일배움카드의 나이 기준을 충족하나요?",
+    "profile": {
+     "age": 76,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_005"
+   },
+   "status": 200,
+   "seconds": 2.17,
+   "response": {
+    "status": "info",
+    "answer": "고용24 국민내일배움카드는 현재 접수 중이에요. 다만 나이만으로는 신청 가능 여부를 확정할 수 없고, 공식 원문상 공무원·사립학교 교직원, 75세 이상인 사람, 대규모 기업 근로자 중 월 임금 300만원 이상이면서 만 45세 미만인 사람 등은 지원 제외 대상입니다 [1][5].\n\n사용자님은 만 76세이므로, 원문에 적힌 **75세 이상인 사람** 제외 기준에 해당합니다 [5]. 따라서 이 정책은 나이 기준을 충족한다고 보기 어렵고, 현재 입력 기준으로는 지원에서 제외됩니다 [5].\n\n온라인으로 신청서 작성·제출이 가능합니다 [1][2][3][4]. 다만 직접 신청 링크는 확인되지 않았어요.",
+    "citations": [
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_005",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "고용24 국민내일배움카드",
+      "agency": "고용노동부 / 한국고용정보원",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-1 POL_005 76세 run2"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "만 76세도 국민내일배움카드를 신청할 수 있나요?",
+    "profile": {
+     "age": 76,
+     "region": "서울",
+     "income": null
+    },
+    "history": [],
+    "selected_policy_id": "POL_005"
+   },
+   "status": 200,
+   "seconds": 3.31,
+   "response": {
+    "status": "answered",
+    "answer": "만 76세는 **국민내일배움카드**의 나이 기준에서 제외 대상에 해당합니다. 공식 원문에는 75세 이상인 사람은 지원 제외라고 되어 있어, 입력하신 만 76세는 해당 제외 기준에 포함됩니다 [3]. 다만 이 제도는 현재 접수 중이며, 신청은 온라인(고용24) 또는 가까운 고용센터 방문으로 할 수 있습니다 [1][2]. 직접 신청 링크는 확인되지 않았어요 [1].",
+    "citations": [
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     },
+     {
+      "title": "고용24 국민내일배움카드 발급안내 및 지원자격",
+      "url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "document_id": "DOC_WORK24_001",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_005",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 75세 이상(상한 없음) 기준에 입력한 만 76세가 포함됩니다.",
+        "status": "eligible"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 월 소득이 300만원 이상인 법인대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 지원·융자·수강제한 기간인 부정수급자은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 부정행위에 따른 지원금을 반환하지 않은 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 대규모 기업 근로자로서 월 임금 300만원 이상이고 만 45세 미만인 사람은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 생계급여를 받고 있는 사람(조건부 수급자 또는 조건부과 유예자는 지원 가능)은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득이 300만원 이상인 비영리단체 대표은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 기타 지원 필요성이 인정되지 않는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "target",
+        "label": "기타 자격 조건",
+        "reason": "제외: 다른 부처 또는 지방자치단체로부터 교육/훈련비를 지원받고 있는 사람은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 공무원, 사립학교 교직원은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 사업 기간이 1년 미만이거나 연 매출 4억 이상의 자영업자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "employment",
+        "label": "기타 자격 조건",
+        "reason": "제외: 월 소득 500만원 이상의 특수형태근로종사자은(는) 추가 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "제외: 졸업까지 남은 수업연한이 2년 이상인 대학/대학원 재학생, 고등학교 1~2학년생은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "해당 조건이 충족되지 않아야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": null,
+       "end_date": null,
+       "is_ongoing": true,
+       "days_to_start": null,
+       "days_to_end": null
+      },
+      "required_documents": null,
+      "policy_name": "고용24 국민내일배움카드",
+      "agency": "고용노동부 / 한국고용정보원",
+      "source_url": "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 신청 방법은 어떻게 되나요?",
+      "field": null
+     },
+     {
+      "kind": "question",
+      "text": "국민내일배움카드의 지원 제외 대상은 무엇인가요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "04-1 POL_005 76세 run2"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "교육비·구직·교통 지원 정책이 있나요?",
+    "profile": {
+     "age": 29,
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.61,
+   "response": {
+    "status": "answered",
+    "answer": "교육비 지원 정책으로는 **초중고 교육비 지원사업(고교학비 지원)**과 **교육급여(맞춤형 급여)**가 확인됩니다. 다만 두 정책 모두 신청 자격은 자동 판정이 보류되어 있고, 현재 접수 여부는 공식 공고에서 확인해 주세요 [1][4].\n\n초중고 교육비 지원사업(고교학비 지원)은 고등학교 입학금, 수업료, 학교운영지원비를 납부 면제하고 방과후 활동 이용권, PC·인터넷 설치를 지원합니다 [1]. 신청 링크는 확인되지 않았습니다 [1].\n\n교육급여(맞춤형 급여)는 초·중·고등학생의 교육활동지원비와 입학금, 수업료, 교과서비를 지원합니다 [4]. 신청 링크는 확인되지 않았습니다 [4].\n\n구직 지원 정책으로는 **취업취약계층 고용지원 사업**이 확인되지만, 신청 자격과 현재 접수 여부는 공식 공고에서 확인해 주세요 [2]. 구비서류로는 2026년 시행지침과 구직자취업역량강화프로그램참여신청서가 안내되어 있고, 문의처는 고용노동부 고객상담센터 1350입니다 [2]. 직접 신청 링크는 확인되지 않았습니다 [2].\n\n교통 지원 정책으로는 **대중교통비 환급 지원(모두의카드)**가 확인됩니다. 현재 접수 여부는 공식 공고에서 확인해 주세요 [3]. 이 정책은 정기적 대중교통 이용을 지원해 교통비 부담을 완화하는 사업으로 안내되어 있지만, 신청 자격은 자동 판정이 보류되어 있습니다 [3]. 직접 신청 링크는 확인되지 않았습니다 [3].\n\n참고로 공학교육혁신센터 지원은 교육·직업훈련 성격의 정책으로 보이지만, 학력·지역 등 자격이 추가 확인 필요이고 현재 접수 중입니다. 다만 질문하신 교육비·구직·교통 지원과는 성격이 달라 별도로 확인하는 것이 좋습니다 [5].",
+    "citations": [
+     {
+      "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "document_id": "DOC_BOK_024",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 취업취약계층 고용지원 사업 (WLF00001172)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "document_id": "DOC_BOK_099",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 대중교통비 환급 지원(모두의카드) (WLF00005440)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "document_id": "DOC_BOK_075",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "document_id": "DOC_BOK_020",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 공학교육혁신센터 지원 (20261101005400214679)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "document_id": "DOC_YC_009",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_BOK_024",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_099",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "- ★2026년 취업취약계층 고용지원사업 시행지침.pdf\n- 구직자취업역량강화프로그램참여신청서.hwp",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "policy_name": "취업취약계층 고용지원 사업",
+      "agency": "고용노동부 고용서비스정책과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "고용노동부 고객상담센터",
+        "phone": "1350",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_075",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "대중교통비 환급 지원(모두의카드)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_020",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "교육급여(맞춤형 급여)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_009",
+      "conditions": [
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 재학은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": "2026-06-01",
+       "end_date": "2026-12-31",
+       "is_ongoing": false,
+       "days_to_start": -180,
+       "days_to_end": 33
+      },
+      "required_documents": null,
+      "policy_name": "공학교육혁신센터 지원",
+      "agency": "대구광역시 인공지능혁신성장실 대학인재혁신과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "official_apply_url": "https://ceedin.knu.ac.kr",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "#75 29세 복수 분야 run1"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "교육비·구직·교통 지원 정책이 있나요?",
+    "profile": {
+     "age": 29,
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.96,
+   "response": {
+    "status": "info",
+    "answer": "질문하신 교육비·구직·교통 지원 정책 중에서, 공식 원문과 판정 정보로 확인되는 것은 다음과 같습니다.\n\n- **초중고 교육비 지원사업(고교학비 지원)**은 고등학교 입학금, 수업료, 학교운영지원비를 면제하고 방과후 활동 이용권, PC·인터넷 설치를 지원한다고만 확인됩니다. 다만 신청 자격과 현재 접수 여부는 공식 원문에서 확인되지 않았고, 직접 신청 링크도 확인되지 않았습니다. [1]\n- **교육급여(맞춤형 급여)**는 초·중·고등학생의 교육활동지원비, 입학금, 수업료, 교과서비를 지원한다고 확인됩니다. 하지만 신청 자격과 현재 접수 여부는 공식 원문에서 확인되지 않았고, 직접 신청 링크도 확인되지 않았습니다. [4]\n- **취업취약계층 고용지원 사업**은 구비서류와 문의처만 확인되고, 신청 자격과 현재 접수 여부는 공식 원문에서 확인되지 않았습니다. 직접 신청 링크도 확인되지 않았습니다. [2]\n- **대중교통비 환급 지원(모두의카드)**는 정기적 대중교통 이용을 지원해 교통비 부담을 완화하는 사업으로 확인되지만, 신청 자격과 현재 접수 여부는 공식 원문에서 확인되지 않았고, 직접 신청 링크도 확인되지 않았습니다. [3]\n\n참고로 **공학교육혁신센터 지원**은 현재 접수 중이고 직접 신청 링크도 확인되지만, 원문상 학력·지역·연령 등 자격은 추가 확인이 필요해 지금 입력만으로는 신청 가능 여부를 확정할 수 없습니다. [5]\n\n원하시면 각 정책별로 지원 내용, 신청 방법, 또는 현재 접수 상태를 더 자세히 정리해 드릴게요.\n\n초중고 교육비 지원사업(고교학비 지원): 현재 접수 여부는 공식 공고에서 확인해 주세요. 교육급여(맞춤형 급여): 현재 접수 여부는 공식 공고에서 확인해 주세요. 취업취약계층 고용지원 사업: 현재 접수 여부는 공식 공고에서 확인해 주세요. 대중교통비 환급 지원(모두의카드): 현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "document_id": "DOC_BOK_024",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 취업취약계층 고용지원 사업 (WLF00001172)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "document_id": "DOC_BOK_099",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 대중교통비 환급 지원(모두의카드) (WLF00005440)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "document_id": "DOC_BOK_075",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "document_id": "DOC_BOK_020",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 공학교육혁신센터 지원 (20261101005400214679)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "document_id": "DOC_YC_009",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_BOK_024",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_099",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "- ★2026년 취업취약계층 고용지원사업 시행지침.pdf\n- 구직자취업역량강화프로그램참여신청서.hwp",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "policy_name": "취업취약계층 고용지원 사업",
+      "agency": "고용노동부 고용서비스정책과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "고용노동부 고객상담센터",
+        "phone": "1350",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_075",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "대중교통비 환급 지원(모두의카드)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_020",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "교육급여(맞춤형 급여)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_009",
+      "conditions": [
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 재학은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": "2026-06-01",
+       "end_date": "2026-12-31",
+       "is_ongoing": false,
+       "days_to_start": -180,
+       "days_to_end": 33
+      },
+      "required_documents": null,
+      "policy_name": "공학교육혁신센터 지원",
+      "agency": "대구광역시 인공지능혁신성장실 대학인재혁신과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "official_apply_url": "https://ceedin.knu.ac.kr",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "#75 29세 복수 분야 run2"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "교육비·구직·교통 지원 정책이 있나요?",
+    "profile": {
+     "age": 29,
+     "region": "",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.55,
+   "response": {
+    "status": "answered",
+    "answer": "질문하신 세 가지 중, 공식 원문과 판정 정보로 확인되는 것은 다음과 같습니다.\n\n- **대중교통비 환급 지원(모두의카드)**는 현재 접수 여부를 공식 공고에서 확인해 주세요. 자격은 만 19세 이상 기준이 보이지만, 종합 자격은 자동 판정이 보류되어 이번 입력만으로는 신청 가능 여부를 확정할 수 없습니다. 신청 주소도 확인되지 않았어요. [3]\n- **교육급여(맞춤형 급여)**는 현재 접수 여부를 공식 공고에서 확인해 주세요. 초·중·고등학생에게 교육활동지원비, 입학금, 수업료, 교과서비를 지원한다는 내용은 확인되지만, 자격은 자동 판정이 보류되어 있습니다. 신청 주소도 확인되지 않았어요. [4]\n- **초중고 교육비 지원사업(고교학비 지원)**도 현재 접수 여부를 공식 공고에서 확인해 주세요. 고등학교 입학금, 수업료, 학교운영지원비 면제와 방과후 활동 이용권, PC·인터넷 설치 지원 내용은 확인되지만, 자격은 자동 판정이 보류되어 있습니다. 신청 주소도 확인되지 않았어요. [1]\n- **취업취약계층 고용지원 사업**은 현재 접수 여부를 공식 공고에서 확인해 주세요. 구비서류와 문의처는 확인되지만, 자격 요건과 신청 방법은 이번 원문에서 확인되지 않았습니다. 신청 주소도 확인되지 않았어요. [2]\n- **공학교육혁신센터 지원**은 현재 접수 중이에요. 다만 자격은 학력 조건과 지역·연령 조건이 모두 추가 확인 필요로 표시되어 있어, 이번 입력만으로 신청 가능하다고 말할 수는 없습니다. 공식 신청 주소는 https://ceedin.knu.ac.kr 입니다. [5]\n\n원하시면 각 정책별로 지원 대상과 신청 방법을 더 좁혀서 다시 정리해 드릴게요.",
+    "citations": [
+     {
+      "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "document_id": "DOC_BOK_024",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 취업취약계층 고용지원 사업 (WLF00001172)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "document_id": "DOC_BOK_099",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 대중교통비 환급 지원(모두의카드) (WLF00005440)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "document_id": "DOC_BOK_075",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "document_id": "DOC_BOK_020",
+      "page_number": null
+     },
+     {
+      "title": "[온통청년 정책] 공학교육혁신센터 지원 (20261101005400214679)",
+      "url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "document_id": "DOC_YC_009",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_BOK_024",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_099",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "- ★2026년 취업취약계층 고용지원사업 시행지침.pdf\n- 구직자취업역량강화프로그램참여신청서.hwp",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "policy_name": "취업취약계층 고용지원 사업",
+      "agency": "고용노동부 고용서비스정책과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "고용노동부 고객상담센터",
+        "phone": "1350",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_075",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "대중교통비 환급 지원(모두의카드)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_020",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "교육급여(맞춤형 급여)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_YC_009",
+      "conditions": [
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대졸 예정은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 재학은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "education",
+        "label": "기타 자격 조건",
+        "reason": "학력조건: 대학 졸업은(는) 추가 확인이 필요합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "조건 중 하나 이상 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "region",
+        "label": "거주 지역",
+        "reason": "데이터 품질 경고로 해당 자격 요건의 확인이 필요합니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "open",
+      "application_schedule": {
+       "evaluated_on": "2026-11-28",
+       "start_date": "2026-06-01",
+       "end_date": "2026-12-31",
+       "is_ongoing": false,
+       "days_to_start": -180,
+       "days_to_end": 33
+      },
+      "required_documents": null,
+      "policy_name": "공학교육혁신센터 지원",
+      "agency": "대구광역시 인공지능혁신성장실 대학인재혁신과",
+      "source_url": "https://www.youthcenter.go.kr/youthPolicy/ythPlcyTotalSearch/ythPlcyDetail/20261101005400214679",
+      "official_apply_url": "https://ceedin.knu.ac.kr",
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [
+     {
+      "kind": "question",
+      "text": "각 정책의 신청 서류와 문의처를 더 자세히 알려 주세요?",
+      "field": null
+     }
+    ],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "#75 29세 복수 분야 run3"
+  },
+  {
+   "method": "POST",
+   "url": "http://127.0.0.1:18360/api/ask",
+   "request": {
+    "question": "교육비·구직·교통 지원 정책이 있나요?",
+    "profile": {
+     "age": 29,
+     "region": "서울",
+     "income": null
+    },
+    "history": []
+   },
+   "status": 200,
+   "seconds": 3.12,
+   "response": {
+    "status": "info",
+    "answer": "질문하신 교육비·구직·교통 지원 정책은 모두 공식 원문에서 지원 내용은 확인되지만, 신청 자격과 현재 접수 여부는 이번 자료만으로 확정할 수 없습니다. 각 정책별로 보면, 초중고 교육비 지원사업(고교학비 지원)은 고등학교 입학금·수업료·학교운영지원비 면제와 방과후 활동 이용권, PC·인터넷 설치 지원이 확인되지만 자격 요건은 자동 판정이 보류되어 있고 접수 여부도 확인되지 않았습니다 [1]. 교육급여(맞춤형 급여)는 초·중·고등학생 교육활동지원비와 입학금·수업료·교과서비 지원이 확인되지만, 자격 요건과 접수 여부는 이번 근거에서 확정되지 않았습니다 [4]. 초·중·고 학생 교육정보화 지원은 PC 1대, 인터넷 통신비, 유해차단서비스 지원이 확인되지만 자격 요건과 접수 여부는 확인되지 않았습니다 [5]. 취업취약계층 고용지원 사업은 구비서류와 문의처만 확인되고, 신청 방법과 자격 요건은 이번 자료에서 확인되지 않았습니다 [2]. 대중교통비 환급 지원(모두의카드)은 정기적 대중교통 이용을 지원해 교통비 부담을 완화한다는 사업 개요만 확인되며, 자격 요건과 접수 여부는 확인되지 않았습니다 [3].\n\n직접 신청 링크는 확인되지 않았어요. 다만 취업취약계층 고용지원 사업은 고용노동부 고객상담센터 1350 문의처가 확인됩니다 [2].\n\n초중고 교육비 지원사업(고교학비 지원): 현재 접수 여부는 공식 공고에서 확인해 주세요. 교육급여(맞춤형 급여): 현재 접수 여부는 공식 공고에서 확인해 주세요. 초.중.고 학생 교육정보화 지원: 현재 접수 여부는 공식 공고에서 확인해 주세요. 취업취약계층 고용지원 사업: 현재 접수 여부는 공식 공고에서 확인해 주세요. 대중교통비 환급 지원(모두의카드): 현재 접수 여부는 공식 공고에서 확인해 주세요.",
+    "citations": [
+     {
+      "title": "[중앙부처복지서비스] 초중고 교육비 지원사업(고교학비 지원) (WLF00001103)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "document_id": "DOC_BOK_024",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 취업취약계층 고용지원 사업 (WLF00001172)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "document_id": "DOC_BOK_099",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 대중교통비 환급 지원(모두의카드) (WLF00005440)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "document_id": "DOC_BOK_075",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 교육급여(맞춤형 급여) (WLF00001089)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "document_id": "DOC_BOK_020",
+      "page_number": null
+     },
+     {
+      "title": "[중앙부처복지서비스] 초.중.고 학생 교육정보화 지원 (WLF00003227)",
+      "url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "document_id": "DOC_BOK_052",
+      "page_number": null
+     }
+    ],
+    "policy_checks": [
+     {
+      "policy_id": "POL_BOK_024",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "초중고 교육비 지원사업(고교학비 지원)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001103",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_099",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": [
+       {
+        "text": "- ★2026년 취업취약계층 고용지원사업 시행지침.pdf\n- 구직자취업역량강화프로그램참여신청서.hwp",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "policy_name": "취업취약계층 고용지원 사업",
+      "agency": "고용노동부 고용서비스정책과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172",
+      "official_apply_url": null,
+      "contacts": [
+       {
+        "agency": "고용노동부 고객상담센터",
+        "phone": "1350",
+        "document_id": "DOC_BOK_099",
+        "chunk_id": "CHK_B2_DOC_BOK_099_C004",
+        "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001172"
+       }
+      ],
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_075",
+      "conditions": [
+       {
+        "field": "age",
+        "label": "나이",
+        "reason": "만 19세 이상(상한 없음) 기준에 입력한 만 29세가 포함됩니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       },
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "모든 조건을 충족해야 합니다(종합 결과). 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "대중교통비 환급 지원(모두의카드)",
+      "agency": "국토교통부 광역교통경제과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00005440",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_020",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "교육급여(맞춤형 급여)",
+      "agency": "교육부 학생지원총괄과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001089",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     },
+     {
+      "policy_id": "POL_BOK_052",
+      "conditions": [
+       {
+        "field": "eligibility",
+        "label": "자격 요건",
+        "reason": "UNKNOWN 조건 그룹은 자동 판정할 수 없습니다. 데이터 품질 경고로 자동 판정을 보류합니다.",
+        "status": "needs_check"
+       }
+      ],
+      "reception_status": "unknown",
+      "application_schedule": null,
+      "required_documents": null,
+      "policy_name": "초.중.고 학생 교육정보화 지원",
+      "agency": "교육부 디지털교육기반과",
+      "source_url": "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003227",
+      "official_apply_url": null,
+      "contacts": null,
+      "requirement_excerpts": null,
+      "exclusion_reasons": null,
+      "official_requirements": null
+     }
+    ],
+    "follow_up_questions": [],
+    "checked_at": null,
+    "notice": {
+     "kind": "warn",
+     "title": "추가 확인 필요",
+     "text": "자동 판정을 보류한 조건이 있습니다. 공식 공고를 확인해 주세요."
+    },
+    "is_sample": false
+   },
+   "id": "#75 29세 복수 분야 서울"
+  }
+ ]
+}
